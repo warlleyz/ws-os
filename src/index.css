@@ -1,0 +1,125 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;500&family=Nunito+Sans:wght@300..800&display=swap");
+@import "tailwindcss";
+
+/* Integração dos tokens semânticos com Tailwind v4 */
+@theme inline {
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-ws-bg: var(--ws-bg);
+  --color-ws-surface: var(--ws-surface);
+  --color-ws-text: var(--ws-text);
+  --color-ws-muted: var(--ws-text-muted);
+  --color-ws-border: var(--ws-border);
+  --color-ws-accent: var(--ws-accent);
+}
+
+/* Tema escuro padrão */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --ws-bg: #101827;
+  --ws-surface: #1b2638;
+  --ws-surface-raised: #253349;
+
+  --ws-text: #eef3f9;
+  --ws-text-muted: #a7b7ca;
+
+  --ws-border: rgb(194 212 235 / 16%);
+  --ws-accent: #78b7f5;
+  --ws-accent-text: #0c2035;
+
+  --ws-glass: rgb(25 36 54 / 78%);
+  --ws-shadow: 0 12px 36px rgb(0 0 0 / 24%);
+
+  --ws-radius: 16px;
+  --ws-transition: 180ms ease;
+}
+
+/* Tema claro suave, sem superfícies estouradas */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --ws-bg: #e9eef5;
+  --ws-surface: #f3f5f8;
+  --ws-surface-raised: #e0e7f0;
+
+  --ws-text: #243348;
+  --ws-text-muted: #56667b;
+
+  --ws-border: rgb(53 75 105 / 19%);
+  --ws-accent: #356fa9;
+  --ws-accent-text: #ffffff;
+
+  --ws-glass: rgb(236 241 247 / 85%);
+  --ws-shadow: 0 12px 34px rgb(42 61 87 / 13%);
+}
+
+/* Fundação global */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+html {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+
+  background: var(--ws-bg);
+  color: var(--ws-text);
+
+  font-family: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ws-accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--ws-accent);
+  color: var(--ws-accent-text);
+}
+
+/* Utilitário tipográfico para Terminal e código */
+.ws-mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-weight: 100;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
