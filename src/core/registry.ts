@@ -25,7 +25,7 @@ const APP_DEFINITIONS = [
         name: 'Projetos',
         icon: 'folder-kanban',
         category: 'portfolio',
-        instancePolicy: 'multiple',
+        instancePolicy: 'single',
         capabilities: ['windows'],
     },
     {

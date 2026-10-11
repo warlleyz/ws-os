@@ -51,5 +51,11 @@ describe('registro de aplicativos da WS OS', () => {
             expect(Object.isFrozen(app.capabilities)).toBe(true)
         }
     })
+    
+    it('mantém Projetos como aplicativo de instância única', () => {
+        const projects = appRegistry.getApp('projects')
+
+        expect(projects?.instancePolicy).toBe('single')
+    })
 
 })
