@@ -582,6 +582,7 @@ export default function Window({
     return (
         <section
             ref={windowRef}
+            data-instance-id={instance.id}
             className={[
                 'desktop-window',
                 active ? 'desktop-window--active' : '',

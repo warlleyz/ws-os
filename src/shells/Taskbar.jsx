@@ -1,5 +1,7 @@
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { toPng } from 'html-to-image';
 
 import {
     activateApp,
@@ -80,12 +82,16 @@ export default function Taskbar({ appState, onAppAction }) {
     const [contextGroup, setContextGroup] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [previewGroup, setPreviewGroup] = useState(null);
+    const [thumbnails, setThumbnails] = useState({});
 
     const previewOpenTimerRef = useRef(null);
     const previewCloseTimerRef = useRef(null);
     const [currentTime, setCurrentTime] = useState(() => new Date());
 
     const taskbarRef = useRef(null);
+    const floatingLayerRef = useRef(null);
+    const previewRef = useRef(null);
+    const highlightedWindowRef = useRef(null);
     const contextMenuRef = useRef(null);
     const contextTriggerRef = useRef(null);
     const menuButtonRef = useRef(null);
@@ -144,7 +150,12 @@ export default function Taskbar({ appState, onAppAction }) {
 
     useEffect(() => {
         function handlePointerDown(event) {
-            if (!taskbarRef.current?.contains(event.target)) {
+            if (
+                !taskbarRef.current?.contains(event.target) &&
+                !floatingLayerRef.current?.contains(event.target)
+            ) {
+                clearWindowHighlight();
+
                 setContextGroup(null);
                 setMenuOpen(false);
                 contextTriggerRef.current = null;
@@ -153,6 +164,8 @@ export default function Taskbar({ appState, onAppAction }) {
 
         function handleKeyDown(event) {
             if (event.key !== 'Escape') return;
+
+            clearWindowHighlight();
 
             if (contextTriggerRef.current) {
                 contextTriggerRef.current.focus();
@@ -185,12 +198,108 @@ export default function Taskbar({ appState, onAppAction }) {
         }
     }, [contextGroup]);
 
+    useEffect(() => {
+        if (!previewGroup) return;
+
+        let cancelled = false;
+
+        const instances = appState.instances.filter(
+            (instance) =>
+                instance.appId === previewGroup && !instance.minimized,
+        );
+
+        async function captureThumbnails() {
+            const images = {};
+
+            for (const instance of instances) {
+                if (cancelled) return;
+
+                const element = document.querySelector(
+                    `[data-instance-id="${instance.id}"]`,
+                );
+
+                if (!element) continue;
+
+                try {
+                    const rect = element.getBoundingClientRect();
+
+                    if (rect.width === 0 || rect.height === 0) continue;
+
+                    images[instance.id] = await toPng(element, {
+                        width: Math.round(rect.width),
+                        height: Math.round(rect.height),
+                        pixelRatio: 0.75,
+                        cacheBust: false,
+
+                        style: {
+                            position: 'relative',
+                            top: '0',
+                            left: '0',
+                            right: 'auto',
+                            bottom: 'auto',
+                            transform: 'none',
+
+                            width: `${rect.width}px`,
+                            height: `${rect.height}px`,
+                            maxWidth: 'none',
+                            maxHeight: 'none',
+
+                            margin: '0',
+                            visibility: 'visible',
+                        },
+
+                        filter: (node) =>
+                            !node.classList?.contains('desktop-window__resize'),
+                    });
+                } catch {
+                    // Mantém a representação padrão se a captura falhar.
+                }
+            }
+
+            if (!cancelled) {
+                setThumbnails(images);
+            }
+        }
+
+        captureThumbnails();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [previewGroup, appState.instances]);
+
+    function clearWindowHighlight() {
+        const element = highlightedWindowRef.current;
+
+        if (element) {
+            delete element.dataset.taskbarPreview;
+        }
+
+        highlightedWindowRef.current = null;
+    }
+
+    function highlightWindow(instance) {
+        clearWindowHighlight();
+
+        if (instance.minimized) return;
+
+        const element = document.querySelector(
+            `[data-instance-id="${instance.id}"]`,
+        );
+
+        if (!element) return;
+
+        element.dataset.taskbarPreview = 'true';
+        highlightedWindowRef.current = element;
+    }
+
     function clearPreviewTimers() {
         window.clearTimeout(previewOpenTimerRef.current);
         window.clearTimeout(previewCloseTimerRef.current);
     }
 
     function closePreview() {
+        clearWindowHighlight();
         clearPreviewTimers();
         setPreviewGroup(null);
     }
@@ -208,18 +317,32 @@ export default function Taskbar({ appState, onAppAction }) {
         window.clearTimeout(previewCloseTimerRef.current);
 
         previewCloseTimerRef.current = window.setTimeout(() => {
+            if (previewRef.current?.matches(':hover')) return;
+
+            clearWindowHighlight();
             setPreviewGroup(null);
-        }, 180);
+        }, 300);
     }
 
     useEffect(() => {
-        return () => {
-            window.clearTimeout(previewOpenTimerRef.current);
-            window.clearTimeout(previewCloseTimerRef.current);
-        };
-    }, []);
+        const element = highlightedWindowRef.current;
+
+        if (!element) return;
+
+        const instanceId = element.dataset.instanceId;
+
+        const instance = appState.instances.find(
+            (item) => item.id === instanceId,
+        );
+
+        if (!instance || instance.minimized || !element.isConnected) {
+            delete element.dataset.taskbarPreview;
+            highlightedWindowRef.current = null;
+        }
+    }, [appState.instances]);
 
     function closePanels() {
+        clearWindowHighlight();
         closePreview();
         setContextGroup(null);
         setMenuOpen(false);
@@ -236,6 +359,7 @@ export default function Taskbar({ appState, onAppAction }) {
     }
 
     function handleGroupClick(group) {
+        clearWindowHighlight();
         setContextGroup(null);
         setMenuOpen(false);
         contextTriggerRef.current = null;
@@ -264,6 +388,8 @@ export default function Taskbar({ appState, onAppAction }) {
 
     function handleContextMenu(event, group) {
         event.preventDefault();
+        clearWindowHighlight();
+        closePreview();
         contextTriggerRef.current = event.currentTarget;
 
         setMenuOpen(false);
@@ -365,8 +491,14 @@ export default function Taskbar({ appState, onAppAction }) {
 
     return (
         <div className="taskbar-container" ref={taskbarRef}>
+            {createPortal(
+                <div
+                    ref={floatingLayerRef}
+                    className="taskbar-floating-layer"
+                >
             {preview && !contextGroup && !menuOpen && (
                 <section
+                    ref={previewRef}
                     className="taskbar-preview"
                     aria-label={`Pré-visualizações de ${getAppDefinition(preview.appId)?.name ?? preview.appId
                         }`}
@@ -398,6 +530,7 @@ export default function Taskbar({ appState, onAppAction }) {
                                             aria-label={`Fechar ${title}`}
                                             title="Fechar janela"
                                             onClick={() => {
+                                                clearWindowHighlight();
                                                 onAppAction(closeApp, instance.id);
                                             }}
                                         >
@@ -420,12 +553,25 @@ export default function Taskbar({ appState, onAppAction }) {
                                         type="button"
                                         className="taskbar-preview__open"
                                         aria-label={`Ativar ${title}`}
+                                        onPointerEnter={() => highlightWindow(instance)}
+                                        onPointerLeave={clearWindowHighlight}
+                                        onFocus={() => highlightWindow(instance)}
+                                        onBlur={clearWindowHighlight}
                                         onClick={() => activateInstance(instance)}
                                     >
                                         <span className="taskbar-preview__placeholder">
-                                            <span className="taskbar-preview__placeholder-icon">
-                                                {(app?.name ?? instance.appId).charAt(0)}
-                                            </span>
+                                            {thumbnails[instance.id] && !instance.minimized ? (
+                                                <img
+                                                    className="taskbar-preview__image"
+                                                    src={thumbnails[instance.id]}
+                                                    alt=""
+                                                    draggable={false}
+                                                />
+                                            ) : (
+                                                <span className="taskbar-preview__placeholder-icon">
+                                                    {(app?.name ?? instance.appId).charAt(0)}
+                                                </span>
+                                            )}
                                         </span>
 
                                         <small>
@@ -540,6 +686,9 @@ export default function Taskbar({ appState, onAppAction }) {
                         )}
                     </div>
                 </section>
+            )}
+                </div>,
+                document.body,
             )}
 
             <nav className="taskbar" aria-label="Barra de tarefas">

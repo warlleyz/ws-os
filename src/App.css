@@ -1166,12 +1166,6 @@
 
 /* Elevar os painéis abertos acima das janelas */
 
-.taskbar-container:has(.taskbar-preview,
-  .taskbar-context,
-  .taskbar-launcher) {
-  z-index: 100;
-}
-
 .taskbar-preview,
 .taskbar-context,
 .taskbar-launcher {
@@ -1238,4 +1232,64 @@
 .taskbar-preview__item:focus-within {
   border-color: var(--border-default);
   background: var(--surface-secondary);
+}
+
+/* Camada independente dos painéis da Taskbar */
+
+.taskbar-floating-layer {
+  position: fixed;
+  z-index: 10000;
+  bottom: 72px;
+  left: 50%;
+
+  display: flex;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 88px);
+  align-items: center;
+  justify-content: center;
+
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.taskbar-floating-layer>* {
+  max-width: 100%;
+  max-height: inherit;
+  pointer-events: auto;
+}
+
+@media (max-width: 720px) {
+  .taskbar-floating-layer {
+    bottom: 64px;
+    max-width: calc(100vw - 20px);
+    max-height: calc(100dvh - 80px);
+  }
+}
+
+.taskbar-preview__placeholder {
+  overflow: hidden;
+}
+
+.taskbar-preview__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  user-select: none;
+}
+
+/* Destaque temporário de janela pela Taskbar */
+
+.desktop-window[data-taskbar-preview='true'] {
+  z-index: 9998 !important;
+
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+
+  box-shadow:
+    0 24px 70px rgb(0 0 0 / 42%),
+    0 0 0 4px rgb(101 205 225 / 14%),
+    0 0 28px rgb(101 205 225 / 12%);
 }
