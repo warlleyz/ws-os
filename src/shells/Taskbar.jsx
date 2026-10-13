@@ -1,7 +1,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { toPng } from 'html-to-image';
 
 import {
     activateApp,
@@ -82,7 +81,6 @@ export default function Taskbar({ appState, onAppAction }) {
     const [contextGroup, setContextGroup] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [previewGroup, setPreviewGroup] = useState(null);
-    const [thumbnails, setThumbnails] = useState({});
 
     const previewOpenTimerRef = useRef(null);
     const previewCloseTimerRef = useRef(null);
@@ -197,76 +195,6 @@ export default function Taskbar({ appState, onAppAction }) {
                 ?.focus();
         }
     }, [contextGroup]);
-
-    useEffect(() => {
-        if (!previewGroup) return;
-
-        let cancelled = false;
-
-        const instances = appState.instances.filter(
-            (instance) =>
-                instance.appId === previewGroup && !instance.minimized,
-        );
-
-        async function captureThumbnails() {
-            const images = {};
-
-            for (const instance of instances) {
-                if (cancelled) return;
-
-                const element = document.querySelector(
-                    `[data-instance-id="${instance.id}"]`,
-                );
-
-                if (!element) continue;
-
-                try {
-                    const rect = element.getBoundingClientRect();
-
-                    if (rect.width === 0 || rect.height === 0) continue;
-
-                    images[instance.id] = await toPng(element, {
-                        width: Math.round(rect.width),
-                        height: Math.round(rect.height),
-                        pixelRatio: 0.75,
-                        cacheBust: false,
-
-                        style: {
-                            position: 'relative',
-                            top: '0',
-                            left: '0',
-                            right: 'auto',
-                            bottom: 'auto',
-                            transform: 'none',
-
-                            width: `${rect.width}px`,
-                            height: `${rect.height}px`,
-                            maxWidth: 'none',
-                            maxHeight: 'none',
-
-                            margin: '0',
-                            visibility: 'visible',
-                        },
-
-                        filter: (node) =>
-                            !node.classList?.contains('desktop-window__resize'),
-                    });
-                } catch {
-                    // Mantém a representação padrão se a captura falhar.
-                }
-            }
-
-            if (!cancelled) {
-                setThumbnails(images);
-            }
-        }
-
-        captureThumbnails();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [previewGroup, appState.instances]);
 
     function clearWindowHighlight() {
         const element = highlightedWindowRef.current;
@@ -559,19 +487,13 @@ export default function Taskbar({ appState, onAppAction }) {
                                         onBlur={clearWindowHighlight}
                                         onClick={() => activateInstance(instance)}
                                     >
-                                        <span className="taskbar-preview__placeholder">
-                                            {thumbnails[instance.id] && !instance.minimized ? (
-                                                <img
-                                                    className="taskbar-preview__image"
-                                                    src={thumbnails[instance.id]}
-                                                    alt=""
-                                                    draggable={false}
-                                                />
-                                            ) : (
-                                                <span className="taskbar-preview__placeholder-icon">
-                                                    {(app?.name ?? instance.appId).charAt(0)}
-                                                </span>
-                                            )}
+                                        <span
+                                            className="taskbar-preview__placeholder"
+                                            aria-hidden="true"
+                                        >
+                                            <span className="taskbar-preview__placeholder-icon">
+                                                {(app?.name ?? instance.appId).charAt(0)}
+                                            </span>
                                         </span>
 
                                         <small>
