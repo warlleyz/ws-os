@@ -1,9 +1,10 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Desktop from './shells/Desktop';
 import './App.css';
 
 const WELCOME_STORAGE_KEY = 'ws-os:welcome-seen';
+const BOOT_DURATION = 1500;
 
 function shouldShowWelcome() {
   try {
@@ -14,16 +15,39 @@ function shouldShowWelcome() {
 }
 
 export default function App() {
+  const [bootComplete, setBootComplete] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(shouldShowWelcome);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setBootComplete(true);
+    }, BOOT_DURATION);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   function closeWelcome() {
     try {
       localStorage.setItem(WELCOME_STORAGE_KEY, 'true');
     } catch {
-      // A apresentação continua funcionando sem armazenamento.
+      // A apresentação funciona mesmo sem armazenamento.
     }
 
     setWelcomeOpen(false);
+  }
+
+  if (!bootComplete) {
+    return (
+      <main className="ws-boot" aria-label="Inicializando WS OS">
+        <div className="ws-boot__content" role="status">
+          <strong>WS OS</strong>
+          <p>Inicializando sistema...</p>
+          <div className="ws-boot__progress" aria-hidden="true">
+            <span />
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -38,17 +62,13 @@ export default function App() {
             aria-modal="true"
             aria-labelledby="ws-welcome-title"
           >
-            <span className="ws-welcome__label">
-              WS OS
-            </span>
+            <span className="ws-welcome__label">WS OS</span>
 
             <h1 id="ws-welcome-title">
               Bem-vindo à WS OS
             </h1>
 
-            <p>
-              Olá! Eu sou o Wally, seu assistente.
-            </p>
+            <p>Olá! Eu sou o Wally, seu assistente.</p>
 
             <p>
               Explore os projetos, conheça o desenvolvedor
