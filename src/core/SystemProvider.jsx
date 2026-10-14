@@ -23,7 +23,7 @@ export default function SystemProvider({ children }) {
     setAppState((current) => operation(current, id));
     if (operation === openApp) {
       const app = getAppDefinition(id);
-      if (app) {
+      if (app?.public) {
         const notification = createNotification({
           title: 'Aplicativo iniciado',
           message: `${app.name} foi aberto na WS OS.`,

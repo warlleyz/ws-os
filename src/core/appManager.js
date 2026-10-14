@@ -56,7 +56,7 @@ export function activateApp(state, instanceId) {
 export function openApp(state, appId) {
   const app = getAppDefinition(appId);
 
-  if (!app) return state;
+  if (!app?.public) return state;
 
   if (!app.allowMultipleInstances) {
     const existing = state.instances.find((instance) => instance.appId === appId);

@@ -174,3 +174,34 @@ test('calendário e painéis preservam exclusividade', () => {
   panel = m.resolvePanel(false, panel, 'weather');
   assert.equal(panel, null);
 });
+
+test('registry não declara aplicativos funcionais inexistentes', () => {
+  const { registry } = loadCore();
+  const apps = registry.getRegisteredApps();
+
+  assert.equal(apps.length, 18);
+  assert.equal(apps.filter((app) => app.implemented).length, 0);
+  assert.equal(apps.filter((app) => app.desktopShortcut).length, 12);
+});
+
+test('Core bloqueia aplicativos restritos sem modificar a sessão', () => {
+  const { manager: m } = loadCore();
+
+  let state = {
+    instances: [],
+    activeInstanceId: null,
+    focusHistory: [],
+  };
+
+  const originalState = state;
+
+  state = m.openApp(state, 'administration');
+
+  assert.equal(state, originalState);
+  assert.equal(state.instances.length, 0);
+
+  state = m.openApp(state, 'projects');
+
+  assert.equal(state.instances.length, 1);
+  assert.equal(state.instances[0].appId, 'projects');
+});
