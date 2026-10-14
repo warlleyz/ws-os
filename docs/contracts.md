@@ -12,7 +12,7 @@ Futuro: entrada lazy, elegibilidade por shell, capacidades, parâmetros e polít
 
 ## Instâncias
 
-Estado atual: `{ instances, activeInstanceId, focusHistory }`. Instância: `{ id, appId, minimized, executionState, origin, params }`.`. ID da instância usa crypto.randomUUID; não equivale ao appId ou a ID de recurso externo.
+Estado atual: `{ instances, activeInstanceId, focusHistory }`. Instância: `{ id, appId, minimized, executionState, origin, params }`. ID da instância usa crypto.randomUUID; não equivale ao appId ou a ID de recurso externo.
 
 | Operação    | Entrada           | Resultado atual                                    |
 | ----------- | ----------------- | -------------------------------------------------- |
@@ -81,3 +81,32 @@ Futuro: previsão, validação completa, cancelamento, resultados obsoletos, cac
 6. Serviços com falhas categorizadas, limites, cache/frescor e cancelamento.
 7. Ferramentas Wally permitidas com validação, permissão e confirmação quando sensível.
 8. Testes negativos, limpeza, compatibilidade de shells e recuperação.
+
+## Resultado da R2 — 14/10/2026
+
+A base de contratos e isolamento foi integrada e validada
+com 15 testes automatizados e verificações manuais.
+
+Implementado:
+- Registry com flags correspondentes aos componentes existentes.
+- Bloqueio de abertura pública de aplicativos restritos.
+- Carregamento lazy de aplicativos implementados.
+- Isolamento de erro de renderização por aplicativo.
+- Abertura com origin e params opcionais.
+- Lifecycle básico de instâncias e histórico de foco.
+
+Limitações preservadas:
+- Sem resultado ou erro tipado na abertura.
+- Sem validação específica de parâmetros por aplicativo.
+- Pausa seletiva representada no estado, sem suspensão
+  automática das tarefas internas.
+- Sem confirmação de descarte de alterações pendentes.
+- Sem garantia de recuperação de todos os tipos de falha.
+- Sem autorização administrativa real.
+
+O teste manual de erro confirmou que uma falha de
+renderização não derruba o Desktop.
+
+Os contratos adicionais serão implementados conforme
+as necessidades dos aplicativos, sem reabrir a fundação
+desnecessariamente.

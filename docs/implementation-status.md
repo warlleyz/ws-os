@@ -103,3 +103,22 @@ Não há porcentagem confiável de conclusão: catálogo cadastrado não mede fu
 - Conteúdo inicial implementado; funcionalidades definitivas ainda parciais.
 - Outros 17 aplicativos permanecem sem implementação funcional.
 - Commit: 7e58b08.
+
+### R2.4 — Parâmetros de abertura
+- Origin e params opcionais por instância.
+- Compatibilidade com chamadas anteriores preservada.
+- Testes automatizados adicionados.
+- Commit: 7b89665.
+
+### R2.5 — Lifecycle e isolamento
+- Validada transição running/paused/running.
+- Validada preservação e remoção de instâncias.
+- Confirmado isolamento de erro de renderização em teste manual.
+- 15 testes automatizados aprovados.
+- Pendências avançadas documentadas em contracts.md.
+- Commit: 2ea1c2f.
+
+### Encerramento da R2
+- Fundação de contratos e isolamento validada.
+- Limitações conhecidas preservadas como pendências.
+- Próxima etapa: R3 — grade, widgets e persistência.

@@ -37,6 +37,14 @@ Arquivos: appRegistry, appManager, AppHost, AppErrorBoundary e docs/contracts.
 
 Aceite: app desconhecido/restrito, instância única/múltipla, entrada inválida, erro de app isolado, close/reopen e reload. Não habilitar Administração funcional apenas por esconder botão.
 
+### Resultado da R2 — 14/10/2026
+
+Fundação implementada e validada, com limitações registradas
+em contracts.md. Os contratos avançados serão concluídos
+conforme os aplicativos que deles dependem.
+
+Aprovada a continuidade para R3.
+
 ## R3 — grade, widgets e persistência
 
 Arquivos: desktopLayout, useDesktopWidgets, DesktopShortcuts, serviços de armazenamento.
