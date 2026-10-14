@@ -19,8 +19,8 @@ export default function SystemProvider({ children }) {
   const [notificationState, setNotificationState] = useState(initialNotificationState);
   const [visibleToasts, setVisibleToasts] = useState([]);
   // Único ponto de entrada para ações de aplicativos e avisos do sistema.
-  function run(operation, id) {
-    setAppState((current) => operation(current, id));
+  function run(operation, id, options) {
+    setAppState((current) => operation(current, id, options));
     if (operation === openApp) {
       const app = getAppDefinition(id);
       if (app?.public) {

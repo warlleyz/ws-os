@@ -53,10 +53,22 @@ export function activateApp(state, instanceId) {
   };
 }
 
-export function openApp(state, appId) {
+export function openApp(state, appId, options = {}) {
   const app = getAppDefinition(appId);
 
   if (!app?.public) return state;
+
+  const params =
+    options?.params &&
+      typeof options.params === 'object' &&
+      !Array.isArray(options.params)
+      ? { ...options.params }
+      : {};
+
+  const origin =
+    typeof options?.origin === 'string'
+      ? options.origin
+      : 'system';
 
   if (!app.allowMultipleInstances) {
     const existing = state.instances.find((instance) => instance.appId === appId);
@@ -69,6 +81,8 @@ export function openApp(state, appId) {
     appId,
     minimized: false,
     executionState: 'running',
+    origin,
+    params,
   };
 
   return activateApp(

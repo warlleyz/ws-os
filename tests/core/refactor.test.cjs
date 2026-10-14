@@ -210,3 +210,55 @@ test('Core bloqueia aplicativos restritos sem modificar a sessão', () => {
   assert.equal(state.instances.length, 1);
   assert.equal(state.instances[0].appId, 'projects');
 });
+
+test('abertura aceita origem e parâmetros por instância', () => {
+  const { manager: m } = loadCore();
+
+  let state = {
+    instances: [],
+    activeInstanceId: null,
+    focusHistory: [],
+  };
+
+  state = m.openApp(state, 'projects', {
+    origin: 'app',
+    params: { projectId: 'project-01' },
+  });
+
+  const first = state.instances[0];
+
+  assert.equal(first.origin, 'app');
+  assert.equal(first.params.projectId, 'project-01');
+
+  state = m.openApp(state, 'projects', {
+    origin: 'menu',
+    params: { projectId: 'project-02' },
+  });
+
+  assert.equal(state.instances.length, 2);
+  assert.equal(state.instances[0].params.projectId, 'project-01');
+  assert.equal(state.instances[1].params.projectId, 'project-02');
+
+  state = m.closeApp(state, first.id);
+
+  assert.equal(state.instances.length, 1);
+  assert.equal(state.instances[0].params.projectId, 'project-02');
+});
+
+test('abertura mantém compatibilidade com chamadas existentes', () => {
+  const { manager: m } = loadCore();
+
+  const initial = {
+    instances: [],
+    activeInstanceId: null,
+    focusHistory: [],
+  };
+
+  const state = m.openApp(initial, 'about-system');
+
+  assert.equal(state.instances.length, 1);
+  assert.equal(state.instances[0].origin, 'system');
+  assert.equal(Object.keys(state.instances[0].params).length, 0);
+
+  assert.equal(m.openApp(state, 'administration'), state);
+});
