@@ -4,6 +4,7 @@ import { AppIcon } from '../../../shared/components/AppIcon';
 
 export default function TaskbarPreview({
   previewRef,
+  closePreview,
   preview,
   previewCloseTimerRef,
   schedulePreviewClose,
@@ -22,6 +23,13 @@ export default function TaskbarPreview({
         window.clearTimeout(previewCloseTimerRef.current);
       }}
       onPointerLeave={schedulePreviewClose}
+      onBlur={schedulePreviewClose}
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape') return;
+        event.preventDefault();
+        event.stopPropagation();
+        closePreview(true);
+      }}
     >
       <div className="taskbar-preview__list">
         {preview.instances.map((instance, index) => {

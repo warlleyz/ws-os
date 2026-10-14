@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 // Utilitários e preferências persistentes do WS Menu.
 export default function useTaskbarPreviews({
   groups,
@@ -10,14 +10,20 @@ export default function useTaskbarPreviews({
   const previewCloseTimerRef = useRef(null);
   const previewRef = useRef(null);
   const highlightedWindowRef = useRef(null);
+  const keyboardTriggerRef = useRef(null);
+  const [previewFocusHistory, setPreviewFocusHistory] = useState(appState.focusHistory);
+  if (previewFocusHistory !== appState.focusHistory) {
+    setPreviewFocusHistory(appState.focusHistory);
+    setPreviewGroup(null);
+  }
   const preview = groups.find((group) => group.appId === previewGroup);
-  function clearWindowHighlight() {
+  const clearWindowHighlight = useCallback(() => {
     const element = highlightedWindowRef.current;
     if (element) {
       delete element.dataset.taskbarPreview;
     }
     highlightedWindowRef.current = null;
-  }
+  }, []);
   function highlightWindow(instance) {
     clearWindowHighlight();
     if (instance.minimized) return;
@@ -26,28 +32,41 @@ export default function useTaskbarPreviews({
     element.dataset.taskbarPreview = 'true';
     highlightedWindowRef.current = element;
   }
-  function clearPreviewTimers() {
+  const clearPreviewTimers = useCallback(() => {
     window.clearTimeout(previewOpenTimerRef.current);
     window.clearTimeout(previewCloseTimerRef.current);
-  }
-  function closePreview() {
+  }, []);
+  function closePreview(restoreFocus = false) {
+    if (restoreFocus) keyboardTriggerRef.current?.focus();
+    keyboardTriggerRef.current = null;
     clearWindowHighlight();
     clearPreviewTimers();
     setPreviewGroup(null);
+  }
+  function openPreview(appId, keyboardTrigger = null) {
+    clearPreviewTimers();
+    keyboardTriggerRef.current = keyboardTrigger;
+    onPreviewOpen?.();
+    setPreviewGroup(appId);
+    if (keyboardTrigger && previewGroup === appId) {
+      previewRef.current?.querySelector('button')?.focus();
+    }
   }
   function schedulePreviewOpen(appId) {
     clearPreviewTimers();
 
     previewOpenTimerRef.current = window.setTimeout(() => {
-      onPreviewOpen?.();
-      setPreviewGroup(appId);
+      openPreview(appId);
     }, 300);
   }
   function schedulePreviewClose() {
     window.clearTimeout(previewOpenTimerRef.current);
     window.clearTimeout(previewCloseTimerRef.current);
     previewCloseTimerRef.current = window.setTimeout(() => {
-      if (previewRef.current?.matches(':hover')) return;
+      if (
+        previewRef.current?.matches(':hover') ||
+        previewRef.current?.contains(document.activeElement)
+      ) return;
       clearWindowHighlight();
       setPreviewGroup(null);
     }, 300);
@@ -62,6 +81,16 @@ export default function useTaskbarPreviews({
       highlightedWindowRef.current = null;
     }
   }, [appState.instances]);
+  useEffect(() => {
+    if (previewGroup && keyboardTriggerRef.current) {
+      previewRef.current?.querySelector('button')?.focus();
+    }
+  }, [previewGroup]);
+  // Cancela aberturas pendentes e destaque ao mudar foco ou desmontar a Taskbar.
+  useEffect(() => () => {
+    clearPreviewTimers();
+    clearWindowHighlight();
+  }, [appState.focusHistory, clearPreviewTimers, clearWindowHighlight]);
   // Fechamento e alternância de painéis flutuantes.
   return {
     previewGroup,
@@ -73,6 +102,7 @@ export default function useTaskbarPreviews({
     highlightWindow,
     clearPreviewTimers,
     closePreview,
+    openPreview,
     schedulePreviewOpen,
     schedulePreviewClose,
   };

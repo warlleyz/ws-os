@@ -66,6 +66,7 @@ export default function TaskbarApps({
               aria-label={app?.name ?? group.appId}
               aria-pressed={active}
               aria-expanded={previewGroup === group.appId || contextGroup === group.appId}
+              aria-keyshortcuts="ArrowUp ArrowDown Shift+F10"
               title={app?.name ?? group.appId}
               onClick={() => handleGroupClick(group)}
               onPointerEnter={() => {

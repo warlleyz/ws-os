@@ -120,6 +120,7 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     highlightWindow,
     clearPreviewTimers,
     closePreview,
+    openPreview,
     schedulePreviewOpen,
     schedulePreviewClose,
   } = useTaskbarPreviews({
@@ -235,6 +236,11 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     );
   }
   function handleContextKeyDown(event, group) {
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      openPreview(group.appId, event.currentTarget);
+      return;
+    }
     if (event.key === 'F10' && event.shiftKey) {
       event.preventDefault();
 
@@ -394,6 +400,14 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     shortcutTriggerRef.current = null;
     setCalendarOpen((current) => !current);
   }
+  // Ativar/restaurar um app também fecha painéis sem depender de um clique externo.
+  const [panelFocusHistory, setPanelFocusHistory] = useState(appState.focusHistory);
+  if (panelFocusHistory !== appState.focusHistory) {
+    setPanelFocusHistory(appState.focusHistory);
+    setActivePanel(null);
+    setContextGroup(null);
+    setShortcutContext(null);
+  }
   // Camada flutuante + barra inferior (sem containers extras).
   useGlobalShortcuts({
     clearWindowHighlight,
@@ -425,6 +439,7 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
             !calendarOpen && (
               <TaskbarPreview
                 previewRef={previewRef}
+                closePreview={closePreview}
                 preview={preview}
                 previewCloseTimerRef={previewCloseTimerRef}
                 schedulePreviewClose={schedulePreviewClose}
