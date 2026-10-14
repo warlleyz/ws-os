@@ -2357,3 +2357,64 @@ button.taskbar__clock[aria-expanded="true"] {
   flex: 1;
   min-height: 0;
 }
+
+/* F4.20.1 — Menu contextual do Desktop */
+
+.desktop__context {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  width: 210px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 25%);
+}
+
+.desktop__context strong {
+  padding: 7px 9px;
+  font-size: 12px;
+}
+
+.desktop__context button {
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.desktop__context button:hover:not(:disabled) {
+  background: var(--surface-secondary);
+}
+
+.desktop__context button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.desktop__context-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--border-default);
+}
+
+/* F4.20.2 — Informações dos atalhos */
+
+.desktop__context-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px;
+  border-top: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+}

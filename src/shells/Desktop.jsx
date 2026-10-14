@@ -308,24 +308,34 @@ export default function Desktop() {
     );
     const [visibleToasts, setVisibleToasts] = useState([]);
     const [selectedShortcut, setSelectedShortcut] = useState(null);
+    const [desktopContext, setDesktopContext] = useState(null);
+    const [shortcutContext, setShortcutContext] = useState(null);
+    const [shortcutOrder, setShortcutOrder] = useState('default');
+    const desktopContextRef = useRef(null);
+    const shortcutContextRef = useRef(null);
     const [gridSize, setGridSize] = useState({ width: 0, height: 0 });
     const shortcutsRef = useRef(null);
     const widgetDragRef = useRef(null);
-    const shortcuts = useMemo(
-        () =>
-            getRegisteredApps()
-                .filter(
-                    (app) =>
-                        app.desktopShortcut &&
-                        desktopShortcutOrder.includes(app.id),
-                )
-                .sort(
-                    (a, b) =>
-                        desktopShortcutOrder.indexOf(a.id) -
-                        desktopShortcutOrder.indexOf(b.id),
-                ),
-        [],
-    );
+    const shortcuts = useMemo(() => {
+        const apps = getRegisteredApps()
+            .filter(
+                (app) =>
+                    app.desktopShortcut &&
+                    desktopShortcutOrder.includes(app.id),
+            );
+
+        if (shortcutOrder === 'name') {
+            return apps.sort((a, b) =>
+                a.name.localeCompare(b.name, 'pt-BR'),
+            );
+        }
+
+        return apps.sort(
+            (a, b) =>
+                desktopShortcutOrder.indexOf(a.id) -
+                desktopShortcutOrder.indexOf(b.id),
+        );
+    }, [shortcutOrder]);
     useEffect(() => {
         const element = shortcutsRef.current;
         if (!element) return;
@@ -546,12 +556,133 @@ export default function Desktop() {
         dismissToast(notification.id);
     }
 
+    function openShortcutContext(event, app) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const workspace = event.currentTarget.closest('.desktop__workspace');
+        if (!workspace) return;
+
+        const rect = workspace.getBoundingClientRect();
+        const menuWidth = 210;
+        const menuHeight = 150;
+
+        setDesktopContext(null);
+        setSelectedShortcut(app.id);
+
+        setShortcutContext({
+            appId: app.id,
+            x: Math.max(
+                8,
+                Math.min(event.clientX - rect.left, rect.width - menuWidth - 8),
+            ),
+            y: Math.max(
+                8,
+                Math.min(event.clientY - rect.top, rect.height - menuHeight - 8),
+            ),
+            showInfo: false,
+        });
+    }
+
+    function runShortcutContextAction(action) {
+        if (!shortcutContext) return;
+
+        if (action === 'open') {
+            run(openApp, shortcutContext.appId);
+            setShortcutContext(null);
+            return;
+        }
+
+        if (action === 'info') {
+            setShortcutContext((current) =>
+                current
+                    ? { ...current, showInfo: !current.showInfo }
+                    : null,
+            );
+        }
+    }
+
+    function openDesktopContext(event) {
+        if (
+            event.target.closest(
+                '.desktop__shortcut, .desktop__widget, .desktop__widget-toggle',
+            )
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const workspace = event.currentTarget;
+        const rect = workspace.getBoundingClientRect();
+
+        const menuWidth = 210;
+        const menuHeight = 170;
+
+        setShortcutContext(null);
+
+        setDesktopContext({
+            x: Math.max(
+                8,
+                Math.min(event.clientX - rect.left, rect.width - menuWidth - 8),
+            ),
+            y: Math.max(
+                8,
+                Math.min(event.clientY - rect.top, rect.height - menuHeight - 8),
+            ),
+        });
+    }
+
+    function runDesktopContextAction(action) {
+        if (action === 'sort-name') {
+            setShortcutOrder('name');
+        }
+
+        if (action === 'sort-default') {
+            setShortcutOrder('default');
+        }
+
+        if (action === 'toggle-clock') {
+            toggleClockWidget();
+        }
+
+        setDesktopContext(null);
+    }
+
+    useEffect(() => {
+        function handlePointerDown(event) {
+            if (!desktopContextRef.current?.contains(event.target)) {
+                setDesktopContext(null);
+            }
+
+            if (!shortcutContextRef.current?.contains(event.target)) {
+                setShortcutContext(null);
+            }
+        }
+
+        function handleEscape(event) {
+            if (event.key === 'Escape') {
+                setDesktopContext(null);
+                setShortcutContext(null);
+            }
+        }
+
+        document.addEventListener('pointerdown', handlePointerDown);
+        document.addEventListener('keydown', handleEscape);
+
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown);
+            document.removeEventListener('keydown', handleEscape);
+        };
+    }, []);
+
     return (
         <main className="desktop">
             <div className="desktop__wallpaper" aria-hidden="true" />
             <section
                 className="desktop__workspace"
                 aria-label="Área de trabalho"
+                onContextMenu={openDesktopContext}
                 onPointerDown={(event) => {
                     if (
                         event.target instanceof Element &&
@@ -566,13 +697,96 @@ export default function Desktop() {
                     }
                 }}
             >
-                <button
-                    type="button"
-                    className="desktop__widget-toggle"
-                    onClick={toggleClockWidget}
-                >
-                    {clockWidget?.visible ? 'Ocultar relógio' : 'Mostrar relógio'}
-                </button>
+                {desktopContext && (
+                    <div
+                        ref={desktopContextRef}
+                        className="desktop__context"
+                        role="group"
+                        aria-label="Opções da área de trabalho"
+                        style={{
+                            left: desktopContext.x,
+                            top: desktopContext.y,
+                        }}
+                    >
+                        <strong>Área de trabalho</strong>
+
+                        <button
+                            type="button"
+                            onClick={() => runDesktopContextAction('sort-default')}
+                            disabled={shortcutOrder === 'default'}
+                        >
+                            Organização padrão
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => runDesktopContextAction('sort-name')}
+                            disabled={shortcutOrder === 'name'}
+                        >
+                            Ordenar por nome
+                        </button>
+
+                        <div className="desktop__context-divider" />
+
+                        <button
+                            type="button"
+                            onClick={() => runDesktopContextAction('toggle-clock')}
+                        >
+                            {clockWidget?.visible ? 'Ocultar relógio' : 'Mostrar relógio'}
+                        </button>
+                    </div>
+                )}
+
+                {shortcutContext && (() => {
+                    const app = getAppDefinition(shortcutContext.appId);
+                    if (!app) return null;
+
+                    return (
+                        <div
+                            ref={shortcutContextRef}
+                            className="desktop__context"
+                            role="group"
+                            aria-label={`Opções de ${app.name}`}
+                            style={{
+                                left: shortcutContext.x,
+                                top: shortcutContext.y,
+                            }}
+                        >
+                            <strong>{app.name}</strong>
+
+                            <button
+                                type="button"
+                                onClick={() => runShortcutContextAction('open')}
+                            >
+                                Abrir
+                            </button>
+
+                            <button
+                                type="button"
+                                aria-expanded={shortcutContext.showInfo}
+                                onClick={() => runShortcutContextAction('info')}
+                            >
+                                Informações
+                            </button>
+
+                            {shortcutContext.showInfo && (
+                                <div className="desktop__context-info">
+                                    <span>
+                                        Tipo: {app.category === 'system'
+                                            ? 'Aplicativo de Sistema'
+                                            : 'Aplicativo Desktop'}
+                                    </span>
+
+                                    <span>
+                                        Estado: {app.implemented
+                                            ? 'Implementado'
+                                            : 'Em desenvolvimento'}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
                 <div
                     ref={shortcutsRef}
                     className="desktop__shortcuts"
@@ -661,6 +875,7 @@ export default function Desktop() {
                                 aria-label={`Abrir ${app.name}`}
                                 aria-pressed={selectedShortcut === app.id}
                                 title={app.name}
+                                onContextMenu={(event) => openShortcutContext(event, app)}
                                 onClick={() => {
                                     setSelectedShortcut(app.id);
                                 }}
