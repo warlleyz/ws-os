@@ -605,7 +605,13 @@ export default function Window({
                     ? 'none'
                     : 'auto',
             }}
-            onPointerDown={onActivate}
+            onPointerDown={(event) => {
+                if (event.target.closest('.desktop-window__controls')) {
+                    return;
+                }
+
+                onActivate();
+            }}
         >
             <header className="desktop-window__header">
                 <span
