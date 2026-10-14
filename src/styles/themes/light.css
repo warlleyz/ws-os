@@ -1,0 +1,17 @@
+:root[data-theme='light'] {
+    color-scheme: light;
+
+    --surface-canvas: #f1f5f9;
+    --surface-primary: #ffffff;
+    --surface-secondary: #e2e8f0;
+
+    --text-primary: #172334;
+    --text-secondary: #506176;
+
+    --border-default: #cbd5e1;
+
+    --accent-primary: #2876d0;
+    --accent-secondary: #147d96;
+
+    --shadow-floating: 0 16px 45px rgb(25 45 70 / 16%);
+}

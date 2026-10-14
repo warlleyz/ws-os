@@ -281,7 +281,7 @@ function NotificationToast({ notification, onDismiss, onAction }) {
     );
 }
 
-export default function Desktop() {
+export default function Desktop({ theme, onThemeChange }) {
     const [appState, setAppState] = useState(initialAppState);
     const [widgetState, setWidgetState] = useState(loadWidgetState);
     useEffect(() => {
@@ -953,6 +953,8 @@ export default function Desktop() {
                 onNotificationAction={handleNotificationAction}
                 onNotificationOpen={handleNotificationOpen}
                 onShowDesktop={showDesktop}
+                theme={theme}
+                onThemeChange={onThemeChange}
             />
             {visibleToasts.length > 0 && (
                 <aside

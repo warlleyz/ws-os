@@ -1,5 +1,10 @@
 
 import { useEffect, useState } from 'react';
+import {
+  applyTheme,
+  loadTheme,
+  saveTheme,
+} from './core/themeManager';
 import Desktop from './shells/Desktop';
 import './App.css';
 
@@ -16,6 +21,12 @@ function shouldShowWelcome() {
 
 export default function App() {
   const [bootComplete, setBootComplete] = useState(false);
+  const [theme, setTheme] = useState(loadTheme);
+
+  useEffect(() => {
+    applyTheme(theme);
+    saveTheme(theme);
+  }, [theme]);
   const [welcomeOpen, setWelcomeOpen] = useState(shouldShowWelcome);
 
   useEffect(() => {
@@ -52,7 +63,10 @@ export default function App() {
 
   return (
     <>
-      <Desktop />
+      <Desktop
+        theme={theme}
+        onThemeChange={setTheme}
+      />
 
       {welcomeOpen && (
         <div className="ws-welcome-backdrop">

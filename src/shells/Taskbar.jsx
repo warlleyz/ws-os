@@ -132,6 +132,8 @@ export default function Taskbar({
     onNotificationAction,
     onNotificationOpen,
     onShowDesktop,
+    theme,
+    onThemeChange,
 }) {
     const notifications = notificationState?.items ?? [];
     const unreadCount = notifications.filter((item) => !item.read).length;
@@ -1263,12 +1265,21 @@ export default function Taskbar({
                             <div className="taskbar-quick-controls__content">
                                 <div className="taskbar-quick-controls__section">
                                     <strong>Aparência</strong>
-                                    <p>Temas e personalização do sistema.</p>
-                                </div>
 
-                                <div className="taskbar-quick-controls__section">
-                                    <strong>Sons</strong>
-                                    <p>Preferências de áudio do sistema.</p>
+                                    <label className="taskbar-quick-controls__theme">
+                                        <span>Tema do sistema</span>
+
+                                        <select
+                                            aria-label="Tema do sistema"
+                                            value={theme}
+                                            onChange={(event) =>
+                                                onThemeChange(event.target.value)
+                                            }
+                                        >
+                                            <option value="dark">Escuro</option>
+                                            <option value="light">Claro</option>
+                                        </select>
+                                    </label>
                                 </div>
 
                                 <div className="taskbar-quick-controls__section">
