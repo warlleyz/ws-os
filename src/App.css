@@ -936,11 +936,11 @@
 }
 
 
-/* WS Menu provisório */
+/* WS Menu — estrutura inicial */
 
 .taskbar-launcher {
-  width: min(280px, calc(100vw - 32px));
-  max-height: min(360px, 60vh);
+  width: min(340px, calc(100vw - 32px));
+  max-height: min(440px, 65dvh);
   overflow-y: auto;
   padding: 12px;
   border: 1px solid var(--border-default);
@@ -949,10 +949,45 @@
   box-shadow: 0 16px 45px rgb(0 0 0 / 28%);
 }
 
+.taskbar-launcher__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 4px 12px;
+  border-bottom: 1px solid var(--border-default);
+}
+
 .taskbar-launcher__title {
   display: block;
-  margin-bottom: 10px;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.taskbar-launcher__subtitle {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.taskbar-launcher__count {
+  display: grid;
+  min-width: 26px;
+  height: 26px;
+  place-items: center;
+  padding-inline: 6px;
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.taskbar-launcher__section-heading {
+  padding: 14px 8px 7px;
+  color: var(--text-secondary);
+  font-size: 11px;
 }
 
 .taskbar-launcher__apps {
@@ -972,11 +1007,17 @@
   color: var(--text-primary);
   font-size: 12px;
   text-align: left;
+  cursor: pointer;
 }
 
 .taskbar-launcher__apps button:hover,
 .taskbar-launcher__apps button:focus-visible {
   background: var(--surface-secondary);
+}
+
+.taskbar-launcher__apps button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
 }
 
 .taskbar-launcher__icon {
@@ -989,6 +1030,12 @@
   background: var(--surface-secondary);
   color: var(--accent-secondary);
   font-weight: 800;
+}
+
+.taskbar-launcher__empty {
+  padding: 10px 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
 }
 
 /* Responsividade e acessibilidade */
@@ -1062,5 +1109,703 @@
   .taskbar-preview__item {
     width: 150px;
     min-width: 150px;
+  }
+}
+
+/* WS Menu — navegação por categorias */
+
+.taskbar-launcher {
+  display: flex;
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(440px, 65dvh);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.taskbar-launcher__header {
+  flex: 0 0 auto;
+}
+
+.taskbar-launcher__body {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  min-height: 0;
+  flex: 1 1 auto;
+  padding-top: 10px;
+}
+
+.taskbar-launcher__categories {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px 8px 4px 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-default);
+}
+
+.taskbar-launcher__category {
+  width: 100%;
+  min-height: 36px;
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.taskbar-launcher__category:hover {
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+.taskbar-launcher__category--active {
+  border-color: var(--border-default);
+  background: var(--surface-secondary);
+  color: var(--accent-secondary);
+  font-weight: 700;
+}
+
+.taskbar-launcher__category:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+}
+
+.taskbar-launcher__results {
+  min-width: 0;
+  min-height: 0;
+  padding-left: 8px;
+  overflow-y: auto;
+}
+
+.taskbar-launcher__section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .taskbar-launcher__body {
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+
+  .taskbar-launcher__category {
+    padding-inline: 6px;
+    font-size: 10px;
+  }
+}
+
+/* F4.14.4 — Novo WS Menu, dimensões fixas no Desktop */
+.taskbar-launcher--redesign {
+  position: relative;
+  display: flex;
+  width: min(360px, calc(100vw - 24px));
+  height: min(360px, calc(100dvh - 108px));
+  max-height: none;
+  min-height: 0;
+  flex-direction: column;
+  overflow: visible;
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  background: var(--surface-primary);
+  box-shadow: 0 20px 65px rgb(0 0 0 / 30%);
+}
+
+.ws-menu__identity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 18px 18px 12px;
+}
+
+.ws-menu__avatar {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  background: var(--surface-secondary);
+  color: var(--accent-secondary);
+}
+
+.ws-menu__identity-text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ws-menu__identity-text strong {
+  font-size: 13px;
+}
+
+.ws-menu__identity-text small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ws-menu__brand {
+  color: var(--text-secondary);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.ws-menu__search {
+  display: flex;
+  height: 40px;
+  flex: 0 0 40px;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 18px 12px;
+  padding: 0 11px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+}
+
+.ws-menu__search:focus-within {
+  border-color: var(--accent-secondary);
+}
+
+.ws-menu__search input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+}
+
+.ws-menu__search input::placeholder {
+  color: var(--text-secondary);
+}
+
+.ws-menu__search button {
+  border: 0;
+  padding: 2px 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.ws-menu__main {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: 0 12px 12px 18px;
+}
+
+.ws-menu__section-heading {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 6px 11px 0;
+}
+
+.ws-menu__section-heading strong {
+  font-size: 12px;
+}
+
+.ws-menu__view-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--accent-secondary);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.ws-menu__view-toggle:hover {
+  text-decoration: underline;
+}
+
+.ws-menu__apps {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  align-content: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  overflow-y: auto;
+  padding: 2px 5px 4px 0;
+  scrollbar-width: thin;
+}
+
+.ws-menu__app {
+  display: flex;
+  min-width: 0;
+  min-height: 51px;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ws-menu__app:hover,
+.ws-menu__app:focus-visible {
+  border-color: var(--border-default);
+  background: var(--surface-secondary);
+}
+
+.ws-menu__app-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  background: var(--surface-secondary);
+  color: var(--accent-secondary);
+}
+
+.ws-menu__app-name {
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.ws-menu__app-item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  border-radius: 9px;
+}
+
+.ws-menu__app-item:hover,
+.ws-menu__app-item:focus-within {
+  background: var(--surface-secondary);
+}
+
+.ws-menu__app-item .ws-menu__app {
+  min-width: 0;
+  flex: 1;
+}
+
+.ws-menu__favorite {
+  display: grid;
+  width: 28px;
+  height: 32px;
+  flex: 0 0 28px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0.45;
+}
+
+.ws-menu__favorite:hover,
+.ws-menu__favorite:focus-visible,
+.ws-menu__favorite--active {
+  color: var(--accent-secondary);
+  opacity: 1;
+}
+
+.ws-menu__favorite:disabled {
+  cursor: default;
+  opacity: 0.2;
+}
+
+.ws-menu__favorite:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+}
+
+.ws-menu__empty {
+  grid-column: 1 / -1;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+@media (max-width: 360px) {
+  .ws-menu__apps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* WS Menu — contexto dos aplicativos */
+
+.ws-menu__context {
+  position: absolute;
+  z-index: 20;
+  width: 180px;
+  padding: 5px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: var(--surface-primary);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 30%);
+}
+
+.ws-menu__context button {
+  display: flex;
+  width: 100%;
+  min-height: 34px;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ws-menu__context button:hover:not(:disabled),
+.ws-menu__context button:focus-visible {
+  background: var(--surface-secondary);
+  color: var(--accent-secondary);
+}
+
+.ws-menu__context button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.ws-menu__context button span {
+  display: grid;
+  width: 16px;
+  flex: 0 0 16px;
+  place-items: center;
+  color: var(--accent-secondary);
+  font-size: 17px;
+}
+
+.ws-menu__context button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+}
+
+/* Scrollbar do WS Menu */
+
+.taskbar-launcher--redesign,
+.taskbar-launcher--redesign * {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(110 148 190 / 0.55) transparent;
+}
+
+.taskbar-launcher--redesign::-webkit-scrollbar,
+.taskbar-launcher--redesign *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.taskbar-launcher--redesign::-webkit-scrollbar-track,
+.taskbar-launcher--redesign *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.taskbar-launcher--redesign::-webkit-scrollbar-thumb,
+.taskbar-launcher--redesign *::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(180deg,
+      rgb(125 175 230 / 0.72),
+      rgb(84 122 170 / 0.72));
+  background-clip: padding-box;
+}
+
+.taskbar-launcher--redesign::-webkit-scrollbar-thumb:hover,
+.taskbar-launcher--redesign *::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg,
+      rgb(145 198 255 / 0.9),
+      rgb(95 145 205 / 0.9));
+  background-clip: padding-box;
+}
+
+.taskbar-launcher--redesign::-webkit-scrollbar-corner,
+.taskbar-launcher--redesign *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* WS Menu — acabamento visual final */
+/* Mantém as dimensões atuais: 360 × 360 px */
+
+.taskbar-launcher--redesign {
+  border: 1px solid rgb(148 185 215 / 16%);
+  border-radius: 16px;
+  background: linear-gradient(155deg,
+      rgb(28 43 61 / 98%),
+      rgb(21 33 49 / 98%));
+  box-shadow:
+    0 22px 60px rgb(0 0 0 / 36%),
+    0 4px 12px rgb(0 0 0 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 5%);
+}
+
+.ws-menu__identity {
+  align-items: center;
+}
+
+.ws-menu__avatar {
+  border: 1px solid rgb(101 205 225 / 18%);
+  background: linear-gradient(145deg,
+      rgb(51 82 107 / 70%),
+      rgb(30 52 74 / 80%));
+  color: var(--accent-secondary);
+}
+
+.ws-menu__identity-text strong {
+  font-weight: 700;
+  letter-spacing: -0.15px;
+}
+
+.ws-menu__identity-text small {
+  color: var(--text-secondary);
+}
+
+.ws-menu__brand {
+  color: var(--text-secondary);
+  font-size: 10px;
+  letter-spacing: 0.25px;
+}
+
+.ws-menu__search {
+  border-color: rgb(148 185 215 / 19%);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 4%);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.ws-menu__search:hover {
+  border-color: rgb(101 205 225 / 35%);
+}
+
+.ws-menu__search:focus-within {
+  border-color: var(--accent-secondary);
+  background: rgb(255 255 255 / 6%);
+  box-shadow: 0 0 0 3px rgb(101 205 225 / 9%);
+}
+
+.ws-menu__section-heading strong {
+  font-weight: 700;
+  letter-spacing: -0.15px;
+}
+
+.ws-menu__view-toggle {
+  color: var(--accent-secondary);
+  transition:
+    color 140ms ease,
+    opacity 140ms ease;
+}
+
+.ws-menu__view-toggle:hover {
+  opacity: 0.8;
+}
+
+.ws-menu__app-item {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.ws-menu__app-item:hover,
+.ws-menu__app-item:focus-within {
+  border-color: rgb(101 205 225 / 12%);
+  background: rgb(255 255 255 / 5%);
+}
+
+.ws-menu__app-icon {
+  border: 1px solid rgb(101 205 225 / 12%);
+  border-radius: 9px;
+  background: rgb(55 85 112 / 35%);
+  color: var(--accent-secondary);
+}
+
+.ws-menu__app-name {
+  font-weight: 500;
+}
+
+/* Rolagem interna */
+
+.ws-menu__apps {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(116 165 197 / 60%) transparent;
+}
+
+.ws-menu__apps::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ws-menu__apps::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ws-menu__apps::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(116 165 197 / 55%);
+}
+
+.ws-menu__apps::-webkit-scrollbar-thumb:hover {
+  background: rgb(101 205 225 / 75%);
+}
+
+/* Menu de contexto */
+
+.ws-menu__context {
+  position: absolute;
+  z-index: 30;
+  display: flex;
+  width: 204px;
+  max-height: min(260px, calc(100dvh - 120px));
+  flex-direction: column;
+  gap: 2px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid rgb(148 185 215 / 20%);
+  border-radius: 12px;
+  background: rgb(24 37 54 / 99%);
+  box-shadow:
+    0 14px 35px rgb(0 0 0 / 38%),
+    inset 0 1px 0 rgb(255 255 255 / 5%);
+  scrollbar-width: thin;
+  scrollbar-color: rgb(116 165 197 / 45%) transparent;
+}
+
+.ws-menu__context-header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 8px;
+}
+
+.ws-menu__context-header strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-menu__context-icon {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  place-items: center;
+  border: 1px solid rgb(101 205 225 / 14%);
+  border-radius: 8px;
+  background: rgb(55 85 112 / 35%);
+  color: var(--accent-secondary);
+}
+
+.ws-menu__context-divider {
+  height: 1px;
+  flex: 0 0 1px;
+  margin: 3px 5px;
+  background: rgb(148 185 215 / 13%);
+}
+
+.ws-menu__context button {
+  display: flex;
+  width: 100%;
+  min-height: 34px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.ws-menu__context button:hover:not(:disabled),
+.ws-menu__context button:focus-visible {
+  background: rgb(101 205 225 / 11%);
+  color: var(--accent-secondary);
+}
+
+.ws-menu__context button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+}
+
+.ws-menu__context button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.ws-menu__context-action-icon {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  place-items: center;
+  color: var(--accent-secondary);
+}
+
+.ws-menu__context-action-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ws-menu__context-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 2px 3px 5px;
+  padding: 9px;
+  border: 1px solid rgb(148 185 215 / 10%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 4%);
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .ws-menu__search,
+  .ws-menu__app-item,
+  .ws-menu__context button {
+    transition: none;
   }
 }

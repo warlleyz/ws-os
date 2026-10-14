@@ -12,6 +12,42 @@ import {
     getAppDefinition,
     getRegisteredApps,
 } from '../core/appRegistry';
+function normalizeSearch(value) {
+    return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+}
+
+const FAVORITES_STORAGE_KEY = 'ws-os:menu-favorites';
+const MAX_FAVORITES = 6;
+
+const DEFAULT_FAVORITES = [
+    'about-me',
+    'projects',
+    'dev-insights',
+    'resume',
+    'files',
+    'notes',
+];
+
+function getInitialFavorites() {
+    try {
+        const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
+
+        if (saved !== null) {
+            const parsed = JSON.parse(saved);
+
+            if (Array.isArray(parsed)) {
+                return [...new Set(parsed.filter(
+                    (id) => typeof id === 'string',
+                ))].slice(0, MAX_FAVORITES);
+            }
+        }
+    } catch {
+        // Usa os favoritos padrão se o armazenamento estiver indisponível.
+    }
+
+    return DEFAULT_FAVORITES;
+}
+
 function TaskbarIcon({ name, size = 18 }) {
     const paths = {
         menu: (
@@ -92,6 +128,10 @@ function AppIcon({ app, size = 18 }) {
 export default function Taskbar({ appState, onAppAction }) {
     const [contextGroup, setContextGroup] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [menuView, setMenuView] = useState('home');
+    const [menuSearch, setMenuSearch] = useState('');
+    const [shortcutContext, setShortcutContext] = useState(null);
+    const [favoriteIds, setFavoriteIds] = useState(getInitialFavorites);
     const [previewGroup, setPreviewGroup] = useState(null);
     const previewOpenTimerRef = useRef(null);
     const previewCloseTimerRef = useRef(null);
@@ -109,6 +149,131 @@ export default function Taskbar({ appState, onAppAction }) {
     const contextMenuRef = useRef(null);
     const contextTriggerRef = useRef(null);
     const menuButtonRef = useRef(null);
+    const menuSearchRef = useRef(null);
+    const shortcutContextRef = useRef(null);
+    const shortcutTriggerRef = useRef(null);
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(
+                FAVORITES_STORAGE_KEY,
+                JSON.stringify(favoriteIds),
+            );
+        } catch {
+            // A seleção funciona durante a sessão, mesmo sem persistência.
+        }
+    }, [favoriteIds]);
+
+    function toggleFavorite(appId) {
+        setFavoriteIds((current) => {
+            if (current.includes(appId)) {
+                return current.filter((id) => id !== appId);
+            }
+
+            if (current.length >= MAX_FAVORITES) {
+                return current;
+            }
+
+            return [...current, appId];
+        });
+    }
+    function openShortcutContext(event, app) {
+        event.preventDefault();
+
+        const panel = event.currentTarget.closest(
+            '.taskbar-launcher--redesign',
+        );
+
+        if (!panel) return;
+
+        shortcutTriggerRef.current = event.currentTarget;
+
+        const rect = panel.getBoundingClientRect();
+
+        const width = 204;
+        const estimatedHeight = 210;
+        const padding = 8;
+
+        const x = Math.max(
+            padding,
+            Math.min(
+                event.clientX - rect.left,
+                rect.width - width - padding,
+            ),
+        );
+
+        const y = Math.max(
+            padding,
+            Math.min(
+                event.clientY - rect.top,
+                rect.height - estimatedHeight - padding,
+            ),
+        );
+
+        setShortcutContext({
+            appId: app.id,
+            x,
+            y,
+            showInfo: false,
+        });
+    }
+
+    function runShortcutContextAction(action) {
+        if (!shortcutContext) return;
+
+        const appId = shortcutContext.appId;
+
+        if (action === 'open') {
+            onAppAction(openApp, appId);
+            closePanels();
+            return;
+        }
+
+        if (action === 'favorite') {
+            toggleFavorite(appId);
+            setShortcutContext(null);
+            shortcutTriggerRef.current?.focus();
+            return;
+        }
+
+        if (action === 'info') {
+            setShortcutContext((current) =>
+                current
+                    ? { ...current, showInfo: !current.showInfo }
+                    : null,
+            );
+        }
+    }
+    const menuApps = getRegisteredApps()
+        .filter((app) => app.public && app.showInMenu !== false)
+        .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+    const searchTerm = normalizeSearch(menuSearch.trim());
+    const searchResults = menuApps.filter((app) =>
+        normalizeSearch(app.name).includes(searchTerm),
+    );
+    const favoriteApps = favoriteIds
+        .map((id) => menuApps.find((app) => app.id === id))
+        .filter(Boolean);
+
+    const visibleMenuApps = searchTerm
+        ? searchResults
+        : menuView === 'all'
+            ? menuApps
+            : favoriteApps;
+    
+    useEffect(() => {
+        if (!shortcutContext) return;
+
+        shortcutContextRef.current
+            ?.querySelector('button:not(:disabled)')
+            ?.focus();
+    }, [shortcutContext]);
+
+    useEffect(() => {
+        if (menuOpen) menuSearchRef.current?.focus();
+    }, [menuOpen]);
+
     const groups = [];
     for (const instance of appState.instances) {
         let group = groups.find((item) => item.appId === instance.appId);
@@ -186,37 +351,63 @@ export default function Taskbar({ appState, onAppAction }) {
     }, []);
     useEffect(() => {
         function handlePointerDown(event) {
-            if (
-                !taskbarRef.current?.contains(event.target) &&
-                !floatingLayerRef.current?.contains(event.target)
-            ) {
+            const insideTaskbar = taskbarRef.current?.contains(event.target);
+            const insideFloating = floatingLayerRef.current?.contains(
+                event.target,
+            );
+
+            if (!insideTaskbar && !insideFloating) {
                 clearWindowHighlight();
+                clearPreviewTimers();
+
+                setPreviewGroup(null);
                 setContextGroup(null);
+                setShortcutContext(null);
                 setMenuOpen(false);
+
                 contextTriggerRef.current = null;
+                shortcutTriggerRef.current = null;
             }
         }
+
         function handleKeyDown(event) {
             if (event.key !== 'Escape') return;
+
+            if (shortcutContext) {
+                event.preventDefault();
+                event.stopImmediatePropagation?.();
+
+                setShortcutContext(null);
+                shortcutTriggerRef.current?.focus();
+                return;
+            }
+
             clearWindowHighlight();
+            clearPreviewTimers();
+
             if (contextTriggerRef.current) {
                 contextTriggerRef.current.focus();
             } else if (menuOpen) {
                 menuButtonRef.current?.focus();
             }
-            window.clearTimeout(previewOpenTimerRef.current);
-            window.clearTimeout(previewCloseTimerRef.current);
+
             setPreviewGroup(null);
             setContextGroup(null);
+            setShortcutContext(null);
             setMenuOpen(false);
+
+            contextTriggerRef.current = null;
+            shortcutTriggerRef.current = null;
         }
+
         document.addEventListener('pointerdown', handlePointerDown);
         document.addEventListener('keydown', handleKeyDown);
+
         return () => {
             document.removeEventListener('pointerdown', handlePointerDown);
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [menuOpen]);
+    }, [menuOpen, shortcutContext]);
     useEffect(() => {
         if (contextGroup) {
             contextMenuRef.current
@@ -280,9 +471,15 @@ export default function Taskbar({ appState, onAppAction }) {
     function closePanels() {
         clearWindowHighlight();
         closePreview();
+
         setContextGroup(null);
+        setShortcutContext(null);
         setMenuOpen(false);
+        setMenuView('home');
+        setMenuSearch('');
+
         contextTriggerRef.current = null;
+        shortcutTriggerRef.current = null;
     }
     function activateInstance(instance) {
         onAppAction(
@@ -390,8 +587,20 @@ export default function Taskbar({ appState, onAppAction }) {
         closePanels();
     }
     function toggleWSMenu() {
+        clearWindowHighlight();
+        closePreview();
+
         setContextGroup(null);
+        setShortcutContext(null);
+
         contextTriggerRef.current = null;
+        shortcutTriggerRef.current = null;
+
+        if (!menuOpen) {
+            setMenuView('home');
+            setMenuSearch('');
+        }
+
         setMenuOpen((current) => !current);
     }
     const timeText = currentTime.toLocaleTimeString('pt-BR', {
@@ -489,31 +698,232 @@ export default function Taskbar({ appState, onAppAction }) {
                     )}
                     {menuOpen && (
                         <section
-                            className="taskbar-launcher"
+                            className="taskbar-launcher taskbar-launcher--redesign"
                             aria-label="WS Menu"
+                            onPointerDown={(event) => {
+                                if (
+                                    shortcutContext &&
+                                    !event.target.closest('.ws-menu__context')
+                                ) {
+                                    setShortcutContext(null);
+                                }
+                            }}
                         >
-                            <strong className="taskbar-launcher__title">
-                                Aplicativos
-                            </strong>
-                            <div className="taskbar-launcher__apps">
-                                {getRegisteredApps()
-                                    .filter((app) => app.public)
-                                    .map((app) => (
+                            <header className="ws-menu__identity">
+                                <div className="ws-menu__avatar" aria-hidden="true">
+                                    <TaskbarIcon name="wally" size={21} />
+                                </div>
+                                <div className="ws-menu__identity-text">
+                                    <strong>Visitante</strong>
+                                    <small>Bem-vindo à WS OS</small>
+                                </div>
+                                <span className="ws-menu__brand">WS OS V2</span>
+                            </header>
+
+                            <div className="ws-menu__search">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                                    <circle cx="10.8" cy="10.8" r="6.8" />
+                                    <path d="m16 16 5 5" />
+                                </svg>
+                                <input
+                                    ref={menuSearchRef}
+                                    type="search"
+                                    aria-label="Pesquisar na WS OS"
+                                    placeholder="Pesquisar na WS OS..."
+                                    value={menuSearch}
+                                    onChange={(event) => setMenuSearch(event.target.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter' && visibleMenuApps.length > 0) {
+                                            event.preventDefault();
+                                            onAppAction(openApp, visibleMenuApps[0].id);
+                                            closePanels();
+                                        }
+                                    }}
+                                />
+                                {menuSearch && (
+                                    <button
+                                        type="button"
+                                        aria-label="Limpar pesquisa"
+                                        title="Limpar pesquisa"
+                                        onClick={() => {
+                                            setMenuSearch('');
+                                            menuSearchRef.current?.focus();
+                                        }}
+                                    >×</button>
+                                )}
+                            </div>
+
+                            <div className="ws-menu__main">
+                                <div className="ws-menu__section-heading">
+                                    <strong>
+                                        {searchTerm
+                                            ? 'Resultados da pesquisa'
+                                            : menuView === 'all'
+                                                ? 'Todos os aplicativos'
+                                                : 'Aplicativos Favoritos'}
+                                    </strong>
+                                    {!searchTerm && (
                                         <button
-                                            key={app.id}
                                             type="button"
-                                            onClick={() => {
-                                                onAppAction(openApp, app.id);
-                                                closePanels();
-                                            }}
+                                            className="ws-menu__view-toggle"
+                                            onClick={() => setMenuView((current) => current === 'all' ? 'home' : 'all')}
                                         >
-                                            <span className="taskbar-launcher__icon">
+                                            {menuView === 'all' ? 'Voltar' : 'Todos os aplicativos'}
+                                            <span aria-hidden="true">{menuView === 'all' ? ' ←' : ' →'}</span>
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="ws-menu__apps" aria-label="Aplicativos">
+                                    {visibleMenuApps.length === 0 ? (
+                                        <p className="ws-menu__empty">
+                                            {searchTerm
+                                                ? 'Nenhum aplicativo encontrado.'
+                                                : menuView === 'home'
+                                                    ? 'Nenhum favorito. Clique em Todos os aplicativos para adicionar.'
+                                                    : 'Nenhum aplicativo disponível.'}
+                                        </p>
+                                    ) : (
+                                            visibleMenuApps.map((app) => {
+                                                return (
+                                                    <div className="ws-menu__app-item" key={app.id}>
+                                                        <button
+                                                            type="button"
+                                                            className="ws-menu__app"
+                                                            onContextMenu={(event) => openShortcutContext(event, app)}
+                                                            onKeyDown={(event) => {
+                                                                if (
+                                                                    (event.shiftKey && event.key === 'F10') ||
+                                                                    event.key === 'ContextMenu'
+                                                                ) {
+                                                                    event.preventDefault();
+
+                                                                    const rect = event.currentTarget.getBoundingClientRect();
+
+                                                                    openShortcutContext(
+                                                                        {
+                                                                            preventDefault: () => { },
+                                                                            currentTarget: event.currentTarget,
+                                                                            clientX: rect.left + rect.width / 2,
+                                                                            clientY: rect.top + rect.height / 2,
+                                                                        },
+                                                                        app,
+                                                                    );
+                                                                }
+                                                            }}
+                                                            onClick={() => {
+                                                                onAppAction(openApp, app.id);
+                                                                closePanels();
+                                                            }}
+                                                        >
+                                                            <span className="ws-menu__app-icon">
+                                                                <AppIcon app={app} size={19} />
+                                                            </span>
+
+                                                            <span className="ws-menu__app-name">
+                                                                {app.name}
+                                                            </span>
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })
+                                    )}
+                                </div>
+                            </div>
+
+                            {shortcutContext && (() => {
+                                const app = getAppDefinition(shortcutContext.appId);
+                                const isFavorite = favoriteIds.includes(shortcutContext.appId);
+
+                                if (!app) return null;
+
+                                const canFavorite =
+                                    isFavorite || favoriteIds.length < MAX_FAVORITES;
+
+                                return (
+                                    <div
+                                        ref={shortcutContextRef}
+                                        className="ws-menu__context"
+                                        role="group"
+                                        aria-label={`Opções de ${app.name}`}
+                                        style={{
+                                            left: shortcutContext.x,
+                                            top: shortcutContext.y,
+                                        }}
+                                    >
+                                        <div className="ws-menu__context-header">
+                                            <span className="ws-menu__context-icon">
                                                 <AppIcon app={app} size={18} />
                                             </span>
-                                            <span>{app.name}</span>
+
+                                            <strong title={app.name}>{app.name}</strong>
+                                        </div>
+
+                                        <div className="ws-menu__context-divider" />
+
+                                        <button
+                                            type="button"
+                                            onClick={() => runShortcutContextAction('open')}
+                                        >
+                                            <span className="ws-menu__context-action-icon">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path d="M8 5l11 7-11 7V5Z" />
+                                                </svg>
+                                            </span>
+                                            Abrir
                                         </button>
-                                    ))}
-                            </div>
+
+                                        <button
+                                            type="button"
+                                            disabled={!canFavorite}
+                                            onClick={() => runShortcutContextAction('favorite')}
+                                        >
+                                            <span className="ws-menu__context-action-icon">
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    aria-hidden="true"
+                                                    fill={isFavorite ? 'currentColor' : 'none'}
+                                                >
+                                                    <path d="m12 2 3.1 6.3 7 1-5.1 5 .9 7-5.9-3.2-5.9 3.2.9-7-5.1-5 7-1L12 2Z" />
+                                                </svg>
+                                            </span>
+                                            {isFavorite
+                                                ? 'Desafixar do WS Menu'
+                                                : 'Fixar no WS Menu'}
+                                        </button>
+
+                                        <div className="ws-menu__context-divider" />
+
+                                        <button
+                                            type="button"
+                                            aria-expanded={shortcutContext.showInfo}
+                                            onClick={() => runShortcutContextAction('info')}
+                                        >
+                                            <span className="ws-menu__context-action-icon">
+                                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                    <circle cx="12" cy="12" r="9" />
+                                                    <path d="M12 11v6M12 7h.01" />
+                                                </svg>
+                                            </span>
+                                            Informações
+                                        </button>
+
+                                        {shortcutContext.showInfo && (
+                                            <div className="ws-menu__context-details">
+                                                <span>
+                                                    Tipo: {app.category === 'system'
+                                                        ? 'Aplicativo de Sistema'
+                                                        : 'Aplicativo Desktop'}
+                                                </span>
+                                                <span>
+                                                    Estado: {app.implemented
+                                                        ? 'Implementado'
+                                                        : 'Em desenvolvimento'}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </section>
                     )}
                     {context && (
