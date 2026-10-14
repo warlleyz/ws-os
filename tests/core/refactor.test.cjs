@@ -118,3 +118,59 @@ test('resolução de painéis preserva exclusividade e alternância', () => {
   assert.equal(m.resolvePanel(false, 'calendar', 'calendar'), null);
   assert.equal(m.resolvePanel(false, 'calendar', 'weather'), 'calendar');
 });
+
+test('grupo da Taskbar respeita histórico de foco e minimização', () => {
+  const { manager: m } = loadCore();
+
+  let state = {
+    instances: [],
+    activeInstanceId: null,
+    focusHistory: [],
+  };
+
+  state = m.openApp(state, 'projects');
+  const first = state.activeInstanceId;
+
+  state = m.openApp(state, 'projects');
+  const second = state.activeInstanceId;
+
+  state = m.openApp(state, 'about-me');
+  const other = state.activeInstanceId;
+
+  assert.equal(m.getPreferredInstance(state, 'projects').id, second);
+
+  state = m.minimizeApp(state, second);
+  assert.equal(m.getPreferredInstance(state, 'projects').id, second);
+
+  state = m.minimizeApp(state, other);
+  assert.equal(state.activeInstanceId, first);
+  assert.equal(m.getPreferredInstance(state, 'projects').id, first);
+
+  state = m.minimizeApp(state, first);
+  assert.equal(state.activeInstanceId, null);
+  assert.equal(m.getPreferredInstance(state, 'projects').id, first);
+
+  state = m.restoreApp(state, second);
+  assert.equal(m.getPreferredInstance(state, 'projects').id, second);
+
+  state = m.closeApp(state, second);
+  assert.equal(m.getPreferredInstance(state, 'projects').id, first);
+});
+
+test('calendário e painéis preservam exclusividade', () => {
+  const m = loadPureModule('src/core/panelManager.js');
+
+  let panel = 'calendar';
+
+  panel = m.resolvePanel(true, panel, 'menu');
+  assert.equal(panel, 'menu');
+
+  panel = m.resolvePanel(true, panel, 'weather');
+  assert.equal(panel, 'weather');
+
+  panel = m.resolvePanel(false, panel, 'calendar');
+  assert.equal(panel, 'weather');
+
+  panel = m.resolvePanel(false, panel, 'weather');
+  assert.equal(panel, null);
+});

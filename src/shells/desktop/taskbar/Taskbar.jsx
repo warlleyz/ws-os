@@ -18,7 +18,14 @@ import { resolvePanel } from '../../../core/panelManager';
 import { SystemIcon } from '../../../shared/components/SystemIcon';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { activateApp, closeApp, minimizeApp, openApp, restoreApp } from '../../../core/appManager';
+import {
+  activateApp,
+  closeApp,
+  minimizeApp,
+  openApp,
+  restoreApp,
+  getPreferredInstance,
+} from '../../../core/appManager';
 import { getAppDefinition } from '../../../core/appRegistry';
 
 // Utilitários e preferências persistentes do WS Menu.
@@ -118,6 +125,13 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
   } = useTaskbarPreviews({
     groups,
     appState,
+    onPreviewOpen: () => {
+      setActivePanel(null);
+      setContextGroup(null);
+      setShortcutContext(null);
+      contextTriggerRef.current = null;
+      shortcutTriggerRef.current = null;
+    },
   });
   // Fechamento e alternância de painéis flutuantes.
   const { appsScrollRef, appsScroll, setAppsScroll, scrollApps } = useTaskbarScroll({
@@ -126,12 +140,7 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
   const context = groups.find((group) => group.appId === contextGroup);
   const contextApp = context ? getAppDefinition(context.appId) : null;
   function getTargetInstance(group) {
-    const active = group.instances.find((instance) => instance.id === appState.activeInstanceId);
-    if (active) return active;
-    return (
-      [...group.instances].reverse().find((instance) => !instance.minimized) ??
-      group.instances.at(-1)
-    );
+    return getPreferredInstance(appState, group.appId);
   }
   const contextTarget = context ? getTargetInstance(context) : null;
   useEffect(() => {
@@ -179,13 +188,9 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     closePreview();
     setContextGroup(null);
     setShortcutContext(null);
-    setMenuOpen(false);
-    setNotificationOpen(false);
+    setActivePanel(null);
     setMenuView('home');
     setMenuSearch('');
-    setQuickControlsOpen(false);
-    setWallyOpen(false);
-    setWeatherOpen(false);
     contextTriggerRef.current = null;
     shortcutTriggerRef.current = null;
   }
@@ -194,51 +199,55 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     closePanels();
   }
   function handleGroupClick(group) {
-    clearWindowHighlight();
-    setContextGroup(null);
-    setMenuOpen(false);
-    setNotificationOpen(false);
-    setQuickControlsOpen(false);
-    setWallyOpen(false);
-    setWeatherOpen(false);
-    contextTriggerRef.current = null;
-    if (group.instances.length > 1) {
-      clearPreviewTimers();
-      setPreviewGroup((current) => (current === group.appId ? null : group.appId));
+    const target = getTargetInstance(group);
+
+    closePanels();
+
+    if (!target) return;
+
+    if (
+      appState.activeInstanceId === target.id &&
+      !target.minimized
+    ) {
+      onAppAction(minimizeApp, target.id);
       return;
     }
-    const instance = group.instances[0];
-    if (instance.minimized) {
-      activateInstance(instance);
-    } else if (appState.activeInstanceId === instance.id) {
-      onAppAction(minimizeApp, instance.id);
-      closePanels();
-    } else {
-      activateInstance(instance);
-    }
+
+    onAppAction(
+      target.minimized ? restoreApp : activateApp,
+      target.id,
+    );
   }
   function handleContextMenu(event, group) {
     event.preventDefault();
+
     clearWindowHighlight();
     closePreview();
+
     contextTriggerRef.current = event.currentTarget;
-    setMenuOpen(false);
-    setNotificationOpen(false);
-    setQuickControlsOpen(false);
-    setWallyOpen(false);
-    setWeatherOpen(false);
-    setContextGroup((current) => (current === group.appId ? null : group.appId));
+
+    setActivePanel(null);
+    setShortcutContext(null);
+    shortcutTriggerRef.current = null;
+
+    setContextGroup((current) =>
+      current === group.appId ? null : group.appId,
+    );
   }
   function handleContextKeyDown(event, group) {
     if (event.key === 'F10' && event.shiftKey) {
       event.preventDefault();
+
+      clearWindowHighlight();
+      closePreview();
+
       contextTriggerRef.current = event.currentTarget;
-      setMenuOpen(false);
-      setNotificationOpen(false);
+
+      setActivePanel(null);
+      setShortcutContext(null);
+      shortcutTriggerRef.current = null;
+
       setContextGroup(group.appId);
-      setQuickControlsOpen(false);
-      setWallyOpen(false);
-      setWeatherOpen(false);
     }
   }
   function handleMenuNavigation(event) {

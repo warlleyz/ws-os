@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 // Utilitários e preferências persistentes do WS Menu.
-export default function useTaskbarPreviews({ groups, appState }) {
+export default function useTaskbarPreviews({
+  groups,
+  appState,
+  onPreviewOpen,
+}) {
   const [previewGroup, setPreviewGroup] = useState(null);
   const previewOpenTimerRef = useRef(null);
   const previewCloseTimerRef = useRef(null);
@@ -33,7 +37,9 @@ export default function useTaskbarPreviews({ groups, appState }) {
   }
   function schedulePreviewOpen(appId) {
     clearPreviewTimers();
+
     previewOpenTimerRef.current = window.setTimeout(() => {
+      onPreviewOpen?.();
       setPreviewGroup(appId);
     }, 300);
   }

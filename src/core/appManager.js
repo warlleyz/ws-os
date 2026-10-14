@@ -6,6 +6,33 @@ export const initialAppState = {
   focusHistory: [],
 };
 
+export function getPreferredInstance(state, appId) {
+  const instances = state.instances.filter(
+    (instance) => instance.appId === appId,
+  );
+
+  if (instances.length === 0) return null;
+
+  const active = instances.find(
+    (instance) => instance.id === state.activeInstanceId,
+  );
+
+  if (active) return active;
+
+  for (let index = state.focusHistory.length - 1; index >= 0; index -= 1) {
+    const instance = instances.find(
+      (item) => item.id === state.focusHistory[index],
+    );
+
+    if (instance) return instance;
+  }
+
+  return (
+    instances.find((instance) => !instance.minimized) ??
+    instances.at(-1)
+  );
+}
+
 function getLastAvailableFocus(instances, history) {
   return (
     [...history]
@@ -63,23 +90,31 @@ export function minimizeApp(state, instanceId) {
   const instances = state.instances.map((item) =>
     item.id === instanceId
       ? {
-          ...item,
-          minimized: true,
-          executionState: app?.pauseWhenMinimized ? 'paused' : 'running',
-        }
+        ...item,
+        minimized: true,
+        executionState: app?.pauseWhenMinimized ? 'paused' : 'running',
+      }
       : item,
   );
 
-  const focusHistory = state.focusHistory.filter((id) => id !== instanceId);
+  const activeInstanceId =
+    state.activeInstanceId === instanceId
+      ? getLastAvailableFocus(instances, state.focusHistory)
+      : state.activeInstanceId;
+
+  const focusHistory =
+    activeInstanceId && state.activeInstanceId === instanceId
+      ? [
+        ...state.focusHistory.filter((id) => id !== activeInstanceId),
+        activeInstanceId,
+      ]
+      : state.focusHistory;
 
   return {
     ...state,
     instances,
     focusHistory,
-    activeInstanceId:
-      state.activeInstanceId === instanceId
-        ? getLastAvailableFocus(instances, focusHistory)
-        : state.activeInstanceId,
+    activeInstanceId,
   };
 }
 
