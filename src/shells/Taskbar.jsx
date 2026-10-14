@@ -368,11 +368,7 @@ export default function Taskbar({
                 setPreviewGroup(null);
                 setContextGroup(null);
                 setShortcutContext(null);
-                setMenuOpen(false);
-                setNotificationOpen(false);
-                setQuickControlsOpen(false);
-                setWallyOpen(false);
-                setWeatherOpen(false);
+                setActivePanel(null);
                 contextTriggerRef.current = null;
                 shortcutTriggerRef.current = null;
             }
