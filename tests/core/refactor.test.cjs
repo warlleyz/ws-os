@@ -324,3 +324,47 @@ test('apps sem pausa seletiva continuam running ao minimizar', () => {
   assert.equal(state.instances.length, 1);
   assert.equal(state.instances[0].executionState, 'running');
 });
+
+test('widget não oculta atalhos quando a grade está no limite', () => {
+  const m = loadPureModule('src/shells/desktop/desktopLayout.js');
+
+  const layout = m.getDesktopLayout(12, 360, 352, {
+    visible: true,
+    position: null,
+    size: { columns: 2, rows: 2 },
+  });
+
+  assert.equal(layout.shortcuts.length, 12);
+  assert.equal(layout.widget, null);
+});
+
+
+test('widget é realocado quando sua posição preferida não cabe', () => {
+  const m = loadPureModule('src/shells/desktop/desktopLayout.js');
+
+  const layout = m.getDesktopLayout(2, 720, 528, {
+    visible: true,
+    position: { column: 7, row: 5 },
+    size: { columns: 2, rows: 2 },
+  });
+
+  assert.equal(layout.shortcuts.length, 2);
+  assert.ok(layout.widget);
+
+  assert.equal(layout.widget.left, 540);
+  assert.equal(layout.widget.top, 0);
+});
+
+test('widget preserva posição preferida quando ela continua válida', () => {
+  const m = loadPureModule('src/shells/desktop/desktopLayout.js');
+
+  const layout = m.getDesktopLayout(2, 720, 528, {
+    visible: true,
+    position: { column: 3, row: 1 },
+    size: { columns: 2, rows: 2 },
+  });
+
+  assert.equal(layout.shortcuts.length, 2);
+  assert.equal(layout.widget.left, 270);
+  assert.equal(layout.widget.top, 88);
+});

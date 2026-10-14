@@ -31,7 +31,7 @@ export default function useDesktopWidgets({ shortcuts, gridSize }) {
   const positions = desktopLayout.shortcuts;
   function canPlaceWidget(candidate) {
     const layout = getDesktopLayout(shortcuts.length, gridSize.width, gridSize.height, candidate);
-    return layout.widget !== null && layout.shortcuts.length >= positions.length;
+    return layout.widget !== null && layout.shortcuts.length === shortcuts.length;
   }
   function changeWidgetSize(value) {
     const [columns, rows] = value.split('x').map(Number);
