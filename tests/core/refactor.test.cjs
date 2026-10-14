@@ -180,7 +180,12 @@ test('registry não declara aplicativos funcionais inexistentes', () => {
   const apps = registry.getRegisteredApps();
 
   assert.equal(apps.length, 18);
-  assert.equal(apps.filter((app) => app.implemented).length, 0);
+  assert.deepEqual(
+    Array.from(
+      apps.filter((app) => app.implemented).map((app) => app.id),
+    ),
+    ['about-system'],
+  );
   assert.equal(apps.filter((app) => app.desktopShortcut).length, 12);
 });
 

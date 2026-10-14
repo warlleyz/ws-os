@@ -179,7 +179,7 @@ const appDefinitions = [
     category: 'desktop',
     menuCategory: 'system',
     desktopShortcut: true,
-    implemented: false,
+    implemented: true,
     allowMultipleInstances: false,
     pauseWhenMinimized: false,
     public: true,

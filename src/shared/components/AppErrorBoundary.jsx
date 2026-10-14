@@ -1,4 +1,3 @@
-// Reservado para implementação futura; este módulo ainda não deve ser importado.
 import { Component } from 'react';
 
 export default class AppErrorBoundary extends Component {
