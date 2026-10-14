@@ -262,3 +262,65 @@ test('abertura mantém compatibilidade com chamadas existentes', () => {
 
   assert.equal(m.openApp(state, 'administration'), state);
 });
+
+
+test('lifecycle mantém estado ao minimizar e restaurar', () => {
+  const { manager: m } = loadCore();
+
+  let state = {
+    instances: [],
+    activeInstanceId: null,
+    focusHistory: [],
+  };
+
+  state = m.openApp(state, 'projects');
+  const id = state.activeInstanceId;
+
+  assert.equal(state.instances[0].executionState, 'running');
+
+  state = m.minimizeApp(state, id);
+
+  assert.equal(state.instances[0].minimized, true);
+  assert.equal(state.instances[0].executionState, 'paused');
+  assert.equal(state.activeInstanceId, null);
+
+  state = m.restoreApp(state, id);
+
+  assert.equal(state.instances[0].id, id);
+  assert.equal(state.instances[0].minimized, false);
+  assert.equal(state.instances[0].executionState, 'running');
+  assert.equal(state.activeInstanceId, id);
+
+  state = m.closeApp(state, id);
+
+  assert.equal(state.instances.length, 0);
+  assert.equal(state.focusHistory.length, 0);
+  assert.equal(state.activeInstanceId, null);
+});
+
+test('apps sem pausa seletiva continuam running ao minimizar', () => {
+  const { manager: m } = loadCore();
+
+  let state = {
+    instances: [],
+    activeInstanceId: null,
+    focusHistory: [],
+  };
+
+  state = m.openApp(state, 'about-system');
+  const id = state.activeInstanceId;
+
+  state = m.minimizeApp(state, id);
+
+  assert.equal(state.instances[0].minimized, true);
+  assert.equal(state.instances[0].executionState, 'running');
+
+  const unchanged = m.minimizeApp(state, id);
+
+  assert.equal(unchanged, state);
+
+  state = m.restoreApp(state, id);
+
+  assert.equal(state.instances.length, 1);
+  assert.equal(state.instances[0].executionState, 'running');
+});
