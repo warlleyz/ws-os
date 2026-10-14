@@ -134,6 +134,7 @@ export default function Taskbar({
     const [menuOpen, setMenuOpen] = useState(false);
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [quickControlsOpen, setQuickControlsOpen] = useState(false);
+    const [wallyOpen, setWallyOpen] = useState(false);
     const [menuView, setMenuView] = useState('home');
     const [menuSearch, setMenuSearch] = useState('');
     const [shortcutContext, setShortcutContext] = useState(null);
@@ -349,6 +350,7 @@ export default function Taskbar({
                 setMenuOpen(false);
                 setNotificationOpen(false);
                 setQuickControlsOpen(false);
+                setWallyOpen(false);
                 contextTriggerRef.current = null;
                 shortcutTriggerRef.current = null;
             }
@@ -455,6 +457,7 @@ export default function Taskbar({
         setMenuView('home');
         setMenuSearch('');
         setQuickControlsOpen(false);
+        setWallyOpen(false);
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
     }
@@ -471,6 +474,7 @@ export default function Taskbar({
         setMenuOpen(false);
         setNotificationOpen(false);
         setQuickControlsOpen(false);
+        setWallyOpen(false);
         contextTriggerRef.current = null;
         if (group.instances.length > 1) {
             clearPreviewTimers();
@@ -497,6 +501,7 @@ export default function Taskbar({
         setMenuOpen(false);
         setNotificationOpen(false);
         setQuickControlsOpen(false);
+        setWallyOpen(false);
         setContextGroup((current) =>
             current === group.appId ? null : group.appId,
         );
@@ -509,6 +514,7 @@ export default function Taskbar({
             setNotificationOpen(false);
             setContextGroup(group.appId);
             setQuickControlsOpen(false);
+            setWallyOpen(false);
         }
     }
     function handleMenuNavigation(event) {
@@ -575,6 +581,7 @@ export default function Taskbar({
         setContextGroup(null);
         setShortcutContext(null);
         setQuickControlsOpen(false);
+        setWallyOpen(false);
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
         if (!menuOpen) {
@@ -591,6 +598,7 @@ export default function Taskbar({
         setShortcutContext(null);
         setMenuOpen(false);
         setQuickControlsOpen(false);
+        setWallyOpen(false);
         setNotificationOpen((current) => !current);
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
@@ -609,6 +617,21 @@ export default function Taskbar({
 
         setQuickControlsOpen((current) => !current);
     }
+    function toggleWally() {
+        clearWindowHighlight();
+        closePreview();
+
+        setContextGroup(null);
+        setShortcutContext(null);
+        setMenuOpen(false);
+        setNotificationOpen(false);
+        setQuickControlsOpen(false);
+
+        contextTriggerRef.current = null;
+        shortcutTriggerRef.current = null;
+
+        setWallyOpen((current) => !current);
+    }
     const timeText = currentTime.toLocaleTimeString('pt-BR', {
         hour: '2-digit',
         minute: '2-digit',
@@ -626,7 +649,8 @@ export default function Taskbar({
                         !contextGroup &&
                         !menuOpen &&
                         !notificationOpen &&
-                        !quickControlsOpen && (
+                        !quickControlsOpen &&
+                        !wallyOpen && (
                         <section
                             ref={previewRef}
                             className="taskbar-preview"
@@ -919,6 +943,40 @@ export default function Taskbar({
                                     </div>
                                 );
                             })()}
+                        </section>
+                    )}
+                    {wallyOpen && (
+                        <section
+                            className="taskbar-wally"
+                            role="region"
+                            aria-label="Wally"
+                        >
+                            <header className="taskbar-wally__header">
+                                <div>
+                                    <strong>Wally</strong>
+                                    <small>Assistente da WS OS</small>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    aria-label="Fechar Wally"
+                                    onClick={() => setWallyOpen(false)}
+                                >
+                                    ×
+                                </button>
+                            </header>
+
+                            <div className="taskbar-wally__content">
+                                <TaskbarIcon name="wally" size={32} />
+
+                                <strong>Olá! Eu sou o Wally.</strong>
+
+                                <p>
+                                    Sou o assistente da WS OS.
+                                    Minhas funcionalidades serão integradas
+                                    nas próximas etapas.
+                                </p>
+                            </div>
                         </section>
                     )}
                     {quickControlsOpen && (
@@ -1267,9 +1325,10 @@ export default function Taskbar({
                     <button
                         type="button"
                         className="taskbar__system-button"
-                        title="Wally — em desenvolvimento"
-                        aria-label="Wally — em desenvolvimento"
-                        disabled
+                        title="Wally"
+                        aria-label="Wally"
+                        aria-expanded={wallyOpen}
+                        onClick={toggleWally}
                     >
                         <TaskbarIcon name="wally" />
                     </button>
