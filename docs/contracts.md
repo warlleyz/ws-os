@@ -6,23 +6,25 @@ Referência: DEC-411–449. O que está marcado como futuro não é implementaç
 
 getRegisteredApps retorna cópia do array com os mesmos objetos; getAppDefinition(appId) retorna definição ou null. Campos atuais: id, name, icon, category, menuCategory, desktopShortcut, implemented, allowMultipleInstances, pauseWhenMinimized, public e showInMenu.
 
-Há 12 Desktop e 6 Sistema. category é classificação arquitetural; menuCategory não deve virar categoria visual do menu. implemented:true em Sobre Mim/Projetos é legado inconsistente com o placeholder atual. Não usar essa flag como prova de conclusão.
+Há 12 Desktop e 6 Sistema. category é classificação arquitetural; menuCategory não deve virar categoria visual do menu. Apenas Sobre o Sistema possui implemented:true e está integrado ao AppHost, ainda com conteúdo parcial. Os outros 17 aplicativos permanecem com implemented:false. Essa flag indica que existe um componente funcional conectado, não que o aplicativo está 100% concluído.
 
 Futuro: entrada lazy, elegibilidade por shell, capacidades, parâmetros e política de acesso, preservando os IDs existentes.
 
 ## Instâncias
 
-Estado atual: `{ instances, activeInstanceId, focusHistory }`. Instância: `{ id, appId, minimized, executionState }`. ID da instância usa crypto.randomUUID; não equivale ao appId ou a ID de recurso externo.
+Estado atual: `{ instances, activeInstanceId, focusHistory }`. Instância: `{ id, appId, minimized, executionState, origin, params }`.`. ID da instância usa crypto.randomUUID; não equivale ao appId ou a ID de recurso externo.
 
 | Operação    | Entrada           | Resultado atual                                    |
 | ----------- | ----------------- | -------------------------------------------------- |
-| openApp     | state, appId      | Novo estado; restaura existente se instância única |
+| openApp | state, appId, options? | Abre ou restaura uma instância pública; aceita origin e params opcionais |
 | activateApp | state, instanceId | Ativa instância visível e atualiza histórico       |
 | minimizeApp | state, instanceId | Oculta e seleciona foco disponível                 |
 | restoreApp  | state, instanceId | Visível, running e ativa                           |
 | closeApp    | state, instanceId | Remove e ajusta foco                               |
 
-Entradas inexistentes geralmente devolvem estado sem alteração. A API não recebe origem/parâmetros ou retorna erro tipado. openApp não verifica public; menu oculta Administração, mas o Core ainda não nega abertura. Hoje não há operações administrativas reais. Corrigir antes de conectar dados protegidos.
+Entradas inexistentes geralmente devolvem estado sem alteração. openApp aceita um terceiro argumento opcional, options, com origin (string) e params (objeto). A origem padrão é system; parâmetros inválidos recebem objeto vazio. Os parâmetros são copiados superficialmente e permanecem na instância durante a sessão.
+
+Aplicativos de instância única restauram a instância existente sem atualizar seus parâmetros. O Core bloqueia aplicativos não públicos, incluindo Administração. A API ainda não retorna erros tipados nem valida parâmetros específicos de cada aplicativo. origin e params não representam autorização. Hoje não há operações administrativas reais. Corrigir antes de conectar dados protegidos.
 
 ## Sessão
 
@@ -42,7 +44,9 @@ Window recebe instância, app, ativo, zIndex, offset e callbacks de ativar/minim
 
 useWindowInteraction retorna refs, modo, nome e handlers existentes. windowGeometry preserva mínimos 300×220 quando cabem, margem 8 e distância de snap 24 px. São parâmetros herdados, não requisitos imutáveis.
 
-AppHost recebe nome/instância e mostra placeholder. Futuro: resolver app, validar parâmetros, carregar sob demanda e isolar falha.
+AppHost recebe nome e instância, consulta o Registry e apresenta placeholder para aplicativos não implementados. Aplicativos habilitados são carregados sob demanda usando React.lazy e Suspense, com AppErrorBoundary por instância.
+
+Sobre o Sistema é o primeiro componente integrado. Permanecem pendentes a validação de parâmetros por aplicativo, os testes de falha real, a recuperação de erros e o lifecycle completo.
 
 ## Notificações
 
