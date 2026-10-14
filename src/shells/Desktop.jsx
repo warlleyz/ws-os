@@ -3,6 +3,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Window from './Window';
 import Taskbar from './Taskbar';
 
+import ClockWidget from '../widgets/ClockWidget';
+import {
+    getWidgetDefinition,
+    loadWidgetState,
+    saveWidgetState,
+    setWidgetVisibility,
+    setWidgetPosition,
+    setWidgetSize,
+} from '../core/widgetManager';
+
 import {
     activateApp,
     closeApp,
@@ -42,37 +52,124 @@ const desktopShortcutOrder = [
     'about-system',
 ];
 
-const SHORTCUT_SIZE = 82;
 const COLUMN_STEP = 90;
 const ROW_STEP = 88;
 const TASKBAR_RESERVED_WIDTH = 720;
 const TASKBAR_RESERVED_BOTTOM = 64;
 
-function getShortcutPositions(count, width, height) {
-    const positions = [];
-    const rows = Math.max(
-        1,
-        Math.floor((Math.max(height, SHORTCUT_SIZE) - SHORTCUT_SIZE) / ROW_STEP) + 1,
-    );
+
+function getDesktopLayout(count, width, height, widget) {
+    const columns = Math.floor(width / COLUMN_STEP);
+    const rows = Math.floor(height / ROW_STEP);
+
+    if (columns < 1 || rows < 1) {
+        return {
+            shortcuts: [],
+            widget: null,
+        };
+    }
+
+    const occupied = new Set();
+    const shortcuts = [];
+
     const reservedWidth = Math.min(TASKBAR_RESERVED_WIDTH, width);
     const reservedLeft = (width - reservedWidth) / 2;
     const reservedRight = reservedLeft + reservedWidth;
     const reservedTop = height - TASKBAR_RESERVED_BOTTOM;
-    for (let column = 0; positions.length < count; column += 1) {
+
+    function isAvailable(column, row) {
+        if (column >= columns || row >= rows) return false;
+
         const left = column * COLUMN_STEP;
-        for (let row = 0; row < rows && positions.length < count; row += 1) {
-            const top = row * ROW_STEP;
-            const overlapsTaskbar =
-                left < reservedRight &&
-                left + SHORTCUT_SIZE > reservedLeft &&
-                top < height &&
-                top + SHORTCUT_SIZE > reservedTop;
-            if (overlapsTaskbar && height >= SHORTCUT_SIZE + TASKBAR_RESERVED_BOTTOM) continue;
-            positions.push({ left, top });
+        const top = row * ROW_STEP;
+
+        const overlapsTaskbar =
+            left < reservedRight &&
+            left + COLUMN_STEP > reservedLeft &&
+            top < height &&
+            top + ROW_STEP > reservedTop;
+
+        return (
+            !occupied.has(`${column}:${row}`) &&
+            !overlapsTaskbar
+        );
+    }
+
+    // Reserva duas colunas e duas linhas para o relógio.
+    let widgetPosition = null;
+
+    const widgetColumns = widget?.size?.columns ?? 2;
+    const widgetRows = widget?.size?.rows ?? 2;
+
+    if (
+        widget?.visible &&
+        columns >= widgetColumns &&
+        rows >= widgetRows
+    ) {
+        const preferredColumn = widget.position?.column;
+        const preferredRow = widget.position?.row;
+
+        const column =
+            preferredColumn !== undefined && preferredColumn !== null &&
+                preferredColumn + widgetColumns <= columns
+                ? preferredColumn
+                : columns - widgetColumns;
+
+        const row =
+            preferredRow !== undefined && preferredRow !== null &&
+                preferredRow + widgetRows <= rows
+                ? preferredRow
+                : 0;
+
+        let available = true;
+
+        for (let x = column; x < column + widgetColumns; x += 1) {
+            for (let y = row; y < row + widgetRows; y += 1) {
+                if (!isAvailable(x, y)) {
+                    available = false;
+                }
+            }
+        }
+
+        if (available) {
+            for (let x = column; x < column + widgetColumns; x += 1) {
+                for (let y = row; y < row + widgetRows; y += 1) {
+                    occupied.add(`${x}:${y}`);
+                }
+            }
+
+            widgetPosition = {
+                left: column * COLUMN_STEP,
+                top: row * ROW_STEP,
+            };
         }
     }
-    return positions;
+
+    // Atalhos e widgets utilizam o mesmo mapa de ocupação.
+    for (
+        let column = 0;
+        column < columns && shortcuts.length < count;
+        column += 1
+    ) {
+        for (
+            let row = 0;
+            row < rows && shortcuts.length < count;
+            row += 1
+        ) {
+            if (!isAvailable(column, row)) continue;
+
+            occupied.add(`${column}:${row}`);
+
+            shortcuts.push({
+                left: column * COLUMN_STEP,
+                top: row * ROW_STEP,
+            });
+        }
+    }
+
+    return { shortcuts, widget: widgetPosition };
 }
+
 
 // Avisos temporários: o histórico é mantido pelo notificationManager.
 const TOAST_DURATION = 5000;
@@ -186,6 +283,26 @@ function NotificationToast({ notification, onDismiss, onAction }) {
 
 export default function Desktop() {
     const [appState, setAppState] = useState(initialAppState);
+    const [widgetState, setWidgetState] = useState(loadWidgetState);
+    useEffect(() => {
+        saveWidgetState(widgetState);
+    }, [widgetState]);
+
+    function toggleClockWidget() {
+        setWidgetState((current) => {
+            const clock = current.widgets.find(
+                (widget) => widget.instanceId === 'clock-default',
+            );
+
+            if (!clock) return current;
+
+            return setWidgetVisibility(
+                current,
+                clock.instanceId,
+                !clock.visible,
+            );
+        });
+    }
     const [notificationState, setNotificationState] = useState(
         initialNotificationState,
     );
@@ -193,6 +310,7 @@ export default function Desktop() {
     const [selectedShortcut, setSelectedShortcut] = useState(null);
     const [gridSize, setGridSize] = useState({ width: 0, height: 0 });
     const shortcutsRef = useRef(null);
+    const widgetDragRef = useRef(null);
     const shortcuts = useMemo(
         () =>
             getRegisteredApps()
@@ -223,11 +341,130 @@ export default function Desktop() {
         observer.observe(element);
         return () => observer.disconnect();
     }, []);
-    const positions = getShortcutPositions(
+    const clockWidget = widgetState.widgets.find(
+        (widget) => widget.instanceId === 'clock-default',
+    );
+
+    const desktopLayout = getDesktopLayout(
         shortcuts.length,
         gridSize.width,
         gridSize.height,
+        clockWidget,
     );
+
+    const positions = desktopLayout.shortcuts;
+
+    function canPlaceWidget(candidate) {
+        const layout = getDesktopLayout(
+            shortcuts.length,
+            gridSize.width,
+            gridSize.height,
+            candidate,
+        );
+
+        return (
+            layout.widget !== null &&
+            layout.shortcuts.length >= positions.length
+        );
+    }
+
+    function changeWidgetSize(value) {
+        const [columns, rows] = value.split('x').map(Number);
+
+        const candidate = {
+            ...clockWidget,
+            size: { columns, rows },
+        };
+
+        if (!canPlaceWidget(candidate)) return;
+
+        setWidgetState((current) =>
+            setWidgetSize(
+                current,
+                'clock-default',
+                { columns, rows },
+            ),
+        );
+    }
+
+    function startWidgetDrag(event) {
+        if (event.button !== 0 || !desktopLayout.widget) return;
+
+        widgetDragRef.current = {
+            x: event.clientX,
+            y: event.clientY,
+            left: desktopLayout.widget.left,
+            top: desktopLayout.widget.top,
+        };
+
+        event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    function moveWidgetDrag(event) {
+        const drag = widgetDragRef.current;
+        if (!drag) return;
+
+        const widgetElement = event.currentTarget.closest('.desktop__widget');
+        if (!widgetElement) return;
+
+        widgetElement.style.translate =
+            `${event.clientX - drag.x}px ${event.clientY - drag.y}px`;
+    }
+
+    function finishWidgetDrag(event) {
+        const drag = widgetDragRef.current;
+        if (!drag) return;
+
+        widgetDragRef.current = null;
+
+        const widgetElement = event.currentTarget.closest('.desktop__widget');
+
+        if (widgetElement) {
+            widgetElement.style.translate = '';
+        }
+
+        if (event.type === 'pointercancel') return;
+
+        const column = Math.round(
+            (drag.left + event.clientX - drag.x) / COLUMN_STEP,
+        );
+
+        const row = Math.round(
+            (drag.top + event.clientY - drag.y) / ROW_STEP,
+        );
+
+        if (column < 0 || row < 0) return;
+
+        const candidate = {
+            ...clockWidget,
+            position: { column, row },
+        };
+
+        if (!canPlaceWidget(candidate)) return;
+
+        const layout = getDesktopLayout(
+            shortcuts.length,
+            gridSize.width,
+            gridSize.height,
+            candidate,
+        );
+
+        if (
+            layout.widget.left !== column * COLUMN_STEP ||
+            layout.widget.top !== row * ROW_STEP
+        ) {
+            return;
+        }
+
+        setWidgetState((current) =>
+            setWidgetPosition(
+                current,
+                'clock-default',
+                { column, row },
+            ),
+        );
+    }
+
     // Único ponto de entrada para ações de aplicativos e avisos do sistema.
     function run(operation, id) {
         setAppState((current) => operation(current, id));
@@ -329,11 +566,75 @@ export default function Desktop() {
                     }
                 }}
             >
+                <button
+                    type="button"
+                    className="desktop__widget-toggle"
+                    onClick={toggleClockWidget}
+                >
+                    {clockWidget?.visible ? 'Ocultar relógio' : 'Mostrar relógio'}
+                </button>
                 <div
                     ref={shortcutsRef}
                     className="desktop__shortcuts"
                     aria-label="Atalhos da área de trabalho"
                 >
+                    {desktopLayout.widget &&
+                        widgetState.widgets
+                            .filter((widget) => widget.visible)
+                            .map((widget) => {
+                                const definition = getWidgetDefinition(widget.widgetId);
+
+                                if (!definition || widget.widgetId !== 'clock') {
+                                    return null;
+                                }
+
+                                return (
+                                    <div
+                                        key={widget.instanceId}
+                                        className="desktop__widget"
+                                        data-widget-id={widget.widgetId}
+                                        data-widget-size={widget.size}
+                                        style={{
+                                            position: 'absolute',
+                                            left: desktopLayout.widget.left,
+                                            top: desktopLayout.widget.top,
+                                            width: widget.size.columns * COLUMN_STEP,
+                                            height: widget.size.rows * ROW_STEP,
+                                        }}
+                                    >
+                                        <div className="desktop__widget-controls">
+                                            <button
+                                                type="button"
+                                                className="desktop__widget-drag"
+                                                aria-label="Arrastar relógio"
+                                                title="Arrastar relógio"
+                                                onPointerDown={startWidgetDrag}
+                                                onPointerMove={moveWidgetDrag}
+                                                onPointerUp={finishWidgetDrag}
+                                                onPointerCancel={finishWidgetDrag}
+                                                onDragStart={(event) => event.preventDefault()}
+                                            >
+                                                Arrastar
+                                            </button>
+
+                                            <label className="desktop__widget-size">
+                                                <span>Tamanho</span>
+                                                <select
+                                                    aria-label="Tamanho do relógio"
+                                                    value={`${widget.size.columns}x${widget.size.rows}`}
+                                                    onChange={(event) => changeWidgetSize(event.target.value)}
+                                                >
+                                                    <option value="2x2">2 × 2</option>
+                                                    <option value="3x2">3 × 2</option>
+                                                    <option value="3x3">3 × 3</option>
+                                                </select>
+                                            </label>
+                                        </div>
+
+                                        <ClockWidget />
+                                    </div>
+                                );
+                            })}
                     {shortcuts.map((app, index) => {
                         const AppIcon = app.icon;
                         const isOpen = appState.instances.some(
@@ -352,8 +653,9 @@ export default function Desktop() {
                                     .join(' ')}
                                 style={{
                                     position: 'absolute',
-                                    left: positions[index].left,
-                                    top: positions[index].top,
+                                    left: positions[index]?.left ?? -1000,
+                                    top: positions[index]?.top ?? -1000,
+                                    display: positions[index] ? undefined : 'none',
                                 }}
                                 type="button"
                                 aria-label={`Abrir ${app.name}`}
