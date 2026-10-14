@@ -12,13 +12,13 @@ import {
     getAppDefinition,
     getRegisteredApps,
 } from '../core/appRegistry';
+
+// Utilitários e preferências persistentes do WS Menu.
 function normalizeSearch(value) {
     return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
 }
-
 const FAVORITES_STORAGE_KEY = 'ws-os:menu-favorites';
 const MAX_FAVORITES = 6;
-
 const DEFAULT_FAVORITES = [
     'about-me',
     'projects',
@@ -27,14 +27,11 @@ const DEFAULT_FAVORITES = [
     'files',
     'notes',
 ];
-
 function getInitialFavorites() {
     try {
         const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
-
         if (saved !== null) {
             const parsed = JSON.parse(saved);
-
             if (Array.isArray(parsed)) {
                 return [...new Set(parsed.filter(
                     (id) => typeof id === 'string',
@@ -44,10 +41,8 @@ function getInitialFavorites() {
     } catch {
         // Usa os favoritos padrão se o armazenamento estiver indisponível.
     }
-
     return DEFAULT_FAVORITES;
 }
-
 function TaskbarIcon({ name, size = 18 }) {
     const paths = {
         menu: (
@@ -125,9 +120,19 @@ function AppIcon({ app, size = 18 }) {
         </span>
     );
 }
-export default function Taskbar({ appState, onAppAction }) {
+export default function Taskbar({
+    appState,
+    onAppAction,
+    notificationState,
+    onNotificationAction,
+    onNotificationOpen,
+}) {
+    const notifications = notificationState?.items ?? [];
+    const unreadCount = notifications.filter((item) => !item.read).length;
+
     const [contextGroup, setContextGroup] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [notificationOpen, setNotificationOpen] = useState(false);
     const [menuView, setMenuView] = useState('home');
     const [menuSearch, setMenuSearch] = useState('');
     const [shortcutContext, setShortcutContext] = useState(null);
@@ -152,7 +157,7 @@ export default function Taskbar({ appState, onAppAction }) {
     const menuSearchRef = useRef(null);
     const shortcutContextRef = useRef(null);
     const shortcutTriggerRef = useRef(null);
-
+    // Favoritos do WS Menu.
     useEffect(() => {
         try {
             localStorage.setItem(
@@ -163,37 +168,28 @@ export default function Taskbar({ appState, onAppAction }) {
             // A seleção funciona durante a sessão, mesmo sem persistência.
         }
     }, [favoriteIds]);
-
     function toggleFavorite(appId) {
         setFavoriteIds((current) => {
             if (current.includes(appId)) {
                 return current.filter((id) => id !== appId);
             }
-
             if (current.length >= MAX_FAVORITES) {
                 return current;
             }
-
             return [...current, appId];
         });
     }
     function openShortcutContext(event, app) {
         event.preventDefault();
-
         const panel = event.currentTarget.closest(
             '.taskbar-launcher--redesign',
         );
-
         if (!panel) return;
-
         shortcutTriggerRef.current = event.currentTarget;
-
         const rect = panel.getBoundingClientRect();
-
         const width = 204;
         const estimatedHeight = 210;
         const padding = 8;
-
         const x = Math.max(
             padding,
             Math.min(
@@ -201,7 +197,6 @@ export default function Taskbar({ appState, onAppAction }) {
                 rect.width - width - padding,
             ),
         );
-
         const y = Math.max(
             padding,
             Math.min(
@@ -209,7 +204,6 @@ export default function Taskbar({ appState, onAppAction }) {
                 rect.height - estimatedHeight - padding,
             ),
         );
-
         setShortcutContext({
             appId: app.id,
             x,
@@ -217,25 +211,20 @@ export default function Taskbar({ appState, onAppAction }) {
             showInfo: false,
         });
     }
-
     function runShortcutContextAction(action) {
         if (!shortcutContext) return;
-
         const appId = shortcutContext.appId;
-
         if (action === 'open') {
             onAppAction(openApp, appId);
             closePanels();
             return;
         }
-
         if (action === 'favorite') {
             toggleFavorite(appId);
             setShortcutContext(null);
             shortcutTriggerRef.current?.focus();
             return;
         }
-
         if (action === 'info') {
             setShortcutContext((current) =>
                 current
@@ -247,7 +236,6 @@ export default function Taskbar({ appState, onAppAction }) {
     const menuApps = getRegisteredApps()
         .filter((app) => app.public && app.showInMenu !== false)
         .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-
     const searchTerm = normalizeSearch(menuSearch.trim());
     const searchResults = menuApps.filter((app) =>
         normalizeSearch(app.name).includes(searchTerm),
@@ -255,25 +243,21 @@ export default function Taskbar({ appState, onAppAction }) {
     const favoriteApps = favoriteIds
         .map((id) => menuApps.find((app) => app.id === id))
         .filter(Boolean);
-
     const visibleMenuApps = searchTerm
         ? searchResults
         : menuView === 'all'
             ? menuApps
             : favoriteApps;
-    
     useEffect(() => {
         if (!shortcutContext) return;
-
         shortcutContextRef.current
             ?.querySelector('button:not(:disabled)')
             ?.focus();
     }, [shortcutContext]);
-
     useEffect(() => {
         if (menuOpen) menuSearchRef.current?.focus();
     }, [menuOpen]);
-
+    // Instâncias agrupadas por aplicativo na Taskbar.
     const groups = [];
     for (const instance of appState.instances) {
         let group = groups.find((item) => item.appId === instance.appId);
@@ -355,54 +339,44 @@ export default function Taskbar({ appState, onAppAction }) {
             const insideFloating = floatingLayerRef.current?.contains(
                 event.target,
             );
-
             if (!insideTaskbar && !insideFloating) {
                 clearWindowHighlight();
                 clearPreviewTimers();
-
                 setPreviewGroup(null);
                 setContextGroup(null);
                 setShortcutContext(null);
                 setMenuOpen(false);
-
+                setNotificationOpen(false);
                 contextTriggerRef.current = null;
                 shortcutTriggerRef.current = null;
             }
         }
-
         function handleKeyDown(event) {
             if (event.key !== 'Escape') return;
-
             if (shortcutContext) {
                 event.preventDefault();
                 event.stopImmediatePropagation?.();
-
                 setShortcutContext(null);
                 shortcutTriggerRef.current?.focus();
                 return;
             }
-
             clearWindowHighlight();
             clearPreviewTimers();
-
             if (contextTriggerRef.current) {
                 contextTriggerRef.current.focus();
             } else if (menuOpen) {
                 menuButtonRef.current?.focus();
             }
-
             setPreviewGroup(null);
             setContextGroup(null);
             setShortcutContext(null);
             setMenuOpen(false);
-
+            setNotificationOpen(false);
             contextTriggerRef.current = null;
             shortcutTriggerRef.current = null;
         }
-
         document.addEventListener('pointerdown', handlePointerDown);
         document.addEventListener('keydown', handleKeyDown);
-
         return () => {
             document.removeEventListener('pointerdown', handlePointerDown);
             document.removeEventListener('keydown', handleKeyDown);
@@ -468,16 +442,16 @@ export default function Taskbar({ appState, onAppAction }) {
             highlightedWindowRef.current = null;
         }
     }, [appState.instances]);
+    // Fechamento e alternância de painéis flutuantes.
     function closePanels() {
         clearWindowHighlight();
         closePreview();
-
         setContextGroup(null);
         setShortcutContext(null);
         setMenuOpen(false);
+        setNotificationOpen(false);
         setMenuView('home');
         setMenuSearch('');
-
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
     }
@@ -492,6 +466,7 @@ export default function Taskbar({ appState, onAppAction }) {
         clearWindowHighlight();
         setContextGroup(null);
         setMenuOpen(false);
+        setNotificationOpen(false);
         contextTriggerRef.current = null;
         if (group.instances.length > 1) {
             clearPreviewTimers();
@@ -516,6 +491,7 @@ export default function Taskbar({ appState, onAppAction }) {
         closePreview();
         contextTriggerRef.current = event.currentTarget;
         setMenuOpen(false);
+        setNotificationOpen(false);
         setContextGroup((current) =>
             current === group.appId ? null : group.appId,
         );
@@ -525,6 +501,7 @@ export default function Taskbar({ appState, onAppAction }) {
             event.preventDefault();
             contextTriggerRef.current = event.currentTarget;
             setMenuOpen(false);
+            setNotificationOpen(false);
             setContextGroup(group.appId);
         }
     }
@@ -589,25 +566,33 @@ export default function Taskbar({ appState, onAppAction }) {
     function toggleWSMenu() {
         clearWindowHighlight();
         closePreview();
-
         setContextGroup(null);
         setShortcutContext(null);
-
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
-
         if (!menuOpen) {
             setMenuView('home');
             setMenuSearch('');
         }
-
         setMenuOpen((current) => !current);
+        setNotificationOpen(false);
+    }
+    function toggleNotifications() {
+        clearWindowHighlight();
+        closePreview();
+        setContextGroup(null);
+        setShortcutContext(null);
+        setMenuOpen(false);
+        setNotificationOpen((current) => !current);
+        contextTriggerRef.current = null;
+        shortcutTriggerRef.current = null;
     }
     const timeText = currentTime.toLocaleTimeString('pt-BR', {
         hour: '2-digit',
         minute: '2-digit',
     });
     const dateText = currentTime.toLocaleDateString('pt-BR');
+    // Camada flutuante + barra inferior (sem containers extras).
     return (
         <div className="taskbar-container" ref={taskbarRef}>
             {createPortal(
@@ -719,7 +704,6 @@ export default function Taskbar({ appState, onAppAction }) {
                                 </div>
                                 <span className="ws-menu__brand">WS OS V2</span>
                             </header>
-
                             <div className="ws-menu__search">
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                                     <circle cx="10.8" cy="10.8" r="6.8" />
@@ -752,7 +736,6 @@ export default function Taskbar({ appState, onAppAction }) {
                                     >×</button>
                                 )}
                             </div>
-
                             <div className="ws-menu__main">
                                 <div className="ws-menu__section-heading">
                                     <strong>
@@ -783,62 +766,55 @@ export default function Taskbar({ appState, onAppAction }) {
                                                     : 'Nenhum aplicativo disponível.'}
                                         </p>
                                     ) : (
-                                            visibleMenuApps.map((app) => {
-                                                return (
-                                                    <div className="ws-menu__app-item" key={app.id}>
-                                                        <button
-                                                            type="button"
-                                                            className="ws-menu__app"
-                                                            onContextMenu={(event) => openShortcutContext(event, app)}
-                                                            onKeyDown={(event) => {
-                                                                if (
-                                                                    (event.shiftKey && event.key === 'F10') ||
-                                                                    event.key === 'ContextMenu'
-                                                                ) {
-                                                                    event.preventDefault();
-
-                                                                    const rect = event.currentTarget.getBoundingClientRect();
-
-                                                                    openShortcutContext(
-                                                                        {
-                                                                            preventDefault: () => { },
-                                                                            currentTarget: event.currentTarget,
-                                                                            clientX: rect.left + rect.width / 2,
-                                                                            clientY: rect.top + rect.height / 2,
-                                                                        },
-                                                                        app,
-                                                                    );
-                                                                }
-                                                            }}
-                                                            onClick={() => {
-                                                                onAppAction(openApp, app.id);
-                                                                closePanels();
-                                                            }}
-                                                        >
-                                                            <span className="ws-menu__app-icon">
-                                                                <AppIcon app={app} size={19} />
-                                                            </span>
-
-                                                            <span className="ws-menu__app-name">
-                                                                {app.name}
-                                                            </span>
-                                                        </button>
-                                                    </div>
-                                                );
-                                            })
+                                        visibleMenuApps.map((app) => {
+                                            return (
+                                                <div className="ws-menu__app-item" key={app.id}>
+                                                    <button
+                                                        type="button"
+                                                        className="ws-menu__app"
+                                                        onContextMenu={(event) => openShortcutContext(event, app)}
+                                                        onKeyDown={(event) => {
+                                                            if (
+                                                                (event.shiftKey && event.key === 'F10') ||
+                                                                event.key === 'ContextMenu'
+                                                            ) {
+                                                                event.preventDefault();
+                                                                const rect = event.currentTarget.getBoundingClientRect();
+                                                                openShortcutContext(
+                                                                    {
+                                                                        preventDefault: () => { },
+                                                                        currentTarget: event.currentTarget,
+                                                                        clientX: rect.left + rect.width / 2,
+                                                                        clientY: rect.top + rect.height / 2,
+                                                                    },
+                                                                    app,
+                                                                );
+                                                            }
+                                                        }}
+                                                        onClick={() => {
+                                                            onAppAction(openApp, app.id);
+                                                            closePanels();
+                                                        }}
+                                                    >
+                                                        <span className="ws-menu__app-icon">
+                                                            <AppIcon app={app} size={19} />
+                                                        </span>
+                                                        <span className="ws-menu__app-name">
+                                                            {app.name}
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            );
+                                        })
                                     )}
                                 </div>
                             </div>
-
                             {shortcutContext && (() => {
                                 const app = getAppDefinition(shortcutContext.appId);
                                 const isFavorite = favoriteIds.includes(shortcutContext.appId);
-
                                 if (!app) return null;
-
                                 const canFavorite =
                                     isFavorite || favoriteIds.length < MAX_FAVORITES;
-
                                 return (
                                     <div
                                         ref={shortcutContextRef}
@@ -854,12 +830,9 @@ export default function Taskbar({ appState, onAppAction }) {
                                             <span className="ws-menu__context-icon">
                                                 <AppIcon app={app} size={18} />
                                             </span>
-
                                             <strong title={app.name}>{app.name}</strong>
                                         </div>
-
                                         <div className="ws-menu__context-divider" />
-
                                         <button
                                             type="button"
                                             onClick={() => runShortcutContextAction('open')}
@@ -871,7 +844,6 @@ export default function Taskbar({ appState, onAppAction }) {
                                             </span>
                                             Abrir
                                         </button>
-
                                         <button
                                             type="button"
                                             disabled={!canFavorite}
@@ -890,9 +862,7 @@ export default function Taskbar({ appState, onAppAction }) {
                                                 ? 'Desafixar do WS Menu'
                                                 : 'Fixar no WS Menu'}
                                         </button>
-
                                         <div className="ws-menu__context-divider" />
-
                                         <button
                                             type="button"
                                             aria-expanded={shortcutContext.showInfo}
@@ -906,7 +876,6 @@ export default function Taskbar({ appState, onAppAction }) {
                                             </span>
                                             Informações
                                         </button>
-
                                         {shortcutContext.showInfo && (
                                             <div className="ws-menu__context-details">
                                                 <span>
@@ -924,6 +893,101 @@ export default function Taskbar({ appState, onAppAction }) {
                                     </div>
                                 );
                             })()}
+                        </section>
+                    )}
+                    {notificationOpen && (
+                        <section
+                            className="taskbar-notifications"
+                            role="region"
+                            aria-label="Central de notificações"
+                        >
+                            <header className="taskbar-notifications__header">
+                                <div>
+                                    <strong>Notificações</strong>
+                                    <small>
+                                        {unreadCount > 0
+                                            ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}`
+                                            : 'Nenhuma notificação não lida'}
+                                    </small>
+                                </div>
+                                <button
+                                    type="button"
+                                    aria-label="Fechar notificações"
+                                    title="Fechar notificações"
+                                    onClick={() => setNotificationOpen(false)}
+                                >×</button>
+                            </header>
+                            {notifications.length > 0 ? (
+                                <>
+                                    <div className="taskbar-notifications__toolbar">
+                                        <button
+                                            type="button"
+                                            disabled={unreadCount === 0}
+                                            onClick={() => onNotificationAction('read-all')}
+                                        >Marcar todas como lidas</button>
+                                        <button
+                                            type="button"
+                                            onClick={() => onNotificationAction('clear')}
+                                        >Limpar tudo</button>
+                                    </div>
+                                    <div className="taskbar-notifications__list">
+                                        {notifications.map((notification) => (
+                                            <article
+                                                key={notification.id}
+                                                className={[
+                                                    'taskbar-notifications__item',
+                                                    notification.read
+                                                        ? 'taskbar-notifications__item--read'
+                                                        : 'taskbar-notifications__item--unread',
+                                                ].join(' ')}
+                                            >
+                                                <div className="taskbar-notifications__item-top">
+                                                    <span className="taskbar-notifications__source">
+                                                        {notification.source}
+                                                    </span>
+                                                    <time dateTime={new Date(notification.createdAt).toISOString()}>
+                                                        {new Date(notification.createdAt).toLocaleTimeString('pt-BR', {
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                        })}
+                                                    </time>
+                                                </div>
+                                                <strong>{notification.title}</strong>
+                                                {notification.message && <p>{notification.message}</p>}
+                                                <div className="taskbar-notifications__actions">
+                                                    {notification.action?.type === 'open-app' && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                onNotificationOpen(notification);
+                                                                setNotificationOpen(false);
+                                                            }}
+                                                        >
+                                                            {notification.action.label ?? 'Abrir aplicativo'}
+                                                        </button>
+                                                    )}
+                                                    {!notification.read && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => onNotificationAction('read', notification.id)}
+                                                        >Marcar como lida</button>
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onNotificationAction('remove', notification.id)}
+                                                    >Excluir</button>
+                                                </div>
+                                            </article>
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="taskbar-notifications__empty">
+                                    <TaskbarIcon name="bell" size={26} />
+                                    <strong>Tudo em dia</strong>
+                                    <p>Nenhuma notificação por enquanto.</p>
+                                </div>
+                            )}
                         </section>
                     )}
                     {context && (
@@ -1108,11 +1172,22 @@ export default function Taskbar({ appState, onAppAction }) {
                     <button
                         type="button"
                         className="taskbar__system-button"
-                        title="Notificações — em desenvolvimento"
-                        aria-label="Notificações — em desenvolvimento"
-                        disabled
+                        title="Notificações"
+                        aria-label="Notificações"
+                        aria-expanded={notificationOpen}
+                        onClick={toggleNotifications}
                     >
-                        <TaskbarIcon name="bell" />
+                        <span className="taskbar-notifications__trigger">
+                            <TaskbarIcon name="bell" />
+                            {unreadCount > 0 && (
+                                <span
+                                    className="taskbar-notifications__badge"
+                                    aria-label={`${unreadCount} notificações não lidas`}
+                                >
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
+                        </span>
                     </button>
                     <button
                         type="button"
