@@ -131,6 +131,7 @@ export default function Taskbar({
     notificationState,
     onNotificationAction,
     onNotificationOpen,
+    onShowDesktop,
 }) {
     const notifications = notificationState?.items ?? [];
     const unreadCount = notifications.filter((item) => !item.read).length;
@@ -374,41 +375,96 @@ export default function Taskbar({
                 shortcutTriggerRef.current = null;
             }
         }
+
         function handleKeyDown(event) {
+            const key = event.code;
+
+            if (
+                event.ctrlKey &&
+                event.shiftKey &&
+                !event.altKey &&
+                !event.repeat &&
+                event.code === 'Space'
+            ) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                clearWindowHighlight();
+                clearPreviewTimers();
+
+                setPreviewGroup(null);
+                setContextGroup(null);
+                setShortcutContext(null);
+
+                contextTriggerRef.current = null;
+                shortcutTriggerRef.current = null;
+
+                setMenuView('home');
+                setMenuSearch('');
+
+                setActivePanel((current) =>
+                    current === 'menu' ? null : 'menu'
+                );
+
+                return;
+            }
+
+                if (key === 'KeyD') {
+                    if (event.ctrlKey && event.altKey && !event.repeat) {
+                    event.preventDefault();
+
+                    clearWindowHighlight();
+                    clearPreviewTimers();
+
+                    setPreviewGroup(null);
+                    setContextGroup(null);
+                    setShortcutContext(null);
+                    setActivePanel(null);
+
+                    contextTriggerRef.current = null;
+                    shortcutTriggerRef.current = null;
+
+                    onShowDesktop?.();
+                    return;
+                }
+            }
+
             if (event.key !== 'Escape') return;
+
             if (shortcutContext) {
                 event.preventDefault();
                 event.stopImmediatePropagation?.();
+
                 setShortcutContext(null);
                 shortcutTriggerRef.current?.focus();
                 return;
             }
+
             clearWindowHighlight();
             clearPreviewTimers();
+
             if (contextTriggerRef.current) {
                 contextTriggerRef.current.focus();
             } else if (menuOpen) {
                 menuButtonRef.current?.focus();
             }
+
             setPreviewGroup(null);
             setContextGroup(null);
             setShortcutContext(null);
-            setMenuOpen(false);
-            setNotificationOpen(false);
-            setQuickControlsOpen(false);
-            setWallyOpen(false);
-            setWeatherOpen(false);
-            setCalendarOpen(false);
+            setActivePanel(null);
+
             contextTriggerRef.current = null;
             shortcutTriggerRef.current = null;
         }
+
         document.addEventListener('pointerdown', handlePointerDown);
         document.addEventListener('keydown', handleKeyDown);
         return () => {
             document.removeEventListener('pointerdown', handlePointerDown);
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, [menuOpen, shortcutContext]);
+    }, [menuOpen, shortcutContext, onShowDesktop]);
     useEffect(() => {
         if (contextGroup) {
             contextMenuRef.current

@@ -475,6 +475,17 @@ export default function Desktop() {
         );
     }
 
+    function showDesktop() {
+        setAppState((current) =>
+            current.instances.reduce(
+                (state, instance) => minimizeApp(state, instance.id),
+                current,
+            ),
+        );
+
+        setSelectedShortcut(null);
+    }
+
     // Único ponto de entrada para ações de aplicativos e avisos do sistema.
     function run(operation, id) {
         setAppState((current) => operation(current, id));
@@ -941,6 +952,7 @@ export default function Desktop() {
                 notificationState={notificationState}
                 onNotificationAction={handleNotificationAction}
                 onNotificationOpen={handleNotificationOpen}
+                onShowDesktop={showDesktop}
             />
             {visibleToasts.length > 0 && (
                 <aside
