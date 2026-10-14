@@ -120,6 +120,11 @@ function AppIcon({ app, size = 18 }) {
         </span>
     );
 }
+function resolvePanel(value, current, panel) {
+    const next = typeof value === 'function' ? value(current === panel) : value;
+    return next ? panel : (current === panel ? null : current);
+}
+
 export default function Taskbar({
     appState,
     onAppAction,
@@ -131,10 +136,20 @@ export default function Taskbar({
     const unreadCount = notifications.filter((item) => !item.read).length;
 
     const [contextGroup, setContextGroup] = useState(null);
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [notificationOpen, setNotificationOpen] = useState(false);
-    const [quickControlsOpen, setQuickControlsOpen] = useState(false);
-    const [wallyOpen, setWallyOpen] = useState(false);
+    const [activePanel, setActivePanel] = useState(null);
+    const menuOpen = activePanel === 'menu';
+    const notificationOpen = activePanel === 'notifications';
+    const quickControlsOpen = activePanel === 'controls';
+    const wallyOpen = activePanel === 'wally';
+    const weatherOpen = activePanel === 'weather';
+    const calendarOpen = activePanel === 'calendar';
+
+    function setMenuOpen(value) { setActivePanel((current) => resolvePanel(value, current, 'menu')); }
+    function setNotificationOpen(value) { setActivePanel((current) => resolvePanel(value, current, 'notifications')); }
+    function setQuickControlsOpen(value) { setActivePanel((current) => resolvePanel(value, current, 'controls')); }
+    function setWallyOpen(value) { setActivePanel((current) => resolvePanel(value, current, 'wally')); }
+    function setWeatherOpen(value) { setActivePanel((current) => resolvePanel(value, current, 'weather')); }
+    function setCalendarOpen(value) { setActivePanel((current) => resolvePanel(value, current, 'calendar')); }
     const [menuView, setMenuView] = useState('home');
     const [menuSearch, setMenuSearch] = useState('');
     const [shortcutContext, setShortcutContext] = useState(null);
@@ -143,6 +158,9 @@ export default function Taskbar({
     const previewOpenTimerRef = useRef(null);
     const previewCloseTimerRef = useRef(null);
     const [currentTime, setCurrentTime] = useState(() => new Date());
+    const [weather, setWeather] = useState(null);
+    const [weatherLoading, setWeatherLoading] = useState(false);
+    const [weatherError, setWeatherError] = useState('');
     const taskbarRef = useRef(null);
     const appsScrollRef = useRef(null);
     const [appsScroll, setAppsScroll] = useState({
@@ -351,6 +369,7 @@ export default function Taskbar({
                 setNotificationOpen(false);
                 setQuickControlsOpen(false);
                 setWallyOpen(false);
+                setWeatherOpen(false);
                 contextTriggerRef.current = null;
                 shortcutTriggerRef.current = null;
             }
@@ -376,6 +395,10 @@ export default function Taskbar({
             setShortcutContext(null);
             setMenuOpen(false);
             setNotificationOpen(false);
+            setQuickControlsOpen(false);
+            setWallyOpen(false);
+            setWeatherOpen(false);
+            setCalendarOpen(false);
             contextTriggerRef.current = null;
             shortcutTriggerRef.current = null;
         }
@@ -458,6 +481,7 @@ export default function Taskbar({
         setMenuSearch('');
         setQuickControlsOpen(false);
         setWallyOpen(false);
+        setWeatherOpen(false);
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
     }
@@ -475,6 +499,7 @@ export default function Taskbar({
         setNotificationOpen(false);
         setQuickControlsOpen(false);
         setWallyOpen(false);
+        setWeatherOpen(false);
         contextTriggerRef.current = null;
         if (group.instances.length > 1) {
             clearPreviewTimers();
@@ -502,6 +527,7 @@ export default function Taskbar({
         setNotificationOpen(false);
         setQuickControlsOpen(false);
         setWallyOpen(false);
+        setWeatherOpen(false);
         setContextGroup((current) =>
             current === group.appId ? null : group.appId,
         );
@@ -515,6 +541,7 @@ export default function Taskbar({
             setContextGroup(group.appId);
             setQuickControlsOpen(false);
             setWallyOpen(false);
+            setWeatherOpen(false);
         }
     }
     function handleMenuNavigation(event) {
@@ -582,6 +609,7 @@ export default function Taskbar({
         setShortcutContext(null);
         setQuickControlsOpen(false);
         setWallyOpen(false);
+        setWeatherOpen(false);
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
         if (!menuOpen) {
@@ -599,6 +627,7 @@ export default function Taskbar({
         setMenuOpen(false);
         setQuickControlsOpen(false);
         setWallyOpen(false);
+        setWeatherOpen(false);
         setNotificationOpen((current) => !current);
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
@@ -632,11 +661,133 @@ export default function Taskbar({
 
         setWallyOpen((current) => !current);
     }
+    function toggleWeather() {
+        clearWindowHighlight();
+        closePreview();
+
+        setContextGroup(null);
+        setShortcutContext(null);
+        setMenuOpen(false);
+        setNotificationOpen(false);
+        setQuickControlsOpen(false);
+        setWallyOpen(false);
+
+        contextTriggerRef.current = null;
+        shortcutTriggerRef.current = null;
+
+        setWeatherOpen((current) => !current);
+    }
+
+    async function fetchWeather(latitude, longitude) {
+        setWeatherLoading(true);
+        setWeatherError('');
+
+        try {
+            const params = new URLSearchParams({
+                latitude: String(latitude),
+                longitude: String(longitude),
+                current:
+                    'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m',
+                timezone: 'auto',
+            });
+
+            const response = await fetch(
+                `https://api.open-meteo.com/v1/forecast?${params}`,
+            );
+
+            if (!response.ok) {
+                throw new Error('Não foi possível consultar o clima.');
+            }
+
+            const data = await response.json();
+
+            if (
+                !data.current ||
+                !Number.isFinite(data.current.temperature_2m)
+            ) {
+                throw new Error('Dados meteorológicos indisponíveis.');
+            }
+
+            setWeather(data.current);
+        } catch (error) {
+            setWeatherError(error.message || 'Erro ao consultar o clima.');
+        } finally {
+            setWeatherLoading(false);
+        }
+    }
+
+    function requestWeather() {
+        if (!navigator.geolocation) {
+            setWeatherError('Geolocalização indisponível neste navegador.');
+            return;
+        }
+
+        setWeatherLoading(true);
+        setWeatherError('');
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                fetchWeather(
+                    position.coords.latitude,
+                    position.coords.longitude,
+                );
+            },
+            () => {
+                setWeatherLoading(false);
+                setWeatherError(
+                    'Não foi possível obter sua localização. Verifique a permissão do navegador.',
+                );
+            },
+            {
+                enableHighAccuracy: false,
+                timeout: 10000,
+                maximumAge: 300000,
+            },
+        );
+    }
+
+    function getWeatherDescription(code) {
+        if (code === 0) return 'Céu limpo';
+        if ([1, 2, 3].includes(code)) return 'Parcialmente nublado';
+        if ([45, 48].includes(code)) return 'Nevoeiro';
+        if ([51, 53, 55, 56, 57].includes(code)) return 'Garoa';
+        if ([61, 63, 65, 66, 67].includes(code)) return 'Chuva';
+        if ([71, 73, 75, 77].includes(code)) return 'Neve';
+        if ([80, 81, 82].includes(code)) return 'Pancadas de chuva';
+        if ([85, 86].includes(code)) return 'Pancadas de neve';
+        if ([95, 96, 99].includes(code)) return 'Trovoadas';
+
+        return 'Condição indisponível';
+    }
     const timeText = currentTime.toLocaleTimeString('pt-BR', {
         hour: '2-digit',
         minute: '2-digit',
     });
     const dateText = currentTime.toLocaleDateString('pt-BR');
+    const [calendarMonth, setCalendarMonth] = useState(() => {
+        const date = new Date();
+        return new Date(date.getFullYear(), date.getMonth(), 1);
+    });
+    const monthLabel = calendarMonth.toLocaleDateString('pt-BR', {
+        month: 'long',
+        year: 'numeric',
+    });
+    const firstWeekday = calendarMonth.getDay();
+    const daysInMonth = new Date(
+        calendarMonth.getFullYear(),
+        calendarMonth.getMonth() + 1,
+        0,
+    ).getDate();
+
+    function toggleCalendar() {
+        clearWindowHighlight();
+        closePreview();
+        setContextGroup(null);
+        setShortcutContext(null);
+        contextTriggerRef.current = null;
+        shortcutTriggerRef.current = null;
+        setCalendarOpen((current) => !current);
+    }
     // Camada flutuante + barra inferior (sem containers extras).
     return (
         <div className="taskbar-container" ref={taskbarRef}>
@@ -650,87 +801,89 @@ export default function Taskbar({
                         !menuOpen &&
                         !notificationOpen &&
                         !quickControlsOpen &&
-                        !wallyOpen && (
-                        <section
-                            ref={previewRef}
-                            className="taskbar-preview"
-                            aria-label={`Pré-visualizações de ${getAppDefinition(preview.appId)?.name ?? preview.appId
-                                }`}
-                            onPointerEnter={() => {
-                                window.clearTimeout(previewCloseTimerRef.current);
-                            }}
-                            onPointerLeave={schedulePreviewClose}
-                        >
-                            <div className="taskbar-preview__list">
-                                {preview.instances.map((instance, index) => {
-                                    const app = getAppDefinition(instance.appId);
-                                    const title = `${app?.name ?? instance.appId}${preview.instances.length > 1
-                                        ? ` — Janela ${index + 1}`
-                                        : ''
-                                        }`;
-                                    return (
-                                        <div
-                                            key={instance.id}
-                                            className="taskbar-preview__item"
-                                        >
-                                            <div className="taskbar-preview__header">
-                                                <strong title={title}>{title}</strong>
+                        !wallyOpen &&
+                        !weatherOpen &&
+                        !calendarOpen && (
+                            <section
+                                ref={previewRef}
+                                className="taskbar-preview"
+                                aria-label={`Pré-visualizações de ${getAppDefinition(preview.appId)?.name ?? preview.appId
+                                    }`}
+                                onPointerEnter={() => {
+                                    window.clearTimeout(previewCloseTimerRef.current);
+                                }}
+                                onPointerLeave={schedulePreviewClose}
+                            >
+                                <div className="taskbar-preview__list">
+                                    {preview.instances.map((instance, index) => {
+                                        const app = getAppDefinition(instance.appId);
+                                        const title = `${app?.name ?? instance.appId}${preview.instances.length > 1
+                                            ? ` — Janela ${index + 1}`
+                                            : ''
+                                            }`;
+                                        return (
+                                            <div
+                                                key={instance.id}
+                                                className="taskbar-preview__item"
+                                            >
+                                                <div className="taskbar-preview__header">
+                                                    <strong title={title}>{title}</strong>
+                                                    <button
+                                                        type="button"
+                                                        className="taskbar-preview__close"
+                                                        aria-label={`Fechar ${title}`}
+                                                        title="Fechar janela"
+                                                        onClick={() => {
+                                                            clearWindowHighlight();
+                                                            onAppAction(closeApp, instance.id);
+                                                        }}
+                                                    >
+                                                        <svg
+                                                            width="13"
+                                                            height="13"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            strokeWidth="2"
+                                                            strokeLinecap="round"
+                                                            aria-hidden="true"
+                                                        >
+                                                            <path d="M18 6 6 18M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                                 <button
                                                     type="button"
-                                                    className="taskbar-preview__close"
-                                                    aria-label={`Fechar ${title}`}
-                                                    title="Fechar janela"
-                                                    onClick={() => {
-                                                        clearWindowHighlight();
-                                                        onAppAction(closeApp, instance.id);
-                                                    }}
+                                                    className="taskbar-preview__open"
+                                                    aria-label={`Ativar ${title}`}
+                                                    onPointerEnter={() => highlightWindow(instance)}
+                                                    onPointerLeave={clearWindowHighlight}
+                                                    onFocus={() => highlightWindow(instance)}
+                                                    onBlur={clearWindowHighlight}
+                                                    onClick={() => activateInstance(instance)}
                                                 >
-                                                    <svg
-                                                        width="13"
-                                                        height="13"
-                                                        viewBox="0 0 24 24"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        strokeWidth="2"
-                                                        strokeLinecap="round"
+                                                    <span
+                                                        className="taskbar-preview__placeholder"
                                                         aria-hidden="true"
                                                     >
-                                                        <path d="M18 6 6 18M6 6l12 12" />
-                                                    </svg>
+                                                        <span className="taskbar-preview__placeholder-icon">
+                                                            <AppIcon app={app} size={27} />
+                                                        </span>
+                                                    </span>
+                                                    <small>
+                                                        {instance.minimized
+                                                            ? 'Minimizada'
+                                                            : appState.activeInstanceId === instance.id
+                                                                ? 'Ativa'
+                                                                : 'Aberta'}
+                                                    </small>
                                                 </button>
                                             </div>
-                                            <button
-                                                type="button"
-                                                className="taskbar-preview__open"
-                                                aria-label={`Ativar ${title}`}
-                                                onPointerEnter={() => highlightWindow(instance)}
-                                                onPointerLeave={clearWindowHighlight}
-                                                onFocus={() => highlightWindow(instance)}
-                                                onBlur={clearWindowHighlight}
-                                                onClick={() => activateInstance(instance)}
-                                            >
-                                                <span
-                                                    className="taskbar-preview__placeholder"
-                                                    aria-hidden="true"
-                                                >
-                                                    <span className="taskbar-preview__placeholder-icon">
-                                                        <AppIcon app={app} size={27} />
-                                                    </span>
-                                                </span>
-                                                <small>
-                                                    {instance.minimized
-                                                        ? 'Minimizada'
-                                                        : appState.activeInstanceId === instance.id
-                                                            ? 'Ativa'
-                                                            : 'Aberta'}
-                                                </small>
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </section>
-                    )}
+                                        );
+                                    })}
+                                </div>
+                            </section>
+                        )}
                     {menuOpen && (
                         <section
                             className="taskbar-launcher taskbar-launcher--redesign"
@@ -943,6 +1096,57 @@ export default function Taskbar({
                                     </div>
                                 );
                             })()}
+                        </section>
+                    )}
+                    {weatherOpen && (
+                        <section className="taskbar-weather-panel" role="region" aria-label="Painel do clima">
+                            <header className="taskbar-weather-panel__header">
+                                <strong>Clima</strong>
+                                <button type="button" aria-label="Fechar clima" onClick={() => setWeatherOpen(false)}>×</button>
+                            </header>
+                            <div className="taskbar-weather-panel__content">
+                                {weather && (
+                                    <>
+                                        <strong>{Math.round(weather.temperature_2m)} °C</strong>
+                                        <p>{getWeatherDescription(weather.weather_code)}</p>
+                                        <p>Sensação: {Math.round(weather.apparent_temperature)} °C</p>
+                                        <p>Umidade: {weather.relative_humidity_2m}%</p>
+                                        <p>Vento: {Math.round(weather.wind_speed_10m)} km/h</p>
+                                    </>
+                                )}
+                                {weatherError && <p role="alert">{weatherError}</p>}
+                                <button type="button" disabled={weatherLoading} onClick={requestWeather}>
+                                    {weatherLoading ? 'Consultando...' : weather ? 'Atualizar clima' : 'Consultar clima'}
+                                </button>
+                            </div>
+                        </section>
+                    )}
+                    {calendarOpen && (
+                        <section className="taskbar-calendar" role="region" aria-label="Calendário">
+                            <header className="taskbar-calendar__header">
+                                <strong>{monthLabel}</strong>
+                                <div>
+                                    <button type="button" aria-label="Mês anterior" onClick={() => setCalendarMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))}>‹</button>
+                                    <button type="button" onClick={() => setCalendarMonth(new Date(currentTime.getFullYear(), currentTime.getMonth(), 1))}>Hoje</button>
+                                    <button type="button" aria-label="Próximo mês" onClick={() => setCalendarMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))}>›</button>
+                                    <button type="button" aria-label="Fechar calendário" onClick={() => setCalendarOpen(false)}>×</button>
+                                </div>
+                            </header>
+                            <div className="taskbar-calendar__grid">
+                                {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => (
+                                    <span className="taskbar-calendar__weekday" key={index}>{day}</span>
+                                ))}
+                                {Array.from({ length: firstWeekday }, (_, index) => (
+                                    <span key={`empty-${index}`} aria-hidden="true" />
+                                ))}
+                                {Array.from({ length: daysInMonth }, (_, index) => {
+                                    const day = index + 1;
+                                    const isToday = currentTime.getFullYear() === calendarMonth.getFullYear()
+                                        && currentTime.getMonth() === calendarMonth.getMonth()
+                                        && currentTime.getDate() === day;
+                                    return <span key={day} className={isToday ? 'taskbar-calendar__today' : undefined} aria-current={isToday ? 'date' : undefined}>{day}</span>;
+                                })}
+                            </div>
                         </section>
                     )}
                     {wallyOpen && (
@@ -1335,20 +1539,29 @@ export default function Taskbar({
                 </div>
                 <span className="taskbar__divider" aria-hidden="true" />
                 <div className="taskbar__section taskbar__section--status">
-                    <span
+                    <button
+                        type="button"
                         className="taskbar__weather"
-                        title="Clima — integração pendente"
-                        aria-label="Clima — integração pendente"
+                        title="Clima"
+                        aria-label="Clima"
+                        aria-expanded={weatherOpen}
+                        onClick={toggleWeather}
                     >
                         <TaskbarIcon name="weather" />
-                    </span>
-                    <time
+                        {weather && (
+                            <span>{Math.round(weather.temperature_2m)}°</span>
+                        )}
+                    </button>
+                    <button
+                        type="button"
                         className="taskbar__clock"
-                        dateTime={currentTime.toISOString()}
                         title={dateText}
+                        aria-label={`Calendário, ${dateText}`}
+                        aria-expanded={calendarOpen}
+                        onClick={toggleCalendar}
                     >
-                        {timeText}
-                    </time>
+                        <time dateTime={currentTime.toISOString()}>{timeText}</time>
+                    </button>
                 </div>
             </nav>
         </div>
