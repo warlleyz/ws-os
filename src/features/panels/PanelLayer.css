@@ -1,0 +1,28 @@
+.taskbar-floating-layer {
+  position: fixed;
+  z-index: 10000;
+  bottom: 80px;
+  left: 50%;
+  display: flex;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 96px);
+  align-items: center;
+  justify-content: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.taskbar-floating-layer > * {
+  max-width: 100%;
+  max-height: inherit;
+  pointer-events: auto;
+}
+
+@media (max-width: 720px) {
+  .taskbar-floating-layer {
+    bottom: 74px;
+    max-width: calc(100vw - 20px);
+    max-height: calc(100dvh - 90px);
+  }
+}

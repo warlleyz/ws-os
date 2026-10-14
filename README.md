@@ -1,16 +1,32 @@
-# React + Vite
+# WS OS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Portfólio profissional com experiência de sistema operacional, desenvolvido em React, JavaScript e Vite.
 
-Currently, two official plugins are available:
+**Estado:** protótipo Desktop reorganizado. Os 18 aplicativos estão registrados, mas seu conteúdo funcional ainda não está implementado. Mobile e integrações protegidas permanecem futuros. Arquivos reservados não representam funcionalidades entregues.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Executar
 
-## React Compiler
+```bash
+npm ci
+npm run dev
+npm run lint
+npm run build
+node --test tests/core/refactor.test.cjs
+npm run preview
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Quem já tem dependências instaladas pode executar diretamente os scripts. A reorganização não instalou nem atualizou pacotes.
 
-## Expanding the ESLint configuration
+## Documentação
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- [Continuidade completa](docs/CONTINUIDADE.md): ponto de entrada para retomar em outra conversa.
+- [Arquitetura](docs/architecture.md): responsabilidades, dependências, estado e estilos.
+- [Estado da implementação](docs/implementation-status.md).
+- [Contratos atuais e pendentes](docs/contracts.md).
+- [Próximas etapas e critérios de aceite](docs/roadmap.md).
+- [Inventário exato de arquivos](docs/file-inventory.md).
+- [Planejamento canônico v0.16.0](docs/planning/WS-OS-V2-MESTRE-v0.16.0.md).
+
+`core` contém regras e estado compartilhado; `shells` compõe Desktop/Mobile; `features` reúne capacidades do sistema; `apps` reserva os aplicativos; `services` contém acesso a provedores e armazenamento; `shared` contém recursos comuns comprovados; `styles` contém fundamentos, temas e a ordem dos estilos dos módulos.
+
+Preferências continuam nas chaves existentes do navegador. Não há backend configurado nesta entrega. O domínio planejado é `warlley.dev`; publicação não foi executada.

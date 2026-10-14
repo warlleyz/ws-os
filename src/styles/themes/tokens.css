@@ -1,19 +1,19 @@
 :root {
-    --radius-sm: 6px;
-    --radius-md: 12px;
-    --radius-lg: 18px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
 
-    --blur-strength: 14px;
-    --surface-opacity: 0.94;
-    --shadow-floating: 0 16px 45px rgb(0 0 0 / 28%);
+  --blur-strength: 14px;
+  --surface-opacity: 0.94;
+  --shadow-floating: 0 16px 45px rgb(0 0 0 / 28%);
 
-    --transition-fast: 120ms;
-    --transition-normal: 200ms;
+  --transition-fast: 120ms;
+  --transition-normal: 200ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    :root {
-        --transition-fast: 0ms;
-        --transition-normal: 0ms;
-    }
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+  }
 }

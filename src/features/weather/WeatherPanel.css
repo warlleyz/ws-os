@@ -1,0 +1,98 @@
+.taskbar-weather-panel {
+  width: min(320px, calc(100vw - 24px));
+  max-height: calc(100dvh - 108px);
+  overflow-y: auto;
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: 0 16px 45px rgb(0 0 0 / 28%);
+}
+
+.taskbar-weather-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.taskbar-weather-panel__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px;
+}
+
+.taskbar-weather-panel__content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.taskbar-weather-panel button {
+  padding: 6px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.taskbar-weather-panel button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.taskbar-weather-panel button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+.taskbar-weather-panel {
+  box-sizing: border-box;
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100dvh - 100px);
+  overflow-y: auto;
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  background: var(--panel-background);
+  color: var(--text-primary);
+  box-shadow: var(--panel-shadow);
+}
+
+.taskbar-weather-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgb(148 185 215 / 15%);
+}
+
+.taskbar-weather-panel__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+}
+
+.taskbar-weather-panel__content p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.taskbar-weather-panel button {
+  padding: 5px 9px;
+  border: 1px solid rgb(148 185 215 / 25%);
+  border-radius: 7px;
+  background: rgb(255 255 255 / 7%);
+  color: inherit;
+  cursor: pointer;
+}
+
+.taskbar-weather-panel button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

@@ -3,9 +3,9 @@ import { useEffect, useState } from 'react';
 import { applyTheme, loadTheme, saveTheme } from './core/themeManager';
 import BootScreen from './features/boot/BootScreen';
 import WelcomeDialog from './features/welcome/WelcomeDialog';
-import Desktop from './shells/Desktop';
+import Desktop from './shells/desktop/Desktop';
 
-import './App.css';
+import SystemProvider from './core/SystemProvider';
 
 const WELCOME_STORAGE_KEY = 'ws-os:welcome-seen';
 const BOOT_DURATION = 1500;
@@ -52,7 +52,9 @@ export default function App() {
 
   return (
     <>
-      <Desktop theme={theme} onThemeChange={setTheme} />
+      <SystemProvider>
+        <Desktop theme={theme} onThemeChange={setTheme} />
+      </SystemProvider>
 
       {welcomeOpen && <WelcomeDialog onClose={closeWelcome} />}
     </>

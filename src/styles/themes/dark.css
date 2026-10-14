@@ -1,16 +1,16 @@
 :root,
 :root[data-theme='dark'] {
-    color-scheme: dark;
+  color-scheme: dark;
 
-    --surface-canvas: #111925;
-    --surface-primary: #1b2736;
-    --surface-secondary: #26384a;
+  --surface-canvas: #111925;
+  --surface-primary: #1b2736;
+  --surface-secondary: #26384a;
 
-    --text-primary: #ebf2fb;
-    --text-secondary: #acbdcd;
+  --text-primary: #ebf2fb;
+  --text-secondary: #acbdcd;
 
-    --border-default: #35465b;
+  --border-default: #35465b;
 
-    --accent-primary: #378ce4;
-    --accent-secondary: #65cde1;
+  --accent-primary: #378ce4;
+  --accent-secondary: #65cde1;
 }

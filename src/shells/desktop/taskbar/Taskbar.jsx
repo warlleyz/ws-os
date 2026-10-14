@@ -1,0 +1,605 @@
+import useGlobalShortcuts from '../../../features/shortcuts/useGlobalShortcuts';
+import useTaskbarScroll from './useTaskbarScroll';
+import useTaskbarPreviews from './useTaskbarPreviews';
+import useWSMenu from '../../../features/launcher/useWSMenu';
+import { useSystem } from '../../../core/useSystem';
+import useWeather from '../../../features/weather/useWeather';
+import TaskbarContextMenu from './TaskbarContextMenu';
+import NotificationCenter from '../../../features/notifications/NotificationCenter';
+import QuickControls from '../../../features/quick-controls/QuickControls';
+import WallyPanel from '../../../features/wally/WallyPanel';
+import CalendarPanel from '../../../features/calendar/CalendarPanel';
+import WeatherPanel from '../../../features/weather/WeatherPanel';
+import WSMenu from '../../../features/launcher/WSMenu';
+import TaskbarPreview from './TaskbarPreview';
+import PanelLayer from '../../../features/panels/PanelLayer';
+import TaskbarApps from './TaskbarApps';
+import { resolvePanel } from '../../../core/panelManager';
+import { SystemIcon } from '../../../shared/components/SystemIcon';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { activateApp, closeApp, minimizeApp, openApp, restoreApp } from '../../../core/appManager';
+import { getAppDefinition } from '../../../core/appRegistry';
+
+// Utilitários e preferências persistentes do WS Menu.
+
+export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
+  const {
+    appState,
+    run: onAppAction,
+    notificationState,
+    handleNotificationAction: onNotificationAction,
+    handleNotificationOpen: onNotificationOpen,
+  } = useSystem();
+  const { weather, weatherLoading, weatherError, requestWeather, getWeatherDescription } =
+    useWeather();
+  const notifications = notificationState?.items ?? [];
+  const unreadCount = notifications.filter((item) => !item.read).length;
+  const [contextGroup, setContextGroup] = useState(null);
+  const [activePanel, setActivePanel] = useState(null);
+  const menuOpen = activePanel === 'menu';
+  const notificationOpen = activePanel === 'notifications';
+  const quickControlsOpen = activePanel === 'controls';
+  const wallyOpen = activePanel === 'wally';
+  const weatherOpen = activePanel === 'weather';
+  const calendarOpen = activePanel === 'calendar';
+  function setMenuOpen(value) {
+    setActivePanel((current) => resolvePanel(value, current, 'menu'));
+  }
+  function setNotificationOpen(value) {
+    setActivePanel((current) => resolvePanel(value, current, 'notifications'));
+  }
+  function setQuickControlsOpen(value) {
+    setActivePanel((current) => resolvePanel(value, current, 'controls'));
+  }
+  function setWallyOpen(value) {
+    setActivePanel((current) => resolvePanel(value, current, 'wally'));
+  }
+  function setWeatherOpen(value) {
+    setActivePanel((current) => resolvePanel(value, current, 'weather'));
+  }
+  function setCalendarOpen(value) {
+    setActivePanel((current) => resolvePanel(value, current, 'calendar'));
+  }
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+  const taskbarRef = useRef(null);
+  const floatingLayerRef = useRef(null);
+  const contextMenuRef = useRef(null);
+  const contextTriggerRef = useRef(null);
+  const menuButtonRef = useRef(null);
+  const {
+    favoriteIds,
+    MAX_FAVORITES,
+    menuView,
+    setMenuView,
+    menuSearch,
+    setMenuSearch,
+    shortcutContext,
+    setShortcutContext,
+    menuSearchRef,
+    shortcutContextRef,
+    shortcutTriggerRef,
+    openShortcutContext,
+    runShortcutContextAction,
+    searchTerm,
+    visibleMenuApps,
+  } = useWSMenu({
+    onAppAction,
+    closePanels,
+    menuOpen,
+  });
+  // Instâncias agrupadas por aplicativo na Taskbar.
+  const groups = [];
+  for (const instance of appState.instances) {
+    let group = groups.find((item) => item.appId === instance.appId);
+    if (!group) {
+      group = {
+        appId: instance.appId,
+        instances: [],
+      };
+      groups.push(group);
+    }
+    group.instances.push(instance);
+  }
+  // Detecta excesso de aplicativos e mantém a navegação atualizada.
+
+  const {
+    previewGroup,
+    setPreviewGroup,
+    previewCloseTimerRef,
+    previewRef,
+    preview,
+    clearWindowHighlight,
+    highlightWindow,
+    clearPreviewTimers,
+    closePreview,
+    schedulePreviewOpen,
+    schedulePreviewClose,
+  } = useTaskbarPreviews({
+    groups,
+    appState,
+  });
+  // Fechamento e alternância de painéis flutuantes.
+  const { appsScrollRef, appsScroll, setAppsScroll, scrollApps } = useTaskbarScroll({
+    groups,
+  });
+  const context = groups.find((group) => group.appId === contextGroup);
+  const contextApp = context ? getAppDefinition(context.appId) : null;
+  function getTargetInstance(group) {
+    const active = group.instances.find((instance) => instance.id === appState.activeInstanceId);
+    if (active) return active;
+    return (
+      [...group.instances].reverse().find((instance) => !instance.minimized) ??
+      group.instances.at(-1)
+    );
+  }
+  const contextTarget = context ? getTargetInstance(context) : null;
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setCurrentTime(new Date());
+    }, 30000);
+    return () => window.clearInterval(timer);
+  }, []);
+  useEffect(() => {
+    function handlePointerDown(event) {
+      const insideTaskbar = taskbarRef.current?.contains(event.target);
+      const insideFloating = floatingLayerRef.current?.contains(event.target);
+      if (!insideTaskbar && !insideFloating) {
+        clearWindowHighlight();
+        clearPreviewTimers();
+        setPreviewGroup(null);
+        setContextGroup(null);
+        setShortcutContext(null);
+        setActivePanel(null);
+        contextTriggerRef.current = null;
+        shortcutTriggerRef.current = null;
+      }
+    }
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [
+    menuOpen,
+    shortcutContext,
+    onShowDesktop,
+    clearWindowHighlight,
+    clearPreviewTimers,
+    setPreviewGroup,
+    setShortcutContext,
+    shortcutTriggerRef,
+  ]);
+  useEffect(() => {
+    if (contextGroup) {
+      contextMenuRef.current?.querySelector('button:not(:disabled)')?.focus();
+    }
+  }, [contextGroup]);
+  function closePanels() {
+    clearWindowHighlight();
+    closePreview();
+    setContextGroup(null);
+    setShortcutContext(null);
+    setMenuOpen(false);
+    setNotificationOpen(false);
+    setMenuView('home');
+    setMenuSearch('');
+    setQuickControlsOpen(false);
+    setWallyOpen(false);
+    setWeatherOpen(false);
+    contextTriggerRef.current = null;
+    shortcutTriggerRef.current = null;
+  }
+  function activateInstance(instance) {
+    onAppAction(instance.minimized ? restoreApp : activateApp, instance.id);
+    closePanels();
+  }
+  function handleGroupClick(group) {
+    clearWindowHighlight();
+    setContextGroup(null);
+    setMenuOpen(false);
+    setNotificationOpen(false);
+    setQuickControlsOpen(false);
+    setWallyOpen(false);
+    setWeatherOpen(false);
+    contextTriggerRef.current = null;
+    if (group.instances.length > 1) {
+      clearPreviewTimers();
+      setPreviewGroup((current) => (current === group.appId ? null : group.appId));
+      return;
+    }
+    const instance = group.instances[0];
+    if (instance.minimized) {
+      activateInstance(instance);
+    } else if (appState.activeInstanceId === instance.id) {
+      onAppAction(minimizeApp, instance.id);
+      closePanels();
+    } else {
+      activateInstance(instance);
+    }
+  }
+  function handleContextMenu(event, group) {
+    event.preventDefault();
+    clearWindowHighlight();
+    closePreview();
+    contextTriggerRef.current = event.currentTarget;
+    setMenuOpen(false);
+    setNotificationOpen(false);
+    setQuickControlsOpen(false);
+    setWallyOpen(false);
+    setWeatherOpen(false);
+    setContextGroup((current) => (current === group.appId ? null : group.appId));
+  }
+  function handleContextKeyDown(event, group) {
+    if (event.key === 'F10' && event.shiftKey) {
+      event.preventDefault();
+      contextTriggerRef.current = event.currentTarget;
+      setMenuOpen(false);
+      setNotificationOpen(false);
+      setContextGroup(group.appId);
+      setQuickControlsOpen(false);
+      setWallyOpen(false);
+      setWeatherOpen(false);
+    }
+  }
+  function handleMenuNavigation(event) {
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+      return;
+    }
+    const buttons = Array.from(
+      contextMenuRef.current?.querySelectorAll('button:not(:disabled)') ?? [],
+    );
+    if (buttons.length === 0) return;
+    event.preventDefault();
+    const currentIndex = buttons.indexOf(document.activeElement);
+    let nextIndex = 0;
+    if (event.key === 'ArrowDown') {
+      nextIndex = (currentIndex + 1) % buttons.length;
+    } else if (event.key === 'ArrowUp') {
+      nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+    } else if (event.key === 'End') {
+      nextIndex = buttons.length - 1;
+    }
+    buttons[nextIndex].focus();
+  }
+  function runContextAction(action) {
+    if (!context) return;
+    const target = getTargetInstance(context);
+    switch (action) {
+      case 'new':
+        onAppAction(openApp, context.appId);
+        break;
+      case 'activate':
+        if (target) {
+          onAppAction(target.minimized ? restoreApp : activateApp, target.id);
+        }
+        break;
+      case 'minimize':
+        if (target && !target.minimized) {
+          onAppAction(minimizeApp, target.id);
+        }
+        break;
+      case 'close':
+        if (target) onAppAction(closeApp, target.id);
+        break;
+      case 'close-all':
+        for (const instance of context.instances) {
+          onAppAction(closeApp, instance.id);
+        }
+        break;
+      default:
+        break;
+    }
+    closePanels();
+  }
+  function toggleWSMenu() {
+    clearWindowHighlight();
+    closePreview();
+    setContextGroup(null);
+    setShortcutContext(null);
+    setQuickControlsOpen(false);
+    setWallyOpen(false);
+    setWeatherOpen(false);
+    contextTriggerRef.current = null;
+    shortcutTriggerRef.current = null;
+    if (!menuOpen) {
+      setMenuView('home');
+      setMenuSearch('');
+    }
+    setMenuOpen((current) => !current);
+    setNotificationOpen(false);
+  }
+  function toggleNotifications() {
+    clearWindowHighlight();
+    closePreview();
+    setContextGroup(null);
+    setShortcutContext(null);
+    setMenuOpen(false);
+    setQuickControlsOpen(false);
+    setWallyOpen(false);
+    setWeatherOpen(false);
+    setNotificationOpen((current) => !current);
+    contextTriggerRef.current = null;
+    shortcutTriggerRef.current = null;
+  }
+  function toggleQuickControls() {
+    clearWindowHighlight();
+    closePreview();
+    setContextGroup(null);
+    setShortcutContext(null);
+    setMenuOpen(false);
+    setNotificationOpen(false);
+    contextTriggerRef.current = null;
+    shortcutTriggerRef.current = null;
+    setQuickControlsOpen((current) => !current);
+  }
+  function toggleWally() {
+    clearWindowHighlight();
+    closePreview();
+    setContextGroup(null);
+    setShortcutContext(null);
+    setMenuOpen(false);
+    setNotificationOpen(false);
+    setQuickControlsOpen(false);
+    contextTriggerRef.current = null;
+    shortcutTriggerRef.current = null;
+    setWallyOpen((current) => !current);
+  }
+  function toggleWeather() {
+    clearWindowHighlight();
+    closePreview();
+    setContextGroup(null);
+    setShortcutContext(null);
+    setMenuOpen(false);
+    setNotificationOpen(false);
+    setQuickControlsOpen(false);
+    setWallyOpen(false);
+    contextTriggerRef.current = null;
+    shortcutTriggerRef.current = null;
+    setWeatherOpen((current) => !current);
+  }
+  const timeText = currentTime.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const dateText = currentTime.toLocaleDateString('pt-BR');
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const date = new Date();
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  });
+  const monthLabel = calendarMonth.toLocaleDateString('pt-BR', {
+    month: 'long',
+    year: 'numeric',
+  });
+  const firstWeekday = calendarMonth.getDay();
+  const daysInMonth = new Date(
+    calendarMonth.getFullYear(),
+    calendarMonth.getMonth() + 1,
+    0,
+  ).getDate();
+  function toggleCalendar() {
+    clearWindowHighlight();
+    closePreview();
+    setContextGroup(null);
+    setShortcutContext(null);
+    contextTriggerRef.current = null;
+    shortcutTriggerRef.current = null;
+    setCalendarOpen((current) => !current);
+  }
+  // Camada flutuante + barra inferior (sem containers extras).
+  useGlobalShortcuts({
+    clearWindowHighlight,
+    clearPreviewTimers,
+    setPreviewGroup,
+    setContextGroup,
+    setShortcutContext,
+    contextTriggerRef,
+    shortcutTriggerRef,
+    setMenuView,
+    setMenuSearch,
+    setActivePanel,
+    onShowDesktop,
+    shortcutContext,
+    menuOpen,
+    menuButtonRef,
+  });
+  return (
+    <div className="taskbar-container" ref={taskbarRef}>
+      {createPortal(
+        <PanelLayer layerRef={floatingLayerRef}>
+          {preview &&
+            !contextGroup &&
+            !menuOpen &&
+            !notificationOpen &&
+            !quickControlsOpen &&
+            !wallyOpen &&
+            !weatherOpen &&
+            !calendarOpen && (
+              <TaskbarPreview
+                previewRef={previewRef}
+                preview={preview}
+                previewCloseTimerRef={previewCloseTimerRef}
+                schedulePreviewClose={schedulePreviewClose}
+                clearWindowHighlight={clearWindowHighlight}
+                onAppAction={onAppAction}
+                highlightWindow={highlightWindow}
+                activateInstance={activateInstance}
+                appState={appState}
+              />
+            )}
+          {menuOpen && (
+            <WSMenu
+              shortcutContext={shortcutContext}
+              setShortcutContext={setShortcutContext}
+              menuSearchRef={menuSearchRef}
+              menuSearch={menuSearch}
+              setMenuSearch={setMenuSearch}
+              visibleMenuApps={visibleMenuApps}
+              onAppAction={onAppAction}
+              closePanels={closePanels}
+              searchTerm={searchTerm}
+              menuView={menuView}
+              setMenuView={setMenuView}
+              openShortcutContext={openShortcutContext}
+              favoriteIds={favoriteIds}
+              MAX_FAVORITES={MAX_FAVORITES}
+              shortcutContextRef={shortcutContextRef}
+              runShortcutContextAction={runShortcutContextAction}
+            />
+          )}
+          {weatherOpen && (
+            <WeatherPanel
+              setWeatherOpen={setWeatherOpen}
+              weather={weather}
+              getWeatherDescription={getWeatherDescription}
+              weatherError={weatherError}
+              weatherLoading={weatherLoading}
+              requestWeather={requestWeather}
+            />
+          )}
+          {calendarOpen && (
+            <CalendarPanel
+              monthLabel={monthLabel}
+              setCalendarMonth={setCalendarMonth}
+              currentTime={currentTime}
+              setCalendarOpen={setCalendarOpen}
+              firstWeekday={firstWeekday}
+              daysInMonth={daysInMonth}
+              calendarMonth={calendarMonth}
+            />
+          )}
+          {wallyOpen && <WallyPanel setWallyOpen={setWallyOpen} />}
+          {quickControlsOpen && (
+            <QuickControls
+              setQuickControlsOpen={setQuickControlsOpen}
+              theme={theme}
+              onThemeChange={onThemeChange}
+            />
+          )}
+          {notificationOpen && (
+            <NotificationCenter
+              unreadCount={unreadCount}
+              setNotificationOpen={setNotificationOpen}
+              notifications={notifications}
+              onNotificationAction={onNotificationAction}
+              onNotificationOpen={onNotificationOpen}
+            />
+          )}
+          {context && (
+            <TaskbarContextMenu
+              contextMenuRef={contextMenuRef}
+              contextApp={contextApp}
+              context={context}
+              contextTriggerRef={contextTriggerRef}
+              closePanels={closePanels}
+              handleMenuNavigation={handleMenuNavigation}
+              runContextAction={runContextAction}
+              contextTarget={contextTarget}
+            />
+          )}
+        </PanelLayer>,
+        document.body,
+      )}
+      <nav className="taskbar" aria-label="Barra de tarefas">
+        <div className="taskbar__section taskbar__section--start">
+          <button
+            ref={menuButtonRef}
+            type="button"
+            className="taskbar__system-button taskbar__menu-button"
+            aria-label="WS Menu"
+            aria-expanded={menuOpen}
+            title="WS Menu"
+            onClick={toggleWSMenu}
+          >
+            <SystemIcon name="menu" size={19} />
+          </button>
+        </div>
+        <span className="taskbar__divider" aria-hidden="true" />
+        {groups.length > 0 && (
+          <TaskbarApps
+            appsScroll={appsScroll}
+            scrollApps={scrollApps}
+            appsScrollRef={appsScrollRef}
+            setAppsScroll={setAppsScroll}
+            groups={groups}
+            appState={appState}
+            previewGroup={previewGroup}
+            contextGroup={contextGroup}
+            handleGroupClick={handleGroupClick}
+            previewCloseTimerRef={previewCloseTimerRef}
+            schedulePreviewOpen={schedulePreviewOpen}
+            schedulePreviewClose={schedulePreviewClose}
+            handleContextMenu={handleContextMenu}
+            handleContextKeyDown={handleContextKeyDown}
+          />
+        )}
+        {groups.length > 0 && <span className="taskbar__divider" aria-hidden="true" />}
+        <div className="taskbar__section taskbar__section--system">
+          <button
+            type="button"
+            className="taskbar__system-button"
+            title="Notificações"
+            aria-label="Notificações"
+            aria-expanded={notificationOpen}
+            onClick={toggleNotifications}
+          >
+            <span className="taskbar-notifications__trigger">
+              <SystemIcon name="bell" />
+              {unreadCount > 0 && (
+                <span
+                  className="taskbar-notifications__badge"
+                  aria-label={`${unreadCount} notificações não lidas`}
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="taskbar__system-button"
+            title="Controle Rápido"
+            aria-label="Controle Rápido"
+            aria-expanded={quickControlsOpen}
+            onClick={toggleQuickControls}
+          >
+            <SystemIcon name="controls" />
+          </button>
+          <button
+            type="button"
+            className="taskbar__system-button"
+            title="Wally"
+            aria-label="Wally"
+            aria-expanded={wallyOpen}
+            onClick={toggleWally}
+          >
+            <SystemIcon name="wally" />
+          </button>
+        </div>
+        <span className="taskbar__divider" aria-hidden="true" />
+        <div className="taskbar__section taskbar__section--status">
+          <button
+            type="button"
+            className="taskbar__weather"
+            title="Clima"
+            aria-label="Clima"
+            aria-expanded={weatherOpen}
+            onClick={toggleWeather}
+          >
+            <SystemIcon name="weather" />
+            {weather && <span>{Math.round(weather.temperature_2m)}°</span>}
+          </button>
+          <button
+            type="button"
+            className="taskbar__clock"
+            title={dateText}
+            aria-label={`Calendário, ${dateText}`}
+            aria-expanded={calendarOpen}
+            onClick={toggleCalendar}
+          >
+            <time dateTime={currentTime.toISOString()}>{timeText}</time>
+          </button>
+        </div>
+      </nav>
+    </div>
+  );
+}

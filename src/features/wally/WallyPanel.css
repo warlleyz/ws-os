@@ -1,0 +1,77 @@
+.taskbar-wally {
+  display: flex;
+  width: min(360px, calc(100vw - 24px));
+  height: min(280px, calc(100dvh - 108px));
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: 0 16px 45px rgb(0 0 0 / 28%);
+}
+
+.taskbar-wally__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.taskbar-wally__header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.taskbar-wally__header strong {
+  font-size: 13px;
+}
+
+.taskbar-wally__header small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.taskbar-wally__header button {
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.taskbar-wally__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.taskbar-wally__content > svg {
+  color: var(--accent-secondary);
+}
+
+.taskbar-wally__content strong {
+  font-size: 13px;
+}
+
+.taskbar-wally__content p {
+  max-width: 260px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.taskbar-wally button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}

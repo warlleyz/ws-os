@@ -1,0 +1,60 @@
+.taskbar-calendar {
+  box-sizing: border-box;
+  width: min(340px, calc(100vw - 24px));
+  max-height: calc(100dvh - 100px);
+  overflow-y: auto;
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  background: var(--panel-background);
+  color: var(--text-primary);
+  box-shadow: var(--panel-shadow);
+}
+
+.taskbar-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgb(148 185 215 / 15%);
+}
+
+.taskbar-calendar button {
+  padding: 5px 9px;
+  border: 1px solid rgb(148 185 215 / 25%);
+  border-radius: 7px;
+  background: rgb(255 255 255 / 7%);
+  color: inherit;
+  cursor: pointer;
+}
+
+.taskbar-calendar__header > div {
+  display: flex;
+  gap: 5px;
+}
+
+.taskbar-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: 12px;
+  text-align: center;
+}
+
+.taskbar-calendar__grid > span {
+  display: grid;
+  min-height: 32px;
+  place-items: center;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.taskbar-calendar__weekday {
+  opacity: 0.65;
+  font-weight: 700;
+}
+
+.taskbar-calendar__today {
+  background: rgb(94 176 217 / 26%);
+  font-weight: 700;
+}

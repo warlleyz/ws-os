@@ -1,0 +1,224 @@
+.desktop {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100dvh;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.desktop__wallpaper {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 75% 20%, rgb(55 140 228 / 15%), transparent 45%),
+    radial-gradient(ellipse at 20% 85%, rgb(101 205 225 / 8%), transparent 45%),
+    var(--surface-canvas);
+}
+
+.desktop__workspace {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 0;
+}
+
+.desktop__shortcuts {
+  position: relative;
+  width: calc(100% - 40px);
+  height: calc(100% - 38px);
+  min-height: 82px;
+  margin: 22px 20px 16px;
+}
+
+.desktop__shortcut {
+  display: flex;
+  width: 82px;
+  height: 82px;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 3px 4px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: default;
+  user-select: none;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.desktop__shortcut:hover {
+  border-color: rgb(255 255 255 / 10%);
+  background: rgb(255 255 255 / 7%);
+}
+
+.desktop__shortcut--selected {
+  border-color: var(--border-default);
+  background: rgb(101 205 225 / 12%);
+}
+
+.desktop__shortcut:active {
+  transform: scale(0.97);
+}
+
+.desktop__shortcut:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+.desktop__shortcut-icon {
+  position: relative;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: 13px;
+  background: var(--surface-primary);
+  color: var(--accent-secondary);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+  font-size: 20px;
+  font-weight: 800;
+  transition:
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.desktop__shortcut-indicator {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+
+  width: 8px;
+  height: 8px;
+
+  border: 2px solid var(--surface-primary);
+  border-radius: 50%;
+
+  background: var(--accent-secondary);
+
+  pointer-events: none;
+}
+
+.desktop__shortcut:hover .desktop__shortcut-icon {
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+.desktop__shortcut-label {
+  display: flex;
+  width: 100%;
+  height: 26px;
+  flex: 0 0 26px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 13px;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: normal;
+}
+
+.desktop__window-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  --window-gap: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop__shortcut,
+  .desktop__shortcut-icon {
+    transition: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .desktop__shortcuts {
+    width: calc(100% - 28px);
+    margin: 22px 14px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .desktop__shortcuts {
+    width: calc(100% - 20px);
+    margin-inline: 10px;
+  }
+}
+
+.desktop__context {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  width: 210px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 25%);
+}
+
+.desktop__context strong {
+  padding: 7px 9px;
+  font-size: 12px;
+}
+
+.desktop__context button {
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.desktop__context button:hover:not(:disabled) {
+  background: var(--surface-secondary);
+}
+
+.desktop__context button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.desktop__context-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--border-default);
+}
+
+.desktop__context-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px;
+  border-top: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+}
