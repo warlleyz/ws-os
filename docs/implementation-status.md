@@ -77,3 +77,29 @@ Cada app precisa também de estados aplicáveis de vazio/carregando/erro/offline
 | D12 | média                  | executionState sem consumidor; fechamento sem transição/isolamento                 | DEC-133/135/136 |
 
 Não há porcentagem confiável de conclusão: catálogo cadastrado não mede funcionalidade entregue. F1–F4 possuem código parcial; F5 e A1–A8 permanecem pendentes de implementação/validação.
+
+## Atualizações — 14/10/2026
+
+### R1 — Taskbar e painéis
+- Corrigida a seleção de instâncias pelo histórico de foco.
+- Corrigidos os comportamentos de ativação, minimização e restauração.
+- Uniformizado o fechamento dos painéis.
+- Validado com testes automatizados e manuais.
+- Commit: e09b8dc.
+
+### R2.1 — Registry e acesso
+- Corrigidas as flags de implementação dos aplicativos.
+- Bloqueada a abertura pública da Administração no Core.
+- Commit: 8f1bbdd.
+
+### R2.2 — Carregamento e isolamento
+- Preparado carregamento lazy dos aplicativos.
+- Implementado AppErrorBoundary.
+- Tratamento de erros ainda pendente de validação prática.
+- Commit: f5f33cf.
+
+### R2.3 — Sobre o Sistema
+- Primeiro aplicativo conectado ao AppHost.
+- Conteúdo inicial implementado; funcionalidades definitivas ainda parciais.
+- Outros 17 aplicativos permanecem sem implementação funcional.
+- Commit: 7e58b08.
