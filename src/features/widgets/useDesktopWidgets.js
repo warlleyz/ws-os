@@ -1,5 +1,6 @@
 import { COLUMN_STEP, ROW_STEP, getDesktopLayout } from '../../shells/desktop/desktopLayout';
 import { useEffect, useRef, useState } from 'react';
+import { useSystem } from '../../core/useSystem';
 import {
   loadWidgetState,
   saveWidgetState,
@@ -9,10 +10,30 @@ import {
 } from '../../core/widgetManager';
 // Distribuição dos atalhos no Desktop.
 export default function useDesktopWidgets({ shortcuts, gridSize }) {
+  const { notify } = useSystem();
   const [widgetState, setWidgetState] = useState(loadWidgetState);
+  const saveWarningRef = useRef(false);
+
   useEffect(() => {
-    saveWidgetState(widgetState);
-  }, [widgetState]);
+    const saved = saveWidgetState(widgetState);
+
+    if (saved) {
+      saveWarningRef.current = false;
+      return;
+    }
+
+    if (saveWarningRef.current) return;
+
+    saveWarningRef.current = true;
+
+    notify({
+      title: 'Falha ao salvar preferências',
+      message:
+        'As configurações dos widgets podem não ser preservadas após recarregar a página.',
+      source: 'Widgets',
+      type: 'warning',
+    });
+  }, [widgetState, notify]);
   function toggleClockWidget() {
     setWidgetState((current) => {
       const clock = current.widgets.find((widget) => widget.instanceId === 'clock-default');

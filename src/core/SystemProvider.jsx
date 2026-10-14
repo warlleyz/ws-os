@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { SystemContext } from './systemContext';
 import { activateApp, initialAppState, openApp, restoreApp, minimizeApp } from './appManager';
 import { getAppDefinition } from './appRegistry';
@@ -18,6 +18,21 @@ export default function SystemProvider({ children }) {
   const [appState, setAppState] = useState(initialAppState);
   const [notificationState, setNotificationState] = useState(initialNotificationState);
   const [visibleToasts, setVisibleToasts] = useState([]);
+
+  const notify = useCallback((details) => {
+    const notification = createNotification(details);
+
+    if (!notification) return;
+
+    setNotificationState((current) =>
+      addNotification(current, notification),
+    );
+
+    setVisibleToasts((current) =>
+      [...current, notification].slice(-MAX_VISIBLE_TOASTS),
+    );
+  }, []);
+
   // Único ponto de entrada para ações de aplicativos e avisos do sistema.
   function run(operation, id, options) {
     setAppState((current) => operation(current, id, options));
@@ -92,6 +107,7 @@ export default function SystemProvider({ children }) {
         appState,
         notificationState,
         visibleToasts,
+        notify,
         run,
         handleNotificationAction,
         dismissToast,

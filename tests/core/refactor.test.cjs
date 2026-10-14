@@ -368,3 +368,76 @@ test('widget preserva posição preferida quando ela continua válida', () => {
   assert.equal(layout.widget.left, 270);
   assert.equal(layout.widget.top, 88);
 });
+
+
+test('widgets recuperam estado padrão quando armazenamento falha', () => {
+  const storage = {
+    getItem() {
+      throw new Error('Armazenamento indisponível');
+    },
+    setItem() {
+      throw new Error('Armazenamento indisponível');
+    },
+  };
+
+  const m = loadPureModule('src/core/widgetManager.js', {
+    localStorage: storage,
+  });
+
+  const state = m.loadWidgetState();
+
+  assert.equal(state.widgets.length, 1);
+  assert.equal(state.widgets[0].instanceId, 'clock-default');
+  assert.equal(state.widgets[0].visible, true);
+  assert.equal(m.saveWidgetState(state), false);
+});
+
+test('widgets recuperam dados corrompidos sem perder valores padrão', () => {
+  const storage = {
+    getItem() {
+      return '{dados inválidos';
+    },
+  };
+
+  const m = loadPureModule('src/core/widgetManager.js', {
+    localStorage: storage,
+  });
+
+  const state = m.loadWidgetState();
+
+  assert.equal(state.widgets.length, 1);
+  assert.equal(state.widgets[0].widgetId, 'clock');
+  assert.equal(state.widgets[0].visible, true);
+  assert.equal(state.widgets[0].size.columns, 2);
+  assert.equal(state.widgets[0].size.rows, 2);
+});
+
+test('widgets preservam preferências válidas armazenadas', () => {
+  const storage = {
+    getItem(key) {
+      assert.equal(key, 'ws-os:desktop-widgets');
+
+      return JSON.stringify({
+        widgets: [{
+          instanceId: 'clock-default',
+          widgetId: 'clock',
+          visible: false,
+          position: { column: 4, row: 2 },
+          size: { columns: 3, rows: 2 },
+        }],
+      });
+    },
+  };
+
+  const m = loadPureModule('src/core/widgetManager.js', {
+    localStorage: storage,
+  });
+
+  const widget = m.loadWidgetState().widgets[0];
+
+  assert.equal(widget.visible, false);
+  assert.equal(widget.position.column, 4);
+  assert.equal(widget.position.row, 2);
+  assert.equal(widget.size.columns, 3);
+  assert.equal(widget.size.rows, 2);
+});
