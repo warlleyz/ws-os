@@ -1,3 +1,5 @@
+import './BootScreen.css';
+
 export default function BootScreen() {
     return (
         <main className="ws-boot" aria-label="Inicializando WS OS">

@@ -1,3 +1,5 @@
+import './WelcomeDialog.css';
+
 export default function WelcomeDialog({ onClose }) {
     return (
         <div className="ws-welcome-backdrop">
