@@ -117,7 +117,11 @@ export default function Window({
         </div>
       </header>
 
-      <AppHost appName={appName} instance={instance} />
+      <AppHost
+        key={instance.id}
+        appName={appName}
+        instance={instance}
+      />
 
       {mode === 'normal' &&
         RESIZE_DIRECTIONS.map((direction) => (
