@@ -133,6 +133,7 @@ export default function Taskbar({
     const [contextGroup, setContextGroup] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [notificationOpen, setNotificationOpen] = useState(false);
+    const [quickControlsOpen, setQuickControlsOpen] = useState(false);
     const [menuView, setMenuView] = useState('home');
     const [menuSearch, setMenuSearch] = useState('');
     const [shortcutContext, setShortcutContext] = useState(null);
@@ -347,6 +348,7 @@ export default function Taskbar({
                 setShortcutContext(null);
                 setMenuOpen(false);
                 setNotificationOpen(false);
+                setQuickControlsOpen(false);
                 contextTriggerRef.current = null;
                 shortcutTriggerRef.current = null;
             }
@@ -452,6 +454,7 @@ export default function Taskbar({
         setNotificationOpen(false);
         setMenuView('home');
         setMenuSearch('');
+        setQuickControlsOpen(false);
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
     }
@@ -467,6 +470,7 @@ export default function Taskbar({
         setContextGroup(null);
         setMenuOpen(false);
         setNotificationOpen(false);
+        setQuickControlsOpen(false);
         contextTriggerRef.current = null;
         if (group.instances.length > 1) {
             clearPreviewTimers();
@@ -492,6 +496,7 @@ export default function Taskbar({
         contextTriggerRef.current = event.currentTarget;
         setMenuOpen(false);
         setNotificationOpen(false);
+        setQuickControlsOpen(false);
         setContextGroup((current) =>
             current === group.appId ? null : group.appId,
         );
@@ -503,6 +508,7 @@ export default function Taskbar({
             setMenuOpen(false);
             setNotificationOpen(false);
             setContextGroup(group.appId);
+            setQuickControlsOpen(false);
         }
     }
     function handleMenuNavigation(event) {
@@ -568,6 +574,7 @@ export default function Taskbar({
         closePreview();
         setContextGroup(null);
         setShortcutContext(null);
+        setQuickControlsOpen(false);
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
         if (!menuOpen) {
@@ -583,9 +590,24 @@ export default function Taskbar({
         setContextGroup(null);
         setShortcutContext(null);
         setMenuOpen(false);
+        setQuickControlsOpen(false);
         setNotificationOpen((current) => !current);
         contextTriggerRef.current = null;
         shortcutTriggerRef.current = null;
+    }
+    function toggleQuickControls() {
+        clearWindowHighlight();
+        closePreview();
+
+        setContextGroup(null);
+        setShortcutContext(null);
+        setMenuOpen(false);
+        setNotificationOpen(false);
+
+        contextTriggerRef.current = null;
+        shortcutTriggerRef.current = null;
+
+        setQuickControlsOpen((current) => !current);
     }
     const timeText = currentTime.toLocaleTimeString('pt-BR', {
         hour: '2-digit',
@@ -600,7 +622,11 @@ export default function Taskbar({
                     ref={floatingLayerRef}
                     className="taskbar-floating-layer"
                 >
-                    {preview && !contextGroup && !menuOpen && (
+                    {preview &&
+                        !contextGroup &&
+                        !menuOpen &&
+                        !notificationOpen &&
+                        !quickControlsOpen && (
                         <section
                             ref={previewRef}
                             className="taskbar-preview"
@@ -893,6 +919,45 @@ export default function Taskbar({
                                     </div>
                                 );
                             })()}
+                        </section>
+                    )}
+                    {quickControlsOpen && (
+                        <section
+                            className="taskbar-quick-controls"
+                            role="region"
+                            aria-label="Painel de Controle Rápido"
+                        >
+                            <header className="taskbar-quick-controls__header">
+                                <div>
+                                    <strong>Controle Rápido</strong>
+                                    <small>Preferências do sistema</small>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    aria-label="Fechar Controle Rápido"
+                                    onClick={() => setQuickControlsOpen(false)}
+                                >
+                                    ×
+                                </button>
+                            </header>
+
+                            <div className="taskbar-quick-controls__content">
+                                <div className="taskbar-quick-controls__section">
+                                    <strong>Aparência</strong>
+                                    <p>Temas e personalização do sistema.</p>
+                                </div>
+
+                                <div className="taskbar-quick-controls__section">
+                                    <strong>Sons</strong>
+                                    <p>Preferências de áudio do sistema.</p>
+                                </div>
+
+                                <div className="taskbar-quick-controls__section">
+                                    <strong>Efeitos</strong>
+                                    <p>Animações e transparências.</p>
+                                </div>
+                            </div>
                         </section>
                     )}
                     {notificationOpen && (
@@ -1192,9 +1257,10 @@ export default function Taskbar({
                     <button
                         type="button"
                         className="taskbar__system-button"
-                        title="Controles rápidos — em desenvolvimento"
-                        aria-label="Controles rápidos — em desenvolvimento"
-                        disabled
+                        title="Controle Rápido"
+                        aria-label="Controle Rápido"
+                        aria-expanded={quickControlsOpen}
+                        onClick={toggleQuickControls}
                     >
                         <TaskbarIcon name="controls" />
                     </button>
