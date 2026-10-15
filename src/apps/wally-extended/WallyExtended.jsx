@@ -15,6 +15,7 @@ import useWallyConversation from '../../features/wally/useWallyConversation';
 import '../../styles/apps.css';
 
 import WallyTurnstile from '../../features/wally/WallyTurnstile';
+import { getWallyErrorMessage } from '../../features/wally/wallyErrorMessages';
 import '../../features/wally/WallyPanel.css';
 
 export default function WallyExtended() {
@@ -158,16 +159,7 @@ export default function WallyExtended() {
 
       {lastError && (
         <p role="status">
-          {t(
-            lastError === 'AI_DISABLED'
-              ? 'O Gemini está temporariamente desativado. Resposta local utilizada.'
-              : lastError === 'RATE_LIMIT_EXCEEDED'
-                ? 'Limite de consultas atingido. Resposta local utilizada.'
-                : lastError === 'VERIFICATION_REQUIRED' ||
-                  lastError === 'VERIFICATION_FAILED'
-                  ? 'A verificação de segurança não foi concluída. Resposta local utilizada.'
-                  : 'O Gemini está indisponível. Resposta local utilizada.',
-          )}
+          {t(getWallyErrorMessage(lastError))}
         </p>
       )}
 
