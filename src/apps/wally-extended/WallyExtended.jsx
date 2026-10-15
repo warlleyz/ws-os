@@ -107,6 +107,11 @@ export default function WallyExtended() {
             className="ws-app__card"
             key={message.id}
           >
+            {message.cancelled && (
+              <small role="status">
+                {t('Resposta cancelada')}
+              </small>
+            )}
             <p>
               <strong>
                 {message.role === 'user'

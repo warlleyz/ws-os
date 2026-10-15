@@ -30,6 +30,7 @@ export default function useWallyConversation() {
     const busyRef = useRef(false);
     const abortRef = useRef(null);
     const generationRef = useRef(0);
+    const pendingMessageIdRef = useRef(null);
 
     useEffect(() => {
         return () => {
@@ -65,22 +66,42 @@ export default function useWallyConversation() {
         setStatus('responding');
         setLastError(null);
 
-        const history = messagesRef.current
-            .filter((message) =>
-                message.role === 'user' ||
-                message.role === 'assistant'
-            )
-            .slice(-10)
-            .map((message) => ({
-                role: message.role,
-                text: message.text.slice(0, MAX_QUESTION_LENGTH),
-            }));
+
+        // Envia apenas pares completos de pergunta e resposta.
+        // Perguntas canceladas não entram no contexto do Gemini.
+        const completedHistory = [];
+
+        for (let i = 0; i < messagesRef.current.length - 1; i += 1) {
+            const user = messagesRef.current[i];
+            const assistant = messagesRef.current[i + 1];
+
+            if (
+                user.role === 'user' &&
+                !user.cancelled &&
+                assistant.role === 'assistant'
+            ) {
+                completedHistory.push(
+                    { role: 'user', text: user.text },
+                    { role: 'assistant', text: assistant.text },
+                );
+
+                i += 1;
+            }
+        }
+
+        const history = completedHistory.slice(-10).map((message) => ({
+            role: message.role,
+            text: message.text.slice(0, MAX_QUESTION_LENGTH),
+        }));
+
 
         const userMessage = {
             id: createId(),
             role: 'user',
             text: question,
         };
+
+        pendingMessageIdRef.current = userMessage.id;
 
         updateMessages([...messagesRef.current, userMessage]);
 
@@ -144,6 +165,8 @@ export default function useWallyConversation() {
             },
         ]);
 
+        pendingMessageIdRef.current = null;
+
         setProvider(response.provider);
         setLastError(remoteError);
         setStatus('idle');
@@ -153,23 +176,35 @@ export default function useWallyConversation() {
     }, [locale, createId, updateMessages]);
 
 
+
     const cancelResponse = useCallback(() => {
         if (!busyRef.current) return;
 
-        // Invalida a resposta pendente, inclusive se o
-        // serviço remoto já estiver prestes a responder.
         generationRef.current += 1;
 
         const controller = abortRef.current;
         abortRef.current = null;
-
         busyRef.current = false;
+
+        const pendingId = pendingMessageIdRef.current;
+        pendingMessageIdRef.current = null;
+
+        if (pendingId) {
+            updateMessages(
+                messagesRef.current.map((message) =>
+                    message.id === pendingId
+                        ? { ...message, cancelled: true }
+                        : message,
+                ),
+            );
+        }
 
         controller?.abort();
 
         setStatus('idle');
         setLastError(null);
-    }, []);
+    }, [updateMessages]);
+
 
 
 
@@ -178,7 +213,7 @@ export default function useWallyConversation() {
         abortRef.current?.abort();
         abortRef.current = null;
         busyRef.current = false;
-
+        pendingMessageIdRef.current = null;
         updateMessages([]);
         setProvider('local');
         setLastError(null);

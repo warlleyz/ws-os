@@ -189,6 +189,11 @@ export default function WallyPanel({ setWallyOpen }) {
                 )}
 
                 <div className="ws-wally__bubble">
+                  {message.cancelled && (
+                    <small role="status">
+                      {t('Resposta cancelada')}
+                    </small>
+                  )}
                   <p>
                     {message.role === 'assistant'
                       ? t(message.text)
