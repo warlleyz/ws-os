@@ -78,3 +78,11 @@ Terminal oferece help/apps/open/close/theme/lang/ls/pwd/date/whoami/history/clea
 Wally compacto e estendido orientam por intenções locais e oferecem botões de abertura pelo Core. O Mobile oferece Wally como app no catálogo. Conversa limitada à sessão, sem envio a serviços e sem execução de ações destrutivas. Gemini, autenticação, cotas e ferramentas remotas continuam pendentes; este fallback não é apresentado como IA generativa conectada.
 
 Dois testes novos verificam parser/completar e catálogo restrito do Wally. Suíte acumulada: 90 testes. Smoke no navegador: help exibiu o catálogo; open calculator abriu a Calculadora; painel Wally respondeu sobre Projetos e abriu Wally Estendido pelo Core. A interação por teclado foi usada para evitar o recorte da área de automação. Nenhuma IA remota ou autenticação real foi testada/conectada.
+
+## A7 — cinco jogos locais
+
+Snake, Memória, Campo Minado (8×8/10 minas), Flappy Bird em desenho geométrico e Paciência Klondike com compra de uma carta. Controles por botões/teclado; recordes locais por jogo, undo limitado da Paciência e regras sem código executável externo. Campo Minado só aceita bandeiras depois da primeira abertura segura. DOOM não incluído por depender de licença/distribuição. Rankings globais não conectados.
+
+Games declara pausa seletiva. Minimizá-lo ou ocultar a página interrompe intervalos/rAF/timeouts; o Mobile passa estado pausado aos consumidores ocultos que optaram por pausa. Voltar ao catálogo desmonta o jogo e limpa recursos; fechar encerra a partida, sem persistir o tabuleiro. Os recordes são separados das preferências do sistema.
+
+Oito testes novos cobrem shuffle reproduzível, Snake (crescimento/direção/cauda/borda), Campo Minado (segurança/bandeiras/vitória), voo (delta/colisões/pontos) e Paciência (52 cartas/compra/movimentos/bases). Navegador: Snake iniciou/pausou; Memória contou a primeira tentativa; Campo Minado abriu casa segura; Paciência comprou carta e desfez (24→23→24); voo respondeu a salto/pausa. Console sem erros/warnings. Suíte acumulada: 98 testes. Partidas completas de todos os jogos, acessibilidade assistiva e toque físico ainda exigem ensaio humano; smoke não prova ausência de todos os bugs.

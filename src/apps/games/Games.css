@@ -1,0 +1,80 @@
+.ws-snake {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  width: min(100%, 360px);
+  aspect-ratio: 1;
+  border: 1px solid var(--border-control);
+  background: var(--surface-secondary);
+  gap: 1px;
+}
+.ws-snake span {
+  min-width: 0;
+  background: var(--surface-primary);
+}
+.ws-snake .is-snake {
+  background: var(--accent-secondary);
+}
+.ws-snake .is-food {
+  background: var(--status-warning);
+  border-radius: 50%;
+}
+.ws-memory {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-block: 16px;
+}
+.ws-memory button {
+  min-height: 52px;
+  font-size: 20px;
+}
+.ws-mines {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(30px, 1fr));
+  gap: 3px;
+  margin-block: 16px;
+  overflow: auto;
+}
+.ws-mines button {
+  min-width: 30px;
+  min-height: 38px;
+  padding: 4px;
+}
+.ws-flappy {
+  display: block;
+  width: min(100%, 320px);
+  max-height: 60dvh;
+  margin-block: 16px;
+  border: 1px solid var(--border-control);
+}
+.ws-solitaire {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(66px, 1fr));
+  gap: 8px;
+  overflow: auto;
+  padding-block: 12px;
+}
+.ws-solitaire__column {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+}
+.ws-solitaire__column button {
+  padding: 8px 2px;
+}
+.ws-solitaire .is-red {
+  color: var(--status-error);
+}
+.ws-solitaire [aria-pressed='true'] {
+  outline: 2px solid var(--accent-secondary);
+}
+
+@media (pointer: coarse) {
+  .ws-mines {
+    grid-template-columns: repeat(8, minmax(44px, 1fr));
+  }
+  .ws-mines button {
+    min-height: 44px;
+  }
+}

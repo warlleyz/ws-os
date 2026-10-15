@@ -310,7 +310,14 @@ export default function Mobile({ theme, onThemeChange }) {
                   hidden={!isVisible}
                   inert={!isVisible}
                 >
-                  <AppHost appName={app.name} instance={instance} />
+                  <AppHost
+                    appName={app.name}
+                    instance={
+                      app.pauseWhenMinimized && !isVisible
+                        ? { ...instance, executionState: 'paused' }
+                        : instance
+                    }
+                  />
                 </div>
               );
             })}
