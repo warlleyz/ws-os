@@ -108,6 +108,54 @@ export async function onRequestPost(context) {
         return json({ error: 'INVALID_QUESTION' }, 400);
     }
 
+
+    // Verificação antiabuso obrigatória antes do Gemini.
+    // Sem configuração ou token válido, a chamada é bloqueada.
+
+    if (!env.TURNSTILE_SECRET_KEY) {
+        return json({ error: 'PROTECTION_UNAVAILABLE' }, 503);
+    }
+
+    if (
+        typeof body.turnstileToken !== 'string' ||
+        !body.turnstileToken ||
+        body.turnstileToken.length > 2048
+    ) {
+        return json({ error: 'VERIFICATION_REQUIRED' }, 403);
+    }
+
+    let verified;
+
+    try {
+        const verification = await fetch(
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    secret: env.TURNSTILE_SECRET_KEY,
+                    response: body.turnstileToken,
+                    remoteip: request.headers.get('CF-Connecting-IP') || undefined,
+                }),
+            },
+        );
+
+        if (!verification.ok) {
+            return json({ error: 'VERIFICATION_UNAVAILABLE' }, 503);
+        }
+
+        verified = await verification.json();
+    } catch {
+        return json({ error: 'VERIFICATION_UNAVAILABLE' }, 503);
+    }
+
+    if (!verified.success) {
+        return json({ error: 'VERIFICATION_FAILED' }, 403);
+    }
+
+
     const history = body.history ?? [];
 
     if (
