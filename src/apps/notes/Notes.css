@@ -6,6 +6,6 @@
   max-width: 75ch;
 }
 .notes-app time {
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }

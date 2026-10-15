@@ -14,13 +14,18 @@ Não confundir componente integrado com app completo, nem configuração prepara
 
 ## Blocos desta execução
 
-| Bloco       | Estado                                     | Escopo                                                                 |
-| ----------- | ------------------------------------------ | ---------------------------------------------------------------------- |
-| A2          | Implementado com dependências pendentes    | Projetos, Demos, Dev Insights e serviços de leitura/cache/cancelamento |
-| A3          | Implementado; envio externo pendente       | Calculadora e Contato                                                  |
-| A5          | Implementado; ensaios adicionais pendentes | Arquivos locais, editor e integração ao visualizador                   |
-| Demais apps | Não iniciado                               | Conforme capacidade desta execução; registrar entrega e limites        |
-| Temas v1    | Adaptado e conferido nos dois temas        | Comparar e adaptar vidro/blur preservando controles e acessibilidade   |
+| Bloco          | Estado                                    | Escopo                                   |
+| -------------- | ----------------------------------------- | ---------------------------------------- |
+| A2             | Integrado; configuração/aceites pendentes | Projetos, Demos e Dev Insights           |
+| A3             | Integrado; envio real pendente            | Calculadora e Contato                    |
+| A5             | Integrado; ensaios adicionais pendentes   | Arquivos pessoais, editor e visualizador |
+| Temas          | Adaptados e conferidos nos dois temas     | Vidro/blur inspirado na v1               |
+| Terminal/Wally | Recursos locais integrados                | Sem auth/Gemini remoto                   |
+| A7             | Cinco jogos locais integrados             | Sem ranking global/DOOM                  |
+| Notas          | Leitura integrada e backend preparado     | Sem curtidas/Admin/anexos                |
+| Administração  | Reservada e bloqueada ao público          | Implementação futura                     |
+
+Entrega consolidada, conteúdo e plano restante: [ENTREGA-E-CONTINUIDADE-2026-10-15.md](ENTREGA-E-CONTINUIDADE-2026-10-15.md).
 
 ## Dependências externas
 
@@ -90,3 +95,7 @@ Oito testes novos cobrem shuffle reproduzível, Snake (crescimento/direção/cau
 ## Notas e preparação de backend
 
 Notas integrado ao shell: busca sem acentos, filtro por assunto, leitura de texto simples, datas, retorno interno Desktop/Mobile, estados vazio/erro/cache. Fonte pública local ou endpoint explícito; nenhum artigo inventado. Pages Functions para agregados WakaTime e leitura de posts Supabase, com segredos apenas no servidor, timeout e erros sanitizados. SQL com RLS de leitura publicada preparado, não executado. Curtidas, anexos e administração autenticada pendentes. Configuração: [backend/CONFIGURACAO.md](backend/CONFIGURACAO.md). Testes usam rede simulada; não houve deploy ou integração com contas reais.
+
+## Fechamento
+
+103 testes aprovados, lint/build aprovados. Retorno interno de Notas conferido pelo cabeçalho Mobile; publicação temporária de teste removida antes do commit. Foram adicionados comando npm test e regras para ignorar segredos locais. Nenhum push/deploy. Três alterações locais iniciais e stash original preservados. Consulte a entrega consolidada para pendências e limites.

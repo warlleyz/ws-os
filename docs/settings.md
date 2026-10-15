@@ -1,3 +1,5 @@
+> **Temas atualizados em 15/10/2026:** [glass.css](../src/styles/themes/glass.css) agora aplica vidro à janela inteira e controla empilhamento de blur. As descrições/evidências abaixo sobre conteúdo opaco e blur antigo são da etapa anterior; detalhes atuais em [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md). Os contratos de dados/persistência abaixo permanecem válidos.
+
 # Configurações — entrega de 15/10/2026
 
 Escopo: completar o app existente, preservando a arquitetura e as edições locais encontradas sobre `2b4bf86`. Não representa conclusão de todos os aplicativos ou de todo o roadmap.

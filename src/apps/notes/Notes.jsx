@@ -18,7 +18,11 @@ export default function Notes({ instance }) {
   const [query, setQuery] = useState('');
   const [tag, setTag] = useState('');
   const [selectedId, setSelectedId] = useState(null);
-  useAppBack(instance.id, selectedId ? () => setSelectedId(null) : null);
+  useAppBack(instance.id, () => {
+    if (!selectedId) return false;
+    setSelectedId(null);
+    return true;
+  });
   const posts = resource.data ?? [];
   const selected = posts.find((post) => post.id === selectedId);
   const tags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) =>

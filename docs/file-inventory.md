@@ -1,117 +1,210 @@
-# Inventário de arquivos
+# Inventário de arquivos — 15/10/2026
 
-Gerado na reorganização de 14/10/2026. Implementado/parcial significa código presente, não requisito concluído. Consulte implementation-status e CONTINUIDADE.
+Arquivos versionados e novos desta entrega; dependências, dist e segredos ignorados não fazem parte do inventário. A árvore não indica completude funcional. Módulos reservados e responsabilidades estão em [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md#4-arquitetura-atual).
 
-| Arquivo                                             | Estado               | Linhas |
-| --------------------------------------------------- | -------------------- | ------ |
-| `src/App.jsx`                                       | implementado/parcial | 62     |
-| `src/apps/about-me/AboutMe.jsx`                     | reservado            | 1      |
-| `src/apps/about-system/AboutSystem.jsx`             | reservado            | 1      |
-| `src/apps/administration/Administration.jsx`        | reservado            | 1      |
-| `src/apps/calculator/Calculator.jsx`                | reservado            | 1      |
-| `src/apps/certificates/Certificates.jsx`            | reservado            | 1      |
-| `src/apps/contact/Contact.jsx`                      | reservado            | 1      |
-| `src/apps/demo-viewer/DemoViewer.jsx`               | reservado            | 1      |
-| `src/apps/dev-insights/DevInsights.jsx`             | reservado            | 1      |
-| `src/apps/file-editor/FileEditor.jsx`               | reservado            | 1      |
-| `src/apps/file-viewer/FileViewer.jsx`               | reservado            | 1      |
-| `src/apps/files/Files.jsx`                          | reservado            | 1      |
-| `src/apps/games/Games.jsx`                          | reservado            | 1      |
-| `src/apps/notes/Notes.jsx`                          | reservado            | 1      |
-| `src/apps/projects/Projects.jsx`                    | reservado            | 1      |
-| `src/apps/resume/Resume.jsx`                        | reservado            | 1      |
-| `src/apps/settings/Settings.jsx`                    | reservado            | 1      |
-| `src/apps/terminal/Terminal.jsx`                    | reservado            | 1      |
-| `src/apps/wally-extended/WallyExtended.jsx`         | reservado            | 1      |
-| `src/assets/hero.png`                               | implementado/parcial | 53     |
-| `src/assets/react.svg`                              | implementado/parcial | 1      |
-| `src/assets/vite.svg`                               | implementado/parcial | 1      |
-| `src/core/appManager.js`                            | implementado/parcial | 122    |
-| `src/core/appRegistry.js`                           | implementado/parcial | 277    |
-| `src/core/navigationManager.js`                     | reservado            | 1      |
-| `src/core/notificationManager.js`                   | implementado/parcial | 83     |
-| `src/core/panelManager.js`                          | implementado/parcial | 4      |
-| `src/core/systemContext.js`                         | implementado/parcial | 2      |
-| `src/core/SystemProvider.jsx`                       | implementado/parcial | 104    |
-| `src/core/themeManager.js`                          | implementado/parcial | 31     |
-| `src/core/useSystem.js`                             | implementado/parcial | 7      |
-| `src/core/widgetManager.js`                         | implementado/parcial | 149    |
-| `src/features/boot/BootScreen.css`                  | implementado/parcial | 62     |
-| `src/features/boot/BootScreen.jsx`                  | implementado/parcial | 16     |
-| `src/features/calendar/CalendarPanel.css`           | implementado/parcial | 60     |
-| `src/features/calendar/CalendarPanel.jsx`           | implementado/parcial | 92     |
-| `src/features/launcher/useMenuPreferences.js`       | implementado/parcial | 41     |
-| `src/features/launcher/useWSMenu.js`                | implementado/parcial | 98     |
-| `src/features/launcher/WSMenu.css`                  | implementado/parcial | 473    |
-| `src/features/launcher/WSMenu.jsx`                  | implementado/parcial | 230    |
-| `src/features/notifications/NotificationCenter.jsx` | implementado/parcial | 106    |
-| `src/features/notifications/notifications.css`      | implementado/parcial | 402    |
-| `src/features/notifications/NotificationToast.jsx`  | implementado/parcial | 91     |
-| `src/features/notifications/NotificationToasts.jsx` | implementado/parcial | 20     |
-| `src/features/panels/PanelLayer.css`                | implementado/parcial | 28     |
-| `src/features/panels/PanelLayer.jsx`                | implementado/parcial | 7      |
-| `src/features/quick-controls/QuickControls.css`     | implementado/parcial | 116    |
-| `src/features/quick-controls/QuickControls.jsx`     | implementado/parcial | 48     |
-| `src/features/search/searchService.js`              | implementado/parcial | 7      |
-| `src/features/shortcuts/useGlobalShortcuts.js`      | implementado/parcial | 97     |
-| `src/features/wally/wallyKnowledge.js`              | reservado            | 1      |
-| `src/features/wally/WallyPanel.css`                 | implementado/parcial | 77     |
-| `src/features/wally/WallyPanel.jsx`                 | implementado/parcial | 28     |
-| `src/features/weather/useWeather.js`                | implementado/parcial | 56     |
-| `src/features/weather/WeatherPanel.css`             | implementado/parcial | 98     |
-| `src/features/weather/WeatherPanel.jsx`             | implementado/parcial | 34     |
-| `src/features/welcome/WelcomeDialog.css`            | implementado/parcial | 50     |
-| `src/features/welcome/WelcomeDialog.jsx`            | implementado/parcial | 29     |
-| `src/features/widgets/clock/ClockWidget.jsx`        | implementado/parcial | 32     |
-| `src/features/widgets/useDesktopWidgets.js`         | implementado/parcial | 112    |
-| `src/features/widgets/WidgetHost.jsx`               | implementado/parcial | 59     |
-| `src/features/widgets/widgets.css`                  | implementado/parcial | 104    |
-| `src/features/windows/AppHost.jsx`                  | implementado/parcial | 9      |
-| `src/features/windows/useWindowInteraction.js`      | implementado/parcial | 250    |
-| `src/features/windows/Window.css`                   | implementado/parcial | 330    |
-| `src/features/windows/Window.jsx`                   | implementado/parcial | 141    |
-| `src/features/windows/windowGeometry.js`            | implementado/parcial | 88     |
-| `src/features/windows/WindowLayer.jsx`              | implementado/parcial | 29     |
-| `src/main.jsx`                                      | implementado/parcial | 10     |
-| `src/services/authService.js`                       | reservado            | 1      |
-| `src/services/calendarService.js`                   | reservado            | 1      |
-| `src/services/contactService.js`                    | reservado            | 1      |
-| `src/services/githubService.js`                     | reservado            | 1      |
-| `src/services/storage/localFilesStorage.js`         | reservado            | 1      |
-| `src/services/storage/preferencesStorage.js`        | reservado            | 1      |
-| `src/services/wakatimeService.js`                   | reservado            | 1      |
-| `src/services/wallyService.js`                      | reservado            | 1      |
-| `src/services/weatherService.js`                    | implementado/parcial | 17     |
-| `src/shared/components/AppErrorBoundary.jsx`        | reservado            | 1      |
-| `src/shared/components/AppIcon.jsx`                 | implementado/parcial | 7      |
-| `src/shared/components/SystemIcon.jsx`              | implementado/parcial | 60     |
-| `src/shared/i18n/i18n.js`                           | reservado            | 1      |
-| `src/shared/i18n/locales/en.json`                   | reservado            | 1      |
-| `src/shared/i18n/locales/pt-BR.json`                | reservado            | 1      |
-| `src/shells/desktop/Desktop.css`                    | implementado/parcial | 224    |
-| `src/shells/desktop/Desktop.jsx`                    | implementado/parcial | 225    |
-| `src/shells/desktop/DesktopContextMenu.jsx`         | implementado/parcial | 44     |
-| `src/shells/desktop/desktopLayout.js`               | implementado/parcial | 87     |
-| `src/shells/desktop/DesktopShortcuts.jsx`           | implementado/parcial | 95     |
-| `src/shells/desktop/ShortcutContextMenu.jsx`        | implementado/parcial | 43     |
-| `src/shells/desktop/taskbar/Taskbar.css`            | implementado/parcial | 289    |
-| `src/shells/desktop/taskbar/Taskbar.jsx`            | implementado/parcial | 605    |
-| `src/shells/desktop/taskbar/TaskbarApps.jsx`        | implementado/parcial | 103    |
-| `src/shells/desktop/taskbar/TaskbarContextMenu.css` | implementado/parcial | 62     |
-| `src/shells/desktop/taskbar/TaskbarContextMenu.jsx` | implementado/parcial | 59     |
-| `src/shells/desktop/taskbar/TaskbarPreview.css`     | implementado/parcial | 155    |
-| `src/shells/desktop/taskbar/TaskbarPreview.jsx`     | implementado/parcial | 87     |
-| `src/shells/desktop/taskbar/useTaskbarPreviews.js`  | implementado/parcial | 73     |
-| `src/shells/desktop/taskbar/useTaskbarScroll.js`    | implementado/parcial | 52     |
-| `src/shells/desktop/useDesktopLayout.js`            | implementado/parcial | 27     |
-| `src/shells/mobile/Mobile.css`                      | reservado            | 1      |
-| `src/shells/mobile/Mobile.jsx`                      | reservado            | 1      |
-| `src/shells/mobile/MobileCatalog.jsx`               | reservado            | 1      |
-| `src/shells/mobile/MobileHome.jsx`                  | reservado            | 1      |
-| `src/shells/mobile/MobileNavigation.jsx`            | reservado            | 1      |
-| `src/styles/global.css`                             | implementado/parcial | 54     |
-| `src/styles/system.css`                             | implementado/parcial | 14     |
-| `src/styles/themes/dark.css`                        | implementado/parcial | 16     |
-| `src/styles/themes/effects.css`                     | implementado/parcial | 60     |
-| `src/styles/themes/light.css`                       | implementado/parcial | 17     |
-| `src/styles/themes/tokens.css`                      | implementado/parcial | 19     |
+```text
+.gitignore
+.prettierignore
+.prettierrc.json
+README.md
+diagnostico-codex.patch
+docs/CONTINUIDADE.md
+docs/ENTREGA-E-CONTINUIDADE-2026-10-15.md
+docs/PROGRESSO-CONCLUSAO.md
+docs/architecture.md
+docs/backend/CONFIGURACAO.md
+docs/backend/posts.sql
+docs/contracts.md
+docs/file-inventory.md
+docs/implementation-status.md
+docs/planning/WS-OS-V2-MESTRE-v0.16.0.md
+docs/roadmap.md
+docs/settings.md
+docs/validation.md
+eslint.config.js
+functions/api/posts.js
+functions/api/wakatime.js
+index.html
+package-lock.json
+package.json
+public/favicon.svg
+public/icons.svg
+qq
+src/App.jsx
+src/apps/about-me/AboutMe.jsx
+src/apps/about-system/AboutSystem.jsx
+src/apps/administration/Administration.jsx
+src/apps/calculator/Calculator.css
+src/apps/calculator/Calculator.jsx
+src/apps/calculator/calculatorEngine.js
+src/apps/certificates/Certificates.css
+src/apps/certificates/Certificates.jsx
+src/apps/contact/Contact.css
+src/apps/contact/Contact.jsx
+src/apps/demo-viewer/DemoViewer.jsx
+src/apps/demo-viewer/demoModel.js
+src/apps/dev-insights/DevInsights.jsx
+src/apps/file-editor/FileEditor.jsx
+src/apps/file-viewer/FileViewer.css
+src/apps/file-viewer/FileViewer.jsx
+src/apps/file-viewer/LocalFileViewer.jsx
+src/apps/files/Files.jsx
+src/apps/games/FlappyGame.jsx
+src/apps/games/Games.css
+src/apps/games/Games.jsx
+src/apps/games/MemoryGame.jsx
+src/apps/games/MinesGame.jsx
+src/apps/games/SnakeGame.jsx
+src/apps/games/SolitaireGame.jsx
+src/apps/games/gameModels.js
+src/apps/games/gameRecords.js
+src/apps/notes/Notes.css
+src/apps/notes/Notes.jsx
+src/apps/projects/Projects.jsx
+src/apps/projects/projectModel.js
+src/apps/resume/Resume.css
+src/apps/resume/Resume.jsx
+src/apps/settings/Settings.css
+src/apps/settings/Settings.jsx
+src/apps/settings/SettingsNavigation.jsx
+src/apps/settings/SettingsSections.jsx
+src/apps/terminal/Terminal.css
+src/apps/terminal/Terminal.jsx
+src/apps/terminal/terminalCommands.js
+src/apps/wally-extended/WallyExtended.jsx
+src/assets/hero.png
+src/assets/react.svg
+src/assets/vite.svg
+src/content/portfolioContent.js
+src/core/SystemProvider.jsx
+src/core/appCloseGuards.js
+src/core/appManager.js
+src/core/appRegistry.js
+src/core/appearanceManager.js
+src/core/effectsManager.js
+src/core/mobilePreferences.js
+src/core/navigationManager.js
+src/core/notificationManager.js
+src/core/panelManager.js
+src/core/preferencesManager.js
+src/core/systemContext.js
+src/core/taskbarPreferences.js
+src/core/themeManager.js
+src/core/useSystem.js
+src/core/wallpaperManager.js
+src/core/widgetManager.js
+src/core/widgetPreferences.js
+src/features/boot/BootScreen.css
+src/features/boot/BootScreen.jsx
+src/features/calendar/CalendarPanel.css
+src/features/calendar/CalendarPanel.jsx
+src/features/calendar/CalendarService.js
+src/features/launcher/WSMenu.css
+src/features/launcher/WSMenu.jsx
+src/features/launcher/useMenuPreferences.js
+src/features/launcher/useWSMenu.js
+src/features/notifications/NotificationCenter.jsx
+src/features/notifications/NotificationToast.jsx
+src/features/notifications/NotificationToasts.jsx
+src/features/notifications/notifications.css
+src/features/panels/PanelLayer.css
+src/features/panels/PanelLayer.jsx
+src/features/quick-controls/QuickControls.css
+src/features/quick-controls/QuickControls.jsx
+src/features/search/searchService.js
+src/features/shortcuts/useGlobalShortcuts.js
+src/features/wally/WallyPanel.css
+src/features/wally/WallyPanel.jsx
+src/features/wally/wallyKnowledge.js
+src/features/weather/WeatherPanel.css
+src/features/weather/WeatherPanel.jsx
+src/features/weather/useWeather.js
+src/features/welcome/WelcomeDialog.css
+src/features/welcome/WelcomeDialog.jsx
+src/features/widgets/WidgetHost.jsx
+src/features/widgets/clock/ClockWidget.jsx
+src/features/widgets/useDesktopWidgets.js
+src/features/widgets/widgets.css
+src/features/windows/AppHost.jsx
+src/features/windows/Window.css
+src/features/windows/Window.jsx
+src/features/windows/WindowLayer.jsx
+src/features/windows/useWindowInteraction.js
+src/features/windows/windowGeometry.js
+src/main.jsx
+src/services/authService.js
+src/services/calendarService.js
+src/services/contactService.js
+src/services/githubService.js
+src/services/notesService.js
+src/services/publicDataService.js
+src/services/storage/fileModel.js
+src/services/storage/localFilesStorage.js
+src/services/storage/preferencesStorage.js
+src/services/storage/wallpaperStorage.js
+src/services/wakatimeService.js
+src/services/wallyService.js
+src/services/weatherService.js
+src/shared/components/AppCloseDialog.css
+src/shared/components/AppCloseDialog.jsx
+src/shared/components/AppErrorBoundary.jsx
+src/shared/components/AppIcon.jsx
+src/shared/components/SystemIcon.jsx
+src/shared/hooks/useAppBack.js
+src/shared/hooks/useLocalFiles.js
+src/shared/hooks/useMenuNavigation.js
+src/shared/hooks/usePublicResource.js
+src/shared/hooks/useUnsavedChanges.js
+src/shared/i18n/i18n.js
+src/shared/i18n/locales/en.json
+src/shared/i18n/locales/pt-BR.json
+src/shared/utils/urls.js
+src/shells/desktop/Desktop.css
+src/shells/desktop/Desktop.jsx
+src/shells/desktop/DesktopContextMenu.jsx
+src/shells/desktop/DesktopShortcuts.jsx
+src/shells/desktop/ShortcutContextMenu.jsx
+src/shells/desktop/desktopLayout.js
+src/shells/desktop/desktopPreferences.js
+src/shells/desktop/taskbar/Taskbar.css
+src/shells/desktop/taskbar/Taskbar.jsx
+src/shells/desktop/taskbar/TaskbarApps.jsx
+src/shells/desktop/taskbar/TaskbarContextMenu.css
+src/shells/desktop/taskbar/TaskbarContextMenu.jsx
+src/shells/desktop/taskbar/TaskbarPreview.css
+src/shells/desktop/taskbar/TaskbarPreview.jsx
+src/shells/desktop/taskbar/useTaskbarPreviews.js
+src/shells/desktop/taskbar/useTaskbarScroll.js
+src/shells/desktop/useDesktopLayout.js
+src/shells/desktop/useDesktopOrganization.js
+src/shells/mobile/Mobile.css
+src/shells/mobile/Mobile.jsx
+src/shells/mobile/MobileCatalog.jsx
+src/shells/mobile/MobileHome.jsx
+src/shells/mobile/MobileNavigation.jsx
+src/styles/apps.css
+src/styles/global.css
+src/styles/system.css
+src/styles/themes/customization.css
+src/styles/themes/dark.css
+src/styles/themes/effects.css
+src/styles/themes/foundation.css
+src/styles/themes/glass.css
+src/styles/themes/light.css
+src/styles/themes/tokens.css
+tests/core/.gitkeep
+tests/core/accessibility.test.cjs
+tests/core/app-contracts.test.cjs
+tests/core/desktop.test.cjs
+tests/core/files.test.cjs
+tests/core/games.test.cjs
+tests/core/helpers.test.cjs
+tests/core/notes.test.cjs
+tests/core/portfolio.test.cjs
+tests/core/refactor.test.cjs
+tests/core/settings.test.cjs
+tests/core/taskbar.test.cjs
+tests/core/utilities.test.cjs
+tests/integration/.gitkeep
+vite.config.js
+```

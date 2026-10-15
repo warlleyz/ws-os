@@ -6,21 +6,21 @@ Referência: DEC-411–449. O que está marcado como futuro não é implementaç
 
 getRegisteredApps retorna cópia do array com os mesmos objetos; getAppDefinition(appId) retorna definição ou null. Campos atuais: id, name, icon, category, menuCategory, desktopShortcut, implemented, loadComponent (quando implementado), allowMultipleInstances, pauseWhenMinimized, public e showInMenu.
 
-Há 12 Desktop e 6 Sistema. category é classificação arquitetural; menuCategory não deve virar categoria visual do menu. Apenas Sobre o Sistema possui implemented:true e está integrado ao AppHost, ainda com conteúdo parcial. Os outros 17 aplicativos permanecem com implemented:false. Essa flag indica que existe um componente funcional conectado, não que o aplicativo está 100% concluído.
+Há 12 Desktop e 6 Sistema. category é classificação arquitetural; menuCategory não deve virar categoria visual do menu. Em 15/10/2026, 17 componentes possuem implemented:true e entrada lazy explícita. Administração permanece implemented:false e public:false. O escopo e as pendências de cada app estão na entrega consolidada. Essa flag indica que existe um componente funcional conectado, não que o aplicativo está 100% concluído.
 
-A entrada lazy é explícita no Registry: loadComponent retorna a promessa do módulo com export default. Apenas Sobre o Sistema possui essa entrada. AppHost não descobre componentes a partir de arquivos vazios. Futuro: elegibilidade por shell, capacidades e regras específicas de acesso e parâmetros, preservando os IDs existentes.
+A entrada lazy é explícita no Registry: loadComponent retorna a promessa do módulo com export default. Cada app implementado possui sua entrada. AppHost não descobre componentes a partir de arquivos vazios. Futuro: elegibilidade por shell, capacidades e regras específicas de acesso e parâmetros, preservando os IDs existentes.
 
 ## Instâncias
 
 Estado atual: `{ instances, activeInstanceId, focusHistory }`. Instância: `{ id, appId, minimized, executionState, origin, params }`. ID da instância usa crypto.randomUUID; não equivale ao appId ou a ID de recurso externo.
 
-| Operação    | Entrada           | Resultado atual                                    |
-| ----------- | ----------------- | -------------------------------------------------- |
-| openApp | state, appId, options? | Abre ou restaura uma instância pública; aceita origin e params opcionais |
-| activateApp | state, instanceId | Ativa instância visível e atualiza histórico       |
-| minimizeApp | state, instanceId | Oculta e seleciona foco disponível                 |
-| restoreApp  | state, instanceId | Visível, running e ativa                           |
-| closeApp    | state, instanceId | Remove e ajusta foco                               |
+| Operação    | Entrada                | Resultado atual                                                          |
+| ----------- | ---------------------- | ------------------------------------------------------------------------ |
+| openApp     | state, appId, options? | Abre ou restaura uma instância pública; aceita origin e params opcionais |
+| activateApp | state, instanceId      | Ativa instância visível e atualiza histórico                             |
+| minimizeApp | state, instanceId      | Oculta e seleciona foco disponível                                       |
+| restoreApp  | state, instanceId      | Visível, running e ativa                                                 |
+| closeApp    | state, instanceId      | Remove e ajusta foco                                                     |
 
 Entradas inexistentes devolvem estado sem alteração. openApp aceita um terceiro argumento opcional, options, com origin (string) e params (objeto). A origem padrão é system; options e params, quando fornecidos, precisam ser objetos simples (incluindo protótipo nulo). origin, quando fornecida, precisa ser string não vazia. Entradas inválidas são rejeitadas sem alterar a sessão; não são mais silenciosamente convertidas em parâmetros vazios. Os parâmetros são copiados superficialmente e permanecem na instância durante a sessão.
 
@@ -29,6 +29,7 @@ Aplicativos de instância única restauram a instância existente sem atualizar 
 ### Solicitação com resultado
 
 requestAppOpen(state, appId, options?) retorna { state, result }:
+
 - Sucesso: result = { ok: true, instanceId, status: 'opened' | 'restored' }.
 - Falha: result = { ok: false, error: { code, message } }; state é a mesma referência recebida.
 - Códigos atuais: APP_NOT_FOUND, APP_ACCESS_DENIED e INVALID_OPEN_OPTIONS.
@@ -71,7 +72,7 @@ Sobre o Sistema é o primeiro componente integrado. Tentar novamente cria um nov
 
 O boundary cobre erros de renderização e rejeição do carregamento lazy. Erros de handlers, timers e operações assíncronas internas devem ser tratados pelo app/serviço. A tentativa não garante recuperação de falhas persistentes de rede nem limpa o cache de módulos do navegador.
 
-Lifecycle atual: minimizar mantém AppHost montado e transmite instance.executionState; apps que admitem pausa precisam consumir esse campo para suspender trabalho e retomá-lo. Não há suspensão mágica de qualquer efeito React. Fechar remove a instância e desmonta o conteúdo, executando os cleanups dos efeitos. Cada app deve cancelar seus próprios recursos. Reabrir cria novo estado local; reload não restaura janelas. Apps atuais não possuem documentos editáveis com alterações pendentes; a confirmação de descarte será exigida quando esses fluxos forem implementados.
+Lifecycle atual: minimizar mantém AppHost montado e transmite instance.executionState; apps que admitem pausa precisam consumir esse campo para suspender trabalho e retomá-lo. Não há suspensão mágica de qualquer efeito React. Fechar remove a instância e desmonta o conteúdo, executando os cleanups dos efeitos. Cada app deve cancelar seus próprios recursos. Reabrir cria novo estado local; reload não restaura janelas. Editor e Contato agora registram guards de alterações pendentes. run(closeApp, instanceId) retorna false enquanto a confirmação está pendente; cancelar mantém a instância, confirmar aplica o fechamento. O diálogo central contém foco e fundo inert. Reload usa beforeunload; a aplicação não persiste o rascunho após reload.
 
 ## Notificações
 
@@ -81,14 +82,14 @@ Abertura por notificação verifica app público e procura instância existente.
 
 ## Persistência
 
-| Chave                 | Conteúdo                      |
-| --------------------- | ----------------------------- |
-| ws-os:theme           | dark/light                    |
-| ws-os:welcome-seen    | string true após apresentação |
-| ws-os:desktop-widgets | Widget serializado            |
-| ws-os:desktop-shortcut-order | default/name |
-| ws-os:desktop-shortcut-positions | Mapa appId → {column,row} |
-| ws-os:menu-favorites  | IDs favoritos; máximo atual 6 |
+| Chave                            | Conteúdo                      |
+| -------------------------------- | ----------------------------- |
+| ws-os:theme                      | dark/light                    |
+| ws-os:welcome-seen               | string true após apresentação |
+| ws-os:desktop-widgets            | Widget serializado            |
+| ws-os:desktop-shortcut-order     | default/name                  |
+| ws-os:desktop-shortcut-positions | Mapa appId → {column,row}     |
+| ws-os:menu-favorites             | IDs favoritos; máximo atual 6 |
 
 Widget ativo clock-default: visible, position `{column,row}`, size `{columns,rows}`. UI oferece 2×2, 3×2, 3×3. Validação de formato usa fallback. Falhas de leitura/salvamento são avisadas; preferências inválidas não são sobrescritas automaticamente na inicialização. Não apagar chaves ou converter formatos sem migração. IndexedDB de arquivos ainda não existe.
 
@@ -115,6 +116,7 @@ A base de contratos e isolamento foi integrada e validada
 com 15 testes automatizados e verificações manuais.
 
 Implementado:
+
 - Registry com flags correspondentes aos componentes existentes.
 - Bloqueio de abertura pública de aplicativos restritos.
 - Carregamento lazy de aplicativos implementados.
@@ -123,6 +125,7 @@ Implementado:
 - Lifecycle básico de instâncias e histórico de foco.
 
 Limitações preservadas:
+
 - Sem resultado ou erro tipado na abertura.
 - Sem validação específica de parâmetros por aplicativo.
 - Pausa seletiva representada no estado, sem suspensão
@@ -143,7 +146,6 @@ desnecessariamente.
 A primeira passagem acima descreve o estado anterior. Nesta revisão foram acrescentados resultado tipado no Core, validação estrutural de entrada, feedback de rejeição, entrada lazy explícita no Registry e recuperação de carregamento/renderização por app. Os contratos atuais estão nas seções anteriores.
 
 Permanecem para as etapas dos aplicativos: schemas de domínio, autenticação/autorização backend, confirmação de descarte de documentos, cancelamento de serviços específicos e API de confirmação de abertura na sessão React quando houver consumidor real. Não foram implementados apps novos ou habilitada Administração.
-
 
 ## R3 — organização do Desktop, widgets e armazenamento
 
@@ -182,7 +184,6 @@ e informa o usuário, sem substituir automaticamente o valor original. Escrita p
 falhar por quota/bloqueio: o uso continua na sessão com aviso. O salvamento continua
 em chaves separadas, sem transação entre elas ou migração de formato. Tema, favoritos
 e demais chaves existentes não são removidos por esta etapa.
-
 
 ## R4 — idioma, efeitos e acessibilidade da interface
 

@@ -1,3 +1,5 @@
+> **Atualização de 15/10/2026:** consulte primeiro [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md) e [Estado atual](implementation-status.md). O texto abaixo preserva descrições/evidências de etapas anteriores; afirmações sobre apps reservados, Mobile ausente ou apenas um app implementado foram superadas pelos commits atuais.
+
 # Arquitetura de implementação
 
 Data: 14/10/2026. Referência: mestre v0.16.0, especialmente B04, B05 e B11. Este documento descreve a reorganização, sem substituir decisões de produto.

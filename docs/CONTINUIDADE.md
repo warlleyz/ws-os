@@ -1,3 +1,5 @@
+> **Atualização de 15/10/2026:** consulte primeiro [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md) e [Estado atual](implementation-status.md). O texto abaixo preserva descrições/evidências de etapas anteriores; afirmações sobre apps reservados, Mobile ausente ou apenas um app implementado foram superadas pelos commits atuais.
+
 # WS OS — Documento de continuidade e recuperação
 
 **Data:** 14/10/2026. **Planejamento de referência:** WS-OS-V2-MESTRE-REPLANEJAMENTO v0.16.0, consolidado em 13/10/2026. **Repositório:** https://github.com/warlleyz/ws-os. **Branch de trabalho:** main.

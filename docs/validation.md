@@ -1,3 +1,5 @@
+> **Atualização de 15/10/2026:** consulte primeiro [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md) e [Estado atual](implementation-status.md). O texto abaixo preserva descrições/evidências de etapas anteriores; afirmações sobre apps reservados, Mobile ausente ou apenas um app implementado foram superadas pelos commits atuais.
+
 # Verificação da reorganização
 
 Data: 14/10/2026. Execução sobre a cópia organizada e repetição no destino antes do commit.
@@ -22,6 +24,7 @@ e09b8dc. A escolha de instâncias por histórico e o clique repetido para minimi
 já existiam e foram preservados.
 
 Alterações desta revisão:
+
 - ArrowUp/ArrowDown no grupo abre as prévias e leva o foco para seus controles.
 - Escape dentro das prévias fecha a seção e devolve o foco ao grupo de origem.
 - O fechamento atrasado respeita foco do teclado e hover.
@@ -32,6 +35,7 @@ Alterações desta revisão:
 - Seis testes novos cobrem foco, timers, cleanup e seleção da última instância usada.
 
 Verificações executadas no navegador local, com mouse e teclado:
+
 - Duas instâncias de Projetos e Sobre Mim ativo; grupo retorna à última instância
   usada mesmo quando ela foi criada antes da outra.
 - Clique repetido minimiza; com uma ou todas minimizadas, grupo/prévias restauram.
@@ -53,7 +57,6 @@ locais e fora deste commit; seu diagnóstico permanece parcial para o travamento
 bordas do monitor. O stash WIP R3.3 e o arquivo local diagnostico-codex.patch foram
 preservados. R2 só será revisada após autorização para avançar.
 
-
 ## R2 — revisão complementar de contratos e recuperação — 14/10/2026
 
 - Mantidos os 18 apps, 12 atalhos e apenas Sobre o Sistema implementado.
@@ -69,6 +72,7 @@ preservados. R2 só será revisada após autorização para avançar.
   única/múltipla, close/reopen, sessão inicial e pausa seletiva.
 
 Navegador, diagnóstico isolado (instrumentação fora do produto):
+
 - Loader rejeitado uma vez: fallback isolado, outro app permanece interativo;
   Tentar novamente invoca o loader outra vez e recupera a instância.
 - Erro de renderização: fallback e recuperação sem reiniciar os demais apps.
@@ -81,6 +85,7 @@ Navegador, diagnóstico isolado (instrumentação fora do produto):
   válida seguinte: uma instância e aviso de abertura.
 
 Preview real sem instrumentação:
+
 - Sobre o Sistema carrega conteúdo real; minimizar/restaurar preserva instanceId;
   fechar/reabrir cria instanceId diferente; reload retorna ao Desktop sem janelas.
 - Console sem erros/warnings nesses fluxos.
@@ -97,7 +102,6 @@ não garante corrigir erro persistente de rede ou invalidar cache nativo de mód
 
 Nenhuma alteração em localStorage, CSS, dependências ou na R3.3. Correções locais
 anteriores de performance preservadas e excluídas deste commit. Sem push.
-
 
 ## R3 — grade, organização e persistência — 14/10/2026
 
@@ -140,7 +144,6 @@ Instrumentação ficou fora do produto. Alterações locais anteriores de perfor
 foram preservadas e excluídas do commit R3. Não houve instalação, migração destrutiva,
 commit do stash original ou push. Próxima etapa, mediante autorização: R4.
 
-
 ## R4 — fundação visual, acessibilidade e idioma — 14/10/2026
 
 Implementado: pt-BR/en persistente na interface atual, datas/pesquisa/ordenação
@@ -160,6 +163,7 @@ isolado: lint/build e 51 testes. As duas verificações extras locais pertencem 
 diagnóstico de performance anterior e ficam fora do commit R4.
 
 Navegador:
+
 - Idioma trocado para inglês com Sobre o Sistema aberto: mesmo instanceId preservado;
   rótulos, conteúdo estático, menus, atalhos e datas traduzidos. Pesquisa Projects
   encontra o app pelo nome apresentado. Volta para pt-BR sem recriar a sessão.
@@ -188,43 +192,52 @@ correções locais de performance mantidas fora do commit. Sem push. Próxima et
 mediante autorização: R5, com gates manuais ainda pendentes conforme descrito acima.
 
 ## R5.1 — Revisão das correções locais de performance
+
 Data: 2026-10-14
 
 ### Escopo
+
 - Revisão das oito alterações locais de performance.
 - Preservação dos contratos e comportamentos existentes.
 - Sem alterações nas chaves de localStorage ou dependências.
 - Sem reaplicação de patches ou do stash R3.3.
 
 ### Validações
+
 - git diff --check: aprovado.
 - npm.cmd run lint: aprovado.
 - npm.cmd run build: aprovado (Vite 8.3.4).
 - node --test tests/core/*.test.cjs: 53/53 aprovados.
 
 ### Limitações
+
 - O travamento no resize nativo permanece aberto.
 - Testes físicos de mouse, touch e zoom não executados.
 - WCAG AA não comprovada.
 - Não há comprovação de ganho de performance em preview.
 
 ### Resultado
+
 Correções locais revisadas e aprovadas nos gates estáticos.
 Integração condicionada a commit isolado.
 
 ### Próximo passo
+
 R5.2 — Ciclo de vida de janelas, Desktop e recursos.
 
 ## R5.2 — Ciclo de vida de janelas e Desktop
+
 Data: 14/10/2026
 
 ### Alterações
+
 - Cleanup explícito de pointer capture na desmontagem de janelas.
 - Preservados os listeners, observers e timers existentes.
 - Nenhuma alteração em geometria, contratos ou persistência.
 - Nenhuma reorganização de diretórios ou dependência nova.
 
 ### Validações
+
 - npm.cmd run lint: aprovado.
 - npm.cmd run build: aprovado.
 - node --test tests/core/*.test.cjs: aprovado.
@@ -233,16 +246,19 @@ Data: 14/10/2026
 - Dez ciclos de abertura e fechamento: aprovados manualmente, sem problemas relatados.
 
 ### Limitações
+
 - Testes manuais realizados pelo desenvolvedor.
 - Ausência de medição instrumental de memória e listeners.
 - Resize nativo junto às bordas físicas ainda não validado.
 - WCAG AA não comprovada.
 
 ### Resultado
+
 Correção de cleanup integrada ao escopo da R5.2.
 Testes automatizados e manuais aprovados.
 
 ### Próximo passo
+
 R5.3 — Diagnóstico e validação do resize nativo.
 
 ## Configurações — 15/10/2026
