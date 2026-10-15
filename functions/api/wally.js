@@ -45,17 +45,7 @@ function validMessage(message) {
 export async function onRequestPost(context) {
     const { request, env } = context;
 
-    // Fail closed: a IA só será liberada depois
-    // de configurar os controles contra abuso.
-    if (env.WALLY_AI_ENABLED !== 'true') {
-        return json(
-            {
-                error: 'AI_DISABLED',
-                message: 'O modo remoto está indisponível.',
-            },
-            503,
-        );
-    }
+    
 
     if (!env.GEMINI_API_KEY) {
         return json(
@@ -182,6 +172,18 @@ export async function onRequestPost(context) {
                     : 'A proteção de consultas está indisponível.',
             },
             limited ? 429 : 503,
+        );
+    }
+
+    // Fail closed: a IA só será liberada depois
+    // de configurar os controles contra abuso.
+    if (env.WALLY_AI_ENABLED !== 'true') {
+        return json(
+            {
+                error: 'AI_DISABLED',
+                message: 'O modo remoto está indisponível.',
+            },
+            503,
         );
     }
 
