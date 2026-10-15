@@ -7,7 +7,12 @@ import {
   loadDesktopPreferences,
   saveDesktopPreferences,
 } from './desktopPreferences';
-import { COLUMN_STEP, ROW_STEP, getShortcutsInArea, moveDesktopShortcuts } from './desktopLayout';
+import {
+  getCellColumn,
+  getCellRow,
+  getShortcutsInArea,
+  moveDesktopShortcuts,
+} from './desktopLayout';
 
 export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
   const locale = useLocale();
@@ -181,8 +186,12 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     }
     if (!drag.moved && Math.hypot(dx, dy) < 6) return;
     drag.moved = true;
-    const column = Math.round((drag.initialPosition.left + dx) / COLUMN_STEP);
-    const row = Math.round((drag.initialPosition.top + dy) / ROW_STEP);
+    const column = getCellColumn(
+      drag.initialPosition.left + dx,
+      drag.layout,
+    );
+
+    const row = getCellRow(drag.initialPosition.top + dy);
     drag.candidate = moveDesktopShortcuts(
       shortcuts,
       drag.layout,
@@ -242,8 +251,8 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       const position = layout.shortcuts[index];
       const [dx, dy] = directions[event.key];
       const ids = selectedIds.includes(app.id) ? selectedIds : [app.id];
-      let column = position.left / COLUMN_STEP + dx;
-      let row = position.top / ROW_STEP + dy;
+      let column = getCellColumn(position.left, layout) + dx;
+      let row = getCellRow(position.top) + dy;
       let candidate = null;
       while (column >= 0 && row >= 0 && column < layout.columns && row < layout.rows) {
         candidate = moveDesktopShortcuts(shortcuts, layout, ids, app.id, column, row);

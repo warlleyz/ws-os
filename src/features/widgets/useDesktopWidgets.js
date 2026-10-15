@@ -4,7 +4,13 @@ import {
   saveWidgetPreferences,
   registerWidgetValidator,
 } from '../../core/widgetPreferences';
-import { COLUMN_STEP, ROW_STEP, getDesktopLayout } from '../../shells/desktop/desktopLayout';
+import {
+  getDesktopLayout,
+  getCellLeft,
+  getCellTop,
+  getCellColumn,
+  getCellRow,
+} from '../../shells/desktop/desktopLayout';
 import { useCallback, useEffect, useRef } from 'react';
 import { useSystem } from '../../core/useSystem';
 import { setWidgetVisibility, setWidgetPosition, setWidgetSize } from '../../core/widgetManager';
@@ -110,8 +116,8 @@ export default function useDesktopWidgets({ shortcuts, gridSize, shortcutPositio
     const layout = getCandidateLayout(candidate);
     if (
       !layout.widget ||
-      layout.widget.left !== column * COLUMN_STEP ||
-      layout.widget.top !== row * ROW_STEP
+      Math.abs(layout.widget.left - getCellLeft(column, layout)) > 0.01 ||
+      layout.widget.top !== getCellTop(row)
     ) {
       blocked();
       return;
@@ -154,13 +160,13 @@ export default function useDesktopWidgets({ shortcuts, gridSize, shortcutPositio
     const dx = event.clientX - drag.x;
     const dy = event.clientY - drag.y;
     drag.element.style.translate = `${dx}px ${dy}px`;
-    const column = Math.round((drag.left + dx) / COLUMN_STEP);
-    const row = Math.round((drag.top + dy) / ROW_STEP);
+    const column = getCellColumn(drag.left + dx, desktopLayout);
+    const row = getCellRow(drag.top + dy);
     const layout = getCandidateLayout({ ...clockWidget, position: { column, row } });
     const valid = Boolean(
       layout.widget &&
-      layout.widget.left === column * COLUMN_STEP &&
-      layout.widget.top === row * ROW_STEP,
+      Math.abs(layout.widget.left - getCellLeft(column, layout)) <= 0.01 &&
+      layout.widget.top === getCellTop(row)
     );
     drag.element.setAttribute('data-drop-valid', String(valid));
   }
@@ -169,8 +175,11 @@ export default function useDesktopWidgets({ shortcuts, gridSize, shortcutPositio
     const drag = cancelWidgetDrag();
     if (event.type !== 'pointerup') return;
     placeWidget(
-      Math.round((drag.left + event.clientX - drag.x) / COLUMN_STEP),
-      Math.round((drag.top + event.clientY - drag.y) / ROW_STEP),
+      getCellColumn(
+        drag.left + event.clientX - drag.x,
+        desktopLayout,
+      ),
+      getCellRow(drag.top + event.clientY - drag.y),
     );
   }
   function handleWidgetKeyDown(event) {
@@ -188,8 +197,8 @@ export default function useDesktopWidgets({ shortcuts, gridSize, shortcutPositio
     event.preventDefault();
     const [dx, dy] = directions[event.key];
     placeWidget(
-      desktopLayout.widget.left / COLUMN_STEP + dx,
-      desktopLayout.widget.top / ROW_STEP + dy,
+      getCellColumn(desktopLayout.widget.left, desktopLayout) + dx,
+      getCellRow(desktopLayout.widget.top) + dy,
     );
   }
   return {

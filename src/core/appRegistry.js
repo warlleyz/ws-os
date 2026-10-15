@@ -10,7 +10,7 @@ import {
   FolderOpen,
   Gamepad2,
   Info,
-  Lightbulb,
+  ChartNoAxesCombined,
   NotebookPen,
   Settings,
   Shield,
@@ -61,7 +61,7 @@ const appDefinitions = [
   {
     id: 'dev-insights',
     name: 'Dev Insights',
-    icon: Lightbulb,
+    icon: ChartNoAxesCombined,
     category: 'desktop',
     menuCategory: 'portfolio',
     desktopShortcut: true,

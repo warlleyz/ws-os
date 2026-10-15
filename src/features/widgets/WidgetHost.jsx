@@ -1,6 +1,8 @@
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
-import { COLUMN_STEP } from '../../shells/desktop/desktopLayout';
-import { ROW_STEP } from '../../shells/desktop/desktopLayout';
+import {
+  ROW_STEP,
+  getWidgetWidth,
+} from '../../shells/desktop/desktopLayout';
 import ClockWidget from './clock/ClockWidget';
 
 export default function WidgetHost({
@@ -23,7 +25,7 @@ export default function WidgetHost({
         position: 'absolute',
         left: desktopLayout.widget.left,
         top: desktopLayout.widget.top,
-        width: widget.size.columns * COLUMN_STEP,
+        width: getWidgetWidth(widget.size.columns, desktopLayout),
         height: widget.size.rows * ROW_STEP,
       }}
     >

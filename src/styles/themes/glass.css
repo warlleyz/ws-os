@@ -82,13 +82,15 @@
   }
 }
 
-/* Rótulos precisam de contraste também sobre wallpapers pessoais claros/escuros. */
+/* Rótulos sem fundo, com contraste sobre o wallpaper. */
 .desktop__shortcut-label {
-  padding: 2px 4px;
-  border-radius: 5px;
+  padding: 0;
+  border-radius: 0;
   color: #ffffff;
-  background: rgb(17 25 37 / 92%);
-  text-shadow: none;
+  background: transparent;
+  text-shadow:
+    0 1px 3px rgb(0 0 0 / 90%),
+    0 2px 6px rgb(0 0 0 / 60%);
 }
 .desktop__shortcut:focus-visible {
   background: rgb(17 25 37 / 92%);
