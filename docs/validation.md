@@ -52,3 +52,48 @@ Escopo do checkpoint: somente R1. As alterações de performance anteriores cont
 locais e fora deste commit; seu diagnóstico permanece parcial para o travamento nas
 bordas do monitor. O stash WIP R3.3 e o arquivo local diagnostico-codex.patch foram
 preservados. R2 só será revisada após autorização para avançar.
+
+
+## R2 — revisão complementar de contratos e recuperação — 14/10/2026
+
+- Mantidos os 18 apps, 12 atalhos e apenas Sobre o Sistema implementado.
+- Entrada lazy explícita no Registry; arquivos vazios de outros apps não são
+  mais descobertos como entradas pelo AppHost.
+- requestAppOpen retorna state e result com instanceId/status ou erro tipado.
+  openApp continua retornando estado para os consumidores existentes.
+- Validação estrutural rejeita options/params inválidos e origin vazia sem mudar
+  a sessão. SystemProvider informa falha sem notificação falsa de sucesso.
+- Recuperação cria novo lazy no clique em Tentar novamente e atualiza o cache para
+  novas aberturas. Renderizações normais preservam identidade e estado do app.
+- Sete testes novos de contratos: sucesso/ID, erros, entradas inválidas, instância
+  única/múltipla, close/reopen, sessão inicial e pausa seletiva.
+
+Navegador, diagnóstico isolado (instrumentação fora do produto):
+- Loader rejeitado uma vez: fallback isolado, outro app permanece interativo;
+  Tentar novamente invoca o loader outra vez e recupera a instância.
+- Erro de renderização: fallback e recuperação sem reiniciar os demais apps.
+- Após recuperar, fechar/reabrir usa o componente recuperado e cria estado novo.
+- Componente de teste consumidor de executionState: minimizar preserva contador;
+  activeTimers passa de 1 para 0 na pausa; restaurar preserva o estado; fechar
+  executa cleanup e deixa activeTimers em 0. Isso valida o contrato com um consumidor
+  de teste, não afirma que todo app futuro já possui cleanup ou pausa implementados.
+- Entrada inválida pelo SystemProvider: zero instâncias e aviso de erro; solicitação
+  válida seguinte: uma instância e aviso de abertura.
+
+Preview real sem instrumentação:
+- Sobre o Sistema carrega conteúdo real; minimizar/restaurar preserva instanceId;
+  fechar/reabrir cria instanceId diferente; reload retorna ao Desktop sem janelas.
+- Console sem erros/warnings nesses fluxos.
+
+Checks: lint/build e 36 testes passaram na árvore local. Cópia exata do conteúdo
+preparado para o commit isolado: lint/build e 34 testes. Os dois testes adicionais
+da árvore local pertencem à correção de performance anterior, fora do commit R2.
+
+Limites: validação de dados de domínio, API de confirmação de abertura na sessão
+React, backend/autorização, cancelamento de serviços e confirmação de descarte de
+documentos serão integrados quando esses consumidores existirem. ErrorBoundary não
+captura automaticamente erros de handlers e tarefas assíncronas internas. Retry
+não garante corrigir erro persistente de rede ou invalidar cache nativo de módulos.
+
+Nenhuma alteração em localStorage, CSS, dependências ou na R3.3. Correções locais
+anteriores de performance preservadas e excluídas deste commit. Sem push.

@@ -4,11 +4,11 @@ Referência: DEC-411–449. O que está marcado como futuro não é implementaç
 
 ## Registry
 
-getRegisteredApps retorna cópia do array com os mesmos objetos; getAppDefinition(appId) retorna definição ou null. Campos atuais: id, name, icon, category, menuCategory, desktopShortcut, implemented, allowMultipleInstances, pauseWhenMinimized, public e showInMenu.
+getRegisteredApps retorna cópia do array com os mesmos objetos; getAppDefinition(appId) retorna definição ou null. Campos atuais: id, name, icon, category, menuCategory, desktopShortcut, implemented, loadComponent (quando implementado), allowMultipleInstances, pauseWhenMinimized, public e showInMenu.
 
 Há 12 Desktop e 6 Sistema. category é classificação arquitetural; menuCategory não deve virar categoria visual do menu. Apenas Sobre o Sistema possui implemented:true e está integrado ao AppHost, ainda com conteúdo parcial. Os outros 17 aplicativos permanecem com implemented:false. Essa flag indica que existe um componente funcional conectado, não que o aplicativo está 100% concluído.
 
-Futuro: entrada lazy, elegibilidade por shell, capacidades, parâmetros e política de acesso, preservando os IDs existentes.
+A entrada lazy é explícita no Registry: loadComponent retorna a promessa do módulo com export default. Apenas Sobre o Sistema possui essa entrada. AppHost não descobre componentes a partir de arquivos vazios. Futuro: elegibilidade por shell, capacidades e regras específicas de acesso e parâmetros, preservando os IDs existentes.
 
 ## Instâncias
 
@@ -22,19 +22,40 @@ Estado atual: `{ instances, activeInstanceId, focusHistory }`. Instância: `{ id
 | restoreApp  | state, instanceId | Visível, running e ativa                           |
 | closeApp    | state, instanceId | Remove e ajusta foco                               |
 
-Entradas inexistentes geralmente devolvem estado sem alteração. openApp aceita um terceiro argumento opcional, options, com origin (string) e params (objeto). A origem padrão é system; parâmetros inválidos recebem objeto vazio. Os parâmetros são copiados superficialmente e permanecem na instância durante a sessão.
+Entradas inexistentes devolvem estado sem alteração. openApp aceita um terceiro argumento opcional, options, com origin (string) e params (objeto). A origem padrão é system; options e params, quando fornecidos, precisam ser objetos simples (incluindo protótipo nulo). origin, quando fornecida, precisa ser string não vazia. Entradas inválidas são rejeitadas sem alterar a sessão; não são mais silenciosamente convertidas em parâmetros vazios. Os parâmetros são copiados superficialmente e permanecem na instância durante a sessão.
 
-Aplicativos de instância única restauram a instância existente sem atualizar seus parâmetros. O Core bloqueia aplicativos não públicos, incluindo Administração. A API ainda não retorna erros tipados nem valida parâmetros específicos de cada aplicativo. origin e params não representam autorização. Hoje não há operações administrativas reais. Corrigir antes de conectar dados protegidos.
+Aplicativos de instância única restauram a instância existente sem atualizar seus parâmetros. O Core bloqueia aplicativos não públicos, incluindo Administração. openApp mantém o retorno de estado para compatibilidade. requestAppOpen fornece o resultado explícito descrito abaixo. A validação dos campos de domínio permanece específica de cada aplicativo futuro. origin e params não representam autorização. Hoje não há operações administrativas reais. Corrigir antes de conectar dados protegidos.
+
+### Solicitação com resultado
+
+requestAppOpen(state, appId, options?) retorna { state, result }:
+- Sucesso: result = { ok: true, instanceId, status: 'opened' | 'restored' }.
+- Falha: result = { ok: false, error: { code, message } }; state é a mesma referência recebida.
+- Códigos atuais: APP_NOT_FOUND, APP_ACCESS_DENIED e INVALID_OPEN_OPTIONS.
+- validateAppOpen(appId, options?) compartilha a validação com o SystemProvider, antes de avisar que um app foi aberto.
+
+Esse é o contrato da operação de estado do Core, não uma promessa de retorno síncrono de atualizações React. run continua sem resultado de abertura; consumidores que precisem de confirmação de uma ação de UI deverão ter uma API de sessão apropriada. Não executar notificações ou efeitos dentro de um updater de estado React para obter esse retorno.
+
+Exemplo no Core:
+
+```js
+const { state: nextState, result } = requestAppOpen(state, 'projects', {
+  origin: 'app',
+  params: { projectId: 'project-01' },
+});
+```
+
+Instância única conserva origin e params originais ao ser restaurada. Nova instância recebe cópia superficial de params. Isso não representa validação de um projectId real, autorização ou persistência de dados.
 
 ## Sessão
 
 useSystem exige SystemProvider acima. Superfície: appState, notificationState, visibleToasts, run, minimizeAllApps, handleNotificationAction, dismissToast e handleNotificationOpen.
 
-run(operation,id) aplica a função de estado. Para openApp também produz o aviso de abertura existente, inclusive ao restaurar app único. Não oferece transação, autorização ou isolamento de erro. minimizeAllApps preserva a redução de minimização usada antes pelo Desktop; não é desligamento/reinício completo.
+run(operation,id,options?) aplica a função de estado. Para openApp primeiro valida a solicitação: falhas geram aviso de erro sem criar instância ou aviso falso de sucesso. Abertura válida produz o aviso existente, inclusive ao restaurar app único. Não oferece transação, autorização ou isolamento de erro. minimizeAllApps preserva a redução de minimização usada antes pelo Desktop; não é desligamento/reinício completo.
 
 ## Painéis
 
-resolvePanel(value,current,panel) recebe booleano ou função. Abrir substitui o ativo; fechar painel diferente preserva o atual. Por isso, uma rotina que tenta fechar tudo por setters individuais pode omitir calendário. O clique externo já corrigido foi preservado; outras rotinas continuam pendentes.
+resolvePanel(value,current,panel) recebe booleano ou função. Abrir substitui o ativo; fechar painel diferente preserva o atual. Taskbar usa o painel ativo para garantir exclusividade, incluindo calendário. Clique externo, Escape, abertura de outro painel/prévia e mudança de foco dos apps fecham os elementos transitórios. A revisão complementar da R1 adicionou prévias por teclado e limpeza dos timers.
 
 PanelLayer recebe referência/filhos e não administra autenticação ou navegação.
 
@@ -44,9 +65,13 @@ Window recebe instância, app, ativo, zIndex, offset e callbacks de ativar/minim
 
 useWindowInteraction retorna refs, modo, nome e handlers existentes. windowGeometry preserva mínimos 300×220 quando cabem, margem 8 e distância de snap 24 px. São parâmetros herdados, não requisitos imutáveis.
 
-AppHost recebe nome e instância, consulta o Registry e apresenta placeholder para aplicativos não implementados. Aplicativos habilitados são carregados sob demanda usando React.lazy e Suspense, com AppErrorBoundary por instância.
+AppHost recebe nome e instância, consulta o Registry e apresenta placeholder para aplicativos não implementados. Aplicativos habilitados são carregados sob demanda pela entrada loadComponent do Registry, usando React.lazy e Suspense, com AppErrorBoundary por instância. AppHost também recusa definições inexistentes ou não públicas.
 
-Sobre o Sistema é o primeiro componente integrado. Permanecem pendentes a validação de parâmetros por aplicativo, os testes de falha real, a recuperação de erros e o lifecycle completo.
+Sobre o Sistema é o primeiro componente integrado. Tentar novamente cria um novo lazy somente na ação explícita de recuperação, reinicia o boundary daquela instância e atualiza a entrada usada em novas aberturas. Renderizações normais mantêm a identidade do componente e seu estado. Recuperação reinicia o estado local do app que falhou; as outras instâncias permanecem independentes.
+
+O boundary cobre erros de renderização e rejeição do carregamento lazy. Erros de handlers, timers e operações assíncronas internas devem ser tratados pelo app/serviço. A tentativa não garante recuperação de falhas persistentes de rede nem limpa o cache de módulos do navegador.
+
+Lifecycle atual: minimizar mantém AppHost montado e transmite instance.executionState; apps que admitem pausa precisam consumir esse campo para suspender trabalho e retomá-lo. Não há suspensão mágica de qualquer efeito React. Fechar remove a instância e desmonta o conteúdo, executando os cleanups dos efeitos. Cada app deve cancelar seus próprios recursos. Reabrir cria novo estado local; reload não restaura janelas. Apps atuais não possuem documentos editáveis com alterações pendentes; a confirmação de descarte será exigida quando esses fluxos forem implementados.
 
 ## Notificações
 
@@ -82,7 +107,7 @@ Futuro: previsão, validação completa, cancelamento, resultados obsoletos, cac
 7. Ferramentas Wally permitidas com validação, permissão e confirmação quando sensível.
 8. Testes negativos, limpeza, compatibilidade de shells e recuperação.
 
-## Resultado da R2 — 14/10/2026
+## Registro da primeira passagem da R2 — 14/10/2026 (histórico)
 
 A base de contratos e isolamento foi integrada e validada
 com 15 testes automatizados e verificações manuais.
@@ -110,3 +135,9 @@ renderização não derruba o Desktop.
 Os contratos adicionais serão implementados conforme
 as necessidades dos aplicativos, sem reabrir a fundação
 desnecessariamente.
+
+## Revisão complementar da R2 — 14/10/2026
+
+A primeira passagem acima descreve o estado anterior. Nesta revisão foram acrescentados resultado tipado no Core, validação estrutural de entrada, feedback de rejeição, entrada lazy explícita no Registry e recuperação de carregamento/renderização por app. Os contratos atuais estão nas seções anteriores.
+
+Permanecem para as etapas dos aplicativos: schemas de domínio, autenticação/autorização backend, confirmação de descarte de documentos, cancelamento de serviços específicos e API de confirmação de abertura na sessão React quando houver consumidor real. Não foram implementados apps novos ou habilitada Administração.

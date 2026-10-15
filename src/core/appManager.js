@@ -7,30 +7,21 @@ export const initialAppState = {
 };
 
 export function getPreferredInstance(state, appId) {
-  const instances = state.instances.filter(
-    (instance) => instance.appId === appId,
-  );
+  const instances = state.instances.filter((instance) => instance.appId === appId);
 
   if (instances.length === 0) return null;
 
-  const active = instances.find(
-    (instance) => instance.id === state.activeInstanceId,
-  );
+  const active = instances.find((instance) => instance.id === state.activeInstanceId);
 
   if (active) return active;
 
   for (let index = state.focusHistory.length - 1; index >= 0; index -= 1) {
-    const instance = instances.find(
-      (item) => item.id === state.focusHistory[index],
-    );
+    const instance = instances.find((item) => item.id === state.focusHistory[index]);
 
     if (instance) return instance;
   }
 
-  return (
-    instances.find((instance) => !instance.minimized) ??
-    instances.at(-1)
-  );
+  return instances.find((instance) => !instance.minimized) ?? instances.at(-1);
 }
 
 function getLastAvailableFocus(instances, history) {
@@ -53,29 +44,57 @@ export function activateApp(state, instanceId) {
   };
 }
 
-export function openApp(state, appId, options = {}) {
+function isPlainRecord(value) {
+  if (!value || typeof value !== 'object') return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === null || Object.getPrototypeOf(prototype) === null;
+}
+
+export function validateAppOpen(appId, options = {}) {
   const app = getAppDefinition(appId);
+  if (!app) {
+    return { ok: false, error: { code: 'APP_NOT_FOUND', message: 'Aplicativo não encontrado.' } };
+  }
+  if (!app.public) {
+    return {
+      ok: false,
+      error: {
+        code: 'APP_ACCESS_DENIED',
+        message: 'Este aplicativo não permite abertura pública.',
+      },
+    };
+  }
+  if (
+    !isPlainRecord(options) ||
+    (options.origin !== undefined &&
+      (typeof options.origin !== 'string' || !options.origin.trim())) ||
+    (options.params !== undefined && !isPlainRecord(options.params))
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: 'INVALID_OPEN_OPTIONS',
+        message: 'Origem ou parâmetros de abertura inválidos.',
+      },
+    };
+  }
+  return { ok: true, app, origin: options.origin ?? 'system', params: { ...options.params } };
+}
 
-  if (!app?.public) return state;
-
-  const params =
-    options?.params &&
-      typeof options.params === 'object' &&
-      !Array.isArray(options.params)
-      ? { ...options.params }
-      : {};
-
-  const origin =
-    typeof options?.origin === 'string'
-      ? options.origin
-      : 'system';
-
+// Contrato com resultado explícito; openApp continua compatível com os reducers existentes.
+export function requestAppOpen(state, appId, options = {}) {
+  const request = validateAppOpen(appId, options);
+  if (!request.ok) return { state, result: { ok: false, error: request.error } };
+  const { app, origin, params } = request;
   if (!app.allowMultipleInstances) {
     const existing = state.instances.find((instance) => instance.appId === appId);
-
-    if (existing) return restoreApp(state, existing.id);
+    if (existing) {
+      return {
+        state: restoreApp(state, existing.id),
+        result: { ok: true, instanceId: existing.id, status: 'restored' },
+      };
+    }
   }
-
   const instance = {
     id: crypto.randomUUID(),
     appId,
@@ -84,14 +103,14 @@ export function openApp(state, appId, options = {}) {
     origin,
     params,
   };
+  return {
+    state: activateApp({ ...state, instances: [...state.instances, instance] }, instance.id),
+    result: { ok: true, instanceId: instance.id, status: 'opened' },
+  };
+}
 
-  return activateApp(
-    {
-      ...state,
-      instances: [...state.instances, instance],
-    },
-    instance.id,
-  );
+export function openApp(state, appId, options = {}) {
+  return requestAppOpen(state, appId, options).state;
 }
 
 export function minimizeApp(state, instanceId) {
@@ -104,10 +123,10 @@ export function minimizeApp(state, instanceId) {
   const instances = state.instances.map((item) =>
     item.id === instanceId
       ? {
-        ...item,
-        minimized: true,
-        executionState: app?.pauseWhenMinimized ? 'paused' : 'running',
-      }
+          ...item,
+          minimized: true,
+          executionState: app?.pauseWhenMinimized ? 'paused' : 'running',
+        }
       : item,
   );
 
@@ -118,10 +137,7 @@ export function minimizeApp(state, instanceId) {
 
   const focusHistory =
     activeInstanceId && state.activeInstanceId === instanceId
-      ? [
-        ...state.focusHistory.filter((id) => id !== activeInstanceId),
-        activeInstanceId,
-      ]
+      ? [...state.focusHistory.filter((id) => id !== activeInstanceId), activeInstanceId]
       : state.focusHistory;
 
   return {

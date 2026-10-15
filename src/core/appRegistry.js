@@ -24,7 +24,8 @@ import {
 // desktopShortcut: exibição inicial na área de trabalho.
 // public: permissão de abertura pública.
 // showInMenu: visibilidade na listagem do WS Menu.
-// implemented: indica se o conteúdo definitivo está implementado.
+// implemented: existe um componente funcional integrado, ainda que parcial.
+// loadComponent: entrada lazy explícita dos aplicativos implementados.
 
 const appDefinitions = [
   // Aplicativos Desktop
@@ -180,6 +181,7 @@ const appDefinitions = [
     menuCategory: 'system',
     desktopShortcut: true,
     implemented: true,
+    loadComponent: () => import('../apps/about-system/AboutSystem.jsx'),
     allowMultipleInstances: false,
     pauseWhenMinimized: false,
     public: true,

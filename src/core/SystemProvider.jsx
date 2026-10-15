@@ -1,6 +1,13 @@
 import { useCallback, useState } from 'react';
 import { SystemContext } from './systemContext';
-import { activateApp, initialAppState, openApp, restoreApp, minimizeApp } from './appManager';
+import {
+  activateApp,
+  initialAppState,
+  openApp,
+  restoreApp,
+  minimizeApp,
+  validateAppOpen,
+} from './appManager';
 import { getAppDefinition } from './appRegistry';
 import {
   initialNotificationState,
@@ -24,17 +31,25 @@ export default function SystemProvider({ children }) {
 
     if (!notification) return;
 
-    setNotificationState((current) =>
-      addNotification(current, notification),
-    );
+    setNotificationState((current) => addNotification(current, notification));
 
-    setVisibleToasts((current) =>
-      [...current, notification].slice(-MAX_VISIBLE_TOASTS),
-    );
+    setVisibleToasts((current) => [...current, notification].slice(-MAX_VISIBLE_TOASTS));
   }, []);
 
   // Único ponto de entrada para ações de aplicativos e avisos do sistema.
   function run(operation, id, options) {
+    if (operation === openApp) {
+      const request = validateAppOpen(id, options);
+      if (!request.ok) {
+        notify({
+          title: 'Não foi possível abrir o aplicativo',
+          message: request.error.message,
+          source: 'Sistema',
+          type: 'error',
+        });
+        return;
+      }
+    }
     setAppState((current) => operation(current, id, options));
     if (operation === openApp) {
       const app = getAppDefinition(id);
