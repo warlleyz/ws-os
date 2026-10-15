@@ -6,6 +6,7 @@
 @import './themes/effects.css';
 @import './system.css';
 @import './themes/foundation.css';
+@import './themes/customization.css';
 
 :root {
   font-family: 'Nunito Sans', sans-serif;

@@ -1,6 +1,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Bell, Settings2 } from 'lucide-react';
+import { useMobilePreferences } from '../../core/mobilePreferences';
 
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useSystem } from '../../core/useSystem';
@@ -24,6 +25,8 @@ import './Mobile.css';
 
 export default function Mobile({ theme, onThemeChange }) {
     useLocale();
+    
+    const mobilePreferences = useMobilePreferences();
 
     const {
         appState,
@@ -228,7 +231,12 @@ export default function Mobile({ theme, onThemeChange }) {
     }
 
     return (
-        <main id="ws-mobile" className="ws-mobile" tabIndex={-1}>
+        <main
+            id="ws-mobile"
+            className="ws-mobile"
+            data-grid-density={mobilePreferences.gridDensity}
+            tabIndex={-1}
+        >
             <div className="ws-mobile__content-shell" inert={Boolean(activePanel)}>
                 <div className="ws-mobile__system-bar">
                     <strong>WS OS</strong>

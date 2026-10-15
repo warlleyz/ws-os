@@ -1,6 +1,6 @@
 import { translate as t, useLocale, setLocale } from '../../shared/i18n/i18n';
 import { useAccessibility, setAccessibility } from '../../core/effectsManager';
-import { saveTheme } from '../../core/themeManager';
+import { setTheme } from '../../core/themeManager';
 import { useSystem } from '../../core/useSystem';
 
 export default function QuickControls({
@@ -51,8 +51,7 @@ export default function QuickControls({
               aria-label={t('Tema do sistema')}
               value={theme}
               onChange={(event) => {
-                onThemeChange(event.target.value);
-                report(saveTheme(event.target.value));
+                report(setTheme(event.target.value));
               }}
             >
               <option value="dark">{t('Escuro')}</option>

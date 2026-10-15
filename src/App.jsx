@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { translate as t, useLocale } from './shared/i18n/i18n';
 import { applyAccessibility, useAccessibility } from './core/effectsManager';
 
-import { applyTheme, loadTheme } from './core/themeManager';
+import { applyTheme, useTheme, setTheme } from './core/themeManager';
+import { applyAppearance, useAppearance } from './core/appearanceManager';
 import BootScreen from './features/boot/BootScreen';
 import WelcomeDialog from './features/welcome/WelcomeDialog';
 import Desktop from './shells/desktop/Desktop';
@@ -24,6 +25,11 @@ function shouldShowWelcome() {
 export default function App() {
   const locale = useLocale();
   const accessibility = useAccessibility();
+  const appearance = useAppearance();
+
+  useEffect(() => {
+    applyAppearance(appearance);
+  }, [appearance]);
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
@@ -31,7 +37,7 @@ export default function App() {
     applyAccessibility(accessibility);
   }, [accessibility]);
   const [bootComplete, setBootComplete] = useState(false);
-  const [theme, setTheme] = useState(loadTheme);
+  const theme = useTheme();
   const [welcomeOpen, setWelcomeOpen] = useState(shouldShowWelcome);
 
   const [isMobile, setIsMobile] = useState(

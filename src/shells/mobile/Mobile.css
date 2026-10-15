@@ -372,3 +372,26 @@
 .ws-mobile__app-content {
     overflow-x: hidden;
 }
+
+/* Preferência visual exclusiva do Mobile. */
+
+.ws-mobile[data-grid-density='default'] .ws-mobile__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ws-mobile[data-grid-density='comfortable'] .ws-mobile__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 20px;
+}
+
+.ws-mobile[data-grid-density='comfortable'] .ws-mobile__app-button {
+    min-height: 96px;
+    padding: 12px 8px;
+}
+
+@media (max-width: 360px) {
+    .ws-mobile .ws-mobile__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

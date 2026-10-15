@@ -28,6 +28,10 @@ import {
   getPreferredInstance,
 } from '../../../core/appManager';
 import { getAppDefinition } from '../../../core/appRegistry';
+import {
+  useTaskbarAutoHide,
+  setTaskbarAutoHide,
+} from '../../../core/taskbarPreferences';
 
 // Utilitários e preferências persistentes do WS Menu.
 
@@ -53,13 +57,23 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
   const unreadCount = notifications.filter((item) => !item.read).length;
   const [contextGroup, setContextGroup] = useState(null);
   const [activePanel, setActivePanel] = useState(null);
-  const [autoHide, setAutoHide] = useState(() => {
-    try {
-      return localStorage.getItem('ws-os:taskbar-auto-hide') === 'true';
-    } catch {
-      return false;
+
+  const autoHide = useTaskbarAutoHide();
+
+  function changeAutoHide(enabled) {
+    const saved = setTaskbarAutoHide(enabled);
+
+    if (!saved) {
+      notify({
+        title: t('Preferência não salva'),
+        message: t(
+          'Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.',
+        ),
+        type: 'warning',
+        source: t('Sistema'),
+      });
     }
-  });
+  }
 
   function changeAutoHide(enabled) {
     setAutoHide(enabled);
