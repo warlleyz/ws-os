@@ -101,14 +101,15 @@ export default function useWallyConversation() {
             } catch (error) {
                 remoteError = error.message || 'REMOTE_UNAVAILABLE';
             } finally {
-                abortRef.current = null;
+                if (abortRef.current === controller) {
+                    abortRef.current = null;
+                }
             }
         } else if (REMOTE_ENABLED) {
             remoteError = 'VERIFICATION_REQUIRED';
         }
 
         if (generation !== generationRef.current) {
-            busyRef.current = false;
             return false;
         }
 
@@ -151,6 +152,27 @@ export default function useWallyConversation() {
         return true;
     }, [locale, createId, updateMessages]);
 
+
+    const cancelResponse = useCallback(() => {
+        if (!busyRef.current) return;
+
+        // Invalida a resposta pendente, inclusive se o
+        // serviço remoto já estiver prestes a responder.
+        generationRef.current += 1;
+
+        const controller = abortRef.current;
+        abortRef.current = null;
+
+        busyRef.current = false;
+
+        controller?.abort();
+
+        setStatus('idle');
+        setLastError(null);
+    }, []);
+
+
+
     const clearConversation = useCallback(() => {
         generationRef.current += 1;
         abortRef.current?.abort();
@@ -170,6 +192,7 @@ export default function useWallyConversation() {
         lastError,
         remoteEnabled: REMOTE_ENABLED,
         sendMessage,
+        cancelResponse,
         clearConversation,
         maxQuestionLength: MAX_QUESTION_LENGTH,
     };

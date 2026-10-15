@@ -9,6 +9,8 @@ import {
   Sparkles,
   Trash2,
   X,
+  LoaderCircle,
+  Square,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -48,6 +50,7 @@ export default function WallyPanel({ setWallyOpen }) {
     remoteEnabled,
     sendMessage,
     clearConversation,
+    cancelResponse,
   } = useSharedWallyConversation();
 
   const scrollRef = useRef(null);
@@ -79,15 +82,15 @@ export default function WallyPanel({ setWallyOpen }) {
       turnstileToken: token,
     });
 
-    if (!sent) return;
-
-    setQuestion('');
-    inputRef.current?.focus();
-
     if (remoteEnabled && token) {
       setTurnstileToken(null);
       setVerificationKey((current) => current + 1);
     }
+
+    if (!sent) return;
+
+    setQuestion('');
+    inputRef.current?.focus();
   }
 
   return (
@@ -215,6 +218,35 @@ export default function WallyPanel({ setWallyOpen }) {
           </div>
         )}
       </div>
+
+
+      {status === 'responding' && (
+        <div
+          className="ws-wally__responding"
+          role="status"
+          aria-live="polite"
+        >
+          <LoaderCircle
+            size={15}
+            className="ws-wally__loading-icon"
+            aria-hidden="true"
+          />
+
+          <span>
+            {t('Wally está preparando uma resposta...')}
+          </span>
+
+          <button
+            type="button"
+            onClick={cancelResponse}
+          >
+            <Square size={12} aria-hidden="true" />
+            {t('Cancelar')}
+          </button>
+        </div>
+      )}
+
+
 
       <div className="ws-wally__composer-area">
         {remoteEnabled && (

@@ -35,7 +35,9 @@ export default function WallyExtended() {
     remoteEnabled,
     lastError,
     maxQuestionLength,
+    cancelResponse,
   } = useSharedWallyConversation();
+
 
   async function send(event) {
     event.preventDefault();
@@ -48,15 +50,16 @@ export default function WallyExtended() {
       turnstileToken: token,
     });
 
+    if (remoteEnabled && token) {
+      setTurnstileToken(null);
+      setVerificationKey((current) => current + 1);
+    }
+
     if (sent) {
       setQuestion('');
-
-      if (remoteEnabled && token) {
-        setTurnstileToken(null);
-        setVerificationKey((current) => current + 1);
-      }
     }
   }
+
 
   function openRelatedApp(appId) {
     const app = getAppDefinition(appId);
@@ -143,6 +146,24 @@ export default function WallyExtended() {
           </section>
         ))}
       </div>
+
+
+      {status === 'responding' && (
+        <div className="ws-wally__responding" role="status">
+          <span>
+            {t('Wally está preparando uma resposta...')}
+          </span>
+
+          <button
+            type="button"
+            onClick={cancelResponse}
+          >
+            {t('Cancelar')}
+          </button>
+        </div>
+      )}
+
+
 
       {status === 'error' && (
         <p role="alert">
