@@ -99,3 +99,9 @@ Notas integrado ao shell: busca sem acentos, filtro por assunto, leitura de text
 ## Fechamento
 
 103 testes aprovados, lint/build aprovados. Retorno interno de Notas conferido pelo cabeçalho Mobile; publicação temporária de teste removida antes do commit. Foram adicionados comando npm test e regras para ignorar segredos locais. Nenhum push/deploy. Três alterações locais iniciais e stash original preservados. Consulte a entrega consolidada para pendências e limites.
+
+## Conferência final do preview de produção
+
+Build servido por Vite preview na mesma origem isolada 127.0.0.1:5189. Confirmados: Notas sem a fixture temporária e com vazio correto; arquivo teste-codex.txt recuperado do IndexedDB após reload; catálogo dos cinco jogos no Mobile 390×844; troca PT-BR/EN e rótulos/estado vazio de Notas traduzidos; Projetos maximizado com 14 repositórios reais carregados. Sem erros/warnings observados no console. Viewport e idioma da origem de teste restaurados; servidor temporário encerrado após os ensaios. O comando npm test também foi executado com sucesso (103 testes).
+
+Commit de fechamento funcional/documental: efcca78569a6cf48cdd639c07ed96e7dae045074. A conferência não executou Pages Functions e não substitui os gates humanos/externos registrados.

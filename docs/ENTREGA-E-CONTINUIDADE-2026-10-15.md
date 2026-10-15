@@ -277,3 +277,9 @@ npm run dev
 ## 14. Prompt para retomar em outro chat
 
 > Continue o WS OS em C:\Projetos\ws-os. Leia primeiro docs/ENTREGA-E-CONTINUIDADE-2026-10-15.md, docs/PROGRESSO-CONCLUSAO.md e docs/planning/WS-OS-V2-MESTRE-v0.16.0.md. Confira Git, commits e stash antes de editar. Preserve as três modificações locais documentadas e o stash R3.3; não aplique nem descarte automaticamente. Há 17 componentes de apps integrados, mas Administração/auth, Gemini, curtidas, rankings e configurações/aceites externos continuam pendentes. Não refaça o projeto, não invente conteúdo ou métricas e não confunda endpoint preparado com integração de produção. Use o plano P0–P4 deste documento, valide cada bloco com lint/build/testes e evidências pertinentes. Mantenha dados pessoais locais. Antes de começar, informe o próximo bloco concreto e as dependências que de fato exigem minha configuração. Não faça push/deploy sem autorização.
+
+## Conferência final do preview de produção
+
+Build servido por Vite preview na mesma origem isolada 127.0.0.1:5189. Confirmados: Notas sem a fixture temporária e com vazio correto; arquivo teste-codex.txt recuperado do IndexedDB após reload; catálogo dos cinco jogos no Mobile 390×844; troca PT-BR/EN e rótulos/estado vazio de Notas traduzidos; Projetos maximizado com 14 repositórios reais carregados. Sem erros/warnings observados no console. Viewport e idioma da origem de teste restaurados; servidor temporário encerrado após os ensaios. O comando npm test também foi executado com sucesso (103 testes).
+
+Commit de fechamento funcional/documental: efcca78569a6cf48cdd639c07ed96e7dae045074. A conferência não executou Pages Functions e não substitui os gates humanos/externos registrados.
