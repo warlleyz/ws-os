@@ -376,6 +376,7 @@ export default function SettingsSections({ activeSection }) {
         </p>
       </SettingsCard>
     );
+
   if (activeSection === 'widgets')
     content = (
       <SettingsCard
@@ -384,33 +385,83 @@ export default function SettingsSections({ activeSection }) {
           'Gerencie os widgets disponíveis. Posição e tamanho são compartilhados com o Desktop.',
         )}
       >
-        {widgets.widgets.map((widget) => (
-          <div key={widget.instanceId} className="ws-settings__options">
-            <SettingsToggle
-              label={t(getWidgetDefinition(widget.widgetId)?.name ?? widget.widgetId)}
-              checked={widget.visible}
-              onChange={(visible) => changeWidget(widget.instanceId, { visible })}
-            />
-            <SettingsSelect
-              label={t('Tamanho do relógio')}
-              value={`${widget.size.columns}x${widget.size.rows}`}
-              options={[
-                ['2x2', '2 × 2'],
-                ['3x2', '3 × 2'],
-                ['3x3', '3 × 3'],
-              ]}
-              onChange={(value) => {
-                const [columns, rows] = value.split('x').map(Number);
-                changeWidget(widget.instanceId, { size: { columns, rows } });
-              }}
-            />
-            <p className="ws-settings__hint">
-              {t(
-                'O relógio segue o idioma e a hora do dispositivo. Mova-o no Desktop. Tamanhos sem espaço são bloqueados; em telas pequenas ele pode ficar temporariamente indisponível.',
+        {widgets.widgets.map((widget) => {
+          const definition = getWidgetDefinition(widget.widgetId);
+          const isReady = widget.widgetId === 'clock';
+
+          const sizeOptions = (definition?.allowedSizes ?? []).map(
+            (size) => [size, size.replace('x', ' × ')],
+          );
+
+          return (
+            <div
+              key={widget.instanceId}
+              className="ws-settings__options"
+            >
+              <div className="ws-settings__card-heading">
+                <h4>{t(definition?.name ?? widget.widgetId)}</h4>
+                <p>{t(definition?.description ?? '')}</p>
+              </div>
+
+              {!isReady && (
+                <p className="ws-settings__hint" role="status">
+                  {t(
+                    'Widget em preparação. Os controles serão habilitados após a integração com a grade do Desktop.',
+                  )}
+                </p>
               )}
-            </p>
-          </div>
-        ))}
+
+              <div
+                style={
+                  !isReady
+                    ? { opacity: 0.55 }
+                    : undefined
+                }
+              >
+                <fieldset
+                  disabled={!isReady}
+                  style={{
+                    border: 0,
+                    padding: 0,
+                    margin: 0,
+                    minWidth: 0,
+                  }}
+                >
+                  <SettingsToggle
+                    label={t('Exibir no Desktop')}
+                    checked={widget.visible}
+                    onChange={(visible) =>
+                      changeWidget(widget.instanceId, { visible })
+                    }
+                  />
+
+                  <SettingsSelect
+                    label={t('Tamanho')}
+                    value={`${widget.size.columns}x${widget.size.rows}`}
+                    options={sizeOptions}
+                    onChange={(value) => {
+                      const [columns, rows] = value
+                        .split('x')
+                        .map(Number);
+
+                      changeWidget(widget.instanceId, {
+                        size: { columns, rows },
+                      });
+                    }}
+                  />
+                </fieldset>
+              </div>
+
+              {isReady && (
+                <p className="ws-settings__hint">
+                  {t(
+                    'O relógio segue o idioma e a hora do dispositivo. Mova-o no Desktop. Tamanhos sem espaço são bloqueados; em telas pequenas ele pode ficar temporariamente indisponível.',
+                  )}
+                </p>
+              )}
+            </div>
+          );
+        })}
       </SettingsCard>
     );
   if (activeSection === 'mobile')

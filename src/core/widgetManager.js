@@ -1,24 +1,66 @@
 const WIDGETS_STORAGE_KEY = 'ws-os:desktop-widgets';
 
+
 const widgetDefinitions = [
   {
     id: 'clock',
     name: 'Relógio',
     description: 'Exibe a data e a hora atuais.',
     defaultSize: { columns: 2, rows: 2 },
+    allowedSizes: ['2x2', '3x2', '3x3'],
+    defaultVisible: true,
+  },
+  {
+    id: 'calendar',
+    name: 'Calendário',
+    description: 'Exibe datas, feriados e eventos públicos.',
+    defaultSize: { columns: 3, rows: 3 },
+    allowedSizes: ['3x3', '4x3', '4x4'],
+    defaultVisible: true,
+  },
+  {
+    id: 'weather',
+    name: 'Clima',
+    description: 'Exibe as condições meteorológicas e a previsão.',
+    defaultSize: { columns: 3, rows: 2 },
+    allowedSizes: ['2x2', '3x2', '4x2'],
+    defaultVisible: true,
+  },
+  {
+    id: 'dev-insights',
+    name: 'Dev Insights',
+    description: 'Apresenta estatísticas da atividade de desenvolvimento.',
+    defaultSize: { columns: 3, rows: 2 },
+    allowedSizes: ['3x2', '4x2', '4x3'],
+    defaultVisible: false,
+  },
+  {
+    id: 'notes',
+    name: 'Notas',
+    description: 'Exibe notas públicas do portfólio.',
+    defaultSize: { columns: 2, rows: 2 },
+    allowedSizes: ['2x2', '3x2', '3x3'],
+    defaultVisible: false,
+  },
+  {
+    id: 'system-info',
+    name: 'Informações do Sistema',
+    description: 'Exibe informações do navegador e da sessão.',
+    defaultSize: { columns: 2, rows: 2 },
+    allowedSizes: ['2x2', '3x2', '3x3'],
+    defaultVisible: false,
   },
 ];
 
 export const initialWidgetState = {
-  widgets: [
-    {
-      instanceId: 'clock-default',
-      widgetId: 'clock',
-      visible: true,
-      position: null,
-      size: { columns: 2, rows: 2 },
-    },
-  ],
+  widgets: widgetDefinitions.map((definition) => ({
+    instanceId: `${definition.id}-default`,
+    widgetId: definition.id,
+    visible: definition.defaultVisible,
+    position: null,
+    size: { ...definition.defaultSize },
+    settings: {},
+  })),
 };
 
 export function getWidgetDefinition(widgetId) {
@@ -29,16 +71,21 @@ export function getRegisteredWidgets() {
   return [...widgetDefinitions];
 }
 
-function validSize(size, fallback) {
+function validSize(size, fallback, allowedSizes) {
   if (
     !size ||
     !Number.isInteger(size.columns) ||
     !Number.isInteger(size.rows) ||
     size.columns < 1 ||
-    size.rows < 1 ||
-    !['2x2', '3x2', '3x3'].includes(`${size.columns}x${size.rows}`)
+    size.rows < 1
   ) {
-    return fallback;
+    return { ...fallback };
+  }
+
+  const sizeKey = `${size.columns}x${size.rows}`;
+
+  if (!allowedSizes.includes(sizeKey)) {
+    return { ...fallback };
   }
 
   return {
@@ -64,56 +111,105 @@ function validPosition(position) {
   };
 }
 
+
 export function loadWidgetPreferences() {
   try {
     const saved = localStorage.getItem(WIDGETS_STORAGE_KEY);
 
-    if (!saved) return { state: initialWidgetState, error: null };
+    if (!saved) {
+      return {
+        state: initialWidgetState,
+        error: null,
+      };
+    }
 
     const parsed = JSON.parse(saved);
 
     if (!parsed || !Array.isArray(parsed.widgets)) {
-      return { state: initialWidgetState, error: 'invalid' };
+      return {
+        state: initialWidgetState,
+        error: 'invalid',
+      };
     }
 
-    let invalid = parsed.widgets.length !== initialWidgetState.widgets.length;
+    let invalid = false;
+
+    const widgets = widgetDefinitions.map((definition) => {
+      const defaults = initialWidgetState.widgets.find(
+        (widget) => widget.widgetId === definition.id,
+      );
+
+      const stored = parsed.widgets.find(
+        (widget) =>
+          widget?.instanceId === defaults.instanceId &&
+          widget?.widgetId === definition.id,
+      );
+
+      // Widget novo: adiciona os valores padrão
+      // sem alterar os widgets já existentes.
+      if (!stored) {
+        return {
+          ...defaults,
+          size: { ...defaults.size },
+          settings: {},
+        };
+      }
+
+      const size = validSize(
+        stored.size,
+        defaults.size,
+        definition.allowedSizes,
+      );
+
+      const position = validPosition(stored.position);
+
+      const validVisible = typeof stored.visible === 'boolean';
+
+      const validSettings =
+        stored.settings !== null &&
+        typeof stored.settings === 'object' &&
+        !Array.isArray(stored.settings);
+
+      if (
+        !validVisible ||
+        (
+          stored.position != null &&
+          position === null
+        ) ||
+        !(
+          stored.size?.columns === size.columns &&
+          stored.size?.rows === size.rows
+        ) ||
+        (
+          stored.settings !== undefined &&
+          !validSettings
+        )
+      ) {
+        invalid = true;
+      }
+
+      return {
+        ...defaults,
+        visible: validVisible
+          ? stored.visible
+          : defaults.visible,
+        position,
+        size,
+        settings: validSettings
+          ? { ...stored.settings }
+          : {},
+      };
+    });
+
     return {
-      state: {
-        widgets: initialWidgetState.widgets.map((defaultWidget) => {
-          const savedWidget = parsed.widgets.find(
-            (item) =>
-              item?.instanceId === defaultWidget.instanceId &&
-              item?.widgetId === defaultWidget.widgetId,
-          );
-
-          if (!savedWidget) {
-            invalid = true;
-            return defaultWidget;
-          }
-          const position = validPosition(savedWidget.position);
-          const size = validSize(savedWidget.size, defaultWidget.size);
-          if (
-            typeof savedWidget.visible !== 'boolean' ||
-            (savedWidget.position !== null && !position) ||
-            size === defaultWidget.size
-          )
-            invalid = true;
-
-          return {
-            ...defaultWidget,
-            visible:
-              typeof savedWidget.visible === 'boolean'
-                ? savedWidget.visible
-                : defaultWidget.visible,
-            position,
-            size,
-          };
-        }),
-      },
+      state: { widgets },
       error: invalid ? 'invalid' : null,
     };
   } catch {
-    return { state: initialWidgetState, error: 'unavailable' };
+    return {
+      state: initialWidgetState,
+      error: 'unavailable',
+    };
   }
 }
 
@@ -154,16 +250,32 @@ export function setWidgetPosition(state, instanceId, position) {
   };
 }
 
+
 export function setWidgetSize(state, instanceId, size) {
   return {
     ...state,
-    widgets: state.widgets.map((widget) =>
-      widget.instanceId === instanceId
-        ? {
-            ...widget,
-            size: validSize(size, widget.size),
-          }
-        : widget,
-    ),
+    widgets: state.widgets.map((widget) => {
+      if (widget.instanceId !== instanceId) {
+        return widget;
+      }
+
+      const definition = getWidgetDefinition(
+        widget.widgetId,
+      );
+
+      if (!definition) {
+        return widget;
+      }
+
+      return {
+        ...widget,
+        size: validSize(
+          size,
+          widget.size,
+          definition.allowedSizes,
+        ),
+      };
+    }),
   };
 }
+

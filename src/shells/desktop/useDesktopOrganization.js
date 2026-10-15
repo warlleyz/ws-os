@@ -7,13 +7,16 @@ import {
   loadDesktopPreferences,
   saveDesktopPreferences,
 } from './desktopPreferences';
+
 import {
   clampDesktopDrag,
   getCellColumn,
   getCellRow,
+  getPersistableShortcutPositions,
   getShortcutsInArea,
   moveDesktopShortcuts,
 } from './desktopLayout';
+
 
 export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
   const locale = useLocale();
@@ -104,6 +107,34 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     setSelectedIds(next);
     return next;
   }
+
+  function commitLayoutPositions(layout) {
+    // Não confirma uma organização durante o
+    // arraste de atalhos ou seleção por área.
+    if (dragRef.current) {
+      return false;
+    }
+
+    const positions = getPersistableShortcutPositions(
+      shortcuts,
+      layout,
+    );
+
+    if (!positions) {
+      return false;
+    }
+
+    // A atualização só acontece após validar
+    // todas as posições dos atalhos.
+    setPreferences((current) => ({
+      ...current,
+      positions,
+      error: null,
+    }));
+
+    return true;
+  }
+
   function sort(order) {
     clearDrag();
     setPreferences({ order, positions: {}, error: null });
@@ -319,6 +350,7 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
   }
   return {
     shortcuts,
+    commitLayoutPositions,
     shortcutOrder: preferences.order,
     shortcutPositions: preferences.positions,
     selectedIds,

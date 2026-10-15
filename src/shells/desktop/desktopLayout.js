@@ -97,6 +97,137 @@ export function isDesktopCellAvailable(column, row, layout) {
   return left + SHORTCUT_WIDTH <= reservedLeft;
 }
 
+
+/**
+ * Retorna todas as células ocupadas por um widget.
+ * As dimensões são expressas em células da grade.
+ */
+export function getWidgetCells(position, size) {
+  if (
+    !position ||
+    !size ||
+    !Number.isInteger(position.column) ||
+    !Number.isInteger(position.row) ||
+    !Number.isInteger(size.columns) ||
+    !Number.isInteger(size.rows) ||
+    position.column < 0 ||
+    position.row < 0 ||
+    size.columns < 1 ||
+    size.rows < 1
+  ) {
+    return [];
+  }
+
+  const cells = [];
+
+  for (let column = 0; column < size.columns; column += 1) {
+    for (let row = 0; row < size.rows; row += 1) {
+      cells.push({
+        column: position.column + column,
+        row: position.row + row,
+      });
+    }
+  }
+
+  return cells;
+}
+
+/**
+ * Verifica se um widget cabe na grade sem ocupar
+ * células reservadas ou já utilizadas.
+ */
+export function canPlaceWidget(
+  position,
+  size,
+  layout,
+  occupied = new Set(),
+) {
+  const cells = getWidgetCells(position, size);
+
+  if (
+    cells.length === 0 ||
+    cells.length !== size.columns * size.rows
+  ) {
+    return false;
+  }
+
+  return cells.every(
+    ({ column, row }) =>
+      isDesktopCellAvailable(column, row, layout) &&
+      !occupied.has(`${column}:${row}`),
+  );
+}
+
+/**
+ * Marca todas as células de um widget como ocupadas.
+ * Retorna um novo Set, preservando o original.
+ */
+export function occupyWidgetCells(
+  occupied,
+  position,
+  size,
+) {
+  const next = new Set(occupied);
+
+  for (const { column, row } of getWidgetCells(position, size)) {
+    next.add(`${column}:${row}`);
+  }
+
+  return next;
+}
+
+/**
+ * Procura posições válidas na grade.
+ * Se houver preferência, prioriza posições próximas.
+ */
+export function findWidgetPosition(
+  size,
+  layout,
+  occupied = new Set(),
+  preferred = null,
+) {
+  const candidates = [];
+
+  for (let column = 0; column < layout.columns; column += 1) {
+    for (let row = 0; row < layout.rows; row += 1) {
+      const position = { column, row };
+
+      if (canPlaceWidget(position, size, layout, occupied)) {
+        candidates.push(position);
+      }
+    }
+  }
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  if (
+    preferred &&
+    Number.isInteger(preferred.column) &&
+    Number.isInteger(preferred.row)
+  ) {
+    candidates.sort((a, b) => {
+      const distanceA =
+        Math.abs(a.column - preferred.column) +
+        Math.abs(a.row - preferred.row);
+
+      const distanceB =
+        Math.abs(b.column - preferred.column) +
+        Math.abs(b.row - preferred.row);
+
+      return (
+        distanceA - distanceB ||
+        a.column - b.column ||
+        a.row - b.row
+      );
+    });
+  }
+
+  return candidates[0];
+}
+
+
 export function getDesktopLayout(
   count,
   width,
@@ -298,6 +429,224 @@ export function getDesktopLayout(
   return layout;
 }
 
+
+/**
+ * Calcula a distribuição de múltiplos widgets
+ * sem alterar a organização atual do Desktop.
+ *
+ * Nesta fase, os atalhos existentes têm prioridade.
+ * A reorganização inteligente será integrada na W2.3.
+ */
+
+export function getMultiWidgetLayout(
+  count,
+  width,
+  height,
+  widgets = [],
+  preferred = [],
+) {
+  const base = getDesktopLayout(
+    count,
+    width,
+    height,
+    null,
+    preferred,
+  );
+
+  const placements = {};
+  const blockedWidgets = [];
+  const widgetOccupied = new Set();
+
+  // Preserva a posição calculada anteriormente para cada atalho.
+  const originalShortcuts = base.shortcuts.map((point) =>
+    point
+      ? {
+        column: getCellColumn(point.left, base),
+        row: getCellRow(point.top),
+      }
+      : null,
+  );
+
+  function placeShortcuts(reserved) {
+    const occupied = new Set(reserved);
+    const result = Array(count).fill(null);
+
+    function available(position) {
+      return (
+        position &&
+        isDesktopCellAvailable(
+          position.column,
+          position.row,
+          base,
+        ) &&
+        !occupied.has(key(position.column, position.row))
+      );
+    }
+
+    function assign(index, position) {
+      result[index] = {
+        left: getCellLeft(position.column, base),
+        top: getCellTop(position.row),
+      };
+
+      occupied.add(key(position.column, position.row));
+    }
+
+    // Primeira passagem: manter posições escolhidas pelo usuário.
+    for (let index = 0; index < count; index += 1) {
+      if (available(preferred[index])) {
+        assign(index, preferred[index]);
+      }
+    }
+
+    // Segunda passagem: manter a distribuição anterior.
+    for (let index = 0; index < count; index += 1) {
+      if (!result[index] && available(originalShortcuts[index])) {
+        assign(index, originalShortcuts[index]);
+      }
+    }
+
+    // Terceira passagem: realocar somente os atalhos afetados.
+    for (let index = 0; index < count; index += 1) {
+      if (result[index]) continue;
+
+      const anchor = preferred[index] ?? originalShortcuts[index];
+
+      const position = findWidgetPosition(
+        { columns: 1, rows: 1 },
+        base,
+        occupied,
+        anchor,
+      );
+
+      if (!position) return null;
+
+      assign(index, position);
+    }
+
+    return result;
+  }
+
+  let shortcuts = placeShortcuts(widgetOccupied);
+
+  // Posições de widgets são avaliadas sem modificar
+  // a distribuição aceita anteriormente.
+  for (const widget of widgets) {
+    if (!widget.visible) continue;
+
+    const { instanceId, size } = widget;
+
+    if (
+      !instanceId ||
+      !size ||
+      !Number.isInteger(size.columns) ||
+      !Number.isInteger(size.rows) ||
+      size.columns < 1 ||
+      size.rows < 1
+    ) {
+      if (instanceId) blockedWidgets.push(instanceId);
+      continue;
+    }
+
+    const candidates = [];
+
+    for (let column = 0; column < base.columns; column += 1) {
+      for (let row = 0; row < base.rows; row += 1) {
+        const position = { column, row };
+
+        if (
+          canPlaceWidget(
+            position,
+            size,
+            base,
+            widgetOccupied,
+          )
+        ) {
+          candidates.push(position);
+        }
+      }
+    }
+
+    const desired = widget.position;
+
+    if (
+      Number.isInteger(desired?.column) &&
+      Number.isInteger(desired?.row)
+    ) {
+      candidates.sort((a, b) => {
+        const distanceA =
+          Math.abs(a.column - desired.column) +
+          Math.abs(a.row - desired.row);
+
+        const distanceB =
+          Math.abs(b.column - desired.column) +
+          Math.abs(b.row - desired.row);
+
+        return (
+          distanceA - distanceB ||
+          a.column - b.column ||
+          a.row - b.row
+        );
+      });
+    } else {
+      // Sem posição salva, prioriza a lateral direita.
+      candidates.sort(
+        (a, b) =>
+          b.column - a.column ||
+          a.row - b.row,
+      );
+    }
+
+    let accepted = false;
+
+    for (const position of candidates) {
+      const trialOccupied = occupyWidgetCells(
+        widgetOccupied,
+        position,
+        size,
+      );
+
+      const trialShortcuts = placeShortcuts(trialOccupied);
+
+      // Só aceita quando todos os atalhos continuam presentes.
+      if (!trialShortcuts) continue;
+
+      for (const cell of trialOccupied) {
+        widgetOccupied.add(cell);
+      }
+
+      shortcuts = trialShortcuts;
+
+      placements[instanceId] = {
+        instanceId,
+        widgetId: widget.widgetId,
+        position,
+        size,
+        left: getCellLeft(position.column, base),
+        top: getCellTop(position.row),
+        width: getWidgetWidth(size.columns, base),
+        height: size.rows * ROW_STEP,
+      };
+
+      accepted = true;
+      break;
+    }
+
+    if (!accepted) {
+      blockedWidgets.push(instanceId);
+    }
+  }
+
+  return {
+    ...base,
+    shortcuts: shortcuts ?? base.shortcuts,
+    widgets: placements,
+    blockedWidgets,
+  };
+}
+
+
+
 export function moveDesktopShortcuts(
   shortcuts,
   layout,
@@ -339,13 +688,31 @@ export function moveDesktopShortcuts(
 
   if (!targets.size) return null;
 
-  const widgetLeft = layout.widget
-    ? getCellColumn(layout.widget.left, layout)
-    : -1;
 
-  const widgetTop = layout.widget
-    ? getCellRow(layout.widget.top)
-    : -1;
+  const widgetOccupied = new Set();
+
+  const placedWidgets = Object.values(layout.widgets ?? {});
+
+  // Compatibilidade com o layout antigo do relógio.
+  if (placedWidgets.length === 0 && layout.widget && layout.widgetSize) {
+    placedWidgets.push({
+      position: {
+        column: getCellColumn(layout.widget.left, layout),
+        row: getCellRow(layout.widget.top),
+      },
+      size: layout.widgetSize,
+    });
+  }
+
+  for (const widget of placedWidgets) {
+    for (const cell of getWidgetCells(
+      widget.position,
+      widget.size,
+    )) {
+      widgetOccupied.add(key(cell.column, cell.row));
+    }
+  }
+
 
   for (const position of targets.values()) {
     if (
@@ -359,15 +726,15 @@ export function moveDesktopShortcuts(
       return null;
     }
 
+
     if (
-      layout.widget &&
-      position.column >= widgetLeft &&
-      position.column < widgetLeft + layout.widgetSize.columns &&
-      position.row >= widgetTop &&
-      position.row < widgetTop + layout.widgetSize.rows
+      widgetOccupied.has(
+        key(position.column, position.row),
+      )
     ) {
       return null;
     }
+
   }
 
   return Object.fromEntries(
