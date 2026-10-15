@@ -146,6 +146,19 @@ export default function useWallyConversation() {
                     provider: 'local',
                 };
             } catch {
+                const pendingId = pendingMessageIdRef.current;
+                pendingMessageIdRef.current = null;
+
+                if (pendingId) {
+                    updateMessages(
+                        messagesRef.current.map((message) =>
+                            message.id === pendingId
+                                ? { ...message, cancelled: true }
+                                : message,
+                        ),
+                    );
+                }
+
                 setStatus('error');
                 busyRef.current = false;
                 return false;
