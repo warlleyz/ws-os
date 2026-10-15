@@ -1,66 +1,47 @@
 import useDesktopWidgets from '../../features/widgets/useDesktopWidgets';
 import { useSystem } from '../../core/useSystem';
 import useDesktopLayout from './useDesktopLayout';
+import useDesktopOrganization from './useDesktopOrganization';
 import ShortcutContextMenu from './ShortcutContextMenu';
 import DesktopContextMenu from './DesktopContextMenu';
 import WindowLayer from '../../features/windows/WindowLayer';
 import DesktopShortcuts from './DesktopShortcuts';
 import NotificationToasts from '../../features/notifications/NotificationToasts';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Taskbar from './taskbar/Taskbar';
 import { openApp } from '../../core/appManager';
-import { getAppDefinition, getRegisteredApps } from '../../core/appRegistry';
-// Distribuição dos atalhos no Desktop.
-const desktopShortcutOrder = [
-  'about-me',
-  'projects',
-  'dev-insights',
-  'resume',
-  'certificates',
-  'contact',
-  'terminal',
-  'games',
-  'notes',
-  'files',
-  'settings',
-  'about-system',
-];
+import { getAppDefinition } from '../../core/appRegistry';
 // Avisos temporários: o histórico é mantido pelo notificationManager.
 
 export default function Desktop({ theme, onThemeChange }) {
   const { appState, minimizeAllApps, visibleToasts, run, dismissToast, handleNotificationOpen } =
     useSystem();
-  const { gridSize, shortcutsRef } = useDesktopLayout();
-  const [selectedShortcut, setSelectedShortcut] = useState(null);
+  const { gridSize, shortcutsRef, workspaceRef } = useDesktopLayout();
+  const organization = useDesktopOrganization({ shortcutsRef, gridSize });
+  const { shortcuts, shortcutPositions, shortcutOrder, setSelectedIds } = organization;
+  function setSelectedShortcut(id) {
+    if (id) organization.select(id);
+    else setSelectedIds([]);
+  }
   const [desktopContext, setDesktopContext] = useState(null);
   const [shortcutContext, setShortcutContext] = useState(null);
-  const [shortcutOrder, setShortcutOrder] = useState('default');
   const desktopContextRef = useRef(null);
   const shortcutContextRef = useRef(null);
-  const shortcuts = useMemo(() => {
-    const apps = getRegisteredApps().filter(
-      (app) => app.desktopShortcut && desktopShortcutOrder.includes(app.id),
-    );
-    if (shortcutOrder === 'name') {
-      return apps.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
-    }
-    return apps.sort(
-      (a, b) => desktopShortcutOrder.indexOf(a.id) - desktopShortcutOrder.indexOf(b.id),
-    );
-  }, [shortcutOrder]);
   const {
     widgetState,
     toggleClockWidget,
     clockWidget,
     desktopLayout,
-    positions,
     changeWidgetSize,
     startWidgetDrag,
     moveWidgetDrag,
     finishWidgetDrag,
+    handleWidgetKeyDown,
+    cancelWidgetDrag,
   } = useDesktopWidgets({
     shortcuts,
     gridSize,
+    shortcutPositions,
   });
   function showDesktop() {
     minimizeAllApps();
@@ -121,10 +102,10 @@ export default function Desktop({ theme, onThemeChange }) {
   }
   function runDesktopContextAction(action) {
     if (action === 'sort-name') {
-      setShortcutOrder('name');
+      organization.sort('name');
     }
     if (action === 'sort-default') {
-      setShortcutOrder('default');
+      organization.sort('default');
     }
     if (action === 'toggle-clock') {
       toggleClockWidget();
@@ -157,16 +138,18 @@ export default function Desktop({ theme, onThemeChange }) {
     <main className="desktop">
       <div className="desktop__wallpaper" aria-hidden="true" />
       <section
+        ref={workspaceRef}
         className="desktop__workspace"
+        onScroll={() => {
+          organization.clearDrag();
+          cancelWidgetDrag();
+        }}
         aria-label="Área de trabalho"
         onContextMenu={openDesktopContext}
-        onPointerDown={(event) => {
-          if (event.target instanceof Element && !event.target.closest('.desktop__shortcut')) {
-            setSelectedShortcut(null);
-          }
-        }}
         onKeyDown={(event) => {
           if (event.key === 'Escape') {
+            organization.clearDrag();
+            cancelWidgetDrag();
             setSelectedShortcut(null);
           }
         }}
@@ -204,10 +187,9 @@ export default function Desktop({ theme, onThemeChange }) {
           changeWidgetSize={changeWidgetSize}
           shortcuts={shortcuts}
           appState={appState}
-          selectedShortcut={selectedShortcut}
-          positions={positions}
+          organization={organization}
+          handleWidgetKeyDown={handleWidgetKeyDown}
           openShortcutContext={openShortcutContext}
-          setSelectedShortcut={setSelectedShortcut}
           run={run}
         />
       </section>

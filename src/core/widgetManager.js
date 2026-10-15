@@ -36,8 +36,7 @@ function validSize(size, fallback) {
     !Number.isInteger(size.rows) ||
     size.columns < 1 ||
     size.rows < 1 ||
-    size.columns > 6 ||
-    size.rows > 6
+    !['2x2', '3x2', '3x3'].includes(`${size.columns}x${size.rows}`)
   ) {
     return fallback;
   }
@@ -65,40 +64,61 @@ function validPosition(position) {
   };
 }
 
-export function loadWidgetState() {
+export function loadWidgetPreferences() {
   try {
     const saved = localStorage.getItem(WIDGETS_STORAGE_KEY);
 
-    if (!saved) return initialWidgetState;
+    if (!saved) return { state: initialWidgetState, error: null };
 
     const parsed = JSON.parse(saved);
 
     if (!parsed || !Array.isArray(parsed.widgets)) {
-      return initialWidgetState;
+      return { state: initialWidgetState, error: 'invalid' };
     }
 
+    let invalid = parsed.widgets.length !== initialWidgetState.widgets.length;
     return {
-      widgets: initialWidgetState.widgets.map((defaultWidget) => {
-        const savedWidget = parsed.widgets.find(
-          (item) =>
-            item?.instanceId === defaultWidget.instanceId &&
-            item?.widgetId === defaultWidget.widgetId,
-        );
+      state: {
+        widgets: initialWidgetState.widgets.map((defaultWidget) => {
+          const savedWidget = parsed.widgets.find(
+            (item) =>
+              item?.instanceId === defaultWidget.instanceId &&
+              item?.widgetId === defaultWidget.widgetId,
+          );
 
-        if (!savedWidget) return defaultWidget;
+          if (!savedWidget) {
+            invalid = true;
+            return defaultWidget;
+          }
+          const position = validPosition(savedWidget.position);
+          const size = validSize(savedWidget.size, defaultWidget.size);
+          if (
+            typeof savedWidget.visible !== 'boolean' ||
+            (savedWidget.position !== null && !position) ||
+            size === defaultWidget.size
+          )
+            invalid = true;
 
-        return {
-          ...defaultWidget,
-          visible:
-            typeof savedWidget.visible === 'boolean' ? savedWidget.visible : defaultWidget.visible,
-          position: validPosition(savedWidget.position),
-          size: validSize(savedWidget.size, defaultWidget.size),
-        };
-      }),
+          return {
+            ...defaultWidget,
+            visible:
+              typeof savedWidget.visible === 'boolean'
+                ? savedWidget.visible
+                : defaultWidget.visible,
+            position,
+            size,
+          };
+        }),
+      },
+      error: invalid ? 'invalid' : null,
     };
   } catch {
-    return initialWidgetState;
+    return { state: initialWidgetState, error: 'unavailable' };
   }
+}
+
+export function loadWidgetState() {
+  return loadWidgetPreferences().state;
 }
 
 export function saveWidgetState(state) {

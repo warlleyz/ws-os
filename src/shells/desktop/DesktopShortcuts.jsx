@@ -10,86 +10,110 @@ export default function DesktopShortcuts({
   moveWidgetDrag,
   finishWidgetDrag,
   changeWidgetSize,
-  shortcuts,
+  handleWidgetKeyDown,
+  organization,
   appState,
-  selectedShortcut,
-  positions,
   openShortcutContext,
-  setSelectedShortcut,
   run,
 }) {
+  const {
+    shortcuts,
+    selectedIds,
+    startShortcutDrag,
+    startAreaSelection,
+    movePointer,
+    finishPointer,
+    handleClick,
+    handleKeyDown,
+    selectionBoxRef,
+    suppressClickRef,
+  } = organization;
   return (
-    <div ref={shortcutsRef} className="desktop__shortcuts" aria-label="Atalhos da área de trabalho">
-      {desktopLayout.widget &&
-        widgetState.widgets
-          .filter((widget) => widget.visible)
-          .map((widget) => {
-            const definition = getWidgetDefinition(widget.widgetId);
-            if (!definition || widget.widgetId !== 'clock') {
-              return null;
-            }
-            return (
-              <WidgetHost
-                key={widget.instanceId}
-                widget={widget}
-                desktopLayout={desktopLayout}
-                startWidgetDrag={startWidgetDrag}
-                moveWidgetDrag={moveWidgetDrag}
-                finishWidgetDrag={finishWidgetDrag}
-                changeWidgetSize={changeWidgetSize}
-              />
-            );
-          })}
-      {shortcuts.map((app, index) => {
-        const AppIcon = app.icon;
-        const isOpen = appState.instances.some((instance) => instance.appId === app.id);
-        return (
-          <button
-            key={app.id}
-            className={[
-              'desktop__shortcut',
-              selectedShortcut === app.id ? 'desktop__shortcut--selected' : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            style={{
-              position: 'absolute',
-              left: positions[index]?.left ?? -1000,
-              top: positions[index]?.top ?? -1000,
-              display: positions[index] ? undefined : 'none',
-            }}
-            type="button"
-            aria-label={`Abrir ${app.name}`}
-            aria-pressed={selectedShortcut === app.id}
-            title={app.name}
-            onContextMenu={(event) => openShortcutContext(event, app)}
-            onClick={() => {
-              setSelectedShortcut(app.id);
-            }}
-            onDoubleClick={() => {
-              setSelectedShortcut(app.id);
-              run(openApp, app.id);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                setSelectedShortcut(app.id);
-                run(openApp, app.id);
+    <>
+      {desktopLayout.widgetBlocked && (
+        <p className="desktop__layout-notice" role="status">
+          O relógio está temporariamente fora da grade por falta de espaço. Sua preferência foi
+          mantida; ele voltará quando couber.
+        </p>
+      )}
+      {desktopLayout.overflow && (
+        <p className="desktop__layout-notice" role="status">
+          Role a área de trabalho para acessar todos os atalhos.
+        </p>
+      )}
+      <p id="desktop-shortcut-help" className="desktop__visually-hidden">
+        Ctrl ou Shift para selecionar vários atalhos. Ctrl+A seleciona todos. Alt e setas movem a
+        seleção na grade. Escape cancela o arraste e limpa a seleção.
+      </p>
+      <div
+        ref={shortcutsRef}
+        className="desktop__shortcuts"
+        aria-label="Atalhos da área de trabalho"
+        style={{ height: desktopLayout.height || undefined }}
+        onPointerDown={(event) => startAreaSelection(event, desktopLayout)}
+        onPointerMove={movePointer}
+        onPointerUp={finishPointer}
+        onPointerCancel={finishPointer}
+        onLostPointerCapture={finishPointer}
+      >
+        {desktopLayout.widget &&
+          widgetState.widgets
+            .filter((widget) => widget.visible)
+            .map((widget) => {
+              if (!getWidgetDefinition(widget.widgetId) || widget.widgetId !== 'clock') return null;
+              return (
+                <WidgetHost
+                  key={widget.instanceId}
+                  widget={widget}
+                  desktopLayout={desktopLayout}
+                  startWidgetDrag={startWidgetDrag}
+                  moveWidgetDrag={moveWidgetDrag}
+                  finishWidgetDrag={finishWidgetDrag}
+                  changeWidgetSize={changeWidgetSize}
+                  handleWidgetKeyDown={handleWidgetKeyDown}
+                />
+              );
+            })}
+        {shortcuts.map((app, index) => {
+          const AppIcon = app.icon;
+          const position = desktopLayout.shortcuts[index];
+          if (!position) return null;
+          const isOpen = appState.instances.some((instance) => instance.appId === app.id);
+          const selected = selectedIds.includes(app.id);
+          return (
+            <button
+              key={app.id}
+              data-app-id={app.id}
+              className={['desktop__shortcut', selected ? 'desktop__shortcut--selected' : '']
+                .filter(Boolean)
+                .join(' ')}
+              style={{ position: 'absolute', left: position.left, top: position.top }}
+              type="button"
+              aria-label={`Abrir ${app.name}`}
+              aria-pressed={selected}
+              aria-describedby="desktop-shortcut-help"
+              title={app.name}
+              onContextMenu={(event) => openShortcutContext(event, app)}
+              onClick={(event) => handleClick(event, app.id)}
+              onDoubleClick={() => {
+                if (!suppressClickRef.current) run(openApp, app.id);
+              }}
+              onKeyDown={(event) =>
+                handleKeyDown(event, app, index, desktopLayout, (id) => run(openApp, id))
               }
-              if (event.key === ' ') {
-                event.preventDefault();
-                setSelectedShortcut(app.id);
-              }
-            }}
-          >
-            <span className="desktop__shortcut-icon" aria-hidden="true">
-              {AppIcon ? <AppIcon size={27} strokeWidth={1.8} /> : app.name.charAt(0)}
-              {isOpen && <span className="desktop__shortcut-indicator" />}
-            </span>
-            <span className="desktop__shortcut-label">{app.name}</span>
-          </button>
-        );
-      })}
-    </div>
+              onPointerDown={(event) => startShortcutDrag(event, app.id, index, desktopLayout)}
+              onDragStart={(event) => event.preventDefault()}
+            >
+              <span className="desktop__shortcut-icon" aria-hidden="true">
+                {AppIcon ? <AppIcon size={27} strokeWidth={1.8} /> : app.name.charAt(0)}
+                {isOpen && <span className="desktop__shortcut-indicator" />}
+              </span>
+              <span className="desktop__shortcut-label">{app.name}</span>
+            </button>
+          );
+        })}
+        <div ref={selectionBoxRef} className="desktop__selection-box" aria-hidden="true" hidden />
+      </div>
+    </>
   );
 }

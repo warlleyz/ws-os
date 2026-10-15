@@ -86,9 +86,11 @@ Abertura por notificação verifica app público e procura instância existente.
 | ws-os:theme           | dark/light                    |
 | ws-os:welcome-seen    | string true após apresentação |
 | ws-os:desktop-widgets | Widget serializado            |
+| ws-os:desktop-shortcut-order | default/name |
+| ws-os:desktop-shortcut-positions | Mapa appId → {column,row} |
 | ws-os:menu-favorites  | IDs favoritos; máximo atual 6 |
 
-Widget ativo clock-default: visible, position `{column,row}`, size `{columns,rows}`. UI oferece 2×2, 3×2, 3×3. Validação de formato usa fallback. Falha de salvamento ainda pode ser silenciosa. Não apagar chaves ou converter formatos sem migração. IndexedDB de arquivos ainda não existe.
+Widget ativo clock-default: visible, position `{column,row}`, size `{columns,rows}`. UI oferece 2×2, 3×2, 3×3. Validação de formato usa fallback. Falhas de leitura/salvamento são avisadas; preferências inválidas não são sobrescritas automaticamente na inicialização. Não apagar chaves ou converter formatos sem migração. IndexedDB de arquivos ainda não existe.
 
 ## Clima
 
@@ -141,3 +143,42 @@ desnecessariamente.
 A primeira passagem acima descreve o estado anterior. Nesta revisão foram acrescentados resultado tipado no Core, validação estrutural de entrada, feedback de rejeição, entrada lazy explícita no Registry e recuperação de carregamento/renderização por app. Os contratos atuais estão nas seções anteriores.
 
 Permanecem para as etapas dos aplicativos: schemas de domínio, autenticação/autorização backend, confirmação de descarte de documentos, cancelamento de serviços específicos e API de confirmação de abertura na sessão React quando houver consumidor real. Não foram implementados apps novos ou habilitada Administração.
+
+
+## R3 — organização do Desktop, widgets e armazenamento
+
+desktopPreferences preserva as chaves/formato iniciados na R3.3 guardada. O stash
+original permanece intacto como referência; sua funcionalidade foi incorporada e
+completada nesta R3. Não aplicar novamente o stash como se fosse trabalho pendente.
+
+useDesktopOrganization administra ordem, posições preferidas e seleção. Ordem padrão
+e alfabética são persistidas; escolher uma organização limpa posições manuais mesmo
+quando essa ordem já estava ativa. IDs de atalhos permanecem os mesmos.
+
+getDesktopLayout recebe posições preferidas em ordem dos atalhos. Projeta preferências
+na área atual, realoca conflitos deterministicamente e não grava durante resize.
+Widgets não removem capacidade dos 12 atalhos. Se o viewport não comporta os atalhos,
+a grade ganha altura de rolagem; largura menor que uma célula admite rolagem horizontal.
+Um relógio habilitado que não cabe fica temporariamente fora da grade, com aviso;
+sua preferência volta a ser aplicada quando houver espaço. Mostrar ou ampliar um
+widget sem capacidade é bloqueado com feedback.
+
+O observer mede o workspace de tamanho estável, não a altura virtual da grade. Isso
+evita realimentar a medição a partir da própria área de rolagem que o layout cria.
+
+Mouse: seleção individual, Ctrl para alternar seleção, Shift para intervalo, arraste
+de uma seleção e seleção por retângulo no fundo da grade. Touch no fundo preserva
+rolagem; drag de atalhos/widget usa pointer capture. Movimento é confirmado somente
+em pointerup válido. pointercancel, perda de captura, Escape, rolagem ou resize limpam
+a translação temporária e não gravam posições de um drop cancelado.
+
+Teclado: Espaço seleciona, Ctrl+A seleciona todos, Alt+setas move a seleção para a
+próxima posição livre na direção indicada, Enter abre o atalho em foco e Escape
+cancela/limpa seleção. No botão Arrastar relógio, setas movem o widget. Tamanhos
+permitidos: 2×2, 3×2 e 3×3. Gerenciamento adicional em Configurações segue para A6.
+
+Posições e tamanhos são validados. Leitura inválida/bloqueada usa fallback na sessão
+e informa o usuário, sem substituir automaticamente o valor original. Escrita pode
+falhar por quota/bloqueio: o uso continua na sessão com aviso. O salvamento continua
+em chaves separadas, sem transação entre elas ou migração de formato. Tema, favoritos
+e demais chaves existentes não são removidos por esta etapa.

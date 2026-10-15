@@ -5,12 +5,13 @@ export default function useDesktopLayout() {
     height: 0,
   });
   const shortcutsRef = useRef(null);
+  const workspaceRef = useRef(null);
   useEffect(() => {
-    const element = shortcutsRef.current;
+    const element = workspaceRef.current;
     if (!element) return;
     const observer = new ResizeObserver(([entry]) => {
-      const width = Math.round(entry.contentRect.width);
-      const height = Math.round(entry.contentRect.height);
+      const width = Math.round(shortcutsRef.current?.clientWidth ?? entry.contentRect.width);
+      const height = Math.max(0, Math.round(entry.contentRect.height) - 38);
       setGridSize((current) =>
         current.width === width && current.height === height
           ? current
@@ -23,5 +24,5 @@ export default function useDesktopLayout() {
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
-  return { gridSize, shortcutsRef };
+  return { gridSize, shortcutsRef, workspaceRef };
 }

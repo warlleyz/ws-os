@@ -2,8 +2,8 @@ export default function DesktopContextMenu({
   desktopContextRef,
   desktopContext,
   runDesktopContextAction,
-  shortcutOrder,
   clockWidget,
+  shortcutOrder,
 }) {
   return (
     <div
@@ -21,7 +21,7 @@ export default function DesktopContextMenu({
       <button
         type="button"
         onClick={() => runDesktopContextAction('sort-default')}
-        disabled={shortcutOrder === 'default'}
+        aria-pressed={shortcutOrder === 'default'}
       >
         Organização padrão
       </button>
@@ -29,7 +29,7 @@ export default function DesktopContextMenu({
       <button
         type="button"
         onClick={() => runDesktopContextAction('sort-name')}
-        disabled={shortcutOrder === 'name'}
+        aria-pressed={shortcutOrder === 'name'}
       >
         Ordenar por nome
       </button>

@@ -9,13 +9,14 @@ export default function WidgetHost({
   moveWidgetDrag,
   finishWidgetDrag,
   changeWidgetSize,
+  handleWidgetKeyDown,
 }) {
   return (
     <div
       key={widget.instanceId}
       className="desktop__widget"
       data-widget-id={widget.widgetId}
-      data-widget-size={widget.size}
+      data-widget-size={`${widget.size.columns}x${widget.size.rows}`}
       style={{
         position: 'absolute',
         left: desktopLayout.widget.left,
@@ -29,11 +30,13 @@ export default function WidgetHost({
           type="button"
           className="desktop__widget-drag"
           aria-label="Arrastar relógio"
-          title="Arrastar relógio"
+          title="Arrastar relógio ou usar as setas para mover"
+          onKeyDown={handleWidgetKeyDown}
           onPointerDown={startWidgetDrag}
           onPointerMove={moveWidgetDrag}
           onPointerUp={finishWidgetDrag}
           onPointerCancel={finishWidgetDrag}
+          onLostPointerCapture={finishWidgetDrag}
           onDragStart={(event) => event.preventDefault()}
         >
           Arrastar

@@ -97,3 +97,45 @@ não garante corrigir erro persistente de rede ou invalidar cache nativo de mód
 
 Nenhuma alteração em localStorage, CSS, dependências ou na R3.3. Correções locais
 anteriores de performance preservadas e excluídas deste commit. Sem push.
+
+
+## R3 — grade, organização e persistência — 14/10/2026
+
+Entregue: aplicação de posições persistidas, drag individual/de grupo, seleção por
+Ctrl/Shift, retângulo e Ctrl+A, alternativas por teclado, ordenação persistente,
+grade com rolagem em áreas pequenas, capacidade compartilhada com widget, feedback
+de falta de espaço e tratamento de armazenamento inválido/bloqueado/sem quota.
+
+O WIP R3.3 foi lido e reaproveitado como base de intenção, chaves e formatos. Foi
+corrigida sua lacuna de não consumir as posições salvas no layout. O stash original
+não foi aplicado/destruído: SHA fde807596bafaad6878da5721445b428c4ea468b preservado.
+
+Validação automatizada: nove testes novos, incluindo matriz de 96 combinações de
+viewport/widget; todos os 12 atalhos recebem células válidas sem colisões. Cobertos
+retorno de posições após resize, colisões, movimento de grupo, seleção por área,
+compatibilidade com chaves R3.3, dados corrompidos, quota e tamanhos discretos.
+Lint/build e 45 testes passaram na árvore local; commit isolado: lint/build e 43.
+
+Navegador com teclado e cliques reais: seleção Ctrl/Shift, Ctrl+A e Escape; movimento
+de dois atalhos mantendo deslocamento relativo; posições e ordem alfabética após
+reload; relógio movido por setas e redimensionado; tamanho sem espaço rejeitado;
+inclusão em grade cheia bloqueada com aviso. Área 320×300 manteve os 12 atalhos e
+rolagem, com relógio temporariamente indisponível e aviso; ampliar retornou às
+preferências anteriores. Área 600×450 rejeitou 3×3 preservando 2×2 e os atalhos.
+
+Diagnóstico de armazenamento em origem de teste: dados corrompidos e leitura
+bloqueada produziram fallback, dois avisos (Desktop/widgets) e zero tentativas de
+gravação na inicialização. Com escrita bloqueada, movimento por teclado continuou
+funcionando na sessão e houve feedback. Dados reais não foram corrompidos para testar.
+Contador de observer do workspace permaneceu estável sem resize (um callback inicial);
+resize/rolagem não produziram ciclo contínuo observado.
+
+Handlers de drag/seleção por área/cancelamento também foram exercitados no navegador
+com eventos pointer simulados e captura substituída apenas na instrumentação externa.
+Cancelamento manteve a posição e limpou translate. Isso não equivale a validar captura
+nativa com mouse real, touch ou o resize junto às bordas do monitor: esses gates
+continuam na R5. Não declarar o problema original de performance resolvido nesta R3.
+
+Instrumentação ficou fora do produto. Alterações locais anteriores de performance
+foram preservadas e excluídas do commit R3. Não houve instalação, migração destrutiva,
+commit do stash original ou push. Próxima etapa, mediante autorização: R4.

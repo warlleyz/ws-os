@@ -2,157 +2,184 @@ export const COLUMN_STEP = 90;
 export const ROW_STEP = 88;
 export const TASKBAR_RESERVED_WIDTH = 720;
 export const TASKBAR_RESERVED_BOTTOM = 64;
-export function getDesktopLayout(count, width, height, widget) {
-  const columns = Math.floor(width / COLUMN_STEP);
-  const rows = Math.floor(height / ROW_STEP);
-  if (columns < 1 || rows < 1) {
-    return {
-      shortcuts: [],
-      widget: null,
-    };
-  }
-  const occupied = new Set();
-  const shortcuts = [];
-  const reservedWidth = Math.min(TASKBAR_RESERVED_WIDTH, width);
-  const reservedLeft = (width - reservedWidth) / 2;
-  const reservedRight = reservedLeft + reservedWidth;
-  const reservedTop = height - TASKBAR_RESERVED_BOTTOM;
-  function isAvailable(column, row) {
-    if (column >= columns || row >= rows) return false;
-    const left = column * COLUMN_STEP;
-    const top = row * ROW_STEP;
-    const overlapsTaskbar =
-      left < reservedRight &&
-      left + COLUMN_STEP > reservedLeft &&
-      top < height &&
-      top + ROW_STEP > reservedTop;
-    return !occupied.has(`${column}:${row}`) && !overlapsTaskbar;
-  }
 
+export function isDesktopCellAvailable(column, row, layout) {
+  if (
+    !Number.isInteger(column) ||
+    !Number.isInteger(row) ||
+    column < 0 ||
+    row < 0 ||
+    column >= layout.columns ||
+    row >= layout.rows
+  )
+    return false;
+  const left = column * COLUMN_STEP;
+  const top = row * ROW_STEP;
+  const reservedWidth = Math.min(TASKBAR_RESERVED_WIDTH, layout.width);
+  const reservedLeft = (layout.width - reservedWidth) / 2;
+  return !(
+    left < reservedLeft + reservedWidth &&
+    left + COLUMN_STEP > reservedLeft &&
+    top + ROW_STEP > layout.height - TASKBAR_RESERVED_BOTTOM
+  );
+}
 
-  // Widgets e atalhos compartilham a mesma grade.
-  let widgetPosition = null;
-
-  const widgetColumns = widget?.size?.columns ?? 2;
-  const widgetRows = widget?.size?.rows ?? 2;
-
-  function canFitWidget(column, row) {
-    if (
-      column < 0 ||
-      row < 0 ||
-      column + widgetColumns > columns ||
-      row + widgetRows > rows
-    ) {
-      return false;
-    }
-
-    for (let x = column; x < column + widgetColumns; x += 1) {
-      for (let y = row; y < row + widgetRows; y += 1) {
-        if (!isAvailable(x, y)) return false;
+export function getDesktopLayout(count, width, height, widget, preferred = []) {
+  if (width <= 0 || height <= 0)
+    return { shortcuts: [], widget: null, width: 0, height: 0, columns: 0, rows: 0 };
+  const layout = {
+    width: Math.max(COLUMN_STEP, width),
+    height,
+    columns: Math.max(1, Math.floor(width / COLUMN_STEP)),
+    rows: Math.floor(height / ROW_STEP),
+    shortcuts: [],
+    widget: null,
+    widgetSize: widget?.size,
+    overflow: false,
+  };
+  function cells() {
+    const result = [];
+    for (let column = 0; column < layout.columns; column += 1) {
+      for (let row = 0; row < layout.rows; row += 1) {
+        if (isDesktopCellAvailable(column, row, layout)) result.push({ column, row });
       }
     }
-
+    return result;
+  }
+  let available = cells();
+  const occupied = new Set();
+  const key = (column, row) => `${column}:${row}`;
+  const widgetColumns = widget?.size?.columns ?? 2;
+  const widgetRows = widget?.size?.rows ?? 2;
+  function fits(column, row) {
+    for (let x = column; x < column + widgetColumns; x += 1) {
+      for (let y = row; y < row + widgetRows; y += 1) {
+        if (!isDesktopCellAvailable(x, y, layout)) return false;
+      }
+    }
     return true;
   }
-
   if (
     widget?.visible &&
     Number.isInteger(widgetColumns) &&
     Number.isInteger(widgetRows) &&
     widgetColumns > 0 &&
-    widgetRows > 0
+    widgetRows > 0 &&
+    available.length >= count + widgetColumns * widgetRows
   ) {
-    const preferredColumn = widget.position?.column;
-    const preferredRow = widget.position?.row;
-
-    let chosenPosition = null;
-
-    // Respeitar a posição salva quando continuar válida.
+    let chosen = null;
     if (
-      Number.isInteger(preferredColumn) &&
-      Number.isInteger(preferredRow) &&
-      canFitWidget(preferredColumn, preferredRow)
+      Number.isInteger(widget.position?.column) &&
+      Number.isInteger(widget.position?.row) &&
+      fits(widget.position.column, widget.position.row)
+    )
+      chosen = widget.position;
+    for (let column = layout.columns - widgetColumns; column >= 0 && !chosen; column -= 1) {
+      for (let row = 0; row < layout.rows; row += 1) {
+        if (fits(column, row)) {
+          chosen = { column, row };
+          break;
+        }
+      }
+    }
+    if (chosen) {
+      layout.widget = { left: chosen.column * COLUMN_STEP, top: chosen.row * ROW_STEP };
+      for (let x = chosen.column; x < chosen.column + widgetColumns; x += 1) {
+        for (let y = chosen.row; y < chosen.row + widgetRows; y += 1) occupied.add(key(x, y));
+      }
+    }
+  }
+  layout.widgetBlocked = Boolean(widget?.visible && !layout.widget);
+  if (available.length < count) {
+    layout.overflow = true;
+    layout.rows = Math.max(layout.rows, Math.ceil(count / layout.columns) + 1);
+    layout.height = layout.rows * ROW_STEP;
+    available = cells();
+  }
+  // Preferências são projetadas na área atual; resize não altera os dados salvos.
+  const result = Array.from({ length: count }, () => null);
+  for (let index = 0; index < count; index += 1) {
+    const position = preferred[index];
+    if (
+      position &&
+      isDesktopCellAvailable(position.column, position.row, layout) &&
+      !occupied.has(key(position.column, position.row))
     ) {
-      chosenPosition = {
-        column: preferredColumn,
-        row: preferredRow,
-      };
-    }
-
-    // Procurar outra posição quando a preferida estiver indisponível.
-    if (!chosenPosition) {
-      for (
-        let column = columns - widgetColumns;
-        column >= 0 && !chosenPosition;
-        column -= 1
-      ) {
-        for (let row = 0; row < rows; row += 1) {
-          if (canFitWidget(column, row)) {
-            chosenPosition = { column, row };
-            break;
-          }
-        }
-      }
-    }
-
-    if (chosenPosition) {
-      for (
-        let x = chosenPosition.column;
-        x < chosenPosition.column + widgetColumns;
-        x += 1
-      ) {
-        for (
-          let y = chosenPosition.row;
-          y < chosenPosition.row + widgetRows;
-          y += 1
-        ) {
-          occupied.add(`${x}:${y}`);
-        }
-      }
-
-      widgetPosition = {
-        left: chosenPosition.column * COLUMN_STEP,
-        top: chosenPosition.row * ROW_STEP,
-      };
+      result[index] = { left: position.column * COLUMN_STEP, top: position.row * ROW_STEP };
+      occupied.add(key(position.column, position.row));
     }
   }
-
-  // Não permitir que o widget retire posições dos atalhos.
-  if (widgetPosition) {
-    let availableForShortcuts = 0;
-
-    for (let column = 0; column < columns; column += 1) {
-      for (let row = 0; row < rows; row += 1) {
-        if (isAvailable(column, row)) {
-          availableForShortcuts += 1;
-        }
-      }
-    }
-
-    if (availableForShortcuts < count) {
-      for (const cell of occupied) {
-        occupied.delete(cell);
-      }
-
-      widgetPosition = null;
-    }
+  let nextCell = 0;
+  for (let index = 0; index < count; index += 1) {
+    if (result[index]) continue;
+    while (
+      nextCell < available.length &&
+      occupied.has(key(available[nextCell].column, available[nextCell].row))
+    )
+      nextCell += 1;
+    const cell = available[nextCell++];
+    if (!cell) break;
+    result[index] = { left: cell.column * COLUMN_STEP, top: cell.row * ROW_STEP };
+    occupied.add(key(cell.column, cell.row));
   }
-
-  // Atalhos e widgets utilizam o mesmo mapa de ocupação.
-  for (let column = 0; column < columns && shortcuts.length < count; column += 1) {
-    for (let row = 0; row < rows && shortcuts.length < count; row += 1) {
-      if (!isAvailable(column, row)) continue;
-      occupied.add(`${column}:${row}`);
-      shortcuts.push({
-        left: column * COLUMN_STEP,
-        top: row * ROW_STEP,
-      });
-    }
-  }
-  return {
-    shortcuts,
-    widget: widgetPosition,
-  };
+  layout.shortcuts = result;
+  return layout;
 }
 
-// Avisos temporários: o histórico é mantido pelo notificationManager.
+export function moveDesktopShortcuts(shortcuts, layout, selectedIds, anchorId, column, row) {
+  const anchor = layout.shortcuts[shortcuts.findIndex((app) => app.id === anchorId)];
+  if (!anchor) return null;
+  const dx = column - anchor.left / COLUMN_STEP;
+  const dy = row - anchor.top / ROW_STEP;
+  const targets = new Map();
+  const stationary = new Set();
+  for (let index = 0; index < shortcuts.length; index += 1) {
+    const position = layout.shortcuts[index];
+    if (!position) return null;
+    const current = { column: position.left / COLUMN_STEP, row: position.top / ROW_STEP };
+    if (selectedIds.includes(shortcuts[index].id))
+      targets.set(shortcuts[index].id, { column: current.column + dx, row: current.row + dy });
+    else stationary.add(`${current.column}:${current.row}`);
+  }
+  if (!targets.size) return null;
+  for (const position of targets.values()) {
+    if (
+      !isDesktopCellAvailable(position.column, position.row, layout) ||
+      stationary.has(`${position.column}:${position.row}`)
+    )
+      return null;
+    if (
+      layout.widget &&
+      position.column * COLUMN_STEP <
+        layout.widget.left + layout.widgetSize.columns * COLUMN_STEP &&
+      (position.column + 1) * COLUMN_STEP > layout.widget.left &&
+      position.row * ROW_STEP < layout.widget.top + layout.widgetSize.rows * ROW_STEP &&
+      (position.row + 1) * ROW_STEP > layout.widget.top
+    )
+      return null;
+  }
+  return Object.fromEntries(
+    shortcuts.map((app, index) => [
+      app.id,
+      targets.get(app.id) ?? {
+        column: layout.shortcuts[index].left / COLUMN_STEP,
+        row: layout.shortcuts[index].top / ROW_STEP,
+      },
+    ]),
+  );
+}
+
+export function getShortcutsInArea(shortcuts, positions, area) {
+  return shortcuts
+    .filter((_app, index) => {
+      const p = positions[index];
+      return (
+        p &&
+        p.left < area.left + area.width &&
+        p.left + 82 > area.left &&
+        p.top < area.top + area.height &&
+        p.top + 82 > area.top
+      );
+    })
+    .map((app) => app.id);
+}

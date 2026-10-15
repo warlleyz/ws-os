@@ -222,3 +222,49 @@
   font-size: 11px;
   line-height: 1.4;
 }
+
+/* R3: interação e acesso à grade completa, inclusive em áreas menores. */
+.desktop__shortcuts {
+  min-width: 90px;
+}
+.desktop__shortcut,
+.desktop__widget-drag {
+  touch-action: none;
+}
+.desktop__shortcut[data-drop-valid] {
+  z-index: 2;
+}
+.desktop__shortcut[data-drop-valid='true'] {
+  outline: 2px solid var(--accent-secondary);
+}
+.desktop__shortcut[data-drop-valid='false'] {
+  outline: 2px solid var(--text-primary);
+  opacity: 0.5;
+}
+.desktop__selection-box {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  border: 1px solid var(--accent-secondary);
+  background: rgb(101 205 225 / 12%);
+}
+.desktop__layout-notice {
+  margin: 8px 20px 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.desktop__visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.desktop__widget[data-drop-valid='true'] {
+  outline: 2px solid var(--accent-secondary);
+}
+.desktop__widget[data-drop-valid='false'] {
+  opacity: 0.5;
+}
