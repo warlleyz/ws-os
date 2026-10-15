@@ -656,7 +656,7 @@ function Taskbar({
           </button>
         </div>
         <span className="taskbar__divider" aria-hidden="true" />
-        <div className="taskbar__section taskbar__section--status">
+        <div className="taskbar__weather-group">
           <button
             type="button"
             className="taskbar__weather"
@@ -665,9 +665,14 @@ function Taskbar({
             aria-expanded={weatherOpen}
             onClick={toggleWeather}
           >
-            <SystemIcon name="weather" />
-            {weather && <span>{Math.round(weather.temperature_2m)}°</span>}
+            <CloudSun size={19} />
           </button>
+
+          {weather && (
+            <span className="taskbar__temperature">
+              {Math.round(weather.temperature_2m)}°
+            </span>
+          )}
           <button
             type="button"
             className="taskbar__clock"
