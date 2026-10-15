@@ -1,3 +1,6 @@
+import { canCloseApp, requestCloseConfirmation, useCloseConfirmation } from './appCloseGuards';
+import AppCloseDialog from '../shared/components/AppCloseDialog';
+import { closeApp } from './appManager';
 import { translate as t, useLocale } from '../shared/i18n/i18n';
 import { useCallback, useState } from 'react';
 import { SystemContext } from './systemContext';
@@ -24,6 +27,7 @@ import {
 const MAX_VISIBLE_TOASTS = 3;
 export default function SystemProvider({ children }) {
   useLocale();
+  const closeRequest = useCloseConfirmation();
   const [appState, setAppState] = useState(initialAppState);
   const [notificationState, setNotificationState] = useState(initialNotificationState);
   const [visibleToasts, setVisibleToasts] = useState([]);
@@ -40,6 +44,10 @@ export default function SystemProvider({ children }) {
 
   // Único ponto de entrada para ações de aplicativos e avisos do sistema.
   function run(operation, id, options) {
+    if (operation === closeApp && !canCloseApp(id)) {
+      requestCloseConfirmation(id, () => setAppState((current) => closeApp(current, id)));
+      return false;
+    }
     if (operation === openApp) {
       const request = validateAppOpen(id, options);
       if (!request.ok) {
@@ -49,7 +57,7 @@ export default function SystemProvider({ children }) {
           source: t('Sistema'),
           type: 'error',
         });
-        return;
+        return false;
       }
     }
     setAppState((current) => operation(current, id, options));
@@ -72,6 +80,7 @@ export default function SystemProvider({ children }) {
         }
       }
     }
+    return true;
   }
   function handleNotificationAction(action, id) {
     if (action === 'remove') {
@@ -131,7 +140,10 @@ export default function SystemProvider({ children }) {
         handleNotificationOpen,
       }}
     >
-      {children}
+      <div style={{ display: 'contents' }} inert={Boolean(closeRequest)}>
+        {children}
+      </div>
+      <AppCloseDialog request={closeRequest} />
     </SystemContext.Provider>
   );
 }

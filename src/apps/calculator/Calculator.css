@@ -1,0 +1,27 @@
+.ws-calculator {
+  max-width: 100%;
+}
+.ws-calculator__keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-block: 16px;
+}
+.ws-calculator__keys button {
+  min-width: 0;
+  padding: 10px 2px;
+}
+.ws-calculator__result {
+  display: block;
+  padding: 14px;
+  margin-block: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  font-size: 24px;
+  overflow-wrap: anywhere;
+}
+.ws-calculator input[type='checkbox'] {
+  width: 22px;
+  min-height: 22px;
+}

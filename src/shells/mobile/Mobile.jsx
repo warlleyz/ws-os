@@ -176,7 +176,7 @@ export default function Mobile({ theme, onThemeChange }) {
           instance.appId === instanceToClose.origin && instance.id !== instanceToClose.id,
       );
 
-    run(closeApp, instanceToClose.id);
+    if (run(closeApp, instanceToClose.id) === false) return;
 
     if (originInstance) {
       run(originInstance.minimized ? restoreApp : activateApp, originInstance.id);
@@ -205,6 +205,8 @@ export default function Mobile({ theme, onThemeChange }) {
     handleNotificationOpen(notification);
     closePanel();
   }
+
+  const visibleScreen = screen === 'app' && !selectedInstance ? 'home' : screen;
 
   return (
     <main
@@ -246,7 +248,7 @@ export default function Mobile({ theme, onThemeChange }) {
           </div>
         </div>
 
-        {screen === 'app' ? (
+        {visibleScreen === 'app' ? (
           <header className="ws-mobile__header">
             <button type="button" onClick={goBack}>
               ← {t('Voltar')}
@@ -265,7 +267,7 @@ export default function Mobile({ theme, onThemeChange }) {
           </header>
         ) : null}
 
-        {screen === 'home' && (
+        {visibleScreen === 'home' && (
           <MobileHome
             apps={apps}
             onOpenApp={openMobileApp}
@@ -273,16 +275,16 @@ export default function Mobile({ theme, onThemeChange }) {
           />
         )}
 
-        {(screen === 'catalog' || screen === 'search') && (
+        {(visibleScreen === 'catalog' || visibleScreen === 'search') && (
           <MobileCatalog
             key={screen}
             apps={apps}
             onOpenApp={openMobileApp}
-            searchMode={screen === 'search'}
+            searchMode={visibleScreen === 'search'}
           />
         )}
 
-        {screen === 'app' && !selectedInstance && (
+        {visibleScreen === 'app' && !selectedInstance && (
           <p className="ws-mobile__loading" role="status">
             {t('Carregando')}
           </p>
@@ -290,14 +292,14 @@ export default function Mobile({ theme, onThemeChange }) {
 
         <section
           className="ws-mobile__app-content"
-          hidden={screen !== 'app'}
+          hidden={visibleScreen !== 'app'}
           aria-label={t(currentApp?.name ?? 'Aplicativos')}
         >
           {appState.instances
             .filter((instance) => getAppDefinition(instance.appId)?.public)
             .map((instance) => {
               const app = getAppDefinition(instance.appId);
-              const isVisible = screen === 'app' && selectedInstance?.id === instance.id;
+              const isVisible = visibleScreen === 'app' && selectedInstance?.id === instance.id;
 
               return (
                 <div
@@ -312,7 +314,7 @@ export default function Mobile({ theme, onThemeChange }) {
             })}
         </section>
 
-        <MobileNavigation activeScreen={screen} onNavigate={navigateTo} />
+        <MobileNavigation activeScreen={visibleScreen} onNavigate={navigateTo} />
       </div>
 
       {activePanel && (

@@ -17,7 +17,7 @@ Não confundir componente integrado com app completo, nem configuração prepara
 | Bloco       | Estado                                  | Escopo                                                                 |
 | ----------- | --------------------------------------- | ---------------------------------------------------------------------- |
 | A2          | Implementado com dependências pendentes | Projetos, Demos, Dev Insights e serviços de leitura/cache/cancelamento |
-| A3          | Não iniciado                            | Calculadora e Contato                                                  |
+| A3          | Implementado; envio externo pendente    | Calculadora e Contato                                                  |
 | A5          | Não iniciado                            | Arquivos locais, editor e integração ao visualizador                   |
 | Demais apps | Não iniciado                            | Conforme capacidade desta execução; registrar entrega e limites        |
 | Temas v1    | Referência localizada                   | Comparar e adaptar vidro/blur preservando controles e acessibilidade   |
@@ -42,3 +42,13 @@ Cache compartilhado por URL com cancelamento por consumidor, timeout e fallback 
 Validação: lint/build e 75 testes aprovados. Navegador consultou GitHub real: 14 repositórios, 1 estrela e 2 seguidores no momento do ensaio; pesquisa SnakePy/detalhes funcionaram, Insights reutilizou cache; voltar no Mobile retornou ao catálogo interno. Console sem erros/warnings. Esses números são evidência datada, não conteúdo fixo. Embed real e WakaTime precisam de descritores/origens/dados autorizados para validação ponta a ponta.
 
 Referências técnicas consultadas: documentação oficial REST GitHub (repositórios públicos) e WakaTime (Stats). Endpoints/provedores e erros devem ser revalidados ao configurar produção.
+
+## A3 — Calculadora e Contato
+
+Calculadora usa parser restrito, sem eval/Function, com precedência, potência associativa à direita, sinais, parênteses, porcentagem, funções científicas e graus/radianos. Tem teclado, erros de domínio/divisão por zero e histórico local limitado a 20 entradas. Precisão de exibição até 14 dígitos; não se destina a contabilidade de precisão decimal arbitrária.
+
+Contato possui formulário, canais editáveis, validações, consentimento, honeypot, intervalo mínimo de preenchimento, limite de repetição em sessão e integração REST EmailJS por chave pública. Sucesso só após resposta técnica; timeout/cancelamento é envio não confirmado. Agendamento é solicitação privada para análise, nunca confirmação de reunião/evento público. Nenhuma mensagem real foi enviada nos testes. Configurar serviço/template/chave pública, remetente/destinatário fixo no provedor, restrição de origens e proteção antiabuso/CAPTCHA no serviço antes de produção. Throttle local não é controle de segurança de backend.
+
+Proteção compartilhada de alterações não salvas: fechar abre diálogo acessível do WS OS, mantendo o fundo inert, foco e Escape/Tab; cancelar mantém dados; descartar fecha a instância. Reload usa proteção nativa do navegador. SystemProvider retorna aceitação/rejeição booleana para fechamento; isso não é API de resultado síncrono de ID na abertura. Mobile respeita rejeição e retorna à Home se um fechamento externo remover a última instância.
+
+Validação: sete testes novos de aritmética, domínio, entrada não executável, contato, agenda, resposta do provedor e guards. Navegador: 2+3*4 resultou 14; 1/0 exibiu erro; Contato não configurado não habilita envio; diálogo preservou nome ao cancelar e fechou após descarte. Suíte completa esperada nesta entrega: 82 testes, além de lint/build.

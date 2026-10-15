@@ -1,0 +1,38 @@
+.ws-close-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(0 0 0 / 55%);
+}
+.ws-close-dialog {
+  width: min(420px, 100%);
+  max-height: 90dvh;
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-lg);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-floating);
+}
+.ws-close-dialog h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+.ws-close-dialog p {
+  line-height: 1.6;
+}
+.ws-close-dialog button {
+  min-height: 44px;
+  padding: 10px 14px;
+  margin: 6px;
+  border: 1px solid var(--border-control);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+}
