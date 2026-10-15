@@ -225,7 +225,16 @@ export default function WallyPanel({ setWallyOpen }) {
 
         {lastError && (
           <p className="ws-wally__verification-info" role="status">
-            {t('Não foi possível usar a IA. Resposta local utilizada.')}
+            {t(
+              lastError === 'AI_DISABLED'
+                ? 'O Gemini está temporariamente desativado. Resposta local utilizada.'
+                : lastError === 'RATE_LIMIT_EXCEEDED'
+                  ? 'Limite de consultas atingido. Resposta local utilizada.'
+                  : lastError === 'VERIFICATION_REQUIRED' ||
+                    lastError === 'VERIFICATION_FAILED'
+                    ? 'A verificação de segurança não foi concluída. Resposta local utilizada.'
+                    : 'O Gemini está indisponível. Resposta local utilizada.',
+            )}
           </p>
         )}
         <form
