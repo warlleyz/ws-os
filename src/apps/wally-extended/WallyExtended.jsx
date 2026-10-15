@@ -31,6 +31,8 @@ export default function WallyExtended() {
     sendMessage,
     clearConversation,
     provider,
+    remoteEnabled,
+    lastError,
     maxQuestionLength,
   } = useWallyConversation();
 
@@ -70,9 +72,13 @@ export default function WallyExtended() {
       <h2>{t('Wally Estendido')}</h2>
 
       <p>
-        {t(
-          'Assistente local do portfólio. Sem IA remota ou histórico enviado a servidores.',
-        )}
+        {remoteEnabled
+          ? t(
+            'Assistente do WS OS com integração ao Gemini e respostas locais alternativas. Perguntas e contexto da conversa podem ser enviados ao serviço de IA.',
+          )
+          : t(
+            'Assistente local do portfólio. Sem IA remota ou histórico enviado a servidores.',
+          )}
       </p>
 
       <p>
