@@ -1,0 +1,221 @@
+diff --git a/src/features/widgets/clock/ClockWidget.jsx b/src/features/widgets/clock/ClockWidget.jsx
+index 31fa74a..001f127 100644
+--- a/src/features/widgets/clock/ClockWidget.jsx
++++ b/src/features/widgets/clock/ClockWidget.jsx
+@@ -1,6 +1,7 @@
++import { memo } from 'react';
+ import { useEffect, useState } from 'react';
+ 
+-export default function ClockWidget() {
++function ClockWidget() {
+   const [now, setNow] = useState(() => new Date());
+ 
+   useEffect(() => {
+@@ -30,3 +31,5 @@ export default function ClockWidget() {
+     </section>
+   );
+ }
++
++export default memo(ClockWidget);
+diff --git a/src/features/windows/WindowLayer.jsx b/src/features/windows/WindowLayer.jsx
+index bb11e93..44e521c 100644
+--- a/src/features/windows/WindowLayer.jsx
++++ b/src/features/windows/WindowLayer.jsx
+@@ -1,10 +1,11 @@
++import { memo } from 'react';
+ import Window from './Window';
+ import { getAppDefinition } from '../../core/appRegistry';
+ import { activateApp } from '../../core/appManager';
+ import { minimizeApp } from '../../core/appManager';
+ import { closeApp } from '../../core/appManager';
+ 
+-export default function WindowLayer({ appState, run }) {
++function WindowLayer({ appState, run }) {
+   return (
+     <div className="desktop__window-layer">
+       {appState.instances.map((instance, index) => {
+@@ -27,3 +28,5 @@ export default function WindowLayer({ appState, run }) {
+     </div>
+   );
+ }
++
++export default memo(WindowLayer);
+diff --git a/src/features/windows/useWindowInteraction.js b/src/features/windows/useWindowInteraction.js
+index e6615c6..08ec5d8 100644
+--- a/src/features/windows/useWindowInteraction.js
++++ b/src/features/windows/useWindowInteraction.js
+@@ -105,13 +105,14 @@ export default function useWindowInteraction({ instance, app }) {
+     const parent = element?.offsetParent;
+     if (!element || !parent) return;
+     let frame = 0;
+-    const observer = new ResizeObserver(() => {
++    const observer = new ResizeObserver(([entry]) => {
++      const bounds = { width: entry.contentRect.width, height: entry.contentRect.height };
+       cancelAnimationFrame(frame);
+       frame = requestAnimationFrame(() => {
+         if (modeRef.current !== 'normal' || !geometryRef.current) {
+           return;
+         }
+-        geometryRef.current = applyGeometry(element, geometryRef.current);
++        geometryRef.current = applyGeometry(element, geometryRef.current, bounds);
+       });
+     });
+     observer.observe(parent);
+diff --git a/src/features/windows/windowGeometry.js b/src/features/windows/windowGeometry.js
+index e963f11..f53373d 100644
+--- a/src/features/windows/windowGeometry.js
++++ b/src/features/windows/windowGeometry.js
+@@ -36,12 +36,17 @@ export function constrainGeometry(geometry, bounds) {
+     height,
+   };
+ }
+-export function applyGeometry(element, geometry) {
+-  const next = constrainGeometry(geometry, getBounds(element));
+-  element.style.left = `${next.x}px`;
+-  element.style.top = `${next.y}px`;
+-  element.style.width = `${next.width}px`;
+-  element.style.height = `${next.height}px`;
++export function applyGeometry(element, geometry, bounds = getBounds(element)) {
++  const next = constrainGeometry(geometry, bounds);
++  const styles = {
++    left: `${next.x}px`,
++    top: `${next.y}px`,
++    width: `${next.width}px`,
++    height: `${next.height}px`,
++  };
++  for (const [property, value] of Object.entries(styles)) {
++    if (element.style[property] !== value) element.style[property] = value;
++  }
+   return next;
+ }
+ export function resizeGeometry(initial, direction, dx, dy, bounds) {
+diff --git a/src/shared/components/AppIcon.jsx b/src/shared/components/AppIcon.jsx
+index fb17586..d0d9687 100644
+--- a/src/shared/components/AppIcon.jsx
++++ b/src/shared/components/AppIcon.jsx
+@@ -1,7 +1,10 @@
+-export function AppIcon({ app, size = 18 }) {
++import { memo } from 'react';
++function AppIconView({ app, size = 18 }) {
+   const Icon = app?.icon;
+   if (Icon) {
+     return <Icon size={size} strokeWidth={1.8} aria-hidden="true" />;
+   }
+   return <span aria-hidden="true">{app?.name?.charAt(0) ?? '?'}</span>;
+ }
++
++export const AppIcon = memo(AppIconView);
+diff --git a/src/shells/desktop/DesktopShortcuts.jsx b/src/shells/desktop/DesktopShortcuts.jsx
+index 37aa5f0..314f627 100644
+--- a/src/shells/desktop/DesktopShortcuts.jsx
++++ b/src/shells/desktop/DesktopShortcuts.jsx
+@@ -1,3 +1,4 @@
++import { AppIcon } from '../../shared/components/AppIcon';
+ import { getWidgetDefinition } from '../../core/widgetManager';
+ import WidgetHost from '../../features/widgets/WidgetHost';
+ import { openApp } from '../../core/appManager';
+@@ -41,7 +42,6 @@ export default function DesktopShortcuts({
+             );
+           })}
+       {shortcuts.map((app, index) => {
+-        const AppIcon = app.icon;
+         const isOpen = appState.instances.some((instance) => instance.appId === app.id);
+         return (
+           <button
+@@ -83,7 +83,7 @@ export default function DesktopShortcuts({
+             }}
+           >
+             <span className="desktop__shortcut-icon" aria-hidden="true">
+-              {AppIcon ? <AppIcon size={27} strokeWidth={1.8} /> : app.name.charAt(0)}
++              <AppIcon app={app} size={27} />
+               {isOpen && <span className="desktop__shortcut-indicator" />}
+             </span>
+             <span className="desktop__shortcut-label">{app.name}</span>
+diff --git a/src/shells/desktop/taskbar/Taskbar.jsx b/src/shells/desktop/taskbar/Taskbar.jsx
+index 6a84925..0ea81b8 100644
+--- a/src/shells/desktop/taskbar/Taskbar.jsx
++++ b/src/shells/desktop/taskbar/Taskbar.jsx
+@@ -16,7 +16,7 @@ import PanelLayer from '../../../features/panels/PanelLayer';
+ import TaskbarApps from './TaskbarApps';
+ import { resolvePanel } from '../../../core/panelManager';
+ import { SystemIcon } from '../../../shared/components/SystemIcon';
+-import { useEffect, useRef, useState } from 'react';
++import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+ import { createPortal } from 'react-dom';
+ import {
+   activateApp,
+@@ -30,7 +30,7 @@ import { getAppDefinition } from '../../../core/appRegistry';
+ 
+ // Utilitários e preferências persistentes do WS Menu.
+ 
+-export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
++function Taskbar({ onShowDesktop, theme, onThemeChange }) {
+   const {
+     appState,
+     run: onAppAction,
+@@ -612,3 +612,15 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
+     </div>
+   );
+ }
++
++const MemoizedTaskbar = memo(Taskbar);
++
++// Mantém a Taskbar isolada do resize sem reter um callback antigo do Desktop.
++export default function TaskbarContainer(props) {
++  const showDesktopRef = useRef(props.onShowDesktop);
++  useLayoutEffect(() => {
++    showDesktopRef.current = props.onShowDesktop;
++  }, [props.onShowDesktop]);
++  const onShowDesktop = useCallback(() => showDesktopRef.current?.(), []);
++  return <MemoizedTaskbar {...props} onShowDesktop={onShowDesktop} />;
++}
+diff --git a/tests/core/refactor.test.cjs b/tests/core/refactor.test.cjs
+index 252df95..ef57faa 100644
+--- a/tests/core/refactor.test.cjs
++++ b/tests/core/refactor.test.cjs
+@@ -441,3 +441,45 @@ test('widgets preservam preferências válidas armazenadas', () => {
+   assert.equal(widget.size.columns, 3);
+   assert.equal(widget.size.rows, 2);
+ });
++
++test('resize aplica geometria usando dimensões do observer sem reler layout', () => {
++  const m = loadPureModule('src/features/windows/windowGeometry.js');
++  const element = {
++    style: {},
++    get offsetParent() {
++      throw new Error('Leitura de layout inesperada');
++    },
++  };
++  const result = m.applyGeometry(
++    element,
++    { x: 900, y: 600, width: 400, height: 300 },
++    { width: 1000, height: 700 },
++  );
++  assert.equal(result.x, 592);
++  assert.equal(result.y, 392);
++  assert.equal(element.style.width, '400px');
++});
++
++test('geometria inalterada não reescreve estilos a cada resize', () => {
++  const m = loadPureModule('src/features/windows/windowGeometry.js');
++  let writes = 0;
++  const style = new Proxy(
++    {},
++    {
++      set(target, property, value) {
++        writes += 1;
++        target[property] = value;
++        return true;
++      },
++    },
++  );
++  const element = { style };
++  const geometry = { x: 30, y: 40, width: 400, height: 300 };
++  const bounds = { width: 1000, height: 700 };
++  m.applyGeometry(element, geometry, bounds);
++  assert.equal(writes, 4);
++  m.applyGeometry(element, geometry, bounds);
++  assert.equal(writes, 4);
++  m.applyGeometry(element, { ...geometry, x: 50 }, bounds);
++  assert.equal(writes, 5);
++});

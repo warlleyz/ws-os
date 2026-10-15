@@ -127,6 +127,23 @@ export default function useWindowInteraction({ instance, app }) {
       previewRef.current = null;
     };
   }, []);
+  useLayoutEffect(() => {
+    return () => {
+      const interaction = interactionRef.current;
+      interactionRef.current = null;
+
+      if (interaction) {
+        const { captureTarget, pointerId } = interaction;
+
+        if (captureTarget?.hasPointerCapture?.(pointerId)) {
+          captureTarget.releasePointerCapture(pointerId);
+        }
+      }
+
+      previewRef.current?.remove();
+      previewRef.current = null;
+    };
+  }, []);
   function startInteraction(event, type, direction = '') {
     if (event.button !== 0) return;
     if (type === 'drag' && event.target.closest('button')) {

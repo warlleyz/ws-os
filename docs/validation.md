@@ -214,3 +214,33 @@ Integração condicionada a commit isolado.
 
 ### Próximo passo
 R5.2 — Ciclo de vida de janelas, Desktop e recursos.
+
+## R5.2 — Ciclo de vida de janelas e Desktop
+Data: 14/10/2026
+
+### Alterações
+- Cleanup explícito de pointer capture na desmontagem de janelas.
+- Preservados os listeners, observers e timers existentes.
+- Nenhuma alteração em geometria, contratos ou persistência.
+- Nenhuma reorganização de diretórios ou dependência nova.
+
+### Validações
+- npm.cmd run lint: aprovado.
+- npm.cmd run build: aprovado.
+- node --test tests/core/*.test.cjs: aprovado.
+- Abertura, minimização, restauração, maximização e fechamento: aprovados manualmente.
+- Arraste e cancelamento com Escape: aprovados manualmente.
+- Dez ciclos de abertura e fechamento: aprovados manualmente, sem problemas relatados.
+
+### Limitações
+- Testes manuais realizados pelo desenvolvedor.
+- Ausência de medição instrumental de memória e listeners.
+- Resize nativo junto às bordas físicas ainda não validado.
+- WCAG AA não comprovada.
+
+### Resultado
+Correção de cleanup integrada ao escopo da R5.2.
+Testes automatizados e manuais aprovados.
+
+### Próximo passo
+R5.3 — Diagnóstico e validação do resize nativo.
