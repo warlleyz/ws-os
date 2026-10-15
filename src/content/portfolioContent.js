@@ -2,6 +2,8 @@
 // Nunca coloque chaves privadas ou dados de visitantes neste arquivo.
 export const portfolio = {
   githubUser: 'warlleyz',
+  notesEndpoint: '', // /api/posts quando o backend estiver configurado.
+  posts: [], // Apenas publicações públicas: { id, title, summary, body, tags: [], status: 'published', publishedAt: ISO }. Nunca rascunhos privados.
   wakatimeProxy: '', // Endpoint próprio protegido, ex.: /api/wakatime. Não é uma chave de API.
   profile: {
     name: '',

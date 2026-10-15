@@ -602,5 +602,16 @@
   "Desfazer": "Undo",
   "Recordes somente neste navegador. Ranking global ainda não conectado.": "Best scores stay in this browser only. Global rankings are not connected yet.",
   "Jogar": "Play",
-  "DOOM depende de licença e distribuição autorizadas; não está incluído.": "DOOM requires authorized licensing and distribution; it is not included."
+  "DOOM depende de licença e distribuição autorizadas; não está incluído.": "DOOM requires authorized licensing and distribution; it is not included.",
+  "Resposta de publicações inválida.": "Invalid publications response.",
+  "Endpoint de publicações inválido.": "Invalid publications endpoint.",
+  "Publicações, estudos e registros públicos.": "Public articles, studies and records.",
+  "Atualizar publicações": "Refresh publications",
+  "Publicação": "Publication",
+  "Voltar para publicações": "Back to publications",
+  "Buscar publicações": "Search publications",
+  "Assunto": "Topic",
+  "Nenhuma publicação disponível. O conteúdo será adicionado pelo autor.": "No publications available. Content will be added by the author.",
+  "Nenhuma publicação encontrada.": "No publications found.",
+  "Ler publicação": "Read publication"
 }

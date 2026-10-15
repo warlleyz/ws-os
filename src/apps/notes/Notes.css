@@ -1,0 +1,11 @@
+.notes-app__body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+  user-select: text;
+  max-width: 75ch;
+}
+.notes-app time {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
