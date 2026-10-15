@@ -7,6 +7,7 @@
 @import './system.css';
 @import './themes/foundation.css';
 @import './themes/customization.css';
+@import './themes/glass.css';
 
 :root {
   font-family: 'Nunito Sans', sans-serif;

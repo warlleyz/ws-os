@@ -24,6 +24,7 @@ export default function useWindowInteraction({ instance, app }) {
       const element = windowRef.current;
       interactionRef.current = null;
       if (element) {
+        element.removeAttribute('data-interacting');
         geometryRef.current = applyGeometry(element, interaction.geometry);
       }
       previewRef.current?.remove();
@@ -40,6 +41,7 @@ export default function useWindowInteraction({ instance, app }) {
   }, []);
   useEffect(() => {
     if (!instance.minimized) return;
+    windowRef.current?.removeAttribute('data-interacting');
     const interaction = interactionRef.current;
     interactionRef.current = null;
     if (interaction) {
@@ -172,6 +174,7 @@ export default function useWindowInteraction({ instance, app }) {
       changeMode('normal');
       geometryRef.current = applyGeometry(element, geometry);
     }
+    element.setAttribute('data-interacting', 'true');
     interactionRef.current = {
       type,
       direction,
@@ -224,6 +227,7 @@ export default function useWindowInteraction({ instance, app }) {
       return;
     }
     interactionRef.current = null;
+    windowRef.current?.removeAttribute('data-interacting');
     removeSnapPreview();
     if (event.type === 'pointerup' && interaction.type === 'drag') {
       const element = windowRef.current;

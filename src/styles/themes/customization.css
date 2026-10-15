@@ -47,12 +47,12 @@
 }
 :root[data-blur='normal'] {
   --blur-light: 8px;
-  --blur-medium: 12px;
-  --blur-strong: 20px;
+  --blur-medium: 24px;
+  --blur-strong: 28px;
 }
 :root[data-blur='strong'] {
   --blur-light: 12px;
-  --blur-medium: 20px;
+  --blur-medium: 28px;
   --blur-strong: 30px;
 }
 :root[data-transparency='solid'] {

@@ -20,7 +20,7 @@ Não confundir componente integrado com app completo, nem configuração prepara
 | A3          | Implementado; envio externo pendente       | Calculadora e Contato                                                  |
 | A5          | Implementado; ensaios adicionais pendentes | Arquivos locais, editor e integração ao visualizador                   |
 | Demais apps | Não iniciado                               | Conforme capacidade desta execução; registrar entrega e limites        |
-| Temas v1    | Referência localizada                      | Comparar e adaptar vidro/blur preservando controles e acessibilidade   |
+| Temas v1    | Adaptado e conferido nos dois temas        | Comparar e adaptar vidro/blur preservando controles e acessibilidade   |
 
 ## Dependências externas
 
@@ -62,3 +62,11 @@ Arquivo oficial é catálogo somente leitura e depende de conteúdo público cad
 Editor usa revisão transacional: uma janela antiga não sobrescreve a mais recente. Rascunho sobrevive ao erro; salvar cópia e recarregar com confirmação permitem recuperação. Ctrl+S, indicador de pendência e guard de fechamento/reload. Visualizador local tem texto escapado, imagem com zoom, PDF sandbox com alternativa de download, metadados e revogação de blob URLs.
 
 Validação: seis testes novos para criação, nomes, duplicação, ciclos, extensão, revisões, lixeira/descendentes, purga, limites e integridade. Navegador com IndexedDB real: criou teste-codex.txt, salvou por Ctrl+S, visualizou conteúdo, moveu à lixeira/restaurou e recuperou após reload. Duas janelas produziram conflito de revisão mantendo o rascunho. Nenhum dado da origem habitual do usuário foi alterado. Prévia PDF, importação de todos os formatos e falhas reais de quota ainda precisam de ensaios complementares; os caminhos de erro/modelos têm cobertura automatizada. Suíte nesta etapa: 88 testes.
+
+## Temas — referência v1
+
+Referência lida: warlleyz/portfolio-warlley, commit c2e51be6106752f671d9469e4eadad27b669b24c. V1 usa vidro na janela inteira (24 px/saturação 135%), barra 24 px e painéis 28–30 px. Adaptação na v2: janela inteira translúcida, conteúdo externo transparente e cartões legíveis; normal 24/28 px, forte 28/30 px, demais níveis preservados. Sem transições de left/top/width/height da v1: não introduzir animação de geometria durante resize.
+
+Uma camada de blur por janela/painel evita empilhamento desnecessário. Durante gesto de janela, o efeito é suspenso e a superfície fica sólida; pointerup/cancelamento/Escape/minimização restauram o estado. Baixo custo/redução de transparência e preferências do SO prevalecem; navegadores sem suporte recebem superfícies sólidas. Opacidade mínima 88% foi mantida pela legibilidade dos destaques, em vez de copiar os 78% da v1 indiscriminadamente. O resultado é uma adaptação visual, não uma cópia pixel a pixel nem prova de desempenho em todos os monitores.
+
+Validação do vidro no navegador: dark/high apresentou rgba(24,34,48,.88), light/high rgba(255,255,255,.88), ambos blur(24px)/saturate(1.35); conteúdo externo transparente e cabeçalho sem blur duplicado. Reduzir transparência produziu superfície sólida e backdrop-filter none. Foi corrigido contraste dos rótulos do Desktop sobre wallpaper escuro no tema claro com fundo escuro legível independente do tema/imagem. Lint/build e 88 testes continuam como gates. O resize físico nas bordas do monitor continua exigindo ensaio no equipamento do usuário.

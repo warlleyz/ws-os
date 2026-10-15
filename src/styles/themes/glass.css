@@ -1,0 +1,96 @@
+/* Vidro inspirado na v1 c2e51be; uma camada de blur por janela/painel. */
+:root {
+  --ws-glass-saturation: 135%;
+}
+:root[data-blur='off'],
+:root[data-transparency='solid'] {
+  --ws-glass-saturation: 100%;
+}
+.desktop-window {
+  border: 1px solid var(--panel-border);
+  background: var(--ws-glass);
+  backdrop-filter: blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
+  -webkit-backdrop-filter: blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
+}
+.desktop-window > .desktop-window__header {
+  background: color-mix(in srgb, var(--surface-secondary) 45%, transparent);
+  backdrop-filter: none;
+}
+.desktop-window > .desktop-window__content,
+.desktop-window > .ws-settings,
+.desktop-window .ws-settings__content,
+.desktop-window .ws-settings__header,
+.desktop-window .ws-settings__sidebar {
+  background: transparent;
+}
+.desktop-window .ws-settings__card,
+.desktop-window .ws-app__card {
+  background: color-mix(in srgb, var(--surface-primary) 92%, transparent);
+}
+.taskbar-launcher--redesign,
+.taskbar-notifications,
+.taskbar-quick-controls,
+.taskbar-calendar,
+.taskbar-weather-panel,
+.taskbar-wally,
+.taskbar-preview,
+.taskbar-context,
+.ws-mobile__panel {
+  backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
+}
+.ws-mobile__panel > .taskbar-quick-controls,
+.ws-mobile__panel > .taskbar-notifications {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.desktop-snap-preview {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* O efeito custoso não é mantido na janela durante o gesto. */
+.desktop-window[data-interacting='true'] {
+  background: var(--surface-primary);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+:root[data-reduced-transparency='true'],
+:root[data-low-effects='true'] {
+  --ws-glass-saturation: 100%;
+}
+:root[data-reduced-transparency='true'] .desktop-window,
+:root[data-low-effects='true'] .desktop-window {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --ws-glass-saturation: 100%;
+  }
+  .desktop-window {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root,
+  :root[data-theme] {
+    --ws-glass: var(--surface-primary);
+    --panel-background: var(--surface-primary);
+    --taskbar-background: var(--surface-primary);
+  }
+}
+
+/* Rótulos precisam de contraste também sobre wallpapers pessoais claros/escuros. */
+.desktop__shortcut-label {
+  padding: 2px 4px;
+  border-radius: 5px;
+  color: #ffffff;
+  background: rgb(17 25 37 / 92%);
+  text-shadow: none;
+}
+.desktop__shortcut:focus-visible {
+  background: rgb(17 25 37 / 92%);
+  outline-color: #ffffff;
+}
