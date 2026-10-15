@@ -16,6 +16,6 @@
         }
     ],
     "vars": {
-        "WALLY_AI_ENABLED": "false"
+        "WALLY_AI_ENABLED": "true"
     }
 }
