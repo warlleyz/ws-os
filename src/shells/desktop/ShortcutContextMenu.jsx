@@ -1,5 +1,6 @@
 
-import { useLayoutEffect, useState } from 'react';
+import { useState } from 'react';
+import useContextMenuPosition from './useContextMenuPosition';
 import {
   ArrowDownAZ,
   ArrowUpToLine,
@@ -26,62 +27,12 @@ export default function ShortcutContextMenu({
   useLocale();
 
   const [page, setPage] = useState('main');
-  const [position, setPosition] = useState({
-    left: shortcutContext.x,
-    top: shortcutContext.y,
-  });
+  const position = useContextMenuPosition(
+    shortcutContextRef,
+    shortcutContext,
+  );
 
   useMenuNavigation(shortcutContextRef, `${app.id}:${page}`);
-
-  useLayoutEffect(() => {
-    const menu = shortcutContextRef.current;
-    const workspace = menu?.parentElement;
-
-    if (!menu || !workspace) return;
-
-    function updatePosition() {
-      const width = menu.offsetWidth;
-      const height = menu.offsetHeight;
-
-      const minLeft = workspace.scrollLeft + 8;
-      const minTop = workspace.scrollTop + 8;
-
-      const maxLeft = Math.max(
-        minLeft,
-        workspace.scrollLeft + workspace.clientWidth - width - 8,
-      );
-
-      const maxTop = Math.max(
-        minTop,
-        workspace.scrollTop + workspace.clientHeight - height - 8,
-      );
-
-      const left = Math.max(
-        minLeft,
-        Math.min(shortcutContext.x, maxLeft),
-      );
-
-      const top = Math.max(
-        minTop,
-        Math.min(shortcutContext.y, maxTop),
-      );
-
-      setPosition((current) =>
-        current.left === left && current.top === top
-          ? current
-          : { left, top },
-      );
-    }
-
-    updatePosition();
-
-    const observer = new ResizeObserver(updatePosition);
-
-    observer.observe(menu);
-    observer.observe(workspace);
-
-    return () => observer.disconnect();
-  }, [shortcutContext, shortcutContextRef, page]);
 
   return (
     <div

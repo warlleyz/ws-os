@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export default function useDesktopLayout() {
   const [gridSize, setGridSize] = useState({
@@ -10,33 +10,57 @@ export default function useDesktopLayout() {
   const shortcutsRef = useRef(null);
   const workspaceRef = useRef(null);
 
-  useEffect(() => {
-    const element = workspaceRef.current;
-    if (!element) return;
+  const refreshLayout = useCallback(() => {
+    const workspace = workspaceRef.current;
 
-    const observer = new ResizeObserver(([entry]) => {
+    if (!workspace) return;
+
+    const width = Math.round(
+      shortcutsRef.current?.clientWidth ?? workspace.clientWidth,
+    );
+
+    const height = Math.max(
+      0,
+      Math.round(workspace.clientHeight) - 38,
+    );
+
+    // Atualização explícita, inclusive quando as dimensões
+    // não mudaram. Não altera as preferências salvas.
+    setGridSize({ width, height });
+  }, []);
+
+  useEffect(() => {
+    const workspace = workspaceRef.current;
+
+    if (!workspace) return;
+
+    const observer = new ResizeObserver(() => {
       const width = Math.round(
-        shortcutsRef.current?.clientWidth ??
-        entry.contentRect.width,
+        shortcutsRef.current?.clientWidth ?? workspace.clientWidth,
       );
 
       const height = Math.max(
         0,
-        Math.round(entry.contentRect.height) - 38,
+        Math.round(workspace.clientHeight) - 38,
       );
 
       setGridSize((current) =>
-        current.width === width &&
-          current.height === height
+        current.width === width && current.height === height
           ? current
           : { width, height },
       );
     });
 
-    observer.observe(element);
+    observer.observe(workspace);
+    refreshLayout();
 
     return () => observer.disconnect();
-  }, []);
+  }, [refreshLayout]);
 
-  return { gridSize, shortcutsRef, workspaceRef };
+  return {
+    gridSize,
+    shortcutsRef,
+    workspaceRef,
+    refreshLayout,
+  };
 }

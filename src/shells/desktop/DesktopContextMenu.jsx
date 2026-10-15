@@ -1,5 +1,5 @@
 
-import { useLayoutEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   ArrowDownAZ,
   Check,
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 import useMenuNavigation from '../../shared/hooks/useMenuNavigation';
+import useContextMenuPosition from './useContextMenuPosition';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
 export default function DesktopContextMenu({
@@ -23,54 +24,12 @@ export default function DesktopContextMenu({
   useLocale();
 
   const [page, setPage] = useState('main');
-  const [position, setPosition] = useState({
-    left: desktopContext.x,
-    top: desktopContext.y,
-  });
+  const position = useContextMenuPosition(
+    desktopContextRef,
+    desktopContext,
+  );
 
   useMenuNavigation(desktopContextRef, page);
-
-  useLayoutEffect(() => {
-    const menu = desktopContextRef.current;
-    const workspace = menu?.parentElement;
-
-    if (!menu || !workspace) return;
-
-    function updatePosition() {
-      const width = menu.offsetWidth;
-      const height = menu.offsetHeight;
-
-      const left = Math.max(
-        8,
-        Math.min(
-          desktopContext.x,
-          workspace.clientWidth - width - 8,
-        ),
-      );
-
-      const top = Math.max(
-        8,
-        Math.min(
-          desktopContext.y,
-          workspace.clientHeight - height - 8,
-        ),
-      );
-
-      setPosition((current) =>
-        current.left === left && current.top === top
-          ? current
-          : { left, top },
-      );
-    }
-
-    updatePosition();
-
-    const observer = new ResizeObserver(updatePosition);
-    observer.observe(menu);
-    observer.observe(workspace);
-
-    return () => observer.disconnect();
-  }, [desktopContext, desktopContextRef, page]);
 
   return (
     <div

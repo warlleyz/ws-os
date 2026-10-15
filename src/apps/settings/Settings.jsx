@@ -79,33 +79,18 @@ export default function Settings({ instance }) {
     }
   }
 
-
   useEffect(() => {
-    function handleSettingsNavigate(event) {
-      const sectionId = event.detail?.section;
+    const sectionId = instance?.params?.section;
 
-      if (
-        SETTINGS_SECTIONS.some(
-          (section) => section.id === sectionId,
-        )
-      ) {
-        navigateTo(sectionId);
-      }
+    if (
+      typeof sectionId === 'string' &&
+      SETTINGS_SECTIONS.some(
+        (section) => section.id === sectionId,
+      )
+    ) {
+      navigateTo(sectionId);
     }
-
-    window.addEventListener(
-      'ws:settings-navigate',
-      handleSettingsNavigate,
-    );
-
-    return () => {
-      window.removeEventListener(
-        'ws:settings-navigate',
-        handleSettingsNavigate,
-      );
-    };
-  }, []);
-
+  }, [instance?.navigationRequestId]);
 
   return (
     <div className="ws-settings">

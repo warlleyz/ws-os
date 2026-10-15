@@ -27,7 +27,12 @@ export default function Desktop({ theme, onThemeChange }) {
   useLocale();
   const { appState, minimizeAllApps, visibleToasts, run, dismissToast, handleNotificationOpen } =
     useSystem();
-  const { gridSize, shortcutsRef, workspaceRef } = useDesktopLayout();
+  const {
+    gridSize,
+    shortcutsRef,
+    workspaceRef,
+    refreshLayout,
+  } = useDesktopLayout();
   const organization = useDesktopOrganization({ shortcutsRef, gridSize });
   const { shortcuts, shortcutPositions, shortcutOrder, setSelectedIds } = organization;
   function setSelectedShortcut(id) {
@@ -144,12 +149,11 @@ export default function Desktop({ theme, onThemeChange }) {
     const workspace = event.currentTarget;
     workspace.focus();
     const rect = workspace.getBoundingClientRect();
-    const menuWidth = 210;
-    const menuHeight = 170;
     setShortcutContext(null);
+
     setDesktopContext({
-      x: Math.max(8, Math.min(event.clientX - rect.left, rect.width - menuWidth - 8)),
-      y: Math.max(8, Math.min(event.clientY - rect.top, rect.height - menuHeight - 8)),
+      x: event.clientX - rect.left + workspace.scrollLeft,
+      y: event.clientY - rect.top + workspace.scrollTop,
     });
   }
 
@@ -157,7 +161,9 @@ export default function Desktop({ theme, onThemeChange }) {
   function runDesktopContextAction(action) {
     switch (action) {
       case 'refresh':
-        window.dispatchEvent(new Event('resize'));
+        organization.clearDrag();
+        cancelWidgetDrag();
+        refreshLayout();
         break;
 
       case 'sort-name':
@@ -177,14 +183,7 @@ export default function Desktop({ theme, onThemeChange }) {
           origin: 'desktop-context-menu',
           params: { section },
         });
-
-        requestAnimationFrame(() => {
-          window.dispatchEvent(
-            new CustomEvent('ws:settings-navigate', {
-              detail: { section },
-            }),
-          );
-        });
+        
         break;
       }
 

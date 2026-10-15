@@ -86,12 +86,43 @@ export function requestAppOpen(state, appId, options = {}) {
   const request = validateAppOpen(appId, options);
   if (!request.ok) return { state, result: { ok: false, error: request.error } };
   const { app, origin, params } = request;
+
   if (!app.allowMultipleInstances) {
-    const existing = state.instances.find((instance) => instance.appId === appId);
+    const existing = state.instances.find(
+      (instance) => instance.appId === appId,
+    );
+
     if (existing) {
+      const hasSettingsNavigation =
+        appId === 'settings' &&
+        typeof params.section === 'string';
+
+      const nextState = hasSettingsNavigation
+        ? {
+          ...state,
+          instances: state.instances.map((instance) =>
+            instance.id === existing.id
+              ? {
+                ...instance,
+                params: {
+                  ...instance.params,
+                  section: params.section,
+                },
+                navigationRequestId:
+                  (instance.navigationRequestId ?? 0) + 1,
+              }
+              : instance,
+          ),
+        }
+        : state;
+
       return {
-        state: restoreApp(state, existing.id),
-        result: { ok: true, instanceId: existing.id, status: 'restored' },
+        state: restoreApp(nextState, existing.id),
+        result: {
+          ok: true,
+          instanceId: existing.id,
+          status: 'restored',
+        },
       };
     }
   }
