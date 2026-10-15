@@ -9,6 +9,7 @@ export default function QuickControls({
   onThemeChange,
   autoHideTaskbar,
   onAutoHideTaskbarChange,
+  showAutoHideTaskbar = true,
 }) {
   const locale = useLocale();
   const accessibility = useAccessibility();
@@ -69,16 +70,18 @@ export default function QuickControls({
               <option value="en">English</option>
             </select>
           </label>
-          <label className="ws-effect-option">
-            <input
-              type="checkbox"
-              checked={autoHideTaskbar}
-              onChange={(event) =>
-                onAutoHideTaskbarChange(event.target.checked)
-              }
-            />
-            {t('Ocultar automaticamente a barra de tarefas')}
-          </label>
+          {showAutoHideTaskbar && (
+            <label className="ws-effect-option">
+              <input
+                type="checkbox"
+                checked={autoHideTaskbar}
+                onChange={(event) =>
+                  onAutoHideTaskbarChange(event.target.checked)
+                }
+              />
+              {t('Ocultar automaticamente a barra de tarefas')}
+            </label>
+          )}
         </div>
         <fieldset className="taskbar-quick-controls__section">
           <legend>{t('Efeitos')}</legend>

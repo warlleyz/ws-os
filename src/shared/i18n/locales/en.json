@@ -220,5 +220,8 @@
   "Previsão dos próximos dias": "Forecast for the next few days",
   "Previsão meteorológica indisponível.": "Weather forecast unavailable.",
   "Tempo limite ao consultar o clima.": "Weather request timed out.",
-  "Falha de conexão ao consultar o clima.": "Connection failed while fetching weather."
+  "Falha de conexão ao consultar o clima.": "Connection failed while fetching weather.",
+  "Buscar": "Search",
+  "Navegação Mobile": "Mobile navigation",
+  "Início": "Home"
 }

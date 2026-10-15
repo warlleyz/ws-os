@@ -1,1 +1,374 @@
-/* Reservado para implementação futura. */
+.ws-mobile {
+    display: flex;
+    min-height: 100dvh;
+    flex-direction: column;
+    background: var(--surface-primary);
+    color: var(--text-primary);
+}
+
+.ws-mobile__header {
+    display: flex;
+    min-height: 64px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-default);
+}
+
+.ws-mobile__header button {
+    border: 0;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    cursor: pointer;
+}
+
+.ws-mobile__welcome {
+    padding: 36px 24px;
+    background: var(--surface-secondary);
+}
+
+.ws-mobile__welcome>span {
+    color: var(--accent-secondary);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ws-mobile__welcome h1 {
+    margin: 12px 0;
+    font-size: clamp(26px, 8vw, 36px);
+}
+
+.ws-mobile__welcome p {
+    max-width: 420px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.ws-mobile__catalog {
+    flex: 1;
+    padding: 24px 20px 100px;
+}
+
+.ws-mobile__catalog h2 {
+    margin: 0 0 20px;
+    font-size: 18px;
+}
+
+.ws-mobile__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 10px;
+}
+
+.ws-mobile__app-button {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 4px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 11px;
+    text-align: center;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.ws-mobile__app-button:hover,
+.ws-mobile__app-button:focus-visible {
+    background: var(--surface-secondary);
+}
+
+.ws-mobile__app-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    place-items: center;
+    border: 1px solid var(--border-default);
+    border-radius: 16px;
+    background: var(--surface-secondary);
+    color: var(--accent-secondary);
+}
+
+.ws-mobile__app-content {
+    min-height: 0;
+    flex: 1;
+    overflow: auto;
+    padding: 20px;
+}
+
+.ws-mobile__navigation {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    min-height: 64px;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: auto;
+    border-top: 1px solid var(--border-default);
+    background: var(--surface-primary);
+}
+
+.ws-mobile__navigation button {
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-primary);
+    font: inherit;
+    cursor: pointer;
+}
+
+.ws-mobile button:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+}
+
+.ws-mobile__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.ws-mobile__section-header h2 {
+    margin: 0;
+}
+
+.ws-mobile__section-header button {
+    border: 0;
+    background: transparent;
+    color: var(--accent-secondary);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.ws-mobile__search {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.ws-mobile__search input {
+    width: 100%;
+    min-height: 44px;
+    padding: 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font: inherit;
+}
+
+.ws-mobile__search input:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+}
+
+.ws-mobile__navigation {
+    position: sticky;
+    z-index: 20;
+    bottom: 0;
+    display: flex;
+    width: 100%;
+    min-height: 68px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-top: 1px solid var(--border-default);
+    background: var(--surface-primary);
+}
+
+.ws-mobile__navigation button {
+    display: flex;
+    min-width: 100px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.ws-mobile__navigation button.ws-mobile__nav-active {
+    background: var(--surface-secondary);
+    color: var(--accent-secondary);
+}
+
+.ws-mobile__app-content {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.ws-mobile__navigation {
+    box-sizing: border-box;
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+}
+
+.ws-mobile__navigation button {
+    min-width: 0;
+    flex: 1;
+}
+
+.ws-mobile__catalog h1 {
+    margin: 0 0 20px;
+    font-size: 20px;
+}
+
+.ws-mobile__system-bar {
+    display: flex;
+    min-height: 48px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px;
+    border-bottom: 1px solid var(--border-default);
+    background: var(--surface-primary);
+}
+
+.ws-mobile__system-bar>strong {
+    color: var(--accent-secondary);
+    font-size: 13px;
+    letter-spacing: 0.4px;
+}
+
+.ws-mobile__system-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ws-mobile__system-actions button {
+    position: relative;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.ws-mobile__system-actions button:hover,
+.ws-mobile__system-actions button[aria-expanded='true'] {
+    background: var(--surface-secondary);
+    color: var(--accent-secondary);
+}
+
+.ws-mobile__badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: grid;
+    min-width: 15px;
+    height: 15px;
+    place-items: center;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: var(--accent-secondary);
+    color: var(--surface-primary);
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.ws-mobile__overlay {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgb(0 0 0 / 55%);
+}
+
+.ws-mobile__panel {
+    width: 100%;
+    max-width: 600px;
+    max-height: min(80dvh, 720px);
+    overflow-y: auto;
+    border-radius: 18px 18px 0 0;
+    background: var(--panel-background);
+    box-shadow: var(--panel-shadow);
+}
+
+.ws-mobile__panel .taskbar-notifications,
+.ws-mobile__panel .taskbar-quick-controls {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    max-height: min(80dvh, 720px);
+    border: 0;
+    border-radius: 18px 18px 0 0;
+    box-shadow: none;
+}
+
+.ws-mobile__system-actions button:focus-visible,
+.ws-mobile__panel button:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ws-mobile__overlay {
+        scroll-behavior: auto;
+    }
+}
+
+.ws-mobile__content-shell {
+    display: flex;
+    min-height: 100dvh;
+    flex: 1;
+    flex-direction: column;
+}
+
+.ws-mobile__app-content[hidden],
+.ws-mobile__instance[hidden] {
+    display: none !important;
+}
+
+.ws-mobile__instance {
+    min-width: 0;
+    min-height: 100%;
+}
+
+.ws-mobile__loading {
+    margin: 20px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.ws-mobile__overlay {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.ws-mobile__panel {
+    overscroll-behavior: contain;
+}
+
+.ws-mobile__app-content {
+    overflow-x: hidden;
+}

@@ -6,6 +6,7 @@ import { applyTheme, loadTheme } from './core/themeManager';
 import BootScreen from './features/boot/BootScreen';
 import WelcomeDialog from './features/welcome/WelcomeDialog';
 import Desktop from './shells/desktop/Desktop';
+import Mobile from './shells/mobile/Mobile';
 
 import SystemProvider from './core/SystemProvider';
 
@@ -32,6 +33,22 @@ export default function App() {
   const [bootComplete, setBootComplete] = useState(false);
   const [theme, setTheme] = useState(loadTheme);
   const [welcomeOpen, setWelcomeOpen] = useState(shouldShowWelcome);
+
+  const [isMobile, setIsMobile] = useState(
+    () => window.matchMedia('(max-width: 767px)').matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)');
+
+    function updateShell(event) {
+      setIsMobile(event.matches);
+    }
+
+    media.addEventListener('change', updateShell);
+
+    return () => media.removeEventListener('change', updateShell);
+  }, []);
 
   useEffect(() => {
     applyTheme(theme);
@@ -67,13 +84,17 @@ export default function App() {
           href="#ws-desktop"
           onClick={(event) => {
             event.preventDefault();
-            document.getElementById('ws-desktop')?.focus();
+            document.getElementById(isMobile ? 'ws-mobile' : 'ws-desktop')?.focus();
           }}
         >
           {t('Ir para a área de trabalho')}
         </a>
         <SystemProvider>
-          <Desktop theme={theme} onThemeChange={setTheme} />
+          {isMobile ? (
+            <Mobile theme={theme} onThemeChange={setTheme} />
+          ) : (
+            <Desktop theme={theme} onThemeChange={setTheme} />
+          )}
         </SystemProvider>
       </div>
 
