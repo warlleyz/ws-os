@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 import { getAppDefinition } from '../../../core/appRegistry';
 import { closeApp } from '../../../core/appManager';
 import { AppIcon } from '../../../shared/components/AppIcon';
@@ -14,11 +15,14 @@ export default function TaskbarPreview({
   activateInstance,
   appState,
 }) {
+  useLocale();
   return (
     <section
       ref={previewRef}
       className="taskbar-preview"
-      aria-label={`Pré-visualizações de ${getAppDefinition(preview.appId)?.name ?? preview.appId}`}
+      aria-label={t(
+        `Pré-visualizações de ${getAppDefinition(preview.appId)?.name ?? preview.appId}`,
+      )}
       onPointerEnter={() => {
         window.clearTimeout(previewCloseTimerRef.current);
       }}
@@ -34,16 +38,16 @@ export default function TaskbarPreview({
       <div className="taskbar-preview__list">
         {preview.instances.map((instance, index) => {
           const app = getAppDefinition(instance.appId);
-          const title = `${app?.name ?? instance.appId}${preview.instances.length > 1 ? ` — Janela ${index + 1}` : ''}`;
+          const title = `${app?.name ?? instance.appId}${preview.instances.length > 1 ? t(` — Janela ${index + 1}`) : ''}`;
           return (
             <div key={instance.id} className="taskbar-preview__item">
               <div className="taskbar-preview__header">
-                <strong title={title}>{title}</strong>
+                <strong title={t(title)}>{t(title)}</strong>
                 <button
                   type="button"
                   className="taskbar-preview__close"
-                  aria-label={`Fechar ${title}`}
-                  title="Fechar janela"
+                  aria-label={t(`Fechar ${title}`)}
+                  title={t('Fechar janela')}
                   onClick={() => {
                     clearWindowHighlight();
                     onAppAction(closeApp, instance.id);
@@ -80,10 +84,10 @@ export default function TaskbarPreview({
                 </span>
                 <small>
                   {instance.minimized
-                    ? 'Minimizada'
+                    ? t('Minimizada')
                     : appState.activeInstanceId === instance.id
-                      ? 'Ativa'
-                      : 'Aberta'}
+                      ? t('Ativa')
+                      : t('Aberta')}
                 </small>
               </button>
             </div>

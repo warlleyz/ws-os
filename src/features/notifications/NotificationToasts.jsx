@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { NotificationToast } from './NotificationToast';
 
 export default function NotificationToasts({
@@ -5,8 +6,9 @@ export default function NotificationToasts({
   dismissToast,
   handleNotificationOpen,
 }) {
+  useLocale();
   return (
-    <aside className="ws-toast-container" aria-label="Notificações recentes">
+    <aside className="ws-toast-container" aria-label={t('Notificações recentes')}>
       {visibleToasts.map((notification) => (
         <NotificationToast
           key={notification.id}

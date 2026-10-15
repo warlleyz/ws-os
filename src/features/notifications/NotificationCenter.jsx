@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { SystemIcon } from '../../shared/components/SystemIcon';
 
 export default function NotificationCenter({
@@ -7,21 +8,26 @@ export default function NotificationCenter({
   onNotificationAction,
   onNotificationOpen,
 }) {
+  const locale = useLocale();
   return (
-    <section className="taskbar-notifications" role="region" aria-label="Central de notificações">
+    <section
+      className="taskbar-notifications"
+      role="region"
+      aria-label={t('Central de notificações')}
+    >
       <header className="taskbar-notifications__header">
         <div>
-          <strong>Notificações</strong>
+          <strong>{t('Notificações')}</strong>
           <small>
             {unreadCount > 0
-              ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}`
-              : 'Nenhuma notificação não lida'}
+              ? t(`${unreadCount} não lida${unreadCount > 1 ? 's' : ''}`)
+              : t('Nenhuma notificação não lida')}
           </small>
         </div>
         <button
           type="button"
-          aria-label="Fechar notificações"
-          title="Fechar notificações"
+          aria-label={t('Fechar notificações')}
+          title={t('Fechar notificações')}
           onClick={() => setNotificationOpen(false)}
         >
           ×
@@ -35,10 +41,10 @@ export default function NotificationCenter({
               disabled={unreadCount === 0}
               onClick={() => onNotificationAction('read-all')}
             >
-              Marcar todas como lidas
+              {t('Marcar todas como lidas')}
             </button>
             <button type="button" onClick={() => onNotificationAction('clear')}>
-              Limpar tudo
+              {t('Limpar tudo')}
             </button>
           </div>
           <div className="taskbar-notifications__list">
@@ -53,16 +59,16 @@ export default function NotificationCenter({
                 ].join(' ')}
               >
                 <div className="taskbar-notifications__item-top">
-                  <span className="taskbar-notifications__source">{notification.source}</span>
+                  <span className="taskbar-notifications__source">{t(notification.source)}</span>
                   <time dateTime={new Date(notification.createdAt).toISOString()}>
-                    {new Date(notification.createdAt).toLocaleTimeString('pt-BR', {
+                    {new Date(notification.createdAt).toLocaleTimeString(locale, {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
                   </time>
                 </div>
-                <strong>{notification.title}</strong>
-                {notification.message && <p>{notification.message}</p>}
+                <strong>{t(notification.title)}</strong>
+                {notification.message && <p>{t(notification.message)}</p>}
                 <div className="taskbar-notifications__actions">
                   {notification.action?.type === 'open-app' && (
                     <button
@@ -72,7 +78,7 @@ export default function NotificationCenter({
                         setNotificationOpen(false);
                       }}
                     >
-                      {notification.action.label ?? 'Abrir aplicativo'}
+                      {notification.action.label ?? t('Abrir aplicativo')}
                     </button>
                   )}
                   {!notification.read && (
@@ -80,14 +86,14 @@ export default function NotificationCenter({
                       type="button"
                       onClick={() => onNotificationAction('read', notification.id)}
                     >
-                      Marcar como lida
+                      {t('Marcar como lida')}
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={() => onNotificationAction('remove', notification.id)}
                   >
-                    Excluir
+                    {t('Excluir')}
                   </button>
                 </div>
               </article>
@@ -97,8 +103,8 @@ export default function NotificationCenter({
       ) : (
         <div className="taskbar-notifications__empty">
           <SystemIcon name="bell" size={26} />
-          <strong>Tudo em dia</strong>
-          <p>Nenhuma notificação por enquanto.</p>
+          <strong>{t('Tudo em dia')}</strong>
+          <p>{t('Nenhuma notificação por enquanto.')}</p>
         </div>
       )}
     </section>

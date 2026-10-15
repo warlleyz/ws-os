@@ -1,6 +1,8 @@
+import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 import { useEffect, useState } from 'react';
 
 export default function ClockWidget() {
+  const locale = useLocale();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -12,16 +14,16 @@ export default function ClockWidget() {
   }, []);
 
   return (
-    <section className="ws-widget ws-widget--clock" aria-label="Widget de relógio">
+    <section className="ws-widget ws-widget--clock" aria-label={t('Widget de relógio')}>
       <time dateTime={now.toISOString()}>
-        {now.toLocaleTimeString('pt-BR', {
+        {now.toLocaleTimeString(locale, {
           hour: '2-digit',
           minute: '2-digit',
         })}
       </time>
 
       <span>
-        {now.toLocaleDateString('pt-BR', {
+        {now.toLocaleDateString(locale, {
           weekday: 'long',
           day: '2-digit',
           month: 'long',

@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 export default function TaskbarContextMenu({
   contextMenuRef,
   contextApp,
@@ -8,11 +9,12 @@ export default function TaskbarContextMenu({
   runContextAction,
   contextTarget,
 }) {
+  useLocale();
   return (
     <section
       ref={contextMenuRef}
       className="taskbar-context"
-      aria-label={`Opções de ${contextApp?.name ?? context.appId}`}
+      aria-label={t(`Opções de ${t(contextApp?.name ?? context.appId)}`)}
       onKeyDown={(event) => {
         if (event.key === 'Escape') {
           event.stopPropagation();
@@ -27,22 +29,22 @@ export default function TaskbarContextMenu({
       <div className="taskbar-context__actions">
         {contextApp?.allowMultipleInstances && (
           <button type="button" onClick={() => runContextAction('new')}>
-            Abrir nova janela
+            {t('Abrir nova janela')}
           </button>
         )}
         <button type="button" onClick={() => runContextAction('activate')}>
-          {contextTarget?.minimized ? 'Restaurar janela' : 'Ativar janela'}
+          {contextTarget?.minimized ? t('Restaurar janela') : t('Ativar janela')}
         </button>
         <button
           type="button"
           disabled={!contextTarget || contextTarget.minimized}
           onClick={() => runContextAction('minimize')}
         >
-          Minimizar janela
+          {t('Minimizar janela')}
         </button>
         <div className="taskbar-context__divider" />
         <button type="button" onClick={() => runContextAction('close')}>
-          Fechar janela
+          {t('Fechar janela')}
         </button>
         {context.instances.length > 1 && (
           <button
@@ -50,7 +52,7 @@ export default function TaskbarContextMenu({
             className="taskbar-context__danger"
             onClick={() => runContextAction('close-all')}
           >
-            Fechar todas as janelas
+            {t('Fechar todas as janelas')}
           </button>
         )}
       </div>

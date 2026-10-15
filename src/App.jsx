@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { translate as t, useLocale } from './shared/i18n/i18n';
+import { applyAccessibility, useAccessibility } from './core/effectsManager';
 
-import { applyTheme, loadTheme, saveTheme } from './core/themeManager';
+import { applyTheme, loadTheme } from './core/themeManager';
 import BootScreen from './features/boot/BootScreen';
 import WelcomeDialog from './features/welcome/WelcomeDialog';
 import Desktop from './shells/desktop/Desktop';
@@ -19,13 +21,20 @@ function shouldShowWelcome() {
 }
 
 export default function App() {
+  const locale = useLocale();
+  const accessibility = useAccessibility();
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+  useEffect(() => {
+    applyAccessibility(accessibility);
+  }, [accessibility]);
   const [bootComplete, setBootComplete] = useState(false);
   const [theme, setTheme] = useState(loadTheme);
   const [welcomeOpen, setWelcomeOpen] = useState(shouldShowWelcome);
 
   useEffect(() => {
     applyTheme(theme);
-    saveTheme(theme);
   }, [theme]);
 
   useEffect(() => {
@@ -52,9 +61,21 @@ export default function App() {
 
   return (
     <>
-      <SystemProvider>
-        <Desktop theme={theme} onThemeChange={setTheme} />
-      </SystemProvider>
+      <div inert={welcomeOpen} aria-hidden={welcomeOpen || undefined}>
+        <a
+          className="ws-skip-link"
+          href="#ws-desktop"
+          onClick={(event) => {
+            event.preventDefault();
+            document.getElementById('ws-desktop')?.focus();
+          }}
+        >
+          {t('Ir para a área de trabalho')}
+        </a>
+        <SystemProvider>
+          <Desktop theme={theme} onThemeChange={setTheme} />
+        </SystemProvider>
+      </div>
 
       {welcomeOpen && <WelcomeDialog onClose={closeWelcome} />}
     </>

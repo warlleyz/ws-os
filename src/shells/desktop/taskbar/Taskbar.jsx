@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 import useGlobalShortcuts from '../../../features/shortcuts/useGlobalShortcuts';
 import useTaskbarScroll from './useTaskbarScroll';
 import useTaskbarPreviews from './useTaskbarPreviews';
@@ -31,6 +32,7 @@ import { getAppDefinition } from '../../../core/appRegistry';
 // Utilitários e preferências persistentes do WS Menu.
 
 export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
+  const locale = useLocale();
   const {
     appState,
     run: onAppAction,
@@ -206,18 +208,12 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
 
     if (!target) return;
 
-    if (
-      appState.activeInstanceId === target.id &&
-      !target.minimized
-    ) {
+    if (appState.activeInstanceId === target.id && !target.minimized) {
       onAppAction(minimizeApp, target.id);
       return;
     }
 
-    onAppAction(
-      target.minimized ? restoreApp : activateApp,
-      target.id,
-    );
+    onAppAction(target.minimized ? restoreApp : activateApp, target.id);
   }
   function handleContextMenu(event, group) {
     event.preventDefault();
@@ -231,9 +227,7 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     setShortcutContext(null);
     shortcutTriggerRef.current = null;
 
-    setContextGroup((current) =>
-      current === group.appId ? null : group.appId,
-    );
+    setContextGroup((current) => (current === group.appId ? null : group.appId));
   }
   function handleContextKeyDown(event, group) {
     if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
@@ -372,16 +366,16 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     shortcutTriggerRef.current = null;
     setWeatherOpen((current) => !current);
   }
-  const timeText = currentTime.toLocaleTimeString('pt-BR', {
+  const timeText = currentTime.toLocaleTimeString(locale, {
     hour: '2-digit',
     minute: '2-digit',
   });
-  const dateText = currentTime.toLocaleDateString('pt-BR');
+  const dateText = currentTime.toLocaleDateString(locale);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const date = new Date();
     return new Date(date.getFullYear(), date.getMonth(), 1);
   });
-  const monthLabel = calendarMonth.toLocaleDateString('pt-BR', {
+  const monthLabel = calendarMonth.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric',
   });
@@ -428,7 +422,7 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
   return (
     <div className="taskbar-container" ref={taskbarRef}>
       {createPortal(
-        <PanelLayer layerRef={floatingLayerRef}>
+        <PanelLayer layerRef={floatingLayerRef} onDismiss={closePanels}>
           {preview &&
             !contextGroup &&
             !menuOpen &&
@@ -475,7 +469,7 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
               setWeatherOpen={setWeatherOpen}
               weather={weather}
               getWeatherDescription={getWeatherDescription}
-              weatherError={weatherError}
+              weatherError={t(weatherError)}
               weatherLoading={weatherLoading}
               requestWeather={requestWeather}
             />
@@ -523,7 +517,7 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
         </PanelLayer>,
         document.body,
       )}
-      <nav className="taskbar" aria-label="Barra de tarefas">
+      <nav className="taskbar" aria-label={t('Barra de tarefas')}>
         <div className="taskbar__section taskbar__section--start">
           <button
             ref={menuButtonRef}
@@ -561,8 +555,8 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
           <button
             type="button"
             className="taskbar__system-button"
-            title="Notificações"
-            aria-label="Notificações"
+            title={t('Notificações')}
+            aria-label={t('Notificações')}
             aria-expanded={notificationOpen}
             onClick={toggleNotifications}
           >
@@ -571,7 +565,11 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
               {unreadCount > 0 && (
                 <span
                   className="taskbar-notifications__badge"
-                  aria-label={`${unreadCount} notificações não lidas`}
+                  aria-label={t(
+                    unreadCount === 1
+                      ? '1 notificação não lida'
+                      : `${unreadCount} notificações não lidas`,
+                  )}
                 >
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
@@ -581,8 +579,8 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
           <button
             type="button"
             className="taskbar__system-button"
-            title="Controle Rápido"
-            aria-label="Controle Rápido"
+            title={t('Controle Rápido')}
+            aria-label={t('Controle Rápido')}
             aria-expanded={quickControlsOpen}
             onClick={toggleQuickControls}
           >
@@ -604,8 +602,8 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
           <button
             type="button"
             className="taskbar__weather"
-            title="Clima"
-            aria-label="Clima"
+            title={t('Clima')}
+            aria-label={t('Clima')}
             aria-expanded={weatherOpen}
             onClick={toggleWeather}
           >
@@ -616,7 +614,7 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
             type="button"
             className="taskbar__clock"
             title={dateText}
-            aria-label={`Calendário, ${dateText}`}
+            aria-label={t(`Calendário, ${dateText}`)}
             aria-expanded={calendarOpen}
             onClick={toggleCalendar}
           >

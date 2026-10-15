@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 export default function CalendarPanel({
   monthLabel,
   setCalendarMonth,
@@ -7,14 +8,15 @@ export default function CalendarPanel({
   daysInMonth,
   calendarMonth,
 }) {
+  const locale = useLocale();
   return (
-    <section className="taskbar-calendar" role="region" aria-label="Calendário">
+    <section className="taskbar-calendar" role="region" aria-label={t('Calendário')}>
       <header className="taskbar-calendar__header">
         <strong>{monthLabel}</strong>
         <div>
           <button
             type="button"
-            aria-label="Mês anterior"
+            aria-label={t('Mês anterior')}
             onClick={() =>
               setCalendarMonth(
                 (current) => new Date(current.getFullYear(), current.getMonth() - 1, 1),
@@ -29,11 +31,11 @@ export default function CalendarPanel({
               setCalendarMonth(new Date(currentTime.getFullYear(), currentTime.getMonth(), 1))
             }
           >
-            Hoje
+            {t('Hoje')}
           </button>
           <button
             type="button"
-            aria-label="Próximo mês"
+            aria-label={t('Próximo mês')}
             onClick={() =>
               setCalendarMonth(
                 (current) => new Date(current.getFullYear(), current.getMonth() + 1, 1),
@@ -44,7 +46,7 @@ export default function CalendarPanel({
           </button>
           <button
             type="button"
-            aria-label="Fechar calendário"
+            aria-label={t('Fechar calendário')}
             onClick={() => setCalendarOpen(false)}
           >
             ×
@@ -52,7 +54,11 @@ export default function CalendarPanel({
         </div>
       </header>
       <div className="taskbar-calendar__grid">
-        {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, index) => (
+        {Array.from({ length: 7 }, (_, index) =>
+          new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(
+            new Date(2024, 0, 7 + index),
+          ),
+        ).map((day, index) => (
           <span className="taskbar-calendar__weekday" key={index}>
             {day}
           </span>

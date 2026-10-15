@@ -1,24 +1,28 @@
+import useMenuNavigation from '../../shared/hooks/useMenuNavigation';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 export default function ShortcutContextMenu({
   shortcutContextRef,
   app,
   shortcutContext,
   runShortcutContextAction,
 }) {
+  useLocale();
+  useMenuNavigation(shortcutContextRef, app.id);
   return (
     <div
       ref={shortcutContextRef}
       className="desktop__context"
       role="group"
-      aria-label={`Opções de ${app.name}`}
+      aria-label={t(`Opções de ${app.name}`)}
       style={{
         left: shortcutContext.x,
         top: shortcutContext.y,
       }}
     >
-      <strong>{app.name}</strong>
+      <strong>{t(app.name)}</strong>
 
       <button type="button" onClick={() => runShortcutContextAction('open')}>
-        Abrir
+        {t('Abrir')}
       </button>
 
       <button
@@ -26,16 +30,19 @@ export default function ShortcutContextMenu({
         aria-expanded={shortcutContext.showInfo}
         onClick={() => runShortcutContextAction('info')}
       >
-        Informações
+        {t('Informações')}
       </button>
 
       {shortcutContext.showInfo && (
         <div className="desktop__context-info">
           <span>
-            Tipo: {app.category === 'system' ? 'Aplicativo de Sistema' : 'Aplicativo Desktop'}
+            {t('Tipo:')}
+            {app.category === 'system' ? t('Aplicativo de Sistema') : t('Aplicativo Desktop')}
           </span>
 
-          <span>Estado: {app.implemented ? 'Implementado' : 'Em desenvolvimento'}</span>
+          <span>
+            {t('Estado:')} {app.implemented ? t('Implementado') : t('Em desenvolvimento')}
+          </span>
         </div>
       )}
     </div>

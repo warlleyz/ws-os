@@ -1,3 +1,5 @@
+import useMenuNavigation from '../../shared/hooks/useMenuNavigation';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 export default function DesktopContextMenu({
   desktopContextRef,
   desktopContext,
@@ -5,25 +7,27 @@ export default function DesktopContextMenu({
   clockWidget,
   shortcutOrder,
 }) {
+  useLocale();
+  useMenuNavigation(desktopContextRef);
   return (
     <div
       ref={desktopContextRef}
       className="desktop__context"
       role="group"
-      aria-label="Opções da área de trabalho"
+      aria-label={t('Opções da área de trabalho')}
       style={{
         left: desktopContext.x,
         top: desktopContext.y,
       }}
     >
-      <strong>Área de trabalho</strong>
+      <strong>{t('Área de trabalho')}</strong>
 
       <button
         type="button"
         onClick={() => runDesktopContextAction('sort-default')}
         aria-pressed={shortcutOrder === 'default'}
       >
-        Organização padrão
+        {t('Organização padrão')}
       </button>
 
       <button
@@ -31,13 +35,13 @@ export default function DesktopContextMenu({
         onClick={() => runDesktopContextAction('sort-name')}
         aria-pressed={shortcutOrder === 'name'}
       >
-        Ordenar por nome
+        {t('Ordenar por nome')}
       </button>
 
       <div className="desktop__context-divider" />
 
       <button type="button" onClick={() => runDesktopContextAction('toggle-clock')}>
-        {clockWidget?.visible ? 'Ocultar relógio' : 'Mostrar relógio'}
+        {clockWidget?.visible ? t('Ocultar relógio') : t('Mostrar relógio')}
       </button>
     </div>
   );

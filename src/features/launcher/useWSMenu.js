@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { normalizeSearch } from '../search/searchService';
 import useMenuPreferences from './useMenuPreferences';
 import { useEffect, useRef, useState } from 'react';
@@ -6,6 +7,7 @@ import { getRegisteredApps } from '../../core/appRegistry';
 
 // Utilitários e preferências persistentes do WS Menu.
 export default function useWSMenu({ onAppAction, closePanels, menuOpen }) {
+  const locale = useLocale();
   const { favoriteIds, toggleFavorite, MAX_FAVORITES } = useMenuPreferences();
   const [menuView, setMenuView] = useState('home');
   const [menuSearch, setMenuSearch] = useState('');
@@ -63,9 +65,9 @@ export default function useWSMenu({ onAppAction, closePanels, menuOpen }) {
   }
   const menuApps = getRegisteredApps()
     .filter((app) => app.public && app.showInMenu !== false)
-    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    .sort((a, b) => t(a.name).localeCompare(t(b.name), locale));
   const searchTerm = normalizeSearch(menuSearch.trim());
-  const searchResults = menuApps.filter((app) => normalizeSearch(app.name).includes(searchTerm));
+  const searchResults = menuApps.filter((app) => normalizeSearch(t(app.name)).includes(searchTerm));
   const favoriteApps = favoriteIds
     .map((id) => menuApps.find((app) => app.id === id))
     .filter(Boolean);

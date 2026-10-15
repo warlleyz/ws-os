@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 import { getAppDefinition } from '../../../core/appRegistry';
 import { AppIcon } from '../../../shared/components/AppIcon';
 
@@ -17,14 +18,15 @@ export default function TaskbarApps({
   handleContextMenu,
   handleContextKeyDown,
 }) {
+  useLocale();
   return (
     <div className="taskbar__apps-navigation">
       {appsScroll.overflow && (
         <button
           type="button"
           className="taskbar__scroll-button"
-          aria-label="Ver aplicativos anteriores"
-          title="Aplicativos anteriores"
+          aria-label={t('Ver aplicativos anteriores')}
+          title={t('Aplicativos anteriores')}
           disabled={!appsScroll.left}
           onClick={() => scrollApps(-1)}
         >
@@ -34,7 +36,7 @@ export default function TaskbarApps({
       <div
         ref={appsScrollRef}
         className="taskbar__apps"
-        aria-label="Aplicativos abertos"
+        aria-label={t('Aplicativos abertos')}
         onScroll={() => {
           const element = appsScrollRef.current;
           if (!element) return;
@@ -63,11 +65,11 @@ export default function TaskbarApps({
               ]
                 .filter(Boolean)
                 .join(' ')}
-              aria-label={app?.name ?? group.appId}
+              aria-label={t(app?.name ?? group.appId)}
               aria-pressed={active}
               aria-expanded={previewGroup === group.appId || contextGroup === group.appId}
               aria-keyshortcuts="ArrowUp ArrowDown Shift+F10"
-              title={app?.name ?? group.appId}
+              title={t(app?.name ?? group.appId)}
               onClick={() => handleGroupClick(group)}
               onPointerEnter={() => {
                 window.clearTimeout(previewCloseTimerRef.current);
@@ -91,8 +93,8 @@ export default function TaskbarApps({
         <button
           type="button"
           className="taskbar__scroll-button"
-          aria-label="Ver próximos aplicativos"
-          title="Próximos aplicativos"
+          aria-label={t('Ver próximos aplicativos')}
+          title={t('Próximos aplicativos')}
           disabled={!appsScroll.right}
           onClick={() => scrollApps(1)}
         >

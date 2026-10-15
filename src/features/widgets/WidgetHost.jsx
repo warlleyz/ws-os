@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { COLUMN_STEP } from '../../shells/desktop/desktopLayout';
 import { ROW_STEP } from '../../shells/desktop/desktopLayout';
 import ClockWidget from './clock/ClockWidget';
@@ -11,6 +12,7 @@ export default function WidgetHost({
   changeWidgetSize,
   handleWidgetKeyDown,
 }) {
+  useLocale();
   return (
     <div
       key={widget.instanceId}
@@ -29,8 +31,8 @@ export default function WidgetHost({
         <button
           type="button"
           className="desktop__widget-drag"
-          aria-label="Arrastar relógio"
-          title="Arrastar relógio ou usar as setas para mover"
+          aria-label={t('Arrastar relógio')}
+          title={t('Arrastar relógio ou usar as setas para mover')}
           onKeyDown={handleWidgetKeyDown}
           onPointerDown={startWidgetDrag}
           onPointerMove={moveWidgetDrag}
@@ -39,13 +41,13 @@ export default function WidgetHost({
           onLostPointerCapture={finishWidgetDrag}
           onDragStart={(event) => event.preventDefault()}
         >
-          Arrastar
+          {t('Arrastar')}
         </button>
 
         <label className="desktop__widget-size">
-          <span>Tamanho</span>
+          <span>{t('Tamanho')}</span>
           <select
-            aria-label="Tamanho do relógio"
+            aria-label={t('Tamanho do relógio')}
             value={`${widget.size.columns}x${widget.size.rows}`}
             onChange={(event) => changeWidgetSize(event.target.value)}
           >

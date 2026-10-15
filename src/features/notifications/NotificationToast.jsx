@@ -1,8 +1,10 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useRef } from 'react';
 import { useEffect } from 'react';
 export // Avisos temporários: o histórico é mantido pelo notificationManager.
 const TOAST_DURATION = 5000;
 export function NotificationToast({ notification, onDismiss, onAction }) {
+  useLocale();
   const remainingRef = useRef(TOAST_DURATION);
   const startedAtRef = useRef(null);
   const timerRef = useRef(null);
@@ -51,37 +53,37 @@ export function NotificationToast({ notification, onDismiss, onAction }) {
     };
   }, [notification.id]);
   const typeLabels = {
-    info: 'Informação',
-    success: 'Sucesso',
-    warning: 'Atenção',
-    error: 'Erro',
+    info: t('Informação'),
+    success: t('Sucesso'),
+    warning: t('Atenção'),
+    error: t('Erro'),
   };
   return (
     <article
       id={`ws-toast-${notification.id}`}
       className={`ws-toast ws-toast--${notification.type}`}
       role="status"
-      aria-label={`Notificação: ${notification.title}`}
+      aria-label={t(`Notificação: ${notification.title}`)}
     >
       <div className="ws-toast__indicator" aria-hidden="true" />
       <div className="ws-toast__content">
         <div className="ws-toast__header">
-          <span className="ws-toast__source">{notification.source}</span>
-          <span className="ws-toast__type">{typeLabels[notification.type] ?? 'Informação'}</span>
+          <span className="ws-toast__source">{t(notification.source)}</span>
+          <span className="ws-toast__type">{typeLabels[notification.type] ?? t('Informação')}</span>
         </div>
-        <strong className="ws-toast__title">{notification.title}</strong>
-        {notification.message && <p className="ws-toast__message">{notification.message}</p>}
+        <strong className="ws-toast__title">{t(notification.title)}</strong>
+        {notification.message && <p className="ws-toast__message">{t(notification.message)}</p>}
         {notification.action?.type === 'open-app' && (
           <button type="button" className="ws-toast__action" onClick={() => onAction(notification)}>
-            {notification.action.label ?? 'Abrir aplicativo'}
+            {notification.action.label ?? t('Abrir aplicativo')}
           </button>
         )}
       </div>
       <button
         type="button"
         className="ws-toast__close"
-        aria-label={`Dispensar notificação: ${notification.title}`}
-        title="Dispensar"
+        aria-label={t(`Dispensar notificação: ${notification.title}`)}
+        title={t('Dispensar')}
         onClick={() => onDismiss(notification.id)}
       >
         ×

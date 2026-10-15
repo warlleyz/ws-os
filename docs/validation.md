@@ -139,3 +139,50 @@ continuam na R5. Não declarar o problema original de performance resolvido nest
 Instrumentação ficou fora do produto. Alterações locais anteriores de performance
 foram preservadas e excluídas do commit R3. Não houve instalação, migração destrutiva,
 commit do stash original ou push. Próxima etapa, mediante autorização: R4.
+
+
+## R4 — fundação visual, acessibilidade e idioma — 14/10/2026
+
+Implementado: pt-BR/en persistente na interface atual, datas/pesquisa/ordenação
+localizadas, lang e marca WS OS, preferências de movimento/transparência/baixo custo,
+tokens complementares para superfícies claras/escuras e semântica, foco visível,
+foco modal e navegação/retorno dos painéis e menus contextuais.
+
+Oito testes novos: paridade dos catálogos; persistência/assinaturas/lang; templates,
+nomes e fallback seguro; armazenamento bloqueado; preferências de efeitos e falhas;
+contrastes dos dois temas. Para cada tema, 21 pares texto/superfície foram medidos
+numericamente (mínimo exigido 4,5:1), além de ação/badge (4,5:1) e borda de controle
+contra superfície primária (3:1). Pares cobertos: texto primário/secundário, link,
+acento secundário e success/warning/error sobre canvas/primary/secondary.
+
+Checks: lint, build e 53 testes passaram na árvore local. Cópia exata do commit
+isolado: lint/build e 51 testes. As duas verificações extras locais pertencem ao
+diagnóstico de performance anterior e ficam fora do commit R4.
+
+Navegador:
+- Idioma trocado para inglês com Sobre o Sistema aberto: mesmo instanceId preservado;
+  rótulos, conteúdo estático, menus, atalhos e datas traduzidos. Pesquisa Projects
+  encontra o app pelo nome apresentado. Volta para pt-BR sem recriar a sessão.
+- Light/dark conferidos. Modal claro computado: fundo rgb(255,255,255), texto
+  rgb(23,35,52). Corrigida regra legada do modal/boot que sobrepunha os tokens.
+- Flags persistentes após reload; modo de baixo custo produziu wallpaper sem
+  gradiente e transição computada 0s. As preferências mantêm fallback quando salvar
+  falha, conforme testes de contrato.
+- Modal forçado só por instrumentação externa de leitura, sem apagar welcome-seen:
+  atributo inert presente no fundo, Tab e Shift+Tab permaneceram no botão, Escape
+  removeu o modal e devolveu foco ao WS Menu. Tema/idioma persistidos aplicados.
+- Shift+F10 no atalho abriu ações; setas moveram foco e Escape retornou ao atalho.
+  Foi corrigido o retorno em StrictMode, preservando a origem entre efeitos iniciais.
+- Painel fechado por Escape retornou ao acionador. Link de salto focou ws-desktop
+  e manteve a URL. Reflow em aproximadamente 640×360: conteúdo dos controles com
+  scrollHeight 405/clientHeight 179; opções finais permaneceram operáveis por teclado.
+- Console sem erros/warnings nos fluxos de idioma, temas e controles testados.
+
+Não executado: leitor de tela real, zoom nativo, toque físico e ensaio de todas as
+combinações/estados. Inspeção da árvore acessível e reflow não substituem esses ensaios.
+Nenhuma afirmação de WCAG AA completa. Esses gates manuais ficam explícitos na
+validação integrada; a R5 também precisa retomar o resize nativo junto às bordas.
+
+Nenhuma biblioteca instalada, nenhum dado existente apagado. Stash R3.3 preservado;
+correções locais de performance mantidas fora do commit. Sem push. Próxima etapa,
+mediante autorização: R5, com gates manuais ainda pendentes conforme descrito acima.

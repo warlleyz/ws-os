@@ -18,8 +18,8 @@
   padding: 26px;
   border: 1px solid var(--border-default);
   border-radius: 16px;
-  background: #1b293a;
-  color: #edf4ff;
+  background: var(--surface-primary);
+  color: var(--text-primary);
   box-shadow: 0 20px 60px rgb(0 0 0 / 35%);
 }
 
@@ -44,7 +44,7 @@
   padding: 9px 18px;
   border: 0;
   border-radius: 8px;
-  background: #397fae;
-  color: white;
+  background: var(--action-background);
+  color: var(--action-text);
   cursor: pointer;
 }

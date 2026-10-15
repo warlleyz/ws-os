@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../shared/i18n/i18n';
 import { useCallback, useState } from 'react';
 import { SystemContext } from './systemContext';
 import {
@@ -22,6 +23,7 @@ import {
 
 const MAX_VISIBLE_TOASTS = 3;
 export default function SystemProvider({ children }) {
+  useLocale();
   const [appState, setAppState] = useState(initialAppState);
   const [notificationState, setNotificationState] = useState(initialNotificationState);
   const [visibleToasts, setVisibleToasts] = useState([]);
@@ -42,9 +44,9 @@ export default function SystemProvider({ children }) {
       const request = validateAppOpen(id, options);
       if (!request.ok) {
         notify({
-          title: 'Não foi possível abrir o aplicativo',
+          title: t('Não foi possível abrir o aplicativo'),
           message: request.error.message,
-          source: 'Sistema',
+          source: t('Sistema'),
           type: 'error',
         });
         return;
@@ -55,9 +57,9 @@ export default function SystemProvider({ children }) {
       const app = getAppDefinition(id);
       if (app?.public) {
         const notification = createNotification({
-          title: 'Aplicativo iniciado',
-          message: `${app.name} foi aberto na WS OS.`,
-          source: 'Sistema',
+          title: t('Aplicativo iniciado'),
+          message: t(`${app.name} foi aberto na WS OS.`),
+          source: t('Sistema'),
           type: 'info',
           action: {
             type: 'open-app',

@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { getWidgetDefinition } from '../../core/widgetManager';
 import WidgetHost from '../../features/widgets/WidgetHost';
 import { openApp } from '../../core/appManager';
@@ -16,6 +17,7 @@ export default function DesktopShortcuts({
   openShortcutContext,
   run,
 }) {
+  useLocale();
   const {
     shortcuts,
     selectedIds,
@@ -32,23 +34,25 @@ export default function DesktopShortcuts({
     <>
       {desktopLayout.widgetBlocked && (
         <p className="desktop__layout-notice" role="status">
-          O relógio está temporariamente fora da grade por falta de espaço. Sua preferência foi
-          mantida; ele voltará quando couber.
+          {t(
+            'O relógio está temporariamente fora da grade por falta de espaço. Sua preferência foi mantida; ele voltará quando couber.',
+          )}
         </p>
       )}
       {desktopLayout.overflow && (
         <p className="desktop__layout-notice" role="status">
-          Role a área de trabalho para acessar todos os atalhos.
+          {t('Role a área de trabalho para acessar todos os atalhos.')}
         </p>
       )}
       <p id="desktop-shortcut-help" className="desktop__visually-hidden">
-        Ctrl ou Shift para selecionar vários atalhos. Ctrl+A seleciona todos. Alt e setas movem a
-        seleção na grade. Escape cancela o arraste e limpa a seleção.
+        {t(
+          'Ctrl ou Shift para selecionar vários atalhos. Ctrl+A seleciona todos. Alt e setas movem a seleção na grade. Escape cancela o arraste e limpa a seleção.',
+        )}
       </p>
       <div
         ref={shortcutsRef}
         className="desktop__shortcuts"
-        aria-label="Atalhos da área de trabalho"
+        aria-label={t('Atalhos da área de trabalho')}
         style={{ height: desktopLayout.height || undefined }}
         onPointerDown={(event) => startAreaSelection(event, desktopLayout)}
         onPointerMove={movePointer}
@@ -89,18 +93,34 @@ export default function DesktopShortcuts({
                 .join(' ')}
               style={{ position: 'absolute', left: position.left, top: position.top }}
               type="button"
-              aria-label={`Abrir ${app.name}`}
+              aria-label={t(`Abrir ${app.name}`)}
               aria-pressed={selected}
               aria-describedby="desktop-shortcut-help"
-              title={app.name}
+              title={t(app.name)}
               onContextMenu={(event) => openShortcutContext(event, app)}
               onClick={(event) => handleClick(event, app.id)}
               onDoubleClick={() => {
                 if (!suppressClickRef.current) run(openApp, app.id);
               }}
-              onKeyDown={(event) =>
-                handleKeyDown(event, app, index, desktopLayout, (id) => run(openApp, id))
-              }
+              onKeyDown={(event) => {
+                if ((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  openShortcutContext(
+                    {
+                      preventDefault() {},
+                      stopPropagation() {},
+                      currentTarget: event.currentTarget,
+                      clientX: rect.left + rect.width / 2,
+                      clientY: rect.top + rect.height / 2,
+                    },
+                    app,
+                  );
+                  return;
+                }
+                handleKeyDown(event, app, index, desktopLayout, (id) => run(openApp, id));
+              }}
               onPointerDown={(event) => startShortcutDrag(event, app.id, index, desktopLayout)}
               onDragStart={(event) => event.preventDefault()}
             >
@@ -108,7 +128,7 @@ export default function DesktopShortcuts({
                 {AppIcon ? <AppIcon size={27} strokeWidth={1.8} /> : app.name.charAt(0)}
                 {isOpen && <span className="desktop__shortcut-indicator" />}
               </span>
-              <span className="desktop__shortcut-label">{app.name}</span>
+              <span className="desktop__shortcut-label">{t(app.name)}</span>
             </button>
           );
         })}

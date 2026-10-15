@@ -182,3 +182,39 @@ e informa o usuário, sem substituir automaticamente o valor original. Escrita p
 falhar por quota/bloqueio: o uso continua na sessão com aviso. O salvamento continua
 em chaves separadas, sem transação entre elas ou migração de formato. Tema, favoritos
 e demais chaves existentes não são removidos por esta etapa.
+
+
+## R4 — idioma, efeitos e acessibilidade da interface
+
+- shared/i18n fornece useLocale, getLocale, setLocale e translate. Idiomas pt-BR/en;
+  chave nova ws-os:locale; fallback pt-BR para valor inválido ou leitura bloqueada.
+  setLocale sinaliza falha de gravação, mas mantém o idioma da sessão. Atualiza lang,
+  rótulos, datas, nomes apresentados, pesquisa e ordenação sem recriar instâncias.
+- IDs de apps, chaves, contratos e nomes internos em appRegistry continuam estáveis.
+  Os catálogos usam o texto fonte pt-BR como chave; catálogos possuem paridade de
+  chaves. Templates traduzem parâmetros de apresentação; texto externo desconhecido
+  permanece na origem. A interface atual e Sobre o Sistema são o escopo desta etapa;
+  conteúdo futuro e integrações devem acrescentar suas entradas, sem tradução de dados
+  privados, URLs, identificadores, comandos ou entrada livre do visitante.
+- effectsManager fornece preferências motion/transparency/lowEffects, persistidas
+  em ws-os:accessibility. Falha mantém a sessão e gera aviso pelos controles. CSS
+  respeita também prefers-reduced-motion/transparency; desmarcar uma opção da UI não
+  força efeitos contra a preferência do sistema. Modo de baixo custo reduz gradientes,
+  sombras, blur e animações; não é garantia de resolver o resize nas bordas do monitor.
+- Tema mantém ws-os:theme e dark/light. Aplicação do tema fica no App; salvamento e
+  feedback da ação ficam no Controle Rápido. Nenhuma migração de dados foi realizada.
+- Boas-vindas possui fundo inert/aria-hidden, foco inicial, ciclo de Tab/Shift+Tab,
+  Escape e retorno de foco. O link de salto move o foco ao Desktop sem mudar a URL.
+- Painéis não modais levam foco ao conteúdo e devolvem ao acionador ao fechar por
+  Escape/botão. Tab para fora fecha o painel, sem prender o foco. Menus contextuais
+  do Desktop/atalhos abrem por Shift+F10/ContextMenu e admitem setas, Home/End, Escape
+  e retorno à origem. Navegação dos grupos permanece com semântica de botões.
+- foundation.css complementa os tokens para superfícies, estados semânticos, links,
+  foco e controles. Boot/boas-vindas usam tokens diretamente. Alvos mínimos de 24 px,
+  com regra de 44 px para ponteiro coarse; isso não substitui ensaio físico de toque.
+
+Limites de aceite: testes de contraste verificam pares opacos representativos, não
+todas as composições, imagens e estados possíveis. Não existe declaração de conformidade
+WCAG AA. Leitor de tela real, zoom nativo e toque físico ainda dependem de validação
+manual. Wallpapers personalizados e seu tratamento de arquivos permanecem futuros;
+nenhum upload remoto ou mudança de persistência de imagens foi introduzido.

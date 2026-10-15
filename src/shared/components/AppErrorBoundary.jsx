@@ -1,3 +1,4 @@
+import { translate as t } from '../i18n/i18n';
 import { Component } from 'react';
 
 export default class AppErrorBoundary extends Component {
@@ -17,8 +18,8 @@ export default class AppErrorBoundary extends Component {
     if (this.state.hasError) {
       return (
         <div className="desktop-window__content" role="alert">
-          <h2>Erro no aplicativo</h2>
-          <p>Não foi possível carregar ou executar este aplicativo.</p>
+          <h2>{t('Erro no aplicativo')}</h2>
+          <p>{t('Não foi possível carregar ou executar este aplicativo.')}</p>
 
           <button
             type="button"
@@ -27,7 +28,7 @@ export default class AppErrorBoundary extends Component {
               else this.setState({ hasError: false });
             }}
           >
-            Tentar novamente
+            {t('Tentar novamente')}
           </button>
         </div>
       );

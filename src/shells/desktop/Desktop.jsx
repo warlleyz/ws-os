@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import useDesktopWidgets from '../../features/widgets/useDesktopWidgets';
 import { useSystem } from '../../core/useSystem';
 import useDesktopLayout from './useDesktopLayout';
@@ -14,6 +15,7 @@ import { getAppDefinition } from '../../core/appRegistry';
 // Avisos temporários: o histórico é mantido pelo notificationManager.
 
 export default function Desktop({ theme, onThemeChange }) {
+  useLocale();
   const { appState, minimizeAllApps, visibleToasts, run, dismissToast, handleNotificationOpen } =
     useSystem();
   const { gridSize, shortcutsRef, workspaceRef } = useDesktopLayout();
@@ -53,6 +55,7 @@ export default function Desktop({ theme, onThemeChange }) {
   function openShortcutContext(event, app) {
     event.preventDefault();
     event.stopPropagation();
+    event.currentTarget.focus();
     const workspace = event.currentTarget.closest('.desktop__workspace');
     if (!workspace) return;
     const rect = workspace.getBoundingClientRect();
@@ -86,11 +89,16 @@ export default function Desktop({ theme, onThemeChange }) {
     }
   }
   function openDesktopContext(event) {
-    if (event.target.closest('.desktop__shortcut, .desktop__widget, .desktop__widget-toggle')) {
+    if (
+      event.target.closest(
+        '.desktop__shortcut, .desktop__widget, .desktop__widget-toggle, .desktop__context',
+      )
+    ) {
       return;
     }
     event.preventDefault();
     const workspace = event.currentTarget;
+    workspace.focus();
     const rect = workspace.getBoundingClientRect();
     const menuWidth = 210;
     const menuHeight = 170;
@@ -135,18 +143,33 @@ export default function Desktop({ theme, onThemeChange }) {
     };
   }, []);
   return (
-    <main className="desktop">
+    <main className="desktop" id="ws-desktop" tabIndex={-1}>
       <div className="desktop__wallpaper" aria-hidden="true" />
       <section
         ref={workspaceRef}
+        tabIndex={0}
         className="desktop__workspace"
         onScroll={() => {
           organization.clearDrag();
           cancelWidgetDrag();
         }}
-        aria-label="Área de trabalho"
+        aria-label={t('Área de trabalho')}
         onContextMenu={openDesktopContext}
         onKeyDown={(event) => {
+          if (
+            ((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu') &&
+            event.target === event.currentTarget
+          ) {
+            event.preventDefault();
+            const rect = event.currentTarget.getBoundingClientRect();
+            openDesktopContext({
+              preventDefault() {},
+              target: event.currentTarget,
+              currentTarget: event.currentTarget,
+              clientX: rect.left + 8,
+              clientY: rect.top + 8,
+            });
+          }
           if (event.key === 'Escape') {
             organization.clearDrag();
             cancelWidgetDrag();

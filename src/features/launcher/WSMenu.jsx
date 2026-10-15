@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { SystemIcon } from '../../shared/components/SystemIcon';
 import { openApp } from '../../core/appManager';
 import { AppIcon } from '../../shared/components/AppIcon';
@@ -21,6 +22,7 @@ export default function WSMenu({
   shortcutContextRef,
   runShortcutContextAction,
 }) {
+  useLocale();
   return (
     <section
       className="taskbar-launcher taskbar-launcher--redesign"
@@ -36,10 +38,10 @@ export default function WSMenu({
           <SystemIcon name="wally" size={21} />
         </div>
         <div className="ws-menu__identity-text">
-          <strong>Visitante</strong>
-          <small>Bem-vindo à WS OS</small>
+          <strong>{t('Visitante')}</strong>
+          <small>{t('Bem-vindo à WS OS')}</small>
         </div>
-        <span className="ws-menu__brand">WS OS V2</span>
+        <span className="ws-menu__brand">WS OS</span>
       </header>
       <div className="ws-menu__search">
         <svg
@@ -57,8 +59,8 @@ export default function WSMenu({
         <input
           ref={menuSearchRef}
           type="search"
-          aria-label="Pesquisar na WS OS"
-          placeholder="Pesquisar na WS OS..."
+          aria-label={t('Pesquisar na WS OS')}
+          placeholder={t('Pesquisar na WS OS...')}
           value={menuSearch}
           onChange={(event) => setMenuSearch(event.target.value)}
           onKeyDown={(event) => {
@@ -72,8 +74,8 @@ export default function WSMenu({
         {menuSearch && (
           <button
             type="button"
-            aria-label="Limpar pesquisa"
-            title="Limpar pesquisa"
+            aria-label={t('Limpar pesquisa')}
+            title={t('Limpar pesquisa')}
             onClick={() => {
               setMenuSearch('');
               menuSearchRef.current?.focus();
@@ -87,10 +89,10 @@ export default function WSMenu({
         <div className="ws-menu__section-heading">
           <strong>
             {searchTerm
-              ? 'Resultados da pesquisa'
+              ? t('Resultados da pesquisa')
               : menuView === 'all'
-                ? 'Todos os aplicativos'
-                : 'Aplicativos Favoritos'}
+                ? t('Todos os aplicativos')
+                : t('Aplicativos Favoritos')}
           </strong>
           {!searchTerm && (
             <button
@@ -98,19 +100,19 @@ export default function WSMenu({
               className="ws-menu__view-toggle"
               onClick={() => setMenuView((current) => (current === 'all' ? 'home' : 'all'))}
             >
-              {menuView === 'all' ? 'Voltar' : 'Todos os aplicativos'}
+              {menuView === 'all' ? t('Voltar') : t('Todos os aplicativos')}
               <span aria-hidden="true">{menuView === 'all' ? ' ←' : ' →'}</span>
             </button>
           )}
         </div>
-        <div className="ws-menu__apps" aria-label="Aplicativos">
+        <div className="ws-menu__apps" aria-label={t('Aplicativos')}>
           {visibleMenuApps.length === 0 ? (
             <p className="ws-menu__empty">
               {searchTerm
-                ? 'Nenhum aplicativo encontrado.'
+                ? t('Nenhum aplicativo encontrado.')
                 : menuView === 'home'
-                  ? 'Nenhum favorito. Clique em Todos os aplicativos para adicionar.'
-                  : 'Nenhum aplicativo disponível.'}
+                  ? t('Nenhum favorito. Clique em Todos os aplicativos para adicionar.')
+                  : t('Nenhum aplicativo disponível.')}
             </p>
           ) : (
             visibleMenuApps.map((app) => {
@@ -143,7 +145,7 @@ export default function WSMenu({
                     <span className="ws-menu__app-icon">
                       <AppIcon app={app} size={19} />
                     </span>
-                    <span className="ws-menu__app-name">{app.name}</span>
+                    <span className="ws-menu__app-name">{t(app.name)}</span>
                   </button>
                 </div>
               );
@@ -162,7 +164,7 @@ export default function WSMenu({
               ref={shortcutContextRef}
               className="ws-menu__context"
               role="group"
-              aria-label={`Opções de ${app.name}`}
+              aria-label={t(`Opções de ${app.name}`)}
               style={{
                 left: shortcutContext.x,
                 top: shortcutContext.y,
@@ -172,7 +174,7 @@ export default function WSMenu({
                 <span className="ws-menu__context-icon">
                   <AppIcon app={app} size={18} />
                 </span>
-                <strong title={app.name}>{app.name}</strong>
+                <strong title={t(app.name)}>{t(app.name)}</strong>
               </div>
               <div className="ws-menu__context-divider" />
               <button type="button" onClick={() => runShortcutContextAction('open')}>
@@ -181,7 +183,7 @@ export default function WSMenu({
                     <path d="M8 5l11 7-11 7V5Z" />
                   </svg>
                 </span>
-                Abrir
+                {t('Abrir')}
               </button>
               <button
                 type="button"
@@ -197,7 +199,7 @@ export default function WSMenu({
                     <path d="m12 2 3.1 6.3 7 1-5.1 5 .9 7-5.9-3.2-5.9 3.2.9-7-5.1-5 7-1L12 2Z" />
                   </svg>
                 </span>
-                {isFavorite ? 'Desafixar do WS Menu' : 'Fixar no WS Menu'}
+                {isFavorite ? t('Desafixar do WS Menu') : t('Fixar no WS Menu')}
               </button>
               <div className="ws-menu__context-divider" />
               <button
@@ -211,15 +213,19 @@ export default function WSMenu({
                     <path d="M12 11v6M12 7h.01" />
                   </svg>
                 </span>
-                Informações
+                {t('Informações')}
               </button>
               {shortcutContext.showInfo && (
                 <div className="ws-menu__context-details">
                   <span>
-                    Tipo:{' '}
-                    {app.category === 'system' ? 'Aplicativo de Sistema' : 'Aplicativo Desktop'}
+                    {t('Tipo:')}{' '}
+                    {app.category === 'system'
+                      ? t('Aplicativo de Sistema')
+                      : t('Aplicativo Desktop')}
                   </span>
-                  <span>Estado: {app.implemented ? 'Implementado' : 'Em desenvolvimento'}</span>
+                  <span>
+                    {t('Estado:')} {app.implemented ? t('Implementado') : t('Em desenvolvimento')}
+                  </span>
                 </div>
               )}
             </div>

@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getRegisteredApps } from '../../core/appRegistry';
 import { useSystem } from '../../core/useSystem';
@@ -9,6 +10,7 @@ import {
 import { COLUMN_STEP, ROW_STEP, getShortcutsInArea, moveDesktopShortcuts } from './desktopLayout';
 
 export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
+  const locale = useLocale();
   const { notify } = useSystem();
   const [initial] = useState(loadDesktopPreferences);
   const [preferences, setPreferences] = useState(initial);
@@ -25,10 +27,10 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     );
     return apps.sort(
       preferences.order === 'name'
-        ? (a, b) => a.name.localeCompare(b.name, 'pt-BR')
+        ? (a, b) => t(a.name).localeCompare(t(b.name), locale)
         : (a, b) => DEFAULT_SHORTCUT_ORDER.indexOf(a.id) - DEFAULT_SHORTCUT_ORDER.indexOf(b.id),
     );
-  }, [preferences.order]);
+  }, [preferences.order, locale]);
   useEffect(() => {
     const failed =
       preferences === initial && initial.error ? true : !saveDesktopPreferences(preferences);
