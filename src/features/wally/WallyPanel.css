@@ -448,3 +448,37 @@
     animation: none;
   }
 }
+
+/* Refinamentos finais do painel rápido */
+
+.ws-wally__messages {
+  scrollbar-gutter: stable;
+}
+
+.ws-wally__message--assistant .ws-wally__bubble {
+  max-width: 90%;
+}
+
+.ws-wally__bubble p {
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.ws-wally__suggestions button {
+  min-height: 42px;
+  font-size: 11px;
+}
+
+.ws-wally__composer input {
+  font-size: 13px;
+}
+
+.ws-wally__verification-info {
+  padding: 7px 0;
+  font-size: 11px;
+}
+
+.ws-wally__bubble small {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
