@@ -218,3 +218,7 @@ todas as composições, imagens e estados possíveis. Não existe declaração d
 WCAG AA. Leitor de tela real, zoom nativo e toque físico ainda dependem de validação
 manual. Wallpapers personalizados e seu tratamento de arquivos permanecem futuros;
 nenhum upload remoto ou mudança de persistência de imagens foi introduzido.
+
+## Configurações — 15/10/2026
+
+Contratos de wallpapers, preferências compartilhadas, widgets, restauração e preferências particulares de apps: consulte docs/settings.md. A restauração usa allowlist e preserva arquivos, imagem pessoal e organização. Desktop/Mobile têm seleções próprias; preferências de acessibilidade prevalecem sobre os efeitos.

@@ -12,6 +12,11 @@ import { useEffect, useRef, useState } from 'react';
 import Taskbar from './taskbar/Taskbar';
 import { openApp } from '../../core/appManager';
 import { getAppDefinition } from '../../core/appRegistry';
+import {
+  useWallpaper,
+  useWallpaperRevision,
+  getWallpaperDefinition,
+} from '../../core/wallpaperManager';
 // Avisos temporários: o histórico é mantido pelo notificationManager.
 
 export default function Desktop({ theme, onThemeChange }) {
@@ -28,6 +33,8 @@ export default function Desktop({ theme, onThemeChange }) {
   const [desktopContext, setDesktopContext] = useState(null);
   const [shortcutContext, setShortcutContext] = useState(null);
   const desktopContextRef = useRef(null);
+  const wallpaper = useWallpaper();
+  useWallpaperRevision();
   const shortcutContextRef = useRef(null);
   const {
     widgetState,
@@ -144,7 +151,13 @@ export default function Desktop({ theme, onThemeChange }) {
   }, []);
   return (
     <main className="desktop" id="ws-desktop" tabIndex={-1}>
-      <div className="desktop__wallpaper" aria-hidden="true" />
+      <div
+        className="desktop__wallpaper"
+        aria-hidden="true"
+        style={{
+          background: getWallpaperDefinition(wallpaper).background,
+        }}
+      />
       <section
         ref={workspaceRef}
         tabIndex={0}

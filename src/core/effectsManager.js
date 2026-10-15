@@ -50,3 +50,11 @@ export function setAccessibility(preferences) {
   listeners.forEach((listener) => listener());
   return saved;
 }
+
+if (typeof window !== 'undefined')
+  window.addEventListener('storage', (event) => {
+    if (event.key !== KEY && event.key !== null) return;
+    current = loadAccessibility();
+    applyAccessibility(current);
+    listeners.forEach((listener) => listener());
+  });

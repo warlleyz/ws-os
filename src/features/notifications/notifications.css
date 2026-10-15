@@ -179,7 +179,7 @@
 
 .taskbar-notifications__item--unread {
   border-left: 3px solid var(--accent-secondary);
-  background: rgb(101 205 225 / 7%);
+  background: color-mix(in srgb, var(--accent-secondary) 7%, transparent);
 }
 
 .taskbar-notifications__item--read {

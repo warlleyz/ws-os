@@ -146,7 +146,7 @@
   width: 16px;
   border-radius: 5px;
   background: var(--accent-secondary);
-  box-shadow: 0 0 8px rgb(101 205 225 / 35%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-secondary) 35%, transparent);
   opacity: 1;
 }
 

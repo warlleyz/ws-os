@@ -1,27 +1,20 @@
-import { COLUMN_STEP, ROW_STEP, getDesktopLayout } from '../../shells/desktop/desktopLayout';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSystem } from '../../core/useSystem';
 import {
-  loadWidgetPreferences,
-  saveWidgetState,
-  setWidgetVisibility,
-  setWidgetPosition,
-  setWidgetSize,
-} from '../../core/widgetManager';
+  useWidgetPreferences,
+  getWidgetPreferenceError,
+  saveWidgetPreferences,
+  registerWidgetValidator,
+} from '../../core/widgetPreferences';
+import { COLUMN_STEP, ROW_STEP, getDesktopLayout } from '../../shells/desktop/desktopLayout';
+import { useCallback, useEffect, useRef } from 'react';
+import { useSystem } from '../../core/useSystem';
+import { setWidgetVisibility, setWidgetPosition, setWidgetSize } from '../../core/widgetManager';
 
 export default function useDesktopWidgets({ shortcuts, gridSize, shortcutPositions = {} }) {
   const { notify } = useSystem();
-  const [initial] = useState(loadWidgetPreferences);
-  const [widgetState, setWidgetState] = useState(initial.state);
-  const saveWarningRef = useRef(false);
+  const widgetState = useWidgetPreferences();
   const widgetDragRef = useRef(null);
-  useEffect(() => {
-    const saved =
-      widgetState === initial.state && initial.error ? false : saveWidgetState(widgetState);
-    if (saved) {
-      saveWarningRef.current = false;
-      return;
-    }
+  const saveWarningRef = useRef(false);
+  function warnStorage() {
     if (saveWarningRef.current) return;
     saveWarningRef.current = true;
     notify({
@@ -31,7 +24,23 @@ export default function useDesktopWidgets({ shortcuts, gridSize, shortcutPositio
       source: 'Widgets',
       type: 'warning',
     });
-  }, [widgetState, initial, notify]);
+  }
+  function setWidgetState(next) {
+    if (!saveWidgetPreferences(next)) warnStorage();
+    else saveWarningRef.current = false;
+  }
+  useEffect(() => {
+    if (getWidgetPreferenceError() && !saveWarningRef.current) {
+      saveWarningRef.current = true;
+      notify({
+        title: 'Preferências dos widgets',
+        message:
+          'Não foi possível ler ou salvar as preferências. Os widgets continuam disponíveis nesta sessão; alterações podem não permanecer após recarregar.',
+        source: 'Widgets',
+        type: 'warning',
+      });
+    }
+  }, [notify]);
   const clockWidget = widgetState.widgets.find((widget) => widget.instanceId === 'clock-default');
   const preferred = shortcuts.map((app) => shortcutPositions[app.id]);
   const desktopLayout = getDesktopLayout(
@@ -59,6 +68,21 @@ export default function useDesktopWidgets({ shortcuts, gridSize, shortcutPositio
       preferred,
     );
   }
+  useEffect(
+    () =>
+      registerWidgetValidator((candidate) =>
+        Boolean(
+          getDesktopLayout(
+            shortcuts.length,
+            gridSize.width,
+            gridSize.height,
+            candidate,
+            shortcuts.map((app) => shortcutPositions[app.id]),
+          ).widget,
+        ),
+      ),
+    [shortcuts, gridSize.width, gridSize.height, shortcutPositions],
+  );
   function toggleClockWidget() {
     if (!clockWidget) return;
     if (!clockWidget.visible && !getCandidateLayout({ ...clockWidget, visible: true }).widget) {
@@ -72,7 +96,10 @@ export default function useDesktopWidgets({ shortcuts, gridSize, shortcutPositio
   function changeWidgetSize(value) {
     if (!['2x2', '3x2', '3x3'].includes(value)) return;
     const [columns, rows] = value.split('x').map(Number);
-    if (!getCandidateLayout({ ...clockWidget, size: { columns, rows } }).widget) {
+    if (
+      clockWidget.visible &&
+      !getCandidateLayout({ ...clockWidget, size: { columns, rows } }).widget
+    ) {
       blocked();
       return;
     }
@@ -105,7 +132,7 @@ export default function useDesktopWidgets({ shortcuts, gridSize, shortcutPositio
     () => () => {
       cancelWidgetDrag();
     },
-    [gridSize.width, gridSize.height, cancelWidgetDrag],
+    [gridSize.width, gridSize.height, widgetState, cancelWidgetDrag],
   );
   function startWidgetDrag(event) {
     if (event.button !== 0 || !desktopLayout.widget) return;

@@ -184,7 +184,7 @@ test('registry não declara aplicativos funcionais inexistentes', () => {
     Array.from(
       apps.filter((app) => app.implemented).map((app) => app.id),
     ),
-    ['about-me', 'resume', 'certificates', 'about-system', 'file-viewer'],
+    ['about-me', 'resume', 'certificates', 'settings', 'about-system', 'file-viewer'],
   );
   assert.equal(apps.filter((app) => app.desktopShortcut).length, 12);
 });

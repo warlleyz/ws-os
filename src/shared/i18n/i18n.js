@@ -81,3 +81,11 @@ export function translate(value) {
   cache.set(key, result);
   return result;
 }
+
+if (typeof window !== 'undefined')
+  window.addEventListener('storage', (event) => {
+    if (event.key !== STORAGE_KEY && event.key !== null) return;
+    currentLocale = loadLocale();
+    document.documentElement.lang = currentLocale;
+    listeners.forEach((listener) => listener());
+  });

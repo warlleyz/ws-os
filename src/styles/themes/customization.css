@@ -1,98 +1,176 @@
-/* Personalização visual compartilhada entre Desktop e Mobile. */
-
-/* Cores de destaque */
-
-:root[data-accent='violet'][data-theme='dark'] {
-    --accent-primary: #9270ed;
-    --accent-secondary: #c3abff;
-}
-
-:root[data-accent='violet'][data-theme='light'] {
-    --accent-primary: #6942bb;
-    --accent-secondary: #6439a9;
-}
-
-:root[data-accent='green'][data-theme='dark'] {
-    --accent-primary: #229b83;
-    --accent-secondary: #7de1c4;
-}
-
-:root[data-accent='green'][data-theme='light'] {
-    --accent-primary: #08775f;
-    --accent-secondary: #08634f;
-}
-
-/* Intensidade do desfoque */
-
-:root[data-blur='off'] {
-    --blur-light: 0px;
-    --blur-medium: 0px;
-    --blur-strong: 0px;
-}
-
-:root[data-blur='soft'] {
-    --blur-light: 4px;
-    --blur-medium: 8px;
-    --blur-strong: 12px;
-}
-
-:root[data-blur='normal'] {
-    --blur-light: 8px;
-    --blur-medium: 12px;
-    --blur-strong: 20px;
-}
-
-:root[data-blur='strong'] {
-    --blur-light: 12px;
-    --blur-medium: 20px;
-    --blur-strong: 30px;
-}
-
-/* Transparência compartilhada */
-
+/* Controlled appearance; accessibility rules come last. */
 :root {
-    --ws-glass-opacity: 0.92;
-    --ws-dark-glass-rgb: 24 34 48;
-    --ws-light-glass-rgb: 255 255 255;
+  --ws-glass-opacity: 0.92;
+  --ws-glass-rgb: 24 34 48;
+  --ws-glass: rgb(var(--ws-glass-rgb) / var(--ws-glass-opacity));
+  --taskbar-background: var(--ws-glass);
+  --panel-background: var(--ws-glass);
 }
-
-:root[data-transparency='solid'] {
-    --ws-glass-opacity: 1;
-}
-
-:root[data-transparency='default'] {
-    --ws-glass-opacity: 0.92;
-}
-
-:root[data-transparency='high'] {
-    --ws-glass-opacity: 0.78;
-}
-
-:root[data-theme='dark'] {
-    --taskbar-background: rgb(var(--ws-dark-glass-rgb) / var(--ws-glass-opacity));
-}
-
 :root[data-theme='light'] {
-    --taskbar-background: rgb(var(--ws-light-glass-rgb) / var(--ws-glass-opacity));
+  --ws-glass-rgb: 255 255 255;
+  --taskbar-background: var(--ws-glass);
+  --panel-background: var(--ws-glass);
 }
-
-/* Acessibilidade sempre prevalece sobre personalização */
-
+:root[data-accent='violet'][data-theme='dark'] {
+  --accent-primary: #9270ed;
+  --accent-secondary: #c3abff;
+  --action-background: #6439a9;
+  --link-color: #c3abff;
+}
+:root[data-accent='violet'][data-theme='light'] {
+  --accent-primary: #6942bb;
+  --accent-secondary: #6439a9;
+  --action-background: #6439a9;
+  --link-color: #6439a9;
+}
+:root[data-accent='green'][data-theme='dark'] {
+  --accent-primary: #229b83;
+  --accent-secondary: #7de1c4;
+  --action-background: #08634f;
+  --link-color: #7de1c4;
+}
+:root[data-accent='green'][data-theme='light'] {
+  --accent-primary: #08775f;
+  --accent-secondary: #08634f;
+  --action-background: #08634f;
+  --link-color: #08634f;
+}
+:root[data-blur='off'] {
+  --blur-light: 0px;
+  --blur-medium: 0px;
+  --blur-strong: 0px;
+}
+:root[data-blur='soft'] {
+  --blur-light: 4px;
+  --blur-medium: 8px;
+  --blur-strong: 12px;
+}
+:root[data-blur='normal'] {
+  --blur-light: 8px;
+  --blur-medium: 12px;
+  --blur-strong: 20px;
+}
+:root[data-blur='strong'] {
+  --blur-light: 12px;
+  --blur-medium: 20px;
+  --blur-strong: 30px;
+}
+:root[data-transparency='solid'] {
+  --ws-glass-opacity: 1;
+  --blur-light: 0px;
+  --blur-medium: 0px;
+  --blur-strong: 0px;
+}
+:root[data-transparency='high'] {
+  --ws-glass-opacity: 0.88;
+}
+:root[data-motion-intensity='subtle'] {
+  --transition-fast: 60ms;
+  --transition-normal: 100ms;
+}
+:root[data-motion-intensity='off'] *,
+:root[data-motion-intensity='off'] *::before,
+:root[data-motion-intensity='off'] *::after {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+.desktop-window__header,
+.desktop__context,
+.ws-widget {
+  background: var(--ws-glass);
+  backdrop-filter: blur(var(--blur-medium));
+}
+.desktop-window {
+  background: transparent;
+}
+.desktop-window__content {
+  background: var(--surface-primary);
+}
+.desktop-window__focus[data-active='true'] {
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent-secondary) 35%, transparent);
+}
+.desktop-snap-preview {
+  background: color-mix(in srgb, var(--accent-primary) 16%, transparent) !important;
+  box-shadow: inset 0 0 24px color-mix(in srgb, var(--accent-primary) 8%, transparent) !important;
+}
+.ws-mobile__panel {
+  backdrop-filter: blur(var(--blur-medium));
+}
 :root[data-reduced-transparency='true'],
 :root[data-low-effects='true'] {
+  --ws-glass-opacity: 1;
+  --blur-light: 0px;
+  --blur-medium: 0px;
+  --blur-strong: 0px;
+  --taskbar-background: var(--surface-primary);
+  --panel-background: var(--surface-primary);
+  --ws-glass: var(--surface-primary);
+}
+:root[data-reduced-motion='true'] *,
+:root[data-reduced-motion='true'] *::before,
+:root[data-reduced-motion='true'] *::after,
+:root[data-low-effects='true'] *,
+:root[data-low-effects='true'] *::before,
+:root[data-low-effects='true'] *::after {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+:root[data-low-effects='true'] .desktop__wallpaper,
+:root[data-low-effects='true'] .ws-mobile__wallpaper {
+  background: var(--surface-canvas) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  :root[data-theme],
+  :root[data-blur],
+  :root[data-transparency] {
+    --ws-glass-opacity: 1;
     --blur-light: 0px;
     --blur-medium: 0px;
     --blur-strong: 0px;
+    --ws-glass: var(--surface-primary);
     --taskbar-background: var(--surface-primary);
     --panel-background: var(--surface-primary);
+  }
+  .ws-mobile__catalog,
+  .ws-mobile__welcome {
+    background: var(--surface-primary);
+  }
+}
+:root[data-reduced-transparency='true'] .ws-mobile__catalog,
+:root[data-reduced-transparency='true'] .ws-mobile__welcome,
+:root[data-low-effects='true'] .ws-mobile__catalog,
+:root[data-low-effects='true'] .ws-mobile__welcome {
+  background: var(--surface-primary);
 }
 
-@media (prefers-reduced-transparency: reduce) {
-    :root {
-        --blur-light: 0px;
-        --blur-medium: 0px;
-        --blur-strong: 0px;
-        --taskbar-background: var(--surface-primary);
-        --panel-background: var(--surface-primary);
-    }
+.taskbar-launcher--redesign,
+.taskbar-notifications,
+.taskbar-quick-controls,
+.taskbar-calendar,
+.taskbar-weather-panel,
+.taskbar-wally,
+.taskbar-preview,
+.taskbar-context {
+  background: var(--panel-background);
+  backdrop-filter: blur(var(--blur-medium));
+  box-shadow: var(--panel-shadow);
+}
+.taskbar button,
+.ws-menu__search,
+.ws-menu__app-item,
+.desktop__shortcut,
+.desktop-window__control::after {
+  transition-duration: var(--transition-fast);
+}
+.ws-toast {
+  animation-duration: var(--transition-normal);
 }

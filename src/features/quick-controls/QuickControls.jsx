@@ -6,7 +6,6 @@ import { useSystem } from '../../core/useSystem';
 export default function QuickControls({
   setQuickControlsOpen,
   theme,
-  onThemeChange,
   autoHideTaskbar,
   onAutoHideTaskbarChange,
   showAutoHideTaskbar = true,
@@ -74,9 +73,7 @@ export default function QuickControls({
               <input
                 type="checkbox"
                 checked={autoHideTaskbar}
-                onChange={(event) =>
-                  onAutoHideTaskbarChange(event.target.checked)
-                }
+                onChange={(event) => onAutoHideTaskbarChange(event.target.checked)}
               />
               {t('Ocultar automaticamente a barra de tarefas')}
             </label>

@@ -232,7 +232,7 @@
 }
 
 .ws-menu__avatar {
-  border: 1px solid rgb(101 205 225 / 18%);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 18%, transparent);
   background: linear-gradient(145deg, rgb(51 82 107 / 70%), rgb(30 52 74 / 80%));
   color: var(--accent-secondary);
 }
@@ -263,13 +263,13 @@
 }
 
 .ws-menu__search:hover {
-  border-color: rgb(101 205 225 / 35%);
+  border-color: color-mix(in srgb, var(--accent-secondary) 35%, transparent);
 }
 
 .ws-menu__search:focus-within {
   border-color: var(--accent-secondary);
   background: rgb(255 255 255 / 6%);
-  box-shadow: 0 0 0 3px rgb(101 205 225 / 9%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-secondary) 9%, transparent);
 }
 
 .ws-menu__section-heading strong {
@@ -298,12 +298,12 @@
 
 .ws-menu__app-item:hover,
 .ws-menu__app-item:focus-within {
-  border-color: rgb(101 205 225 / 12%);
+  border-color: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
   background: rgb(255 255 255 / 5%);
 }
 
 .ws-menu__app-icon {
-  border: 1px solid rgb(101 205 225 / 12%);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 12%, transparent);
   border-radius: 9px;
   background: rgb(55 85 112 / 35%);
   color: var(--accent-secondary);
@@ -335,7 +335,7 @@
 }
 
 .ws-menu__apps::-webkit-scrollbar-thumb:hover {
-  background: rgb(101 205 225 / 75%);
+  background: color-mix(in srgb, var(--accent-secondary) 75%, transparent);
 }
 
 .ws-menu__context {
@@ -382,7 +382,7 @@
   height: 27px;
   flex: 0 0 27px;
   place-items: center;
-  border: 1px solid rgb(101 205 225 / 14%);
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 14%, transparent);
   border-radius: 8px;
   background: rgb(55 85 112 / 35%);
   color: var(--accent-secondary);
@@ -417,7 +417,7 @@
 
 .ws-menu__context button:hover:not(:disabled),
 .ws-menu__context button:focus-visible {
-  background: rgb(101 205 225 / 11%);
+  background: color-mix(in srgb, var(--accent-secondary) 11%, transparent);
   color: var(--accent-secondary);
 }
 

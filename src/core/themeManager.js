@@ -1,4 +1,3 @@
-
 import { useSyncExternalStore } from 'react';
 
 const THEME_STORAGE_KEY = 'ws-os:theme';
@@ -26,9 +25,7 @@ export function saveTheme(theme) {
 }
 
 export function applyTheme(theme) {
-  const resolvedTheme = AVAILABLE_THEMES.includes(theme)
-    ? theme
-    : 'dark';
+  const resolvedTheme = AVAILABLE_THEMES.includes(theme) ? theme : 'dark';
 
   document.documentElement.dataset.theme = resolvedTheme;
   document.documentElement.style.colorScheme = resolvedTheme;
@@ -47,11 +44,7 @@ export function getTheme() {
 }
 
 export function useTheme() {
-  return useSyncExternalStore(
-    subscribe,
-    getTheme,
-    () => 'dark',
-  );
+  return useSyncExternalStore(subscribe, getTheme, () => 'dark');
 }
 
 export function setTheme(theme) {
@@ -66,3 +59,11 @@ export function setTheme(theme) {
 
   return saveTheme(theme);
 }
+
+if (typeof window !== 'undefined')
+  window.addEventListener('storage', (event) => {
+    if (event.key !== THEME_STORAGE_KEY && event.key !== null) return;
+    currentTheme = loadTheme();
+    applyTheme(currentTheme);
+    listeners.forEach((listener) => listener());
+  });

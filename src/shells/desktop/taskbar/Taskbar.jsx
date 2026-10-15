@@ -28,10 +28,7 @@ import {
   getPreferredInstance,
 } from '../../../core/appManager';
 import { getAppDefinition } from '../../../core/appRegistry';
-import {
-  useTaskbarAutoHide,
-  setTaskbarAutoHide,
-} from '../../../core/taskbarPreferences';
+import { useTaskbarAutoHide, setTaskbarAutoHide } from '../../../core/taskbarPreferences';
 
 // Utilitários e preferências persistentes do WS Menu.
 
@@ -45,14 +42,8 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     handleNotificationAction: onNotificationAction,
     handleNotificationOpen: onNotificationOpen,
   } = useSystem();
-  const {
-    weather,
-    forecast,
-    weatherLoading,
-    weatherError,
-    requestWeather,
-    getWeatherDescription,
-  } = useWeather();
+  const { weather, forecast, weatherLoading, weatherError, requestWeather, getWeatherDescription } =
+    useWeather();
   const notifications = notificationState?.items ?? [];
   const unreadCount = notifications.filter((item) => !item.read).length;
   const [contextGroup, setContextGroup] = useState(null);
@@ -66,34 +57,13 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     if (!saved) {
       notify({
         title: t('Preferência não salva'),
-        message: t(
-          'Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.',
-        ),
+        message: t('Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.'),
         type: 'warning',
         source: t('Sistema'),
       });
     }
   }
 
-  function changeAutoHide(enabled) {
-    setAutoHide(enabled);
-
-    try {
-      localStorage.setItem(
-        'ws-os:taskbar-auto-hide',
-        String(enabled),
-      );
-    } catch {
-      notify({
-        title: t('Preferência não salva'),
-        message: t(
-          'Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.',
-        ),
-        type: 'warning',
-        source: t('Sistema'),
-      });
-    }
-  }
   const menuOpen = activePanel === 'menu';
   const notificationOpen = activePanel === 'notifications';
   const quickControlsOpen = activePanel === 'controls';
@@ -476,14 +446,12 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     <div
       className={[
         'taskbar-container',
-        autoHide &&
-          activePanel === null &&
-          !preview &&
-          !contextGroup &&
-          !shortcutContext
+        autoHide && activePanel === null && !preview && !contextGroup && !shortcutContext
           ? 'taskbar-container--auto-hide'
           : '',
-      ].filter(Boolean).join(' ')}
+      ]
+        .filter(Boolean)
+        .join(' ')}
       ref={taskbarRef}
     >
       {createPortal(
@@ -688,12 +656,8 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
             onClick={toggleCalendar}
           >
             <span className="taskbar__datetime">
-              <time dateTime={currentTime.toISOString()}>
-                {timeText}
-              </time>
-              <span className="taskbar__date">
-                {shortDateText}
-              </span>
+              <time dateTime={currentTime.toISOString()}>{timeText}</time>
+              <span className="taskbar__date">{shortDateText}</span>
             </span>
           </button>
         </div>

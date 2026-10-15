@@ -1,6 +1,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Bell, Settings2 } from 'lucide-react';
+import { useWallpaper, useWallpaperRevision, getWallpaperDefinition } from '../../core/wallpaperManager';
 import { useMobilePreferences } from '../../core/mobilePreferences';
 
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
@@ -27,6 +28,8 @@ export default function Mobile({ theme, onThemeChange }) {
     useLocale();
     
     const mobilePreferences = useMobilePreferences();
+    const wallpaper = useWallpaper('mobile');
+    useWallpaperRevision();
 
     const {
         appState,
@@ -237,6 +240,7 @@ export default function Mobile({ theme, onThemeChange }) {
             data-grid-density={mobilePreferences.gridDensity}
             tabIndex={-1}
         >
+            <div className="ws-mobile__wallpaper" aria-hidden="true" style={{ background: getWallpaperDefinition(wallpaper, 'mobile').background }} />
             <div className="ws-mobile__content-shell" inert={Boolean(activePanel)}>
                 <div className="ws-mobile__system-bar">
                     <strong>WS OS</strong>

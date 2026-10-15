@@ -16,8 +16,16 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 75% 20%, rgb(55 140 228 / 15%), transparent 45%),
-    radial-gradient(ellipse at 20% 85%, rgb(101 205 225 / 8%), transparent 45%),
+    radial-gradient(
+      ellipse at 75% 20%,
+      color-mix(in srgb, var(--accent-primary) 15%, transparent),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 20% 85%,
+      color-mix(in srgb, var(--accent-secondary) 8%, transparent),
+      transparent 45%
+    ),
     var(--surface-canvas);
 }
 
@@ -68,7 +76,7 @@
 
 .desktop__shortcut--selected {
   border-color: var(--border-default);
-  background: rgb(101 205 225 / 12%);
+  background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
 }
 
 .desktop__shortcut:active {
@@ -246,7 +254,7 @@
   z-index: 3;
   pointer-events: none;
   border: 1px solid var(--accent-secondary);
-  background: rgb(101 205 225 / 12%);
+  background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
 }
 .desktop__layout-notice {
   margin: 8px 20px 0;

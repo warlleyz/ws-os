@@ -244,3 +244,7 @@ Testes automatizados e manuais aprovados.
 
 ### Próximo passo
 R5.3 — Diagnóstico e validação do resize nativo.
+
+## Configurações — 15/10/2026
+
+Implementação e evidências detalhadas em docs/settings.md. Inclui upload real, IndexedDB real, recuperação, restauração, widgets, auto-ocultação, PT-BR/EN, temas e reflow Desktop/Mobile. Leitor de tela real, toque físico, zoom nativo e resize nas bordas do monitor continuam como validação humana explícita; não equivalem aos ensaios automatizados.
