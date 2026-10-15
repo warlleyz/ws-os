@@ -5,7 +5,12 @@ import { Bell, Settings2 } from 'lucide-react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useSystem } from '../../core/useSystem';
 import { getRegisteredApps, getAppDefinition } from '../../core/appRegistry';
-import { openApp, closeApp } from '../../core/appManager';
+import {
+    openApp,
+    closeApp,
+    activateApp,
+    restoreApp,
+} from '../../core/appManager';
 
 import AppHost from '../../features/windows/AppHost';
 import NotificationCenter from '../../features/notifications/NotificationCenter';
@@ -44,19 +49,19 @@ export default function Mobile({ theme, onThemeChange }) {
     );
 
     const activeInstance = appState.instances.find(
-        (instance) =>
-            instance.id === appState.activeInstanceId &&
-            instance.appId === selectedAppId,
+        (instance) => instance.id === appState.activeInstanceId,
     );
 
     const selectedInstance =
-        activeInstance ??
-        [...appState.instances]
-            .reverse()
-            .find((instance) => instance.appId === selectedAppId);
+        screen === 'app'
+            ? activeInstance ??
+            [...appState.instances]
+                .reverse()
+                .find((instance) => instance.appId === selectedAppId)
+            : null;
 
-    const currentApp = selectedAppId
-        ? getAppDefinition(selectedAppId)
+    const currentApp = selectedInstance
+        ? getAppDefinition(selectedInstance.appId)
         : null;
 
     useEffect(() => {
@@ -145,16 +150,67 @@ export default function Mobile({ theme, onThemeChange }) {
 
     function goBack() {
         closePanel();
+
+        const originAppId = selectedInstance?.origin;
+
+        if (
+            selectedInstance?.appId !== originAppId &&
+            originAppId &&
+            originAppId !== 'mobile'
+        ) {
+            const originInstance = [...appState.instances]
+                .reverse()
+                .find((instance) => instance.appId === originAppId);
+
+            if (originInstance) {
+                run(
+                    originInstance.minimized ? restoreApp : activateApp,
+                    originInstance.id,
+                );
+
+                setSelectedAppId(originAppId);
+                setScreen('app');
+                return;
+            }
+        }
+
         setSelectedAppId(null);
         setScreen(appOrigin);
     }
 
     function closeMobileApp() {
-        if (selectedInstance) {
-            run(closeApp, selectedInstance.id);
+        const instanceToClose = selectedInstance;
+
+        if (!instanceToClose) {
+            goBack();
+            return;
         }
 
-        goBack();
+        const originInstance = [...appState.instances]
+            .reverse()
+            .find(
+                (instance) =>
+                    instance.appId === instanceToClose.origin &&
+                    instance.id !== instanceToClose.id,
+            );
+
+        run(closeApp, instanceToClose.id);
+
+        if (originInstance) {
+            run(
+                originInstance.minimized ? restoreApp : activateApp,
+                originInstance.id,
+            );
+
+            setSelectedAppId(originInstance.appId);
+            setScreen('app');
+            closePanel();
+            return;
+        }
+
+        setSelectedAppId(null);
+        setScreen(appOrigin);
+        closePanel();
     }
 
     function openNotificationApp(notification) {

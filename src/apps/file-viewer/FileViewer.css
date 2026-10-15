@@ -1,0 +1,103 @@
+.ws-file-viewer {
+    min-width: 0;
+}
+
+.ws-file-viewer__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.ws-file-viewer__header h2 {
+    margin: 0 0 8px;
+}
+
+.ws-file-viewer__header p {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--text-secondary);
+}
+
+.ws-file-viewer__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ws-file-viewer__actions a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.ws-file-viewer__actions a:hover {
+    background: var(--surface-secondary);
+}
+
+.ws-file-viewer__preview {
+    box-sizing: border-box;
+    width: 100%;
+    height: min(65vh, 680px);
+    min-height: 280px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: white;
+}
+
+.ws-file-viewer__image-container {
+    display: grid;
+    min-height: 220px;
+    place-items: center;
+    padding: 16px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+}
+
+.ws-file-viewer__image-container img {
+    display: block;
+    max-width: 100%;
+    max-height: 65vh;
+    object-fit: contain;
+}
+
+.ws-file-viewer__text {
+    box-sizing: border-box;
+    max-height: 65vh;
+    margin: 0;
+    padding: 16px;
+    overflow: auto;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.ws-file-viewer__empty {
+    display: flex;
+    min-height: 200px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.ws-file-viewer__empty h3,
+.ws-file-viewer__empty p {
+    margin: 0;
+}

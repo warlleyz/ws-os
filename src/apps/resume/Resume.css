@@ -1,0 +1,36 @@
+.ws-resume__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.ws-resume__actions button,
+.ws-resume__actions a {
+    box-sizing: border-box;
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 10px 16px;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ws-resume__actions button:hover,
+.ws-resume__actions a:hover {
+    color: var(--accent-secondary);
+}
+
+.ws-resume__actions button:focus-visible,
+.ws-resume__actions a:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+}
