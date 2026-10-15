@@ -1,4 +1,5 @@
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
+import { AppIcon } from '../../shared/components/AppIcon';
 import { getWidgetDefinition } from '../../core/widgetManager';
 import WidgetHost from '../../features/widgets/WidgetHost';
 import { openApp } from '../../core/appManager';
@@ -79,7 +80,6 @@ export default function DesktopShortcuts({
               );
             })}
         {shortcuts.map((app, index) => {
-          const AppIcon = app.icon;
           const position = desktopLayout.shortcuts[index];
           if (!position) return null;
           const isOpen = appState.instances.some((instance) => instance.appId === app.id);
@@ -125,7 +125,7 @@ export default function DesktopShortcuts({
               onDragStart={(event) => event.preventDefault()}
             >
               <span className="desktop__shortcut-icon" aria-hidden="true">
-                {AppIcon ? <AppIcon size={27} strokeWidth={1.8} /> : app.name.charAt(0)}
+                <AppIcon app={app} size={27} />
                 {isOpen && <span className="desktop__shortcut-indicator" />}
               </span>
               <span className="desktop__shortcut-label">{t(app.name)}</span>

@@ -186,3 +186,31 @@ validação integrada; a R5 também precisa retomar o resize nativo junto às bo
 Nenhuma biblioteca instalada, nenhum dado existente apagado. Stash R3.3 preservado;
 correções locais de performance mantidas fora do commit. Sem push. Próxima etapa,
 mediante autorização: R5, com gates manuais ainda pendentes conforme descrito acima.
+
+## R5.1 — Revisão das correções locais de performance
+Data: 2026-10-14
+
+### Escopo
+- Revisão das oito alterações locais de performance.
+- Preservação dos contratos e comportamentos existentes.
+- Sem alterações nas chaves de localStorage ou dependências.
+- Sem reaplicação de patches ou do stash R3.3.
+
+### Validações
+- git diff --check: aprovado.
+- npm.cmd run lint: aprovado.
+- npm.cmd run build: aprovado (Vite 8.3.4).
+- node --test tests/core/*.test.cjs: 53/53 aprovados.
+
+### Limitações
+- O travamento no resize nativo permanece aberto.
+- Testes físicos de mouse, touch e zoom não executados.
+- WCAG AA não comprovada.
+- Não há comprovação de ganho de performance em preview.
+
+### Resultado
+Correções locais revisadas e aprovadas nos gates estáticos.
+Integração condicionada a commit isolado.
+
+### Próximo passo
+R5.2 — Ciclo de vida de janelas, Desktop e recursos.

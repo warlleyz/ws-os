@@ -1,7 +1,8 @@
 import { translate as t, useLocale } from '../../../shared/i18n/i18n';
+import { memo } from 'react';
 import { useEffect, useState } from 'react';
 
-export default function ClockWidget() {
+function ClockWidget() {
   const locale = useLocale();
   const [now, setNow] = useState(() => new Date());
 
@@ -32,3 +33,5 @@ export default function ClockWidget() {
     </section>
   );
 }
+
+export default memo(ClockWidget);

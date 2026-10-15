@@ -105,13 +105,14 @@ export default function useWindowInteraction({ instance, app }) {
     const parent = element?.offsetParent;
     if (!element || !parent) return;
     let frame = 0;
-    const observer = new ResizeObserver(() => {
+    const observer = new ResizeObserver(([entry]) => {
+      const bounds = { width: entry.contentRect.width, height: entry.contentRect.height };
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         if (modeRef.current !== 'normal' || !geometryRef.current) {
           return;
         }
-        geometryRef.current = applyGeometry(element, geometryRef.current);
+        geometryRef.current = applyGeometry(element, geometryRef.current, bounds);
       });
     });
     observer.observe(parent);

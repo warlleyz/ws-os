@@ -17,7 +17,7 @@ import PanelLayer from '../../../features/panels/PanelLayer';
 import TaskbarApps from './TaskbarApps';
 import { resolvePanel } from '../../../core/panelManager';
 import { SystemIcon } from '../../../shared/components/SystemIcon';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   activateApp,
@@ -31,7 +31,7 @@ import { getAppDefinition } from '../../../core/appRegistry';
 
 // Utilitários e preferências persistentes do WS Menu.
 
-export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
+function Taskbar({ onShowDesktop, theme, onThemeChange }) {
   const locale = useLocale();
   const {
     appState,
@@ -624,4 +624,16 @@ export default function Taskbar({ onShowDesktop, theme, onThemeChange }) {
       </nav>
     </div>
   );
+}
+
+const MemoizedTaskbar = memo(Taskbar);
+
+// Mantém a Taskbar isolada do resize sem reter um callback antigo do Desktop.
+export default function TaskbarContainer(props) {
+  const showDesktopRef = useRef(props.onShowDesktop);
+  useLayoutEffect(() => {
+    showDesktopRef.current = props.onShowDesktop;
+  }, [props.onShowDesktop]);
+  const onShowDesktop = useCallback(() => showDesktopRef.current?.(), []);
+  return <MemoizedTaskbar {...props} onShowDesktop={onShowDesktop} />;
 }

@@ -36,12 +36,17 @@ export function constrainGeometry(geometry, bounds) {
     height,
   };
 }
-export function applyGeometry(element, geometry) {
-  const next = constrainGeometry(geometry, getBounds(element));
-  element.style.left = `${next.x}px`;
-  element.style.top = `${next.y}px`;
-  element.style.width = `${next.width}px`;
-  element.style.height = `${next.height}px`;
+export function applyGeometry(element, geometry, bounds = getBounds(element)) {
+  const next = constrainGeometry(geometry, bounds);
+  const styles = {
+    left: `${next.x}px`,
+    top: `${next.y}px`,
+    width: `${next.width}px`,
+    height: `${next.height}px`,
+  };
+  for (const [property, value] of Object.entries(styles)) {
+    if (element.style[property] !== value) element.style[property] = value;
+  }
   return next;
 }
 export function resizeGeometry(initial, direction, dx, dy, bounds) {

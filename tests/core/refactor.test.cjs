@@ -441,3 +441,45 @@ test('widgets preservam preferências válidas armazenadas', () => {
   assert.equal(widget.size.columns, 3);
   assert.equal(widget.size.rows, 2);
 });
+
+test('resize aplica geometria usando dimensões do observer sem reler layout', () => {
+  const m = loadPureModule('src/features/windows/windowGeometry.js');
+  const element = {
+    style: {},
+    get offsetParent() {
+      throw new Error('Leitura de layout inesperada');
+    },
+  };
+  const result = m.applyGeometry(
+    element,
+    { x: 900, y: 600, width: 400, height: 300 },
+    { width: 1000, height: 700 },
+  );
+  assert.equal(result.x, 592);
+  assert.equal(result.y, 392);
+  assert.equal(element.style.width, '400px');
+});
+
+test('geometria inalterada não reescreve estilos a cada resize', () => {
+  const m = loadPureModule('src/features/windows/windowGeometry.js');
+  let writes = 0;
+  const style = new Proxy(
+    {},
+    {
+      set(target, property, value) {
+        writes += 1;
+        target[property] = value;
+        return true;
+      },
+    },
+  );
+  const element = { style };
+  const geometry = { x: 30, y: 40, width: 400, height: 300 };
+  const bounds = { width: 1000, height: 700 };
+  m.applyGeometry(element, geometry, bounds);
+  assert.equal(writes, 4);
+  m.applyGeometry(element, geometry, bounds);
+  assert.equal(writes, 4);
+  m.applyGeometry(element, { ...geometry, x: 50 }, bounds);
+  assert.equal(writes, 5);
+});

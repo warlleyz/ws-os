@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import Window from './Window';
 import { getAppDefinition } from '../../core/appRegistry';
 import { activateApp } from '../../core/appManager';
 import { minimizeApp } from '../../core/appManager';
 import { closeApp } from '../../core/appManager';
 
-export default function WindowLayer({ appState, run }) {
+function WindowLayer({ appState, run }) {
   return (
     <div className="desktop__window-layer">
       {appState.instances.map((instance, index) => {
@@ -27,3 +28,5 @@ export default function WindowLayer({ appState, run }) {
     </div>
   );
 }
+
+export default memo(WindowLayer);
