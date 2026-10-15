@@ -52,6 +52,14 @@ export default function WallyTurnstile({
 
                         'expired-callback'() {
                             callbackRef.current?.(null);
+
+                            if (widgetIdRef.current !== null) {
+                                window.turnstile.reset(widgetIdRef.current);
+                            }
+                        },
+
+                        'timeout-callback'() {
+                            callbackRef.current?.(null);
                         },
 
                         'error-callback'() {
@@ -118,10 +126,28 @@ export default function WallyTurnstile({
             <div ref={containerRef} />
 
             {error && (
-                <p role="alert">
-                    Não foi possível carregar a verificação.
-                    Tente novamente mais tarde.
-                </p>
+                <div role="alert">
+                    <p>
+                        Não foi possível concluir a verificação.
+                    </p>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setError(false);
+                            callbackRef.current?.(null);
+
+                            if (
+                                widgetIdRef.current !== null &&
+                                window.turnstile
+                            ) {
+                                window.turnstile.reset(widgetIdRef.current);
+                            }
+                        }}
+                    >
+                        Tentar novamente
+                    </button>
+                </div>
             )}
         </div>
     );
