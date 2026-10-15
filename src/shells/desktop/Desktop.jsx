@@ -10,7 +10,11 @@ import DesktopShortcuts from './DesktopShortcuts';
 import NotificationToasts from '../../features/notifications/NotificationToasts';
 import { useEffect, useRef, useState } from 'react';
 import Taskbar from './taskbar/Taskbar';
-import { openApp } from '../../core/appManager';
+import {
+  getPreferredInstance,
+  openApp,
+  restoreApp,
+} from '../../core/appManager';
 import { getAppDefinition } from '../../core/appRegistry';
 import {
   useWallpaper,
@@ -59,42 +63,75 @@ export default function Desktop({ theme, onThemeChange }) {
 
   // Único ponto de entrada para ações de aplicativos e avisos do sistema.
 
+
   function openShortcutContext(event, app) {
     event.preventDefault();
     event.stopPropagation();
+
     event.currentTarget.focus();
-    const workspace = event.currentTarget.closest('.desktop__workspace');
+
+    const workspace = event.currentTarget.closest(
+      '.desktop__workspace',
+    );
+
     if (!workspace) return;
+
     const rect = workspace.getBoundingClientRect();
-    const menuWidth = 210;
-    const menuHeight = 150;
+
     setDesktopContext(null);
     setSelectedShortcut(app.id);
+
     setShortcutContext({
       appId: app.id,
-      x: Math.max(8, Math.min(event.clientX - rect.left, rect.width - menuWidth - 8)),
-      y: Math.max(8, Math.min(event.clientY - rect.top, rect.height - menuHeight - 8)),
-      showInfo: false,
+      x: event.clientX - rect.left + workspace.scrollLeft,
+      y: event.clientY - rect.top + workspace.scrollTop,
     });
   }
+
+
   function runShortcutContextAction(action) {
     if (!shortcutContext) return;
-    if (action === 'open') {
-      run(openApp, shortcutContext.appId);
-      setShortcutContext(null);
-      return;
+
+    const appId = shortcutContext.appId;
+    const app = getAppDefinition(appId);
+    const existing = getPreferredInstance(appState, appId);
+
+    switch (action) {
+      case 'open':
+        if (existing) {
+          run(restoreApp, existing.id);
+        } else {
+          run(openApp, appId);
+        }
+        break;
+
+      case 'new-window':
+        if (!app?.allowMultipleInstances) return;
+        run(openApp, appId, {
+          origin: 'desktop-shortcut-context-menu',
+        });
+        break;
+
+      case 'focus':
+        if (!existing) return;
+        run(restoreApp, existing.id);
+        break;
+
+      case 'sort-default':
+        organization.sort('default');
+        break;
+
+      case 'sort-name':
+        organization.sort('name');
+        break;
+
+      default:
+        return;
     }
-    if (action === 'info') {
-      setShortcutContext((current) =>
-        current
-          ? {
-              ...current,
-              showInfo: !current.showInfo,
-            }
-          : null,
-      );
-    }
+
+    setShortcutContext(null);
   }
+
   function openDesktopContext(event) {
     if (
       event.target.closest(
@@ -115,18 +152,49 @@ export default function Desktop({ theme, onThemeChange }) {
       y: Math.max(8, Math.min(event.clientY - rect.top, rect.height - menuHeight - 8)),
     });
   }
+
+
   function runDesktopContextAction(action) {
-    if (action === 'sort-name') {
-      organization.sort('name');
+    switch (action) {
+      case 'refresh':
+        window.dispatchEvent(new Event('resize'));
+        break;
+
+      case 'sort-name':
+        organization.sort('name');
+        break;
+
+      case 'sort-default':
+        organization.sort('default');
+        break;
+
+      case 'personalize':
+      case 'personalize-widgets': {
+        const section =
+          action === 'personalize' ? 'appearance' : 'widgets';
+
+        run(openApp, 'settings', {
+          origin: 'desktop-context-menu',
+          params: { section },
+        });
+
+        requestAnimationFrame(() => {
+          window.dispatchEvent(
+            new CustomEvent('ws:settings-navigate', {
+              detail: { section },
+            }),
+          );
+        });
+        break;
+      }
+
+      default:
+        return;
     }
-    if (action === 'sort-default') {
-      organization.sort('default');
-    }
-    if (action === 'toggle-clock') {
-      toggleClockWidget();
-    }
+
     setDesktopContext(null);
   }
+
   useEffect(() => {
     function handlePointerDown(event) {
       if (!desktopContextRef.current?.contains(event.target)) {
@@ -210,6 +278,10 @@ export default function Desktop({ theme, onThemeChange }) {
                 app={app}
                 shortcutContext={shortcutContext}
                 runShortcutContextAction={runShortcutContextAction}
+                hasOpenInstance={appState.instances.some(
+                  (instance) => instance.appId === app.id,
+                )}
+                shortcutOrder={shortcutOrder}
               />
             );
           })()}

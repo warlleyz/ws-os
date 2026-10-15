@@ -1,5 +1,6 @@
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { AppIcon } from '../../shared/components/AppIcon';
+import Tooltip from '../../shared/components/Tooltip';
 import { getWidgetDefinition } from '../../core/widgetManager';
 import WidgetHost from '../../features/widgets/WidgetHost';
 import { openApp } from '../../core/appManager';
@@ -83,10 +84,17 @@ export default function DesktopShortcuts({
           const position = desktopLayout.shortcuts[index];
           if (!position) return null;
           const isOpen = appState.instances.some((instance) => instance.appId === app.id);
+          const isActive = appState.instances.some(
+            (instance) =>
+              instance.appId === app.id &&
+              instance.id === appState.activeInstanceId &&
+              !instance.minimized,
+          );
           const selected = selectedIds.includes(app.id);
           return (
-            <button
-              key={app.id}
+            <Tooltip key={app.id} content={t(app.name)}>
+              <button
+                key={app.id}
               data-app-id={app.id}
               className={['desktop__shortcut', selected ? 'desktop__shortcut--selected' : '']
                 .filter(Boolean)
@@ -96,7 +104,6 @@ export default function DesktopShortcuts({
               aria-label={t(`Abrir ${app.name}`)}
               aria-pressed={selected}
               aria-describedby="desktop-shortcut-help"
-              title={t(app.name)}
               onContextMenu={(event) => openShortcutContext(event, app)}
               onClick={(event) => handleClick(event, app.id)}
               onDoubleClick={() => {
@@ -126,10 +133,16 @@ export default function DesktopShortcuts({
             >
               <span className="desktop__shortcut-icon" aria-hidden="true">
                 <AppIcon app={app} size={27} />
-                {isOpen && <span className="desktop__shortcut-indicator" />}
+                {isOpen && (
+                  <span
+                    className="desktop__shortcut-indicator"
+                    data-active={isActive}
+                  />
+                )}
               </span>
               <span className="desktop__shortcut-label">{t(app.name)}</span>
-            </button>
+              </button>
+            </Tooltip>
           );
         })}
         <div ref={selectionBoxRef} className="desktop__selection-box" aria-hidden="true" hidden />

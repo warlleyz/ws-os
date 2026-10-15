@@ -8,6 +8,7 @@ import {
   saveDesktopPreferences,
 } from './desktopPreferences';
 import {
+  clampDesktopDrag,
   getCellColumn,
   getCellRow,
   getShortcutsInArea,
@@ -117,6 +118,26 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     const elements = Array.from(shortcutsRef.current.querySelectorAll('[data-app-id]')).filter(
       (element) => ids.includes(element.dataset.appId),
     );
+
+    const selectedPositions = shortcuts
+      .map((app, shortcutIndex) =>
+        ids.includes(app.id)
+          ? layout.shortcuts[shortcutIndex]
+          : null,
+      )
+      .filter(Boolean);
+
+    const bounds = {
+      left: Math.min(...selectedPositions.map((p) => p.left)),
+      top: Math.min(...selectedPositions.map((p) => p.top)),
+      right: Math.max(
+        ...selectedPositions.map((p) => p.left + 82),
+      ),
+      bottom: Math.max(
+        ...selectedPositions.map((p) => p.top + 82),
+      ),
+    };
+
     dragRef.current = {
       type: 'shortcuts',
       target: event.currentTarget,
@@ -127,6 +148,8 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       ids,
       elements,
       layout,
+      layout,
+      bounds,
       initialPosition: layout.shortcuts[index],
       moved: false,
     };
@@ -184,14 +207,27 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       );
       return;
     }
+
     if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+
     drag.moved = true;
-    const column = getCellColumn(
-      drag.initialPosition.left + dx,
+
+    const limited = clampDesktopDrag(
+      dx,
+      dy,
+      drag.bounds,
       drag.layout,
     );
 
-    const row = getCellRow(drag.initialPosition.top + dy);
+    const column = getCellColumn(
+      drag.initialPosition.left + limited.dx,
+      drag.layout,
+    );
+
+    const row = getCellRow(
+      drag.initialPosition.top + limited.dy,
+    );
+
     drag.candidate = moveDesktopShortcuts(
       shortcuts,
       drag.layout,
@@ -200,9 +236,17 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       column,
       row,
     );
+
     for (const element of drag.elements) {
-      element.style.setProperty('translate', `${dx}px ${dy}px`);
-      element.setAttribute('data-drop-valid', String(Boolean(drag.candidate)));
+      element.style.setProperty(
+        'translate',
+        `${limited.dx}px ${limited.dy}px`,
+      );
+
+      element.setAttribute(
+        'data-drop-valid',
+        String(Boolean(drag.candidate)),
+      );
     }
   }
   function finishPointer(event) {

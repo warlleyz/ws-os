@@ -29,6 +29,13 @@
   box-shadow: var(--window-shadow-active);
 }
 
+/* Tamanho inicial específico de Configurações */
+
+.desktop-window[data-app-id='settings'] {
+  width: min(980px, calc(100% - 32px));
+  height: min(680px, calc(100% - 32px));
+}
+
 .desktop-window--maximized,
 .desktop-window--left,
 .desktop-window--right,

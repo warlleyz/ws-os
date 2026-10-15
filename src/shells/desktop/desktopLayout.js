@@ -37,6 +37,30 @@ export function getWidgetWidth(columns, layout) {
   );
 }
 
+export function clampDesktopDrag(
+  dx,
+  dy,
+  bounds,
+  layout,
+) {
+  const minDx = -bounds.left;
+  const maxDx = Math.max(
+    minDx,
+    layout.width - bounds.right,
+  );
+
+  const minDy = -bounds.top;
+  const maxDy = Math.max(
+    minDy,
+    layout.height - bounds.bottom,
+  );
+
+  return {
+    dx: Math.max(minDx, Math.min(dx, maxDx)),
+    dy: Math.max(minDy, Math.min(dy, maxDy)),
+  };
+}
+
 export function isDesktopCellAvailable(column, row, layout) {
   if (
     !Number.isInteger(column) ||

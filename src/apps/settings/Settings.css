@@ -519,3 +519,55 @@
     outline: 2px solid Highlight;
   }
 }
+
+
+/* Scrollbars do aplicativo Configurações */
+
+.ws-settings {
+    --settings-scrollbar-track: transparent;
+    --settings-scrollbar-thumb: color-mix(in srgb,
+            var(--text-secondary) 34%,
+            transparent);
+    --settings-scrollbar-hover: color-mix(in srgb,
+            var(--accent-primary) 70%,
+            var(--border-default));
+}
+
+.ws-settings__content,
+.ws-settings__navigation,
+.ws-settings__sidebar {
+    scrollbar-width: thin;
+    scrollbar-color:
+        var(--settings-scrollbar-thumb) var(--settings-scrollbar-track);
+}
+
+.ws-settings__content::-webkit-scrollbar,
+.ws-settings__navigation::-webkit-scrollbar,
+.ws-settings__sidebar::-webkit-scrollbar {
+    width: 9px;
+    height: 7px;
+}
+
+.ws-settings__content::-webkit-scrollbar-track,
+.ws-settings__navigation::-webkit-scrollbar-track,
+.ws-settings__sidebar::-webkit-scrollbar-track {
+    background: var(--settings-scrollbar-track);
+}
+
+.ws-settings__content::-webkit-scrollbar-thumb,
+.ws-settings__navigation::-webkit-scrollbar-thumb,
+.ws-settings__sidebar::-webkit-scrollbar-thumb {
+    border: 2px solid var(--surface-primary);
+    border-radius: 999px;
+    background: var(--settings-scrollbar-thumb);
+}
+
+.ws-settings__content::-webkit-scrollbar-thumb:hover,
+.ws-settings__navigation::-webkit-scrollbar-thumb:hover,
+.ws-settings__sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--settings-scrollbar-hover);
+}
+
+.ws-settings__content::-webkit-scrollbar-corner {
+    background: transparent;
+}

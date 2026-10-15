@@ -131,6 +131,16 @@
   pointer-events: none;
 }
 
+/* Aplicativo aberto, mas sem foco. */
+.desktop__shortcut-indicator[data-active='false'] {
+  background: #8b929e;
+}
+
+/* Aplicativo atualmente em foco. */
+.desktop__shortcut-indicator[data-active='true'] {
+  background: var(--accent-secondary);
+}
+
 .desktop__shortcut:hover .desktop__shortcut-icon {
   border-color: var(--accent-primary);
   transform: translateY(-1px);
@@ -246,6 +256,87 @@
   line-height: 1.4;
 }
 
+/* Menu contextual moderno do Desktop */
+
+.desktop__context--modern {
+  width: 248px;
+  max-width: calc(100% - 16px);
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  gap: 3px;
+  padding: 7px;
+  border-radius: 13px;
+  background: var(--ws-glass);
+  backdrop-filter: blur(var(--blur-medium));
+  -webkit-backdrop-filter: blur(var(--blur-medium));
+  box-shadow:
+    0 16px 40px rgb(0 0 0 / 24%),
+    0 2px 8px rgb(0 0 0 / 12%);
+}
+
+.desktop__context--modern .desktop__context-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  color: var(--text-primary);
+}
+
+.desktop__context--modern .desktop__context-header strong {
+  padding: 0;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.desktop__context--modern button {
+  display: flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.desktop__context--modern button:hover {
+  background: var(--surface-secondary);
+  color: var(--accent-secondary);
+}
+
+.desktop__context--modern button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+}
+
+.desktop__context--modern .desktop__context-arrow {
+  margin-left: auto;
+  color: var(--text-secondary);
+}
+
+.desktop__context--modern .desktop__context-back {
+  font-weight: 600;
+}
+
+.desktop__context--modern .desktop__context-divider {
+  margin: 5px 4px;
+  opacity: 0.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop__context--modern button {
+    transition: none;
+  }
+}
+
 /* R3: interação e acesso à grade completa, inclusive em áreas menores. */
 .desktop__shortcuts {
   min-width: 90px;
@@ -290,4 +381,27 @@
 }
 .desktop__widget[data-drop-valid='false'] {
   opacity: 0.5;
+}
+
+/* Menu contextual: informações e indicadores */
+
+.desktop__context--modern .desktop__context-info {
+  margin: 2px 4px 5px;
+  padding: 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+}
+
+.desktop__context--modern button[aria-pressed='true'] {
+  color: var(--accent-secondary);
+}
+
+.desktop__context--modern button[aria-pressed='true']>svg:last-child {
+  margin-left: auto;
+}
+
+.desktop__context--modern button>span {
+  flex: 1;
+  min-width: 0;
 }

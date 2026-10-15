@@ -1,6 +1,6 @@
 import { Accessibility, Languages, Monitor, Palette, RotateCcw, Smartphone } from 'lucide-react';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
@@ -55,10 +55,16 @@ const SETTINGS_SECTIONS = [
   },
 ];
 
-export default function Settings() {
+export default function Settings({ instance }) {
   useLocale();
 
-  const [activeSection, setActiveSection] = useState('appearance');
+  const [activeSection, setActiveSection] = useState(() => {
+    const requested = instance?.params?.section;
+
+    return SETTINGS_SECTIONS.some((section) => section.id === requested)
+      ? requested
+      : 'appearance';
+  });
   const contentRef = useRef(null);
 
   const currentSection =
@@ -72,6 +78,34 @@ export default function Settings() {
       contentRef.current.focus({ preventScroll: true });
     }
   }
+
+
+  useEffect(() => {
+    function handleSettingsNavigate(event) {
+      const sectionId = event.detail?.section;
+
+      if (
+        SETTINGS_SECTIONS.some(
+          (section) => section.id === sectionId,
+        )
+      ) {
+        navigateTo(sectionId);
+      }
+    }
+
+    window.addEventListener(
+      'ws:settings-navigate',
+      handleSettingsNavigate,
+    );
+
+    return () => {
+      window.removeEventListener(
+        'ws:settings-navigate',
+        handleSettingsNavigate,
+      );
+    };
+  }, []);
+
 
   return (
     <div className="ws-settings">
