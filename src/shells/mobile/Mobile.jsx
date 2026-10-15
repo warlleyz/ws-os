@@ -1,18 +1,18 @@
+import { handleAppBack } from '../../core/navigationManager';
 
 import { useEffect, useRef, useState } from 'react';
 import { Bell, Settings2 } from 'lucide-react';
-import { useWallpaper, useWallpaperRevision, getWallpaperDefinition } from '../../core/wallpaperManager';
+import {
+  useWallpaper,
+  useWallpaperRevision,
+  getWallpaperDefinition,
+} from '../../core/wallpaperManager';
 import { useMobilePreferences } from '../../core/mobilePreferences';
 
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useSystem } from '../../core/useSystem';
 import { getRegisteredApps, getAppDefinition } from '../../core/appRegistry';
-import {
-    openApp,
-    closeApp,
-    activateApp,
-    restoreApp,
-} from '../../core/appManager';
+import { openApp, closeApp, activateApp, restoreApp } from '../../core/appManager';
 
 import AppHost from '../../features/windows/AppHost';
 import NotificationCenter from '../../features/notifications/NotificationCenter';
@@ -25,371 +25,334 @@ import MobileNavigation from './MobileNavigation';
 import './Mobile.css';
 
 export default function Mobile({ theme, onThemeChange }) {
-    useLocale();
-    
-    const mobilePreferences = useMobilePreferences();
-    const wallpaper = useWallpaper('mobile');
-    useWallpaperRevision();
+  useLocale();
 
-    const {
-        appState,
-        run,
-        notificationState,
-        handleNotificationAction,
-        handleNotificationOpen,
-    } = useSystem();
+  const mobilePreferences = useMobilePreferences();
+  const wallpaper = useWallpaper('mobile');
+  useWallpaperRevision();
 
-    const [screen, setScreen] = useState('home');
-    const [appOrigin, setAppOrigin] = useState('home');
-    const [selectedAppId, setSelectedAppId] = useState(null);
-    const [activePanel, setActivePanel] = useState(null);
+  const { appState, run, notificationState, handleNotificationAction, handleNotificationOpen } =
+    useSystem();
 
-    const panelRef = useRef(null);
-    const panelTriggerRef = useRef(null);
+  const [screen, setScreen] = useState('home');
+  const [appOrigin, setAppOrigin] = useState('home');
+  const [selectedAppId, setSelectedAppId] = useState(null);
+  const [activePanel, setActivePanel] = useState(null);
 
-    const notifications = notificationState?.items ?? [];
-    const unreadCount = notifications.filter((item) => !item.read).length;
+  const panelRef = useRef(null);
+  const panelTriggerRef = useRef(null);
 
-    const apps = getRegisteredApps().filter(
-        (app) => app.public && app.showInMenu !== false,
+  const notifications = notificationState?.items ?? [];
+  const unreadCount = notifications.filter((item) => !item.read).length;
+
+  const apps = getRegisteredApps().filter((app) => app.public && app.showInMenu !== false);
+
+  const activeInstance = appState.instances.find(
+    (instance) => instance.id === appState.activeInstanceId,
+  );
+
+  const selectedInstance =
+    screen === 'app'
+      ? (activeInstance ??
+        [...appState.instances].reverse().find((instance) => instance.appId === selectedAppId))
+      : null;
+
+  const currentApp = selectedInstance ? getAppDefinition(selectedInstance.appId) : null;
+
+  useEffect(() => {
+    if (!activePanel) return;
+
+    const panel = panelRef.current;
+    const previousFocus = panelTriggerRef.current;
+
+    const firstControl = panel?.querySelector(
+      'button:not(:disabled), input:not(:disabled), select:not(:disabled)',
     );
 
-    const activeInstance = appState.instances.find(
-        (instance) => instance.id === appState.activeInstanceId,
-    );
+    firstControl?.focus();
 
-    const selectedInstance =
-        screen === 'app'
-            ? activeInstance ??
-            [...appState.instances]
-                .reverse()
-                .find((instance) => instance.appId === selectedAppId)
-            : null;
+    return () => {
+      if (previousFocus?.isConnected) {
+        previousFocus.focus();
+      }
+    };
+  }, [activePanel]);
 
-    const currentApp = selectedInstance
-        ? getAppDefinition(selectedInstance.appId)
-        : null;
+  function closePanel() {
+    setActivePanel(null);
+  }
 
-    useEffect(() => {
-        if (!activePanel) return;
+  function togglePanel(name, event) {
+    panelTriggerRef.current = event.currentTarget;
 
-        const panel = panelRef.current;
-        const previousFocus = panelTriggerRef.current;
+    setActivePanel((current) => (current === name ? null : name));
+  }
 
-        const firstControl = panel?.querySelector(
-            'button:not(:disabled), input:not(:disabled), select:not(:disabled)',
-        );
-
-        firstControl?.focus();
-
-        return () => {
-            if (previousFocus?.isConnected) {
-                previousFocus.focus();
-            }
-        };
-    }, [activePanel]);
-
-    function closePanel() {
-        setActivePanel(null);
+  function handlePanelKeyDown(event) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      closePanel();
+      return;
     }
 
-    function togglePanel(name, event) {
-        panelTriggerRef.current = event.currentTarget;
+    if (event.key !== 'Tab') return;
 
-        setActivePanel((current) =>
-            current === name ? null : name,
-        );
+    const controls = Array.from(
+      panelRef.current?.querySelectorAll(
+        'button:not(:disabled), input:not(:disabled), select:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
+      ) ?? [],
+    ).filter((element) => element.getClientRects().length > 0);
+
+    if (controls.length === 0) {
+      event.preventDefault();
+      return;
     }
 
-    function handlePanelKeyDown(event) {
-        if (event.key === 'Escape') {
-            event.preventDefault();
-            event.stopPropagation();
-            closePanel();
-            return;
-        }
+    const first = controls[0];
+    const last = controls[controls.length - 1];
 
-        if (event.key !== 'Tab') return;
-
-        const controls = Array.from(
-            panelRef.current?.querySelectorAll(
-                'button:not(:disabled), input:not(:disabled), select:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])',
-            ) ?? [],
-        ).filter((element) => element.getClientRects().length > 0);
-
-        if (controls.length === 0) {
-            event.preventDefault();
-            return;
-        }
-
-        const first = controls[0];
-        const last = controls[controls.length - 1];
-
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-        }
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
     }
+  }
 
-    function openMobileApp(appId) {
-        setAppOrigin(
-            screen === 'catalog' || screen === 'search'
-                ? screen
-                : 'home',
-        );
+  function openMobileApp(appId) {
+    setAppOrigin(screen === 'catalog' || screen === 'search' ? screen : 'home');
 
-        setSelectedAppId(appId);
+    setSelectedAppId(appId);
+    setScreen('app');
+    closePanel();
+
+    run(openApp, appId, { origin: 'mobile' });
+  }
+
+  function navigateTo(nextScreen) {
+    closePanel();
+    setSelectedAppId(null);
+    setScreen(nextScreen);
+  }
+
+  function goBack() {
+    closePanel();
+    if (handleAppBack(selectedInstance?.id)) return;
+
+    const originAppId = selectedInstance?.origin;
+
+    if (selectedInstance?.appId !== originAppId && originAppId && originAppId !== 'mobile') {
+      const originInstance = [...appState.instances]
+        .reverse()
+        .find((instance) => instance.appId === originAppId);
+
+      if (originInstance) {
+        run(originInstance.minimized ? restoreApp : activateApp, originInstance.id);
+
+        setSelectedAppId(originAppId);
         setScreen('app');
-        closePanel();
-
-        run(openApp, appId, { origin: 'mobile' });
+        return;
+      }
     }
 
-    function navigateTo(nextScreen) {
-        closePanel();
-        setSelectedAppId(null);
-        setScreen(nextScreen);
+    setSelectedAppId(null);
+    setScreen(appOrigin);
+  }
+
+  function closeMobileApp() {
+    const instanceToClose = selectedInstance;
+
+    if (!instanceToClose) {
+      goBack();
+      return;
     }
 
-    function goBack() {
-        closePanel();
+    const originInstance = [...appState.instances]
+      .reverse()
+      .find(
+        (instance) =>
+          instance.appId === instanceToClose.origin && instance.id !== instanceToClose.id,
+      );
 
-        const originAppId = selectedInstance?.origin;
+    run(closeApp, instanceToClose.id);
 
-        if (
-            selectedInstance?.appId !== originAppId &&
-            originAppId &&
-            originAppId !== 'mobile'
-        ) {
-            const originInstance = [...appState.instances]
-                .reverse()
-                .find((instance) => instance.appId === originAppId);
+    if (originInstance) {
+      run(originInstance.minimized ? restoreApp : activateApp, originInstance.id);
 
-            if (originInstance) {
-                run(
-                    originInstance.minimized ? restoreApp : activateApp,
-                    originInstance.id,
-                );
-
-                setSelectedAppId(originAppId);
-                setScreen('app');
-                return;
-            }
-        }
-
-        setSelectedAppId(null);
-        setScreen(appOrigin);
+      setSelectedAppId(originInstance.appId);
+      setScreen('app');
+      closePanel();
+      return;
     }
 
-    function closeMobileApp() {
-        const instanceToClose = selectedInstance;
+    setSelectedAppId(null);
+    setScreen(appOrigin);
+    closePanel();
+  }
 
-        if (!instanceToClose) {
-            goBack();
-            return;
-        }
+  function openNotificationApp(notification) {
+    const appId = notification?.action?.appId;
+    const app = getAppDefinition(appId);
 
-        const originInstance = [...appState.instances]
-            .reverse()
-            .find(
-                (instance) =>
-                    instance.appId === instanceToClose.origin &&
-                    instance.id !== instanceToClose.id,
-            );
+    if (!app?.public) return;
 
-        run(closeApp, instanceToClose.id);
+    setAppOrigin('home');
+    setSelectedAppId(appId);
+    setScreen('app');
 
-        if (originInstance) {
-            run(
-                originInstance.minimized ? restoreApp : activateApp,
-                originInstance.id,
-            );
+    handleNotificationOpen(notification);
+    closePanel();
+  }
 
-            setSelectedAppId(originInstance.appId);
-            setScreen('app');
-            closePanel();
-            return;
-        }
+  return (
+    <main
+      id="ws-mobile"
+      className="ws-mobile"
+      data-grid-density={mobilePreferences.gridDensity}
+      tabIndex={-1}
+    >
+      <div
+        className="ws-mobile__wallpaper"
+        aria-hidden="true"
+        style={{ background: getWallpaperDefinition(wallpaper, 'mobile').background }}
+      />
+      <div className="ws-mobile__content-shell" inert={Boolean(activePanel)}>
+        <div className="ws-mobile__system-bar">
+          <strong>WS OS</strong>
 
-        setSelectedAppId(null);
-        setScreen(appOrigin);
-        closePanel();
-    }
+          <div className="ws-mobile__system-actions">
+            <button
+              type="button"
+              aria-label={t('Notificações')}
+              aria-expanded={activePanel === 'notifications'}
+              onClick={(event) => togglePanel('notifications', event)}
+            >
+              <Bell size={19} aria-hidden="true" />
+              {unreadCount > 0 && (
+                <span className="ws-mobile__badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+              )}
+            </button>
 
-    function openNotificationApp(notification) {
-        const appId = notification?.action?.appId;
-        const app = getAppDefinition(appId);
+            <button
+              type="button"
+              aria-label={t('Controle Rápido')}
+              aria-expanded={activePanel === 'controls'}
+              onClick={(event) => togglePanel('controls', event)}
+            >
+              <Settings2 size={19} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
 
-        if (!app?.public) return;
+        {screen === 'app' ? (
+          <header className="ws-mobile__header">
+            <button type="button" onClick={goBack}>
+              ← {t('Voltar')}
+            </button>
 
-        setAppOrigin('home');
-        setSelectedAppId(appId);
-        setScreen('app');
+            <strong>{t(currentApp?.name ?? '')}</strong>
 
-        handleNotificationOpen(notification);
-        closePanel();
-    }
+            <button
+              type="button"
+              aria-label={t('Fechar')}
+              disabled={!selectedInstance}
+              onClick={closeMobileApp}
+            >
+              ×
+            </button>
+          </header>
+        ) : null}
 
-    return (
-        <main
-            id="ws-mobile"
-            className="ws-mobile"
-            data-grid-density={mobilePreferences.gridDensity}
-            tabIndex={-1}
+        {screen === 'home' && (
+          <MobileHome
+            apps={apps}
+            onOpenApp={openMobileApp}
+            onOpenCatalog={() => navigateTo('catalog')}
+          />
+        )}
+
+        {(screen === 'catalog' || screen === 'search') && (
+          <MobileCatalog
+            key={screen}
+            apps={apps}
+            onOpenApp={openMobileApp}
+            searchMode={screen === 'search'}
+          />
+        )}
+
+        {screen === 'app' && !selectedInstance && (
+          <p className="ws-mobile__loading" role="status">
+            {t('Carregando')}
+          </p>
+        )}
+
+        <section
+          className="ws-mobile__app-content"
+          hidden={screen !== 'app'}
+          aria-label={t(currentApp?.name ?? 'Aplicativos')}
         >
-            <div className="ws-mobile__wallpaper" aria-hidden="true" style={{ background: getWallpaperDefinition(wallpaper, 'mobile').background }} />
-            <div className="ws-mobile__content-shell" inert={Boolean(activePanel)}>
-                <div className="ws-mobile__system-bar">
-                    <strong>WS OS</strong>
+          {appState.instances
+            .filter((instance) => getAppDefinition(instance.appId)?.public)
+            .map((instance) => {
+              const app = getAppDefinition(instance.appId);
+              const isVisible = screen === 'app' && selectedInstance?.id === instance.id;
 
-                    <div className="ws-mobile__system-actions">
-                        <button
-                            type="button"
-                            aria-label={t('Notificações')}
-                            aria-expanded={activePanel === 'notifications'}
-                            onClick={(event) => togglePanel('notifications', event)}
-                        >
-                            <Bell size={19} aria-hidden="true" />
-                            {unreadCount > 0 && (
-                                <span className="ws-mobile__badge">
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                </span>
-                            )}
-                        </button>
-
-                        <button
-                            type="button"
-                            aria-label={t('Controle Rápido')}
-                            aria-expanded={activePanel === 'controls'}
-                            onClick={(event) => togglePanel('controls', event)}
-                        >
-                            <Settings2 size={19} aria-hidden="true" />
-                        </button>
-                    </div>
-                </div>
-
-                {screen === 'app' ? (
-                    <header className="ws-mobile__header">
-                        <button type="button" onClick={goBack}>
-                            ← {t('Voltar')}
-                        </button>
-
-                        <strong>{t(currentApp?.name ?? '')}</strong>
-
-                        <button
-                            type="button"
-                            aria-label={t('Fechar')}
-                            disabled={!selectedInstance}
-                            onClick={closeMobileApp}
-                        >
-                            ×
-                        </button>
-                    </header>
-                ) : null}
-
-                {screen === 'home' && (
-                    <MobileHome
-                        apps={apps}
-                        onOpenApp={openMobileApp}
-                        onOpenCatalog={() => navigateTo('catalog')}
-                    />
-                )}
-
-                {(screen === 'catalog' || screen === 'search') && (
-                    <MobileCatalog
-                        key={screen}
-                        apps={apps}
-                        onOpenApp={openMobileApp}
-                        searchMode={screen === 'search'}
-                    />
-                )}
-
-                {screen === 'app' && !selectedInstance && (
-                    <p className="ws-mobile__loading" role="status">
-                        {t('Carregando')}
-                    </p>
-                )}
-
-                <section
-                    className="ws-mobile__app-content"
-                    hidden={screen !== 'app'}
-                    aria-label={t(currentApp?.name ?? 'Aplicativos')}
-                >
-                    {appState.instances
-                        .filter((instance) => getAppDefinition(instance.appId)?.public)
-                        .map((instance) => {
-                            const app = getAppDefinition(instance.appId);
-                            const isVisible =
-                                screen === 'app' &&
-                                selectedInstance?.id === instance.id;
-
-                            return (
-                                <div
-                                    key={instance.id}
-                                    className="ws-mobile__instance"
-                                    hidden={!isVisible}
-                                    inert={!isVisible}
-                                >
-                                    <AppHost
-                                        appName={app.name}
-                                        instance={instance}
-                                    />
-                                </div>
-                            );
-                        })}
-                </section>
-
-                <MobileNavigation
-                    activeScreen={screen}
-                    onNavigate={navigateTo}
-                />
-            </div>
-
-            {activePanel && (
+              return (
                 <div
-                    className="ws-mobile__overlay"
-                    onPointerDown={(event) => {
-                        if (event.target === event.currentTarget) {
-                            closePanel();
-                        }
-                    }}
+                  key={instance.id}
+                  className="ws-mobile__instance"
+                  hidden={!isVisible}
+                  inert={!isVisible}
                 >
-                    <div
-                        ref={panelRef}
-                        className="ws-mobile__panel"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label={t(
-                            activePanel === 'notifications'
-                                ? 'Notificações'
-                                : 'Controle Rápido',
-                        )}
-                        onKeyDown={handlePanelKeyDown}
-                    >
-                        {activePanel === 'notifications' && (
-                            <NotificationCenter
-                                unreadCount={unreadCount}
-                                setNotificationOpen={closePanel}
-                                notifications={notifications}
-                                onNotificationAction={handleNotificationAction}
-                                onNotificationOpen={openNotificationApp}
-                            />
-                        )}
-
-                        {activePanel === 'controls' && (
-                            <QuickControls
-                                setQuickControlsOpen={closePanel}
-                                theme={theme}
-                                onThemeChange={onThemeChange}
-                                showAutoHideTaskbar={false}
-                            />
-                        )}
-                    </div>
+                  <AppHost appName={app.name} instance={instance} />
                 </div>
+              );
+            })}
+        </section>
+
+        <MobileNavigation activeScreen={screen} onNavigate={navigateTo} />
+      </div>
+
+      {activePanel && (
+        <div
+          className="ws-mobile__overlay"
+          onPointerDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closePanel();
+            }
+          }}
+        >
+          <div
+            ref={panelRef}
+            className="ws-mobile__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t(activePanel === 'notifications' ? 'Notificações' : 'Controle Rápido')}
+            onKeyDown={handlePanelKeyDown}
+          >
+            {activePanel === 'notifications' && (
+              <NotificationCenter
+                unreadCount={unreadCount}
+                setNotificationOpen={closePanel}
+                notifications={notifications}
+                onNotificationAction={handleNotificationAction}
+                onNotificationOpen={openNotificationApp}
+              />
             )}
-        </main>
-    );
+
+            {activePanel === 'controls' && (
+              <QuickControls
+                setQuickControlsOpen={closePanel}
+                theme={theme}
+                onThemeChange={onThemeChange}
+                showAutoHideTaskbar={false}
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </main>
+  );
 }

@@ -1,0 +1,122 @@
+.ws-app {
+  min-width: 0;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+}
+.ws-app h2 {
+  margin-top: 0;
+}
+.ws-app p,
+.ws-app li {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.ws-app section + section {
+  margin-top: 24px;
+}
+.ws-app__toolbar,
+.ws-app__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-block: 16px;
+}
+.ws-app label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.ws-app input,
+.ws-app select,
+.ws-app textarea {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid var(--border-control);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+}
+.ws-app button,
+.ws-app__toolbar a {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-control);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ws-app button:hover {
+  border-color: var(--accent-secondary);
+}
+.ws-app button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.ws-app__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 16px;
+}
+.ws-app__card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+}
+.ws-app__card h3 {
+  margin-top: 0;
+  overflow-wrap: anywhere;
+}
+.ws-app__muted {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.ws-app__cover {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+}
+.ws-app__demo {
+  width: 100%;
+  min-height: 300px;
+  height: 55dvh;
+  border: 1px solid var(--border-control);
+  border-radius: 8px;
+  background: white;
+}
+.ws-app__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  gap: 14px;
+}
+.ws-app__metrics div {
+  padding: 12px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+}
+.ws-app__metrics dt {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.ws-app__metrics dd {
+  margin: 10px 0 0;
+  font-size: 25px;
+  font-weight: bold;
+}
+.ws-app__error {
+  color: var(--status-error);
+}
+.ws-app pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

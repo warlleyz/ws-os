@@ -1,59 +1,83 @@
-
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
-
-const profile = {
-    headline: 'Desenvolvedor de software',
-    description:
-        'Conheça minha trajetória, meus projetos e as tecnologias que utilizo no desenvolvimento de soluções digitais.',
-    areas: [
-        'Desenvolvimento web',
-        'Interfaces interativas',
-        'Arquitetura de aplicações',
-    ],
-};
-
+import { portfolio, contentText } from '../../content/portfolioContent';
+import { safeExternalUrl } from '../../shared/utils/urls';
+import { useSystem } from '../../core/useSystem';
+import { openApp } from '../../core/appManager';
+import '../../styles/apps.css';
 export default function AboutMe() {
-    useLocale();
-
-    return (
-        <article className="desktop-window__content">
-            <header>
-                <p>{t('Apresentação profissional')}</p>
-                <h2>{t('Sobre Mim')}</h2>
-                <h3>{t(profile.headline)}</h3>
-                <p>{t(profile.description)}</p>
-            </header>
-
-            <section aria-labelledby="about-areas">
-                <h3 id="about-areas">{t('Áreas de atuação')}</h3>
-
-                <ul>
-                    {profile.areas.map((area) => (
-                        <li key={area}>{t(area)}</li>
-                    ))}
-                </ul>
-            </section>
-
-            <section aria-labelledby="about-project">
-                <h3 id="about-project">{t('WS OS')}</h3>
-                <p>
-                    {t(
-                        'Este portfólio apresenta projetos e experiências em uma interface inspirada em sistemas operacionais.',
-                    )}
-                </p>
-            </section>
-
-            <section aria-labelledby="about-links">
-                <h3 id="about-links">{t('Links profissionais')}</h3>
-
-                <a
-                    href="https://github.com/warlleyz"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    GitHub
+  const locale = useLocale();
+  const { run } = useSystem();
+  const profile = portfolio.profile;
+  return (
+    <article className="desktop-window__content ws-app">
+      <header>
+        <p>{t('Apresentação profissional')}</p>
+        <h2>{t('Sobre Mim')}</h2>
+        {profile.name && <h3>{profile.name}</h3>}
+        <h3>{contentText(profile.headline, locale)}</h3>
+        <p>{contentText(profile.summary, locale)}</p>
+      </header>
+      <section>
+        <h3>{t('Áreas de atuação')}</h3>
+        <ul>
+          {profile.areas.map((area, index) => (
+            <li key={index}>{contentText(area, locale)}</li>
+          ))}
+        </ul>
+      </section>
+      {profile.timeline.length > 0 && (
+        <section>
+          <h3>{t('Trajetória')}</h3>
+          <ol>
+            {profile.timeline.map((item) => (
+              <li key={item.id}>
+                <time>{item.date}</time>
+                <h4>{contentText(item.title, locale)}</h4>
+                <p>{contentText(item.description, locale)}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+      {profile.interests.length > 0 && (
+        <section>
+          <h3>{t('Interesses')}</h3>
+          <ul>
+            {profile.interests.map((item, index) => (
+              <li key={index}>{contentText(item, locale)}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+      <section>
+        <h3>{t('Explore o portfólio')}</h3>
+        <div className="ws-app__toolbar">
+          {[
+            ['projects', 'Projetos'],
+            ['resume', 'Currículo'],
+            ['certificates', 'Certificados'],
+            ['contact', 'Contato'],
+          ].map(([id, name]) => (
+            <button key={id} type="button" onClick={() => run(openApp, id, { origin: 'about-me' })}>
+              {t(name)}
+            </button>
+          ))}
+        </div>
+      </section>
+      <section>
+        <h3>{t('Links profissionais')}</h3>
+        <ul>
+          {profile.links
+            .filter((item) => safeExternalUrl(item.url))
+            .map((item) => (
+              <li key={item.url}>
+                <a href={safeExternalUrl(item.url)} target="_blank" rel="noopener noreferrer">
+                  {contentText(item.label, locale)}
                 </a>
-            </section>
-        </article>
-    );
+              </li>
+            ))}
+        </ul>
+      </section>
+    </article>
+  );
 }

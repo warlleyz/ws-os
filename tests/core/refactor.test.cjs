@@ -178,15 +178,16 @@ test('calendário e painéis preservam exclusividade', () => {
 test('registry não declara aplicativos funcionais inexistentes', () => {
   const { registry } = loadCore();
   const apps = registry.getRegisteredApps();
-
   assert.equal(apps.length, 18);
-  assert.deepEqual(
-    Array.from(
-      apps.filter((app) => app.implemented).map((app) => app.id),
-    ),
-    ['about-me', 'resume', 'certificates', 'settings', 'about-system', 'file-viewer'],
-  );
   assert.equal(apps.filter((app) => app.desktopShortcut).length, 12);
+  const source = fs.readFileSync(path.join(root, 'src/core/appRegistry.js'), 'utf8');
+  const entries = [...source.matchAll(/import\('\.\.\/apps\/([^']+)'\)/g)];
+  assert.equal(apps.filter((app) => app.implemented).length, entries.length);
+  for (const [, entry] of entries) {
+    const filename = path.join(root, 'src/apps', entry);
+    assert.ok(fs.existsSync(filename), entry);
+    assert.match(fs.readFileSync(filename, 'utf8'), /export default/, entry);
+  }
 });
 
 test('Core bloqueia aplicativos restritos sem modificar a sessão', () => {
@@ -263,7 +264,6 @@ test('abertura mantém compatibilidade com chamadas existentes', () => {
   assert.equal(m.openApp(state, 'administration'), state);
 });
 
-
 test('lifecycle mantém estado ao minimizar e restaurar', () => {
   const { manager: m } = loadCore();
 
@@ -338,7 +338,6 @@ test('widget não oculta atalhos quando a grade está no limite', () => {
   assert.equal(layout.widget, null);
 });
 
-
 test('widget é realocado quando sua posição preferida não cabe', () => {
   const m = loadPureModule('src/shells/desktop/desktopLayout.js');
 
@@ -368,7 +367,6 @@ test('widget preserva posição preferida quando ela continua válida', () => {
   assert.equal(layout.widget.left, 270);
   assert.equal(layout.widget.top, 88);
 });
-
 
 test('widgets recuperam estado padrão quando armazenamento falha', () => {
   const storage = {
@@ -418,13 +416,15 @@ test('widgets preservam preferências válidas armazenadas', () => {
       assert.equal(key, 'ws-os:desktop-widgets');
 
       return JSON.stringify({
-        widgets: [{
-          instanceId: 'clock-default',
-          widgetId: 'clock',
-          visible: false,
-          position: { column: 4, row: 2 },
-          size: { columns: 3, rows: 2 },
-        }],
+        widgets: [
+          {
+            instanceId: 'clock-default',
+            widgetId: 'clock',
+            visible: false,
+            position: { column: 4, row: 2 },
+            size: { columns: 3, rows: 2 },
+          },
+        ],
       });
     },
   };
