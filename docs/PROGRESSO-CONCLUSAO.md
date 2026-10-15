@@ -70,3 +70,11 @@ Referência lida: warlleyz/portfolio-warlley, commit c2e51be6106752f671d9469e4ea
 Uma camada de blur por janela/painel evita empilhamento desnecessário. Durante gesto de janela, o efeito é suspenso e a superfície fica sólida; pointerup/cancelamento/Escape/minimização restauram o estado. Baixo custo/redução de transparência e preferências do SO prevalecem; navegadores sem suporte recebem superfícies sólidas. Opacidade mínima 88% foi mantida pela legibilidade dos destaques, em vez de copiar os 78% da v1 indiscriminadamente. O resultado é uma adaptação visual, não uma cópia pixel a pixel nem prova de desempenho em todos os monitores.
 
 Validação do vidro no navegador: dark/high apresentou rgba(24,34,48,.88), light/high rgba(255,255,255,.88), ambos blur(24px)/saturate(1.35); conteúdo externo transparente e cabeçalho sem blur duplicado. Reduzir transparência produziu superfície sólida e backdrop-filter none. Foi corrigido contraste dos rótulos do Desktop sobre wallpaper escuro no tema claro com fundo escuro legível independente do tema/imagem. Lint/build e 88 testes continuam como gates. O resize físico nas bordas do monitor continua exigindo ensaio no equipamento do usuário.
+
+## Terminal e Wally — recursos locais
+
+Terminal oferece help/apps/open/close/theme/lang/ls/pwd/date/whoami/history/clear/echo/login, parser com aspas, autocompletar por Tab, setas e histórico de sessão limitado. Não há shell real, eval, acesso administrativo ou persistência remota do histórico. Login informa indisponibilidade, sem coletar senha. Close passa pelo guard central de descarte.
+
+Wally compacto e estendido orientam por intenções locais e oferecem botões de abertura pelo Core. O Mobile oferece Wally como app no catálogo. Conversa limitada à sessão, sem envio a serviços e sem execução de ações destrutivas. Gemini, autenticação, cotas e ferramentas remotas continuam pendentes; este fallback não é apresentado como IA generativa conectada.
+
+Dois testes novos verificam parser/completar e catálogo restrito do Wally. Suíte acumulada: 90 testes. Smoke no navegador: help exibiu o catálogo; open calculator abriu a Calculadora; painel Wally respondeu sobre Projetos e abriu Wally Estendido pelo Core. A interação por teclado foi usada para evitar o recorte da área de automação. Nenhuma IA remota ou autenticação real foi testada/conectada.

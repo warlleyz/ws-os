@@ -75,3 +75,32 @@
   outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
 }
+
+.taskbar-wally__content {
+  overflow: auto;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+.taskbar-wally__content label {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+.taskbar-wally__content input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--border-control);
+  border-radius: 8px;
+}
+.taskbar-wally__content button {
+  min-height: 44px;
+  padding: 8px;
+  margin-top: 8px;
+  border: 1px solid var(--border-control);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+}

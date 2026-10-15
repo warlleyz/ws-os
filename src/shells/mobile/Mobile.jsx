@@ -45,7 +45,9 @@ export default function Mobile({ theme, onThemeChange }) {
   const notifications = notificationState?.items ?? [];
   const unreadCount = notifications.filter((item) => !item.read).length;
 
-  const apps = getRegisteredApps().filter((app) => app.public && app.showInMenu !== false);
+  const apps = getRegisteredApps().filter(
+    (app) => app.public && (app.showInMenu !== false || app.id === 'wally-extended'),
+  );
 
   const activeInstance = appState.instances.find(
     (instance) => instance.id === appState.activeInstanceId,

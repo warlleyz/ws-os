@@ -1,0 +1,30 @@
+.ws-terminal {
+  font-family: ui-monospace, monospace;
+}
+.ws-terminal__log {
+  min-height: 150px;
+  max-height: 45dvh;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface-canvas) 85%, transparent);
+}
+.ws-terminal__log pre {
+  margin: 8px 0;
+  font: inherit;
+  font-size: 13px;
+}
+.ws-terminal form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-top: 16px;
+}
+.ws-terminal form label {
+  flex: 1;
+}
+.ws-terminal code {
+  overflow-wrap: anywhere;
+}
