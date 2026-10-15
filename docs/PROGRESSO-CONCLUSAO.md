@@ -14,13 +14,13 @@ Não confundir componente integrado com app completo, nem configuração prepara
 
 ## Blocos desta execução
 
-| Bloco       | Estado                                  | Escopo                                                                 |
-| ----------- | --------------------------------------- | ---------------------------------------------------------------------- |
-| A2          | Implementado com dependências pendentes | Projetos, Demos, Dev Insights e serviços de leitura/cache/cancelamento |
-| A3          | Implementado; envio externo pendente    | Calculadora e Contato                                                  |
-| A5          | Não iniciado                            | Arquivos locais, editor e integração ao visualizador                   |
-| Demais apps | Não iniciado                            | Conforme capacidade desta execução; registrar entrega e limites        |
-| Temas v1    | Referência localizada                   | Comparar e adaptar vidro/blur preservando controles e acessibilidade   |
+| Bloco       | Estado                                     | Escopo                                                                 |
+| ----------- | ------------------------------------------ | ---------------------------------------------------------------------- |
+| A2          | Implementado com dependências pendentes    | Projetos, Demos, Dev Insights e serviços de leitura/cache/cancelamento |
+| A3          | Implementado; envio externo pendente       | Calculadora e Contato                                                  |
+| A5          | Implementado; ensaios adicionais pendentes | Arquivos locais, editor e integração ao visualizador                   |
+| Demais apps | Não iniciado                               | Conforme capacidade desta execução; registrar entrega e limites        |
+| Temas v1    | Referência localizada                      | Comparar e adaptar vidro/blur preservando controles e acessibilidade   |
 
 ## Dependências externas
 
@@ -52,3 +52,13 @@ Contato possui formulário, canais editáveis, validações, consentimento, hone
 Proteção compartilhada de alterações não salvas: fechar abre diálogo acessível do WS OS, mantendo o fundo inert, foco e Escape/Tab; cancelar mantém dados; descartar fecha a instância. Reload usa proteção nativa do navegador. SystemProvider retorna aceitação/rejeição booleana para fechamento; isso não é API de resultado síncrono de ID na abertura. Mobile respeita rejeição e retorna à Home se um fechamento externo remover a última instância.
 
 Validação: sete testes novos de aritmética, domínio, entrada não executável, contato, agenda, resposta do provedor e guards. Navegador: 2+3*4 resultou 14; 1/0 exibiu erro; Contato não configurado não habilita envio; diálogo preservou nome ao cancelar e fechou após descarte. Suíte completa esperada nesta entrega: 82 testes, além de lint/build.
+
+## A5 — arquivos pessoais e editor
+
+Banco IndexedDB separado ws-os-personal-files: pastas, textos, importação validada, renomear com extensão preservada, mover sem ciclos, lixeira recuperável, restauração e exclusão permanente confirmada. Limites: 10 MB por arquivo, 50 MB/500 itens incluindo lixeira; editor de texto até 1 MB. HTML/JS importados são armazenados como texto e não executados. Imagens têm assinatura/decodificação/limite de pixels; PDF tem assinatura. A lixeira não é esvaziada automaticamente.
+
+Arquivo oficial é catálogo somente leitura e depende de conteúdo público cadastrado. Arquivo pessoal não é enviado a backend nem acessível pela Administração. A restauração de Configurações não toca neste banco.
+
+Editor usa revisão transacional: uma janela antiga não sobrescreve a mais recente. Rascunho sobrevive ao erro; salvar cópia e recarregar com confirmação permitem recuperação. Ctrl+S, indicador de pendência e guard de fechamento/reload. Visualizador local tem texto escapado, imagem com zoom, PDF sandbox com alternativa de download, metadados e revogação de blob URLs.
+
+Validação: seis testes novos para criação, nomes, duplicação, ciclos, extensão, revisões, lixeira/descendentes, purga, limites e integridade. Navegador com IndexedDB real: criou teste-codex.txt, salvou por Ctrl+S, visualizou conteúdo, moveu à lixeira/restaurou e recuperou após reload. Duas janelas produziram conflito de revisão mantendo o rascunho. Nenhum dado da origem habitual do usuário foi alterado. Prévia PDF, importação de todos os formatos e falhas reais de quota ainda precisam de ensaios complementares; os caminhos de erro/modelos têm cobertura automatizada. Suíte nesta etapa: 88 testes.

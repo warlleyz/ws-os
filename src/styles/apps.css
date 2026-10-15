@@ -120,3 +120,17 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.ws-files__list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+.ws-editor__text {
+  width: 100%;
+  min-height: 240px;
+  resize: vertical;
+  font-family: ui-monospace, monospace;
+  line-height: 1.6;
+}
