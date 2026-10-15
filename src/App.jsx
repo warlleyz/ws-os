@@ -10,6 +10,7 @@ import Desktop from './shells/desktop/Desktop';
 import Mobile from './shells/mobile/Mobile';
 
 import SystemProvider from './core/SystemProvider';
+import WallyConversationProvider from './features/wally/WallyConversationProvider';
 
 const WELCOME_STORAGE_KEY = 'ws-os:welcome-seen';
 const BOOT_DURATION = 1500;
@@ -95,13 +96,17 @@ export default function App() {
         >
           {t('Ir para a área de trabalho')}
         </a>
+
         <SystemProvider>
-          {isMobile ? (
-            <Mobile theme={theme} onThemeChange={setTheme} />
-          ) : (
-            <Desktop theme={theme} onThemeChange={setTheme} />
-          )}
+          <WallyConversationProvider>
+            {isMobile ? (
+              <Mobile theme={theme} onThemeChange={setTheme} />
+            ) : (
+              <Desktop theme={theme} onThemeChange={setTheme} />
+            )}
+          </WallyConversationProvider>
         </SystemProvider>
+
       </div>
 
       {welcomeOpen && <WelcomeDialog onClose={closeWelcome} />}

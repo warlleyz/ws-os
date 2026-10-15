@@ -10,7 +10,7 @@ import { getAppDefinition } from '../../core/appRegistry';
 import { useSystem } from '../../core/useSystem';
 import { openApp } from '../../core/appManager';
 
-import useWallyConversation from '../../features/wally/useWallyConversation';
+import useSharedWallyConversation from '../../features/wally/useSharedWallyConversation';
 
 import '../../styles/apps.css';
 
@@ -35,7 +35,7 @@ export default function WallyExtended() {
     remoteEnabled,
     lastError,
     maxQuestionLength,
-  } = useWallyConversation();
+  } = useSharedWallyConversation();
 
   async function send(event) {
     event.preventDefault();

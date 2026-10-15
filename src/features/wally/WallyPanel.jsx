@@ -20,7 +20,7 @@ import { useSystem } from '../../core/useSystem';
 import { openApp } from '../../core/appManager';
 import { getAppDefinition } from '../../core/appRegistry';
 import Tooltip from '../../shared/components/Tooltip';
-import useWallyConversation from './useWallyConversation';
+import useSharedWallyConversation from './useSharedWallyConversation';
 import WallyTurnstile from './WallyTurnstile';
 import { getWallyErrorMessage } from './wallyErrorMessages';
 
@@ -48,7 +48,7 @@ export default function WallyPanel({ setWallyOpen }) {
     remoteEnabled,
     sendMessage,
     clearConversation,
-  } = useWallyConversation();
+  } = useSharedWallyConversation();
 
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
