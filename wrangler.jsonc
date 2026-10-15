@@ -16,7 +16,7 @@
         }
     ],
     "vars": {
-        "WALLY_AI_ENABLED": "true",
+        "WALLY_AI_ENABLED": "false",
         "GEMINI_MODEL": "gemini-3.8-flash"
     }
 }
