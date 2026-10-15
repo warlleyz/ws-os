@@ -14,11 +14,16 @@ import useWallyConversation from '../../features/wally/useWallyConversation';
 
 import '../../styles/apps.css';
 
+import WallyTurnstile from '../../features/wally/WallyTurnstile';
+import '../../features/wally/WallyPanel.css';
+
 export default function WallyExtended() {
   useLocale();
 
   const { run } = useSystem();
   const [question, setQuestion] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState(null);
+  const [verificationKey, setVerificationKey] = useState(0);
 
   const {
     messages,
@@ -29,11 +34,24 @@ export default function WallyExtended() {
     maxQuestionLength,
   } = useWallyConversation();
 
-  function send(event) {
+  async function send(event) {
     event.preventDefault();
 
-    if (sendMessage(question)) {
+    if (status === 'responding') return;
+
+    const token = turnstileToken;
+
+    const sent = await sendMessage(question, {
+      turnstileToken: token,
+    });
+
+    if (sent) {
       setQuestion('');
+
+      if (remoteEnabled && token) {
+        setTurnstileToken(null);
+        setVerificationKey((current) => current + 1);
+      }
     }
   }
 
@@ -125,6 +143,19 @@ export default function WallyExtended() {
         </p>
       )}
 
+      {remoteEnabled && (
+        <WallyTurnstile
+          key={verificationKey}
+          onTokenChange={setTurnstileToken}
+        />
+      )}
+
+      {lastError && (
+        <p role="status">
+          {t('Gemini indisponível. Resposta gerada localmente.')}
+        </p>
+      )}
+
       <form onSubmit={send}>
         <label>
           {t('Pergunte ao Wally')}
@@ -142,7 +173,10 @@ export default function WallyExtended() {
         <div className="ws-app__toolbar">
           <button
             type="submit"
-            disabled={!question.trim()}
+            disabled={
+              !question.trim() ||
+              status === 'responding'
+            }
           >
             {t('Enviar')}
           </button>

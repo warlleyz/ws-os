@@ -386,3 +386,21 @@
     justify-content: flex-start;
   }
 }
+
+.ws-wally__verification {
+  width: 100%;
+  min-width: 0;
+  margin-top: 8px;
+}
+
+.ws-wally__verification>div {
+  max-width: 100%;
+}
+
+.ws-wally__verification-info,
+.ws-wally__verification p {
+  margin: 6px 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}

@@ -21,6 +21,7 @@ import { openApp } from '../../core/appManager';
 import { getAppDefinition } from '../../core/appRegistry';
 import Tooltip from '../../shared/components/Tooltip';
 import useWallyConversation from './useWallyConversation';
+import WallyTurnstile from './WallyTurnstile';
 
 import './WallyPanel.css';
 
@@ -36,8 +37,14 @@ export default function WallyPanel({ setWallyOpen }) {
   const { run } = useSystem();
 
   const [question, setQuestion] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState(null);
+  const [verificationKey, setVerificationKey] = useState(0);
   const {
     messages,
+    status,
+    provider,
+    lastError,
+    remoteEnabled,
     sendMessage,
     clearConversation,
   } = useWallyConversation();
@@ -62,13 +69,24 @@ export default function WallyPanel({ setWallyOpen }) {
     if (opened) setWallyOpen(false);
   }
 
-  function ask(value) {
-    const sent = sendMessage(value);
+  async function ask(value) {
+    if (status === 'responding') return;
+
+    const token = turnstileToken;
+
+    const sent = await sendMessage(value, {
+      turnstileToken: token,
+    });
 
     if (!sent) return;
 
     setQuestion('');
     inputRef.current?.focus();
+
+    if (remoteEnabled && token) {
+      setTurnstileToken(null);
+      setVerificationKey((current) => current + 1);
+    }
   }
 
   return (
@@ -198,6 +216,18 @@ export default function WallyPanel({ setWallyOpen }) {
       </div>
 
       <div className="ws-wally__composer-area">
+        {remoteEnabled && (
+          <WallyTurnstile
+            key={verificationKey}
+            onTokenChange={setTurnstileToken}
+          />
+        )}
+
+        {lastError && (
+          <p className="ws-wally__verification-info" role="status">
+            {t('Não foi possível usar a IA. Resposta local utilizada.')}
+          </p>
+        )}
         <form
           className="ws-wally__composer"
           onSubmit={(event) => {
@@ -218,7 +248,10 @@ export default function WallyPanel({ setWallyOpen }) {
           <Tooltip content={t('Enviar')}>
             <button
               type="submit"
-              disabled={!question.trim()}
+              disabled={
+                !question.trim() ||
+                status === 'responding'
+              }
               aria-label={t('Enviar')}
             >
               <ArrowUp size={17} />
@@ -229,7 +262,7 @@ export default function WallyPanel({ setWallyOpen }) {
         <div className="ws-wally__composer-footer">
           <span>
             <MessageCircle size={12} aria-hidden="true" />
-            {t('Respostas locais')}
+            {t(provider === 'gemini' ? 'Gemini' : 'Respostas locais')}
           </span>
 
           <button
