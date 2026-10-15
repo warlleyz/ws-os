@@ -1,6 +1,9 @@
 
-import { useEffect, useRef, useState } from 'react';
-import { fetchWeatherData } from '../../services/weatherService';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  fetchWeatherData,
+  searchWeatherCities,
+} from '../../services/weatherService';
 
 const CACHE_MS = 10 * 60 * 1000;
 
@@ -9,6 +12,14 @@ export default function useWeather() {
   const [forecast, setForecast] = useState([]);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState('');
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [cityResults, setCityResults] = useState([]);
+  const [citySearchLoading, setCitySearchLoading] = useState(false);
+  const [citySearchError, setCitySearchError] = useState('');
+
+  const selectedCityRef = useRef(null);
+  const citySearchIdRef = useRef(0);
+  const citySearchControllerRef = useRef(null);
 
   const mountedRef = useRef(true);
   const requestIdRef = useRef(0);
@@ -22,6 +33,8 @@ export default function useWeather() {
       mountedRef.current = false;
       requestIdRef.current += 1;
       controllerRef.current?.abort();
+      citySearchIdRef.current += 1;
+      citySearchControllerRef.current?.abort();
     };
   }, []);
 
@@ -85,7 +98,16 @@ export default function useWeather() {
     }
   }
 
+
   function requestWeather() {
+    // Se houver uma cidade selecionada, mantém a escolha.
+    const city = selectedCityRef.current;
+
+    if (city) {
+      selectCity(city);
+      return;
+    }
+
     requestIdRef.current += 1;
     const requestId = requestIdRef.current;
 
@@ -97,22 +119,34 @@ export default function useWeather() {
 
     if (!navigator.geolocation) {
       setWeatherLoading(false);
-      setWeatherError('Geolocalização indisponível neste navegador.');
+      setWeatherError(
+        'Geolocalização indisponível neste navegador.',
+      );
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        if (!mountedRef.current || requestId !== requestIdRef.current) return;
+        if (
+          !mountedRef.current ||
+          requestId !== requestIdRef.current
+        ) {
+          return;
+        }
 
-        fetchWeather(
+        void fetchWeather(
           position.coords.latitude,
           position.coords.longitude,
           requestId,
         );
       },
       () => {
-        if (!mountedRef.current || requestId !== requestIdRef.current) return;
+        if (
+          !mountedRef.current ||
+          requestId !== requestIdRef.current
+        ) {
+          return;
+        }
 
         setWeatherLoading(false);
         setWeatherError(
@@ -126,6 +160,128 @@ export default function useWeather() {
       },
     );
   }
+
+
+  useEffect(() => {
+    requestWeather();
+
+    // A consulta automática acontece ao montar o hook.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+  const searchCities = useCallback(async (query) => {
+    const search = query.trim();
+
+    citySearchIdRef.current += 1;
+    const searchId = citySearchIdRef.current;
+
+    citySearchControllerRef.current?.abort();
+    citySearchControllerRef.current = null;
+
+    setCityResults([]);
+    setCitySearchError('');
+
+    if (search.length < 2) {
+      setCitySearchLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    citySearchControllerRef.current = controller;
+
+    setCitySearchLoading(true);
+
+    try {
+      const results = await searchWeatherCities(
+        search,
+        controller.signal,
+      );
+
+      if (
+        !mountedRef.current ||
+        searchId !== citySearchIdRef.current
+      ) {
+        return;
+      }
+
+      setCityResults(results);
+    } catch (error) {
+      if (
+        !mountedRef.current ||
+        searchId !== citySearchIdRef.current ||
+        controller.signal.aborted
+      ) {
+        return;
+      }
+
+      setCitySearchError(
+        error.message || 'Não foi possível pesquisar cidades.',
+      );
+    } finally {
+      if (citySearchControllerRef.current === controller) {
+        citySearchControllerRef.current = null;
+      }
+
+      if (
+        mountedRef.current &&
+        searchId === citySearchIdRef.current
+      ) {
+        setCitySearchLoading(false);
+      }
+    }
+  }, []);
+
+
+  const cancelCitySearch = useCallback(() => {
+    citySearchIdRef.current += 1;
+    citySearchControllerRef.current?.abort();
+    citySearchControllerRef.current = null;
+
+    setCityResults([]);
+    setCitySearchLoading(false);
+    setCitySearchError('');
+  }, []);
+
+
+  function selectCity(city) {
+    if (
+      !city ||
+      !Number.isFinite(city.latitude) ||
+      !Number.isFinite(city.longitude)
+    ) {
+      return;
+    }
+
+    cancelCitySearch();
+
+    selectedCityRef.current = city;
+    setSelectedCity(city);
+    setCityResults([]);
+    setCitySearchError('');
+
+    requestIdRef.current += 1;
+    const requestId = requestIdRef.current;
+
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+
+    setWeatherLoading(true);
+    setWeatherError('');
+
+    void fetchWeather(
+      city.latitude,
+      city.longitude,
+      requestId,
+    );
+  }
+
+  function useCurrentLocation() {
+    selectedCityRef.current = null;
+    setSelectedCity(null);
+    requestWeather();
+  }
+
 
   function getWeatherDescription(code) {
     if (code === 0) return 'Céu limpo';
@@ -147,5 +303,13 @@ export default function useWeather() {
     weatherError,
     requestWeather,
     getWeatherDescription,
+    selectedCity,
+    cityResults,
+    citySearchLoading,
+    citySearchError,
+    searchCities,
+    selectCity,
+    useCurrentLocation,
+    cancelCitySearch,
   };
 }

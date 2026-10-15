@@ -1,143 +1,293 @@
+/* =========================================
+   WS OS — Weather Panel
+   ========================================= */
+
 .taskbar-weather-panel {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
   width: min(320px, calc(100vw - 24px));
-  max-height: calc(100dvh - 108px);
-  overflow-y: auto;
-  border: 1px solid var(--border-default);
-  border-radius: 14px;
-  background: var(--surface-primary);
+  max-height: calc(100dvh - 100px);
+  min-height: 0;
+  overflow: hidden;
+
+  border: 1px solid var(--panel-border, var(--border-default));
+  border-radius: 15px;
+
+  background: var(--panel-background, var(--surface-primary));
   color: var(--text-primary);
-  box-shadow: 0 16px 45px rgb(0 0 0 / 28%);
+
+  box-shadow: var(--panel-shadow, var(--shadow-floating));
 }
+
+/* Cabeçalho */
 
 .taskbar-weather-panel__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px;
+  gap: 10px;
+  flex-shrink: 0;
+
+  padding: 12px 14px;
   border-bottom: 1px solid var(--border-default);
 }
 
-.taskbar-weather-panel__content {
+.taskbar-weather-panel__title,
+.taskbar-weather-panel__header-actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 16px;
+  align-items: center;
+  gap: 8px;
 }
 
-.taskbar-weather-panel__content p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 12px;
+.taskbar-weather-panel__title svg {
+  color: var(--accent-secondary);
 }
 
-.taskbar-weather-panel button {
-  padding: 6px 10px;
-  border: 1px solid var(--border-default);
+.taskbar-weather-panel__title strong {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.taskbar-weather-panel__header-actions {
+  gap: 5px;
+}
+
+.taskbar-weather-panel__header-actions button {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  padding: 0;
+
+  border: 1px solid transparent;
   border-radius: 8px;
-  background: var(--surface-secondary);
-  color: var(--text-primary);
+
+  background: transparent;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 
-.taskbar-weather-panel button:disabled {
-  cursor: wait;
-  opacity: 0.6;
+.taskbar-weather-panel__header-actions button:hover:not(:disabled) {
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+.taskbar-weather-panel__header-actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .taskbar-weather-panel button:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
 }
-.taskbar-weather-panel {
-  box-sizing: border-box;
-  width: min(340px, calc(100vw - 24px));
-  max-height: calc(100dvh - 100px);
-  overflow-y: auto;
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  background: var(--panel-background);
-  color: var(--text-primary);
-  box-shadow: var(--panel-shadow);
-}
 
-.taskbar-weather-panel__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgb(148 185 215 / 15%);
-}
+/* Conteúdo */
 
 .taskbar-weather-panel__content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
+  gap: 13px;
+
+  min-height: 0;
+  overflow-y: auto;
   padding: 14px;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
 }
 
-.taskbar-weather-panel__content p {
-  margin: 0;
-  font-size: 12px;
+.taskbar-weather-panel__location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+
+  color: var(--text-secondary);
+  font-size: 11px;
 }
 
-.taskbar-weather-panel button {
-  padding: 5px 9px;
-  border: 1px solid rgb(148 185 215 / 25%);
-  border-radius: 7px;
-  background: rgb(255 255 255 / 7%);
-  color: inherit;
-  cursor: pointer;
+.taskbar-weather-panel__location svg {
+  flex-shrink: 0;
+  color: var(--accent-secondary);
 }
 
-.taskbar-weather-panel button:disabled {
-  opacity: 0.6;
-  cursor: wait;
+.taskbar-weather-panel__location span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
+
+/* Clima atual */
+
+.taskbar-weather-panel__current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 13px 15px;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+
+  background: color-mix(in srgb,
+      var(--accent-secondary) 7%,
+      var(--surface-secondary));
+}
+
+.taskbar-weather-panel__current-info {
+  min-width: 0;
+}
+
+.taskbar-weather-panel__temperature {
+  display: block;
+  font-size: 43px;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.taskbar-weather-panel__current-info p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.taskbar-weather-panel__current-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 62px;
+  height: 62px;
+  color: var(--accent-secondary);
+}
+
+/* Previsão */
 
 .taskbar-weather-panel__forecast {
   display: flex;
-  width: 100%;
-  min-width: 0;
   flex-direction: column;
   gap: 10px;
-  margin-top: 8px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-default);
+  min-width: 0;
 }
 
-.taskbar-weather-panel__forecast>strong {
+.taskbar-weather-panel__forecast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.taskbar-weather-panel__forecast-header strong {
   font-size: 12px;
+  font-weight: 700;
+}
+
+.taskbar-weather-panel__forecast-header span {
+  color: var(--text-secondary);
+  font-size: 10px;
 }
 
 .taskbar-weather-panel__days {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 5px;
 }
 
 .taskbar-weather-panel__day {
-  display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 7px 0;
-  font-size: 11px;
-}
-
-.taskbar-weather-panel__day+.taskbar-weather-panel__day {
-  border-top: 1px solid var(--border-default);
-}
-
-.taskbar-weather-panel__day span:nth-child(2) {
   min-width: 0;
-  color: var(--text-secondary);
-  overflow-wrap: anywhere;
+
+  padding: 10px 3px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: var(--surface-secondary);
 }
 
-.taskbar-weather-panel__day strong {
+.taskbar-weather-panel__day-label {
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 650;
+  text-transform: capitalize;
   white-space: nowrap;
+}
+
+.taskbar-weather-panel__day-icon {
+  display: grid;
+  place-items: center;
+  height: 26px;
+  color: var(--accent-secondary);
+}
+
+.taskbar-weather-panel__day-max {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
+}
+
+.taskbar-weather-panel__day-min {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Estados */
+
+.taskbar-weather-panel__empty,
+.taskbar-weather-panel__status,
+.taskbar-weather-panel__error {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.taskbar-weather-panel__empty {
+  padding: 20px 10px;
+  border: 1px dashed var(--border-default);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.taskbar-weather-panel__error {
+  color: var(--status-error, var(--text-primary));
+}
+
+.taskbar-weather-panel__spinning {
+  animation: weather-spin 1s linear infinite;
+}
+
+@keyframes weather-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 360px) {
+  .taskbar-weather-panel__content {
+    padding: 10px;
+  }
+
+  .taskbar-weather-panel__days {
+    gap: 3px;
+  }
+
+  .taskbar-weather-panel__day {
+    padding: 9px 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taskbar-weather-panel__spinning {
+    animation: none;
+  }
 }

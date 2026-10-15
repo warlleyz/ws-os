@@ -110,3 +110,77 @@ export async function fetchCurrentWeather(latitude, longitude, signal) {
   const result = await fetchWeatherData(latitude, longitude, signal);
   return result.current;
 }
+
+
+const GEOCODING_API_URL =
+  'https://geocoding-api.open-meteo.com/v1/search';
+
+export async function searchWeatherCities(query, signal) {
+  const search = String(query ?? '').trim();
+
+  if (search.length < 2) {
+    return [];
+  }
+
+  const params = new URLSearchParams({
+    name: search,
+    count: '50',
+    language: 'pt',
+    format: 'json',
+  });
+
+  let response;
+
+  try {
+    response = await fetch(
+      `${GEOCODING_API_URL}?${params.toString()}`,
+      { signal },
+    );
+  } catch (error) {
+    if (signal?.aborted) {
+      throw error;
+    }
+
+    throw new Error(
+      'Falha de conexão ao pesquisar cidades.',
+      { cause: error },
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      'Não foi possível pesquisar cidades.',
+    );
+  }
+
+  const data = await response.json();
+
+  if (!Array.isArray(data.results)) {
+    return [];
+  }
+
+
+  return data.results
+    .filter((city) =>
+      Number.isFinite(city.latitude) &&
+      Number.isFinite(city.longitude) &&
+      typeof city.name === 'string'
+    )
+    .map((city) => ({
+      id: city.id,
+      name: city.name,
+      state: city.admin1 || '',
+      country: city.country || '',
+      countryCode: city.country_code || '',
+      latitude: city.latitude,
+      longitude: city.longitude,
+      timezone: city.timezone || '',
+    }))
+    .sort((a, b) => {
+      const aBrazil = a.countryCode === 'BR' ? 0 : 1;
+      const bBrazil = b.countryCode === 'BR' ? 0 : 1;
+
+      return aBrazil - bBrazil;
+    })
+    .slice(0, 8);
+}

@@ -54,6 +54,14 @@ function Taskbar({
     weatherError,
     requestWeather,
     getWeatherDescription,
+    selectedCity,
+    cityResults,
+    citySearchLoading,
+    citySearchError,
+    searchCities,
+    selectCity,
+    useCurrentLocation,
+    cancelCitySearch,
   } = weatherData;
 
   const notifications = notificationState?.items ?? [];
@@ -513,11 +521,12 @@ function Taskbar({
             <WeatherPanel
               setWeatherOpen={setWeatherOpen}
               weather={weather}
+              forecast={forecast}
               getWeatherDescription={getWeatherDescription}
-              weatherError={t(weatherError)}
+              weatherError={weatherError}
               weatherLoading={weatherLoading}
               requestWeather={requestWeather}
-              forecast={forecast}
+              selectedCity={selectedCity}
             />
           )}
           {calendarOpen && (
