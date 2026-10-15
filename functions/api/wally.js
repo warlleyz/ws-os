@@ -1,3 +1,4 @@
+import { checkWallyRateLimit } from '../_lib/wallyRateLimit.js';
 
 const MAX_QUESTION_LENGTH = 1000;
 const MAX_BODY_LENGTH = 12_000;
@@ -165,6 +166,25 @@ export async function onRequestPost(context) {
     ) {
         return json({ error: 'INVALID_HISTORY' }, 400);
     }
+
+
+    // Bloqueia chamadas sem proteção de consumo.
+    const quota = await checkWallyRateLimit(request, env);
+
+    if (!quota.allowed) {
+        const limited = quota.reason === 'RATE_LIMIT_EXCEEDED';
+
+        return json(
+            {
+                error: quota.reason,
+                message: limited
+                    ? 'O limite de consultas foi atingido. Tente novamente mais tarde.'
+                    : 'A proteção de consultas está indisponível.',
+            },
+            limited ? 429 : 503,
+        );
+    }
+
 
     const contents = [
         ...history.map((message) => ({
