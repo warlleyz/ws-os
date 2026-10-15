@@ -6,11 +6,23 @@ import { openApp } from '../../core/appManager';
 import { getRegisteredApps } from '../../core/appRegistry';
 
 // Utilitários e preferências persistentes do WS Menu.
-export default function useWSMenu({ onAppAction, closePanels, menuOpen }) {
+export default function useWSMenu({ onAppAction, closePanels, menuOpen, appState }) {
   const locale = useLocale();
   const { favoriteIds, toggleFavorite, MAX_FAVORITES } = useMenuPreferences();
   const [menuView, setMenuView] = useState('home');
   const [menuSearch, setMenuSearch] = useState('');
+  const recentIds = [
+    ...new Set(
+      [...appState.focusHistory]
+        .reverse()
+        .map((instanceId) =>
+          appState.instances.find(
+            (instance) => instance.id === instanceId,
+          )?.appId,
+        )
+        .filter(Boolean),
+    ),
+  ].slice(0, 6);
   const [shortcutContext, setShortcutContext] = useState(null);
   const menuSearchRef = useRef(null);
   const shortcutContextRef = useRef(null);
@@ -67,11 +79,35 @@ export default function useWSMenu({ onAppAction, closePanels, menuOpen }) {
     .filter((app) => app.public && app.showInMenu !== false)
     .sort((a, b) => t(a.name).localeCompare(t(b.name), locale));
   const searchTerm = normalizeSearch(menuSearch.trim());
-  const searchResults = menuApps.filter((app) => normalizeSearch(t(app.name)).includes(searchTerm));
+  const searchResults = menuApps.filter((app) => {
+    if (!searchTerm) return true;
+
+    const searchableFields = [
+      t(app.name),
+      app.id,
+      app.category === 'system'
+        ? t('Aplicativo de Sistema')
+        : t('Aplicativo Desktop'),
+    ];
+
+    return searchableFields.some((field) =>
+      normalizeSearch(field).includes(searchTerm),
+    );
+  });
   const favoriteApps = favoriteIds
     .map((id) => menuApps.find((app) => app.id === id))
     .filter(Boolean);
-  const visibleMenuApps = searchTerm ? searchResults : menuView === 'all' ? menuApps : favoriteApps;
+  const recentApps = recentIds
+    .map((id) => menuApps.find((app) => app.id === id))
+    .filter(Boolean);
+
+  const visibleMenuApps = searchTerm
+    ? searchResults
+    : menuView === 'all'
+      ? menuApps
+      : menuView === 'recent'
+        ? recentApps
+        : favoriteApps;
   useEffect(() => {
     if (!shortcutContext) return;
     shortcutContextRef.current?.querySelector('button:not(:disabled)')?.focus();

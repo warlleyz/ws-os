@@ -92,17 +92,40 @@ export default function WSMenu({
               ? t('Resultados da pesquisa')
               : menuView === 'all'
                 ? t('Todos os aplicativos')
-                : t('Aplicativos Favoritos')}
+                : menuView === 'recent'
+                  ? t('Aplicativos recentes')
+                  : t('Aplicativos Favoritos')}
           </strong>
           {!searchTerm && (
-            <button
-              type="button"
-              className="ws-menu__view-toggle"
-              onClick={() => setMenuView((current) => (current === 'all' ? 'home' : 'all'))}
-            >
-              {menuView === 'all' ? t('Voltar') : t('Todos os aplicativos')}
-              <span aria-hidden="true">{menuView === 'all' ? ' ←' : ' →'}</span>
-            </button>
+            <div className="ws-menu__view-actions">
+              <button
+                type="button"
+                className="ws-menu__view-toggle"
+                onClick={() =>
+                  setMenuView((current) =>
+                    current === 'recent' ? 'home' : 'recent'
+                  )
+                }
+              >
+                {menuView === 'recent'
+                  ? t('Favoritos')
+                  : t('Aplicativos recentes')}
+              </button>
+
+              <button
+                type="button"
+                className="ws-menu__view-toggle"
+                onClick={() =>
+                  setMenuView((current) =>
+                    current === 'all' ? 'home' : 'all'
+                  )
+                }
+              >
+                {menuView === 'all'
+                  ? t('Voltar')
+                  : t('Todos os aplicativos')}
+              </button>
+            </div>
           )}
         </div>
         <div className="ws-menu__apps" aria-label={t('Aplicativos')}>
@@ -112,7 +135,9 @@ export default function WSMenu({
                 ? t('Nenhum aplicativo encontrado.')
                 : menuView === 'home'
                   ? t('Nenhum favorito. Clique em Todos os aplicativos para adicionar.')
-                  : t('Nenhum aplicativo disponível.')}
+                  : menuView === 'recent'
+                    ? t('Nenhum aplicativo aberto nesta sessão.')
+                    : t('Nenhum aplicativo disponível.')}
             </p>
           ) : (
             visibleMenuApps.map((app) => {

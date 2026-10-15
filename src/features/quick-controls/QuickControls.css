@@ -114,3 +114,21 @@
   outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
 }
+
+.taskbar-container--auto-hide {
+  bottom: 0;
+  transform: translate(-50%,
+      calc(100% - 8px));
+  transition: transform 180ms ease;
+}
+
+.taskbar-container--auto-hide:hover,
+.taskbar-container--auto-hide:focus-within {
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taskbar-container--auto-hide {
+    transition: none;
+  }
+}

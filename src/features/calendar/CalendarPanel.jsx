@@ -1,4 +1,5 @@
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
+import { getBrazilianHolidays } from './CalendarService';
 export default function CalendarPanel({
   monthLabel,
   setCalendarMonth,
@@ -9,6 +10,11 @@ export default function CalendarPanel({
   calendarMonth,
 }) {
   const locale = useLocale();
+  const holidays = getBrazilianHolidays(calendarMonth.getFullYear());
+
+  const holidaysByDate = new Map(
+    holidays.map((holiday) => [holiday.date, holiday.name]),
+  );
   return (
     <section className="taskbar-calendar" role="region" aria-label={t('Calendário')}>
       <header className="taskbar-calendar__header">
@@ -77,6 +83,13 @@ export default function CalendarPanel({
           },
           (_, index) => {
             const day = index + 1;
+            const dateKey = [
+              calendarMonth.getFullYear(),
+              String(calendarMonth.getMonth() + 1).padStart(2, '0'),
+              String(day).padStart(2, '0'),
+            ].join('-');
+
+            const holiday = holidaysByDate.get(dateKey);
             const isToday =
               currentTime.getFullYear() === calendarMonth.getFullYear() &&
               currentTime.getMonth() === calendarMonth.getMonth() &&
@@ -84,8 +97,13 @@ export default function CalendarPanel({
             return (
               <span
                 key={day}
-                className={isToday ? 'taskbar-calendar__today' : undefined}
+                className={[
+                  isToday ? 'taskbar-calendar__today' : '',
+                  holiday ? 'taskbar-calendar__holiday' : '',
+                ].filter(Boolean).join(' ')}
                 aria-current={isToday ? 'date' : undefined}
+                aria-label={holiday ? `${day}: ${t(holiday)}` : undefined}
+                title={holiday ? t(holiday) : undefined}
               >
                 {day}
               </span>

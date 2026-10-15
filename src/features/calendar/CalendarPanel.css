@@ -58,3 +58,19 @@
   background: rgb(94 176 217 / 26%);
   font-weight: 700;
 }
+
+.taskbar-calendar__holiday {
+  position: relative;
+  color: var(--accent-secondary);
+  font-weight: 700;
+}
+
+.taskbar-calendar__holiday::after {
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}

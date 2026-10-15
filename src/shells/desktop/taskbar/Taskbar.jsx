@@ -35,17 +35,51 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
   const locale = useLocale();
   const {
     appState,
+    notify,
     run: onAppAction,
     notificationState,
     handleNotificationAction: onNotificationAction,
     handleNotificationOpen: onNotificationOpen,
   } = useSystem();
-  const { weather, weatherLoading, weatherError, requestWeather, getWeatherDescription } =
-    useWeather();
+  const {
+    weather,
+    forecast,
+    weatherLoading,
+    weatherError,
+    requestWeather,
+    getWeatherDescription,
+  } = useWeather();
   const notifications = notificationState?.items ?? [];
   const unreadCount = notifications.filter((item) => !item.read).length;
   const [contextGroup, setContextGroup] = useState(null);
   const [activePanel, setActivePanel] = useState(null);
+  const [autoHide, setAutoHide] = useState(() => {
+    try {
+      return localStorage.getItem('ws-os:taskbar-auto-hide') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  function changeAutoHide(enabled) {
+    setAutoHide(enabled);
+
+    try {
+      localStorage.setItem(
+        'ws-os:taskbar-auto-hide',
+        String(enabled),
+      );
+    } catch {
+      notify({
+        title: t('Preferência não salva'),
+        message: t(
+          'Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.',
+        ),
+        type: 'warning',
+        source: t('Sistema'),
+      });
+    }
+  }
   const menuOpen = activePanel === 'menu';
   const notificationOpen = activePanel === 'notifications';
   const quickControlsOpen = activePanel === 'controls';
@@ -93,6 +127,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     searchTerm,
     visibleMenuApps,
   } = useWSMenu({
+    appState,
     onAppAction,
     closePanels,
     menuOpen,
@@ -371,6 +406,10 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     minute: '2-digit',
   });
   const dateText = currentTime.toLocaleDateString(locale);
+  const shortDateText = currentTime.toLocaleDateString(locale, {
+    day: '2-digit',
+    month: 'short',
+  });
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const date = new Date();
     return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -420,7 +459,19 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     menuButtonRef,
   });
   return (
-    <div className="taskbar-container" ref={taskbarRef}>
+    <div
+      className={[
+        'taskbar-container',
+        autoHide &&
+          activePanel === null &&
+          !preview &&
+          !contextGroup &&
+          !shortcutContext
+          ? 'taskbar-container--auto-hide'
+          : '',
+      ].filter(Boolean).join(' ')}
+      ref={taskbarRef}
+    >
       {createPortal(
         <PanelLayer layerRef={floatingLayerRef} onDismiss={closePanels}>
           {preview &&
@@ -472,6 +523,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
               weatherError={t(weatherError)}
               weatherLoading={weatherLoading}
               requestWeather={requestWeather}
+              forecast={forecast}
             />
           )}
           {calendarOpen && (
@@ -491,8 +543,11 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
               setQuickControlsOpen={setQuickControlsOpen}
               theme={theme}
               onThemeChange={onThemeChange}
+              autoHideTaskbar={autoHide}
+              onAutoHideTaskbarChange={changeAutoHide}
             />
           )}
+
           {notificationOpen && (
             <NotificationCenter
               unreadCount={unreadCount}
@@ -618,7 +673,14 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
             aria-expanded={calendarOpen}
             onClick={toggleCalendar}
           >
-            <time dateTime={currentTime.toISOString()}>{timeText}</time>
+            <span className="taskbar__datetime">
+              <time dateTime={currentTime.toISOString()}>
+                {timeText}
+              </time>
+              <span className="taskbar__date">
+                {shortDateText}
+              </span>
+            </span>
           </button>
         </div>
       </nav>

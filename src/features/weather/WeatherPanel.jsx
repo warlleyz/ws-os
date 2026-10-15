@@ -1,21 +1,34 @@
+
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
+
 export default function WeatherPanel({
   setWeatherOpen,
   weather,
+  forecast = [],
   getWeatherDescription,
   weatherError,
   weatherLoading,
   requestWeather,
 }) {
-  useLocale();
+  const locale = useLocale();
+
   return (
-    <section className="taskbar-weather-panel" role="region" aria-label={t('Painel do clima')}>
+    <section
+      className="taskbar-weather-panel"
+      role="region"
+      aria-label={t('Painel do clima')}
+    >
       <header className="taskbar-weather-panel__header">
         <strong>{t('Clima')}</strong>
-        <button type="button" aria-label={t('Fechar clima')} onClick={() => setWeatherOpen(false)}>
+        <button
+          type="button"
+          aria-label={t('Fechar clima')}
+          onClick={() => setWeatherOpen(false)}
+        >
           ×
         </button>
       </header>
+
       <div className="taskbar-weather-panel__content">
         {weather && (
           <>
@@ -32,8 +45,42 @@ export default function WeatherPanel({
             </p>
           </>
         )}
+
+        {forecast.length > 0 && (
+          <div className="taskbar-weather-panel__forecast">
+            <strong>{t('Previsão dos próximos dias')}</strong>
+
+            <div className="taskbar-weather-panel__days">
+              {forecast.map((day) => {
+                const [year, month, date] = day.date.split('-').map(Number);
+                const label = new Intl.DateTimeFormat(locale, {
+                  weekday: 'short',
+                  day: '2-digit',
+                }).format(new Date(year, month - 1, date));
+
+                return (
+                  <div className="taskbar-weather-panel__day" key={day.date}>
+                    <span>{label}</span>
+                    <span title={t(getWeatherDescription(day.weatherCode))}>
+                      {t(getWeatherDescription(day.weatherCode))}
+                    </span>
+                    <strong>
+                      {Math.round(day.max)}° / {Math.round(day.min)}°
+                    </strong>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {weatherError && <p role="alert">{t(weatherError)}</p>}
-        <button type="button" disabled={weatherLoading} onClick={requestWeather}>
+
+        <button
+          type="button"
+          disabled={weatherLoading}
+          onClick={requestWeather}
+        >
           {weatherLoading
             ? t('Consultando...')
             : weather
