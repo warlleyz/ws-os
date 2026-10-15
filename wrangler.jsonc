@@ -9,5 +9,15 @@
         "run_worker_first": [
             "/api/*"
         ]
+    },
+    "d1_databases": [
+        {
+            "binding": "WALLY_LIMITS_DB",
+            "database_name": "ws-os-wally-limits",
+            "database_id": "f5be0f0e-3a31-4ec3-b8d5-510e0c7ab555"
+        }
+    ],
+    "vars": {
+        "WALLY_AI_ENABLED": "false"
     }
 }
