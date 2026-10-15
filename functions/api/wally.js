@@ -236,15 +236,30 @@ export async function onRequestPost(context) {
             },
         );
 
+
         if (!response.ok) {
+            let googleStatus = 'UNKNOWN';
+
+            try {
+                const errorData = await response.json();
+
+                if (typeof errorData?.error?.status === 'string') {
+                    googleStatus = errorData.error.status;
+                }
+            } catch {
+                // Mantém UNKNOWN quando a resposta não é JSON.
+            }
+
             return json(
                 {
                     error: 'GEMINI_UNAVAILABLE',
-                    message: 'Não foi possível consultar o Gemini.',
+                    upstreamStatus: response.status,
+                    upstreamError: googleStatus,
                 },
                 503,
             );
         }
+
 
         const result = await response.json();
 
