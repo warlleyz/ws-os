@@ -4,7 +4,6 @@ import useTaskbarScroll from './useTaskbarScroll';
 import useTaskbarPreviews from './useTaskbarPreviews';
 import useWSMenu from '../../../features/launcher/useWSMenu';
 import { useSystem } from '../../../core/useSystem';
-import useWeather from '../../../features/weather/useWeather';
 import TaskbarContextMenu from './TaskbarContextMenu';
 import NotificationCenter from '../../../features/notifications/NotificationCenter';
 import QuickControls from '../../../features/quick-controls/QuickControls';
@@ -32,7 +31,12 @@ import { useTaskbarAutoHide, setTaskbarAutoHide } from '../../../core/taskbarPre
 
 // Utilitários e preferências persistentes do WS Menu.
 
-function Taskbar({ onShowDesktop, theme, onThemeChange }) {
+function Taskbar({
+  onShowDesktop,
+  theme,
+  onThemeChange,
+  weatherData,
+}) {
   const locale = useLocale();
   const {
     appState,
@@ -42,8 +46,16 @@ function Taskbar({ onShowDesktop, theme, onThemeChange }) {
     handleNotificationAction: onNotificationAction,
     handleNotificationOpen: onNotificationOpen,
   } = useSystem();
-  const { weather, forecast, weatherLoading, weatherError, requestWeather, getWeatherDescription } =
-    useWeather();
+
+  const {
+    weather,
+    forecast,
+    weatherLoading,
+    weatherError,
+    requestWeather,
+    getWeatherDescription,
+  } = weatherData;
+
   const notifications = notificationState?.items ?? [];
   const unreadCount = notifications.filter((item) => !item.read).length;
   const [contextGroup, setContextGroup] = useState(null);

@@ -1,106 +1,388 @@
-.taskbar-wally {
+/* =====================================================
+   WS OS — Wally / Assistente rápido
+   ===================================================== */
+
+.taskbar-wally.ws-wally {
   display: flex;
-  width: min(360px, calc(100vw - 24px));
-  height: min(280px, calc(100dvh - 108px));
-  min-height: 0;
   flex-direction: column;
+  width: min(410px, calc(100vw - 24px));
+  height: min(490px, calc(100dvh - 100px));
+  min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--border-default);
-  border-radius: 16px;
+  border: 1px solid var(--panel-border, var(--border-default));
+  border-radius: 17px;
   background: var(--surface-primary);
   color: var(--text-primary);
-  box-shadow: 0 16px 45px rgb(0 0 0 / 28%);
+  box-shadow: var(--shadow-floating);
 }
 
-.taskbar-wally__header {
+/* Cabeçalho */
+
+.ws-wally__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px;
+  gap: 11px;
+  flex: 0 0 auto;
+  padding: 14px 15px;
   border-bottom: 1px solid var(--border-default);
 }
 
-.taskbar-wally__header > div {
+.ws-wally__avatar,
+.ws-wally__message-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border-default);
+  background: var(--surface-secondary);
+  color: var(--accent-secondary);
+}
+
+.ws-wally__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+}
+
+.ws-wally__identity {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 3px;
+  gap: 5px;
+  min-width: 0;
 }
 
-.taskbar-wally__header strong {
-  font-size: 13px;
+.ws-wally__identity strong {
+  font-size: 14px;
+  font-weight: 750;
 }
 
-.taskbar-wally__header small {
+.ws-wally__identity small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
   color: var(--text-secondary);
-  font-size: 11px;
 }
 
-.taskbar-wally__header button {
+.ws-wally__status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #39b98a;
+}
+
+.ws-wally__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ws-wally__header-actions button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
   border: 0;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 22px;
   cursor: pointer;
 }
 
-.taskbar-wally__content {
+.ws-wally__header-actions button:hover:not(:disabled) {
+  background: var(--surface-secondary);
+  color: var(--accent-secondary);
+}
+
+.ws-wally__header-actions button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Área de conversa */
+
+.ws-wally__messages {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 18px 15px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+
+/* Boas-vindas */
+
+.ws-wally__welcome {
   display: flex;
   flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 20px;
+  gap: 11px;
   text-align: center;
 }
 
-.taskbar-wally__content > svg {
+.ws-wally__welcome-symbol {
+  display: grid;
+  place-items: center;
+  width: 59px;
+  height: 59px;
+  margin-bottom: 3px;
+  border: 1px solid var(--border-default);
+  border-radius: 18px;
+  background: color-mix(in srgb,
+      var(--accent-secondary) 10%,
+      var(--surface-secondary));
   color: var(--accent-secondary);
 }
 
-.taskbar-wally__content strong {
-  font-size: 13px;
+.ws-wally__welcome h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 750;
 }
 
-.taskbar-wally__content p {
+.ws-wally__welcome p {
   max-width: 260px;
   margin: 0;
   color: var(--text-secondary);
   font-size: 11px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-.taskbar-wally button:focus-visible {
+.ws-wally__suggestion-title {
+  align-self: stretch;
+  margin-top: 14px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 650;
+  text-align: left;
+}
+
+.ws-wally__suggestions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  width: 100%;
+}
+
+.ws-wally__suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 37px;
+  padding: 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font-size: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ws-wally__suggestions button svg:first-child {
+  flex-shrink: 0;
+  color: var(--accent-secondary);
+}
+
+.ws-wally__suggestions button svg:last-child {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.ws-wally__suggestions button:hover {
+  border-color: var(--accent-secondary);
+}
+
+/* Mensagens */
+
+.ws-wally__conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ws-wally__message {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.ws-wally__message--user {
+  justify-content: flex-end;
+}
+
+.ws-wally__message-avatar {
+  width: 27px;
+  height: 27px;
+  border-radius: 9px;
+}
+
+.ws-wally__bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  max-width: 84%;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  background: var(--surface-secondary);
+}
+
+.ws-wally__message--user .ws-wally__bubble {
+  background: color-mix(in srgb,
+      var(--accent-secondary) 13%,
+      var(--surface-primary));
+  border-color: color-mix(in srgb,
+      var(--accent-secondary) 30%,
+      var(--border-default));
+  border-bottom-right-radius: 4px;
+}
+
+.ws-wally__message--assistant .ws-wally__bubble {
+  border-bottom-left-radius: 4px;
+}
+
+.ws-wally__bubble p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ws-wally__app-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 6px 9px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-primary);
+  color: var(--accent-secondary);
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.ws-wally__app-action:hover {
+  border-color: var(--accent-secondary);
+}
+
+/* Entrada de texto */
+
+.ws-wally__composer-area {
+  flex: 0 0 auto;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border-default);
+}
+
+.ws-wally__composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 5px 5px 5px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 11px;
+  background: var(--surface-secondary);
+}
+
+.ws-wally__composer:focus-within {
+  border-color: var(--accent-secondary);
+}
+
+.ws-wally__composer input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+}
+
+.ws-wally__composer input::placeholder {
+  color: var(--text-secondary);
+}
+
+.ws-wally__composer>button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent-secondary);
+  color: var(--surface-primary);
+  cursor: pointer;
+}
+
+.ws-wally__composer>button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ws-wally__composer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ws-wally__composer-footer>span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.ws-wally__composer-footer>button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-secondary);
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.ws-wally__composer-footer>button:hover {
+  text-decoration: underline;
+}
+
+.ws-wally button:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
 }
 
-.taskbar-wally__content {
-  overflow: auto;
-  align-items: stretch;
-  justify-content: flex-start;
-}
-.taskbar-wally__content label {
-  display: grid;
-  gap: 8px;
-  font-size: 12px;
-}
-.taskbar-wally__content input {
-  width: 100%;
-  min-height: 44px;
-  padding: 8px;
-  border: 1px solid var(--border-control);
-  border-radius: 8px;
-}
-.taskbar-wally__content button {
-  min-height: 44px;
-  padding: 8px;
-  margin-top: 8px;
-  border: 1px solid var(--border-control);
-  border-radius: 8px;
-  background: var(--surface-secondary);
-  color: var(--text-primary);
-  font: inherit;
-  cursor: pointer;
+@media (max-height: 600px) {
+  .taskbar-wally.ws-wally {
+    height: min(390px, calc(100dvh - 85px));
+  }
+
+  .ws-wally__welcome {
+    justify-content: flex-start;
+  }
 }

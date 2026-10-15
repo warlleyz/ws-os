@@ -387,7 +387,12 @@ export default function SettingsSections({ activeSection }) {
       >
         {widgets.widgets.map((widget) => {
           const definition = getWidgetDefinition(widget.widgetId);
-          const isReady = widget.widgetId === 'clock';
+          const isReady = [
+            'clock',
+            'calendar',
+            'weather',
+            'dev-insights',
+          ].includes(widget.widgetId);
 
           const sizeOptions = (definition?.allowedSizes ?? []).map(
             (size) => [size, size.replace('x', ' × ')],
@@ -435,6 +440,7 @@ export default function SettingsSections({ activeSection }) {
                     }
                   />
 
+
                   <SettingsSelect
                     label={t('Tamanho')}
                     value={`${widget.size.columns}x${widget.size.rows}`}
@@ -449,19 +455,114 @@ export default function SettingsSections({ activeSection }) {
                       });
                     }}
                   />
+
+                  {widget.widgetId === 'clock' && (
+                    <SettingsSelect
+                      label={t('Fuso horário do relógio')}
+                      value={widget.settings?.timeZone ?? ''}
+                      options={[
+                        ['', 'Automático (dispositivo)'],
+                        ['America/Sao_Paulo', 'Brasília'],
+                        ['America/Manaus', 'Manaus'],
+                        ['America/Rio_Branco', 'Rio Branco'],
+                        ['America/Noronha', 'Fernando de Noronha'],
+                        ['America/New_York', 'Nova York'],
+                        ['America/Los_Angeles', 'Los Angeles'],
+                        ['Europe/London', 'Londres'],
+                        ['Europe/Paris', 'Paris'],
+                        ['Asia/Tokyo', 'Tóquio'],
+                        ['UTC', 'UTC'],
+                      ]}
+                      onChange={(timeZone) =>
+                        changeWidget(widget.instanceId, {
+                          settings: {
+                            ...widget.settings,
+                            timeZone,
+                          },
+                        })
+                      }
+                    />
+                  )}
+
+                  {widget.widgetId === 'weather' && (
+                    <>
+                      <SettingsSelect
+                        label={t('Unidade de temperatura')}
+                        value={widget.settings?.temperatureUnit ?? 'celsius'}
+                        options={[
+                          ['celsius', 'Celsius (°C)'],
+                          ['fahrenheit', 'Fahrenheit (°F)'],
+                        ]}
+                        onChange={(temperatureUnit) =>
+                          changeWidget(widget.instanceId, {
+                            settings: {
+                              ...widget.settings,
+                              temperatureUnit,
+                            },
+                          })
+                        }
+                      />
+
+                      <SettingsSelect
+                        label={t('Velocidade do vento')}
+                        value={widget.settings?.windUnit ?? 'kmh'}
+                        options={[
+                          ['kmh', 'Quilômetros por hora (km/h)'],
+                          ['mph', 'Milhas por hora (mph)'],
+                        ]}
+                        onChange={(windUnit) =>
+                          changeWidget(widget.instanceId, {
+                            settings: {
+                              ...widget.settings,
+                              windUnit,
+                            },
+                          })
+                        }
+                      />
+
+                      <SettingsToggle
+                        label={t('Mostrar sensação térmica')}
+                        checked={widget.settings?.showFeelsLike !== false}
+                        onChange={(showFeelsLike) =>
+                          changeWidget(widget.instanceId, {
+                            settings: {
+                              ...widget.settings,
+                              showFeelsLike,
+                            },
+                          })
+                        }
+                      />
+
+                      <SettingsToggle
+                        label={t('Mostrar previsão dos próximos dias')}
+                        checked={widget.settings?.showForecast !== false}
+                        onChange={(showForecast) =>
+                          changeWidget(widget.instanceId, {
+                            settings: {
+                              ...widget.settings,
+                              showForecast,
+                            },
+                          })
+                        }
+                      />
+                    </>
+                  )}
+
                 </fieldset>
               </div>
 
-              {isReady && (
+
+              {widget.widgetId === 'clock' && (
                 <p className="ws-settings__hint">
                   {t(
-                    'O relógio segue o idioma e a hora do dispositivo. Mova-o no Desktop. Tamanhos sem espaço são bloqueados; em telas pequenas ele pode ficar temporariamente indisponível.',
+                    'O relógio utiliza o fuso horário selecionado. Na opção Automático, acompanha o dispositivo. O idioma segue as configurações do WS OS.',
                   )}
                 </p>
               )}
             </div>
           );
         })}
+        
       </SettingsCard>
     );
   if (activeSection === 'mobile')

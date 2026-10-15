@@ -9,6 +9,7 @@ export default function DesktopShortcuts({
   shortcutsRef,
   desktopLayout,
   widgetState,
+  weatherData,
   startWidgetDrag,
   moveWidgetDrag,
   finishWidgetDrag,
@@ -18,6 +19,7 @@ export default function DesktopShortcuts({
   appState,
   openShortcutContext,
   run,
+  onWidgetContextMenu,
 }) {
   useLocale();
   const {
@@ -62,24 +64,35 @@ export default function DesktopShortcuts({
         onPointerCancel={finishPointer}
         onLostPointerCapture={finishPointer}
       >
-        {desktopLayout.widget &&
-          widgetState.widgets
-            .filter((widget) => widget.visible)
-            .map((widget) => {
-              if (!getWidgetDefinition(widget.widgetId) || widget.widgetId !== 'clock') return null;
-              return (
-                <WidgetHost
-                  key={widget.instanceId}
-                  widget={widget}
-                  desktopLayout={desktopLayout}
-                  startWidgetDrag={startWidgetDrag}
-                  moveWidgetDrag={moveWidgetDrag}
-                  finishWidgetDrag={finishWidgetDrag}
-                  changeWidgetSize={changeWidgetSize}
-                  handleWidgetKeyDown={handleWidgetKeyDown}
-                />
-              );
-            })}
+
+        {widgetState.widgets
+          .filter(
+            (widget) =>
+              widget.visible &&
+              [
+                'clock',
+                'calendar',
+                'weather',
+                'dev-insights',
+              ].includes(widget.widgetId) &&
+              getWidgetDefinition(widget.widgetId) &&
+              desktopLayout.widgets?.[widget.instanceId],
+          )
+          .map((widget) => (
+            <WidgetHost
+              key={widget.instanceId}
+              widget={widget}
+              desktopLayout={desktopLayout}
+              startWidgetDrag={startWidgetDrag}
+              moveWidgetDrag={moveWidgetDrag}
+              finishWidgetDrag={finishWidgetDrag}
+              changeWidgetSize={changeWidgetSize}
+              handleWidgetKeyDown={handleWidgetKeyDown}
+              weatherData={weatherData}
+              onWidgetContextMenu={onWidgetContextMenu}
+            />
+          ))}
+
         {shortcuts.map((app, index) => {
           const position = desktopLayout.shortcuts[index];
           if (!position) return null;

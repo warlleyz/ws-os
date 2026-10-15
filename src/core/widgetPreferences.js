@@ -25,12 +25,55 @@ export function registerWidgetValidator(callback) {
     if (validator === callback) validator = null;
   };
 }
+
 export function saveWidgetPreferences(next) {
-  current = typeof next === 'function' ? next(current) : next;
-  const saved = saveWidgetState(current);
+  const previous = current;
+
+  const candidate =
+    typeof next === 'function'
+      ? next(previous)
+      : next;
+
+  if (
+    !candidate ||
+    !Array.isArray(candidate.widgets)
+  ) {
+    return false;
+  }
+
+  const saved = saveWidgetState(candidate);
+
+  // A preferência só é aplicada ao estado compartilhado
+  // depois que a gravação é confirmada.
+  if (!saved) {
+    return false;
+  }
+
+  current = candidate;
+
   listeners.forEach((listener) => listener());
-  return saved;
+
+  return true;
 }
+
+
+/**
+ * Publica no React um estado de widgets que já foi
+ * gravado por uma operação coordenada.
+ *
+ * Não realiza uma segunda gravação.
+ */
+export function publishWidgetPreferences(state) {
+  if (!state || !Array.isArray(state.widgets)) {
+    return false;
+  }
+
+  current = state;
+  listeners.forEach((listener) => listener());
+
+  return true;
+}
+
 
 export function configureWidget(instanceId, patch) {
   if (
@@ -59,7 +102,7 @@ export function configureWidget(instanceId, patch) {
 
   if (
     keys.length === 0 ||
-    keys.some((key) => !['visible', 'size'].includes(key))
+    keys.some((key) => !['visible', 'size', 'settings'].includes(key))
   ) {
     return { ok: false, reason: 'invalid' };
   }
@@ -87,11 +130,132 @@ export function configureWidget(instanceId, patch) {
 
   // Até a W2, somente o relógio está conectado
   // ao motor de layout e ao validador de capacidade.
-  if (widget.widgetId !== 'clock') {
+  if (
+    ![
+      'clock',
+      'calendar',
+      'weather',
+      'dev-insights',
+    ].includes(widget.widgetId)
+  ) {
     return { ok: false, reason: 'not-ready' };
   }
 
+
+
+  if (Object.hasOwn(patch, 'settings')) {
+    const settings = patch.settings;
+
+    if (
+      !settings ||
+      typeof settings !== 'object' ||
+      Array.isArray(settings)
+    ) {
+      return { ok: false, reason: 'invalid' };
+    }
+
+    if (widget.widgetId === 'clock') {
+      if (
+        Object.keys(settings).some(
+          (key) => key !== 'timeZone',
+        )
+      ) {
+        return { ok: false, reason: 'invalid' };
+      }
+
+      const zone = settings.timeZone;
+
+      if (typeof zone !== 'string') {
+        return { ok: false, reason: 'invalid' };
+      }
+
+      if (zone !== '') {
+        try {
+          new Intl.DateTimeFormat('pt-BR', {
+            timeZone: zone,
+          });
+        } catch {
+          return { ok: false, reason: 'invalid' };
+        }
+      }
+    } else if (widget.widgetId === 'weather') {
+      const allowedKeys = [
+        'temperatureUnit',
+        'windUnit',
+        'showFeelsLike',
+        'showForecast',
+      ];
+
+      if (
+        Object.keys(settings).some(
+          (key) => !allowedKeys.includes(key),
+        )
+      ) {
+        return { ok: false, reason: 'invalid' };
+      }
+
+      if (
+        settings.temperatureUnit !== undefined &&
+        !['celsius', 'fahrenheit'].includes(
+          settings.temperatureUnit,
+        )
+      ) {
+        return { ok: false, reason: 'invalid' };
+      }
+
+      if (
+        settings.windUnit !== undefined &&
+        !['kmh', 'mph'].includes(settings.windUnit)
+      ) {
+        return { ok: false, reason: 'invalid' };
+      }
+
+      if (
+        settings.showFeelsLike !== undefined &&
+        typeof settings.showFeelsLike !== 'boolean'
+      ) {
+        return { ok: false, reason: 'invalid' };
+      }
+
+      if (
+        settings.showForecast !== undefined &&
+        typeof settings.showForecast !== 'boolean'
+      ) {
+        return { ok: false, reason: 'invalid' };
+      }
+
+    } else if (widget.widgetId === 'dev-insights') {
+      const allowedKeys = [
+        'showStars',
+        'showFollowers',
+        'showWakatime',
+        'showLanguages',
+      ];
+
+      // Impede configurações desconhecidas.
+      if (
+        Object.keys(settings).some(
+          (key) => !allowedKeys.includes(key),
+        )
+      ) {
+        return { ok: false, reason: 'invalid' };
+      }
+
+      // Todas as opções do Dev Insights são booleanas.
+      if (
+        Object.values(settings).some(
+          (value) => typeof value !== 'boolean',
+        )
+      ) {
+        return { ok: false, reason: 'invalid' };
+      }
+    } else {
+      return { ok: false, reason: 'invalid' };
+    }
+  }
+
   const candidate = { ...widget, ...patch };
+
 
   if (candidate.visible && validator && !validator(candidate)) {
     return { ok: false, reason: 'capacity' };

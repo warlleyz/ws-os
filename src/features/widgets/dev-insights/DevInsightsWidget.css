@@ -1,0 +1,296 @@
+/* =====================================================
+   WS OS — Dev Insights Widget
+   ===================================================== */
+
+.desktop__widget[data-widget-id='dev-insights']>.ws-widget {
+    overflow: hidden;
+    scrollbar-width: none;
+}
+
+.ws-widget--dev-insights {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 11px;
+    box-sizing: border-box;
+    overflow: hidden;
+    color: var(--text-primary);
+}
+
+/* Cabeçalho */
+
+.ws-dev-widget__header,
+.ws-dev-widget__heading {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.ws-dev-widget__header {
+    justify-content: space-between;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.ws-dev-widget__heading {
+    min-width: 0;
+    font-size: 12px;
+}
+
+.ws-dev-widget__heading svg {
+    flex-shrink: 0;
+    color: var(--accent-secondary);
+}
+
+.ws-dev-widget__refresh {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    width: 27px;
+    height: 27px;
+    min-width: 27px;
+    min-height: 27px;
+    padding: 0;
+
+    border: 1px solid var(--border-default);
+    border-radius: 9px;
+    background: var(--surface-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.ws-dev-widget__refresh:hover {
+    color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+}
+
+.ws-dev-widget__refresh .is-loading {
+    animation: ws-dev-spin 1s linear infinite;
+}
+
+@keyframes ws-dev-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Métricas */
+
+.ws-dev-widget__metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    min-width: 0;
+    min-height: 0;
+}
+
+.ws-dev-widget__metric {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    min-width: 0;
+    padding: 9px;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+
+    background: color-mix(in srgb,
+            var(--surface-secondary) 65%,
+            transparent);
+}
+
+.ws-dev-widget__metric-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    color: var(--text-secondary);
+}
+
+.ws-dev-widget__metric-label svg {
+    flex-shrink: 0;
+    color: var(--accent-secondary);
+}
+
+.ws-dev-widget__metric-label span {
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ws-dev-widget__metric>strong {
+    font-size: 22px;
+    font-weight: 750;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Linguagem */
+
+.ws-dev-widget__language {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+    padding: 9px;
+    border: 1px solid var(--border-default);
+    border-radius: 9px;
+    background: var(--surface-secondary);
+    font-size: 11px;
+}
+
+.ws-dev-widget__language svg {
+    color: var(--accent-secondary);
+}
+
+.ws-dev-widget__language>span,
+.ws-dev-widget__language>small {
+    color: var(--text-secondary);
+}
+
+.ws-dev-widget__language>strong {
+    margin-left: auto;
+}
+
+.ws-dev-widget__language>small {
+    font-size: 9px;
+}
+
+/* Estados e rodapé */
+
+.ws-dev-widget__status-area {
+    min-height: 0;
+}
+
+.ws-dev-widget__status-area p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.ws-dev-widget__footer {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: auto;
+    color: var(--text-secondary);
+    font-size: 10px;
+}
+
+/* =====================================================
+   2x2 — Somente GitHub
+   ===================================================== */
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-widget--dev-insights {
+    padding: 9px;
+    gap: 7px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__header,
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__metric--followers,
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__metric--wakatime,
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__language,
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__status-area,
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__footer {
+    display: none;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__metrics {
+    flex: 1;
+    align-content: center;
+    gap: 5px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__metric {
+    padding: 7px 5px;
+    gap: 8px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__metric-label svg {
+    width: 12px;
+    height: 12px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__metric-label span {
+    font-size: 9px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='2x2'] .ws-dev-widget__metric>strong {
+    font-size: 22px;
+}
+
+/* =====================================================
+   3x2 — Quatro métricas
+   ===================================================== */
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='3x2'] .ws-widget--dev-insights {
+    padding: 9px;
+    gap: 5px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='3x2'] .ws-dev-widget__header,
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='3x2'] .ws-dev-widget__language,
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='3x2'] .ws-dev-widget__status-area,
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='3x2'] .ws-dev-widget__footer {
+    display: none;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='3x2'] .ws-dev-widget__metrics {
+    flex: 1;
+    align-content: center;
+    gap: 5px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='3x2'] .ws-dev-widget__metric {
+    padding: 6px 8px;
+    gap: 5px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='3x2'] .ws-dev-widget__metric>strong {
+    font-size: 20px;
+}
+
+/* =====================================================
+   4x3 — Expandido
+   ===================================================== */
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='4x3'] .ws-widget--dev-insights {
+    gap: 7px;
+    padding: 10px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='4x3'] .ws-dev-widget__metric {
+    padding: 7px 9px;
+    gap: 5px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='4x3'] .ws-dev-widget__metric>strong {
+    font-size: 21px;
+}
+
+.desktop__widget[data-widget-id='dev-insights'][data-widget-size='4x3'] .ws-dev-widget__footer {
+    padding-right: 30px;
+}
+
+/* Acessibilidade */
+
+@media (prefers-reduced-motion: reduce) {
+    .ws-dev-widget__refresh .is-loading {
+        animation: none;
+    }
+}
+
+:root[data-reduced-motion='true'] .ws-dev-widget__refresh .is-loading,
+:root[data-low-effects='true'] .ws-dev-widget__refresh .is-loading {
+    animation: none;
+}

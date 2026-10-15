@@ -2,6 +2,7 @@ import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getRegisteredApps } from '../../core/appRegistry';
 import { useSystem } from '../../core/useSystem';
+import { writePreferencesBatch } from '../../services/storage/preferencesStorage';
 import {
   DEFAULT_SHORTCUT_ORDER,
   loadDesktopPreferences,
@@ -30,6 +31,7 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
   const suppressClickRef = useRef(false);
   const clickTimerRef = useRef(null);
   const warningRef = useRef(false);
+  const skipNextSaveRef = useRef(false);
   const shortcuts = useMemo(() => {
     const apps = getRegisteredApps().filter(
       (app) => app.desktopShortcut && DEFAULT_SHORTCUT_ORDER.includes(app.id),
@@ -41,6 +43,10 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     );
   }, [preferences.order, locale]);
   useEffect(() => {
+    if (skipNextSaveRef.current) {
+      skipNextSaveRef.current = false;
+      return;
+    }
     const failed =
       preferences === initial && initial.error ? true : !saveDesktopPreferences(preferences);
     if (!failed) {
@@ -108,10 +114,13 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     return next;
   }
 
-  function commitLayoutPositions(layout) {
-    // Não confirma uma organização durante o
-    // arraste de atalhos ou seleção por área.
-    if (dragRef.current) {
+
+  function commitWidgetLayout(nextWidgetState, layout) {
+    if (
+      dragRef.current ||
+      !nextWidgetState ||
+      !Array.isArray(nextWidgetState.widgets)
+    ) {
       return false;
     }
 
@@ -124,8 +133,44 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       return false;
     }
 
-    // A atualização só acontece após validar
-    // todas as posições dos atalhos.
+    let serializedWidgets;
+    let serializedPositions;
+
+    try {
+      serializedWidgets = JSON.stringify(nextWidgetState);
+      serializedPositions = JSON.stringify(positions);
+    } catch {
+      return false;
+    }
+
+    const result = writePreferencesBatch([
+      {
+        key: 'ws-os:desktop-shortcut-positions',
+        value: serializedPositions,
+      },
+      {
+        key: 'ws-os:desktop-widgets',
+        value: serializedWidgets,
+      },
+    ]);
+
+    if (!result.ok) {
+      notify({
+        title: 'Falha ao salvar organização',
+        message: result.restored
+          ? 'Não foi possível salvar a organização. A alteração foi cancelada.'
+          : 'A gravação falhou e a recuperação não foi concluída. Verifique a organização após recarregar.',
+        source: 'Desktop',
+        type: 'warning',
+      });
+
+      return false;
+    }
+
+    // As duas preferências já foram gravadas.
+    // Evita que o efeito execute uma segunda gravação.
+    skipNextSaveRef.current = true;
+
     setPreferences((current) => ({
       ...current,
       positions,
@@ -134,6 +179,55 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
 
     return true;
   }
+
+
+  function commitLayoutPositions(layout) {
+    // Não salvar enquanto houver uma operação
+    // de arraste ou seleção em andamento.
+    if (dragRef.current) {
+      return false;
+    }
+
+    const positions = getPersistableShortcutPositions(
+      shortcuts,
+      layout,
+    );
+
+    // Rejeitar organizações incompletas,
+    // inválidas ou com células sobrepostas.
+    if (!positions) {
+      return false;
+    }
+
+    const nextPreferences = {
+      ...preferences,
+      positions,
+      error: null,
+    };
+
+    // Confirmar a gravação antes de alterar
+    // o estado utilizado pelo React.
+    const saved = saveDesktopPreferences(nextPreferences);
+
+    if (!saved) {
+      notify({
+        title: 'Falha ao salvar organização',
+        message:
+          'Não foi possível salvar as posições dos atalhos. A organização anterior foi mantida na interface.',
+        source: 'Desktop',
+        type: 'warning',
+      });
+
+      return false;
+    }
+
+    // Somente uma gravação bem-sucedida
+    // poderá atualizar a organização.
+    setPreferences(nextPreferences);
+
+    return true;
+  }
+
 
   function sort(order) {
     clearDrag();
@@ -351,6 +445,7 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
   return {
     shortcuts,
     commitLayoutPositions,
+    commitWidgetLayout,
     shortcutOrder: preferences.order,
     shortcutPositions: preferences.positions,
     selectedIds,

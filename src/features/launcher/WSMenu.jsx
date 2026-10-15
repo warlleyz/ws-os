@@ -1,8 +1,26 @@
+
+import {
+  Clock3,
+  Grid2X2,
+  Search,
+  Star,
+  UserRound,
+  X,
+} from 'lucide-react';
+
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
-import { SystemIcon } from '../../shared/components/SystemIcon';
 import { openApp } from '../../core/appManager';
 import { AppIcon } from '../../shared/components/AppIcon';
 import { getAppDefinition } from '../../core/appRegistry';
+import Tooltip from '../../shared/components/Tooltip';
+
+import './WSMenu.css';
+
+const VIEWS = [
+  { id: 'home', label: 'Favoritos', icon: Star },
+  { id: 'recent', label: 'Recentes', icon: Clock3 },
+  { id: 'all', label: 'Todos', icon: Grid2X2 },
+];
 
 export default function WSMenu({
   shortcutContext,
@@ -23,167 +41,283 @@ export default function WSMenu({
   runShortcutContextAction,
 }) {
   useLocale();
+
+  const searching = Boolean(searchTerm);
+
+  const currentTitle = searching
+    ? t('Resultados da pesquisa')
+    : menuView === 'recent'
+      ? t('Aplicativos recentes')
+      : menuView === 'all'
+        ? t('Todos os aplicativos')
+        : t('Aplicativos favoritos');
+
+  function handleOpenApp(appId) {
+    onAppAction(openApp, appId);
+    closePanels();
+  }
+
+  function handleContextKeyboard(event, app) {
+    if (
+      !(
+        (event.shiftKey && event.key === 'F10') ||
+        event.key === 'ContextMenu'
+      )
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    openShortcutContext(
+      {
+        preventDefault: () => { },
+        currentTarget: event.currentTarget,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2,
+      },
+      app,
+    );
+  }
+
   return (
     <section
-      className="taskbar-launcher taskbar-launcher--redesign"
+      className="taskbar-launcher taskbar-launcher--redesign ws-menu"
       aria-label="WS Menu"
       onPointerDown={(event) => {
-        if (shortcutContext && !event.target.closest('.ws-menu__context')) {
+        if (
+          shortcutContext &&
+          !event.target.closest('.ws-menu__context')
+        ) {
           setShortcutContext(null);
         }
       }}
     >
-      <header className="ws-menu__identity">
-        <div className="ws-menu__avatar" aria-hidden="true">
-          <SystemIcon name="wally" size={21} />
-        </div>
-        <div className="ws-menu__identity-text">
-          <strong>{t('Visitante')}</strong>
-          <small>{t('Bem-vindo à WS OS')}</small>
-        </div>
-        <span className="ws-menu__brand">WS OS</span>
-      </header>
-      <div className="ws-menu__search">
-        <svg
-          width="17"
-          height="17"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          aria-hidden="true"
-        >
-          <circle cx="10.8" cy="10.8" r="6.8" />
-          <path d="m16 16 5 5" />
-        </svg>
-        <input
-          ref={menuSearchRef}
-          type="search"
-          aria-label={t('Pesquisar na WS OS')}
-          placeholder={t('Pesquisar na WS OS...')}
-          value={menuSearch}
-          onChange={(event) => setMenuSearch(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && visibleMenuApps.length > 0) {
-              event.preventDefault();
-              onAppAction(openApp, visibleMenuApps[0].id);
-              closePanels();
-            }
-          }}
-        />
-        {menuSearch && (
-          <button
-            type="button"
-            aria-label={t('Limpar pesquisa')}
-            title={t('Limpar pesquisa')}
-            onClick={() => {
-              setMenuSearch('');
-              menuSearchRef.current?.focus();
-            }}
-          >
-            ×
-          </button>
-        )}
-      </div>
-      <div className="ws-menu__main">
-        <div className="ws-menu__section-heading">
-          <strong>
-            {searchTerm
-              ? t('Resultados da pesquisa')
-              : menuView === 'all'
-                ? t('Todos os aplicativos')
-                : menuView === 'recent'
-                  ? t('Aplicativos recentes')
-                  : t('Aplicativos Favoritos')}
-          </strong>
-          {!searchTerm && (
-            <div className="ws-menu__view-actions">
-              <button
-                type="button"
-                className="ws-menu__view-toggle"
-                onClick={() =>
-                  setMenuView((current) =>
-                    current === 'recent' ? 'home' : 'recent'
-                  )
-                }
-              >
-                {menuView === 'recent'
-                  ? t('Favoritos')
-                  : t('Aplicativos recentes')}
-              </button>
+      {/* Pesquisa superior */}
+      <header className="ws-menu__top">
+        <div className="ws-menu__search">
+          <Search size={17} aria-hidden="true" />
 
+          <input
+            ref={menuSearchRef}
+            type="search"
+            aria-label={t('Pesquisar na WS OS')}
+            placeholder={t('Pesquisar na WS OS...')}
+            value={menuSearch}
+            onChange={(event) => setMenuSearch(event.target.value)}
+            onKeyDown={(event) => {
+              if (
+                event.key === 'Enter' &&
+                visibleMenuApps.length > 0
+              ) {
+                event.preventDefault();
+                handleOpenApp(visibleMenuApps[0].id);
+              }
+            }}
+          />
+
+          {menuSearch && (
+            <Tooltip content={t('Limpar pesquisa')} delay={350}>
               <button
                 type="button"
-                className="ws-menu__view-toggle"
-                onClick={() =>
-                  setMenuView((current) =>
-                    current === 'all' ? 'home' : 'all'
-                  )
-                }
+                className="ws-menu__clear"
+                aria-label={t('Limpar pesquisa')}
+                onClick={() => {
+                  setMenuSearch('');
+                  menuSearchRef.current?.focus();
+                }}
               >
-                {menuView === 'all'
-                  ? t('Voltar')
-                  : t('Todos os aplicativos')}
+                <X size={15} />
               </button>
-            </div>
+            </Tooltip>
           )}
         </div>
-        <div className="ws-menu__apps" aria-label={t('Aplicativos')}>
-          {visibleMenuApps.length === 0 ? (
-            <p className="ws-menu__empty">
-              {searchTerm
-                ? t('Nenhum aplicativo encontrado.')
-                : menuView === 'home'
-                  ? t('Nenhum favorito. Clique em Todos os aplicativos para adicionar.')
-                  : menuView === 'recent'
-                    ? t('Nenhum aplicativo aberto nesta sessão.')
-                    : t('Nenhum aplicativo disponível.')}
-            </p>
-          ) : (
-            visibleMenuApps.map((app) => {
+
+        <span className="ws-menu__top-brand">WS OS</span>
+      </header>
+
+      {/* Navegação e aplicativos */}
+      <div className="ws-menu__workspace">
+        <nav
+          className="ws-menu__sidebar"
+          aria-label={t('Navegação do WS Menu')}
+        >
+          <span className="ws-menu__sidebar-label">
+            {t('Explorar')}
+          </span>
+
+          <div className="ws-menu__sidebar-items">
+            {VIEWS.map(({ id, label, icon: Icon }) => {
+              const selected = menuView === id && !searching;
+
               return (
-                <div className="ws-menu__app-item" key={app.id}>
+                <Tooltip
+                  key={id}
+                  content={t(label)}
+                  delay={450}
+                >
                   <button
                     type="button"
-                    className="ws-menu__app"
-                    onContextMenu={(event) => openShortcutContext(event, app)}
-                    onKeyDown={(event) => {
-                      if ((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu') {
-                        event.preventDefault();
-                        const rect = event.currentTarget.getBoundingClientRect();
-                        openShortcutContext(
-                          {
-                            preventDefault: () => {},
-                            currentTarget: event.currentTarget,
-                            clientX: rect.left + rect.width / 2,
-                            clientY: rect.top + rect.height / 2,
-                          },
-                          app,
-                        );
-                      }
-                    }}
-                    onClick={() => {
-                      onAppAction(openApp, app.id);
-                      closePanels();
-                    }}
+                    className={`ws-menu__nav-button${selected ? ' is-active' : ''
+                      }`}
+                    aria-current={selected ? 'page' : undefined}
+                    disabled={searching}
+                    onClick={() => setMenuView(id)}
                   >
-                    <span className="ws-menu__app-icon">
-                      <AppIcon app={app} size={19} />
-                    </span>
-                    <span className="ws-menu__app-name">{t(app.name)}</span>
+                    <Icon
+                      size={16}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                    />
+                    <span>{t(label)}</span>
                   </button>
-                </div>
+                </Tooltip>
               );
-            })
-          )}
+            })}
+          </div>
+
+          <div className="ws-menu__sidebar-bottom">
+            <span className="ws-menu__sidebar-caption">
+              {t('Seu espaço')}
+            </span>
+            <span className="ws-menu__favorite-count">
+              <Star size={13} aria-hidden="true" />
+              {favoriteIds.length}/{MAX_FAVORITES}
+            </span>
+          </div>
+        </nav>
+
+        <div className="ws-menu__content">
+          <div className="ws-menu__content-heading">
+            <div className="ws-menu__content-title">
+              <span className="ws-menu__eyebrow">
+                {searching
+                  ? t('Pesquisa')
+                  : t('Navegação')}
+              </span>
+
+              <h2>{currentTitle}</h2>
+            </div>
+
+            <span
+              className="ws-menu__result-count"
+              aria-label={`${visibleMenuApps.length} ${t('Aplicativos')}`}
+            >
+              {visibleMenuApps.length}
+            </span>
+          </div>
+
+          <div
+            className="ws-menu__apps"
+            aria-label={t('Aplicativos')}
+          >
+            {visibleMenuApps.length === 0 ? (
+              <div className="ws-menu__empty">
+                <Grid2X2 size={25} aria-hidden="true" />
+
+                <p>
+                  {searching
+                    ? t('Nenhum aplicativo encontrado.')
+                    : menuView === 'home'
+                      ? t(
+                        'Nenhum favorito. Clique em Todos os aplicativos para adicionar.',
+                      )
+                      : menuView === 'recent'
+                        ? t(
+                          'Nenhum aplicativo aberto nesta sessão.',
+                        )
+                        : t(
+                          'Nenhum aplicativo disponível.',
+                        )}
+                </p>
+
+                {!searching && menuView !== 'all' && (
+                  <button
+                    type="button"
+                    className="ws-menu__empty-action"
+                    onClick={() => setMenuView('all')}
+                  >
+                    {t('Todos os aplicativos')}
+                  </button>
+                )}
+              </div>
+            ) : (
+              visibleMenuApps.map((app) => (
+                <div
+                  key={app.id}
+                  className="ws-menu__app-item"
+                >
+                  <Tooltip
+                    content={t(app.name)}
+                    delay={500}
+                  >
+                    <button
+                      type="button"
+                      className="ws-menu__app"
+                      onContextMenu={(event) =>
+                        openShortcutContext(event, app)
+                      }
+                      onKeyDown={(event) =>
+                        handleContextKeyboard(event, app)
+                      }
+                      onClick={() => handleOpenApp(app.id)}
+                    >
+                      <span className="ws-menu__app-icon">
+                        <AppIcon app={app} size={20} />
+                      </span>
+
+                      <span className="ws-menu__app-info">
+                        <strong>{t(app.name)}</strong>
+                        <small>
+                          {app.category === 'system'
+                            ? t('Aplicativo de Sistema')
+                            : t('Aplicativo Desktop')}
+                        </small>
+                      </span>
+                    </button>
+                  </Tooltip>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Rodapé */}
+      <footer className="ws-menu__footer">
+        <div className="ws-menu__user">
+          <span
+            className="ws-menu__user-avatar"
+            aria-hidden="true"
+          >
+            <UserRound size={17} />
+          </span>
+
+          <span className="ws-menu__user-info">
+            <strong>{t('Visitante')}</strong>
+            <small>{t('Bem-vindo à WS OS')}</small>
+          </span>
+        </div>
+
+        <span className="ws-menu__footer-brand">WS OS</span>
+      </footer>
+
+      {/* Menu contextual existente */}
       {shortcutContext &&
         (() => {
           const app = getAppDefinition(shortcutContext.appId);
-          const isFavorite = favoriteIds.includes(shortcutContext.appId);
+
           if (!app) return null;
-          const canFavorite = isFavorite || favoriteIds.length < MAX_FAVORITES;
+
+          const isFavorite = favoriteIds.includes(
+            shortcutContext.appId,
+          );
+
+          const canFavorite =
+            isFavorite || favoriteIds.length < MAX_FAVORITES;
+
           return (
             <div
               ref={shortcutContextRef}
@@ -197,12 +331,20 @@ export default function WSMenu({
             >
               <div className="ws-menu__context-header">
                 <span className="ws-menu__context-icon">
-                  <AppIcon app={app} size={18} />
+                  <AppIcon app={app} size={19} />
                 </span>
-                <strong title={t(app.name)}>{t(app.name)}</strong>
+
+                <strong>{t(app.name)}</strong>
               </div>
+
               <div className="ws-menu__context-divider" />
-              <button type="button" onClick={() => runShortcutContextAction('open')}>
+
+              <button
+                type="button"
+                onClick={() =>
+                  runShortcutContextAction('open')
+                }
+              >
                 <span className="ws-menu__context-action-icon">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8 5l11 7-11 7V5Z" />
@@ -210,27 +352,34 @@ export default function WSMenu({
                 </span>
                 {t('Abrir')}
               </button>
+
               <button
                 type="button"
                 disabled={!canFavorite}
-                onClick={() => runShortcutContextAction('favorite')}
+                onClick={() =>
+                  runShortcutContextAction('favorite')
+                }
               >
                 <span className="ws-menu__context-action-icon">
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
+                  <Star
+                    size={16}
                     fill={isFavorite ? 'currentColor' : 'none'}
-                  >
-                    <path d="m12 2 3.1 6.3 7 1-5.1 5 .9 7-5.9-3.2-5.9 3.2.9-7-5.1-5 7-1L12 2Z" />
-                  </svg>
+                  />
                 </span>
-                {isFavorite ? t('Desafixar do WS Menu') : t('Fixar no WS Menu')}
+
+                {isFavorite
+                  ? t('Desafixar do WS Menu')
+                  : t('Fixar no WS Menu')}
               </button>
+
               <div className="ws-menu__context-divider" />
+
               <button
                 type="button"
                 aria-expanded={shortcutContext.showInfo}
-                onClick={() => runShortcutContextAction('info')}
+                onClick={() =>
+                  runShortcutContextAction('info')
+                }
               >
                 <span className="ws-menu__context-action-icon">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -240,6 +389,7 @@ export default function WSMenu({
                 </span>
                 {t('Informações')}
               </button>
+
               {shortcutContext.showInfo && (
                 <div className="ws-menu__context-details">
                   <span>
@@ -248,8 +398,12 @@ export default function WSMenu({
                       ? t('Aplicativo de Sistema')
                       : t('Aplicativo Desktop')}
                   </span>
+
                   <span>
-                    {t('Estado:')} {app.implemented ? t('Implementado') : t('Em desenvolvimento')}
+                    {t('Estado:')}{' '}
+                    {app.implemented
+                      ? t('Implementado')
+                      : t('Em desenvolvimento')}
                   </span>
                 </div>
               )}

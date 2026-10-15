@@ -1,0 +1,183 @@
+/* =====================================================
+   WS OS — Clock Widget
+   Layouts 2x2, 3x2 e 3x3
+   ===================================================== */
+
+.desktop__widget[data-widget-id='clock']>.ws-widget {
+    overflow: hidden;
+    scrollbar-width: none;
+    padding: 8px 12px;
+}
+
+.desktop__widget[data-widget-id='clock'] .ws-widget::-webkit-scrollbar {
+    display: none;
+}
+
+.ws-widget--clock {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.ws-clock__content {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    gap: 7px;
+}
+
+.ws-clock__caption {
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.ws-widget--clock .ws-clock__time {
+    display: block;
+    max-width: 100%;
+    color: var(--text-primary);
+
+    font-size: 42px;
+    font-weight: 750;
+    line-height: 1.05;
+    letter-spacing: -0.055em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.ws-clock__date {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.ws-clock__weekday {
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.ws-clock__full-date,
+.ws-clock__short-date {
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.35;
+    text-transform: capitalize;
+}
+
+.ws-clock__timezone {
+    max-width: 100%;
+    color: var(--text-secondary);
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ws-clock__decoration {
+    position: absolute;
+    right: -35px;
+    top: -35px;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+            color-mix(in srgb,
+                var(--accent-secondary) 14%,
+                transparent),
+            transparent 70%);
+    pointer-events: none;
+}
+
+/* =====================================================
+   2x1 — Compacto: apenas hora
+   ===================================================== */
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x1'] .ws-clock__content {
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x1'] .ws-clock__time {
+    font-size: clamp(26px, 3vw, 38px);
+}
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x1'] .ws-clock__caption,
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x1'] .ws-clock__date,
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x1'] .ws-clock__timezone {
+    display: none;
+}
+
+/* =====================================================
+   2x2 — Normal: hora + data curta
+   ===================================================== */
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x2'] .ws-clock__content {
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+}
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x2'] .ws-clock__time {
+    font-size: clamp(28px, 3vw, 40px);
+}
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x2'] .ws-clock__caption,
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x2'] .ws-clock__weekday,
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x2'] .ws-clock__full-date,
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x2'] .ws-clock__timezone {
+    display: none;
+}
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='2x2'] .ws-clock__short-date {
+    display: block;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* =====================================================
+   3x2 — Expandido: hora + data completa
+   ===================================================== */
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='3x2'] .ws-clock__content {
+    align-items: flex-start;
+    justify-content: center;
+    gap: 9px;
+}
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='3x2'] .ws-clock__time {
+    font-size: clamp(36px, 3.6vw, 50px);
+}
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='3x2'] .ws-clock__caption,
+.desktop__widget[data-widget-id='clock'][data-widget-size='3x2'] .ws-clock__short-date,
+.desktop__widget[data-widget-id='clock'][data-widget-size='3x2'] .ws-clock__timezone {
+    display: none;
+}
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='3x2'] .ws-clock__weekday {
+    display: block;
+    font-size: 13px;
+}
+
+.desktop__widget[data-widget-id='clock'][data-widget-size='3x2'] .ws-clock__full-date {
+    display: block;
+    font-size: 12px;
+}

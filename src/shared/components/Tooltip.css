@@ -1,6 +1,6 @@
 .ws-tooltip {
     position: fixed;
-    z-index: 9999;
+    z-index: 2147483647;
 
     display: block;
     width: max-content;

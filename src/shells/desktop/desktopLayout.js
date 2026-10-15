@@ -751,6 +751,115 @@ export function moveDesktopShortcuts(
   );
 }
 
+
+/**
+ * Converte as posições dos atalhos calculadas pelo layout
+ * para o formato utilizado por desktopPreferences.
+ *
+ * Valida as células ocupadas pelos widgets e atalhos,
+ * impedindo sobreposições e posições inválidas.
+ *
+ * Não modifica o layout nem salva preferências.
+ */
+export function getPersistableShortcutPositions(
+  shortcuts,
+  layout,
+) {
+  if (
+    !Array.isArray(shortcuts) ||
+    !Array.isArray(layout?.shortcuts) ||
+    shortcuts.length !== layout.shortcuts.length
+  ) {
+    return null;
+  }
+
+  const occupied = new Set();
+
+  const placedWidgets = Object.values(
+    layout.widgets ?? {},
+  );
+
+  // Compatibilidade com o layout antigo do Relógio.
+  if (
+    placedWidgets.length === 0 &&
+    layout.widget &&
+    layout.widgetSize
+  ) {
+    placedWidgets.push({
+      position: {
+        column: getCellColumn(layout.widget.left, layout),
+        row: getCellRow(layout.widget.top),
+      },
+      size: layout.widgetSize,
+    });
+  }
+
+  // Validar todas as células ocupadas pelos widgets.
+  for (const widget of placedWidgets) {
+    const cells = getWidgetCells(
+      widget.position,
+      widget.size,
+    );
+
+    if (
+      !widget.size ||
+      cells.length !==
+      widget.size.columns * widget.size.rows
+    ) {
+      return null;
+    }
+
+    for (const { column, row } of cells) {
+      if (!isDesktopCellAvailable(column, row, layout)) {
+        return null;
+      }
+
+      const cellKey = `${column}:${row}`;
+
+      if (occupied.has(cellKey)) {
+        return null;
+      }
+
+      occupied.add(cellKey);
+    }
+  }
+
+  const positions = {};
+  const ids = new Set();
+
+  // Validar os atalhos contra a ocupação completa da grade.
+  for (let index = 0; index < shortcuts.length; index += 1) {
+    const app = shortcuts[index];
+    const point = layout.shortcuts[index];
+
+    if (!app?.id || !point || ids.has(app.id)) {
+      return null;
+    }
+
+    ids.add(app.id);
+
+    const column = getCellColumn(point.left, layout);
+    const row = getCellRow(point.top);
+
+    if (!isDesktopCellAvailable(column, row, layout)) {
+      return null;
+    }
+
+    const cellKey = `${column}:${row}`;
+
+    if (occupied.has(cellKey)) {
+      return null;
+    }
+
+    occupied.add(cellKey);
+
+    positions[app.id] = { column, row };
+  }
+
+  return positions;
+}
+
+
 export function getShortcutsInArea(shortcuts, positions, area) {
   return shortcuts
     .filter((_app, index) => {

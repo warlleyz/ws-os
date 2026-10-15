@@ -8,8 +8,10 @@ import DesktopContextMenu from './DesktopContextMenu';
 import WindowLayer from '../../features/windows/WindowLayer';
 import DesktopShortcuts from './DesktopShortcuts';
 import NotificationToasts from '../../features/notifications/NotificationToasts';
+import useWeather from '../../features/weather/useWeather';
 import { useEffect, useRef, useState } from 'react';
 import Taskbar from './taskbar/Taskbar';
+import WidgetContextMenu from '../../features/widgets/WidgetContextMenu';
 import {
   getPreferredInstance,
   openApp,
@@ -25,6 +27,7 @@ import {
 
 export default function Desktop({ theme, onThemeChange }) {
   useLocale();
+  const weatherData = useWeather();
   const { appState, minimizeAllApps, visibleToasts, run, dismissToast, handleNotificationOpen } =
     useSystem();
   const {
@@ -34,7 +37,10 @@ export default function Desktop({ theme, onThemeChange }) {
     refreshLayout,
   } = useDesktopLayout();
   const organization = useDesktopOrganization({ shortcutsRef, gridSize });
+  const { commitWidgetLayout } = organization;
   const { shortcuts, shortcutPositions, shortcutOrder, setSelectedIds } = organization;
+  const [widgetContext, setWidgetContext] = useState(null);
+  const widgetContextRef = useRef(null);
   function setSelectedShortcut(id) {
     if (id) organization.select(id);
     else setSelectedIds([]);
@@ -48,6 +54,8 @@ export default function Desktop({ theme, onThemeChange }) {
   const {
     widgetState,
     toggleClockWidget,
+    toggleWidget,
+    resetWidget,
     clockWidget,
     desktopLayout,
     changeWidgetSize,
@@ -60,6 +68,7 @@ export default function Desktop({ theme, onThemeChange }) {
     shortcuts,
     gridSize,
     shortcutPositions,
+    commitWidgetLayout,
   });
   function showDesktop() {
     minimizeAllApps();
@@ -137,6 +146,61 @@ export default function Desktop({ theme, onThemeChange }) {
     setShortcutContext(null);
   }
 
+
+  function openWidgetContextMenu(event, widget) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const workspace = event.currentTarget.closest(
+      '.desktop__workspace',
+    );
+
+    if (!workspace) return;
+
+    const rect = workspace.getBoundingClientRect();
+
+    setDesktopContext(null);
+    setShortcutContext(null);
+
+    setWidgetContext({
+      instanceId: widget.instanceId,
+      x: event.clientX - rect.left + workspace.scrollLeft,
+      y: event.clientY - rect.top + workspace.scrollTop,
+    });
+  }
+
+  function runWidgetContextAction(action, instanceId, value) {
+    switch (action) {
+      case 'personalize':
+        run(openApp, 'settings', {
+          origin: 'widget-context-menu',
+          params: {
+            section: 'widgets',
+            widgetId: instanceId,
+          },
+        });
+        break;
+
+      case 'size':
+        changeWidgetSize(instanceId, value);
+        break;
+
+      case 'hide':
+        toggleWidget(instanceId);
+        break;
+
+      case 'reset':
+        resetWidget(instanceId);
+        break;
+
+      default:
+        return;
+    }
+
+    setWidgetContext(null);
+  }
+
+
   function openDesktopContext(event) {
     if (
       event.target.closest(
@@ -202,11 +266,15 @@ export default function Desktop({ theme, onThemeChange }) {
       if (!shortcutContextRef.current?.contains(event.target)) {
         setShortcutContext(null);
       }
+      if (!widgetContextRef.current?.contains(event.target)) {
+        setWidgetContext(null);
+      }
     }
     function handleEscape(event) {
       if (event.key === 'Escape') {
         setDesktopContext(null);
         setShortcutContext(null);
+        setWidgetContext(null);
       }
     }
     document.addEventListener('pointerdown', handlePointerDown);
@@ -284,6 +352,27 @@ export default function Desktop({ theme, onThemeChange }) {
               />
             );
           })()}
+
+        {widgetContext &&
+          (() => {
+            const widget = widgetState.widgets.find(
+              (item) =>
+                item.instanceId === widgetContext.instanceId,
+            );
+
+            if (!widget) return null;
+
+            return (
+              <WidgetContextMenu
+                key={widget.instanceId}
+                menuRef={widgetContextRef}
+                context={widgetContext}
+                widget={widget}
+                onAction={runWidgetContextAction}
+              />
+            );
+          })()}
+
         <DesktopShortcuts
           shortcutsRef={shortcutsRef}
           desktopLayout={desktopLayout}
@@ -297,11 +386,18 @@ export default function Desktop({ theme, onThemeChange }) {
           organization={organization}
           handleWidgetKeyDown={handleWidgetKeyDown}
           openShortcutContext={openShortcutContext}
+          weatherData={weatherData}
           run={run}
+          onWidgetContextMenu={openWidgetContextMenu}
         />
       </section>
       <WindowLayer appState={appState} run={run} />
-      <Taskbar onShowDesktop={showDesktop} theme={theme} onThemeChange={onThemeChange} />
+      <Taskbar
+        onShowDesktop={showDesktop}
+        theme={theme}
+        onThemeChange={onThemeChange}
+        weatherData={weatherData}
+      />
       {visibleToasts.length > 0 && (
         <NotificationToasts
           visibleToasts={visibleToasts}

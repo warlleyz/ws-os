@@ -1,124 +1,432 @@
-.taskbar-quick-controls {
+/* ==========================================================
+   WS OS — Central de Controle Rápido
+   ========================================================== */
+
+.taskbar-quick-controls.ws-controls {
   display: flex;
-  width: min(360px, calc(100vw - 24px));
-  max-height: min(380px, calc(100dvh - 108px));
-  min-height: 0;
   flex-direction: column;
+
+  width: min(405px, calc(100vw - 24px));
+  max-height: min(515px, calc(100dvh - 100px));
+  min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--panel-border);
-  border-radius: 16px;
-  background: var(--panel-background);
+
+  border: 1px solid var(--panel-border, var(--border-default));
+  border-radius: 17px;
+  background: var(--surface-primary);
   color: var(--text-primary);
-  box-shadow: var(--panel-shadow);
+  box-shadow: var(--shadow-floating);
 }
 
-.taskbar-quick-controls__header {
+/* Cabeçalho */
+
+.ws-controls__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px;
-  border-bottom: 1px solid rgb(148 185 215 / 12%);
+  gap: 11px;
+  flex: 0 0 auto;
+
+  padding: 17px;
+  border-bottom: 1px solid var(--border-default);
 }
 
-.taskbar-quick-controls__header > div {
+.ws-controls__heading-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-default);
+  border-radius: 11px;
+
+  background: var(--surface-secondary);
+  color: var(--accent-secondary);
+}
+
+.ws-controls__heading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ws-controls__heading strong {
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.ws-controls__heading small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ws-controls__icon-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.ws-controls__icon-button:hover {
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+}
+
+/* Conteúdo */
+
+.ws-controls__content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+
+  padding: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+
+.ws-controls__section-header {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.taskbar-quick-controls__header strong {
-  font-size: 14px;
+.ws-controls__section-header strong {
+  font-size: 12px;
+  font-weight: 750;
 }
 
-.taskbar-quick-controls__header small {
+.ws-controls__section-header span {
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 10px;
 }
 
-.taskbar-quick-controls__header button {
+.ws-controls__section-header--compact {
+  margin-top: 5px;
+}
+
+/* Grade de controles */
+
+.ws-controls__tiles {
   display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 22px;
-  cursor: pointer;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
 }
 
-.taskbar-quick-controls__header button:hover {
-  background: rgb(255 255 255 / 8%);
-  color: var(--text-primary);
-}
-
-.taskbar-quick-controls__content {
+.ws-control-tile {
   display: flex;
-  min-height: 0;
   flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
+  align-items: flex-start;
+  gap: 11px;
+
+  min-width: 0;
+  min-height: 105px;
   padding: 12px;
-}
 
-.taskbar-quick-controls__section {
-  padding: 13px;
-  border: 1px solid rgb(148 185 215 / 12%);
-  border-radius: 10px;
-  background: rgb(255 255 255 / 4%);
-}
-
-.taskbar-quick-controls__section strong {
-  font-size: 12px;
-}
-
-.taskbar-quick-controls__section p {
-  margin: 6px 0 0;
-  color: var(--text-secondary);
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.taskbar-quick-controls button:focus-visible {
-  outline: 2px solid var(--accent-secondary);
-  outline-offset: 2px;
-}
-
-.taskbar-quick-controls__theme {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.taskbar-quick-controls__theme span {
-  color: var(--text-secondary);
-  font-size: 12px;
-}
-
-.taskbar-quick-controls__theme select {
-  width: 100%;
-  padding: 9px 10px;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: 12px;
+
   background: var(--surface-secondary);
   color: var(--text-primary);
-  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    transform 150ms ease;
+}
+
+.ws-control-tile:hover:not(:disabled) {
+  border-color: var(--accent-secondary);
+  transform: translateY(-1px);
+}
+
+.ws-control-tile--active {
+  border-color: color-mix(in srgb,
+      var(--accent-secondary) 65%,
+      var(--border-default));
+
+  background: color-mix(in srgb,
+      var(--accent-secondary) 12%,
+      var(--surface-primary));
+}
+
+.ws-control-tile__icon {
+  display: grid;
+  place-items: center;
+
+  width: 33px;
+  height: 33px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+
+  background: var(--surface-primary);
+  color: var(--accent-secondary);
+}
+
+.ws-control-tile--active .ws-control-tile__icon {
+  border-color: var(--accent-secondary);
+}
+
+.ws-control-tile__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ws-control-tile__text strong {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.ws-control-tile__text small {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+/* Idioma */
+
+.ws-controls__locale {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  min-height: 58px;
+  padding: 9px 11px;
+
+  border: 1px solid var(--border-default);
+  border-radius: 11px;
+  background: var(--surface-secondary);
+}
+
+.ws-controls__locale-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+
+  background: var(--surface-primary);
+  color: var(--accent-secondary);
+}
+
+.ws-controls__locale-label {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ws-controls__locale-label strong {
+  font-size: 11px;
+}
+
+.ws-controls__locale-label small {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.ws-controls__locale select {
+  max-width: 120px;
+  min-width: 0;
+  padding: 7px;
+
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font-size: 11px;
   cursor: pointer;
 }
 
-.taskbar-quick-controls__theme select:focus-visible {
+/* Opções avançadas */
+
+.ws-controls__advanced {
+  border: 1px solid var(--border-default);
+  border-radius: 11px;
+  overflow: hidden;
+  background: var(--surface-secondary);
+}
+
+.ws-controls__advanced-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 12px;
+
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.ws-controls__advanced-trigger:hover {
+  background: color-mix(in srgb,
+      var(--accent-secondary) 7%,
+      transparent);
+}
+
+.ws-controls__advanced-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.ws-controls__advanced-heading svg {
+  color: var(--accent-secondary);
+}
+
+.ws-controls__advanced-body {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 12px 12px;
+  border-top: 1px solid var(--border-default);
+}
+
+.ws-controls__effect {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+}
+
+.ws-controls__effect+.ws-controls__effect {
+  border-top: 1px solid var(--border-default);
+}
+
+.ws-controls__effect>span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ws-controls__effect strong {
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.ws-controls__effect small {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.ws-controls__effect input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  accent-color: var(--accent-secondary);
+  cursor: pointer;
+}
+
+/* Rodapé */
+
+.ws-controls__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 0 0 auto;
+
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-default);
+
+  background: color-mix(in srgb,
+      var(--surface-secondary) 50%,
+      var(--surface-primary));
+}
+
+.ws-controls__footer>span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.ws-controls__footer>button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 8px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.ws-controls__footer>button:hover {
+  border-color: var(--accent-secondary);
+  color: var(--accent-secondary);
+}
+
+.ws-controls button:focus-visible,
+.ws-controls select:focus-visible,
+.ws-controls input:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
 }
+
+/* Responsividade */
+
+@media (max-height: 650px) {
+  .taskbar-quick-controls.ws-controls {
+    max-height: calc(100dvh - 85px);
+  }
+}
+
+@media (max-width: 360px) {
+  .ws-controls__content {
+    padding: 11px;
+  }
+
+  .ws-control-tile {
+    padding: 9px;
+  }
+
+  .ws-controls__footer>span {
+    display: none;
+  }
+}
+
+/* Mantém o comportamento já existente da Taskbar */
 
 .taskbar-container--auto-hide {
   bottom: 0;
-  transform: translate(-50%,
-      calc(100% - 8px));
+  transform: translate(-50%, calc(100% - 8px));
   transition: transform 180ms ease;
 }
 
@@ -128,7 +436,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
+  .ws-control-tile,
+  .ws-controls__search,
   .taskbar-container--auto-hide {
     transition: none;
   }
+}
+
+:root[data-reduced-motion='true'] .ws-control-tile,
+:root[data-low-effects='true'] .ws-control-tile {
+  transition: none;
 }

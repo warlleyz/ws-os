@@ -1,0 +1,439 @@
+/* =====================================================
+   WS OS — Weather Widget
+   ===================================================== */
+
+.desktop__widget[data-widget-id='weather']>.ws-widget {
+    overflow: hidden;
+    scrollbar-width: none;
+}
+
+.ws-widget--weather {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    padding: 12px;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    color: var(--text-primary);
+}
+
+/* Cabeçalho */
+
+.ws-weather-widget__header,
+.ws-weather-widget__heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ws-weather-widget__header {
+    justify-content: space-between;
+    flex: 0 0 auto;
+}
+
+.ws-weather-widget__heading {
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.ws-weather-widget__heading svg {
+    color: var(--accent-secondary);
+}
+
+.ws-weather-widget__refresh {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+
+    padding: 0;
+    border: 1px solid var(--border-default);
+    border-radius: 9px;
+
+    background: var(--surface-secondary);
+    color: var(--text-secondary);
+
+    cursor: pointer;
+}
+
+.ws-weather-widget__refresh:hover {
+    color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+}
+
+.ws-weather-widget__refresh:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ws-weather-widget__refresh .is-loading {
+    animation: ws-weather-spin 1s linear infinite;
+}
+
+@keyframes ws-weather-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Condições atuais */
+
+.ws-weather-widget__current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.ws-weather-widget__summary {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    min-width: 0;
+}
+
+.ws-weather-widget__temperature {
+    font-size: 46px;
+    font-weight: 750;
+    line-height: 1;
+    letter-spacing: -0.06em;
+    font-variant-numeric: tabular-nums;
+}
+
+.ws-weather-widget__condition {
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--text-secondary);
+}
+
+.ws-weather-widget__unit {
+    display: none;
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.ws-weather-widget__main-icon {
+    flex-shrink: 0;
+    color: var(--accent-secondary);
+}
+
+/* Métricas */
+
+.ws-weather-widget__details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    min-width: 0;
+}
+
+.ws-weather-widget__detail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    min-width: 0;
+    padding: 8px 6px;
+
+    border: 1px solid var(--border-default);
+    border-radius: 9px;
+
+    background: color-mix(in srgb,
+            var(--surface-secondary) 65%,
+            transparent);
+}
+
+.ws-weather-widget__detail>svg {
+    flex-shrink: 0;
+    color: var(--accent-secondary);
+}
+
+.ws-weather-widget__detail>div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.ws-weather-widget__detail span {
+    font-size: 9px;
+    color: var(--text-secondary);
+}
+
+.ws-weather-widget__detail strong {
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Previsão */
+
+.ws-weather-widget__forecast {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+
+    min-width: 0;
+    min-height: 0;
+    margin-top: auto;
+}
+
+.ws-weather-widget__day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    min-width: 0;
+    padding: 8px 4px;
+
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+
+    background: color-mix(in srgb,
+            var(--surface-secondary) 60%,
+            transparent);
+
+    text-align: center;
+    font-size: 11px;
+}
+
+.ws-weather-widget__day svg {
+    color: var(--accent-secondary);
+}
+
+.ws-weather-widget__day strong {
+    font-size: 12px;
+}
+
+.ws-weather-widget__day small {
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+/* Estados */
+
+.ws-weather-widget__empty {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    min-height: 0;
+    text-align: center;
+}
+
+.ws-weather-widget__empty>svg {
+    color: var(--accent-secondary);
+}
+
+.ws-weather-widget__empty p {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.ws-weather-widget__empty button {
+    padding: 7px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.ws-weather-widget__error {
+    margin: 0;
+    font-size: 10px;
+    color: var(--status-error);
+}
+
+/* =====================================================
+   2×2 — Compacto
+   ===================================================== */
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='2x2'] .ws-widget--weather {
+    gap: 7px;
+    padding: 10px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='2x2'] .ws-weather-widget__header,
+.desktop__widget[data-widget-id='weather'][data-widget-size='2x2'] .ws-weather-widget__details,
+.desktop__widget[data-widget-id='weather'][data-widget-size='2x2'] .ws-weather-widget__forecast,
+.desktop__widget[data-widget-id='weather'][data-widget-size='2x2'] .ws-weather-widget__unit,
+.desktop__widget[data-widget-id='weather'][data-widget-size='2x2'] .ws-weather-widget__error {
+    display: none;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='2x2'] .ws-weather-widget__current {
+    flex: 1;
+    align-items: center;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='2x2'] .ws-weather-widget__temperature {
+    font-size: 34px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='2x2'] .ws-weather-widget__main-icon {
+    width: 37px;
+    height: 37px;
+}
+
+/* =====================================================
+   3×2 — Padrão
+   ===================================================== */
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='3x2'] .ws-widget--weather {
+    gap: 8px;
+    padding: 10px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='3x2'] .ws-weather-widget__forecast {
+    display: none;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='3x2'] .ws-weather-widget__temperature {
+    font-size: 37px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='3x2'] .ws-weather-widget__main-icon {
+    width: 40px;
+    height: 40px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='3x2'] .ws-weather-widget__details {
+    gap: 4px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='3x2'] .ws-weather-widget__detail {
+    gap: 4px;
+    padding: 6px 4px;
+}
+
+/* =====================================================
+   4×3 — Layout expandido e compacto
+   ===================================================== */
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-widget--weather {
+    gap: 7px;
+    padding: 9px 11px;
+    overflow: hidden;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__header {
+    min-height: 25px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__refresh {
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+    min-height: 25px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__current {
+    gap: 6px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__summary {
+    gap: 3px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__temperature {
+    font-size: 40px;
+    line-height: 1;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__condition {
+    font-size: 11px;
+    line-height: 1.25;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__main-icon {
+    width: 42px;
+    height: 42px;
+}
+
+/* Métricas */
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__details {
+    gap: 5px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__detail {
+    min-width: 0;
+    padding: 5px 6px;
+    gap: 5px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__detail>svg {
+    width: 13px;
+    height: 13px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__detail span {
+    font-size: 9px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__detail strong {
+    font-size: 10px;
+}
+
+/* Previsão */
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__forecast {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 0;
+    gap: 5px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__day {
+    gap: 3px;
+    padding: 4px 2px;
+    min-height: 0;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__day svg {
+    width: 16px;
+    height: 16px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__day strong {
+    font-size: 11px;
+}
+
+.desktop__widget[data-widget-id='weather'][data-widget-size='4x3'] .ws-weather-widget__day small {
+    font-size: 9px;
+}
+
+/* Acessibilidade */
+
+@media (prefers-reduced-motion: reduce) {
+    .ws-weather-widget__refresh .is-loading {
+        animation: none;
+    }
+}
+
+:root[data-reduced-motion='true'] .ws-weather-widget__refresh .is-loading,
+:root[data-low-effects='true'] .ws-weather-widget__refresh .is-loading {
+    animation: none;
+}

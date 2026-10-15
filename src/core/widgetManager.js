@@ -7,7 +7,7 @@ const widgetDefinitions = [
     name: 'Relógio',
     description: 'Exibe a data e a hora atuais.',
     defaultSize: { columns: 2, rows: 2 },
-    allowedSizes: ['2x2', '3x2', '3x3'],
+    allowedSizes: ['2x1', '2x2', '3x2'],
     defaultVisible: true,
   },
   {
@@ -23,7 +23,7 @@ const widgetDefinitions = [
     name: 'Clima',
     description: 'Exibe as condições meteorológicas e a previsão.',
     defaultSize: { columns: 3, rows: 2 },
-    allowedSizes: ['2x2', '3x2', '4x2'],
+    allowedSizes: ['2x2', '3x2', '4x3'],
     defaultVisible: true,
   },
   {
@@ -31,23 +31,7 @@ const widgetDefinitions = [
     name: 'Dev Insights',
     description: 'Apresenta estatísticas da atividade de desenvolvimento.',
     defaultSize: { columns: 3, rows: 2 },
-    allowedSizes: ['3x2', '4x2', '4x3'],
-    defaultVisible: false,
-  },
-  {
-    id: 'notes',
-    name: 'Notas',
-    description: 'Exibe notas públicas do portfólio.',
-    defaultSize: { columns: 2, rows: 2 },
-    allowedSizes: ['2x2', '3x2', '3x3'],
-    defaultVisible: false,
-  },
-  {
-    id: 'system-info',
-    name: 'Informações do Sistema',
-    description: 'Exibe informações do navegador e da sessão.',
-    defaultSize: { columns: 2, rows: 2 },
-    allowedSizes: ['2x2', '3x2', '3x3'],
+    allowedSizes: ['2x2', '3x2', '4x3'],
     defaultVisible: false,
   },
 ];

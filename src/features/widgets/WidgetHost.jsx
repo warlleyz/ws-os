@@ -7,21 +7,30 @@ import {
 } from '../../shells/desktop/desktopLayout';
 
 import ClockWidget from './clock/ClockWidget';
+import CalendarWidget from './calendar/CalendarWidget';
+import WeatherWidget from './weather/WeatherWidget';
+import DevInsightsWidget from './dev-insights/DevInsightsWidget';
+import { GripVertical } from 'lucide-react';
 
 // Registro dos componentes efetivamente implementados.
 // Os demais serão adicionados individualmente nas próximas etapas.
 const WIDGET_COMPONENTS = {
   clock: ClockWidget,
+  calendar: CalendarWidget,
+  weather: WeatherWidget,
+  'dev-insights': DevInsightsWidget,
 };
 
 export default function WidgetHost({
   widget,
   desktopLayout,
+  weatherData,
   startWidgetDrag,
   moveWidgetDrag,
   finishWidgetDrag,
   changeWidgetSize,
   handleWidgetKeyDown,
+  onWidgetContextMenu,
 }) {
   useLocale();
 
@@ -47,6 +56,11 @@ export default function WidgetHost({
       className="desktop__widget"
       data-widget-id={widget.widgetId}
       data-widget-instance={widget.instanceId}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onWidgetContextMenu?.(event, widget);
+      }}
       data-widget-size={`${widget.size.columns}x${widget.size.rows}`}
       style={{
         position: 'absolute',
@@ -59,52 +73,29 @@ export default function WidgetHost({
         height: widget.size.rows * ROW_STEP,
       }}
     >
-      <div className="desktop__widget-controls">
-        <button
-          type="button"
-          className="desktop__widget-drag"
-          aria-label={t(`Arrastar ${definition.name}`)}
-          title={t('Arrastar ou usar as setas para mover')}
 
-          onKeyDown={(event) =>
-            handleWidgetKeyDown(event, widget.instanceId)
-          }
-          onPointerDown={(event) =>
-            startWidgetDrag(event, widget.instanceId)
-          }
+      <button
+        type="button"
+        className="desktop__widget-grip"
+        aria-label={t(`Mover ${definition.name}`)}
+        title={t('Arrastar ou usar as setas para mover')}
+        onKeyDown={(event) =>
+          handleWidgetKeyDown(event, widget.instanceId)
+        }
+        onPointerDown={(event) =>
+          startWidgetDrag(event, widget.instanceId)
+        }
+        onPointerMove={moveWidgetDrag}
+        onPointerUp={finishWidgetDrag}
+        onPointerCancel={finishWidgetDrag}
+        onLostPointerCapture={finishWidgetDrag}
+        onDragStart={(event) => event.preventDefault()}
+      >
+        <GripVertical size={15} aria-hidden="true" />
+      </button>
 
-          onPointerMove={moveWidgetDrag}
-          onPointerUp={finishWidgetDrag}
-          onPointerCancel={finishWidgetDrag}
-          onLostPointerCapture={finishWidgetDrag}
-          onDragStart={(event) => event.preventDefault()}
-        >
-          {t('Arrastar')}
-        </button>
 
-        <label className="desktop__widget-size">
-          <span>{t('Tamanho')}</span>
-
-          <select
-            aria-label={`${t('Tamanho')} — ${widgetName}`}
-            value={`${widget.size.columns}x${widget.size.rows}`}
-            onChange={(event) =>
-              changeWidgetSize(
-                widget.instanceId,
-                event.target.value,
-              )
-            }
-          >
-            {sizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size.replace('x', ' × ')}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <WidgetComponent />
+      <WidgetComponent weatherData={weatherData} />
     </div>
   );
 }

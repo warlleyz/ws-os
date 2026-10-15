@@ -1,104 +1,347 @@
+/* ==========================================================
+   WS OS — Widgets
+   Base visual compartilhada
+   ========================================================== */
+
 .desktop__widget {
-  box-sizing: border-box;
-  width: 180px;
-  height: 176px;
-  max-width: 100%;
-  z-index: 1;
-}
+  --widget-radius: 16px;
+  --widget-gap: 10px;
+  --widget-padding: 12px;
 
-.desktop__widget .ws-widget {
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-}
-
-.ws-widget {
+  position: absolute;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  background: var(--surface-primary);
+
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+
+  box-sizing: border-box;
+  overflow: hidden;
+
+  z-index: 1;
+
   color: var(--text-primary);
+  background: var(--ws-glass, var(--surface-primary));
+
+  border: 1px solid var(--panel-border, var(--border-default));
+  border-radius: var(--widget-radius);
+
+  box-shadow: var(--panel-shadow, var(--shadow-floating));
+
+  backdrop-filter:
+    blur(var(--blur-medium, 12px)) saturate(var(--ws-glass-saturation, 135%));
+
+  -webkit-backdrop-filter:
+    blur(var(--blur-medium, 12px)) saturate(var(--ws-glass-saturation, 135%));
+
+  isolation: isolate;
+
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+/* Estado de interação */
+
+.desktop__widget:hover {
+  border-color: var(--border-control, var(--border-default));
+}
+
+.desktop__widget:focus-within {
+  border-color: var(--accent-secondary);
+}
+
+.desktop__widget[data-drop-valid='true'] {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+}
+
+.desktop__widget[data-drop-valid='false'] {
+  outline: 2px dashed var(--status-error);
+  outline-offset: -2px;
+  opacity: 0.72;
+}
+/* ==========================================================
+   Conteúdo compartilhado
+   ========================================================== */
+
+.desktop__widget>.ws-widget {
+  display: flex;
+  flex-direction: column;
+
+  flex: 1 1 auto;
+
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+
+  box-sizing: border-box;
+
+  margin: 0;
+  padding: var(--widget-padding);
+
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+
+  background: transparent;
+  color: var(--text-primary);
+
+  overflow: auto;
+  overscroll-behavior: contain;
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--border-control) transparent;
+}
+
+.desktop__widget>.ws-widget::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.desktop__widget>.ws-widget::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.desktop__widget>.ws-widget::-webkit-scrollbar-thumb {
+  background: var(--border-control);
+  border-radius: 99px;
+}
+
+.desktop__widget>.ws-widget::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Tipografia interna */
+
+.desktop__widget .ws-widget strong {
+  color: var(--text-primary);
+}
+
+.desktop__widget .ws-widget button {
+  color: var(--text-primary);
+}
+
+.desktop__widget .ws-widget button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ==========================================================
+   Relógio
+   ========================================================== */
+
+.ws-widget--clock {
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .ws-widget--clock time {
-  font-size: 28px;
-  font-weight: 600;
+  display: block;
+
+  font-size: clamp(25px, 3vw, 38px);
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-}
 
-.ws-widget--clock span {
-  color: var(--text-secondary);
-  font-size: 12px;
-  text-transform: capitalize;
-}
-
-.desktop__widget-toggle {
-  position: absolute;
-  right: 20px;
-  bottom: 80px;
-  z-index: 2;
-  padding: 7px 10px;
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
-  background: var(--surface-primary);
   color: var(--text-primary);
-  font-size: 11px;
-  cursor: pointer;
 }
 
-.desktop__widget {
-  display: flex;
-  flex-direction: column;
+.ws-widget--clock>span {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 500;
+  text-transform: capitalize;
+
+  color: var(--text-secondary);
 }
 
-.desktop__widget-controls {
+/* ==========================================================
+   Estados por tamanho
+   ========================================================== */
+
+.desktop__widget[data-widget-size='2x2'] {
+  --widget-padding: 10px;
+  --widget-gap: 7px;
+}
+
+.desktop__widget[data-widget-size='2x2'] .desktop__widget-controls {
+  gap: 4px;
+  padding-inline: 5px;
+}
+
+.desktop__widget[data-widget-size='2x2'] .desktop__widget-drag {
+  padding-inline: 5px;
+}
+
+.desktop__widget[data-widget-size='2x2'] .desktop__widget-size>span {
+  display: none;
+}
+
+.desktop__widget[data-widget-size='3x3'],
+.desktop__widget[data-widget-size='4x3'],
+.desktop__widget[data-widget-size='4x4'] {
+  --widget-padding: 14px;
+}
+
+/* ==========================================================
+   Acessibilidade e desempenho
+   ========================================================== */
+
+:root[data-blur='off'] .desktop__widget,
+:root[data-reduced-transparency='true'] .desktop__widget,
+:root[data-low-effects='true'] .desktop__widget {
+  background: var(--surface-primary);
+
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:root[data-low-effects='true'] .desktop__widget {
+  box-shadow: none;
+}
+
+:root[data-reduced-motion='true'] .desktop__widget,
+:root[data-low-effects='true'] .desktop__widget {
+  transition: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .desktop__widget {
+    background: var(--surface-primary);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .desktop__widget,
+  .desktop__widget * {
+    transition: none;
+    animation: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .desktop__widget-controls {
+    min-height: 40px;
+  }
+
+  .desktop__widget-drag,
+  .desktop__widget-size select {
+    min-height: 32px;
+  }
+}
+
+/* ==========================================================
+   W4.3 — Alça de movimentação dos widgets
+   ========================================================== */
+
+.desktop__widget-grip {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  z-index: 5;
+
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  padding: 4px;
-  background: var(--surface-primary);
-}
+  justify-content: center;
 
-.desktop__widget-drag {
-  padding: 5px 8px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+
+  padding: 0;
+
   border: 1px solid var(--border-default);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 11px;
+  border-radius: 9px;
+
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+
+  box-shadow: var(--panel-shadow);
+
   cursor: grab;
   touch-action: none;
   user-select: none;
+
+  opacity: 0;
+  transform: translateY(3px);
+
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease,
+    background 150ms ease,
+    color 150ms ease;
 }
 
-.desktop__widget-drag:active {
+.desktop__widget:hover .desktop__widget-grip,
+.desktop__widget:focus-within .desktop__widget-grip,
+.desktop__widget-grip:active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.desktop__widget-grip:hover {
+  background: var(--surface-primary);
+  color: var(--accent-secondary);
+}
+
+.desktop__widget-grip:active {
   cursor: grabbing;
 }
 
-.desktop__widget-size {
+.desktop__widget-grip:focus-visible {
+  opacity: 1;
+  transform: translateY(0);
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+/* Evita que a alça fique escondida em telas de toque. */
+@media (hover: none) {
+  .desktop__widget-grip {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .desktop__widget-grip {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop__widget-grip {
+    transition: none;
+    transform: none;
+  }
+}
+
+:root[data-reduced-motion='true'] .desktop__widget-grip,
+:root[data-low-effects='true'] .desktop__widget-grip {
+  transition: none;
+  transform: none;
+}
+
+.desktop__widget>.ws-widget {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--text-secondary);
-  font-size: 10px;
-}
-
-.desktop__widget-size select {
-  max-width: 72px;
-  padding: 4px;
-  border: 1px solid var(--border-default);
-  border-radius: 5px;
-  background: var(--surface-primary);
-  color: var(--text-primary);
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.desktop__widget .ws-widget {
-  flex: 1;
+  flex-direction: column;
+  flex: 1 1 auto;
   min-height: 0;
+  width: 100%;
+  height: auto;
+  overflow: auto;
 }
