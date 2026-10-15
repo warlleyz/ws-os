@@ -1,76 +1,86 @@
+/* WS OS — Calendário da Taskbar */
 .taskbar-calendar {
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   width: min(340px, calc(100vw - 24px));
   max-height: calc(100dvh - 100px);
-  overflow-y: auto;
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  background: var(--panel-background);
+  overflow: hidden;
+  border: 1px solid var(--panel-border, var(--border-default));
+  border-radius: 15px;
+  background: var(--panel-background, var(--surface-primary));
   color: var(--text-primary);
   box-shadow: var(--panel-shadow);
 }
-
+.taskbar-calendar *, .taskbar-calendar *::before, .taskbar-calendar *::after { box-sizing: border-box; }
 .taskbar-calendar__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgb(148 185 215 / 15%);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 9px; padding: 12px 13px; border-bottom: 1px solid var(--border-default);
 }
-
+.taskbar-calendar__heading, .taskbar-calendar__actions { display: flex; align-items: center; gap: 5px; }
+.taskbar-calendar__heading { min-width: 0; gap: 8px; }
+.taskbar-calendar__heading svg { flex-shrink: 0; color: var(--accent-secondary); }
+.taskbar-calendar__heading strong { font-size: 12px; font-weight: 700; text-transform: capitalize; }
 .taskbar-calendar button {
-  padding: 5px 9px;
-  border: 1px solid rgb(148 185 215 / 25%);
-  border-radius: 7px;
-  background: rgb(255 255 255 / 7%);
-  color: inherit;
-  cursor: pointer;
+  font: inherit; color: inherit; cursor: pointer;
 }
-
-.taskbar-calendar__header > div {
-  display: flex;
-  gap: 5px;
+.taskbar-calendar__actions button {
+  display: grid; place-items: center; flex-shrink: 0;
+  width: 27px; height: 28px; padding: 0;
+  border: 1px solid transparent; border-radius: 8px; background: transparent;
+  color: var(--text-secondary);
 }
-
+.taskbar-calendar__actions button:hover { background: var(--surface-secondary); color: var(--text-primary); }
+.taskbar-calendar__actions .taskbar-calendar__today-button {
+  width: auto; padding: 0 7px; font-size: 10px; font-weight: 650;
+  background: var(--surface-secondary); color: var(--text-primary);
+}
+.taskbar-calendar button:focus-visible, .taskbar-calendar a:focus-visible {
+  outline: 2px solid var(--accent-secondary); outline-offset: 2px;
+}
+.taskbar-calendar__body { min-height: 0; overflow-y: auto; padding: 12px; scrollbar-width: thin; scrollbar-color: var(--border-default) transparent; }
 .taskbar-calendar__grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 4px;
-  padding: 12px;
-  text-align: center;
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px; text-align: center;
 }
-
-.taskbar-calendar__grid > span {
-  display: grid;
-  min-height: 32px;
-  place-items: center;
-  border-radius: 7px;
-  font-size: 12px;
+.taskbar-calendar__grid > span, .taskbar-calendar__date {
+  display: grid; place-items: center; min-width: 0; height: 34px;
+  border: 1px solid transparent; border-radius: 9px; background: transparent;
+  font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums;
 }
-
-.taskbar-calendar__weekday {
-  opacity: 0.65;
-  font-weight: 700;
+.taskbar-calendar__grid > .taskbar-calendar__weekday {
+  height: 24px; font-size: 10px; font-weight: 700; color: var(--text-secondary);
 }
-
-.taskbar-calendar__today {
-  background: rgb(94 176 217 / 26%);
-  font-weight: 700;
+.taskbar-calendar__date { position: relative; }
+.taskbar-calendar__date.taskbar-calendar__outside { color: var(--text-secondary); opacity: 0.48; }
+.taskbar-calendar__date.taskbar-calendar__outside:hover { opacity: 0.85; }
+.taskbar-calendar__date.taskbar-calendar__outside.taskbar-calendar__today,
+.taskbar-calendar__date.taskbar-calendar__outside.taskbar-calendar__selected { opacity: 1; }
+.taskbar-calendar__date:hover { background: var(--surface-secondary); }
+.taskbar-calendar__date.taskbar-calendar__today { border-color: var(--accent-secondary); color: var(--accent-secondary); font-weight: 750; }
+.taskbar-calendar__date.taskbar-calendar__selected { background: var(--action-background); color: var(--action-text); font-weight: 750; }
+.taskbar-calendar__date.taskbar-calendar__holiday::after,
+.taskbar-calendar__date.taskbar-calendar__event::after {
+  content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+  height: 4px; width: 4px; border-radius: 50%; background: var(--accent-secondary);
 }
-
-.taskbar-calendar__holiday {
-  position: relative;
-  color: var(--accent-secondary);
-  font-weight: 700;
-}
-
-.taskbar-calendar__holiday::after {
-  position: absolute;
-  bottom: 2px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: currentColor;
-  content: '';
+.taskbar-calendar__date.taskbar-calendar__event:not(.taskbar-calendar__holiday)::after { background: var(--text-secondary); }
+.taskbar-calendar__date.taskbar-calendar__selected::after { background: currentColor; }
+.taskbar-calendar__agenda { margin-top: 13px; padding: 12px; border: 1px solid var(--border-default); border-radius: 11px; background: var(--surface-secondary); }
+.taskbar-calendar__agenda-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.taskbar-calendar__agenda-heading strong { font-size: 11px; font-weight: 700; line-height: 1.5; text-transform: capitalize; }
+.taskbar-calendar__agenda-heading span { font-size: 10px; color: var(--text-secondary); }
+.taskbar-calendar__no-events { margin: 7px 0 0; color: var(--text-secondary); font-size: 11px; line-height: 1.5; }
+.taskbar-calendar__agenda-list { display: flex; flex-direction: column; gap: 10px; margin: 10px 0 0; padding: 0; list-style: none; }
+.taskbar-calendar__agenda-item { display: flex; gap: 8px; align-items: flex-start; }
+.taskbar-calendar__agenda-item > svg { flex-shrink: 0; margin-top: 1px; color: var(--accent-secondary); }
+.taskbar-calendar__agenda-item div { min-width: 0; }
+.taskbar-calendar__agenda-item strong { font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.taskbar-calendar__agenda-item p { margin: 3px 0; font-size: 10px; line-height: 1.5; color: var(--text-secondary); overflow-wrap: anywhere; }
+.taskbar-calendar__agenda-item a { color: var(--accent-secondary); font-size: 10px; text-decoration: underline; overflow-wrap: anywhere; }
+@media (max-width: 360px) {
+  .taskbar-calendar__header { padding: 10px 9px; }
+  .taskbar-calendar__body { padding: 9px; }
+  .taskbar-calendar__grid { gap: 2px; }
+  .taskbar-calendar__grid > span, .taskbar-calendar__date { height: 32px; }
 }
