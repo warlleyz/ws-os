@@ -154,7 +154,53 @@ export const portfolio = {
       },
     ],
   },
-  certificates: [], // { id, title, issuer, category: course|certification|achievement, date, description, url }
+  certificates: [
+    {
+      id: 'power-bi-gestao-enap',
+      title: {
+        'pt-BR': 'Aplicação do Power BI para Aprimoramento da Gestão',
+        en: 'Applying Power BI to Improve Management',
+      },
+      issuer: 'Escola Nacional de Administração Pública — ENAP',
+      category: 'course',
+      date: '2026-09-21',
+      description: {
+        'pt-BR':
+          'Curso de 25 horas sobre obtenção e transformação de dados, modelagem, cálculos, visualização e publicação de relatórios com Power BI.',
+        en:
+          'A 25-hour course covering data acquisition and transformation, modeling, calculations, visualization, and report publishing with Power BI.',
+      },
+      url: 'certificates/courses/power-bi-gestao.pdf',
+    },
+    {
+      id: 'github-copilot-dev-days',
+      title: 'GitHub Copilot Dev Days na PUC Minas',
+      issuer: 'PUC Minas — ICEI',
+      category: 'achievement',
+      date: '2026-05-12',
+      description: {
+        'pt-BR':
+          'Participação de 2 horas em evento sobre desenvolvimento de software e inteligência artificial aplicada à programação.',
+        en:
+          'Participation in a two-hour event about software development and artificial intelligence applied to programming.',
+      },
+      url: 'certificates/events/github-copilot-dev-days.pdf',
+    },
+    {
+      id: 'we-make-software-coreu-2026-01',
+      title: 'We Make Software — COREU 2026/1',
+      issuer: 'PUC Minas — Engenharia de Software',
+      category: 'achievement',
+      date: '2026-03-16',
+      description: {
+        'pt-BR':
+          'Participação de 4 horas no evento We Make Software, promovido pela área de Engenharia de Software da PUC Minas.',
+        en:
+          'Participation in a four-hour We Make Software event organized by the Software Engineering department at PUC Minas.',
+      },
+      url: 'certificates/events/we-make-software-coreu-2026-01.pdf',
+    },
+  ],
   projects: [], // { id, name, description, technologies: [], status, repository, image, demos: [{ id, title, mode: external|embedded|hosted|simulated, url }] }
   demoOrigins: [], // Origens HTTPS autorizadas a embed. URLs externas continuam disponíveis sem embed.
   officialFiles: [], // { id, name, url, description }. Somente leitura; caminhos públicos do próprio site.
