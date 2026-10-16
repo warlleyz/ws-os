@@ -1,4 +1,5 @@
 import { getAppDefinition } from './appRegistry';
+import { isAdminAuthenticated } from '../services/authService';
 
 export const initialAppState = {
   instances: [],
@@ -55,7 +56,7 @@ export function validateAppOpen(appId, options = {}) {
   if (!app) {
     return { ok: false, error: { code: 'APP_NOT_FOUND', message: 'Aplicativo não encontrado.' } };
   }
-  if (!app.public) {
+  if (!app.public && !(appId === 'administration' && isAdminAuthenticated())) {
     return {
       ok: false,
       error: {

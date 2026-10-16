@@ -11,6 +11,7 @@ import {
   loginAdmin,
   logoutAdmin,
   isAdminAuthenticated,
+  verifyAdminSession,
 } from '../../services/authService';
 import '../../styles/apps.css';
 import './Terminal.css';
@@ -109,12 +110,37 @@ export default function Terminal() {
           );
           break;
         case 'open': {
+          const requestedApp = args.join(' ').toLowerCase();
+          const isAdministration =
+            requestedApp === 'administration' ||
+            requestedApp === 'administração';
+
+          if (isAdministration) {
+            const authorized = await verifyAdminSession();
+
+            if (!authorized) {
+              setAuthenticated(false);
+              throw new Error('Acesso administrativo negado. Utilize login.');
+            }
+
+            setAuthenticated(true);
+            run(openApp, 'administration', { origin: 'terminal' });
+            output = ['Administração aberta.'];
+            break;
+          }
+
           const app = apps.find(
             (app) =>
-              app.id === args[0] || t(app.name).toLowerCase() === args.join(' ').toLowerCase(),
+              app.id === args[0] ||
+              t(app.name).toLowerCase() === requestedApp,
           );
-          if (!app?.implemented)
-            throw new Error('Aplicativo indisponível. Use apps para consultar o catálogo.');
+
+          if (!app?.implemented) {
+            throw new Error(
+              'Aplicativo indisponível. Use apps para consultar o catálogo.'
+            );
+          }
+
           run(openApp, app.id, { origin: 'terminal' });
           output = ['Aplicativo aberto.'];
           break;
@@ -191,6 +217,14 @@ export default function Terminal() {
           setShowLogin(false);
           setLoginEmail('');
           setLoginPassword('');
+
+          const administrationInstances = appState.instances.filter(
+            (instance) => instance.appId === 'administration'
+          );
+
+          for (const instance of administrationInstances) {
+            run(closeApp, instance.id);
+          }
 
           output = [
             remoteLogoutSucceeded
