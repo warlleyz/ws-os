@@ -85,6 +85,10 @@ export function isAdminAuthenticated() {
     return getAdminAccessToken() !== null;
 }
 
+export function getAdminSessionExpiresAt() {
+    return getAdminAccessToken() ? session.expiresAt : null;
+}
+
 export async function logoutAdmin() {
     const token = getAdminAccessToken();
 

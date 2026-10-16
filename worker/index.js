@@ -6,6 +6,7 @@ import {
   onRequestLogin,
   onRequestMe,
   onRequestLogout,
+  onRequestAdminStatus,
 } from '../functions/api/auth.js';
 
 const routes = {
@@ -15,6 +16,7 @@ const routes = {
   '/api/auth/login': { method: 'POST', handler: onRequestLogin },
   '/api/auth/me': { method: 'GET', handler: onRequestMe },
   '/api/auth/logout': { method: 'POST', handler: onRequestLogout },
+  '/api/admin/status': { method: 'GET', handler: onRequestAdminStatus },
 };
 function error(code, status, headers = {}) {
   return Response.json(

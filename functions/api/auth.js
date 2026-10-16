@@ -72,6 +72,55 @@ async function verifyAdministrator(config, token) {
         rows[0]?.user_id === user.id;
 }
 
+export async function requireAdministrator(request, env) {
+    const config = getConfig(env);
+
+    if (!config) {
+        return {
+            authorized: false,
+            response: json({ error: 'Autenticação não configurada.' }, 503),
+        };
+    }
+
+    const authorization = request.headers.get('authorization') ?? '';
+    const match = /^Bearer ([^\s]+)$/i.exec(authorization);
+
+    if (!match) {
+        return {
+            authorized: false,
+            response: json({ error: 'Não autenticado.' }, 401),
+        };
+    }
+
+    try {
+        const authorized = await verifyAdministrator(config, match[1]);
+
+        if (!authorized) {
+            return {
+                authorized: false,
+                response: json({ error: 'Acesso não autorizado.' }, 403),
+            };
+        }
+
+        return { authorized: true, response: null };
+    } catch {
+        return {
+            authorized: false,
+            response: json({ error: 'Não foi possível verificar a autorização.' }, 502),
+        };
+    }
+}
+
+export async function onRequestAdminStatus({ request, env }) {
+    const access = await requireAdministrator(request, env);
+
+    if (!access.authorized) {
+        return access.response;
+    }
+
+    return json({ admin: true, status: 'authorized' });
+}
+
 export async function onRequestLogin({ request, env }) {
     const config = getConfig(env);
 

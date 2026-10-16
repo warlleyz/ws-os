@@ -2,6 +2,7 @@ import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { lazy, Suspense, useState } from 'react';
 import { getAppDefinition, getRegisteredApps } from '../../core/appRegistry';
 import AppErrorBoundary from '../../shared/components/AppErrorBoundary';
+import { isAdminAuthenticated } from '../../services/authService';
 
 function createAppComponent(app) {
   return lazy(() => {
@@ -44,7 +45,10 @@ export default function AppHost({ appName, instance }) {
     setRetry((current) => ({ Component, attempt: current.attempt + 1 }));
   }
 
-  if (!app?.public) {
+  if (
+    !app?.public &&
+    !(app?.id === 'administration' && isAdminAuthenticated())
+  ) {
     return (
       <div className="desktop-window__content" role="alert">
         <h2>{t(appName)}</h2>
