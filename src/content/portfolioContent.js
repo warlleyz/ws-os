@@ -6,7 +6,7 @@ export const portfolio = {
   githubUser: 'warlleyz',
 
   notesEndpoint: '',
-  posts: [],
+  notesEndpoint: '/api/posts',
   wakatimeProxy: '/api/wakatime',
 
   // PERFIL PROFISSIONAL
