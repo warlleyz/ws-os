@@ -85,7 +85,75 @@ export const portfolio = {
     ],
   },
 
-  resume: { url: 'curriculo.pdf', sections: [] }, // { id, title, items: [{ title, description, period }] }
+  resume: {
+    url: 'documents/curriculo-warlley.pdf',
+
+    sections: [
+      {
+        id: 'education',
+        title: {
+          'pt-BR': 'Formação acadêmica',
+          en: 'Education',
+        },
+        items: [
+          {
+            title: {
+              'pt-BR': 'Bacharelado em Engenharia de Software',
+              en: "Bachelor's Degree in Software Engineering",
+            },
+            description: {
+              'pt-BR': 'Pontifícia Universidade Católica de Minas Gerais (PUC Minas). Graduação em andamento.',
+              en: 'Pontifical Catholic University of Minas Gerais (PUC Minas). Undergraduate degree in progress.',
+            },
+            period: 'Em andamento',
+          },
+        ],
+      },
+
+      {
+        id: 'technical-skills',
+        title: {
+          'pt-BR': 'Conhecimentos técnicos',
+          en: 'Technical Skills',
+        },
+        items: [
+          {
+            title: {
+              'pt-BR': 'Linguagens e desenvolvimento',
+              en: 'Programming and Development',
+            },
+            description: {
+              'pt-BR': 'Java, JavaScript, Python, PHP, HTML, CSS, Programação Orientada a Objetos e desenvolvimento web.',
+              en: 'Java, JavaScript, Python, PHP, HTML, CSS, Object-Oriented Programming, and web development.',
+            },
+            period: '',
+          },
+          {
+            title: {
+              'pt-BR': 'Frameworks e integração',
+              en: 'Frameworks and Integration',
+            },
+            description: {
+              'pt-BR': 'Spring Boot, APIs REST, Maven e integração entre aplicações.',
+              en: 'Spring Boot, REST APIs, Maven, and application integration.',
+            },
+            period: '',
+          },
+          {
+            title: {
+              'pt-BR': 'Ferramentas e dados',
+              en: 'Tools and Data',
+            },
+            description: {
+              'pt-BR': 'Git, GitHub, Docker, Figma, modelagem de dados e fundamentos de banco de dados.',
+              en: 'Git, GitHub, Docker, Figma, data modeling, and database fundamentals.',
+            },
+            period: '',
+          },
+        ],
+      },
+    ],
+  },
   certificates: [], // { id, title, issuer, category: course|certification|achievement, date, description, url }
   projects: [], // { id, name, description, technologies: [], status, repository, image, demos: [{ id, title, mode: external|embedded|hosted|simulated, url }] }
   demoOrigins: [], // Origens HTTPS autorizadas a embed. URLs externas continuam disponíveis sem embed.
