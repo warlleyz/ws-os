@@ -1,0 +1,59 @@
+const { test } = require('node:test'),
+  assert = require('node:assert/strict'),
+  fs = require('node:fs'),
+  path = require('node:path');
+const worker = () => import('../../worker/index.js').then((module) => module.default);
+test('Worker roteia leituras preparadas e não retorna HTML da SPA para APIs', async () => {
+  const app = await worker();
+  for (const endpoint of ['posts', 'wakatime']) {
+    const result = await app.fetch(new Request('https://ws.test/api/' + endpoint), {});
+    assert.equal(result.status, 503);
+    assert.match(result.headers.get('content-type'), /application\/json/);
+  }
+  const missing = await app.fetch(new Request('https://ws.test/api/missing'), {});
+  assert.equal(missing.status, 404);
+  assert.equal(missing.headers.get('cache-control'), 'no-store');
+});
+test('Worker recusa métodos incompatíveis e preserva entrega dos assets', async () => {
+  const app = await worker();
+  for (const [endpoint, method, allow] of [
+    ['posts', 'POST', 'GET'],
+    ['wakatime', 'DELETE', 'GET'],
+    ['wally', 'GET', 'POST'],
+  ]) {
+    const response = await app.fetch(
+      new Request('https://ws.test/api/' + endpoint, { method }),
+      {},
+    );
+    assert.equal(response.status, 405);
+    assert.equal(response.headers.get('allow'), allow);
+  }
+  const response = await app.fetch(new Request('https://ws.test/'), {
+    ASSETS: { fetch: () => new Response('shell') },
+  });
+  assert.equal(await response.text(), 'shell');
+});
+test('IA continua desativada antes de rede, Turnstile ou D1', async (t) => {
+  const app = await worker();
+  let calls = 0;
+  t.mock.method(globalThis, 'fetch', () => {
+    calls++;
+    throw Error('external request forbidden');
+  });
+  const db = {
+    prepare: () => {
+      throw Error('D1 should not be consulted');
+    },
+  };
+  const response = await app.fetch(
+    new Request('https://ws.test/api/wally', { method: 'POST', body: '{}' }),
+    { WALLY_AI_ENABLED: 'false', WALLY_LIMITS_DB: db },
+  );
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).error, 'AI_DISABLED');
+  assert.equal(calls, 0);
+  const config = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '../../wrangler.jsonc'), 'utf8'),
+  );
+  assert.equal(config.vars.WALLY_AI_ENABLED, 'false');
+});

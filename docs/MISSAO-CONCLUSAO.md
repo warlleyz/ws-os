@@ -67,3 +67,7 @@ Medição no navegador encontrou Controles Rápidos sólido (rgb 27,39,54) com b
 Removido blur interno duplicado dos widgets e cabeçalho/compositor Wally; mantida uma camada externa. Blur desligado/superfície sólida/redução de transparência/baixo custo desativam o filtro nas superfícies suportadas; respeitar o SO. Intensidade suave escala durações fixas dos módulos, sem mudar o modo normal; movimento reduzido/desligado continua prioritário. Scrollbars/seleção/foco em alto contraste compartilham tokens. Nenhuma dependência ou serviço remoto ativado.
 
 Validação M1 no navegador: Controles Rápidos passou a rgba(24,34,48,.88)/blur 28 px no escuro e rgba(255,255,255,.88)/texto 23,35,52 no claro. Widget tem blur externo 24 px e interno none. Reduzir transparência tornou painel/janela/widget sólidos e filtro none. O teclado operou as opções; foi identificada/corrigida tradução dinâmica ausente em temas, controles, descrições de widgets e fallbacks Wally. Sugestões prontas acompanham o idioma; perguntas digitadas são preservadas. Os ensaios não representam certificação WCAG ou teste físico de leitor de tela.
+
+### M2.1 — rotas Worker
+
+Worker agora despacha GET de posts/WakaTime e preserva POST Wally, com métodos restritos e falhas JSON sanitizadas. Vite não serve backend nem encaminha para produção. Testes negativos importam o Worker real e demonstram que IA desativada não consulta rede nem D1. Configuração e binding existentes preservados, sem deploy.
