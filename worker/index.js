@@ -2,10 +2,19 @@ import { onRequestPost as handleWally } from '../functions/api/wally.js';
 import { onRequestGet as handlePosts } from '../functions/api/posts.js';
 import { onRequestGet as handleWakatime } from '../functions/api/wakatime.js';
 
+import {
+  onRequestLogin,
+  onRequestMe,
+  onRequestLogout,
+} from '../functions/api/auth.js';
+
 const routes = {
   '/api/wally': { method: 'POST', handler: handleWally },
   '/api/posts': { method: 'GET', handler: handlePosts },
   '/api/wakatime': { method: 'GET', handler: handleWakatime },
+  '/api/auth/login': { method: 'POST', handler: onRequestLogin },
+  '/api/auth/me': { method: 'GET', handler: onRequestMe },
+  '/api/auth/logout': { method: 'POST', handler: onRequestLogout },
 };
 function error(code, status, headers = {}) {
   return Response.json(

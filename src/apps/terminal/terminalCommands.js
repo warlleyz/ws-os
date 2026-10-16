@@ -13,6 +13,7 @@ export const TERMINAL_COMMANDS = [
   'clear',
   'echo',
   'login',
+  'logout',
 ];
 export function parseCommand(input) {
   if (typeof input !== 'string' || input.length > 512) throw new Error('Comando muito longo.');

@@ -7,6 +7,11 @@ import { setTheme } from '../../core/themeManager';
 import { setLocale } from '../../shared/i18n/i18n';
 import { listLocalFiles } from '../../services/storage/localFilesStorage';
 import { TERMINAL_COMMANDS, parseCommand, completeCommand } from './terminalCommands';
+import {
+  loginAdmin,
+  logoutAdmin,
+  isAdminAuthenticated,
+} from '../../services/authService';
 import '../../styles/apps.css';
 import './Terminal.css';
 export default function Terminal() {
@@ -16,7 +21,13 @@ export default function Terminal() {
     [lines, setLines] = useState([]),
     [history, setHistory] = useState([]),
     [cursor, setCursor] = useState(null),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [showLogin, setShowLogin] = useState(false),
+    [loginEmail, setLoginEmail] = useState(''),
+    [loginPassword, setLoginPassword] = useState(''),
+    [authenticated, setAuthenticated] = useState(
+      () => isAdminAuthenticated()
+    );
   const inputRef = useRef(null),
     busyRef = useRef(false),
     alive = useRef(true),
@@ -31,6 +42,46 @@ export default function Terminal() {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
   }, [lines]);
   const apps = getRegisteredApps().filter((app) => app.public);
+  async function submitLogin(event) {
+    event.preventDefault();
+
+    if (busyRef.current) return;
+
+    busyRef.current = true;
+    setBusy(true);
+
+    try {
+      await loginAdmin(loginEmail, loginPassword);
+
+      setAuthenticated(true);
+      setShowLogin(false);
+      setLoginEmail('');
+      setLoginPassword('');
+
+      setLines((current) => [
+        ...current,
+        {
+          command: 'login',
+          output: ['Autenticação administrativa realizada.'],
+        },
+      ].slice(-100));
+    } catch (error) {
+      setLines((current) => [
+        ...current,
+        {
+          command: 'login',
+          output: [error.message],
+        },
+      ].slice(-100));
+    } finally {
+      setLoginPassword('');
+      busyRef.current = false;
+
+      if (alive.current) {
+        setBusy(false);
+      }
+    }
+  }
   async function execute(event) {
     event.preventDefault();
     if (!input.trim() || busyRef.current) return;
@@ -109,7 +160,11 @@ export default function Terminal() {
           output = [new Date().toLocaleString(locale)];
           break;
         case 'whoami':
-          output = ['Visitante'];
+          output = [
+            authenticated && isAdminAuthenticated()
+              ? 'Administrador'
+              : 'Visitante',
+          ];
           break;
         case 'history':
           output = history.map((item, index) => `${index + 1} ${item}`);
@@ -121,10 +176,29 @@ export default function Terminal() {
           output = [args.join(' ')];
           break;
         case 'login':
+          if (isAdminAuthenticated()) {
+            output = ['Você já possui uma sessão administrativa.'];
+          } else {
+            setAuthenticated(false);
+            setShowLogin(true);
+            output = ['Informe suas credenciais no formulário seguro.'];
+          }
+          break;
+        case 'logout': {
+          const remoteLogoutSucceeded = await logoutAdmin();
+
+          setAuthenticated(false);
+          setShowLogin(false);
+          setLoginEmail('');
+          setLoginPassword('');
+
           output = [
-            'Autenticação administrativa ainda não configurada. Nunca insira senhas neste terminal.',
+            remoteLogoutSucceeded
+              ? 'Sessão local encerrada e logout solicitado ao Supabase.'
+              : 'Sessão local encerrada. Não foi possível confirmar o logout remoto.',
           ];
           break;
+        }
         default:
           throw new Error('Comando não reconhecido. Use help.');
       }
@@ -152,6 +226,51 @@ export default function Terminal() {
           </div>
         ))}
       </div>
+      {showLogin && (
+        <form onSubmit={submitLogin}>
+          <h3>Autenticação administrativa</h3>
+
+          <label>
+            E-mail
+            <input
+              type="email"
+              value={loginEmail}
+              onChange={(event) => setLoginEmail(event.target.value)}
+              autoComplete="username"
+              required
+              maxLength={254}
+              disabled={busy}
+            />
+          </label>
+
+          <label>
+            Senha
+            <input
+              type="password"
+              value={loginPassword}
+              onChange={(event) => setLoginPassword(event.target.value)}
+              autoComplete="current-password"
+              required
+              disabled={busy}
+            />
+          </label>
+
+          <button type="submit" disabled={busy}>
+            {busy ? 'Autenticando...' : 'Entrar'}
+          </button>
+
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setShowLogin(false);
+              setLoginPassword('');
+            }}
+          >
+            Cancelar
+          </button>
+        </form>
+      )}
       <form onSubmit={execute}>
         <label>
           {t('Comando')}
