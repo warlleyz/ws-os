@@ -59,3 +59,11 @@ Medição sintética do algoritmo multiwidget (Node/VM, 25 distribuições por d
 Distribuicao sob demanda substitui enumeracao/ordenacao completas no caminho comum, preservando ordem de prioridade e desempate. Layout do hook memoizado por entradas reais para nao recalcular em atualizacoes sem relacao com a grade. Comparacao deterministica: 120 cenarios identicos antes/depois. Mesmo ensaio Node/VM: 4K media 0,95 ms/p95 1,63 ms (antes 18,6/23,5 ms); Full HD media 0,30 ms (antes 3,00 ms). Em 768x500, media 1,91 ms contra 1,51 ms: a melhora nao e uniforme em espacos congestionados. Nao equivale a medicao de FPS no navegador.
 
 Navegador: Desktop e tres widgets padrao renderizados, Taskbar funcional, Configuracoes abriu pelo teclado e listou os quatro widgets e tamanhos legados. Nenhum dado da origem habitual foi alterado. A consulta de localizacao retornou erro de permissao com feedback; nao foi concedida permissao de geolocalizacao.
+
+### M1 — temas e efeitos
+
+Medição no navegador encontrou Controles Rápidos sólido (rgb 27,39,54) com blur 28 px mesmo em transparência elevada. A causa é especificidade de seletores recentes sobrescrevendo a superfície semântica. WS Menu/Controles/Wally/notificações passam a consumir panel-background na própria regra, preservando composição e cartões.
+
+Removido blur interno duplicado dos widgets e cabeçalho/compositor Wally; mantida uma camada externa. Blur desligado/superfície sólida/redução de transparência/baixo custo desativam o filtro nas superfícies suportadas; respeitar o SO. Intensidade suave escala durações fixas dos módulos, sem mudar o modo normal; movimento reduzido/desligado continua prioritário. Scrollbars/seleção/foco em alto contraste compartilham tokens. Nenhuma dependência ou serviço remoto ativado.
+
+Validação M1 no navegador: Controles Rápidos passou a rgba(24,34,48,.88)/blur 28 px no escuro e rgba(255,255,255,.88)/texto 23,35,52 no claro. Widget tem blur externo 24 px e interno none. Reduzir transparência tornou painel/janela/widget sólidos e filtro none. O teclado operou as opções; foi identificada/corrigida tradução dinâmica ausente em temas, controles, descrições de widgets e fallbacks Wally. Sugestões prontas acompanham o idioma; perguntas digitadas são preservadas. Os ensaios não representam certificação WCAG ou teste físico de leitor de tela.

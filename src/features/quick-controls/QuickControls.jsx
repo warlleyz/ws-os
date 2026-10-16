@@ -1,4 +1,3 @@
-
 import {
   BellOff,
   BellRing,
@@ -18,43 +17,22 @@ import {
 } from 'lucide-react';
 
 import { useState } from 'react';
-import {
-  translate as t,
-  useLocale,
-  setLocale,
-} from '../../shared/i18n/i18n';
-import {
-  useAccessibility,
-  setAccessibility,
-} from '../../core/effectsManager';
+import { translate as t, useLocale, setLocale } from '../../shared/i18n/i18n';
+import { useAccessibility, setAccessibility } from '../../core/effectsManager';
 import { setTheme } from '../../core/themeManager';
-import {
-  useNotificationPreferences,
-  setDoNotDisturb,
-} from '../../core/notificationPreferences';
+import { useNotificationPreferences, setDoNotDisturb } from '../../core/notificationPreferences';
 import { useSystem } from '../../core/useSystem';
 import { openApp } from '../../core/appManager';
 import Tooltip from '../../shared/components/Tooltip';
 
 import './QuickControls.css';
 
-function ControlTile({
-  icon: Icon,
-  label,
-  description,
-  active,
-  onClick,
-  disabled = false,
-}) {
+function ControlTile({ icon: Icon, label, description, active, onClick, disabled = false }) {
   return (
-    <Tooltip
-      content={`${label} — ${active ? 'Ativado' : 'Desativado'}`}
-      delay={450}
-    >
+    <Tooltip content={`${label} — ${t(active ? 'Ativado' : 'Desativado')}`} delay={450}>
       <button
         type="button"
-        className={`ws-control-tile${active ? ' ws-control-tile--active' : ''
-          }`}
+        className={`ws-control-tile${active ? ' ws-control-tile--active' : ''}`}
         aria-pressed={active}
         disabled={disabled}
         onClick={onClick}
@@ -109,8 +87,7 @@ export default function QuickControls({
     if (saved === false) {
       notify({
         title: 'Preferência não salva',
-        message:
-          'A alteração permanece ativa nesta sessão, mas poderá ser perdida ao recarregar.',
+        message: 'A alteração permanece ativa nesta sessão, mas poderá ser perdida ao recarregar.',
         type: 'warning',
         source: 'Sistema',
       });
@@ -180,9 +157,7 @@ export default function QuickControls({
           <ControlTile
             icon={doNotDisturb ? BellOff : BellRing}
             label={t('Não Perturbe')}
-            description={t(
-              doNotDisturb ? 'Ativado' : 'Desativado',
-            )}
+            description={t(doNotDisturb ? 'Ativado' : 'Desativado')}
             active={doNotDisturb}
             onClick={() => report(setDoNotDisturb(!doNotDisturb))}
           />
@@ -192,25 +167,16 @@ export default function QuickControls({
             label={t('Baixo custo')}
             description={t('Reduzir efeitos')}
             active={Boolean(accessibility.lowEffects)}
-            onClick={() =>
-              changeEffect(
-                'lowEffects',
-                !accessibility.lowEffects,
-              )
-            }
+            onClick={() => changeEffect('lowEffects', !accessibility.lowEffects)}
           />
 
           {showAutoHideTaskbar ? (
             <ControlTile
               icon={PanelBottom}
               label={t('Ocultar Taskbar')}
-              description={t(
-                autoHideTaskbar ? 'Ativado' : 'Desativado',
-              )}
+              description={t(autoHideTaskbar ? 'Ativado' : 'Desativado')}
               active={Boolean(autoHideTaskbar)}
-              onClick={() =>
-                onAutoHideTaskbarChange(!autoHideTaskbar)
-              }
+              onClick={() => onAutoHideTaskbarChange(!autoHideTaskbar)}
             />
           ) : (
             <ControlTile
@@ -218,9 +184,7 @@ export default function QuickControls({
               label={t('Reduzir movimento')}
               description={t('Acessibilidade')}
               active={Boolean(accessibility.motion)}
-              onClick={() =>
-                changeEffect('motion', !accessibility.motion)
-              }
+              onClick={() => changeEffect('motion', !accessibility.motion)}
             />
           )}
         </div>
@@ -274,27 +238,21 @@ export default function QuickControls({
                 label="Reduzir movimento"
                 description="Minimizar animações"
                 checked={Boolean(accessibility.motion)}
-                onChange={(enabled) =>
-                  changeEffect('motion', enabled)
-                }
+                onChange={(enabled) => changeEffect('motion', enabled)}
               />
 
               <EffectToggle
                 label="Reduzir transparência"
                 description="Aumentar a opacidade dos painéis"
                 checked={Boolean(accessibility.transparency)}
-                onChange={(enabled) =>
-                  changeEffect('transparency', enabled)
-                }
+                onChange={(enabled) => changeEffect('transparency', enabled)}
               />
 
               <EffectToggle
                 label="Modo de baixo custo"
                 description="Reduzir efeitos visuais"
                 checked={Boolean(accessibility.lowEffects)}
-                onChange={(enabled) =>
-                  changeEffect('lowEffects', enabled)
-                }
+                onChange={(enabled) => changeEffect('lowEffects', enabled)}
               />
             </div>
           )}
@@ -308,11 +266,7 @@ export default function QuickControls({
         </span>
 
         <Tooltip content={t('Abrir Configurações')}>
-          <button
-            type="button"
-            onClick={openSettings}
-            aria-label={t('Abrir Configurações')}
-          >
+          <button type="button" onClick={openSettings} aria-label={t('Abrir Configurações')}>
             <Settings2 size={15} aria-hidden="true" />
             {t('Configurações')}
             <ExternalLink size={13} aria-hidden="true" />

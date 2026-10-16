@@ -65,9 +65,9 @@
   cursor: default;
   user-select: none;
   transition:
-    background-color 120ms ease,
-    border-color 120ms ease,
-    transform 120ms ease;
+    background-color calc(var(--motion-scale, 1) * 120ms) ease,
+    border-color calc(var(--motion-scale, 1) * 120ms) ease,
+    transform calc(var(--motion-scale, 1) * 120ms) ease;
 }
 
 .desktop__shortcut:hover {
@@ -109,10 +109,10 @@
   -webkit-backdrop-filter: blur(var(--blur-light)) saturate(120%);
 
   transition:
-    background 120ms ease,
-    border-color 120ms ease,
-    box-shadow 120ms ease,
-    transform 120ms ease;
+    background calc(var(--motion-scale, 1) * 120ms) ease,
+    border-color calc(var(--motion-scale, 1) * 120ms) ease,
+    box-shadow calc(var(--motion-scale, 1) * 120ms) ease,
+    transform calc(var(--motion-scale, 1) * 120ms) ease;
 }
 
 .desktop__shortcut-indicator {
@@ -303,8 +303,8 @@
   text-align: left;
   cursor: pointer;
   transition:
-    background-color 120ms ease,
-    color 120ms ease;
+    background-color calc(var(--motion-scale, 1) * 120ms) ease,
+    color calc(var(--motion-scale, 1) * 120ms) ease;
 }
 
 .desktop__context--modern button:hover {
@@ -397,11 +397,11 @@
   color: var(--accent-secondary);
 }
 
-.desktop__context--modern button[aria-pressed='true']>svg:last-child {
+.desktop__context--modern button[aria-pressed='true'] > svg:last-child {
   margin-left: auto;
 }
 
-.desktop__context--modern button>span {
+.desktop__context--modern button > span {
   flex: 1;
   min-width: 0;
 }

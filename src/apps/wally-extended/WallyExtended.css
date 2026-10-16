@@ -3,681 +3,666 @@
    ========================================== */
 
 .ws-wally-extended {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-    padding: 0;
-    background:
-        radial-gradient(circle at top left,
-            color-mix(in srgb, var(--accent-secondary) 9%, transparent),
-            transparent 32%),
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--surface-secondary) 55%, transparent),
-            transparent 28%),
-        var(--surface-primary);
-    color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--accent-secondary) 9%, transparent),
+      transparent 32%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-secondary) 55%, transparent),
+      transparent 28%
+    ),
+    var(--surface-primary);
+  color: var(--text-primary);
 }
 
 /* Header */
 
 .wally-ext__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-shrink: 0;
-    padding: 18px 22px 16px;
-    border-bottom: 1px solid var(--border-default);
-    background: color-mix(in srgb,
-            var(--surface-secondary) 72%,
-            transparent);
-    backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--border-default);
+  background: color-mix(in srgb, var(--surface-secondary) 72%, transparent);
+  backdrop-filter: none;
 }
 
 .wally-ext__brand {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
 }
 
 .wally-ext__avatar,
 .wally-ext__welcome-icon {
-    display: grid;
-    place-items: center;
-    color: var(--accent-secondary);
-    background:
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--accent-secondary) 16%, var(--surface-secondary)),
-            color-mix(in srgb, var(--accent-secondary) 8%, var(--surface-primary)));
-    border: 1px solid color-mix(in srgb,
-            var(--accent-secondary) 28%,
-            var(--border-default));
-    box-shadow:
-        0 10px 24px color-mix(in srgb, var(--accent-secondary) 10%, transparent),
-        inset 0 1px 0 color-mix(in srgb, white 18%, transparent);
+  display: grid;
+  place-items: center;
+  color: var(--accent-secondary);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-secondary) 16%, var(--surface-secondary)),
+    color-mix(in srgb, var(--accent-secondary) 8%, var(--surface-primary))
+  );
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 28%, var(--border-default));
+  box-shadow:
+    0 10px 24px color-mix(in srgb, var(--accent-secondary) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 18%, transparent);
 }
 
 .wally-ext__avatar {
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
-    border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 16px;
 }
 
 .wally-ext__brand-info {
-    min-width: 0;
+  min-width: 0;
 }
 
 .wally-ext__title-row {
-    display: flex;
-    align-items: center;
-    gap: 9px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
 }
 
 .wally-ext__title-row h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 780;
-    letter-spacing: -0.02em;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 780;
+  letter-spacing: -0.02em;
 }
 
 .wally-ext__version {
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: color-mix(in srgb,
-            var(--accent-secondary) 10%,
-            var(--surface-secondary));
-    border: 1px solid color-mix(in srgb,
-            var(--accent-secondary) 22%,
-            var(--border-default));
-    color: var(--accent-secondary);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.9px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-secondary) 10%, var(--surface-secondary));
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 22%, var(--border-default));
+  color: var(--accent-secondary);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
 }
 
 .wally-ext__brand-info p {
-    margin: 4px 0 0;
-    color: var(--text-secondary);
-    font-size: 11px;
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 11px;
 }
 
 .wally-ext__header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .wally-ext__mode {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 7px 11px;
-    border: 1px solid var(--border-default);
-    border-radius: 999px;
-    background: color-mix(in srgb,
-            var(--surface-secondary) 82%,
-            transparent);
-    color: var(--text-secondary);
-    font-size: 11px;
-    font-weight: 650;
-    white-space: nowrap;
-    box-shadow: inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-secondary) 82%, transparent);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
 }
 
 .wally-ext__status-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--accent-secondary);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-secondary) 18%, transparent);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-secondary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-secondary) 18%, transparent);
 }
 
 .ws-wally-extended .wally-ext__icon-button {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    min-height: 36px;
-    padding: 0;
-    border: 1px solid var(--border-default);
-    border-radius: 11px;
-    background: color-mix(in srgb,
-            var(--surface-secondary) 84%,
-            transparent);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition:
-        transform 160ms ease,
-        border-color 160ms ease,
-        background 160ms ease;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--surface-secondary) 84%, transparent);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    transform calc(var(--motion-scale, 1) * 160ms) ease,
+    border-color calc(var(--motion-scale, 1) * 160ms) ease,
+    background calc(var(--motion-scale, 1) * 160ms) ease;
 }
 
 .ws-wally-extended .wally-ext__icon-button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb,
-            var(--accent-secondary) 28%,
-            var(--border-default));
-    color: var(--text-primary);
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent-secondary) 28%, var(--border-default));
+  color: var(--text-primary);
 }
 
 .ws-wally-extended .wally-ext__icon-button:disabled {
-    opacity: 0.45;
-    cursor: default;
+  opacity: 0.45;
+  cursor: default;
 }
 
 /* Conversation */
 
 .wally-ext__conversation {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 24px 24px 18px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-default) transparent;
-    scrollbar-gutter: stable;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px 24px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+  scrollbar-gutter: stable;
 }
 
 .wally-ext__welcome {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 700px;
-    margin: auto;
-    text-align: center;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
+  text-align: center;
 }
 
 .wally-ext__welcome-icon {
-    width: 78px;
-    height: 78px;
-    margin-bottom: 20px;
-    border-radius: 24px;
+  width: 78px;
+  height: 78px;
+  margin-bottom: 20px;
+  border-radius: 24px;
 }
 
 .wally-ext__eyebrow {
-    margin-bottom: 11px;
-    color: var(--accent-secondary);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.8px;
+  margin-bottom: 11px;
+  color: var(--accent-secondary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
 }
 
 .wally-ext__welcome h3 {
-    margin: 0 0 11px;
-    font-size: clamp(22px, 3vw, 30px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
+  margin: 0 0 11px;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
-.wally-ext__welcome>p {
-    max-width: 470px;
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 13px;
-    line-height: 1.8;
+.wally-ext__welcome > p {
+  max-width: 470px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.8;
 }
 
 .wally-ext__suggestion-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 11px;
-    width: 100%;
-    margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+  width: 100%;
+  margin-top: 30px;
 }
 
 .ws-wally-extended .wally-ext__suggestion {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    min-height: 56px;
-    padding: 13px 14px;
-    border: 1px solid var(--border-default);
-    border-radius: 14px;
-    background:
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--surface-secondary) 84%, transparent),
-            color-mix(in srgb, var(--surface-primary) 96%, transparent));
-    color: var(--text-primary);
-    text-align: left;
-    font-size: 12px;
-    cursor: pointer;
-    transition:
-        transform 160ms ease,
-        border-color 160ms ease,
-        background 160ms ease,
-        box-shadow 160ms ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 13px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-secondary) 84%, transparent),
+    color-mix(in srgb, var(--surface-primary) 96%, transparent)
+  );
+  color: var(--text-primary);
+  text-align: left;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    transform calc(var(--motion-scale, 1) * 160ms) ease,
+    border-color calc(var(--motion-scale, 1) * 160ms) ease,
+    background calc(var(--motion-scale, 1) * 160ms) ease,
+    box-shadow calc(var(--motion-scale, 1) * 160ms) ease;
 }
 
-.wally-ext__suggestion>svg:first-child {
-    flex-shrink: 0;
-    color: var(--accent-secondary);
+.wally-ext__suggestion > svg:first-child {
+  flex-shrink: 0;
+  color: var(--accent-secondary);
 }
 
 .wally-ext__suggestion-arrow {
-    flex-shrink: 0;
-    margin-left: auto;
-    rotate: 45deg;
-    color: var(--text-secondary);
+  flex-shrink: 0;
+  margin-left: auto;
+  rotate: 45deg;
+  color: var(--text-secondary);
 }
 
 .ws-wally-extended .wally-ext__suggestion:hover {
-    transform: translateY(-2px);
-    border-color: color-mix(in srgb,
-            var(--accent-secondary) 30%,
-            var(--border-default));
-    box-shadow: 0 10px 22px color-mix(in srgb, var(--accent-secondary) 10%, transparent);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent-secondary) 30%, var(--border-default));
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--accent-secondary) 10%, transparent);
 }
 
 /* Messages */
 
 .wally-ext__messages {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .wally-ext__message {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
 }
 
 .wally-ext__message--user {
-    justify-content: flex-end;
+  justify-content: flex-end;
 }
 
 .wally-ext__message-avatar {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
-    border: 1px solid color-mix(in srgb,
-            var(--accent-secondary) 24%,
-            var(--border-default));
-    border-radius: 11px;
-    background:
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--accent-secondary) 9%, var(--surface-secondary)),
-            color-mix(in srgb, var(--surface-secondary) 94%, transparent));
-    color: var(--accent-secondary);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 24%, var(--border-default));
+  border-radius: 11px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-secondary) 9%, var(--surface-secondary)),
+    color-mix(in srgb, var(--surface-secondary) 94%, transparent)
+  );
+  color: var(--accent-secondary);
 }
 
 .wally-ext__message-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    max-width: 82%;
-    min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 82%;
+  min-width: 0;
 }
 
 .wally-ext__message--user .wally-ext__message-content {
-    align-items: flex-end;
+  align-items: flex-end;
 }
 
 .wally-ext__message-author {
-    padding: 0 4px;
-    color: var(--text-secondary);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+  padding: 0 4px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .wally-ext__bubble {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    max-width: 100%;
-    min-width: 0;
-    padding: 14px 16px;
-    border: 1px solid var(--border-default);
-    border-radius: 16px 16px 16px 5px;
-    background:
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--surface-secondary) 92%, transparent),
-            color-mix(in srgb, var(--surface-primary) 100%, transparent));
-    box-shadow:
-        0 12px 32px color-mix(in srgb, black 6%, transparent),
-        inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border-default);
+  border-radius: 16px 16px 16px 5px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-secondary) 92%, transparent),
+    color-mix(in srgb, var(--surface-primary) 100%, transparent)
+  );
+  box-shadow:
+    0 12px 32px color-mix(in srgb, black 6%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
 }
 
 .wally-ext__message--user .wally-ext__bubble {
-    border-radius: 16px 16px 5px 16px;
-    border-color: color-mix(in srgb,
-            var(--accent-secondary) 30%,
-            var(--border-default));
-    background:
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--accent-secondary) 16%, var(--surface-secondary)),
-            color-mix(in srgb, var(--accent-secondary) 8%, var(--surface-primary)));
+  border-radius: 16px 16px 5px 16px;
+  border-color: color-mix(in srgb, var(--accent-secondary) 30%, var(--border-default));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-secondary) 16%, var(--surface-secondary)),
+    color-mix(in srgb, var(--accent-secondary) 8%, var(--surface-primary))
+  );
 }
 
 .wally-ext__bubble p {
-    margin: 0;
-    color: var(--text-primary);
-    font-size: 13px;
-    line-height: 1.75;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .wally-ext__cancelled,
 .wally-ext__message-provider {
-    font-size: 10px;
-    color: var(--text-secondary);
+  font-size: 10px;
+  color: var(--text-secondary);
 }
 
 .ws-wally-extended .wally-ext__app-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    min-height: 33px;
-    padding: 7px 10px;
-    border: 1px solid color-mix(in srgb,
-            var(--accent-secondary) 18%,
-            var(--border-default));
-    border-radius: 9px;
-    background: color-mix(in srgb,
-            var(--surface-primary) 96%,
-            transparent);
-    color: var(--accent-secondary);
-    font-size: 11px;
-    cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 33px;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--accent-secondary) 18%, var(--border-default));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface-primary) 96%, transparent);
+  color: var(--accent-secondary);
+  font-size: 11px;
+  cursor: pointer;
 }
 
 /* Thinking */
 
 .wally-ext__thinking {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    width: 100%;
-    max-width: 900px;
-    margin: 18px auto 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  max-width: 900px;
+  margin: 18px auto 0;
 }
 
 .wally-ext__thinking-content {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    padding: 11px 13px;
-    border: 1px solid var(--border-default);
-    border-radius: 12px;
-    background:
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--surface-secondary) 90%, transparent),
-            color-mix(in srgb, var(--surface-primary) 98%, transparent));
-    color: var(--text-secondary);
-    font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-secondary) 90%, transparent),
+    color-mix(in srgb, var(--surface-primary) 98%, transparent)
+  );
+  color: var(--text-secondary);
+  font-size: 12px;
 }
 
 .wally-ext__spinner {
-    flex-shrink: 0;
-    animation: wally-ext-spin 1s linear infinite;
+  flex-shrink: 0;
+  animation: wally-ext-spin 1s linear infinite;
 }
 
 .ws-wally-extended .wally-ext__thinking-content button {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    min-height: 30px;
-    padding: 5px 8px;
-    font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 5px 8px;
+  font-size: 11px;
 }
 
 /* Bottom / Composer */
 
 .wally-ext__bottom {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    padding: 14px 22px 16px;
-    border-top: 1px solid var(--border-default);
-    background:
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--surface-primary) 65%, transparent),
-            var(--surface-primary));
-    backdrop-filter: blur(18px);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 22px 16px;
+  border-top: 1px solid var(--border-default);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-primary) 65%, transparent),
+    var(--surface-primary)
+  );
+  backdrop-filter: none;
 }
 
 .wally-ext__notice {
-    max-width: 900px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 9px 12px;
-    border: 1px solid var(--border-default);
-    border-radius: 10px;
-    background: color-mix(in srgb,
-            var(--surface-secondary) 86%,
-            transparent);
-    color: var(--text-secondary);
-    font-size: 11px;
-    line-height: 1.55;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 9px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-secondary) 86%, transparent);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.55;
 }
 
 .wally-ext__turnstile {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 /* Deixa o Turnstile invisível sem criar aquele quadrado na interface */
 .wally-ext__turnstile .ws-wally__verification {
-    width: 0;
-    min-width: 0;
-    height: 0;
-    min-height: 0;
-    margin: 0;
-    overflow: hidden;
+  width: 0;
+  min-width: 0;
+  height: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
-.wally-ext__turnstile .ws-wally__verification>div {
-    width: 0;
-    max-width: 0;
-    height: 0;
-    overflow: hidden;
+.wally-ext__turnstile .ws-wally__verification > div {
+  width: 0;
+  max-width: 0;
+  height: 0;
+  overflow: hidden;
 }
 
 .wally-ext__turnstile .ws-wally__verification-info,
 .wally-ext__turnstile .ws-wally__verification p {
-    display: none;
+  display: none;
 }
 
 .wally-ext__composer {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-width: 900px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 11px 13px 9px;
-    border: 1px solid var(--border-control);
-    border-radius: 16px;
-    background:
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--surface-secondary) 94%, transparent),
-            color-mix(in srgb, var(--surface-primary) 100%, transparent));
-    box-shadow:
-        0 12px 30px color-mix(in srgb, black 5%, transparent),
-        inset 0 1px 0 color-mix(in srgb, white 9%, transparent);
-    transition:
-        border-color 160ms ease,
-        box-shadow 160ms ease,
-        transform 160ms ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 11px 13px 9px;
+  border: 1px solid var(--border-control);
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-secondary) 94%, transparent),
+    color-mix(in srgb, var(--surface-primary) 100%, transparent)
+  );
+  box-shadow:
+    0 12px 30px color-mix(in srgb, black 5%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 9%, transparent);
+  transition:
+    border-color calc(var(--motion-scale, 1) * 160ms) ease,
+    box-shadow calc(var(--motion-scale, 1) * 160ms) ease,
+    transform calc(var(--motion-scale, 1) * 160ms) ease;
 }
 
 .wally-ext__composer:focus-within {
-    border-color: color-mix(in srgb,
-            var(--accent-secondary) 34%,
-            var(--border-control));
-    box-shadow:
-        0 16px 36px color-mix(in srgb, var(--accent-secondary) 8%, transparent),
-        inset 0 1px 0 color-mix(in srgb, white 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent-secondary) 34%, var(--border-control));
+  box-shadow:
+    0 16px 36px color-mix(in srgb, var(--accent-secondary) 8%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 12%, transparent);
 }
 
 .ws-wally-extended .wally-ext__composer textarea {
-    width: 100%;
-    min-height: 46px;
-    max-height: 150px;
-    padding: 5px 4px 4px;
-    resize: vertical;
-    border: 0;
-    border-radius: 0;
-    outline: none;
-    background: transparent;
-    color: var(--text-primary);
-    font: inherit;
-    font-size: 13px;
-    line-height: 1.65;
+  width: 100%;
+  min-height: 46px;
+  max-height: 150px;
+  padding: 5px 4px 4px;
+  resize: vertical;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .ws-wally-extended .wally-ext__composer textarea::placeholder {
-    color: color-mix(in srgb, var(--text-secondary) 85%, transparent);
+  color: color-mix(in srgb, var(--text-secondary) 85%, transparent);
 }
 
 .wally-ext__composer-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .wally-ext__character-count,
 .wally-ext__composer-hint {
-    color: var(--text-secondary);
-    font-size: 10px;
+  color: var(--text-secondary);
+  font-size: 10px;
 }
 
 .wally-ext__composer-hint {
-    margin-left: auto;
+  margin-left: auto;
 }
 
 .ws-wally-extended .wally-ext__send-button {
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    min-width: 36px;
-    width: 36px;
-    min-height: 36px;
-    height: 36px;
-    padding: 0;
-    border: 0;
-    border-radius: 12px;
-    background:
-        linear-gradient(180deg,
-            color-mix(in srgb, var(--accent-secondary) 94%, white 6%),
-            var(--accent-secondary));
-    color: var(--surface-primary);
-    box-shadow: 0 10px 20px color-mix(in srgb, var(--accent-secondary) 22%, transparent);
-    cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 36px;
+  width: 36px;
+  min-height: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-secondary) 94%, white 6%),
+    var(--accent-secondary)
+  );
+  color: var(--surface-primary);
+  box-shadow: 0 10px 20px color-mix(in srgb, var(--accent-secondary) 22%, transparent);
+  cursor: pointer;
 }
 
 .ws-wally-extended .wally-ext__send-button:disabled {
-    opacity: 0.45;
-    cursor: default;
-    box-shadow: none;
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
 }
 
 .wally-ext__footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    max-width: 900px;
-    width: 100%;
-    margin: 0 auto;
-    color: var(--text-secondary);
-    font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  color: var(--text-secondary);
+  font-size: 10px;
 }
 
 .wally-ext__footer span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 @keyframes wally-ext-spin {
-    to {
-        transform: rotate(360deg);
-    }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive */
 
 @media (max-width: 700px) {
-    .wally-ext__header {
-        padding: 14px 14px 12px;
-    }
+  .wally-ext__header {
+    padding: 14px 14px 12px;
+  }
 
-    .wally-ext__conversation {
-        padding: 16px 14px 14px;
-    }
+  .wally-ext__conversation {
+    padding: 16px 14px 14px;
+  }
 
-    .wally-ext__bottom {
-        padding: 10px 14px 12px;
-    }
+  .wally-ext__bottom {
+    padding: 10px 14px 12px;
+  }
 
-    .wally-ext__suggestion-grid {
-        grid-template-columns: 1fr;
-    }
+  .wally-ext__suggestion-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .wally-ext__message-content {
-        max-width: 90%;
-    }
+  .wally-ext__message-content {
+    max-width: 90%;
+  }
 
-    .wally-ext__composer-hint {
-        display: none;
-    }
+  .wally-ext__composer-hint {
+    display: none;
+  }
 }
 
 @media (max-height: 560px) {
-    .wally-ext__welcome {
-        justify-content: flex-start;
-    }
+  .wally-ext__welcome {
+    justify-content: flex-start;
+  }
 
-    .wally-ext__welcome-icon {
-        width: 58px;
-        height: 58px;
-        margin-bottom: 12px;
-    }
+  .wally-ext__welcome-icon {
+    width: 58px;
+    height: 58px;
+    margin-bottom: 12px;
+  }
 
-    .wally-ext__suggestion-grid {
-        margin-top: 16px;
-    }
+  .wally-ext__suggestion-grid {
+    margin-top: 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .wally-ext__spinner {
-        animation: none;
-    }
+  .wally-ext__spinner {
+    animation: none;
+  }
 
-    .ws-wally-extended .wally-ext__suggestion,
-    .ws-wally-extended .wally-ext__icon-button,
-    .wally-ext__composer {
-        transition: none;
-    }
+  .ws-wally-extended .wally-ext__suggestion,
+  .ws-wally-extended .wally-ext__icon-button,
+  .wally-ext__composer {
+    transition: none;
+  }
 }

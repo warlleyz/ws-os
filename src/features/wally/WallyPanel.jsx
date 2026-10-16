@@ -149,7 +149,7 @@ export default function WallyPanel({ setWallyOpen }) {
                 <button
                   key={suggestion.label}
                   type="button"
-                  onClick={() => ask(suggestion.question)}
+                  onClick={() => ask(t(suggestion.question))}
                 >
                   <CircleHelp size={14} aria-hidden="true" />
                   {t(suggestion.label)}

@@ -143,7 +143,6 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
 
   const triggerProps = {
     ...children.props,
-    key: children.key,
     ref: triggerRef,
 
     'aria-describedby': [children.props['aria-describedby'], visible ? id : null]
@@ -231,7 +230,7 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
       }
     },
   };
-  const trigger = <children.type {...triggerProps} />;
+  const trigger = <children.type key={children.key} {...triggerProps} />;
 
   return (
     <>

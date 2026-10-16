@@ -1,5 +1,6 @@
 /* Controlled appearance; accessibility rules come last. */
 :root {
+  --motion-scale: 1;
   --ws-glass-opacity: 0.92;
   --ws-glass-rgb: 24 34 48;
   --ws-glass: rgb(var(--ws-glass-rgb) / var(--ws-glass-opacity));
@@ -65,6 +66,7 @@
   --ws-glass-opacity: 0.88;
 }
 :root[data-motion-intensity='subtle'] {
+  --motion-scale: 0.5;
   --transition-fast: 60ms;
   --transition-normal: 100ms;
 }
@@ -76,8 +78,7 @@
   scroll-behavior: auto !important;
 }
 .desktop-window__header,
-.desktop__context,
-.ws-widget {
+.desktop__context {
   background: var(--ws-glass);
   backdrop-filter: blur(var(--blur-medium));
 }

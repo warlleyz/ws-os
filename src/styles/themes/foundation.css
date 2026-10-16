@@ -218,3 +218,31 @@ a {
     min-height: 44px;
   }
 }
+
+/* Rolagem e estados comuns, sem substituir a composição de cada aplicativo. */
+:where(
+  .desktop-window__content,
+  .ws-app,
+  .ws-mobile__app,
+  .taskbar-floating-layer,
+  .ws-mobile__panel
+) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-control) transparent;
+  overscroll-behavior: contain;
+}
+:where(.desktop-window, .taskbar-floating-layer, .ws-mobile__panel) ::selection {
+  background: var(--action-background);
+  color: var(--action-text);
+}
+:where(button:disabled, input:disabled, select:disabled, textarea:disabled) {
+  cursor: not-allowed;
+}
+@media (forced-colors: active) {
+  :where(button, input, select, textarea, a, [tabindex]):focus-visible {
+    outline: 2px solid Highlight;
+  }
+  :where(.desktop-window, .desktop__widget, .taskbar) {
+    border-color: CanvasText;
+  }
+}

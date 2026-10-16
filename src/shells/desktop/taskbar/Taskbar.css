@@ -113,8 +113,8 @@
   background: transparent;
   color: var(--text-primary);
   transition:
-    background-color 150ms ease,
-    opacity 150ms ease;
+    background-color calc(var(--motion-scale, 1) * 150ms) ease,
+    opacity calc(var(--motion-scale, 1) * 150ms) ease;
 }
 
 .taskbar__app:hover,
@@ -171,8 +171,8 @@
   background: transparent;
   color: var(--text-secondary);
   transition:
-    background-color 140ms ease,
-    color 140ms ease;
+    background-color calc(var(--motion-scale, 1) * 140ms) ease,
+    color calc(var(--motion-scale, 1) * 140ms) ease;
 }
 
 .taskbar__system-button:not(:disabled) {

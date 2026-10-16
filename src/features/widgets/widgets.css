@@ -29,18 +29,16 @@
 
   box-shadow: var(--panel-shadow, var(--shadow-floating));
 
-  backdrop-filter:
-    blur(var(--blur-medium, 12px)) saturate(var(--ws-glass-saturation, 135%));
+  backdrop-filter: blur(var(--blur-medium, 12px)) saturate(var(--ws-glass-saturation, 135%));
 
-  -webkit-backdrop-filter:
-    blur(var(--blur-medium, 12px)) saturate(var(--ws-glass-saturation, 135%));
+  -webkit-backdrop-filter: blur(var(--blur-medium, 12px)) saturate(var(--ws-glass-saturation, 135%));
 
   isolation: isolate;
 
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    opacity 160ms ease;
+    border-color calc(var(--motion-scale, 1) * 160ms) ease,
+    box-shadow calc(var(--motion-scale, 1) * 160ms) ease,
+    opacity calc(var(--motion-scale, 1) * 160ms) ease;
 }
 
 /* Estado de interação */
@@ -67,7 +65,7 @@
    Conteúdo compartilhado
    ========================================================== */
 
-.desktop__widget>.ws-widget {
+.desktop__widget > .ws-widget {
   display: flex;
   flex-direction: column;
 
@@ -88,31 +86,32 @@
   box-shadow: none;
 
   background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   color: var(--text-primary);
 
   overflow: auto;
   overscroll-behavior: contain;
 
   scrollbar-width: thin;
-  scrollbar-color:
-    var(--border-control) transparent;
+  scrollbar-color: var(--border-control) transparent;
 }
 
-.desktop__widget>.ws-widget::-webkit-scrollbar {
+.desktop__widget > .ws-widget::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
-.desktop__widget>.ws-widget::-webkit-scrollbar-track {
+.desktop__widget > .ws-widget::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.desktop__widget>.ws-widget::-webkit-scrollbar-thumb {
+.desktop__widget > .ws-widget::-webkit-scrollbar-thumb {
   background: var(--border-control);
   border-radius: 99px;
 }
 
-.desktop__widget>.ws-widget::-webkit-scrollbar-thumb:hover {
+.desktop__widget > .ws-widget::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
 
@@ -153,7 +152,7 @@
   color: var(--text-primary);
 }
 
-.ws-widget--clock>span {
+.ws-widget--clock > span {
   font-size: 12px;
   line-height: 1.4;
   font-weight: 500;
@@ -180,7 +179,7 @@
   padding-inline: 5px;
 }
 
-.desktop__widget[data-widget-size='2x2'] .desktop__widget-size>span {
+.desktop__widget[data-widget-size='2x2'] .desktop__widget-size > span {
   display: none;
 }
 
@@ -221,7 +220,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .desktop__widget,
   .desktop__widget * {
     transition: none;
@@ -277,10 +275,10 @@
   transform: translateY(3px);
 
   transition:
-    opacity 150ms ease,
-    transform 150ms ease,
-    background 150ms ease,
-    color 150ms ease;
+    opacity calc(var(--motion-scale, 1) * 150ms) ease,
+    transform calc(var(--motion-scale, 1) * 150ms) ease,
+    background calc(var(--motion-scale, 1) * 150ms) ease,
+    color calc(var(--motion-scale, 1) * 150ms) ease;
 }
 
 .desktop__widget:hover .desktop__widget-grip,
@@ -336,7 +334,7 @@
   transform: none;
 }
 
-.desktop__widget>.ws-widget {
+.desktop__widget > .ws-widget {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;

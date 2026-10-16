@@ -191,7 +191,7 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0;
-  transition: opacity 120ms ease;
+  transition: opacity calc(var(--motion-scale, 1) * 120ms) ease;
   position: relative;
   z-index: 1;
 }
