@@ -1,11 +1,15 @@
-// Conteúdo público editável. Use strings ou { 'pt-BR': '...', en: '...' } nos textos.
-// Nunca coloque chaves privadas ou dados de visitantes neste arquivo.
+
+// Conteúdo público do portfólio WS OS.
+// Não adicionar chaves privadas ou informações de visitantes.
+
 export const portfolio = {
   githubUser: 'warlleyz',
-  notesEndpoint: '', // /api/posts quando o backend estiver configurado.
-  posts: [], // Apenas publicações públicas: { id, title, summary, body, tags: [], status: 'published', publishedAt: ISO }. Nunca rascunhos privados.
-  wakatimeProxy: '', // Endpoint próprio protegido, ex.: /api/wakatime. Não é uma chave de API.
 
+  notesEndpoint: '',
+  posts: [],
+  wakatimeProxy: '',
+
+  // PERFIL PROFISSIONAL
 
   profile: {
     name: 'Warlley Silva',
@@ -89,6 +93,8 @@ export const portfolio = {
     ],
   },
 
+  // CURRÍCULO
+
   resume: {
     url: 'documents/curriculo-warlley.pdf',
 
@@ -99,6 +105,7 @@ export const portfolio = {
           'pt-BR': 'Formação acadêmica',
           en: 'Education',
         },
+
         items: [
           {
             title: {
@@ -106,8 +113,10 @@ export const portfolio = {
               en: "Bachelor's Degree in Software Engineering",
             },
             description: {
-              'pt-BR': 'Pontifícia Universidade Católica de Minas Gerais (PUC Minas). Graduação em andamento.',
-              en: 'Pontifical Catholic University of Minas Gerais (PUC Minas). Undergraduate degree in progress.',
+              'pt-BR':
+                'Pontifícia Universidade Católica de Minas Gerais (PUC Minas). Graduação em andamento.',
+              en:
+                'Pontifical Catholic University of Minas Gerais (PUC Minas). Undergraduate degree in progress.',
             },
             period: 'Em andamento',
           },
@@ -120,6 +129,7 @@ export const portfolio = {
           'pt-BR': 'Conhecimentos técnicos',
           en: 'Technical Skills',
         },
+
         items: [
           {
             title: {
@@ -127,8 +137,10 @@ export const portfolio = {
               en: 'Programming and Development',
             },
             description: {
-              'pt-BR': 'Java, JavaScript, Python, PHP, HTML, CSS, Programação Orientada a Objetos e desenvolvimento web.',
-              en: 'Java, JavaScript, Python, PHP, HTML, CSS, Object-Oriented Programming, and web development.',
+              'pt-BR':
+                'Java, JavaScript, Python, PHP, HTML, CSS, Programação Orientada a Objetos e desenvolvimento web.',
+              en:
+                'Java, JavaScript, Python, PHP, HTML, CSS, Object-Oriented Programming, and web development.',
             },
             period: '',
           },
@@ -138,8 +150,10 @@ export const portfolio = {
               en: 'Frameworks and Integration',
             },
             description: {
-              'pt-BR': 'Spring Boot, APIs REST, Maven e integração entre aplicações.',
-              en: 'Spring Boot, REST APIs, Maven, and application integration.',
+              'pt-BR':
+                'Spring Boot, APIs REST, Maven e integração entre aplicações.',
+              en:
+                'Spring Boot, REST APIs, Maven, and application integration.',
             },
             period: '',
           },
@@ -149,8 +163,10 @@ export const portfolio = {
               en: 'Tools and Data',
             },
             description: {
-              'pt-BR': 'Git, GitHub, Docker, Figma, modelagem de dados e fundamentos de banco de dados.',
-              en: 'Git, GitHub, Docker, Figma, data modeling, and database fundamentals.',
+              'pt-BR':
+                'Git, GitHub, Docker, Figma, modelagem de dados e fundamentos de banco de dados.',
+              en:
+                'Git, GitHub, Docker, Figma, data modeling, and database fundamentals.',
             },
             period: '',
           },
@@ -158,56 +174,85 @@ export const portfolio = {
       },
     ],
   },
+
+  // CERTIFICADOS
+
   certificates: [
     {
       id: 'power-bi-gestao-enap',
+
       title: {
         'pt-BR': 'Aplicação do Power BI para Aprimoramento da Gestão',
         en: 'Applying Power BI to Improve Management',
       },
+
       issuer: 'Escola Nacional de Administração Pública — ENAP',
       category: 'course',
       date: '2026-09-21',
+
       description: {
         'pt-BR':
           'Curso de 25 horas sobre obtenção e transformação de dados, modelagem, cálculos, visualização e publicação de relatórios com Power BI.',
         en:
           'A 25-hour course covering data acquisition and transformation, modeling, calculations, visualization, and report publishing with Power BI.',
       },
+
       url: 'certificates/courses/power-bi-gestao.pdf',
     },
+
     {
       id: 'github-copilot-dev-days',
+
       title: 'GitHub Copilot Dev Days na PUC Minas',
+
       issuer: 'PUC Minas — ICEI',
       category: 'achievement',
       date: '2026-05-12',
+
       description: {
         'pt-BR':
           'Participação de 2 horas em evento sobre desenvolvimento de software e inteligência artificial aplicada à programação.',
         en:
           'Participation in a two-hour event about software development and artificial intelligence applied to programming.',
       },
+
       url: 'certificates/events/github-copilot-dev-days.pdf',
     },
+
     {
       id: 'we-make-software-coreu-2026-01',
+
       title: 'We Make Software — COREU 2026/1',
+
       issuer: 'PUC Minas — Engenharia de Software',
       category: 'achievement',
       date: '2026-03-16',
+
       description: {
         'pt-BR':
           'Participação de 4 horas no evento We Make Software, promovido pela área de Engenharia de Software da PUC Minas.',
         en:
           'Participation in a four-hour We Make Software event organized by the Software Engineering department at PUC Minas.',
       },
+
       url: 'certificates/events/we-make-software-coreu-2026-01.pdf',
     },
   ],
-  projects: [], // { id, name, description, technologies: [], status, repository, image, demos: [{ id, title, mode: external|embedded|hosted|simulated, url }] }
-  demoOrigins: [], // Origens HTTPS autorizadas a embed. URLs externas continuam disponíveis sem embed.
-  officialFiles: [], // { id, name, url, description }. Somente leitura; caminhos públicos do próprio site.
+
+  // PROJETOS E DEMONSTRAÇÕES
+
+  // Repositórios carregados automaticamente pela API do GitHub.
+  // Este array permanece disponível para futuras personalizações.
+  projects: [],
+
+  demoOrigins: [],
+
+  // ARQUIVOS OFICIAIS
+
+  officialFiles: [],
+
+  // CONTATO E EMAILJS
+
   contact: {
     links: [
       {
@@ -231,15 +276,20 @@ export const portfolio = {
         url: 'https://discord.com/users/814927706184613928',
       },
     ],
+
     emailService: 'service_ss81zgq',
     emailTemplate: 'template_heie6oa',
     emailPublicKey: 'dR_srJZx9lh9_GOta',
   },
 };
 
+// LEITURA DE CONTEÚDO MULTILÍNGUE
+
 export function contentText(value, locale = 'pt-BR') {
   if (typeof value === 'string') return value;
+
   if (!value || typeof value !== 'object') return '';
+
   return typeof value[locale] === 'string'
     ? value[locale]
     : typeof value['pt-BR'] === 'string'
