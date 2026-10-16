@@ -350,7 +350,7 @@ test('widget é realocado quando sua posição preferida não cabe', () => {
   assert.equal(layout.shortcuts.length, 2);
   assert.ok(layout.widget);
 
-  assert.equal(layout.widget.left, 540);
+  assert.equal(m.getCellColumn(layout.widget.left, layout), layout.columns - 2);
   assert.equal(layout.widget.top, 0);
 });
 
@@ -364,7 +364,7 @@ test('widget preserva posição preferida quando ela continua válida', () => {
   });
 
   assert.equal(layout.shortcuts.length, 2);
-  assert.equal(layout.widget.left, 270);
+  assert.equal(m.getCellColumn(layout.widget.left, layout), 3);
   assert.equal(layout.widget.top, 88);
 });
 
@@ -384,7 +384,7 @@ test('widgets recuperam estado padrão quando armazenamento falha', () => {
 
   const state = m.loadWidgetState();
 
-  assert.equal(state.widgets.length, 1);
+  assert.equal(state.widgets.length, m.getRegisteredWidgets().length);
   assert.equal(state.widgets[0].instanceId, 'clock-default');
   assert.equal(state.widgets[0].visible, true);
   assert.equal(m.saveWidgetState(state), false);
@@ -403,7 +403,7 @@ test('widgets recuperam dados corrompidos sem perder valores padrão', () => {
 
   const state = m.loadWidgetState();
 
-  assert.equal(state.widgets.length, 1);
+  assert.equal(state.widgets.length, m.getRegisteredWidgets().length);
   assert.equal(state.widgets[0].widgetId, 'clock');
   assert.equal(state.widgets[0].visible, true);
   assert.equal(state.widgets[0].size.columns, 2);

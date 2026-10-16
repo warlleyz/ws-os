@@ -12,11 +12,7 @@ import useWeather from '../../features/weather/useWeather';
 import { useEffect, useRef, useState } from 'react';
 import Taskbar from './taskbar/Taskbar';
 import WidgetContextMenu from '../../features/widgets/WidgetContextMenu';
-import {
-  getPreferredInstance,
-  openApp,
-  restoreApp,
-} from '../../core/appManager';
+import { getPreferredInstance, openApp, restoreApp } from '../../core/appManager';
 import { getAppDefinition } from '../../core/appRegistry';
 import {
   useWallpaper,
@@ -30,12 +26,7 @@ export default function Desktop({ theme, onThemeChange }) {
   const weatherData = useWeather();
   const { appState, minimizeAllApps, visibleToasts, run, dismissToast, handleNotificationOpen } =
     useSystem();
-  const {
-    gridSize,
-    shortcutsRef,
-    workspaceRef,
-    refreshLayout,
-  } = useDesktopLayout();
+  const { gridSize, shortcutsRef, workspaceRef, refreshLayout } = useDesktopLayout();
   const organization = useDesktopOrganization({ shortcutsRef, gridSize });
   const { commitWidgetLayout } = organization;
   const { shortcuts, shortcutPositions, shortcutOrder, setSelectedIds } = organization;
@@ -53,7 +44,6 @@ export default function Desktop({ theme, onThemeChange }) {
   const shortcutContextRef = useRef(null);
   const {
     widgetState,
-    toggleClockWidget,
     toggleWidget,
     resetWidget,
     clockWidget,
@@ -77,16 +67,13 @@ export default function Desktop({ theme, onThemeChange }) {
 
   // Único ponto de entrada para ações de aplicativos e avisos do sistema.
 
-
   function openShortcutContext(event, app) {
     event.preventDefault();
     event.stopPropagation();
 
     event.currentTarget.focus();
 
-    const workspace = event.currentTarget.closest(
-      '.desktop__workspace',
-    );
+    const workspace = event.currentTarget.closest('.desktop__workspace');
 
     if (!workspace) return;
 
@@ -101,7 +88,6 @@ export default function Desktop({ theme, onThemeChange }) {
       y: event.clientY - rect.top + workspace.scrollTop,
     });
   }
-
 
   function runShortcutContextAction(action) {
     if (!shortcutContext) return;
@@ -146,14 +132,11 @@ export default function Desktop({ theme, onThemeChange }) {
     setShortcutContext(null);
   }
 
-
   function openWidgetContextMenu(event, widget) {
     event.preventDefault();
     event.stopPropagation();
 
-    const workspace = event.currentTarget.closest(
-      '.desktop__workspace',
-    );
+    const workspace = event.currentTarget.closest('.desktop__workspace');
 
     if (!workspace) return;
 
@@ -200,7 +183,6 @@ export default function Desktop({ theme, onThemeChange }) {
     setWidgetContext(null);
   }
 
-
   function openDesktopContext(event) {
     if (
       event.target.closest(
@@ -221,7 +203,6 @@ export default function Desktop({ theme, onThemeChange }) {
     });
   }
 
-
   function runDesktopContextAction(action) {
     switch (action) {
       case 'refresh':
@@ -240,14 +221,13 @@ export default function Desktop({ theme, onThemeChange }) {
 
       case 'personalize':
       case 'personalize-widgets': {
-        const section =
-          action === 'personalize' ? 'appearance' : 'widgets';
+        const section = action === 'personalize' ? 'appearance' : 'widgets';
 
         run(openApp, 'settings', {
           origin: 'desktop-context-menu',
           params: { section },
         });
-        
+
         break;
       }
 
@@ -345,9 +325,7 @@ export default function Desktop({ theme, onThemeChange }) {
                 app={app}
                 shortcutContext={shortcutContext}
                 runShortcutContextAction={runShortcutContextAction}
-                hasOpenInstance={appState.instances.some(
-                  (instance) => instance.appId === app.id,
-                )}
+                hasOpenInstance={appState.instances.some((instance) => instance.appId === app.id)}
                 shortcutOrder={shortcutOrder}
               />
             );
@@ -356,8 +334,7 @@ export default function Desktop({ theme, onThemeChange }) {
         {widgetContext &&
           (() => {
             const widget = widgetState.widgets.find(
-              (item) =>
-                item.instanceId === widgetContext.instanceId,
+              (item) => item.instanceId === widgetContext.instanceId,
             );
 
             if (!widget) return null;

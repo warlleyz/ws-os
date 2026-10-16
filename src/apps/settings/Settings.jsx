@@ -56,14 +56,21 @@ const SETTINGS_SECTIONS = [
 ];
 
 export default function Settings({ instance }) {
+  return (
+    <SettingsView
+      key={instance?.navigationRequestId ?? 0}
+      initialSection={instance?.params?.section}
+    />
+  );
+}
+
+function SettingsView({ initialSection }) {
   useLocale();
 
   const [activeSection, setActiveSection] = useState(() => {
-    const requested = instance?.params?.section;
+    const requested = initialSection;
 
-    return SETTINGS_SECTIONS.some((section) => section.id === requested)
-      ? requested
-      : 'appearance';
+    return SETTINGS_SECTIONS.some((section) => section.id === requested) ? requested : 'appearance';
   });
   const contentRef = useRef(null);
 
@@ -80,17 +87,8 @@ export default function Settings({ instance }) {
   }
 
   useEffect(() => {
-    const sectionId = instance?.params?.section;
-
-    if (
-      typeof sectionId === 'string' &&
-      SETTINGS_SECTIONS.some(
-        (section) => section.id === sectionId,
-      )
-    ) {
-      navigateTo(sectionId);
-    }
-  }, [instance?.navigationRequestId]);
+    if (initialSection) contentRef.current?.focus({ preventScroll: true });
+  }, [initialSection]);
 
   return (
     <div className="ws-settings">

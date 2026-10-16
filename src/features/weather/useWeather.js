@@ -1,9 +1,5 @@
-
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  fetchWeatherData,
-  searchWeatherCities,
-} from '../../services/weatherService';
+import { fetchWeatherData, searchWeatherCities } from '../../services/weatherService';
 
 const CACHE_MS = 10 * 60 * 1000;
 
@@ -59,11 +55,7 @@ export default function useWeather() {
     controllerRef.current = controller;
 
     try {
-      const data = await fetchWeatherData(
-        latitude,
-        longitude,
-        controller.signal,
-      );
+      const data = await fetchWeatherData(latitude, longitude, controller.signal);
 
       if (!mountedRef.current || requestId !== requestIdRef.current) return;
 
@@ -98,7 +90,6 @@ export default function useWeather() {
     }
   }
 
-
   function requestWeather() {
     // Se houver uma cidade selecionada, mantém a escolha.
     const city = selectedCityRef.current;
@@ -119,32 +110,20 @@ export default function useWeather() {
 
     if (!navigator.geolocation) {
       setWeatherLoading(false);
-      setWeatherError(
-        'Geolocalização indisponível neste navegador.',
-      );
+      setWeatherError('Geolocalização indisponível neste navegador.');
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        if (
-          !mountedRef.current ||
-          requestId !== requestIdRef.current
-        ) {
+        if (!mountedRef.current || requestId !== requestIdRef.current) {
           return;
         }
 
-        void fetchWeather(
-          position.coords.latitude,
-          position.coords.longitude,
-          requestId,
-        );
+        void fetchWeather(position.coords.latitude, position.coords.longitude, requestId);
       },
       () => {
-        if (
-          !mountedRef.current ||
-          requestId !== requestIdRef.current
-        ) {
+        if (!mountedRef.current || requestId !== requestIdRef.current) {
           return;
         }
 
@@ -161,14 +140,18 @@ export default function useWeather() {
     );
   }
 
-
   useEffect(() => {
-    requestWeather();
-
-    // A consulta automática acontece ao montar o hook.
+    let cancelled = false;
+    // A consulta externa começa após o commit; StrictMode cancela a primeira montagem.
+    queueMicrotask(() => {
+      if (!cancelled) requestWeather();
+    });
+    return () => {
+      cancelled = true;
+    };
+    // A inicialização é única; operações posteriores são ações explícitas do usuário.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   const searchCities = useCallback(async (query) => {
     const search = query.trim();
@@ -193,15 +176,9 @@ export default function useWeather() {
     setCitySearchLoading(true);
 
     try {
-      const results = await searchWeatherCities(
-        search,
-        controller.signal,
-      );
+      const results = await searchWeatherCities(search, controller.signal);
 
-      if (
-        !mountedRef.current ||
-        searchId !== citySearchIdRef.current
-      ) {
+      if (!mountedRef.current || searchId !== citySearchIdRef.current) {
         return;
       }
 
@@ -215,23 +192,17 @@ export default function useWeather() {
         return;
       }
 
-      setCitySearchError(
-        error.message || 'Não foi possível pesquisar cidades.',
-      );
+      setCitySearchError(error.message || 'Não foi possível pesquisar cidades.');
     } finally {
       if (citySearchControllerRef.current === controller) {
         citySearchControllerRef.current = null;
       }
 
-      if (
-        mountedRef.current &&
-        searchId === citySearchIdRef.current
-      ) {
+      if (mountedRef.current && searchId === citySearchIdRef.current) {
         setCitySearchLoading(false);
       }
     }
   }, []);
-
 
   const cancelCitySearch = useCallback(() => {
     citySearchIdRef.current += 1;
@@ -243,13 +214,8 @@ export default function useWeather() {
     setCitySearchError('');
   }, []);
 
-
   function selectCity(city) {
-    if (
-      !city ||
-      !Number.isFinite(city.latitude) ||
-      !Number.isFinite(city.longitude)
-    ) {
+    if (!city || !Number.isFinite(city.latitude) || !Number.isFinite(city.longitude)) {
       return;
     }
 
@@ -269,11 +235,7 @@ export default function useWeather() {
     setWeatherLoading(true);
     setWeatherError('');
 
-    void fetchWeather(
-      city.latitude,
-      city.longitude,
-      requestId,
-    );
+    void fetchWeather(city.latitude, city.longitude, requestId);
   }
 
   function useCurrentLocation() {
@@ -281,7 +243,6 @@ export default function useWeather() {
     setSelectedCity(null);
     requestWeather();
   }
-
 
   function getWeatherDescription(code) {
     if (code === 0) return 'Céu limpo';

@@ -1,10 +1,6 @@
-
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { getWidgetDefinition } from '../../core/widgetManager';
-import {
-  ROW_STEP,
-  getWidgetWidth,
-} from '../../shells/desktop/desktopLayout';
+import { ROW_STEP, getWidgetWidth } from '../../shells/desktop/desktopLayout';
 
 import ClockWidget from './clock/ClockWidget';
 import CalendarWidget from './calendar/CalendarWidget';
@@ -28,7 +24,6 @@ export default function WidgetHost({
   startWidgetDrag,
   moveWidgetDrag,
   finishWidgetDrag,
-  changeWidgetSize,
   handleWidgetKeyDown,
   onWidgetContextMenu,
 }) {
@@ -39,17 +34,12 @@ export default function WidgetHost({
 
   const placement =
     desktopLayout.widgets?.[widget.instanceId] ??
-    (widget.widgetId === 'clock'
-      ? desktopLayout.widget
-      : null);
+    (widget.widgetId === 'clock' ? desktopLayout.widget : null);
 
   // Não renderizar widgets sem componente ou sem posição válida.
   if (!definition || !WidgetComponent || !placement) {
     return null;
   }
-
-  const sizeOptions = definition.allowedSizes ?? [];
-  const widgetName = t(definition.name);
 
   return (
     <div
@@ -66,25 +56,17 @@ export default function WidgetHost({
         position: 'absolute',
         left: placement.left,
         top: placement.top,
-        width: getWidgetWidth(
-          widget.size.columns,
-          desktopLayout,
-        ),
+        width: getWidgetWidth(widget.size.columns, desktopLayout),
         height: widget.size.rows * ROW_STEP,
       }}
     >
-
       <button
         type="button"
         className="desktop__widget-grip"
         aria-label={t(`Mover ${definition.name}`)}
         title={t('Arrastar ou usar as setas para mover')}
-        onKeyDown={(event) =>
-          handleWidgetKeyDown(event, widget.instanceId)
-        }
-        onPointerDown={(event) =>
-          startWidgetDrag(event, widget.instanceId)
-        }
+        onKeyDown={(event) => handleWidgetKeyDown(event, widget.instanceId)}
+        onPointerDown={(event) => startWidgetDrag(event, widget.instanceId)}
         onPointerMove={moveWidgetDrag}
         onPointerUp={finishWidgetDrag}
         onPointerCancel={finishWidgetDrag}
@@ -93,7 +75,6 @@ export default function WidgetHost({
       >
         <GripVertical size={15} aria-hidden="true" />
       </button>
-
 
       <WidgetComponent weatherData={weatherData} />
     </div>

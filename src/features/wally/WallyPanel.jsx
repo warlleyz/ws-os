@@ -1,4 +1,3 @@
-
 import {
   ArrowUp,
   Bot,
@@ -14,10 +13,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import {
-  translate as t,
-  useLocale,
-} from '../../shared/i18n/i18n';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useSystem } from '../../core/useSystem';
 import { openApp } from '../../core/appManager';
 import { getAppDefinition } from '../../core/appRegistry';
@@ -36,7 +32,7 @@ const SUGGESTIONS = [
 ];
 
 export default function WallyPanel({ setWallyOpen }) {
-  const locale = useLocale();
+  useLocale();
   const { run } = useSystem();
 
   const [question, setQuestion] = useState('');
@@ -94,11 +90,7 @@ export default function WallyPanel({ setWallyOpen }) {
   }
 
   return (
-    <section
-      className="taskbar-wally ws-wally"
-      role="region"
-      aria-label="Wally"
-    >
+    <section className="taskbar-wally ws-wally" role="region" aria-label="Wally">
       <header className="ws-wally__header">
         <span className="ws-wally__avatar">
           <Bot size={22} aria-hidden="true" />
@@ -148,15 +140,9 @@ export default function WallyPanel({ setWallyOpen }) {
 
             <h2>{t('Como posso ajudar?')}</h2>
 
-            <p>
-              {t(
-                'Posso orientar você pelos aplicativos e conteúdos do WS OS.',
-              )}
-            </p>
+            <p>{t('Posso orientar você pelos aplicativos e conteúdos do WS OS.')}</p>
 
-            <span className="ws-wally__suggestion-title">
-              {t('Experimente perguntar')}
-            </span>
+            <span className="ws-wally__suggestion-title">{t('Experimente perguntar')}</span>
 
             <div className="ws-wally__suggestions">
               {SUGGESTIONS.map((suggestion) => (
@@ -180,25 +166,14 @@ export default function WallyPanel({ setWallyOpen }) {
                 className={`ws-wally__message ws-wally__message--${message.role}`}
               >
                 {message.role === 'assistant' && (
-                  <span
-                    className="ws-wally__message-avatar"
-                    aria-hidden="true"
-                  >
+                  <span className="ws-wally__message-avatar" aria-hidden="true">
                     <Bot size={15} />
                   </span>
                 )}
 
                 <div className="ws-wally__bubble">
-                  {message.cancelled && (
-                    <small role="status">
-                      {t('Resposta cancelada')}
-                    </small>
-                  )}
-                  <p>
-                    {message.role === 'assistant'
-                      ? t(message.text)
-                      : message.text}
-                  </p>
+                  {message.cancelled && <small role="status">{t('Resposta cancelada')}</small>}
+                  <p>{message.role === 'assistant' ? t(message.text) : message.text}</p>
 
                   {message.actions?.map((action) => {
                     const app = getAppDefinition(action.appId);
@@ -224,48 +199,26 @@ export default function WallyPanel({ setWallyOpen }) {
         )}
       </div>
 
-
       {status === 'responding' && (
-        <div
-          className="ws-wally__responding"
-          role="status"
-          aria-live="polite"
-        >
-          <LoaderCircle
-            size={15}
-            className="ws-wally__loading-icon"
-            aria-hidden="true"
-          />
+        <div className="ws-wally__responding" role="status" aria-live="polite">
+          <LoaderCircle size={15} className="ws-wally__loading-icon" aria-hidden="true" />
 
-          <span>
-            {t('Wally está preparando uma resposta...')}
-          </span>
+          <span>{t('Wally está preparando uma resposta...')}</span>
 
-          <button
-            type="button"
-            onClick={cancelResponse}
-          >
+          <button type="button" onClick={cancelResponse}>
             <Square size={12} aria-hidden="true" />
             {t('Cancelar')}
           </button>
         </div>
       )}
 
-
-
       <div className="ws-wally__composer-area">
         {remoteEnabled && (
-          <WallyTurnstile
-            key={verificationKey}
-            onTokenChange={setTurnstileToken}
-          />
+          <WallyTurnstile key={verificationKey} onTokenChange={setTurnstileToken} />
         )}
 
         {lastError && (
-          <p
-            className="ws-wally__verification-info"
-            role="status"
-          >
+          <p className="ws-wally__verification-info" role="status">
             {t(getWallyErrorMessage(lastError))}
           </p>
         )}
@@ -289,10 +242,7 @@ export default function WallyPanel({ setWallyOpen }) {
           <Tooltip content={t('Enviar')}>
             <button
               type="submit"
-              disabled={
-                !question.trim() ||
-                status === 'responding'
-              }
+              disabled={!question.trim() || status === 'responding'}
               aria-label={t('Enviar')}
             >
               <ArrowUp size={17} />
@@ -306,10 +256,7 @@ export default function WallyPanel({ setWallyOpen }) {
             {t(provider === 'gemini' ? 'Gemini' : 'Respostas locais')}
           </span>
 
-          <button
-            type="button"
-            onClick={() => open('wally-extended')}
-          >
+          <button type="button" onClick={() => open('wally-extended')}>
             {t('Wally Estendido')}
             <ExternalLink size={12} aria-hidden="true" />
           </button>

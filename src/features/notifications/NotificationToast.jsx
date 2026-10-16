@@ -1,24 +1,8 @@
+import { AlertCircle, CheckCircle2, ExternalLink, Info, TriangleAlert, X } from 'lucide-react';
 
-import {
-  AlertCircle,
-  CheckCircle2,
-  ExternalLink,
-  Info,
-  TriangleAlert,
-  X,
-} from 'lucide-react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
-
-import {
-  translate as t,
-  useLocale,
-} from '../../shared/i18n/i18n';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
 const COMPACT_DURATION = 220;
 const EXPAND_DURATION = 300;
@@ -40,11 +24,7 @@ const TYPE_LABELS = {
   error: 'Erro',
 };
 
-export function NotificationToast({
-  notification,
-  onDismiss,
-  onAction,
-}) {
+export function NotificationToast({ notification, onDismiss, onAction }) {
   useLocale();
 
   const [phase, setPhase] = useState('compact');
@@ -56,7 +36,9 @@ export function NotificationToast({
   const timerRef = useRef(null);
   const dismissRef = useRef(onDismiss);
 
-  dismissRef.current = onDismiss;
+  useLayoutEffect(() => {
+    dismissRef.current = onDismiss;
+  }, [onDismiss]);
 
   const Icon = TYPE_ICONS[notification.type] ?? Info;
 
@@ -73,21 +55,14 @@ export function NotificationToast({
   const pauseReading = useCallback(() => {
     if (startedRef.current === null) return;
 
-    remainingRef.current = Math.max(
-      0,
-      remainingRef.current -
-      (Date.now() - startedRef.current),
-    );
+    remainingRef.current = Math.max(0, remainingRef.current - (Date.now() - startedRef.current));
 
     startedRef.current = null;
     clearTimer();
   }, [clearTimer]);
 
   const startCollapse = useCallback(() => {
-    if (
-      phaseRef.current === 'collapsing' ||
-      phaseRef.current === 'leaving'
-    ) {
+    if (phaseRef.current === 'collapsing' || phaseRef.current === 'leaving') {
       return;
     }
 
@@ -105,11 +80,7 @@ export function NotificationToast({
   }, [changePhase, clearTimer, notification.id]);
 
   const resumeReading = useCallback(() => {
-    if (
-      phaseRef.current !== 'expanded' ||
-      hoveringRef.current ||
-      startedRef.current !== null
-    ) {
+    if (phaseRef.current !== 'expanded' || hoveringRef.current || startedRef.current !== null) {
       return;
     }
 
@@ -180,23 +151,15 @@ export function NotificationToast({
       <div className="ws-toast__body">
         <div className="ws-toast__content">
           <div className="ws-toast__header">
-            <span className="ws-toast__source">
-              {t(notification.source)}
-            </span>
+            <span className="ws-toast__source">{t(notification.source)}</span>
             <span className="ws-toast__type">
               {t(TYPE_LABELS[notification.type] ?? 'Informação')}
             </span>
           </div>
 
-          <strong className="ws-toast__title">
-            {t(notification.title)}
-          </strong>
+          <strong className="ws-toast__title">{t(notification.title)}</strong>
 
-          {notification.message && (
-            <p className="ws-toast__message">
-              {t(notification.message)}
-            </p>
-          )}
+          {notification.message && <p className="ws-toast__message">{t(notification.message)}</p>}
 
           {notification.action?.type === 'open-app' && (
             <button

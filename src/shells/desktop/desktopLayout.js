@@ -1,4 +1,3 @@
-
 export const COLUMN_STEP = 90;
 export const ROW_STEP = 88;
 
@@ -31,29 +30,15 @@ export function getCellRow(top) {
 }
 
 export function getWidgetWidth(columns, layout) {
-  return (
-    (columns - 1) * getColumnStep(layout) +
-    SHORTCUT_WIDTH
-  );
+  return (columns - 1) * getColumnStep(layout) + SHORTCUT_WIDTH;
 }
 
-export function clampDesktopDrag(
-  dx,
-  dy,
-  bounds,
-  layout,
-) {
+export function clampDesktopDrag(dx, dy, bounds, layout) {
   const minDx = -bounds.left;
-  const maxDx = Math.max(
-    minDx,
-    layout.width - bounds.right,
-  );
+  const maxDx = Math.max(minDx, layout.width - bounds.right);
 
   const minDy = -bounds.top;
-  const maxDy = Math.max(
-    minDy,
-    layout.height - bounds.bottom,
-  );
+  const maxDy = Math.max(minDy, layout.height - bounds.bottom);
 
   return {
     dx: Math.max(minDx, Math.min(dx, maxDx)),
@@ -77,17 +62,13 @@ export function isDesktopCellAvailable(column, row, layout) {
   const top = getCellTop(row);
 
   const isBottomArea =
-    top + ROW_STEP >
-    layout.viewportHeight - TASKBAR_RESERVED_BOTTOM;
+    top < layout.viewportHeight && top + ROW_STEP > layout.viewportHeight - TASKBAR_RESERVED_BOTTOM;
 
   if (!isBottomArea) {
     return true;
   }
 
-  const reservedWidth = Math.min(
-    TASKBAR_RESERVED_WIDTH,
-    layout.width,
-  );
+  const reservedWidth = Math.min(TASKBAR_RESERVED_WIDTH, layout.width);
 
   const reservedLeft = (layout.width - reservedWidth) / 2;
 
@@ -96,7 +77,6 @@ export function isDesktopCellAvailable(column, row, layout) {
   // Inferior direito: futuras notificações.
   return left + SHORTCUT_WIDTH <= reservedLeft;
 }
-
 
 /**
  * Retorna todas as células ocupadas por um widget.
@@ -136,25 +116,16 @@ export function getWidgetCells(position, size) {
  * Verifica se um widget cabe na grade sem ocupar
  * células reservadas ou já utilizadas.
  */
-export function canPlaceWidget(
-  position,
-  size,
-  layout,
-  occupied = new Set(),
-) {
+export function canPlaceWidget(position, size, layout, occupied = new Set()) {
   const cells = getWidgetCells(position, size);
 
-  if (
-    cells.length === 0 ||
-    cells.length !== size.columns * size.rows
-  ) {
+  if (cells.length === 0 || cells.length !== size.columns * size.rows) {
     return false;
   }
 
   return cells.every(
     ({ column, row }) =>
-      isDesktopCellAvailable(column, row, layout) &&
-      !occupied.has(`${column}:${row}`),
+      isDesktopCellAvailable(column, row, layout) && !occupied.has(`${column}:${row}`),
   );
 }
 
@@ -162,11 +133,7 @@ export function canPlaceWidget(
  * Marca todas as células de um widget como ocupadas.
  * Retorna um novo Set, preservando o original.
  */
-export function occupyWidgetCells(
-  occupied,
-  position,
-  size,
-) {
+export function occupyWidgetCells(occupied, position, size) {
   const next = new Set(occupied);
 
   for (const { column, row } of getWidgetCells(position, size)) {
@@ -180,12 +147,7 @@ export function occupyWidgetCells(
  * Procura posições válidas na grade.
  * Se houver preferência, prioriza posições próximas.
  */
-export function findWidgetPosition(
-  size,
-  layout,
-  occupied = new Set(),
-  preferred = null,
-) {
+export function findWidgetPosition(size, layout, occupied = new Set(), preferred = null) {
   const candidates = [];
 
   for (let column = 0; column < layout.columns; column += 1) {
@@ -202,39 +164,20 @@ export function findWidgetPosition(
     return null;
   }
 
-  if (
-    preferred &&
-    Number.isInteger(preferred.column) &&
-    Number.isInteger(preferred.row)
-  ) {
+  if (preferred && Number.isInteger(preferred.column) && Number.isInteger(preferred.row)) {
     candidates.sort((a, b) => {
-      const distanceA =
-        Math.abs(a.column - preferred.column) +
-        Math.abs(a.row - preferred.row);
+      const distanceA = Math.abs(a.column - preferred.column) + Math.abs(a.row - preferred.row);
 
-      const distanceB =
-        Math.abs(b.column - preferred.column) +
-        Math.abs(b.row - preferred.row);
+      const distanceB = Math.abs(b.column - preferred.column) + Math.abs(b.row - preferred.row);
 
-      return (
-        distanceA - distanceB ||
-        a.column - b.column ||
-        a.row - b.row
-      );
+      return distanceA - distanceB || a.column - b.column || a.row - b.row;
     });
   }
 
   return candidates[0];
 }
 
-
-export function getDesktopLayout(
-  count,
-  width,
-  height,
-  widget,
-  preferred = [],
-) {
+export function getDesktopLayout(count, width, height, widget, preferred = []) {
   if (width <= 0 || height <= 0) {
     return {
       shortcuts: [],
@@ -250,17 +193,9 @@ export function getDesktopLayout(
     };
   }
 
-  const columns = Math.max(
-    1,
-    Math.floor(
-      (width - SHORTCUT_WIDTH) / MIN_COLUMN_STEP,
-    ) + 1,
-  );
+  const columns = Math.max(1, Math.floor((width - SHORTCUT_WIDTH) / MIN_COLUMN_STEP) + 1);
 
-  const columnStep =
-    columns > 1
-      ? (width - SHORTCUT_WIDTH) / (columns - 1)
-      : COLUMN_STEP;
+  const columnStep = columns > 1 ? (width - SHORTCUT_WIDTH) / (columns - 1) : COLUMN_STEP;
 
   const layout = {
     width,
@@ -325,11 +260,7 @@ export function getDesktopLayout(
       chosen = widget.position;
     }
 
-    for (
-      let column = layout.columns - widgetColumns;
-      column >= 0 && !chosen;
-      column -= 1
-    ) {
+    for (let column = layout.columns - widgetColumns; column >= 0 && !chosen; column -= 1) {
       for (let row = 0; row < layout.rows; row += 1) {
         if (fits(column, row)) {
           chosen = { column, row };
@@ -344,16 +275,8 @@ export function getDesktopLayout(
         top: getCellTop(chosen.row),
       };
 
-      for (
-        let x = chosen.column;
-        x < chosen.column + widgetColumns;
-        x += 1
-      ) {
-        for (
-          let y = chosen.row;
-          y < chosen.row + widgetRows;
-          y += 1
-        ) {
+      for (let x = chosen.column; x < chosen.column + widgetColumns; x += 1) {
+        for (let y = chosen.row; y < chosen.row + widgetRows; y += 1) {
           occupied.add(key(x, y));
         }
       }
@@ -366,7 +289,7 @@ export function getDesktopLayout(
     layout.overflow = true;
     layout.rows = Math.max(
       layout.rows,
-      Math.ceil(count / layout.columns) + 1,
+      Math.ceil(height / ROW_STEP) + Math.ceil(count / layout.columns) + 1,
     );
     layout.height = layout.rows * ROW_STEP;
     available = cells();
@@ -379,11 +302,7 @@ export function getDesktopLayout(
 
     if (
       position &&
-      isDesktopCellAvailable(
-        position.column,
-        position.row,
-        layout,
-      ) &&
+      isDesktopCellAvailable(position.column, position.row, layout) &&
       !occupied.has(key(position.column, position.row))
     ) {
       result[index] = {
@@ -402,12 +321,7 @@ export function getDesktopLayout(
 
     while (
       nextCell < available.length &&
-      occupied.has(
-        key(
-          available[nextCell].column,
-          available[nextCell].row,
-        ),
-      )
+      occupied.has(key(available[nextCell].column, available[nextCell].row))
     ) {
       nextCell += 1;
     }
@@ -429,7 +343,6 @@ export function getDesktopLayout(
   return layout;
 }
 
-
 /**
  * Calcula a distribuição de múltiplos widgets
  * sem alterar a organização atual do Desktop.
@@ -438,20 +351,8 @@ export function getDesktopLayout(
  * A reorganização inteligente será integrada na W2.3.
  */
 
-export function getMultiWidgetLayout(
-  count,
-  width,
-  height,
-  widgets = [],
-  preferred = [],
-) {
-  const base = getDesktopLayout(
-    count,
-    width,
-    height,
-    null,
-    preferred,
-  );
+export function getMultiWidgetLayout(count, width, height, widgets = [], preferred = []) {
+  const base = getDesktopLayout(count, width, height, null, preferred);
 
   const placements = {};
   const blockedWidgets = [];
@@ -461,9 +362,9 @@ export function getMultiWidgetLayout(
   const originalShortcuts = base.shortcuts.map((point) =>
     point
       ? {
-        column: getCellColumn(point.left, base),
-        row: getCellRow(point.top),
-      }
+          column: getCellColumn(point.left, base),
+          row: getCellRow(point.top),
+        }
       : null,
   );
 
@@ -474,11 +375,7 @@ export function getMultiWidgetLayout(
     function available(position) {
       return (
         position &&
-        isDesktopCellAvailable(
-          position.column,
-          position.row,
-          base,
-        ) &&
+        isDesktopCellAvailable(position.column, position.row, base) &&
         !occupied.has(key(position.column, position.row))
       );
     }
@@ -512,12 +409,7 @@ export function getMultiWidgetLayout(
 
       const anchor = preferred[index] ?? originalShortcuts[index];
 
-      const position = findWidgetPosition(
-        { columns: 1, rows: 1 },
-        base,
-        occupied,
-        anchor,
-      );
+      const position = findWidgetPosition({ columns: 1, rows: 1 }, base, occupied, anchor);
 
       if (!position) return null;
 
@@ -554,14 +446,7 @@ export function getMultiWidgetLayout(
       for (let row = 0; row < base.rows; row += 1) {
         const position = { column, row };
 
-        if (
-          canPlaceWidget(
-            position,
-            size,
-            base,
-            widgetOccupied,
-          )
-        ) {
+        if (canPlaceWidget(position, size, base, widgetOccupied)) {
           candidates.push(position);
         }
       }
@@ -569,42 +454,23 @@ export function getMultiWidgetLayout(
 
     const desired = widget.position;
 
-    if (
-      Number.isInteger(desired?.column) &&
-      Number.isInteger(desired?.row)
-    ) {
+    if (Number.isInteger(desired?.column) && Number.isInteger(desired?.row)) {
       candidates.sort((a, b) => {
-        const distanceA =
-          Math.abs(a.column - desired.column) +
-          Math.abs(a.row - desired.row);
+        const distanceA = Math.abs(a.column - desired.column) + Math.abs(a.row - desired.row);
 
-        const distanceB =
-          Math.abs(b.column - desired.column) +
-          Math.abs(b.row - desired.row);
+        const distanceB = Math.abs(b.column - desired.column) + Math.abs(b.row - desired.row);
 
-        return (
-          distanceA - distanceB ||
-          a.column - b.column ||
-          a.row - b.row
-        );
+        return distanceA - distanceB || a.column - b.column || a.row - b.row;
       });
     } else {
       // Sem posição salva, prioriza a lateral direita.
-      candidates.sort(
-        (a, b) =>
-          b.column - a.column ||
-          a.row - b.row,
-      );
+      candidates.sort((a, b) => b.column - a.column || a.row - b.row);
     }
 
     let accepted = false;
 
     for (const position of candidates) {
-      const trialOccupied = occupyWidgetCells(
-        widgetOccupied,
-        position,
-        size,
-      );
+      const trialOccupied = occupyWidgetCells(widgetOccupied, position, size);
 
       const trialShortcuts = placeShortcuts(trialOccupied);
 
@@ -645,19 +511,8 @@ export function getMultiWidgetLayout(
   };
 }
 
-
-
-export function moveDesktopShortcuts(
-  shortcuts,
-  layout,
-  selectedIds,
-  anchorId,
-  column,
-  row,
-) {
-  const anchor = layout.shortcuts[
-    shortcuts.findIndex((app) => app.id === anchorId)
-  ];
+export function moveDesktopShortcuts(shortcuts, layout, selectedIds, anchorId, column, row) {
+  const anchor = layout.shortcuts[shortcuts.findIndex((app) => app.id === anchorId)];
 
   if (!anchor) return null;
 
@@ -688,7 +543,6 @@ export function moveDesktopShortcuts(
 
   if (!targets.size) return null;
 
-
   const widgetOccupied = new Set();
 
   const placedWidgets = Object.values(layout.widgets ?? {});
@@ -705,52 +559,34 @@ export function moveDesktopShortcuts(
   }
 
   for (const widget of placedWidgets) {
-    for (const cell of getWidgetCells(
-      widget.position,
-      widget.size,
-    )) {
+    for (const cell of getWidgetCells(widget.position, widget.size)) {
       widgetOccupied.add(key(cell.column, cell.row));
     }
   }
 
-
   for (const position of targets.values()) {
     if (
-      !isDesktopCellAvailable(
-        position.column,
-        position.row,
-        layout,
-      ) ||
+      !isDesktopCellAvailable(position.column, position.row, layout) ||
       stationary.has(key(position.column, position.row))
     ) {
       return null;
     }
 
-
-    if (
-      widgetOccupied.has(
-        key(position.column, position.row),
-      )
-    ) {
+    if (widgetOccupied.has(key(position.column, position.row))) {
       return null;
     }
-
   }
 
   return Object.fromEntries(
     shortcuts.map((app, index) => [
       app.id,
       targets.get(app.id) ?? {
-        column: getCellColumn(
-          layout.shortcuts[index].left,
-          layout,
-        ),
+        column: getCellColumn(layout.shortcuts[index].left, layout),
         row: getCellRow(layout.shortcuts[index].top),
       },
     ]),
   );
 }
-
 
 /**
  * Converte as posições dos atalhos calculadas pelo layout
@@ -761,10 +597,7 @@ export function moveDesktopShortcuts(
  *
  * Não modifica o layout nem salva preferências.
  */
-export function getPersistableShortcutPositions(
-  shortcuts,
-  layout,
-) {
+export function getPersistableShortcutPositions(shortcuts, layout) {
   if (
     !Array.isArray(shortcuts) ||
     !Array.isArray(layout?.shortcuts) ||
@@ -775,16 +608,10 @@ export function getPersistableShortcutPositions(
 
   const occupied = new Set();
 
-  const placedWidgets = Object.values(
-    layout.widgets ?? {},
-  );
+  const placedWidgets = Object.values(layout.widgets ?? {});
 
   // Compatibilidade com o layout antigo do Relógio.
-  if (
-    placedWidgets.length === 0 &&
-    layout.widget &&
-    layout.widgetSize
-  ) {
+  if (placedWidgets.length === 0 && layout.widget && layout.widgetSize) {
     placedWidgets.push({
       position: {
         column: getCellColumn(layout.widget.left, layout),
@@ -796,16 +623,9 @@ export function getPersistableShortcutPositions(
 
   // Validar todas as células ocupadas pelos widgets.
   for (const widget of placedWidgets) {
-    const cells = getWidgetCells(
-      widget.position,
-      widget.size,
-    );
+    const cells = getWidgetCells(widget.position, widget.size);
 
-    if (
-      !widget.size ||
-      cells.length !==
-      widget.size.columns * widget.size.rows
-    ) {
+    if (!widget.size || cells.length !== widget.size.columns * widget.size.rows) {
       return null;
     }
 
@@ -858,7 +678,6 @@ export function getPersistableShortcutPositions(
 
   return positions;
 }
-
 
 export function getShortcutsInArea(shortcuts, positions, area) {
   return shortcuts

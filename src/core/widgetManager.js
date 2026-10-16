@@ -1,13 +1,12 @@
 const WIDGETS_STORAGE_KEY = 'ws-os:desktop-widgets';
 
-
 const widgetDefinitions = [
   {
     id: 'clock',
     name: 'Relógio',
     description: 'Exibe a data e a hora atuais.',
     defaultSize: { columns: 2, rows: 2 },
-    allowedSizes: ['2x1', '2x2', '3x2'],
+    allowedSizes: ['2x1', '2x2', '3x2', '3x3'],
     defaultVisible: true,
   },
   {
@@ -95,7 +94,6 @@ function validPosition(position) {
   };
 }
 
-
 export function loadWidgetPreferences() {
   try {
     const saved = localStorage.getItem(WIDGETS_STORAGE_KEY);
@@ -125,8 +123,7 @@ export function loadWidgetPreferences() {
 
       const stored = parsed.widgets.find(
         (widget) =>
-          widget?.instanceId === defaults.instanceId &&
-          widget?.widgetId === definition.id,
+          widget?.instanceId === defaults.instanceId && widget?.widgetId === definition.id,
       );
 
       // Widget novo: adiciona os valores padrão
@@ -139,11 +136,7 @@ export function loadWidgetPreferences() {
         };
       }
 
-      const size = validSize(
-        stored.size,
-        defaults.size,
-        definition.allowedSizes,
-      );
+      const size = validSize(stored.size, defaults.size, definition.allowedSizes);
 
       const position = validPosition(stored.position);
 
@@ -156,32 +149,19 @@ export function loadWidgetPreferences() {
 
       if (
         !validVisible ||
-        (
-          stored.position != null &&
-          position === null
-        ) ||
-        !(
-          stored.size?.columns === size.columns &&
-          stored.size?.rows === size.rows
-        ) ||
-        (
-          stored.settings !== undefined &&
-          !validSettings
-        )
+        (stored.position != null && position === null) ||
+        !(stored.size?.columns === size.columns && stored.size?.rows === size.rows) ||
+        (stored.settings !== undefined && !validSettings)
       ) {
         invalid = true;
       }
 
       return {
         ...defaults,
-        visible: validVisible
-          ? stored.visible
-          : defaults.visible,
+        visible: validVisible ? stored.visible : defaults.visible,
         position,
         size,
-        settings: validSettings
-          ? { ...stored.settings }
-          : {},
+        settings: validSettings ? { ...stored.settings } : {},
       };
     });
 
@@ -234,7 +214,6 @@ export function setWidgetPosition(state, instanceId, position) {
   };
 }
 
-
 export function setWidgetSize(state, instanceId, size) {
   return {
     ...state,
@@ -243,9 +222,7 @@ export function setWidgetSize(state, instanceId, size) {
         return widget;
       }
 
-      const definition = getWidgetDefinition(
-        widget.widgetId,
-      );
+      const definition = getWidgetDefinition(widget.widgetId);
 
       if (!definition) {
         return widget;
@@ -253,13 +230,8 @@ export function setWidgetSize(state, instanceId, size) {
 
       return {
         ...widget,
-        size: validSize(
-          size,
-          widget.size,
-          definition.allowedSizes,
-        ),
+        size: validSize(size, widget.size, definition.allowedSizes),
       };
     }),
   };
 }
-

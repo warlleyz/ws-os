@@ -33,11 +33,13 @@ test('grade preserva os 12 acessos sem colisões em 96 combinações de viewport
         const cells = layout.shortcuts.map((p) => `${p.left}:${p.top}`);
         assert.equal(new Set(cells).size, 12);
         for (const p of layout.shortcuts) {
-          assert.ok(m.isDesktopCellAvailable(p.left / 90, p.top / 88, layout));
+          assert.ok(
+            m.isDesktopCellAvailable(m.getCellColumn(p.left, layout), m.getCellRow(p.top), layout),
+          );
           if (layout.widget)
             assert.ok(
-              p.left + 90 <= layout.widget.left ||
-                p.left >= layout.widget.left + widget.size.columns * 90 ||
+              p.left + m.getWidgetWidth(1, layout) <= layout.widget.left ||
+                p.left >= layout.widget.left + m.getWidgetWidth(widget.size.columns, layout) ||
                 p.top + 88 <= layout.widget.top ||
                 p.top >= layout.widget.top + widget.size.rows * 88,
             );
@@ -52,7 +54,7 @@ test('posições salvas são consumidas e retornam após resize sem alterar pref
   const preferred = [{ column: 5, row: 2 }];
   const before = JSON.stringify(preferred);
   const wide = m.getDesktopLayout(12, 1000, 700, clock(), preferred);
-  assert.equal(wide.shortcuts[0].left, 450);
+  assert.equal(m.getCellColumn(wide.shortcuts[0].left, wide), 5);
   assert.equal(wide.shortcuts[0].top, 176);
   const small = m.getDesktopLayout(12, 180, 176, clock(), preferred);
   assert.equal(small.overflow, true);
@@ -90,7 +92,14 @@ test('movimento de grupo conserva deslocamento relativo e rejeita colisão ou bo
   assert.equal(m.moveDesktopShortcuts(apps, layout, ids, 'app-0', 1, 0), null);
   const w = layout.widget;
   assert.equal(
-    m.moveDesktopShortcuts(apps, layout, ['app-0'], 'app-0', w.left / 90, w.top / 88),
+    m.moveDesktopShortcuts(
+      apps,
+      layout,
+      ['app-0'],
+      'app-0',
+      m.getCellColumn(w.left, layout),
+      m.getCellRow(w.top),
+    ),
     null,
   );
 });

@@ -18,7 +18,6 @@ import {
   moveDesktopShortcuts,
 } from './desktopLayout';
 
-
 export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
   const locale = useLocale();
   const { notify } = useSystem();
@@ -114,20 +113,12 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     return next;
   }
 
-
   function commitWidgetLayout(nextWidgetState, layout) {
-    if (
-      dragRef.current ||
-      !nextWidgetState ||
-      !Array.isArray(nextWidgetState.widgets)
-    ) {
+    if (dragRef.current || !nextWidgetState || !Array.isArray(nextWidgetState.widgets)) {
       return false;
     }
 
-    const positions = getPersistableShortcutPositions(
-      shortcuts,
-      layout,
-    );
+    const positions = getPersistableShortcutPositions(shortcuts, layout);
 
     if (!positions) {
       return false;
@@ -180,7 +171,6 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     return true;
   }
 
-
   function commitLayoutPositions(layout) {
     // Não salvar enquanto houver uma operação
     // de arraste ou seleção em andamento.
@@ -188,10 +178,7 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       return false;
     }
 
-    const positions = getPersistableShortcutPositions(
-      shortcuts,
-      layout,
-    );
+    const positions = getPersistableShortcutPositions(shortcuts, layout);
 
     // Rejeitar organizações incompletas,
     // inválidas ou com células sobrepostas.
@@ -228,7 +215,6 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     return true;
   }
 
-
   function sort(order) {
     clearDrag();
     setPreferences({ order, positions: {}, error: null });
@@ -245,22 +231,14 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     );
 
     const selectedPositions = shortcuts
-      .map((app, shortcutIndex) =>
-        ids.includes(app.id)
-          ? layout.shortcuts[shortcutIndex]
-          : null,
-      )
+      .map((app, shortcutIndex) => (ids.includes(app.id) ? layout.shortcuts[shortcutIndex] : null))
       .filter(Boolean);
 
     const bounds = {
       left: Math.min(...selectedPositions.map((p) => p.left)),
       top: Math.min(...selectedPositions.map((p) => p.top)),
-      right: Math.max(
-        ...selectedPositions.map((p) => p.left + 82),
-      ),
-      bottom: Math.max(
-        ...selectedPositions.map((p) => p.top + 82),
-      ),
+      right: Math.max(...selectedPositions.map((p) => p.left + 82)),
+      bottom: Math.max(...selectedPositions.map((p) => p.top + 82)),
     };
 
     dragRef.current = {
@@ -272,7 +250,6 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       appId,
       ids,
       elements,
-      layout,
       layout,
       bounds,
       initialPosition: layout.shortcuts[index],
@@ -337,21 +314,11 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
 
     drag.moved = true;
 
-    const limited = clampDesktopDrag(
-      dx,
-      dy,
-      drag.bounds,
-      drag.layout,
-    );
+    const limited = clampDesktopDrag(dx, dy, drag.bounds, drag.layout);
 
-    const column = getCellColumn(
-      drag.initialPosition.left + limited.dx,
-      drag.layout,
-    );
+    const column = getCellColumn(drag.initialPosition.left + limited.dx, drag.layout);
 
-    const row = getCellRow(
-      drag.initialPosition.top + limited.dy,
-    );
+    const row = getCellRow(drag.initialPosition.top + limited.dy);
 
     drag.candidate = moveDesktopShortcuts(
       shortcuts,
@@ -363,15 +330,9 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     );
 
     for (const element of drag.elements) {
-      element.style.setProperty(
-        'translate',
-        `${limited.dx}px ${limited.dy}px`,
-      );
+      element.style.setProperty('translate', `${limited.dx}px ${limited.dy}px`);
 
-      element.setAttribute(
-        'data-drop-valid',
-        String(Boolean(drag.candidate)),
-      );
+      element.setAttribute('data-drop-valid', String(Boolean(drag.candidate)));
     }
   }
   function finishPointer(event) {

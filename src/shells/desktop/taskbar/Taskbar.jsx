@@ -15,6 +15,7 @@ import TaskbarPreview from './TaskbarPreview';
 import PanelLayer from '../../../features/panels/PanelLayer';
 import TaskbarApps from './TaskbarApps';
 import { resolvePanel } from '../../../core/panelManager';
+import { CloudSun } from 'lucide-react';
 import { SystemIcon } from '../../../shared/components/SystemIcon';
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -31,12 +32,7 @@ import { useTaskbarAutoHide, setTaskbarAutoHide } from '../../../core/taskbarPre
 
 // Utilitários e preferências persistentes do WS Menu.
 
-function Taskbar({
-  onShowDesktop,
-  theme,
-  onThemeChange,
-  weatherData,
-}) {
+function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
   const locale = useLocale();
   const {
     appState,
@@ -55,13 +51,6 @@ function Taskbar({
     requestWeather,
     getWeatherDescription,
     selectedCity,
-    cityResults,
-    citySearchLoading,
-    citySearchError,
-    searchCities,
-    selectCity,
-    useCurrentLocation,
-    cancelCitySearch,
   } = weatherData;
 
   const notifications = notificationState?.items ?? [];
@@ -669,9 +658,7 @@ function Taskbar({
           </button>
 
           {weather && (
-            <span className="taskbar__temperature">
-              {Math.round(weather.temperature_2m)}°
-            </span>
+            <span className="taskbar__temperature">{Math.round(weather.temperature_2m)}°</span>
           )}
           <button
             type="button"

@@ -34,51 +34,30 @@ export default function SystemProvider({ children }) {
   const [appState, setAppState] = useState(initialAppState);
   const [notificationState, setNotificationState] = useState(initialNotificationState);
   const [visibleToasts, setVisibleToasts] = useState([]);
-  const [doNotDisturb, setDoNotDisturbState] = useState(
-    () => getNotificationPreferences().doNotDisturb,
+  useEffect(
+    () =>
+      subscribeNotificationPreferences(() => {
+        if (getNotificationPreferences().doNotDisturb) setVisibleToasts([]);
+      }),
+    [],
   );
-
-  useEffect(() => {
-    const unsubscribe = subscribeNotificationPreferences(() => {
-      setDoNotDisturbState(
-        getNotificationPreferences().doNotDisturb,
-      );
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (doNotDisturb) {
-      setVisibleToasts([]);
-    }
-  }, [doNotDisturb]);
-
 
   const notify = useCallback((details) => {
     const notification = createNotification(details);
 
     if (!notification) return;
 
-    setNotificationState((current) =>
-      addNotification(current, notification),
-    );
+    setNotificationState((current) => addNotification(current, notification));
 
-    const doNotDisturb =
-      getNotificationPreferences().doNotDisturb;
+    const doNotDisturb = getNotificationPreferences().doNotDisturb;
 
     const canShowToast =
-      details?.toast !== false &&
-      (!doNotDisturb || notification.type === 'error');
+      details?.toast !== false && (!doNotDisturb || notification.type === 'error');
 
     if (canShowToast) {
-      setVisibleToasts((current) => [
-        ...current,
-        notification,
-      ].slice(0, 20));
+      setVisibleToasts((current) => [...current, notification].slice(0, 20));
     }
   }, []);
-
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;

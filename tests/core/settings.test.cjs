@@ -212,6 +212,7 @@ test('widgets centralizados conservam posição e bloqueiam capacidade sem alter
     'src/core/widgetPreferences.js',
     {
       initialWidgetState,
+      getWidgetDefinition: () => ({ allowedSizes: ['2x2', '3x2', '3x3'] }),
       loadWidgetPreferences: () => ({ state: initialWidgetState, error: null }),
       saveWidgetState: (state) => {
         saved = state;
@@ -380,6 +381,15 @@ test('mensagens e opções apresentadas por Configurações possuem tradução',
     for (const match of read(file).matchAll(/'([^'\n]+)'/g)) {
       const text = match[1];
       if (['Escape', 'RIFF', 'WEBP', 'QuotaExceededError'].includes(text)) continue;
+      // Identificadores IANA são valores internos, não textos de interface.
+      if (
+        /^(?:Africa|America|Antarctica|Arctic|Asia|Atlantic|Australia|Europe|Indian|Pacific|Etc)\/[A-Za-z_]+(?:\/[A-Za-z_]+)?$/.test(
+          text,
+        )
+      ) {
+        assert.doesNotThrow(() => new Intl.DateTimeFormat('en', { timeZone: text }));
+        continue;
+      }
       if (!/^[A-ZÁÉÍÓÚÇ][\p{L}\p{N} .,;:…?!×/()+—–-]*$/u.test(text)) continue;
       assert.ok(Object.hasOwn(english, text), file + ': ' + text);
     }
