@@ -308,7 +308,7 @@ __name(onRequestPost, "onRequestPost");
 
 // functions/api/posts.js
 async function onRequestGet({ env }) {
-  const json3 = /* @__PURE__ */ __name((body, status = 200) => Response.json(body, {
+  const json4 = /* @__PURE__ */ __name((body, status = 200) => Response.json(body, {
     status,
     headers: {
       "Cache-Control": status === 200 ? "public, max-age=60" : "no-store",
@@ -316,7 +316,7 @@ async function onRequestGet({ env }) {
     }
   }), "json");
   if (!/^https:\/\/[a-z\d-]+\.supabase\.co$/i.test(env.SUPABASE_URL ?? "") || !env.SUPABASE_ANON_KEY)
-    return json3({ error: "Publica\xE7\xF5es ainda n\xE3o configuradas." }, 503);
+    return json4({ error: "Publica\xE7\xF5es ainda n\xE3o configuradas." }, 503);
   try {
     const url = new URL("/rest/v1/posts", env.SUPABASE_URL);
     url.search = new URLSearchParams({
@@ -330,10 +330,10 @@ async function onRequestGet({ env }) {
       headers: { apikey: env.SUPABASE_ANON_KEY, Authorization: `Bearer ${env.SUPABASE_ANON_KEY}` },
       signal: AbortSignal.timeout(1e4)
     });
-    if (!response.ok) return json3({ error: "Publica\xE7\xF5es temporariamente indispon\xEDveis." }, 502);
+    if (!response.ok) return json4({ error: "Publica\xE7\xF5es temporariamente indispon\xEDveis." }, 502);
     const rows = await response.json();
-    if (!Array.isArray(rows)) return json3({ error: "Resposta do servi\xE7o inv\xE1lida." }, 502);
-    return json3({
+    if (!Array.isArray(rows)) return json4({ error: "Resposta do servi\xE7o inv\xE1lida." }, 502);
+    return json4({
       posts: rows.map((row) => ({
         id: row.id,
         title: row.title,
@@ -345,14 +345,14 @@ async function onRequestGet({ env }) {
       }))
     });
   } catch {
-    return json3({ error: "Publica\xE7\xF5es temporariamente indispon\xEDveis." }, 502);
+    return json4({ error: "Publica\xE7\xF5es temporariamente indispon\xEDveis." }, 502);
   }
 }
 __name(onRequestGet, "onRequestGet");
 
 // functions/api/wakatime.js
 async function onRequestGet2({ request, env }) {
-  const json3 = /* @__PURE__ */ __name((body, status = 200) => Response.json(body, {
+  const json4 = /* @__PURE__ */ __name((body, status = 200) => Response.json(body, {
     status,
     headers: {
       "Cache-Control": status === 200 ? "public, max-age=300" : "no-store",
@@ -361,18 +361,18 @@ async function onRequestGet2({ request, env }) {
   }), "json");
   const range = new URL(request.url).searchParams.get("range") ?? "last_7_days";
   if (!["last_7_days", "last_30_days", "last_year"].includes(range))
-    return json3({ error: "Per\xEDodo inv\xE1lido." }, 400);
-  if (!env.WAKATIME_API_KEY) return json3({ error: "WakaTime ainda n\xE3o configurado." }, 503);
+    return json4({ error: "Per\xEDodo inv\xE1lido." }, 400);
+  if (!env.WAKATIME_API_KEY) return json4({ error: "WakaTime ainda n\xE3o configurado." }, 503);
   try {
     const response = await fetch(`https://wakatime.com/api/v1/users/current/stats/${range}`, {
       headers: { Authorization: `Basic ${btoa(`${env.WAKATIME_API_KEY}:`)}` },
       signal: AbortSignal.timeout(1e4)
     });
-    if (!response.ok) return json3({ error: "M\xE9tricas temporariamente indispon\xEDveis." }, 502);
+    if (!response.ok) return json4({ error: "M\xE9tricas temporariamente indispon\xEDveis." }, 502);
     const { data } = await response.json();
     if (!Number.isFinite(data?.total_seconds) || !Array.isArray(data.languages))
-      return json3({ error: "Resposta do servi\xE7o inv\xE1lida." }, 502);
-    return json3({
+      return json4({ error: "Resposta do servi\xE7o inv\xE1lida." }, 502);
+    return json4({
       data: {
         total_seconds: Math.max(0, data.total_seconds),
         languages: data.languages.filter(
@@ -384,7 +384,7 @@ async function onRequestGet2({ request, env }) {
       }
     });
   } catch {
-    return json3({ error: "M\xE9tricas temporariamente indispon\xEDveis." }, 502);
+    return json4({ error: "M\xE9tricas temporariamente indispon\xEDveis." }, 502);
   }
 }
 __name(onRequestGet2, "onRequestGet");
@@ -593,6 +593,67 @@ async function onRequestLogout({ request, env }) {
 }
 __name(onRequestLogout, "onRequestLogout");
 
+// functions/api/adminPosts.js
+var json3 = /* @__PURE__ */ __name((body, status = 200) => Response.json(body, {
+  status,
+  headers: {
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff"
+  }
+}), "json");
+async function onRequestGet3({ request, env }) {
+  const access = await requireAdministrator(request, env);
+  if (!access.authorized) {
+    return access.response;
+  }
+  const authorization = request.headers.get("authorization");
+  if (!/^https:\/\/[a-z\d-]+\.supabase\.co$/i.test(env.SUPABASE_URL ?? "") || !env.SUPABASE_ANON_KEY) {
+    return json3({ error: "Supabase n\xE3o configurado." }, 503);
+  }
+  try {
+    const url = new URL("/rest/v1/posts", env.SUPABASE_URL);
+    url.search = new URLSearchParams({
+      select: "id,title,summary,body,tags,status,published_at",
+      order: "published_at.desc.nullslast",
+      limit: "200"
+    });
+    const response = await fetch(url, {
+      headers: {
+        apikey: env.SUPABASE_ANON_KEY,
+        Authorization: authorization
+      },
+      signal: AbortSignal.timeout(1e4)
+    });
+    if (!response.ok) {
+      return json3(
+        { error: "N\xE3o foi poss\xEDvel consultar as publica\xE7\xF5es." },
+        502
+      );
+    }
+    const rows = await response.json();
+    if (!Array.isArray(rows)) {
+      return json3({ error: "Resposta inv\xE1lida do Supabase." }, 502);
+    }
+    return json3({
+      posts: rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        summary: row.summary,
+        body: row.body,
+        tags: row.tags,
+        status: row.status,
+        publishedAt: row.published_at
+      }))
+    });
+  } catch {
+    return json3(
+      { error: "Servi\xE7o de publica\xE7\xF5es indispon\xEDvel." },
+      502
+    );
+  }
+}
+__name(onRequestGet3, "onRequestGet");
+
 // worker/index.js
 var routes = {
   "/api/wally": { method: "POST", handler: onRequestPost },
@@ -601,7 +662,8 @@ var routes = {
   "/api/auth/login": { method: "POST", handler: onRequestLogin },
   "/api/auth/me": { method: "GET", handler: onRequestMe },
   "/api/auth/logout": { method: "POST", handler: onRequestLogout },
-  "/api/admin/status": { method: "GET", handler: onRequestAdminStatus }
+  "/api/admin/status": { method: "GET", handler: onRequestAdminStatus },
+  "/api/admin/posts": { method: "GET", handler: onRequestGet3 }
 };
 function error(code, status, headers = {}) {
   return Response.json(
@@ -682,7 +744,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-ZS2bYM/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-rBVUgZ/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -714,7 +776,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-ZS2bYM/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-rBVUgZ/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

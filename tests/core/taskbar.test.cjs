@@ -50,7 +50,7 @@ function previewsHarness() {
     },
   });
   vm.runInContext(read('src/shells/desktop/taskbar/useTaskbarPreviews.js')
-    .replace(/^import[^;]+;\s*/m, '')
+    .replace(/^import[^;]+;\s*/gm, '')
     .replace('export default function', 'function'), context);
   const props = {
     groups: [{ appId: 'projects', instances: [{ id: 'one', minimized: false }] }],
@@ -158,7 +158,7 @@ test('hover mantém prévia e saída sem foco permite fechamento', () => {
 test('clique no grupo encontra a janela reativada, não a última criada', () => {
   const context = vm.createContext({ getAppDefinition: () => ({ public: true }) });
   vm.runInContext(read('src/core/appManager.js')
-    .replace(/^import[^;]+;\s*/m, '')
+    .replace(/^import[^;]+;[ \t]*(?:\r?\n)?/gm, '')
     .replace(/\bexport\s+(?=(?:const|function)\b)/g, ''), context);
   const state = {
     instances: [

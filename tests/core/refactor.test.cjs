@@ -30,6 +30,7 @@ function loadCore() {
   );
   const manager = loadPureModule('src/core/appManager.js', {
     getAppDefinition: registry.getAppDefinition,
+    isAdminAuthenticated: () => false,
   });
   return { registry, manager };
 }

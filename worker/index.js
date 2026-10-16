@@ -1,6 +1,7 @@
 import { onRequestPost as handleWally } from '../functions/api/wally.js';
 import { onRequestGet as handlePosts } from '../functions/api/posts.js';
 import { onRequestGet as handleWakatime } from '../functions/api/wakatime.js';
+import { onRequestGet as handleAdminPosts } from '../functions/api/adminPosts.js';
 
 import {
   onRequestLogin,
@@ -17,6 +18,7 @@ const routes = {
   '/api/auth/me': { method: 'GET', handler: onRequestMe },
   '/api/auth/logout': { method: 'POST', handler: onRequestLogout },
   '/api/admin/status': { method: 'GET', handler: onRequestAdminStatus },
+  '/api/admin/posts': { method: 'GET', handler: handleAdminPosts },
 };
 function error(code, status, headers = {}) {
   return Response.json(

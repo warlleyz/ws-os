@@ -27,7 +27,10 @@ function core() {
   );
   return {
     registry,
-    manager: moduleAt('src/core/appManager.js', { getAppDefinition: registry.getAppDefinition }),
+    manager: moduleAt('src/core/appManager.js', {
+      getAppDefinition: registry.getAppDefinition,
+      isAdminAuthenticated: () => false,
+    }),
   };
 }
 const initial = () => ({ instances: [], activeInstanceId: null, focusHistory: [] });
