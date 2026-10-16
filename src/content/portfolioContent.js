@@ -7,7 +7,7 @@ export const portfolio = {
 
   notesEndpoint: '',
   posts: [],
-  wakatimeProxy: '',
+  wakatimeProxy: '/api/wakatime',
 
   // PERFIL PROFISSIONAL
 
