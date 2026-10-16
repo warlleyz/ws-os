@@ -82,6 +82,10 @@ export const portfolio = {
         label: 'GitHub',
         url: 'https://github.com/warlleyz',
       },
+      {
+        label: 'LinkedIn',
+        url: 'https://www.linkedin.com/in/warlleysilvab/',
+      },
     ],
   },
 
@@ -204,7 +208,33 @@ export const portfolio = {
   projects: [], // { id, name, description, technologies: [], status, repository, image, demos: [{ id, title, mode: external|embedded|hosted|simulated, url }] }
   demoOrigins: [], // Origens HTTPS autorizadas a embed. URLs externas continuam disponíveis sem embed.
   officialFiles: [], // { id, name, url, description }. Somente leitura; caminhos públicos do próprio site.
-  contact: { links: [], emailService: '', emailTemplate: '', emailPublicKey: '' },
+  contact: {
+    links: [
+      {
+        label: 'E-mail',
+        url: 'mailto:warlleysilvax@gmail.com',
+      },
+      {
+        label: 'GitHub',
+        url: 'https://github.com/warlleyz',
+      },
+      {
+        label: 'LinkedIn',
+        url: 'https://www.linkedin.com/in/warlleysilvab/',
+      },
+      {
+        label: 'WhatsApp',
+        url: 'https://wa.me/5531997185483',
+      },
+      {
+        label: 'Discord',
+        url: 'https://discord.com/users/814927706184613928',
+      },
+    ],
+    emailService: 'service_ss81zgq',
+    emailTemplate: 'template_heie6oa',
+    emailPublicKey: 'dR_srJZx9lh9_GOta',
+  },
 };
 
 export function contentText(value, locale = 'pt-BR') {
