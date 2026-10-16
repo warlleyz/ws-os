@@ -1,5 +1,4 @@
-
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
   useWidgetPreferences,
@@ -26,64 +25,35 @@ import {
 import { useSystem } from '../../core/useSystem';
 
 // Todos os widgets previstos no planejamento.
-export const DESKTOP_WIDGET_IDS = [
-  'clock',
-  'calendar',
-  'weather',
-  'dev-insights',
-];
+export const DESKTOP_WIDGET_IDS = ['clock', 'calendar', 'weather', 'dev-insights'];
 
 // Habilitar cada componente depois de implementado.
 // O cadastro e as preferências dos seis já existem.
-const READY_WIDGET_IDS = new Set([
-  'clock',
-  'calendar',
-  'weather',
-  'dev-insights',
-]);
+const READY_WIDGET_IDS = new Set(['clock', 'calendar', 'weather', 'dev-insights']);
 
-function getCompatibleWidgetLayout(
-  count,
-  width,
-  height,
-  widgets,
-  preferred,
-) {
-  const enabledWidgets = widgets.filter(
-    (widget) => READY_WIDGET_IDS.has(widget.widgetId),
-  );
+function getCompatibleWidgetLayout(count, width, height, widgets, preferred) {
+  const enabledWidgets = widgets.filter((widget) => READY_WIDGET_IDS.has(widget.widgetId));
 
-  const layout = getMultiWidgetLayout(
-    count,
-    width,
-    height,
-    enabledWidgets,
-    preferred,
-  );
+  const layout = getMultiWidgetLayout(count, width, height, enabledWidgets, preferred);
 
   // Compatibilidade temporária com componentes antigos.
-  const clock = widgets.find(
-    (widget) => widget.instanceId === 'clock-default',
-  );
+  const clock = widgets.find((widget) => widget.instanceId === 'clock-default');
 
-  const clockPlacement =
-    layout.widgets?.['clock-default'] ?? null;
+  const clockPlacement = layout.widgets?.['clock-default'] ?? null;
 
   return {
     ...layout,
 
     widget: clockPlacement
       ? {
-        left: clockPlacement.left,
-        top: clockPlacement.top,
-      }
+          left: clockPlacement.left,
+          top: clockPlacement.top,
+        }
       : null,
 
     widgetSize: clock?.size ?? null,
 
-    widgetBlocked: Boolean(
-      clock?.visible && !clockPlacement,
-    ),
+    widgetBlocked: Boolean(clock?.visible && !clockPlacement),
   };
 }
 
@@ -102,20 +72,22 @@ export default function useDesktopWidgets({
 
   const widgets = widgetState.widgets;
 
-  const clockWidget = widgets.find(
-    (widget) => widget.instanceId === 'clock-default',
-  );
+  const clockWidget = widgets.find((widget) => widget.instanceId === 'clock-default');
 
-  const preferred = shortcuts.map(
-    (app) => shortcutPositions[app.id],
+  const preferred = useMemo(
+    () => shortcuts.map((app) => shortcutPositions[app.id]),
+    [shortcuts, shortcutPositions],
   );
-
-  const desktopLayout = getCompatibleWidgetLayout(
-    shortcuts.length,
-    gridSize.width,
-    gridSize.height,
-    widgets,
-    preferred,
+  const desktopLayout = useMemo(
+    () =>
+      getCompatibleWidgetLayout(
+        shortcuts.length,
+        gridSize.width,
+        gridSize.height,
+        widgets,
+        preferred,
+      ),
+    [shortcuts.length, gridSize.width, gridSize.height, widgets, preferred],
   );
 
   // --------------------------------------------------
@@ -123,9 +95,7 @@ export default function useDesktopWidgets({
   // --------------------------------------------------
 
   function getWidget(instanceId) {
-    return widgets.find(
-      (widget) => widget.instanceId === instanceId,
-    ) ?? null;
+    return widgets.find((widget) => widget.instanceId === instanceId) ?? null;
   }
 
   function isWidgetReady(widgetId) {
@@ -136,9 +106,7 @@ export default function useDesktopWidgets({
     return {
       ...widgetState,
       widgets: widgets.map((widget) =>
-        widget.instanceId === instanceId
-          ? { ...widget, ...patch }
-          : widget,
+        widget.instanceId === instanceId ? { ...widget, ...patch } : widget,
       ),
     };
   }
@@ -153,11 +121,7 @@ export default function useDesktopWidgets({
     );
   }
 
-  function isPlacementExact(
-    layout,
-    instanceId,
-    position,
-  ) {
+  function isPlacementExact(layout, instanceId, position) {
     const placement = layout.widgets?.[instanceId];
 
     return Boolean(
@@ -188,8 +152,7 @@ export default function useDesktopWidgets({
 
     notify({
       title: 'Preferências dos widgets',
-      message:
-        'Não foi possível recuperar corretamente as preferências dos widgets.',
+      message: 'Não foi possível recuperar corretamente as preferências dos widgets.',
       source: 'Widgets',
       type: 'warning',
     });
@@ -216,9 +179,7 @@ export default function useDesktopWidgets({
       const nextState = {
         ...widgetState,
         widgets: widgetState.widgets.map((widget) =>
-          widget.instanceId === candidate.instanceId
-            ? candidate
-            : widget,
+          widget.instanceId === candidate.instanceId ? candidate : widget,
         ),
       };
 
@@ -227,23 +188,12 @@ export default function useDesktopWidgets({
         gridSize.width,
         gridSize.height,
         nextState.widgets,
-        shortcuts.map(
-          (app) => shortcutPositions[app.id],
-        ),
+        shortcuts.map((app) => shortcutPositions[app.id]),
       );
 
-      return (
-        !candidate.visible ||
-        Boolean(layout.widgets?.[candidate.instanceId])
-      );
+      return !candidate.visible || Boolean(layout.widgets?.[candidate.instanceId]);
     });
-  }, [
-    widgetState,
-    shortcuts,
-    gridSize.width,
-    gridSize.height,
-    shortcutPositions,
-  ]);
+  }, [widgetState, shortcuts, gridSize.width, gridSize.height, shortcutPositions]);
 
   // --------------------------------------------------
   // Persistência coordenada
@@ -253,8 +203,7 @@ export default function useDesktopWidgets({
     if (typeof commitWidgetLayout !== 'function') {
       notify({
         title: 'Organização indisponível',
-        message:
-          'O gerenciador de persistência do Desktop não está conectado.',
+        message: 'O gerenciador de persistência do Desktop não está conectado.',
         source: 'Widgets',
         type: 'warning',
       });
@@ -282,18 +231,11 @@ export default function useDesktopWidgets({
 
     const visible = !widget.visible;
 
-    const nextState = setWidgetVisibility(
-      widgetState,
-      instanceId,
-      visible,
-    );
+    const nextState = setWidgetVisibility(widgetState, instanceId, visible);
 
     const layout = getCandidateLayout(nextState);
 
-    if (
-      visible &&
-      !layout.widgets?.[instanceId]
-    ) {
+    if (visible && !layout.widgets?.[instanceId]) {
       warnBlocked();
       return false;
     }
@@ -306,13 +248,10 @@ export default function useDesktopWidgets({
     return toggleWidget('clock-default');
   }
 
-
   function resetWidget(instanceId) {
     const widget = getWidget(instanceId);
 
-    const defaults = initialWidgetState.widgets.find(
-      (item) => item.instanceId === instanceId,
-    );
+    const defaults = initialWidgetState.widgets.find((item) => item.instanceId === instanceId);
 
     if (!widget || !defaults) {
       return false;
@@ -325,11 +264,11 @@ export default function useDesktopWidgets({
       widgets: widgetState.widgets.map((item) =>
         item.instanceId === instanceId
           ? {
-            ...item,
-            size: { ...defaults.size },
-            settings: { ...defaults.settings },
-            position: null,
-          }
+              ...item,
+              size: { ...defaults.size },
+              settings: { ...defaults.settings },
+              position: null,
+            }
           : item,
       ),
     };
@@ -338,10 +277,7 @@ export default function useDesktopWidgets({
 
     // A restauração não pode remover atalhos ou
     // salvar uma organização inválida.
-    if (
-      widget.visible &&
-      !layout.widgets?.[instanceId]
-    ) {
+    if (widget.visible && !layout.widgets?.[instanceId]) {
       warnBlocked();
       return false;
     }
@@ -360,30 +296,19 @@ export default function useDesktopWidgets({
       return false;
     }
 
-    const definition = getWidgetDefinition(
-      widget.widgetId,
-    );
+    const definition = getWidgetDefinition(widget.widgetId);
 
     if (!definition?.allowedSizes?.includes(value)) {
       return false;
     }
 
-    const [columns, rows] = value
-      .split('x')
-      .map(Number);
+    const [columns, rows] = value.split('x').map(Number);
 
-    const nextState = setWidgetSize(
-      widgetState,
-      instanceId,
-      { columns, rows },
-    );
+    const nextState = setWidgetSize(widgetState, instanceId, { columns, rows });
 
     const layout = getCandidateLayout(nextState);
 
-    if (
-      widget.visible &&
-      !layout.widgets?.[instanceId]
-    ) {
+    if (widget.visible && !layout.widgets?.[instanceId]) {
       warnBlocked();
       return false;
     }
@@ -398,21 +323,13 @@ export default function useDesktopWidgets({
   function placeWidget(instanceId, column, row) {
     const widget = getWidget(instanceId);
 
-    if (
-      !widget ||
-      !widget.visible ||
-      !isWidgetReady(widget.widgetId)
-    ) {
+    if (!widget || !widget.visible || !isWidgetReady(widget.widgetId)) {
       return false;
     }
 
     const position = { column, row };
 
-    const nextState = setWidgetPosition(
-      widgetState,
-      instanceId,
-      position,
-    );
+    const nextState = setWidgetPosition(widgetState, instanceId, position);
 
     const layout = getCandidateLayout(nextState);
 
@@ -440,12 +357,8 @@ export default function useDesktopWidgets({
       drag.element.removeAttribute('data-drop-valid');
     }
 
-    if (
-      drag.target?.hasPointerCapture?.(drag.pointerId)
-    ) {
-      drag.target.releasePointerCapture(
-        drag.pointerId,
-      );
+    if (drag.target?.hasPointerCapture?.(drag.pointerId)) {
+      drag.target.releasePointerCapture(drag.pointerId);
     }
 
     return drag;
@@ -455,12 +368,7 @@ export default function useDesktopWidgets({
     () => () => {
       cancelWidgetDrag();
     },
-    [
-      gridSize.width,
-      gridSize.height,
-      widgetState,
-      cancelWidgetDrag,
-    ],
+    [gridSize.width, gridSize.height, widgetState, cancelWidgetDrag],
   );
 
   // --------------------------------------------------
@@ -468,29 +376,18 @@ export default function useDesktopWidgets({
   // --------------------------------------------------
 
   function startWidgetDrag(event, instanceId) {
-    if (
-      event.button !== 0 ||
-      widgetDragRef.current
-    ) {
+    if (event.button !== 0 || widgetDragRef.current) {
       return;
     }
 
     const widget = getWidget(instanceId);
-    const placement =
-      desktopLayout.widgets?.[instanceId];
+    const placement = desktopLayout.widgets?.[instanceId];
 
-    if (
-      !widget ||
-      !widget.visible ||
-      !isWidgetReady(widget.widgetId) ||
-      !placement
-    ) {
+    if (!widget || !widget.visible || !isWidgetReady(widget.widgetId) || !placement) {
       return;
     }
 
-    const element = event.currentTarget.closest(
-      '.desktop__widget',
-    );
+    const element = event.currentTarget.closest('.desktop__widget');
 
     if (!element) return;
 
@@ -514,9 +411,7 @@ export default function useDesktopWidgets({
       layout: desktopLayout,
     };
 
-    event.currentTarget.setPointerCapture(
-      event.pointerId,
-    );
+    event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   // --------------------------------------------------
@@ -526,10 +421,7 @@ export default function useDesktopWidgets({
   function moveWidgetDrag(event) {
     const drag = widgetDragRef.current;
 
-    if (
-      !drag ||
-      drag.pointerId !== event.pointerId
-    ) {
+    if (!drag || drag.pointerId !== event.pointerId) {
       return;
     }
 
@@ -547,37 +439,21 @@ export default function useDesktopWidgets({
       drag.layout,
     );
 
-    drag.element.style.translate =
-      `${limited.dx}px ${limited.dy}px`;
+    drag.element.style.translate = `${limited.dx}px ${limited.dy}px`;
 
-    const column = getCellColumn(
-      drag.left + limited.dx,
-      drag.layout,
-    );
+    const column = getCellColumn(drag.left + limited.dx, drag.layout);
 
-    const row = getCellRow(
-      drag.top + limited.dy,
-    );
+    const row = getCellRow(drag.top + limited.dy);
 
-    const nextState = getCandidateState(
-      drag.instanceId,
-      {
-        position: { column, row },
-      },
-    );
+    const nextState = getCandidateState(drag.instanceId, {
+      position: { column, row },
+    });
 
     const layout = getCandidateLayout(nextState);
 
-    const valid = isPlacementExact(
-      layout,
-      drag.instanceId,
-      { column, row },
-    );
+    const valid = isPlacementExact(layout, drag.instanceId, { column, row });
 
-    drag.element.setAttribute(
-      'data-drop-valid',
-      String(valid),
-    );
+    drag.element.setAttribute('data-drop-valid', String(valid));
   }
 
   // --------------------------------------------------
@@ -585,19 +461,13 @@ export default function useDesktopWidgets({
   // --------------------------------------------------
 
   function finishWidgetDrag(event) {
-    if (
-      widgetDragRef.current?.pointerId !==
-      event.pointerId
-    ) {
+    if (widgetDragRef.current?.pointerId !== event.pointerId) {
       return;
     }
 
     const drag = cancelWidgetDrag();
 
-    if (
-      !drag ||
-      event.type !== 'pointerup'
-    ) {
+    if (!drag || event.type !== 'pointerup') {
       return;
     }
 
@@ -608,30 +478,18 @@ export default function useDesktopWidgets({
       drag.layout,
     );
 
-    const column = getCellColumn(
-      drag.left + limited.dx,
-      drag.layout,
-    );
+    const column = getCellColumn(drag.left + limited.dx, drag.layout);
 
-    const row = getCellRow(
-      drag.top + limited.dy,
-    );
+    const row = getCellRow(drag.top + limited.dy);
 
-    placeWidget(
-      drag.instanceId,
-      column,
-      row,
-    );
+    placeWidget(drag.instanceId, column, row);
   }
 
   // --------------------------------------------------
   // Movimentação pelo teclado
   // --------------------------------------------------
 
-  function handleWidgetKeyDown(
-    event,
-    instanceId,
-  ) {
+  function handleWidgetKeyDown(event, instanceId) {
     if (event.key === 'Escape') {
       cancelWidgetDrag();
       return;
@@ -648,8 +506,7 @@ export default function useDesktopWidgets({
       return;
     }
 
-    const placement =
-      desktopLayout.widgets?.[instanceId];
+    const placement = desktopLayout.widgets?.[instanceId];
 
     if (!placement) return;
 
@@ -657,11 +514,9 @@ export default function useDesktopWidgets({
 
     const [dx, dy] = directions[event.key];
 
-    const column =
-      placement.position.column + dx;
+    const column = placement.position.column + dx;
 
-    const row =
-      placement.position.row + dy;
+    const row = placement.position.row + dy;
 
     placeWidget(instanceId, column, row);
   }

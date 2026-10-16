@@ -53,3 +53,9 @@ Corrigidos símbolo ausente na Taskbar, efeito redundante de DND, navegação de
 Grade virtual separa reserva física da Taskbar das linhas roláveis. Testes antigos passaram a comparar coordenadas de células com passo adaptativo, sem fixar 90 px. Tamanho legado 3×3 do relógio restaurado, fixtures atualizadas para quatro widgets e novo teste de colisões/recuperação em múltiplas larguras. Traduções ausentes dos recursos recentes foram acrescentadas.
 
 Medição sintética do algoritmo multiwidget (Node/VM, 25 distribuições por dimensão, não benchmark do navegador): média 1,5 ms em 768×500, 1,5 ms em 1280×720, 3,0 ms em 1920×1080 e 18,6 ms em 3840×2160, p95 de 23,5 ms em 4K. O custo de layout em 4K merece otimização medida; não declarar resize físico corrigido com esse ensaio.
+
+### M0.1 — custo da grade
+
+Distribuicao sob demanda substitui enumeracao/ordenacao completas no caminho comum, preservando ordem de prioridade e desempate. Layout do hook memoizado por entradas reais para nao recalcular em atualizacoes sem relacao com a grade. Comparacao deterministica: 120 cenarios identicos antes/depois. Mesmo ensaio Node/VM: 4K media 0,95 ms/p95 1,63 ms (antes 18,6/23,5 ms); Full HD media 0,30 ms (antes 3,00 ms). Em 768x500, media 1,91 ms contra 1,51 ms: a melhora nao e uniforme em espacos congestionados. Nao equivale a medicao de FPS no navegador.
+
+Navegador: Desktop e tres widgets padrao renderizados, Taskbar funcional, Configuracoes abriu pelo teclado e listou os quatro widgets e tamanhos legados. Nenhum dado da origem habitual foi alterado. A consulta de localizacao retornou erro de permissao com feedback; nao foi concedida permissao de geolocalizacao.

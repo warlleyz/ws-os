@@ -147,34 +147,64 @@ export function occupyWidgetCells(occupied, position, size) {
  * Procura posições válidas na grade.
  * Se houver preferência, prioriza posições próximas.
  */
-export function findWidgetPosition(size, layout, occupied = new Set(), preferred = null) {
-  const candidates = [];
-
-  for (let column = 0; column < layout.columns; column += 1) {
-    for (let row = 0; row < layout.rows; row += 1) {
-      const position = { column, row };
-
-      if (canPlaceWidget(position, size, layout, occupied)) {
-        candidates.push(position);
+// Visita posições na mesma ordem determinística sem materializar toda a grade.
+// O caminho comum encerra assim que a primeira posição válida é encontrada.
+function* widgetCandidates(size, layout, preferred, rightFirst = false) {
+  const maxColumn = layout.columns - size.columns;
+  const maxRow = layout.rows - size.rows;
+  if (maxColumn < 0 || maxRow < 0) return;
+  const hasPreferred = Number.isInteger(preferred?.column) && Number.isInteger(preferred?.row);
+  if (
+    hasPreferred &&
+    preferred.column >= 0 &&
+    preferred.column <= maxColumn &&
+    preferred.row >= 0 &&
+    preferred.row <= maxRow
+  ) {
+    const { column, row } = preferred;
+    const distanceLimit = Math.max(column, maxColumn - column) + Math.max(row, maxRow - row);
+    for (let distance = 0; distance <= distanceLimit; distance += 1) {
+      for (
+        let x = Math.max(0, column - distance);
+        x <= Math.min(maxColumn, column + distance);
+        x += 1
+      ) {
+        const dy = distance - Math.abs(x - column);
+        const low = row - dy,
+          high = row + dy;
+        if (low >= 0 && low <= maxRow) yield { column: x, row: low };
+        if (high !== low && high >= 0 && high <= maxRow) yield { column: x, row: high };
       }
     }
+    return;
   }
-
-  if (candidates.length === 0) {
-    return null;
+  if (hasPreferred) {
+    // Preferência fora da nova área: ordenar apenas as coordenadas finitas.
+    const positions = [];
+    for (let column = 0; column <= maxColumn; column += 1)
+      for (let row = 0; row <= maxRow; row += 1) positions.push({ column, row });
+    positions.sort(
+      (a, b) =>
+        Math.abs(a.column - preferred.column) +
+          Math.abs(a.row - preferred.row) -
+          (Math.abs(b.column - preferred.column) + Math.abs(b.row - preferred.row)) ||
+        a.column - b.column ||
+        a.row - b.row,
+    );
+    yield* positions;
+    return;
   }
-
-  if (preferred && Number.isInteger(preferred.column) && Number.isInteger(preferred.row)) {
-    candidates.sort((a, b) => {
-      const distanceA = Math.abs(a.column - preferred.column) + Math.abs(a.row - preferred.row);
-
-      const distanceB = Math.abs(b.column - preferred.column) + Math.abs(b.row - preferred.row);
-
-      return distanceA - distanceB || a.column - b.column || a.row - b.row;
-    });
+  for (let i = 0; i <= maxColumn; i += 1) {
+    const column = rightFirst ? maxColumn - i : i;
+    for (let row = 0; row <= maxRow; row += 1) yield { column, row };
   }
+}
 
-  return candidates[0];
+export function findWidgetPosition(size, layout, occupied = new Set(), preferred = null) {
+  for (const position of widgetCandidates(size, layout, preferred)) {
+    if (canPlaceWidget(position, size, layout, occupied)) return position;
+  }
+  return null;
 }
 
 export function getDesktopLayout(count, width, height, widget, preferred = []) {
@@ -440,36 +470,9 @@ export function getMultiWidgetLayout(count, width, height, widgets = [], preferr
       continue;
     }
 
-    const candidates = [];
-
-    for (let column = 0; column < base.columns; column += 1) {
-      for (let row = 0; row < base.rows; row += 1) {
-        const position = { column, row };
-
-        if (canPlaceWidget(position, size, base, widgetOccupied)) {
-          candidates.push(position);
-        }
-      }
-    }
-
-    const desired = widget.position;
-
-    if (Number.isInteger(desired?.column) && Number.isInteger(desired?.row)) {
-      candidates.sort((a, b) => {
-        const distanceA = Math.abs(a.column - desired.column) + Math.abs(a.row - desired.row);
-
-        const distanceB = Math.abs(b.column - desired.column) + Math.abs(b.row - desired.row);
-
-        return distanceA - distanceB || a.column - b.column || a.row - b.row;
-      });
-    } else {
-      // Sem posição salva, prioriza a lateral direita.
-      candidates.sort((a, b) => b.column - a.column || a.row - b.row);
-    }
-
     let accepted = false;
-
-    for (const position of candidates) {
+    for (const position of widgetCandidates(size, base, widget.position, true)) {
+      if (!canPlaceWidget(position, size, base, widgetOccupied)) continue;
       const trialOccupied = occupyWidgetCells(widgetOccupied, position, size);
 
       const trialShortcuts = placeShortcuts(trialOccupied);
