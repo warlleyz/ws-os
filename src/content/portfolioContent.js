@@ -5,7 +5,6 @@
 export const portfolio = {
   githubUser: 'warlleyz',
 
-  notesEndpoint: '',
   notesEndpoint: '/api/posts',
   wakatimeProxy: '/api/wakatime',
 
