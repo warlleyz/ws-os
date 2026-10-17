@@ -1,4 +1,6 @@
 
+import { checkAdminLoginRateLimit } from '../_lib/adminLoginRateLimit.js';
+
 const json = (body, status = 200) =>
     Response.json(body, {
         status,
@@ -7,6 +9,47 @@ const json = (body, status = 200) =>
             'X-Content-Type-Options': 'nosniff',
         },
     });
+
+async function readLimitedJson(request, maxBytes = 4096) {
+    if (!request.body) {
+        throw new SyntaxError('EMPTY_BODY');
+    }
+
+    const reader = request.body.getReader();
+    const chunks = [];
+    let totalBytes = 0;
+
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) break;
+
+            totalBytes += value.byteLength;
+
+            if (totalBytes > maxBytes) {
+                throw new RangeError('BODY_TOO_LARGE');
+            }
+
+            chunks.push(value);
+        }
+    } finally {
+        await reader.cancel().catch(() => { });
+        reader.releaseLock();
+    }
+
+    const bytes = new Uint8Array(totalBytes);
+    let offset = 0;
+
+    for (const chunk of chunks) {
+        bytes.set(chunk, offset);
+        offset += chunk.byteLength;
+    }
+
+    return JSON.parse(
+        new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+    );
+}
 
 function getConfig(env) {
     if (
@@ -49,17 +92,22 @@ async function verifyAdministrator(config, token) {
     }
 
     const url = new URL('/rest/v1/admin_users', config.url);
+
     url.search = new URLSearchParams({
         select: 'user_id',
         user_id: `eq.${user.id}`,
         limit: '1',
     });
 
-    const adminResponse = await supabaseFetch(config, url.pathname + url.search, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+    const adminResponse = await supabaseFetch(
+        config,
+        url.pathname + url.search,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
 
     if (!adminResponse.ok) {
         throw new Error('ADMIN_VERIFICATION_FAILED');
@@ -67,9 +115,11 @@ async function verifyAdministrator(config, token) {
 
     const rows = await adminResponse.json();
 
-    return Array.isArray(rows) &&
+    return (
+        Array.isArray(rows) &&
         rows.length === 1 &&
-        rows[0]?.user_id === user.id;
+        rows[0]?.user_id === user.id
+    );
 }
 
 export async function requireAdministrator(request, env) {
@@ -106,7 +156,10 @@ export async function requireAdministrator(request, env) {
     } catch {
         return {
             authorized: false,
-            response: json({ error: 'Não foi possível verificar a autorização.' }, 502),
+            response: json(
+                { error: 'Não foi possível verificar a autorização.' },
+                502
+            ),
         };
     }
 }
@@ -128,15 +181,51 @@ export async function onRequestLogin({ request, env }) {
         return json({ error: 'Autenticação não configurada.' }, 503);
     }
 
-    if (Number(request.headers.get('content-length')) > 4096) {
+    const limit = await checkAdminLoginRateLimit(request, env);
+
+    if (!limit.allowed) {
+        if (limit.reason === 'RATE_LIMIT_EXCEEDED') {
+            return Response.json(
+                { error: 'Muitas tentativas. Tente novamente mais tarde.' },
+                {
+                    status: 429,
+                    headers: {
+                        'Cache-Control': 'no-store',
+                        'Retry-After': String(limit.retryAfter),
+                        'X-Content-Type-Options': 'nosniff',
+                    },
+                }
+            );
+        }
+
+        return json(
+            { error: 'Proteção de autenticação indisponível.' },
+            503
+        );
+    }
+
+    const contentLength = request.headers.get('content-length');
+
+    if (
+        contentLength !== null &&
+        Number.isFinite(Number(contentLength)) &&
+        Number(contentLength) > 4096
+    ) {
         return json({ error: 'Requisição inválida.' }, 413);
     }
 
     let credentials;
 
     try {
-        credentials = await request.json();
-    } catch {
+        credentials = await readLimitedJson(request);
+    } catch (error) {
+        if (
+            error instanceof RangeError &&
+            error.message === 'BODY_TOO_LARGE'
+        ) {
+            return json({ error: 'Requisição inválida.' }, 413);
+        }
+
         return json({ error: 'Dados inválidos.' }, 400);
     }
 
@@ -167,11 +256,14 @@ export async function onRequestLogin({ request, env }) {
                     email: email.trim(),
                     password,
                 }),
-            },
+            }
         );
 
         if (!response.ok) {
-            return json({ error: 'Credenciais inválidas ou acesso negado.' }, 401);
+            return json(
+                { error: 'Credenciais inválidas ou acesso negado.' },
+                401
+            );
         }
 
         const data = await response.json();
@@ -181,16 +273,22 @@ export async function onRequestLogin({ request, env }) {
             !Number.isFinite(data.expires_in) ||
             data.expires_in <= 0
         ) {
-            return json({ error: 'Resposta de autenticação inválida.' }, 502);
+            return json(
+                { error: 'Resposta de autenticação inválida.' },
+                502
+            );
         }
 
         const authorized = await verifyAdministrator(
             config,
-            data.access_token,
+            data.access_token
         );
 
         if (!authorized) {
-            return json({ error: 'Credenciais inválidas ou acesso negado.' }, 403);
+            return json(
+                { error: 'Credenciais inválidas ou acesso negado.' },
+                403
+            );
         }
 
         return json({
@@ -198,7 +296,10 @@ export async function onRequestLogin({ request, env }) {
             expires_in: data.expires_in,
         });
     } catch {
-        return json({ error: 'Serviço de autenticação indisponível.' }, 502);
+        return json(
+            { error: 'Serviço de autenticação indisponível.' },
+            502
+        );
     }
 }
 
@@ -225,10 +326,12 @@ export async function onRequestMe({ request, env }) {
 
         return json({ admin: true });
     } catch {
-        return json({ error: 'Não foi possível verificar a sessão.' }, 502);
+        return json(
+            { error: 'Não foi possível verificar a sessão.' },
+            502
+        );
     }
 }
-
 
 export async function onRequestLogout({ request, env }) {
     const config = getConfig(env);
@@ -245,19 +348,29 @@ export async function onRequestLogout({ request, env }) {
     }
 
     try {
-        const response = await supabaseFetch(config, '/auth/v1/logout', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${match[1]}`,
-            },
-        });
+        const response = await supabaseFetch(
+            config,
+            '/auth/v1/logout',
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${match[1]}`,
+                },
+            }
+        );
 
         if (!response.ok) {
-            return json({ error: 'Falha ao encerrar a sessão remota.' }, 502);
+            return json(
+                { error: 'Falha ao encerrar a sessão remota.' },
+                502
+            );
         }
 
         return json({ success: true });
     } catch {
-        return json({ error: 'Serviço de autenticação indisponível.' }, 502);
+        return json(
+            { error: 'Serviço de autenticação indisponível.' },
+            502
+        );
     }
 }
