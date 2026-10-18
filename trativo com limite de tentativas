@@ -1,0 +1,27 @@
+ .gitignore                                         |   5 [32m+[m[31m-[m
+ .../v3/cache/miniflare-CacheObject/metadata.sqlite | Bin [31m4096[m -> [32m0[m bytes
+ .../miniflare-CacheObject/metadata.sqlite-shm      | Bin [31m32768[m -> [32m0[m bytes
+ .../miniflare-CacheObject/metadata.sqlite-wal      | Bin [31m8272[m -> [32m0[m bytes
+ .../d1/miniflare-D1DatabaseObject/metadata.sqlite  | Bin [31m4096[m -> [32m0[m bytes
+ .../miniflare-D1DatabaseObject/metadata.sqlite-shm | Bin [31m32768[m -> [32m0[m bytes
+ .../miniflare-D1DatabaseObject/metadata.sqlite-wal | Bin [31m8272[m -> [32m0[m bytes
+ .../kv/miniflare-KVNamespaceObject/metadata.sqlite | Bin [31m4096[m -> [32m0[m bytes
+ .../metadata.sqlite-shm                            | Bin [31m32768[m -> [32m0[m bytes
+ .../metadata.sqlite-wal                            | Bin [31m8272[m -> [32m0[m bytes
+ ...9c3c09f58c283a76f2d61392b5d3046caf557602.sqlite | Bin [31m765952[m -> [32m0[m bytes
+ ...09f58c283a76f2d61392b5d3046caf557602.sqlite-shm | Bin [31m32768[m -> [32m0[m bytes
+ ...09f58c283a76f2d61392b5d3046caf557602.sqlite-wal | Bin [31m4161232[m -> [32m0[m bytes
+ .../miniflare-wobs-trace-store/metadata.sqlite     | Bin [31m4096[m -> [32m0[m bytes
+ .../miniflare-wobs-trace-store/metadata.sqlite-shm | Bin [31m32768[m -> [32m0[m bytes
+ .../miniflare-wobs-trace-store/metadata.sqlite-wal | Bin [31m8272[m -> [32m0[m bytes
+ .../v3/r2/miniflare-R2BucketObject/metadata.sqlite | Bin [31m4096[m -> [32m0[m bytes
+ .../miniflare-R2BucketObject/metadata.sqlite-shm   | Bin [31m32768[m -> [32m0[m bytes
+ .../miniflare-R2BucketObject/metadata.sqlite-wal   | Bin [31m8272[m -> [32m0[m bytes
+ .../bundle-rBVUgZ/middleware-insertion-facade.js   |  11 [31m-[m
+ .../tmp/bundle-rBVUgZ/middleware-loader.entry.ts   | 134 [31m----[m
+ .wrangler/tmp/dev-HsqdXy/index.js                  | 881 [31m---------------------[m
+ .wrangler/tmp/dev-HsqdXy/index.js.map              |   8 [31m-[m
+ functions/_lib/adminLoginRateLimit.js              |  59 [32m++[m
+ functions/api/auth.js                              | 167 [32m+++[m[31m-[m
+ tests/core/adminLoginRateLimit.test.cjs            | 141 [32m++++[m
+ 26 files changed, 344 insertions(+), 1062 deletions(-)

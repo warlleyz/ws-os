@@ -1,7 +1,19 @@
 import { onRequestPost as handleWally } from '../functions/api/wally.js';
 import { onRequestGet as handlePosts } from '../functions/api/posts.js';
+import {
+  onRequestGet as handleGetPostLikes,
+  onRequestPost as handlePostLike,
+} from '../functions/api/postLikes.js';
 import { onRequestGet as handleWakatime } from '../functions/api/wakatime.js';
-import { onRequestGet as handleAdminPosts } from '../functions/api/adminPosts.js';
+
+import {
+  onRequestGet as handleAdminPosts,
+  onRequestCreate as handleCreateNote,
+  onRequestUpdate as handleUpdateNote,
+  onRequestChangeStatus as handleChangeNoteStatus,
+  onRequestDelete as handleDeleteNote,
+} from '../functions/api/adminPosts.js';
+
 
 import {
   onRequestLogin,
@@ -13,12 +25,30 @@ import {
 const routes = {
   '/api/wally': { method: 'POST', handler: handleWally },
   '/api/posts': { method: 'GET', handler: handlePosts },
+  '/api/posts/likes': {
+    method: 'GET',
+    handler: handleGetPostLikes,
+  },
+  '/api/posts/likes/add': {
+    method: 'POST',
+    handler: handlePostLike,
+  },
   '/api/wakatime': { method: 'GET', handler: handleWakatime },
   '/api/auth/login': { method: 'POST', handler: onRequestLogin },
   '/api/auth/me': { method: 'GET', handler: onRequestMe },
   '/api/auth/logout': { method: 'POST', handler: onRequestLogout },
   '/api/admin/status': { method: 'GET', handler: onRequestAdminStatus },
   '/api/admin/posts': { method: 'GET', handler: handleAdminPosts },
+  '/api/admin/posts/create': { method: 'POST', handler: handleCreateNote },
+  '/api/admin/posts/update': { method: 'PATCH', handler: handleUpdateNote },
+  '/api/admin/posts/status': {
+    method: 'PATCH',
+    handler: handleChangeNoteStatus,
+  },
+  '/api/admin/posts/delete': {
+    method: 'DELETE',
+    handler: handleDeleteNote,
+  },
 };
 function error(code, status, headers = {}) {
   return Response.json(
