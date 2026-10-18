@@ -16,12 +16,6 @@ export default function PostLikes({ postId }) {
         const controller = new AbortController();
         const requestId = ++requestIdRef.current;
 
-        setCount(null);
-        setLoading(true);
-        setSubmitting(false);
-        setLiked(false);
-        setError('');
-
         async function loadLikes() {
             try {
                 const visitorId = getVisitorId();

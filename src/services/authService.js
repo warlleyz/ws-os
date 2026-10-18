@@ -3,6 +3,22 @@ const AUTH_ENDPOINT = '/api/auth';
 
 let session = null;
 
+const sessionListeners = new Set();
+
+function notifySessionChange() {
+    for (const listener of sessionListeners) {
+        listener();
+    }
+}
+
+export function subscribeAdminSession(listener) {
+    sessionListeners.add(listener);
+
+    return () => {
+        sessionListeners.delete(listener);
+    };
+}
+
 async function authRequest(path, options = {}) {
     const response = await fetch(`${AUTH_ENDPOINT}${path}`, {
         ...options,
@@ -44,6 +60,8 @@ export async function loginAdmin(email, password) {
         expiresAt: Date.now() + data.expires_in * 1000,
     };
 
+    notifySessionChange();
+
     return true;
 }
 
@@ -52,6 +70,7 @@ export function getAdminAccessToken() {
 
     if (Date.now() >= session.expiresAt) {
         session = null;
+        notifySessionChange();
         return null;
     }
 
@@ -71,12 +90,14 @@ export async function verifyAdminSession() {
 
         if (data.admin !== true) {
             session = null;
+            notifySessionChange();
             return false;
         }
 
         return true;
     } catch {
         session = null;
+        notifySessionChange();
         return false;
     }
 }
@@ -93,6 +114,7 @@ export async function logoutAdmin() {
     const token = getAdminAccessToken();
 
     session = null;
+    notifySessionChange();
 
     if (!token) return true;
 
