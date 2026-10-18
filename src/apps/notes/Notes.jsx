@@ -1,10 +1,7 @@
 import { useSyncExternalStore, useState } from 'react';
 import { contentText } from '../../content/portfolioContent';
 import { fetchNotes } from '../../services/notesService';
-import {
-  isAdminAuthenticated,
-  subscribeAdminSession,
-} from '../../services/authService';
+import { isAdminAuthenticated, subscribeAdminSession } from '../../services/authService';
 import usePublicResource from '../../shared/hooks/usePublicResource';
 import useAppBack from '../../shared/hooks/useAppBack';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
@@ -25,11 +22,7 @@ export default function Notes({ instance }) {
   const [tag, setTag] = useState('');
   const [selectedId, setSelectedId] = useState(null);
 
-  const isAdmin = useSyncExternalStore(
-    subscribeAdminSession,
-    isAdminAuthenticated,
-    () => false,
-  );
+  const isAdmin = useSyncExternalStore(subscribeAdminSession, isAdminAuthenticated, () => false);
   useAppBack(instance.id, () => {
     if (!selectedId) return false;
     setSelectedId(null);
@@ -57,15 +50,14 @@ export default function Notes({ instance }) {
       <h2>{t('Notas')}</h2>
       <p>{t('Publicações, estudos e registros públicos.')}</p>
 
-      {isAdmin && (
-        <NotesAdmin
-          instanceId={instance.id}
-          refreshPublicPosts={resource.refresh}
-          onDeletePublicPost={(id) => {
-            setSelectedId((current) => current === id ? null : current);
-          }}
-        />
-      )}
+      <NotesAdmin
+        instanceId={instance.id}
+        isAdmin={isAdmin}
+        refreshPublicPosts={resource.refresh}
+        onDeletePublicPost={(id) => {
+          setSelectedId((current) => (current === id ? null : current));
+        }}
+      />
 
       {resource.status === 'loading' && <p role="status">{t('Carregando')}</p>}
       {resource.status === 'error' && <p role="alert">{t(resource.error)}</p>}

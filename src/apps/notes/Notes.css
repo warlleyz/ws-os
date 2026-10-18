@@ -75,3 +75,11 @@
 .notes-app__likes [role='alert'] {
   flex-basis: 100%;
 }
+.notes-app__editor fieldset {
+  display: grid;
+  gap: 0.875rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { getRegisteredApps } from '../../core/appRegistry';
 import { openApp, closeApp } from '../../core/appManager';
+import { canCloseApp } from '../../core/appCloseGuards';
 import { useSystem } from '../../core/useSystem';
 import { setTheme } from '../../core/themeManager';
 import { setLocale } from '../../shared/i18n/i18n';
@@ -12,6 +13,7 @@ import {
   logoutAdmin,
   isAdminAuthenticated,
   verifyAdminSession,
+  subscribeAdminSession,
 } from '../../services/authService';
 import '../../styles/apps.css';
 import './Terminal.css';
@@ -26,9 +28,7 @@ export default function Terminal() {
     [showLogin, setShowLogin] = useState(false),
     [loginEmail, setLoginEmail] = useState(''),
     [loginPassword, setLoginPassword] = useState(''),
-    [authenticated, setAuthenticated] = useState(
-      () => isAdminAuthenticated()
-    );
+    [authenticated, setAuthenticated] = useState(() => isAdminAuthenticated());
   const inputRef = useRef(null),
     busyRef = useRef(false),
     alive = useRef(true),
@@ -42,6 +42,13 @@ export default function Terminal() {
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
   }, [lines]);
+  useEffect(
+    () =>
+      subscribeAdminSession(() => {
+        setAuthenticated(isAdminAuthenticated());
+      }),
+    [],
+  );
   const apps = getRegisteredApps().filter((app) => app.public);
   async function submitLogin(event) {
     event.preventDefault();
@@ -59,21 +66,25 @@ export default function Terminal() {
       setLoginEmail('');
       setLoginPassword('');
 
-      setLines((current) => [
-        ...current,
-        {
-          command: 'login',
-          output: ['Autenticação administrativa realizada.'],
-        },
-      ].slice(-100));
+      setLines((current) =>
+        [
+          ...current,
+          {
+            command: 'login',
+            output: ['Autenticação administrativa realizada.'],
+          },
+        ].slice(-100),
+      );
     } catch (error) {
-      setLines((current) => [
-        ...current,
-        {
-          command: 'login',
-          output: [error.message],
-        },
-      ].slice(-100));
+      setLines((current) =>
+        [
+          ...current,
+          {
+            command: 'login',
+            output: [error.message],
+          },
+        ].slice(-100),
+      );
     } finally {
       setLoginPassword('');
       busyRef.current = false;
@@ -112,8 +123,7 @@ export default function Terminal() {
         case 'open': {
           const requestedApp = args.join(' ').toLowerCase();
           const isAdministration =
-            requestedApp === 'administration' ||
-            requestedApp === 'administração';
+            requestedApp === 'administration' || requestedApp === 'administração';
 
           if (isAdministration) {
             const authorized = await verifyAdminSession();
@@ -130,15 +140,11 @@ export default function Terminal() {
           }
 
           const app = apps.find(
-            (app) =>
-              app.id === args[0] ||
-              t(app.name).toLowerCase() === requestedApp,
+            (app) => app.id === args[0] || t(app.name).toLowerCase() === requestedApp,
           );
 
           if (!app?.implemented) {
-            throw new Error(
-              'Aplicativo indisponível. Use apps para consultar o catálogo.'
-            );
+            throw new Error('Aplicativo indisponível. Use apps para consultar o catálogo.');
           }
 
           run(openApp, app.id, { origin: 'terminal' });
@@ -186,11 +192,7 @@ export default function Terminal() {
           output = [new Date().toLocaleString(locale)];
           break;
         case 'whoami':
-          output = [
-            authenticated && isAdminAuthenticated()
-              ? 'Administrador'
-              : 'Visitante',
-          ];
+          output = [authenticated && isAdminAuthenticated() ? 'Administrador' : 'Visitante'];
           break;
         case 'history':
           output = history.map((item, index) => `${index + 1} ${item}`);
@@ -211,6 +213,21 @@ export default function Terminal() {
           }
           break;
         case 'logout': {
+          const hasPendingChanges = appState.instances.some(
+            (instance) => !canCloseApp(instance.id),
+          );
+
+          if (
+            hasPendingChanges &&
+            !window.confirm(
+              'Existem alterações não salvas em aplicativos abertos.\n\n' +
+                'O acesso administrativo será encerrado. Alterações pendentes do Notas permanecerão nesta janela até você entrar novamente. Deseja continuar?',
+            )
+          ) {
+            output = ['Logout cancelado. Suas alterações foram preservadas.'];
+            break;
+          }
+
           const remoteLogoutSucceeded = await logoutAdmin();
 
           setAuthenticated(false);
@@ -219,7 +236,7 @@ export default function Terminal() {
           setLoginPassword('');
 
           const administrationInstances = appState.instances.filter(
-            (instance) => instance.appId === 'administration'
+            (instance) => instance.appId === 'administration',
           );
 
           for (const instance of administrationInstances) {
