@@ -9,7 +9,7 @@ export default function AboutMe() {
   const { run } = useSystem();
   const profile = portfolio.profile;
   return (
-    <article className="desktop-window__content ws-app">
+    <article className="desktop-window__content ws-app ws-profile">
       <header>
         <p>{t('Apresentação profissional')}</p>
         <h2>{t('Sobre Mim')}</h2>

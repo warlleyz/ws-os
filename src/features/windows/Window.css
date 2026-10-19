@@ -335,3 +335,31 @@
     max-width: 100px;
   }
 }
+
+/* Dimensões iniciais por tarefa; o gerenciador mantém geometria e snap. */
+.desktop-window {
+  --initial-width: min(780px, calc(100% - 40px));
+  width: var(--initial-width);
+  height: min(620px, calc(100% - 96px));
+  left: max(16px, calc((100% - var(--initial-width)) / 2 + var(--window-offset, 0) * 24px));
+  top: max(16px, calc(9% + var(--window-offset, 0) * 24px));
+}
+.desktop-window:is(
+  [data-app-id='files'],
+  [data-app-id='settings'],
+  [data-app-id='administration']
+) {
+  --initial-width: min(1020px, calc(100% - 40px));
+  height: min(700px, calc(100% - 96px));
+  width: var(--initial-width);
+}
+.desktop-window:is([data-app-id='projects'], [data-app-id='dev-insights'], [data-app-id='notes']) {
+  --initial-width: min(900px, calc(100% - 40px));
+}
+.desktop-window[data-app-id='calculator'] {
+  --initial-width: min(430px, calc(100% - 40px));
+  height: min(690px, calc(100% - 96px));
+}
+.desktop-window[data-app-id='terminal'] {
+  height: min(530px, calc(100% - 96px));
+}

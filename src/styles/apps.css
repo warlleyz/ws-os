@@ -134,3 +134,163 @@
   font-family: ui-monospace, monospace;
   line-height: 1.6;
 }
+
+/* Fundamentos de aplicativos: consumidores .ws-app e documentos institucionais. */
+.desktop-window__content {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.desktop-window__content :where(h2) {
+  font-size: clamp(23px, 2.2vw, 29px);
+  line-height: 1.18;
+  letter-spacing: -0.035em;
+  margin: 0 0 12px;
+  font-weight: 800;
+}
+.desktop-window__content :where(h3) {
+  font-size: 17px;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  margin-block: 20px 10px;
+}
+.desktop-window__content :where(h4) {
+  font-size: 14px;
+  margin-block: 16px 8px;
+}
+.desktop-window__content :where(p) {
+  margin-block: 10px;
+}
+.desktop-window__content > header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-default);
+  margin-bottom: 24px;
+}
+.desktop-window__content > header > p {
+  color: var(--text-secondary);
+  max-width: 70ch;
+}
+.desktop-window__content :where(button, a, input, select, textarea) {
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+.desktop-window__content :where(button):disabled {
+  cursor: not-allowed;
+}
+.desktop-window__content :where(button):not(:disabled):active {
+  filter: brightness(0.96);
+}
+.ws-app :where(input, select, textarea):focus-visible {
+  border-color: var(--accent-secondary);
+  outline-offset: 2px;
+}
+.ws-app__card {
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 18px rgb(0 0 0 / 4%);
+}
+.ws-app__card :where(h3) {
+  margin-top: 0;
+}
+.ws-app__card:focus-within {
+  border-color: var(--accent-secondary);
+}
+.ws-app__metrics div {
+  border-radius: 14px;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-primary) 9%, var(--surface-secondary)),
+    var(--surface-secondary)
+  );
+}
+.ws-app__metrics dd {
+  font-size: 32px;
+  letter-spacing: -0.04em;
+}
+.ws-app__eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent-secondary);
+}
+.ws-profile > header {
+  padding: 28px;
+  border: 1px solid var(--border-default);
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-primary) 12%, transparent),
+    transparent
+  );
+}
+.ws-profile > header h3 {
+  font-size: clamp(22px, 3vw, 34px);
+  margin-block: 10px;
+}
+.ws-profile > section {
+  padding-block: 10px;
+}
+.ws-profile > section > ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+.ws-profile > section > ul > li {
+  padding: 8px 12px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  font-size: 13px;
+}
+.ws-projects .ws-app__card {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 4px;
+}
+.ws-projects .ws-app__card > button {
+  margin-top: auto;
+}
+.ws-projects .ws-app__card h3 {
+  font-size: 18px;
+}
+.ws-app [role='alert'] {
+  padding: 12px 14px;
+  border-left: 3px solid var(--status-error);
+  background: color-mix(in srgb, var(--status-error) 7%, transparent);
+  border-radius: 6px;
+}
+.desktop-window__content :where(dl) {
+  margin-block: 16px;
+}
+@media (max-width: 767px) {
+  .desktop-window__content {
+    font-size: 14px;
+    padding: 20px 16px;
+  }
+  .ws-profile > header {
+    padding: 20px;
+  }
+  .ws-app__card {
+    padding: 16px;
+  }
+  .ws-app__toolbar {
+    gap: 8px;
+  }
+  .ws-app__metrics dd {
+    font-size: 27px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .desktop-window__content :where(button, a, input, select, textarea) {
+    transition: none;
+  }
+}
+
+.ws-profile>header h3+h3 {font-size:20px;font-weight:500;letter-spacing:-.015em;color:var(--text-secondary);}
+
