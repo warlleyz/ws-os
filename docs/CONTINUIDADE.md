@@ -1,3 +1,5 @@
+> **Estado mais recente — 18/10/2026:** consulte [Pendências e continuidade](PENDENCIAS-FINALIZACAO.md). O texto abaixo é histórico; não descreve integralmente o estado atual de auth, Notas, Administração, Arquivos, rankings e testes.
+
 > **Atualização de 15/10/2026:** consulte primeiro [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md) e [Estado atual](implementation-status.md). O texto abaixo preserva descrições/evidências de etapas anteriores; afirmações sobre apps reservados, Mobile ausente ou apenas um app implementado foram superadas pelos commits atuais.
 
 # WS OS — Documento de continuidade e recuperação

@@ -859,5 +859,7 @@
   "Envio opcional. Use um apelido público, sem dados pessoais. Pontuações do navegador estão sujeitas a fraude.": "Submission is optional. Use a public nickname without personal information. Browser scores are subject to fraud.",
   "Atualizar ranking": "Refresh ranking",
   "Apelido público": "Public nickname",
-  "Enviar recorde": "Submit record"
+  "Enviar recorde": "Submit record",
+  "Verificação de segurança não configurada.": "Security verification is not configured.",
+  "Não foi possível concluir a verificação.": "Unable to complete verification."
 }

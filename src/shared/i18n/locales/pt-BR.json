@@ -859,5 +859,7 @@
   "Envio opcional. Use um apelido público, sem dados pessoais. Pontuações do navegador estão sujeitas a fraude.": "Envio opcional. Use um apelido público, sem dados pessoais. Pontuações do navegador estão sujeitas a fraude.",
   "Atualizar ranking": "Atualizar ranking",
   "Apelido público": "Apelido público",
-  "Enviar recorde": "Enviar recorde"
+  "Enviar recorde": "Enviar recorde",
+  "Verificação de segurança não configurada.": "Verificação de segurança não configurada.",
+  "Não foi possível concluir a verificação.": "Não foi possível concluir a verificação."
 }

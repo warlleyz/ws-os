@@ -1,3 +1,5 @@
+> **Estado mais recente — 18/10/2026:** consulte [Pendências e continuidade](../PENDENCIAS-FINALIZACAO.md). O texto abaixo é histórico; não descreve integralmente o estado atual de auth, Notas, Administração, Arquivos, rankings e testes.
+
 # Integrações preparadas — não ativadas
 
 Estas funções usam o roteamento por arquivos do Cloudflare Pages. `npm run dev` e `npm run preview` servem o frontend; **não executam Pages Functions**. A validação atual usa Requests/Responses e fetch simulado em Node, sem contas reais.

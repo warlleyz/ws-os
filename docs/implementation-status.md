@@ -1,3 +1,5 @@
+> **Estado mais recente — 18/10/2026:** consulte [Pendências e continuidade](PENDENCIAS-FINALIZACAO.md). O texto abaixo é histórico; não descreve integralmente o estado atual de auth, Notas, Administração, Arquivos, rankings e testes.
+
 # Estado da implementação — 15/10/2026
 
 O estado atual detalhado está em [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md), seções 4–11. [Progresso](PROGRESSO-CONCLUSAO.md) contém as evidências por bloco. Este arquivo substitui o diagnóstico inicial de 14/10, cujas tabelas não descreviam as implementações posteriores.

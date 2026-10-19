@@ -30,3 +30,7 @@ Os registros abaixo serão atualizados com resultados efetivamente obtidos; a li
 ## Dependências e condições externas
 
 Supabase/RLS e migrações precisam de homologação no banco real autorizado; segredos e bindings não são presumidos válidos por existirem nomes no código. EmailJS exige teste real autorizado de entrega. Gemini não será habilitado automaticamente. DOOM continua condicionado a artefatos/licença autorizados. Não chamar o portfólio completo enquanto houver essas condições ou requisitos implementáveis pendentes.
+
+## Pausa solicitada — 18/10/2026
+
+O usuário pediu encerramento após o próximo bloco. Finalizado o bloco de segurança/idioma do Wally, com validação final. O estado real, commits, arquivos e tarefas restantes estão em [Pendências de finalização](PENDENCIAS-FINALIZACAO.md). Não há declaração de conclusão integral ou autorização para produção.
