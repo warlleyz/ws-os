@@ -34,9 +34,13 @@ export default function Mobile({ theme, onThemeChange }) {
   const { appState, run, notificationState, handleNotificationAction, handleNotificationOpen } =
     useSystem();
 
-  const [screen, setScreen] = useState('home');
+  const [screen, setScreen] = useState(() =>
+    appState.instances.some((item) => item.origin === 'shared-link') ? 'app' : 'home',
+  );
   const [appOrigin, setAppOrigin] = useState('home');
-  const [selectedAppId, setSelectedAppId] = useState(null);
+  const [selectedAppId, setSelectedAppId] = useState(
+    () => appState.instances.find((item) => item.origin === 'shared-link')?.appId ?? null,
+  );
   const [activePanel, setActivePanel] = useState(null);
 
   const panelRef = useRef(null);
@@ -123,14 +127,14 @@ export default function Mobile({ theme, onThemeChange }) {
     }
   }
 
-  function openMobileApp(appId) {
+  function openMobileApp(appId, params = {}) {
     setAppOrigin(screen === 'catalog' || screen === 'search' ? screen : 'home');
 
     setSelectedAppId(appId);
     setScreen('app');
     closePanel();
 
-    run(openApp, appId, { origin: 'mobile' });
+    run(openApp, appId, { origin: 'mobile', params });
   }
 
   function navigateTo(nextScreen) {

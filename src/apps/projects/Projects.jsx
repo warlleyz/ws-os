@@ -22,9 +22,16 @@ export default function Projects({ instance }) {
   const [search, setSearch] = useState('');
   const [technology, setTechnology] = useState('all');
   const [order, setOrder] = useState('updated');
-  const [selectedId, setSelectedId] = useState(
-    typeof instance?.params?.projectId === 'string' ? instance.params.projectId : null,
-  );
+  const navigation = instance?.navigationRequestId ?? 0;
+  const [selection, setSelection] = useState({
+    request: navigation,
+    id: instance?.params?.projectId ?? null,
+  });
+  const selectedId =
+    selection.request === navigation ? selection.id : (instance?.params?.projectId ?? null);
+  function setSelectedId(id) {
+    setSelection({ request: navigation, id });
+  }
   useAppBack(instance?.id, () => {
     if (!selectedId) return false;
     setSelectedId(null);

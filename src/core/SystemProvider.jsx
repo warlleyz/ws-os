@@ -1,3 +1,4 @@
+import { resolveSharedEntry } from '../features/search/searchService';
 import { canCloseApp, requestCloseConfirmation, useCloseConfirmation } from './appCloseGuards';
 import AppCloseDialog from '../shared/components/AppCloseDialog';
 import { closeApp } from './appManager';
@@ -31,7 +32,16 @@ import {
 export default function SystemProvider({ children }) {
   useLocale();
   const closeRequest = useCloseConfirmation();
-  const [appState, setAppState] = useState(initialAppState);
+  const [appState, setAppState] = useState(() => {
+    const entry = resolveSharedEntry(window.location.search);
+    return entry
+      ? openApp(initialAppState, entry.appId, { origin: entry.origin, params: entry.params })
+      : initialAppState;
+  });
+  useEffect(() => {
+    if (resolveSharedEntry(window.location.search))
+      window.history.replaceState(null, '', import.meta.env.BASE_URL);
+  }, []);
   const [notificationState, setNotificationState] = useState(initialNotificationState);
   const [visibleToasts, setVisibleToasts] = useState([]);
   useEffect(

@@ -20,7 +20,19 @@ export default function Notes({ instance }) {
   const resource = usePublicResource(fetchNotes, 'notes');
   const [query, setQuery] = useState('');
   const [tag, setTag] = useState('');
-  const [selectedId, setSelectedId] = useState(null);
+  const navigation = instance?.navigationRequestId ?? 0;
+  const [selection, setSelection] = useState({
+    request: navigation,
+    id: instance?.params?.postId ?? null,
+  });
+  const selectedId =
+    selection.request === navigation ? selection.id : (instance?.params?.postId ?? null);
+  function setSelectedId(value) {
+    setSelection((current) => ({
+      request: navigation,
+      id: typeof value === 'function' ? value(current.id) : value,
+    }));
+  }
 
   const isAdmin = useSyncExternalStore(subscribeAdminSession, isAdminAuthenticated, () => false);
   useAppBack(instance.id, () => {
