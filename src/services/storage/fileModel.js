@@ -96,6 +96,7 @@ export function validateFileEntries(entries) {
 }
 export function applyFileOperation(entries, operation) {
   validateFileEntries(entries);
+  if (operation?.type === 'batch') return applyFileOperations(entries, operation.operations);
   if (
     !Array.isArray(entries) ||
     entries.some(
@@ -220,4 +221,32 @@ export function applyFileOperation(entries, operation) {
   )
     throw new Error('Limite local de 500 itens ou 50 MB atingido. Revise a lixeira.');
   return validateFileEntries(next);
+}
+
+export function applyFileOperations(entries, operations) {
+  validateFileEntries(entries);
+  if (
+    !Array.isArray(operations) ||
+    !operations.length ||
+    operations.length > 500 ||
+    operations.some(
+      (op) =>
+        !op ||
+        !['move', 'trash', 'restore', 'purge'].includes(op.type) ||
+        typeof op.id !== 'string',
+    ) ||
+    new Set(operations.map((op) => op.id)).size !== operations.length
+  )
+    throw new Error('Operação de arquivo inválida.');
+  const selected = new Map(operations.map((op) => [op.id, op.type]));
+  const roots = operations.filter((op) => {
+    let current = entries.find((entry) => entry.id === op.id);
+    if (!current) throw new Error('Arquivo ou pasta não encontrado.');
+    while (current?.parentId !== null) {
+      current = entries.find((entry) => entry.id === current.parentId);
+      if (selected.get(current?.id) === op.type) return false;
+    }
+    return true;
+  });
+  return roots.reduce((current, op) => applyFileOperation(current, op), entries);
 }

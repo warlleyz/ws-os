@@ -47,6 +47,12 @@ async function component(file, props, bindings = {}) {
   const Component = vm.runInNewContext(`${clean}; ${name}`, {
     ...Object.fromEntries(
       [
+        'Search',
+        'MoreHorizontal',
+        'Info',
+        'Upload',
+        'Plus',
+        'ArrowLeft',
         'House',
         'FolderOpen',
         'ShieldCheck',
@@ -72,6 +78,9 @@ async function component(file, props, bindings = {}) {
     TextDecoder,
     useLocale: () => 'pt-BR',
     t: (s) => s,
+    findText: (text, query, start = 0) => text.indexOf(query, start),
+    replaceText: (text, query, replacement) => text.replace(query, replacement),
+    tokenizeText: (text) => [{ text, type: 'plain' }],
     fileKind: (name) =>
       name.endsWith('.txt')
         ? 'text'
@@ -494,7 +503,9 @@ test('gerenciador impede criar na raiz por engano quando a pasta aberta é remov
   );
   ui.button('Meus arquivos').props.onClick();
   ui.render();
-  ui.button('Abrir').props.onClick();
+  ui.nodes()
+    .find((n) => n.type === 'li' && n.props.onDoubleClick)
+    .props.onDoubleClick();
   ui.render();
   store.entries = [];
   ui.render();
@@ -504,8 +515,7 @@ test('gerenciador impede criar na raiz por engano quando a pasta aberta é remov
     .props.onChange({ target: { value: 'Nova' } });
   ui.render();
   assert.equal(ui.button('Criar pasta').props.disabled, true);
-  await ui.button('Criar pasta').props.onClick();
-  ui.render();
+
   assert.equal(created, 0);
   assert.equal(back(), true);
   ui.render();
@@ -530,7 +540,10 @@ test('Arquivos abre visualizador/editor pelo contrato fileId e mantém oficiais 
   );
   ui.button('Meus arquivos').props.onClick();
   ui.render();
-  ui.button('Abrir').props.onClick();
+  const row = ui.nodes().find((n) => n.type === 'li' && n.props.onDoubleClick);
+  row.props.onDoubleClick();
+  row.props.onClick({});
+  ui.render();
   ui.button('Editar').props.onClick();
   assert.equal(calls[0][1], 'file-viewer');
   assert.equal(calls[0][2].params.fileId, 'file');

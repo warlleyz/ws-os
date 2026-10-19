@@ -184,3 +184,40 @@ test('limite de 500 itens e 50 MB inclui a lixeira sem alterar a coleção', () 
   );
   assert.equal(full.length, 500);
 });
+
+test('lotes preservam atomicidade e não processam descendentes duas vezes', () => {
+  const m = model();
+  let entries = m.applyFileOperation([], create('p', 'Pasta'));
+  entries = m.applyFileOperation(entries, create('f', 'f.txt', 'p', 'file', 'seguro'));
+  const trashed = m.applyFileOperation(entries, {
+    type: 'batch',
+    operations: [
+      { type: 'trash', id: 'p' },
+      { type: 'trash', id: 'f' },
+    ],
+  });
+  assert.ok(trashed.every((item) => item.trashed));
+  assert.equal(trashed[1].revision, 2);
+  assert.throws(
+    () =>
+      m.applyFileOperation(entries, {
+        type: 'batch',
+        operations: [
+          { type: 'trash', id: 'p' },
+          { type: 'move', id: 'missing', parentId: null },
+        ],
+      }),
+    /não encontrado/,
+  );
+  assert.equal(entries[0].trashed, false);
+});
+
+test('localizar substituir e tokenizar preservam conteúdo literal sem executar HTML', async () => {
+  const {findText,replaceText,tokenizeText}=await import('../../src/apps/file-editor/textTools.js');
+  assert.equal(findText('um dois um','um',3),8);
+  assert.equal(findText('um dois um','um',10),0);
+  assert.equal(replaceText('a a','a','$&',true),'$& $&');
+  const source='const x = "<script>literal</script>"; // nota';
+  assert.equal(tokenizeText(source).map(part=>part.text).join(''),source);
+  assert.ok(tokenizeText(source).some(part=>part.type==='keyword'));
+});

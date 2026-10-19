@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   House,
   FolderOpen,
@@ -10,10 +10,12 @@ import {
   FileText,
   FileImage,
   FileCode2,
-  FileJson,
-  FileSpreadsheet,
-  FileType,
-  File,
+  Search,
+  MoreHorizontal,
+  Info,
+  Upload,
+  Plus,
+  ArrowLeft,
 } from 'lucide-react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { portfolio, contentText } from '../../content/portfolioContent';
@@ -24,6 +26,7 @@ import useAppBack from '../../shared/hooks/useAppBack';
 import useLocalFiles from '../../shared/hooks/useLocalFiles';
 import {
   changeLocalFile,
+  changeLocalFiles,
   createLocalFolder,
   createLocalText,
   uploadLocalFile,
@@ -31,82 +34,137 @@ import {
 import { fileKind } from '../../services/storage/fileModel';
 import '../../styles/apps.css';
 import './Files.css';
-function getFileIcon(item) {
-  if (item.kind === 'folder') return Folder;
 
-  const extension = item.name.split('.').pop().toLowerCase();
-
-  if (['png', 'jpg', 'jpeg', 'webp'].includes(extension)) return FileImage;
-  if (['js', 'css', 'html'].includes(extension)) return FileCode2;
-  if (extension === 'json') return FileJson;
-  if (extension === 'csv') return FileSpreadsheet;
-  if (extension === 'pdf') return FileType;
-  if (['txt', 'md', 'log'].includes(extension)) return FileText;
-
-  return File;
+function preference(key, fallback) {
+  try {
+    return JSON.parse(localStorage.getItem(key)) ?? fallback;
+  } catch {
+    return fallback;
+  }
 }
+function persist(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* Uso da sessão preservado. */
+  }
+}
+function iconFor(item) {
+  return item.kind === 'folder'
+    ? Folder
+    : fileKind(item.name) === 'image'
+      ? FileImage
+      : /\.(js|css|html|json)$/i.test(item.name)
+        ? FileCode2
+        : FileText;
+}
+function normalized(value) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
 export default function Files({ instance }) {
   const locale = useLocale(),
     { run } = useSystem(),
     store = useLocalFiles();
-  const [space, setSpace] = useState('home'),
-    [folderId, setFolderId] = useState(null),
-    [name, setName] = useState(''),
-    [message, setMessage] = useState(''),
-    [busy, setBusy] = useState(false),
-    [action, setAction] = useState(null),
-    [viewMode, setViewMode] = useState(() => {
-      try {
-        return localStorage.getItem('ws-os:files-view') === 'list' ? 'list' : 'grid';
-      } catch {
-        return 'grid';
-      }
-    });
-  const inputRef = useRef(null),
-    busyRef = useRef(false);
-  const folder = store.entries.find((item) => item.id === folderId && !item.trashed);
-  const parentId = folder?.id ?? null;
-  const unavailableFolder = folderId !== null && !folder && !store.loading;
-  const officialFiles = portfolio.officialFiles.filter((item) => publicAssetUrl(item.url));
-  function changeViewMode(mode) {
-    setViewMode(mode);
-
+  const [space, setSpace] = useState(() => {
+    const saved = preference('ws-os:files-location', {});
+    return ['home', 'personal', 'official', 'trash'].includes(saved.space) ? saved.space : 'home';
+  });
+  const [folderId, setFolderId] = useState(
+    () => preference('ws-os:files-location', {}).folderId ?? null,
+  );
+  const [viewMode, setViewMode] = useState(() => {
     try {
-      localStorage.setItem('ws-os:files-view', mode);
+      const raw = localStorage.getItem('ws-os:files-view');
+      return raw === 'list' || raw === '"list"' ? 'list' : 'grid';
     } catch {
-      // A visualização continua funcionando sem persistência.
+      return 'grid';
     }
-  }
+  });
+  const [sort, setSort] = useState(() =>
+    ['name', 'updated', 'size'].includes(preference('ws-os:files-sort', 'name'))
+      ? preference('ws-os:files-sort', 'name')
+      : 'name',
+  );
+  const [query, setQuery] = useState(''),
+    [globalSearch, setGlobalSearch] = useState(false),
+    [selected, setSelected] = useState([]);
+  const [details, setDetails] = useState(false),
+    [context, setContext] = useState(null),
+    [action, setAction] = useState(null);
+  const [message, setMessage] = useState(''),
+    [busy, setBusy] = useState(false);
+  const inputRef = useRef(null),
+    busyRef = useRef(false),
+    contextRef = useRef(null);
+  const folder = store.entries.find(
+    (item) => item.id === folderId && item.kind === 'folder' && !item.trashed,
+  );
+  const unavailableFolder = space === 'personal' && folderId !== null && !folder && !store.loading;
+  const parentId = folder?.id ?? null;
+  const officialFiles = portfolio.officialFiles.filter((item) => publicAssetUrl(item.url));
+  const currentSelection = store.entries.filter(
+    (item) => selected.includes(item.id) && (space === 'trash' ? item.trashed : !item.trashed),
+  );
+  const current = currentSelection.length === 1 ? currentSelection[0] : null;
   const breadcrumbs = [];
-
-  if (space === 'personal') {
+  for (
     let current = folder;
-    const visited = new Set();
+    current;
+    current = store.entries.find((item) => item.id === current.parentId && !item.trashed)
+  )
+    breadcrumbs.unshift(current);
 
-    while (current && !visited.has(current.id)) {
-      visited.add(current.id);
-      breadcrumbs.unshift(current);
-      current = store.entries.find(
-        (item) => item.id === current.parentId && item.kind === 'folder' && !item.trashed,
-      );
-    }
+  function navigate(nextSpace, id = null) {
+    if (busyRef.current) return;
+    setSpace(nextSpace);
+    setFolderId(id);
+    setSelected([]);
+    setAction(null);
+    setContext(null);
+    setQuery('');
+    persist('ws-os:files-location', { space: nextSpace, folderId: id });
   }
   useAppBack(instance?.id, () => {
     if (busyRef.current) return true;
+    if (context) {
+      setContext(null);
+      return true;
+    }
     if (action) {
       setAction(null);
       return true;
     }
-    if (parentId || unavailableFolder) {
-      setFolderId(folder?.parentId ?? null);
+    if (space === 'personal' && (parentId || unavailableFolder)) {
+      navigate('personal', folder?.parentId ?? null);
       return true;
     }
-    if (space !== 'personal') {
-      setSpace('personal');
+    if (space !== 'home') {
+      navigate('home');
       return true;
     }
     return false;
   });
+  useEffect(() => {
+    if (!context) return;
+    contextRef.current?.querySelector('button')?.focus();
+    function close(event) {
+      if (!contextRef.current?.contains(event.target)) setContext(null);
+    }
+    function key(event) {
+      if (event.key === 'Escape') setContext(null);
+    }
+    window.addEventListener('pointerdown', close);
+    window.addEventListener('keydown', key);
+    return () => {
+      window.removeEventListener('pointerdown', close);
+      window.removeEventListener('keydown', key);
+    };
+  }, [context]);
+
   async function perform(operation) {
     if (busyRef.current) return;
     busyRef.current = true;
@@ -115,6 +173,8 @@ export default function Files({ instance }) {
     try {
       const result = await operation();
       setAction(null);
+      setSelected([]);
+      setContext(null);
       setMessage('Operação concluída.');
       return result;
     } catch (error) {
@@ -127,7 +187,7 @@ export default function Files({ instance }) {
   }
   function open(item, edit = false) {
     if (item.kind === 'folder') {
-      setFolderId(item.id);
+      navigate('personal', item.id);
       return;
     }
     run(openApp, edit ? 'file-editor' : 'file-viewer', {
@@ -135,31 +195,119 @@ export default function Files({ instance }) {
       params: { fileId: item.id },
     });
   }
-  const visible = store.entries
-    .filter((item) =>
-      space === 'trash'
-        ? item.trashed && !store.entries.find((parent) => parent.id === item.parentId)?.trashed
-        : !unavailableFolder && !item.trashed && item.parentId === parentId,
-    )
-    .sort((a, b) =>
-      a.kind === b.kind ? a.name.localeCompare(b.name, locale) : a.kind === 'folder' ? -1 : 1,
+  function select(event, item) {
+    if (busy) return;
+    setSelected((previous) =>
+      event.ctrlKey || event.metaKey
+        ? previous.includes(item.id)
+          ? previous.filter((id) => id !== item.id)
+          : [...previous, item.id]
+        : [item.id],
     );
-  async function create(kind) {
-    if (unavailableFolder) {
+    setContext(null);
+  }
+  const term = normalized(query.trim());
+  const visible = store.entries
+    .filter((item) => {
+      const inSpace =
+        space === 'trash'
+          ? item.trashed && !store.entries.find((parent) => parent.id === item.parentId)?.trashed
+          : !unavailableFolder &&
+            !item.trashed &&
+            (globalSearch && term ? true : item.parentId === parentId);
+      return inSpace && (!term || normalized(item.name).includes(term));
+    })
+    .sort((a, b) =>
+      a.kind !== b.kind
+        ? a.kind === 'folder'
+          ? -1
+          : 1
+        : sort === 'updated'
+          ? b.updatedAt - a.updatedAt
+          : sort === 'size'
+            ? (b.blob?.size ?? 0) - (a.blob?.size ?? 0)
+            : a.name.localeCompare(b.name, locale),
+    );
+  async function batch(type) {
+    if (!currentSelection.length) return;
+    if (type === 'purge') {
+      setAction({ type: 'purge', ids: currentSelection.map((item) => item.id) });
+      return;
+    }
+    await perform(() => changeLocalFiles(currentSelection.map((item) => ({ type, id: item.id }))));
+  }
+  async function submitAction(event) {
+    event.preventDefault();
+    if (!action) return;
+    if (action.type.startsWith('create-') && unavailableFolder) {
       setMessage('Pasta de destino indisponível.');
       return;
     }
     await perform(async () => {
-      const entry = await (kind === 'folder'
-        ? createLocalFolder(name, parentId)
-        : createLocalText(name, parentId));
-      setName('');
-      if (kind === 'file') open(entry, true);
-      return entry;
+      if (action.type === 'create-folder') return createLocalFolder(action.name, parentId);
+      if (action.type === 'create-file') {
+        const file = await createLocalText(action.name, parentId);
+        open(file, true);
+        return file;
+      }
+      if (action.type === 'rename')
+        return changeLocalFile({ type: 'rename', id: action.id, name: action.name });
+      return changeLocalFiles(
+        action.ids.map((id) => ({ type: action.type, id, parentId: action.parentId ?? null })),
+      );
     });
   }
+  const selectionTools = (ids = currentSelection.map((item) => item.id), item = current) => (
+    <>
+      {space === 'trash' ? (
+        <>
+          <button type="button" disabled={busy || !ids.length} onClick={() => batch('restore')}>
+            {t('Restaurar')}
+          </button>
+          <button type="button" disabled={busy || !ids.length} onClick={() => batch('purge')}>
+            {t('Excluir definitivamente')}
+          </button>
+        </>
+      ) : (
+        <>
+          <button type="button" disabled={busy || !item} onClick={() => open(item)}>
+            {t('Abrir')}
+          </button>
+          {item?.kind === 'file' && fileKind(item.name) === 'text' && (
+            <button type="button" disabled={busy} onClick={() => open(item, true)}>
+              {t('Editar')}
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={busy || !item}
+            onClick={() => {
+              setAction({ type: 'rename', id: item.id, name: item.name });
+              setContext(null);
+            }}
+          >
+            {t('Renomear')}
+          </button>
+          <button
+            type="button"
+            disabled={busy || !ids.length}
+            onClick={() => {
+              setAction({ type: 'move', ids, parentId: null });
+              setContext(null);
+            }}
+          >
+            {t('Mover item')}
+          </button>
+          <button type="button" disabled={busy || !ids.length} onClick={() => batch('trash')}>
+            {t('Mover para lixeira')}
+          </button>
+        </>
+      )}
+    </>
+  );
+
   return (
-    <article className="desktop-window__content ws-app">
+    <article className="desktop-window__content ws-app ws-files">
       <div className="ws-files__layout">
         <aside className="ws-files__sidebar" aria-label={t('Locais')}>
           <nav className="ws-files__navigation">
@@ -170,264 +318,254 @@ export default function Files({ instance }) {
               ['trash', 'Lixeira', Trash2],
             ].map(([id, label, Icon]) => (
               <button
-                key={id}
                 type="button"
-                aria-pressed={space === id}
+                key={id}
                 disabled={busy}
-                onClick={() => {
-                  setSpace(id);
-                  setFolderId(null);
-                  setAction(null);
-                }}
+                aria-pressed={space === id}
+                onClick={() => navigate(id)}
               >
-                <Icon size={18} strokeWidth={1.8} aria-hidden="true" />
+                <Icon size={18} aria-hidden="true" />
                 <span>{t(label)}</span>
               </button>
             ))}
+            <p className="ws-app__muted">{t('Arquivos pessoais ficam neste navegador.')}</p>
           </nav>
         </aside>
-
         <main className="ws-files__main">
           <nav className="ws-files__breadcrumbs" aria-label={t('Caminho da pasta')}>
             <button
               type="button"
+              aria-label={t('Início')}
+              onClick={() => navigate('home')}
               disabled={busy}
-              onClick={() => {
-                setSpace('home');
-                setFolderId(null);
-                setAction(null);
-              }}
             >
-              <House size={16} aria-hidden="true" />
+              <House size={16} />
             </button>
-
             {space !== 'home' && (
-              <>
-                <span aria-hidden="true">/</span>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => {
-                    setFolderId(null);
-                    setAction(null);
-                  }}
-                >
-                  {t(
-                    space === 'personal'
-                      ? 'Meus arquivos'
-                      : space === 'official'
-                        ? 'Arquivos oficiais'
-                        : 'Lixeira',
-                  )}
-                </button>
-              </>
+              <button type="button" onClick={() => navigate(space)} disabled={busy}>
+                {t(
+                  space === 'personal'
+                    ? 'Meus arquivos'
+                    : space === 'official'
+                      ? 'Arquivos oficiais'
+                      : 'Lixeira',
+                )}
+              </button>
             )}
-
-            {space === 'personal' &&
-              breadcrumbs.map((item) => (
-                <span className="ws-files__breadcrumb-segment" key={item.id}>
-                  <span aria-hidden="true">/</span>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => {
-                      setFolderId(item.id);
-                      setAction(null);
-                    }}
-                  >
-                    {item.name}
-                  </button>
-                </span>
-              ))}
+            {breadcrumbs.map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                disabled={busy}
+                onClick={() => navigate('personal', item.id)}
+              >
+                {item.name}
+              </button>
+            ))}
           </nav>
-
-          <div className="ws-app__toolbar">
-            <button type="button" onClick={store.refresh}>
-              {t('Atualizar')}
-            </button>
-            <div
-              className="ws-files__view-controls"
-              role="group"
-              aria-label={t('Modo de visualização')}
-            >
-              <button
-                type="button"
-                className="ws-files__view-button"
-                aria-label={t('Visualização em grade')}
-                aria-pressed={viewMode === 'grid'}
-                onClick={() => changeViewMode('grid')}
-              >
-                <LayoutGrid size={18} aria-hidden="true" />
-              </button>
-
-              <button
-                type="button"
-                className="ws-files__view-button"
-                aria-label={t('Visualização em lista')}
-                aria-pressed={viewMode === 'list'}
-                onClick={() => changeViewMode('list')}
-              >
-                <List size={18} aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-          {store.loading && <p role="status">{t('Carregando')}</p>}
-          {store.error && <p role="alert">{t(store.error)}</p>}
-          <p role="status">{t(message)}</p>
           {space === 'home' ? (
             <section className="ws-files__home">
-              <header className="ws-files__home-header">
-                <h3>{t('Início')}</h3>
-                <p className="ws-app__muted">
-                  {t('Acesse seus arquivos e documentos em um só lugar.')}
-                </p>
+              <header>
+                <p className="ws-app__eyebrow">WS OS / {t('Arquivos')}</p>
+                <h2>{t('Seu espaço, organizado.')}</h2>
+                <p>{t('Acesse seus arquivos e documentos em um só lugar.')}</p>
               </header>
-
               <div className="ws-files__home-grid">
                 {[
-                  {
-                    id: 'personal',
-                    label: 'Meus arquivos',
-                    description: 'Arquivos e pastas salvos neste navegador.',
-                    Icon: FolderOpen,
-                  },
-                  {
-                    id: 'official',
-                    label: 'Arquivos oficiais',
-                    description: 'Documentos públicos do portfólio.',
-                    Icon: ShieldCheck,
-                  },
-                  {
-                    id: 'trash',
-                    label: 'Lixeira',
-                    description: 'Itens excluídos que podem ser recuperados.',
-                    Icon: Trash2,
-                  },
-                ].map(({ id, label, description, Icon }) => (
+                  ['personal', 'Meus arquivos', FolderOpen],
+                  ['official', 'Arquivos oficiais', ShieldCheck],
+                  ['trash', 'Lixeira', Trash2],
+                ].map(([id, label, Icon]) => (
                   <button
-                    key={id}
                     type="button"
                     className="ws-files__home-card"
-                    disabled={busy}
-                    onClick={() => {
-                      setSpace(id);
-                      setFolderId(null);
-                      setAction(null);
-                    }}
+                    key={id}
+                    onClick={() => navigate(id)}
                   >
-                    <Icon size={28} strokeWidth={1.6} aria-hidden="true" />
+                    <Icon size={28} />
                     <strong>{t(label)}</strong>
-                    <span>{t(description)}</span>
+                    <span>
+                      {id === 'official'
+                        ? officialFiles.length
+                        : store.entries.filter((item) =>
+                            id === 'trash' ? item.trashed : !item.trashed,
+                          ).length}{' '}
+                      {t('itens')}
+                    </span>
                   </button>
                 ))}
               </div>
             </section>
-          ) : space === 'official' ? (
-            <div className="ws-app__grid">
-              {officialFiles.map((item) => (
-                <section key={item.id} className="ws-app__card">
-                  <h3>{contentText(item.name, locale)}</h3>
-                  <p>{contentText(item.description, locale)}</p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      run(openApp, 'file-viewer', {
-                        origin: 'files',
-                        params: {
-                          url: publicAssetUrl(item.url),
-                          name: contentText(item.name, locale),
-                        },
-                      })
-                    }
-                  >
-                    {t('Visualizar')}
-                  </button>
-                </section>
-              ))}
-              {!officialFiles.length && <p>{t('Nenhum arquivo oficial cadastrado.')}</p>}
-            </div>
           ) : (
             <>
+              <div className="ws-files__commandbar">
+                <label className="ws-files__search">
+                  <Search size={16} />
+                  <input
+                    type="search"
+                    aria-label={t('Pesquisar arquivos')}
+                    placeholder={t('Pesquisar arquivos')}
+                    value={query}
+                    onChange={(event) => {
+                      setQuery(event.target.value);
+                      setSelected([]);
+                    }}
+                  />
+                </label>
+                {space === 'personal' && (
+                  <label className="ws-files__check">
+                    <input
+                      type="checkbox"
+                      checked={globalSearch}
+                      onChange={(event) => setGlobalSearch(event.target.checked)}
+                    />
+                    {t('Todas as pastas')}
+                  </label>
+                )}
+                <label>
+                  {t('Ordenar')}
+                  <select
+                    value={sort}
+                    onChange={(event) => {
+                      setSort(event.target.value);
+                      persist('ws-os:files-sort', event.target.value);
+                    }}
+                  >
+                    <option value="name">{t('Nome')}</option>
+                    <option value="updated">{t('Atualização')}</option>
+                    <option value="size">{t('Tamanho')}</option>
+                  </select>
+                </label>
+                <div className="ws-files__view-controls">
+                  <button
+                    type="button"
+                    aria-label={t('Visualização em grade')}
+                    aria-pressed={viewMode === 'grid'}
+                    onClick={() => {
+                      setViewMode('grid');
+                      persist('ws-os:files-view', 'grid');
+                    }}
+                  >
+                    <LayoutGrid size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={t('Visualização em lista')}
+                    aria-pressed={viewMode === 'list'}
+                    onClick={() => {
+                      setViewMode('list');
+                      persist('ws-os:files-view', 'list');
+                    }}
+                  >
+                    <List size={18} />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  aria-label={t('Detalhes')}
+                  aria-pressed={details}
+                  onClick={() => setDetails((value) => !value)}
+                >
+                  <Info size={18} />
+                </button>
+              </div>
               {space === 'personal' && (
-                <>
-                  <h3>{folder?.name ?? t('Meus arquivos')}</h3>
-                  {unavailableFolder && <p role="status">{t('Pasta de destino indisponível.')}</p>}
+                <div className="ws-app__toolbar ws-files__create">
                   {(parentId || unavailableFolder) && (
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => setFolderId(folder?.parentId ?? null)}
+                      onClick={() => navigate('personal', folder?.parentId ?? null)}
                     >
+                      <ArrowLeft size={16} />
                       {t('Pasta anterior')}
                     </button>
                   )}
-                  <div className="ws-app__toolbar">
-                    <label>
-                      {t('Nome do novo item')}
-                      <input
-                        value={name}
-                        maxLength={120}
-                        disabled={busy}
-                        onChange={(event) => setName(event.target.value)}
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      disabled={busy || store.loading || unavailableFolder || !name.trim()}
-                      onClick={() => create('folder')}
-                    >
-                      {t('Criar pasta')}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy || store.loading || unavailableFolder || !name.trim()}
-                      onClick={() => create('file')}
-                    >
-                      {t('Criar arquivo de texto')}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={busy || store.loading || unavailableFolder}
-                      onClick={() => inputRef.current?.click()}
-                    >
-                      {t('Importar arquivo')}
-                    </button>
-                    <input
-                      ref={inputRef}
-                      type="file"
-                      hidden
-                      accept=".txt,.md,.json,.csv,.log,.js,.css,.html,.png,.jpg,.jpeg,.webp,.pdf"
-                      onChange={(event) => {
-                        const input = event.currentTarget,
-                          file = input.files?.[0];
-                        input.value = '';
-                        if (file && !unavailableFolder)
-                          perform(() => uploadLocalFile(file, parentId));
-                      }}
-                    />
-                  </div>
-                </>
+                  <button
+                    type="button"
+                    disabled={busy || store.loading || unavailableFolder}
+                    onClick={() => setAction({ type: 'create-folder', name: '' })}
+                  >
+                    <Plus size={16} />
+                    {t('Criar pasta')}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy || store.loading || unavailableFolder}
+                    onClick={() => setAction({ type: 'create-file', name: '' })}
+                  >
+                    {t('Criar arquivo de texto')}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy || store.loading || unavailableFolder}
+                    onClick={() => inputRef.current?.click()}
+                  >
+                    <Upload size={16} />
+                    {t('Importar arquivo')}
+                  </button>
+                  <input
+                    ref={inputRef}
+                    type="file"
+                    hidden
+                    accept=".txt,.md,.json,.csv,.log,.js,.css,.html,.png,.jpg,.jpeg,.webp,.pdf"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = '';
+                      if (file && !unavailableFolder)
+                        perform(() => uploadLocalFile(file, parentId));
+                    }}
+                  />
+                </div>
               )}
+              {space !== 'official' && (
+                <div className="ws-app__toolbar ws-files__selection">
+                  <label className="ws-files__check">
+                    <input
+                      type="checkbox"
+                      aria-label={t('Selecionar todos')}
+                      checked={
+                        visible.length > 0 && visible.every((item) => selected.includes(item.id))
+                      }
+                      onChange={(event) =>
+                        setSelected(event.target.checked ? visible.map((item) => item.id) : [])
+                      }
+                    />
+                    {currentSelection.length} {t('selecionados')}
+                  </label>
+                  {selectionTools()}
+                </div>
+              )}
+              {store.loading && <p role="status">{t('Carregando')}</p>}
+              {store.error && <p role="alert">{t(store.error)}</p>}
+              {unavailableFolder && <p role="status">{t('Pasta de destino indisponível.')}</p>}
+              <p role="status">{t(message)}</p>
               {action && (
-                <section className="ws-app__card">
+                <form className="ws-app__card ws-files__dialog" onSubmit={submitAction}>
                   <h3>
                     {t(
                       action.type === 'rename'
                         ? 'Renomear'
                         : action.type === 'move'
                           ? 'Mover item'
-                          : 'Excluir definitivamente',
+                          : action.type === 'purge'
+                            ? 'Excluir definitivamente'
+                            : action.type === 'create-folder'
+                              ? 'Criar pasta'
+                              : 'Criar arquivo de texto',
                     )}
                   </h3>
-                  {action.type === 'rename' && (
+                  {['rename', 'create-folder', 'create-file'].includes(action.type) && (
                     <label>
-                      {t('Novo nome')}
+                      {t('Nome')}
                       <input
-                        disabled={busy}
+                        aria-label={t('Nome do novo item')}
+                        autoFocus
                         value={action.name}
-                        onChange={(event) =>
-                          setAction((current) => ({ ...current, name: event.target.value }))
-                        }
+                        maxLength={120}
+                        required
+                        disabled={busy}
+                        onChange={(event) => setAction({ ...action, name: event.target.value })}
                       />
                     </label>
                   )}
@@ -435,23 +573,22 @@ export default function Files({ instance }) {
                     <label>
                       {t('Pasta de destino')}
                       <select
-                        disabled={busy}
                         value={action.parentId ?? ''}
+                        disabled={busy}
                         onChange={(event) =>
-                          setAction((current) => ({
-                            ...current,
-                            parentId: event.target.value || null,
-                          }))
+                          setAction({ ...action, parentId: event.target.value || null })
                         }
                       >
                         <option value="">{t('Meus arquivos')}</option>
                         {store.entries
                           .filter(
                             (item) =>
-                              item.kind === 'folder' && !item.trashed && item.id !== action.id,
+                              item.kind === 'folder' &&
+                              !item.trashed &&
+                              !action.ids.includes(item.id),
                           )
                           .map((item) => (
-                            <option key={item.id} value={item.id}>
+                            <option value={item.id} key={item.id}>
                               {item.name}
                             </option>
                           ))}
@@ -466,114 +603,184 @@ export default function Files({ instance }) {
                     </p>
                   )}
                   <div className="ws-app__toolbar">
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => perform(() => changeLocalFile(action))}
-                    >
+                    <button disabled={busy} type="submit">
                       {t('Confirmar')}
                     </button>
-                    <button type="button" disabled={busy} onClick={() => setAction(null)}>
+                    <button disabled={busy} type="button" onClick={() => setAction(null)}>
                       {t('Cancelar')}
                     </button>
                   </div>
+                </form>
+              )}
+              {space === 'official' ? (
+                <div className="ws-app__grid">
+                  {officialFiles
+                    .filter(
+                      (item) => !term || normalized(contentText(item.name, locale)).includes(term),
+                    )
+                    .map((item) => (
+                      <section className="ws-app__card" key={item.id}>
+                        <ShieldCheck size={24} />
+                        <h3>{contentText(item.name, locale)}</h3>
+                        <p>{contentText(item.description, locale)}</p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            run(openApp, 'file-viewer', {
+                              origin: 'files',
+                              params: {
+                                url: publicAssetUrl(item.url),
+                                name: contentText(item.name, locale),
+                              },
+                            })
+                          }
+                        >
+                          {t('Visualizar')}
+                        </button>
+                      </section>
+                    ))}
+                  {!officialFiles.length && <p>{t('Nenhum arquivo oficial cadastrado.')}</p>}
+                </div>
+              ) : (
+                <div className={`ws-files__workspace ${details ? 'has-details' : ''}`}>
+                  <ul
+                    className={`ws-files__list ${viewMode === 'grid' ? 'ws-files__list--grid' : 'ws-files__list--details'}`}
+                    aria-label={t('Arquivos')}
+                  >
+                    {visible.map((item) => {
+                      const Icon = iconFor(item);
+                      return (
+                        <li
+                          key={item.id}
+                          className="ws-app__card ws-files__entry"
+                          data-selected={selected.includes(item.id)}
+                          tabIndex={0}
+                          aria-label={item.name}
+                          onClick={(event) => {
+                            select(event, item);
+                            if (event.nativeEvent?.pointerType === 'touch' && space !== 'trash')
+                              open(item);
+                          }}
+                          onDoubleClick={() => {
+                            if (space !== 'trash') open(item);
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' && space !== 'trash') {
+                              event.preventDefault();
+                              open(item);
+                            }
+                            if (event.key === ' ') {
+                              event.preventDefault();
+                              select(event, item);
+                            }
+                            if (
+                              event.key === 'ContextMenu' ||
+                              (event.shiftKey && event.key === 'F10')
+                            ) {
+                              event.preventDefault();
+                              setSelected([item.id]);
+                              setContext({ id: item.id });
+                            }
+                          }}
+                          onContextMenu={(event) => {
+                            event.preventDefault();
+                            if (!selected.includes(item.id)) setSelected([item.id]);
+                            setContext({ id: item.id });
+                          }}
+                        >
+                          <label
+                            className="ws-files__entry-select"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <input
+                              type="checkbox"
+                              aria-label={t('Selecionar') + ' ' + item.name}
+                              checked={selected.includes(item.id)}
+                              onChange={(event) =>
+                                setSelected((ids) =>
+                                  event.target.checked
+                                    ? [...new Set([...ids, item.id])]
+                                    : ids.filter((id) => id !== item.id),
+                                )
+                              }
+                            />
+                          </label>
+                          <Icon size={viewMode === 'grid' ? 38 : 22} aria-hidden="true" />
+                          <strong title={item.name}>{item.name}</strong>
+                          <small>
+                            {item.kind === 'folder'
+                              ? t('Pasta')
+                              : (item.blob.size / 1024).toLocaleString(locale, {
+                                  maximumFractionDigits: 1,
+                                }) + ' KB'}
+                          </small>
+                          <button
+                            type="button"
+                            className="ws-files__more"
+                            aria-label={t('Ações') + ' ' + item.name}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setSelected([item.id]);
+                              setContext({ id: item.id });
+                            }}
+                          >
+                            <MoreHorizontal size={18} />
+                          </button>
+                        </li>
+                      );
+                    })}
+                    {!visible.length && (
+                      <li className="ws-files__empty">
+                        {t(term ? 'Nenhum arquivo encontrado.' : 'Esta pasta está vazia.')}
+                      </li>
+                    )}
+                  </ul>
+                  {details && (
+                    <aside className="ws-files__details">
+                      <Info size={24} />
+                      <h3>{t('Detalhes')}</h3>
+                      {current ? (
+                        <dl>
+                          <dt>{t('Nome')}</dt>
+                          <dd>{current.name}</dd>
+                          <dt>{t('Tipo')}</dt>
+                          <dd>{t(current.kind === 'folder' ? 'Pasta' : 'Arquivo')}</dd>
+                          <dt>{t('Tamanho')}</dt>
+                          <dd>{current.blob?.size ?? 0} bytes</dd>
+                          <dt>{t('Atualização')}</dt>
+                          <dd>{new Date(current.updatedAt).toLocaleString(locale)}</dd>
+                          <dt>{t('Revisão')}</dt>
+                          <dd>{current.revision}</dd>
+                        </dl>
+                      ) : (
+                        <p>{t('Selecione um item para ver os detalhes.')}</p>
+                      )}
+                    </aside>
+                  )}
+                </div>
+              )}
+              {context && (
+                <section
+                  ref={contextRef}
+                  className="ws-files__context"
+                  role="dialog"
+                  aria-label={t('Ações do arquivo')}
+                >
+                  <div className="ws-app__toolbar">{selectionTools()}</div>
+                  <button type="button" onClick={() => setContext(null)}>
+                    {t('Fechar')}
+                  </button>
                 </section>
               )}
-              <ul
-                className={`ws-files__list ${
-                  viewMode === 'grid' ? 'ws-files__list--grid' : 'ws-files__list--details'
-                }`}
-              >
-                {visible.map((item) => {
-                  const Icon = getFileIcon(item);
-                  return (
-                    <li key={item.id} className="ws-app__card">
-                      <div className="ws-files__item-heading">
-                        <Icon
-                          size={viewMode === 'grid' ? 34 : 23}
-                          strokeWidth={1.6}
-                          aria-hidden="true"
-                        />
-                        <strong title={item.name}>{item.name}</strong>
-                      </div>
-                      <p className="ws-app__muted">
-                        {t(item.kind === 'folder' ? 'Pasta' : 'Arquivo')} · {item.blob?.size ?? 0}{' '}
-                        bytes
-                      </p>
-                      <div className="ws-app__toolbar">
-                        {space === 'trash' ? (
-                          <>
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() =>
-                                perform(() => changeLocalFile({ type: 'restore', id: item.id }))
-                              }
-                            >
-                              {t('Restaurar')}
-                            </button>
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() => setAction({ type: 'purge', id: item.id })}
-                            >
-                              {t('Excluir definitivamente')}
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button type="button" disabled={busy} onClick={() => open(item)}>
-                              {t('Abrir')}
-                            </button>
-                            {item.kind === 'file' && fileKind(item.name) === 'text' && (
-                              <button
-                                type="button"
-                                disabled={busy}
-                                onClick={() => open(item, true)}
-                              >
-                                {t('Editar')}
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() =>
-                                setAction({ type: 'rename', id: item.id, name: item.name })
-                              }
-                            >
-                              {t('Renomear')}
-                            </button>
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() =>
-                                setAction({ type: 'move', id: item.id, parentId: item.parentId })
-                              }
-                            >
-                              {t('Mover item')}
-                            </button>
-                            <button
-                              type="button"
-                              disabled={busy}
-                              onClick={() =>
-                                perform(() => changeLocalFile({ type: 'trash', id: item.id }))
-                              }
-                            >
-                              {t('Mover para lixeira')}
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-              {!visible.length && <p>{t('Esta pasta está vazia.')}</p>}
-              <p className="ws-app__muted">
-                {t(
-                  'Limites locais: 10 MB por arquivo, 50 MB e 500 itens no total, incluindo a lixeira. O editor aceita textos de até 1 MB.',
-                )}
-              </p>
+              <footer className="ws-files__status">
+                <span>
+                  {space === 'official' ? officialFiles.length : visible.length} {t('itens')}
+                </span>
+                <button type="button" onClick={store.refresh}>
+                  {t('Atualizar')}
+                </button>
+                <span>{t('Somente neste navegador')}</span>
+              </footer>
             </>
           )}
         </main>

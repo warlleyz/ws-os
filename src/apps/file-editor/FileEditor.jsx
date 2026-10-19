@@ -11,6 +11,8 @@ import {
 import { fileKind, TEXT_LIMIT } from '../../services/storage/fileModel';
 import useUnsavedChanges from '../../shared/hooks/useUnsavedChanges';
 import '../../styles/apps.css';
+import { findText, replaceText, tokenizeText } from './textTools';
+import './FileEditor.css';
 export default function FileEditor({ instance }) {
   useLocale();
   const fileId = instance?.params?.fileId;
@@ -21,6 +23,14 @@ export default function FileEditor({ instance }) {
     [busy, setBusy] = useState(false),
     [copyName, setCopyName] = useState(''),
     [reloadConfirm, setReloadConfirm] = useState(false);
+  const textRef = useRef(null),
+    syntaxRef = useRef(null);
+  const [find, setFind] = useState(''),
+    [replacement, setReplacement] = useState(''),
+    [searchPosition, setSearchPosition] = useState(0);
+  const [wrap, setWrap] = useState(true),
+    [fontSize, setFontSize] = useState(14),
+    [highlight, setHighlight] = useState(false);
   const saving = useRef(false);
   const mounted = useRef(false);
   const fileRef = useRef(null);
@@ -77,6 +87,23 @@ export default function FileEditor({ instance }) {
     };
   }, [fileId, revision, file?.revision]);
 
+  function findNext() {
+    const index = findText(text, find, searchPosition);
+    if (index < 0) {
+      setMessage('Texto não encontrado.');
+      return;
+    }
+    textRef.current?.focus();
+    textRef.current?.setSelectionRange(index, index + find.length);
+    setSearchPosition(index + find.length);
+  }
+  function replace(all) {
+    if (busy) return;
+    const next = replaceText(text, find, replacement, all);
+    setText(next);
+    setSearchPosition(0);
+    if (next === text) setMessage('Texto não encontrado.');
+  }
   async function save(copy = false) {
     if (!file || saving.current) return;
     saving.current = true;
@@ -136,7 +163,7 @@ export default function FileEditor({ instance }) {
     }
   }
   return (
-    <article className="desktop-window__content ws-app">
+    <article className="desktop-window__content ws-app ws-editor">
       <h2>{t('Editor de Arquivos')}</h2>
       {!file ? (
         <p role="status">{t(message || 'Selecione um arquivo de texto em Meus arquivos.')}</p>
@@ -147,23 +174,121 @@ export default function FileEditor({ instance }) {
             {dirty ? ' *' : ''}
           </h3>
           <p>{t(dirty ? 'Alterações não salvas' : 'Sem alterações pendentes')}</p>
+          <div className="ws-editor__tools">
+            <label>
+              {t('Localizar')}
+              <input
+                type="search"
+                value={find}
+                onChange={(event) => {
+                  setFind(event.target.value);
+                  setSearchPosition(0);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    findNext();
+                  }
+                }}
+              />
+            </label>
+            <button type="button" disabled={!find || busy} onClick={findNext}>
+              {t('Próximo')}
+            </button>
+            <label>
+              {t('Substituir')}
+              <input value={replacement} onChange={(event) => setReplacement(event.target.value)} />
+            </label>
+            <button type="button" disabled={!find || busy} onClick={() => replace(false)}>
+              {t('Substituir')}
+            </button>
+            <button type="button" disabled={!find || busy} onClick={() => replace(true)}>
+              {t('Substituir tudo')}
+            </button>
+            <button type="button" aria-pressed={wrap} onClick={() => setWrap((value) => !value)}>
+              {t('Quebra de linha')}
+            </button>
+            <button
+              type="button"
+              aria-pressed={highlight}
+              onClick={() => setHighlight((value) => !value)}
+            >
+              {t('Destaque de sintaxe')}
+            </button>
+            <button
+              type="button"
+              aria-label={t('Reduzir texto')}
+              onClick={() => setFontSize((size) => Math.max(11, size - 1))}
+            >
+              A−
+            </button>
+            <button
+              type="button"
+              aria-label={t('Ampliar texto')}
+              onClick={() => setFontSize((size) => Math.min(24, size + 1))}
+            >
+              A+
+            </button>
+          </div>
           <label>
             {t('Conteúdo do arquivo')}
-            <textarea
-              className="ws-editor__text"
-              rows={14}
-              value={text}
-              disabled={busy}
-              spellCheck={false}
-              onChange={(event) => setText(event.target.value)}
-              onKeyDown={(event) => {
-                if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
-                  event.preventDefault();
-                  save();
-                }
-              }}
-            />
+            <div
+              className="ws-editor__surface"
+              style={{ fontSize, fontFamily: 'var(--font-mono, monospace)' }}
+            >
+              {highlight && (
+                <pre
+                  ref={syntaxRef}
+                  aria-hidden="true"
+                  className="ws-editor__syntax"
+                  style={{ whiteSpace: wrap ? 'pre-wrap' : 'pre' }}
+                >
+                  {tokenizeText(text).map((part, index) => (
+                    <span key={index} className={'token-' + part.type}>
+                      {part.text}
+                    </span>
+                  ))}
+                  {'\n'}
+                </pre>
+              )}
+              <textarea
+                ref={textRef}
+                wrap={wrap ? 'soft' : 'off'}
+                className="ws-editor__text"
+                style={{
+                  color: highlight ? 'transparent' : undefined,
+                  background: highlight ? 'transparent' : undefined,
+                  caretColor: 'var(--text-primary)',
+                  fontSize: 'inherit',
+                  whiteSpace: wrap ? 'pre-wrap' : 'pre',
+                }}
+                onScroll={(event) => {
+                  if (syntaxRef.current) {
+                    syntaxRef.current.scrollTop = event.target.scrollTop;
+                    syntaxRef.current.scrollLeft = event.target.scrollLeft;
+                  }
+                }}
+                rows={14}
+                value={text}
+                disabled={busy}
+                spellCheck={false}
+                onChange={(event) => setText(event.target.value)}
+                onKeyDown={(event) => {
+                  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+                    event.preventDefault();
+                    save();
+                  }
+                }}
+              />
+            </div>
           </label>
+          <footer className="ws-editor__status">
+            <span>
+              {text.split('\n').length} {t('linhas')}
+            </span>
+            <span>{new Blob([text]).size} bytes · UTF-8</span>
+            <span>{fontSize}px</span>
+          </footer>
           <div className="ws-app__toolbar">
             <button type="button" disabled={busy || !dirty} onClick={() => save()}>
               {t('Salvar')}

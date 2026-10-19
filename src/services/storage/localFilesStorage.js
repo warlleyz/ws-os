@@ -130,6 +130,10 @@ export async function changeLocalFile(operation) {
   if (operation.type === 'create' && operation.kind === 'file')
     operation = { ...operation, blob: await validateLocalBlob(operation.blob, operation.name) };
   const result = await transact(operation);
+  announceChange();
+  return result.find((item) => item.id === operation.id) ?? null;
+}
+function announceChange() {
   emit();
   try {
     if (channel) channel.postMessage('change');
@@ -138,7 +142,11 @@ export async function changeLocalFile(operation) {
   } catch {
     /* O commit local já foi confirmado; o foco também força atualização. */
   }
-  return result.find((item) => item.id === operation.id) ?? null;
+}
+export async function changeLocalFiles(operations) {
+  const entries = await transact({ type: 'batch', operations });
+  announceChange();
+  return entries;
 }
 export function createLocalFolder(name, parentId = null) {
   return changeLocalFile({
