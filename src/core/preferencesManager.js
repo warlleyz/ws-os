@@ -1,3 +1,4 @@
+import { createPreferenceResetPlan } from './preferenceContract';
 import { setTheme } from './themeManager';
 import { setLocale } from '../shared/i18n/i18n';
 import { resetAppearance } from './appearanceManager';
@@ -7,8 +8,10 @@ import { resetMobilePreferences } from './mobilePreferences';
 import { setWallpaper } from './wallpaperManager';
 import { resetWidgetPreferences } from './widgetPreferences';
 
-// Explicit allowlist: never clear storage, delete databases, or touch app documents.
-export function restoreSystemPreferences() {
+/* ----- Explicit allowlist: never clear storage, delete databases, or touch app documents. ----- */
+export function restoreSystemPreferences(categories) {
+  const plan = createPreferenceResetPlan(categories);
+  if (!plan.ok) return { ok: false, failed: [], code: plan.code };
   const actions = {
     theme: () => setTheme('dark'),
     locale: () => setLocale('pt-BR'),
@@ -22,7 +25,8 @@ export function restoreSystemPreferences() {
     widgets: resetWidgetPreferences,
   };
   const failed = [];
-  for (const [key, apply] of Object.entries(actions)) {
+  for (const key of plan.actions) {
+    const apply = actions[key];
     try {
       if (!apply()) failed.push(key);
     } catch {

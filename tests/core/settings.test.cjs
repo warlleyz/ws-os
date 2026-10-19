@@ -6,6 +6,13 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '../..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 function load(file, bindings, names) {
+  if (file === 'src/core/preferencesManager.js')
+    bindings = {
+      ...require('../helpers/contract-loader.cjs').loadContract(
+        path.join(root, 'src/core/preferenceContract.js'),
+      ),
+      ...bindings,
+    };
   const source = read(file)
     .replace(/^import[^;]+;\s*/gm, '')
     .replace(/\bexport\s+(?=(?:const|function|async)\b)/g, '');
@@ -381,7 +388,7 @@ test('mensagens e opções apresentadas por Configurações possuem tradução',
     for (const match of read(file).matchAll(/'([^'\n]+)'/g)) {
       const text = match[1];
       if (['Escape', 'RIFF', 'WEBP', 'QuotaExceededError'].includes(text)) continue;
-      // Identificadores IANA são valores internos, não textos de interface.
+      /* ----- Identificadores IANA são valores internos, não textos de interface. ----- */
       if (
         /^(?:Africa|America|Antarctica|Arctic|Asia|Atlantic|Australia|Europe|Indian|Pacific|Etc)\/[A-Za-z_]+(?:\/[A-Za-z_]+)?$/.test(
           text,

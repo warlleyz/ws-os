@@ -1,3 +1,4 @@
+import { adaptLegacyPublicEvent } from './publicContentContract';
 import { requestPublicJson } from './publicDataService';
 import { publicAssetUrl, safeExternalUrl } from '../shared/utils/urls';
 
@@ -12,7 +13,9 @@ export async function fetchManagedContent(kind, options = {}) {
     ...result,
     data: result.data.items
       .filter((item) => item?.status === 'published' && typeof item.data?.title === 'string')
-      .map((item) => ({ id: item.id, ...item.data }))
+      .map((item) => ({ ...item.data, id: item.id }))
+      .map((item) => (kind === 'events' ? (adaptLegacyPublicEvent(item).data ?? null) : item))
+      .filter(Boolean)
       .filter((item) =>
         kind === 'files'
           ? !!publicAssetUrl(item.url)

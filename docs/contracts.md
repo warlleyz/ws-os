@@ -227,3 +227,7 @@ Contratos de wallpapers, preferências compartilhadas, widgets, restauração e 
 ## Etapa 01.3 — contrato vigente de APIs e cache
 
 As descrições antigas deste documento que dizem que cache ou APIs não têm contratos foram superadas. Envelopes, adaptação legada, revisão, idempotência e cancelamento estão em src/services/*Contract.js e apiResponseAdapter.js. requestPublicJson mantém data/source/updatedAt, acrescenta cacheStatus e requiresRevalidation; subscribePublicData recebe sinais públicos e retorna unsubscribe. invalidatePublicData cancela dados em trânsito antigos e sinaliza reconsulta. Detalhes, consumidores e limites: [conclusão 01.3](finalizacao/ETAPA-01-PARTE-01.3-CONCLUSAO.md). Nenhum desses contratos implementa por si só uma escrita idempotente no banco.
+
+## Etapa 01.4 — modelos vigentes
+
+Contratos puros: privateRequestContract (estados privados/revisão/retenção e resultado de envio), publicContentContract (eventos, projetos/demos, publicações/anexos e ranking), preferenceContract (versão lógica e formato legado). restoreSystemPreferences aceita categorias opcionais validadas; sem argumentos mantém o reset existente. Ver [conclusão 01.4](finalizacao/ETAPA-01-PARTE-01.4-CONCLUSAO.md). Rotinas de banco/R2 e interfaces completas continuam nas etapas proprietárias.
