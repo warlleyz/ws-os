@@ -7,6 +7,7 @@ const SCRIPT_URL =
 
 export default function WallyTurnstile({
     onTokenChange,
+    action,
 }) {
     const containerRef = useRef(null);
     const widgetIdRef = useRef(null);
@@ -42,6 +43,7 @@ export default function WallyTurnstile({
                     containerRef.current,
                     {
                         sitekey: siteKey,
+                        action,
                         theme: 'auto',
                         size: 'flexible',
 
@@ -111,7 +113,7 @@ export default function WallyTurnstile({
             widgetIdRef.current = null;
             callbackRef.current?.(null);
         };
-    }, [siteKey]);
+    }, [siteKey,action]);
 
     if (!siteKey) {
         return (

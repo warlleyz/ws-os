@@ -560,7 +560,7 @@
   "Assistente local": "Local assistant",
   "Abrir Wally Estendido": "Open extended Wally",
   "Pontos": "Score",
-  "Recorde local": "Local best",
+  "Recorde local": "Local record",
   "Fim de jogo": "Game over",
   "Pausado": "Paused",
   "Recorde disponível somente nesta sessão.": "Best score is only available in this session.",
@@ -851,5 +851,13 @@
   "Desconhecido": "Unknown",
   "Acesso": "Access",
   "Somente leitura": "Read-only",
-  "Ajustar à janela": "Fit to window"
+  "Ajustar à janela": "Fit to window",
+  "Recordes locais são salvos neste navegador. Rankings públicos dependem de configuração e envio voluntário.": "Local records are saved in this browser. Public rankings require configuration and voluntary submission.",
+  "Ranking indisponível. Seu recorde local está preservado.": "Ranking unavailable. Your local record is preserved.",
+  "Recorde enviado.": "Record submitted.",
+  "Ranking público": "Public ranking",
+  "Envio opcional. Use um apelido público, sem dados pessoais. Pontuações do navegador estão sujeitas a fraude.": "Submission is optional. Use a public nickname without personal information. Browser scores are subject to fraud.",
+  "Atualizar ranking": "Refresh ranking",
+  "Apelido público": "Public nickname",
+  "Enviar recorde": "Submit record"
 }

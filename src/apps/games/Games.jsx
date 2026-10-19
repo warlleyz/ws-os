@@ -1,3 +1,4 @@
+import GameRankings from './GameRankings';
 import { useState } from 'react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import useAppBack from '../../shared/hooks/useAppBack';
@@ -30,13 +31,14 @@ export default function Games({ instance }) {
   return (
     <article className="desktop-window__content ws-app">
       <h2>{t('Jogos')}</h2>
-      <p>{t('Recordes somente neste navegador. Ranking global ainda não conectado.')}</p>
+      <p>{t('Recordes locais são salvos neste navegador. Rankings públicos dependem de configuração e envio voluntário.')}</p>
       {Component ? (
         <>
           <button type="button" onClick={() => setSelected(null)}>
             {t('Voltar ao catálogo')}
           </button>
           <Component paused={paused} />
+          {['snake','flappy'].includes(selected)&&<GameRankings key={selected} game={selected}/>} 
         </>
       ) : (
         <>

@@ -1,3 +1,4 @@
+import {onRequest as handleRankings} from '../functions/api/rankings.js';
 import { onRequest as handleContent } from '../functions/api/managedContent.js';
 import { onRequestPost as handleWally } from '../functions/api/wally.js';
 import { onRequestGet as handlePosts } from '../functions/api/posts.js';
@@ -68,6 +69,7 @@ function error(code, status, headers = {}) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if(url.pathname==='/api/rankings')return handleRankings({request,env,ctx});
     if (url.pathname === '/api/admin/content') return handleContent({ request, env, ctx });
     const route = routes[url.pathname];
     if (route) {
