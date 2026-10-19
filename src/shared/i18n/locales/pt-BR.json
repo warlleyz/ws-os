@@ -765,5 +765,6 @@
   "Não foi possível salvar a organização. A alteração foi cancelada.": "Não foi possível salvar a organização. A alteração foi cancelada.",
   "A gravação falhou e a recuperação não foi concluída. Verifique a organização após recarregar.": "A gravação falhou e a recuperação não foi concluída. Verifique a organização após recarregar.",
   "Não foi possível salvar as posições dos atalhos. A organização anterior foi mantida na interface.": "Não foi possível salvar as posições dos atalhos. A organização anterior foi mantida na interface.",
-  "Mover {0}": "Mover {0}"
+  "Mover {0}": "Mover {0}",
+  "Arquivo grande demais para prévia. Utilize o download.": "Arquivo grande demais para prévia. Utilize o download."
 }

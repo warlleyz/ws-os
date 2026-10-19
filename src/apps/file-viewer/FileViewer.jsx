@@ -1,4 +1,5 @@
 import LocalFileViewer from './LocalFileViewer';
+import { FILE_LIMIT, TEXT_LIMIT } from '../../services/storage/fileModel';
 
 import { useEffect, useMemo, useState } from 'react';
 import { Download, ExternalLink, FileQuestion } from 'lucide-react';
@@ -17,6 +18,9 @@ const MIME_TYPES = {
   json: 'text',
   csv: 'text',
   log: 'text',
+  js: 'text',
+  css: 'text',
+  html: 'text',
 };
 
 function resolveDocument(rawUrl) {
@@ -46,12 +50,39 @@ function resolveDocument(rawUrl) {
   }
 }
 
+async function readPreview(response, limit) {
+  const reader = response.body?.getReader();
+  if (!reader) return new Uint8Array();
+  const chunks = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > limit) return null;
+      chunks.push(value);
+    }
+  } finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
 function OfficialFileViewer({ instance }) {
   useLocale();
 
   const params = instance?.params ?? {};
   const documentUrl = typeof params.url === 'string' ? params.url : '';
   const document = useMemo(() => resolveDocument(documentUrl), [documentUrl]);
+  const [zoom, setZoom] = useState(1);
   const [result, setResult] = useState({
     url: null,
     status: 'idle',
@@ -64,11 +95,16 @@ function OfficialFileViewer({ instance }) {
     const controller = new AbortController();
     const documentUrl = document.url;
     const isText = document.type === 'text';
+    let objectUrl = null;
+    let active = true;
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     async function load() {
       try {
         const response = await fetch(documentUrl, {
-          method: isText ? 'GET' : 'HEAD',
+          method: 'GET',
+          redirect: 'error',
+          credentials: 'same-origin',
           signal: controller.signal,
         });
 
@@ -78,36 +114,57 @@ function OfficialFileViewer({ instance }) {
 
         const validType =
           document.type === 'pdf'
-            ? contentType.includes('application/pdf')
+            ? contentType.split(';')[0].trim() === 'application/pdf'
             : document.type === 'image'
-              ? contentType.startsWith('image/')
-              : contentType.startsWith('text/') || contentType.includes('application/json');
-
-        if (!validType) throw new Error('Formato inválido');
-
-        const text = isText ? await response.text() : '';
-
-        if (!controller.signal.aborted) {
-          setResult({
-            url: documentUrl,
-            status: 'ready',
-            text,
-          });
+              ? ['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(
+                  contentType.split(';')[0].trim(),
+                )
+              : (contentType.startsWith('text/') &&
+                  (!contentType.includes('text/html') || document.extension === 'html')) ||
+                contentType.includes('application/json') ||
+                (document.extension === 'js' && contentType.includes('application/javascript'));
+        if (!validType) {
+          await response.body?.cancel();
+          throw new Error('Formato inválido');
         }
+        const limit = isText ? TEXT_LIMIT : FILE_LIMIT;
+        const declaredSize = Number(response.headers.get('content-length'));
+        let bytes = null;
+        if (Number.isFinite(declaredSize) && declaredSize > limit) await response.body?.cancel();
+        else bytes = await readPreview(response, limit);
+        if (controller.signal.aborted) return;
+        if (bytes === null) {
+          setResult({ url: documentUrl, status: 'download', text: '' });
+          return;
+        }
+        if (document.type === 'pdf' && String.fromCharCode(...bytes.slice(0, 5)) !== '%PDF-')
+          throw new Error('Formato inválido');
+        const text = isText ? new TextDecoder('utf-8', { fatal: true }).decode(bytes) : '';
+        objectUrl = URL.createObjectURL(
+          new Blob([bytes], { type: isText ? 'text/plain;charset=utf-8' : contentType }),
+        );
+        setResult({ url: documentUrl, status: 'ready', text, objectUrl, previewError: false });
       } catch {
-        if (!controller.signal.aborted) {
+        if (active) {
           setResult({
             url: documentUrl,
             status: 'error',
             text: '',
           });
         }
+      } finally {
+        clearTimeout(timeout);
       }
     }
 
     load();
 
-    return () => controller.abort();
+    return () => {
+      active = false;
+      clearTimeout(timeout);
+      controller.abort();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
   }, [document]);
 
   const status = !document ? 'invalid' : result.url !== document.url ? 'loading' : result.status;
@@ -125,14 +182,14 @@ function OfficialFileViewer({ instance }) {
           <p>{name}</p>
         </div>
 
-        {document && status === 'ready' && (
+        {document && ['ready', 'download'].includes(status) && (
           <div className="ws-file-viewer__actions">
-            <a href={document.url} target="_blank" rel="noopener noreferrer">
+            <a href={result.objectUrl ?? document.url} target="_blank" rel="noopener noreferrer">
               <ExternalLink size={16} aria-hidden="true" />
               {t('Abrir')}
             </a>
 
-            <a href={document.url} download={document.filename}>
+            <a href={result.objectUrl ?? document.url} download={document.filename}>
               <Download size={16} aria-hidden="true" />
               {t('Baixar')}
             </a>
@@ -157,13 +214,46 @@ function OfficialFileViewer({ instance }) {
         </div>
       )}
 
+      {status === 'download' && (
+        <p role="status">{t('Arquivo grande demais para prévia. Utilize o download.')}</p>
+      )}
+      {result.url === document?.url && result.previewError && (
+        <p role="alert">{t('Não foi possível abrir o arquivo')}</p>
+      )}
       {status === 'ready' && document.type === 'pdf' && (
-        <iframe className="ws-file-viewer__preview" src={document.url} title={name} />
+        <>
+          <p>{t('Se a prévia não aparecer, utilize o download do PDF.')}</p>
+          <iframe
+            className="ws-file-viewer__preview"
+            src={result.objectUrl}
+            title={name}
+            sandbox=""
+          />
+        </>
       )}
 
       {status === 'ready' && document.type === 'image' && (
         <div className="ws-file-viewer__image-container">
-          <img src={document.url} alt={name} />
+          <div className="ws-file-viewer__actions">
+            <button type="button" onClick={() => setZoom((value) => Math.max(0.25, value - 0.25))}>
+              {t('Reduzir')}
+            </button>
+            <button type="button" onClick={() => setZoom((value) => Math.min(3, value + 0.25))}>
+              {t('Ampliar')}
+            </button>
+            <button type="button" onClick={() => setZoom(1)}>
+              {t('Restaurar zoom')}
+            </button>
+          </div>
+          <img
+            src={result.objectUrl}
+            alt={name}
+            style={{ width: zoom * 100 + '%', maxWidth: 'none' }}
+            onError={(event) => {
+              event.currentTarget.hidden = true;
+              setResult((current) => ({ ...current, previewError: true }));
+            }}
+          />
         </div>
       )}
 

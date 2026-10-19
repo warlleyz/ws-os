@@ -24,7 +24,12 @@ async function component(file, props, bindings = {}) {
       return [slots[i], (v) => (slots[i] = typeof v === 'function' ? v(slots[i]) : v)];
     },
     useRef: (initial) => (slots[cursor++] ??= { current: initial }),
-    useMemo: (fn) => fn(),
+    useMemo: (fn, deps) => {
+      const i = cursor++;
+      if (!slots[i] || deps.some((dep, j) => dep !== slots[i].deps[j]))
+        slots[i] = { deps, value: fn() };
+      return slots[i].value;
+    },
     useSyncExternalStore: (_subscribe, snapshot) => snapshot(),
     useEffect: (effect, deps) => {
       const i = cursor++;
@@ -35,7 +40,7 @@ async function component(file, props, bindings = {}) {
       }
     },
   };
-  const name = /export default function (\w+)/.exec(code)[1];
+  const name = bindings.componentName ?? /export default function (\w+)/.exec(code)[1];
   const clean = code
     .replace(/^import[\s\S]*?;\s*$/gm, '')
     .replace('export default function', 'function');
@@ -57,6 +62,13 @@ async function component(file, props, bindings = {}) {
             ? 'pdf'
             : null,
     TEXT_LIMIT: 1024 * 1024,
+    FILE_LIMIT: 10 * 1024 * 1024,
+    Uint8Array,
+    setTimeout,
+    clearTimeout,
+    Download: 'Download',
+    ExternalLink: 'ExternalLink',
+    FileQuestion: 'FileQuestion',
     useUnsavedChanges: (_id, value) => {
       dirty = value;
     },
@@ -70,11 +82,13 @@ async function component(file, props, bindings = {}) {
     while (effects.length) effects.shift()();
     return tree;
   }
-  function nodes(n = tree) {
+  function nodes(n) {
+    if (!arguments.length) n = tree;
     if (Array.isArray(n)) return n.flatMap(nodes);
     return n && typeof n === 'object' ? [n, ...nodes(n.props.children)] : [];
   }
-  function text(n = tree) {
+  function text(n) {
+    if (!arguments.length) n = tree;
     if (Array.isArray(n)) return n.map(text).join(' ');
     return n && typeof n === 'object' ? text(n.props.children) : String(n ?? '');
   }
@@ -312,4 +326,122 @@ test('visualizador mantém download ao falhar imagem, limita zoom e isola PDF', 
   );
   await pdf.flush();
   assert.equal(pdf.nodes().find((n) => n.type === 'iframe').props.sandbox, '');
+});
+
+function officialBindings(fetchMock, overrides = {}) {
+  const revoked = [];
+  class AssetURL extends URL {
+    static createObjectURL() {
+      return 'blob:official';
+    }
+    static revokeObjectURL(url) {
+      revoked.push(url);
+    }
+  }
+  return {
+    componentName: 'OfficialFileViewer',
+    URL: AssetURL,
+    window: { location: { href: 'https://ws.test/', origin: 'https://ws.test' } },
+    fetch: fetchMock,
+    revoked,
+    ...overrides,
+  };
+}
+const officialProps = (url = '/curriculo.pdf') => ({
+  instance: { id: 'viewer', origin: 'resume', params: { url, name: 'Currículo' } },
+});
+
+test('documentos oficiais aceitam contrato url/name e isolam PDF validado', async () => {
+  let request;
+  const bindings = officialBindings(async (url, options) => {
+    request = { url, options };
+    return new Response('%PDF-1.7\n', { headers: { 'Content-Type': 'application/pdf' } });
+  });
+  const ui = await component('src/apps/file-viewer/FileViewer.jsx', officialProps(), bindings);
+  await ui.flush();
+  assert.equal(request.url, 'https://ws.test/curriculo.pdf');
+  assert.equal(request.options.redirect, 'error');
+  assert.equal(ui.nodes().find((n) => n.type === 'iframe').props.sandbox, '');
+  assert.equal(
+    ui.nodes().find((n) => n.type === 'a' && n.props.download).props.href,
+    'blob:official',
+  );
+  ui.unmount();
+  assert.deepEqual(bindings.revoked, ['blob:official']);
+});
+
+test('visualizador oficial recusa origens externas, credenciais, consultas e PDFs inválidos', async () => {
+  let calls = 0;
+  for (const url of [
+    'https://other.test/x.pdf',
+    'https://user:pass@ws.test/x.pdf',
+    '/x.pdf?token=x',
+    '/x.pdf#fragment',
+    'javascript:alert(1)',
+  ]) {
+    const ui = await component(
+      'src/apps/file-viewer/FileViewer.jsx',
+      officialProps(url),
+      officialBindings(async () => {
+        calls++;
+      }),
+    );
+    await ui.flush();
+    assert.match(ui.text(), /Nenhum arquivo selecionado/);
+  }
+  assert.equal(calls, 0);
+  for (const [body, type] of [
+    ['<html>SPA</html>', 'text/html'],
+    ['not pdf', 'application/pdf'],
+  ]) {
+    const ui = await component(
+      'src/apps/file-viewer/FileViewer.jsx',
+      officialProps(),
+      officialBindings(async () => new Response(body, { headers: { 'Content-Type': type } })),
+    );
+    await ui.flush();
+    assert.match(ui.text(), /Não foi possível abrir/);
+    assert.equal(
+      ui.nodes().find((n) => n.type === 'iframe'),
+      undefined,
+    );
+  }
+});
+
+test('prévia oficial limita leitura por stream mesmo sem Content-Length e oferece download', async () => {
+  const ui = await component(
+    'src/apps/file-viewer/FileViewer.jsx',
+    officialProps('/grande.txt'),
+    officialBindings(
+      async () =>
+        new Response('x'.repeat(1024 * 1024 + 1), { headers: { 'Content-Type': 'text/plain' } }),
+    ),
+  );
+  await ui.flush();
+  assert.match(ui.text(), /grande demais/);
+  assert.equal(
+    ui.nodes().find((n) => n.type === 'a' && n.props.download).props.href,
+    'https://ws.test/grande.txt',
+  );
+  assert.equal(
+    ui.nodes().find((n) => n.type === 'pre'),
+    undefined,
+  );
+});
+
+test('HTML oficial é exibido como texto, nunca como iframe executável', async () => {
+  const ui = await component(
+    'src/apps/file-viewer/FileViewer.jsx',
+    officialProps('/exemplo.html'),
+    officialBindings(
+      async () =>
+        new Response('<script>literal</script>', { headers: { 'Content-Type': 'text/html' } }),
+    ),
+  );
+  await ui.flush();
+  assert.match(ui.text(), /<script>literal/);
+  assert.equal(
+    ui.nodes().find((n) => n.type === 'iframe'),
+    undefined,
+  );
 });

@@ -765,5 +765,6 @@
   "Não foi possível salvar a organização. A alteração foi cancelada.": "Could not save the arrangement. The change was cancelled.",
   "A gravação falhou e a recuperação não foi concluída. Verifique a organização após recarregar.": "Saving failed and recovery was incomplete. Check the arrangement after reloading.",
   "Não foi possível salvar as posições dos atalhos. A organização anterior foi mantida na interface.": "Could not save shortcut positions. The previous arrangement was kept in the interface.",
-  "Mover {0}": "Move {0}"
+  "Mover {0}": "Move {0}",
+  "Arquivo grande demais para prévia. Utilize o download.": "File too large to preview. Use the download."
 }
