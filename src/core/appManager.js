@@ -1,12 +1,15 @@
-import { getAppDefinition } from './appRegistry';
+import { getAppDefinition, getAppNavigationContract } from './appRegistry';
 import { isAdminAuthenticated } from '../services/authService';
 
+/* === Estado inicial === */
 export const initialAppState = {
   instances: [],
   activeInstanceId: null,
   focusHistory: [],
 };
 
+/* === Consultas de instâncias === */
+/* ----- Instância preferencial ----- */
 export function getPreferredInstance(state, appId) {
   const instances = state.instances.filter((instance) => instance.appId === appId);
 
@@ -25,6 +28,7 @@ export function getPreferredInstance(state, appId) {
   return instances.find((instance) => !instance.minimized) ?? instances.at(-1);
 }
 
+/* ----- Última instância disponível ----- */
 function getLastAvailableFocus(instances, history) {
   return (
     [...history]
@@ -33,6 +37,125 @@ function getLastAvailableFocus(instances, history) {
   );
 }
 
+/* === Validação de abertura === */
+/* ----- Objetos de parâmetros ----- */
+function isPlainRecord(value) {
+  if (!value || typeof value !== 'object') return false;
+
+  const prototype = Object.getPrototypeOf(value);
+
+  return prototype === null || Object.getPrototypeOf(prototype) === null;
+}
+
+/* ----- Parâmetros declarados pelo aplicativo ----- */
+function validateNavigationParams(appId, params) {
+  const contract = getAppNavigationContract(appId);
+
+  if (!contract) {
+    return {
+      ok: false,
+      code: 'APP_NOT_FOUND',
+    };
+  }
+
+  if (!isPlainRecord(params)) {
+    return {
+      ok: false,
+      code: 'INVALID_NAVIGATION_PARAMS',
+    };
+  }
+
+  const acceptedParams = contract.params;
+
+  if (acceptedParams === null) {
+    return {
+      ok: true,
+    };
+  }
+
+  for (const [key, value] of Object.entries(params)) {
+    if (
+      !Object.hasOwn(acceptedParams, key) ||
+      typeof value !== acceptedParams[key] ||
+      !value.trim()
+    ) {
+      return {
+        ok: false,
+        code: 'INVALID_NAVIGATION_PARAMS',
+      };
+    }
+  }
+
+  return {
+    ok: true,
+  };
+}
+
+/* ----- Solicitação de abertura ----- */
+export function validateAppOpen(appId, options = {}) {
+  const app = getAppDefinition(appId);
+
+  if (!app) {
+    return {
+      ok: false,
+      error: {
+        code: 'APP_NOT_FOUND',
+        message: 'Aplicativo não encontrado.',
+      },
+    };
+  }
+
+  if (!app.public && !(appId === 'administration' && isAdminAuthenticated())) {
+    return {
+      ok: false,
+      error: {
+        code: 'APP_ACCESS_DENIED',
+        message: 'Este aplicativo não permite abertura pública.',
+      },
+    };
+  }
+
+  if (
+    !isPlainRecord(options) ||
+    (options.origin !== undefined &&
+      (typeof options.origin !== 'string' || !options.origin.trim())) ||
+    (options.params !== undefined && !isPlainRecord(options.params)) ||
+    (options.originInstanceId !== undefined &&
+      (typeof options.originInstanceId !== 'string' ||
+        !options.originInstanceId.trim()))
+  ) {
+    return {
+      ok: false,
+      error: {
+        code: 'INVALID_OPEN_OPTIONS',
+        message: 'Origem ou parâmetros de abertura inválidos.',
+      },
+    };
+  }
+
+  const params = { ...options.params };
+  const validation = validateNavigationParams(appId, params);
+
+  if (!validation.ok) {
+    return {
+      ok: false,
+      error: {
+        code: validation.code,
+        message: 'Parâmetros de navegação inválidos.',
+      },
+    };
+  }
+
+  return {
+    ok: true,
+    app,
+    origin: options.origin ?? 'system',
+    params,
+  };
+}
+
+/* === Gerenciamento de foco === */
+/* ----- Ativação de instância ----- */
 export function activateApp(state, instanceId) {
   const instance = state.instances.find((item) => item.id === instanceId);
 
@@ -45,104 +168,169 @@ export function activateApp(state, instanceId) {
   };
 }
 
-function isPlainRecord(value) {
-  if (!value || typeof value !== 'object') return false;
-  const prototype = Object.getPrototypeOf(value);
-  return prototype === null || Object.getPrototypeOf(prototype) === null;
+/* ----- Seleção de instância reutilizável ----- */
+function findReusableInstance(state, appId, params) {
+  const contract = getAppNavigationContract(appId);
+
+  if (!contract) return null;
+
+  const instances = state.instances.filter(
+    (instance) => instance.appId === appId,
+  );
+
+  if (contract.reusePolicy === 'multiple') return null;
+
+  if (contract.reusePolicy === 'existing') {
+    return instances[0] ?? null;
+  }
+
+  if (contract.reusePolicy === 'contextual') {
+    const keys = Object.keys(contract.params ?? {});
+
+    if (!keys.some((key) => Object.hasOwn(params, key))) {
+      return null;
+    }
+
+    return (
+      instances.find((instance) =>
+        keys.every(
+          (key) => instance.params?.[key] === params[key],
+        ),
+      ) ?? null
+    );
+  }
+
+  return null;
 }
 
-export function validateAppOpen(appId, options = {}) {
-  const app = getAppDefinition(appId);
-  if (!app) {
-    return { ok: false, error: { code: 'APP_NOT_FOUND', message: 'Aplicativo não encontrado.' } };
-  }
-  if (!app.public && !(appId === 'administration' && isAdminAuthenticated())) {
-    return {
-      ok: false,
-      error: {
-        code: 'APP_ACCESS_DENIED',
-        message: 'Este aplicativo não permite abertura pública.',
-      },
-    };
-  }
-  if (
-    !isPlainRecord(options) ||
-    (options.origin !== undefined &&
-      (typeof options.origin !== 'string' || !options.origin.trim())) ||
-    (options.params !== undefined && !isPlainRecord(options.params))
-  ) {
-    return {
-      ok: false,
-      error: {
-        code: 'INVALID_OPEN_OPTIONS',
-        message: 'Origem ou parâmetros de abertura inválidos.',
-      },
-    };
-  }
-  return { ok: true, app, origin: options.origin ?? 'system', params: { ...options.params } };
+/* === Abertura de aplicativos === */
+/* ----- Resolução da instância de origem ----- */
+function resolveOpeningOrigin(state, options) {
+  const instanceId = options.originInstanceId;
+
+  if (!instanceId) return null;
+
+  const instance = state.instances.find(
+    (item) => item.id === instanceId,
+  );
+
+  if (!instance) return null;
+
+  return {
+    instanceId: instance.id,
+    appId: instance.appId,
+  };
 }
 
-// Contrato com resultado explícito; openApp continua compatível com os reducers existentes.
+/* ----- Atualização de navegação contextual ----- */
+function updateInstanceNavigation(state, instanceId, appId, params) {
+  const contract = getAppNavigationContract(appId);
+  const acceptedParams = contract?.params ?? {};
+
+  const hasContextualNavigation = Object.entries(acceptedParams).some(
+    ([key, type]) => typeof params[key] === type,
+  );
+
+  if (!hasContextualNavigation) return state;
+
+  return {
+    ...state,
+    instances: state.instances.map((instance) =>
+      instance.id === instanceId
+        ? {
+          ...instance,
+          params: {
+            ...instance.params,
+            ...params,
+          },
+          navigationRequestId: (instance.navigationRequestId ?? 0) + 1,
+        }
+        : instance,
+    ),
+  };
+}
+
+/* ----- Abertura com resultado ----- */
 export function requestAppOpen(state, appId, options = {}) {
   const request = validateAppOpen(appId, options);
-  if (!request.ok) return { state, result: { ok: false, error: request.error } };
-  const { app, origin, params } = request;
 
-  if (!app.allowMultipleInstances) {
-    const existing = state.instances.find((instance) => instance.appId === appId);
-
-    if (existing) {
-      const hasSettingsNavigation =
-        (appId === 'settings' && typeof params.section === 'string') ||
-        (appId === 'projects' && typeof params.projectId === 'string') ||
-        (appId === 'notes' && typeof params.postId === 'string');
-
-      const nextState = hasSettingsNavigation
-        ? {
-            ...state,
-            instances: state.instances.map((instance) =>
-              instance.id === existing.id
-                ? {
-                    ...instance,
-                    params: {
-                      ...instance.params,
-                      ...params,
-                    },
-                    navigationRequestId: (instance.navigationRequestId ?? 0) + 1,
-                  }
-                : instance,
-            ),
-          }
-        : state;
-
-      return {
-        state: restoreApp(nextState, existing.id),
-        result: {
-          ok: true,
-          instanceId: existing.id,
-          status: 'restored',
-        },
-      };
-    }
+  if (!request.ok) {
+    return {
+      state,
+      result: {
+        ok: false,
+        error: request.error,
+      },
+    };
   }
+
+  const { origin, params } = request;
+  const navigationOrigin = resolveOpeningOrigin(state, options);
+
+  const existing = findReusableInstance(state, appId, params);
+
+  if (existing) {
+    const nextState = updateInstanceNavigation(
+      state,
+      existing.id,
+      appId,
+      params,
+    );
+
+    const stateWithOrigin = navigationOrigin
+      ? {
+        ...nextState,
+        instances: nextState.instances.map((instance) =>
+          instance.id === existing.id
+            ? { ...instance, navigationOrigin }
+            : instance,
+        ),
+      }
+      : nextState;
+
+    return {
+      state: restoreApp(stateWithOrigin, existing.id),
+      result: {
+        ok: true,
+        instanceId: existing.id,
+        status: 'restored',
+      },
+    };
+  }
+
   const instance = {
     id: crypto.randomUUID(),
     appId,
     minimized: false,
     executionState: 'running',
     origin,
+    navigationOrigin,
     params,
   };
+
   return {
-    state: activateApp({ ...state, instances: [...state.instances, instance] }, instance.id),
-    result: { ok: true, instanceId: instance.id, status: 'opened' },
+    state: activateApp(
+      {
+        ...state,
+        instances: [...state.instances, instance],
+      },
+      instance.id,
+    ),
+    result: {
+      ok: true,
+      instanceId: instance.id,
+      status: 'opened',
+    },
   };
 }
 
+/* ----- Abertura compatível com reducers ----- */
 export function openApp(state, appId, options = {}) {
   return requestAppOpen(state, appId, options).state;
 }
 
+/* === Ciclo de vida das instâncias === */
+/* ----- Minimização ----- */
 export function minimizeApp(state, instanceId) {
   const instance = state.instances.find((item) => item.id === instanceId);
 
@@ -153,10 +341,10 @@ export function minimizeApp(state, instanceId) {
   const instances = state.instances.map((item) =>
     item.id === instanceId
       ? {
-          ...item,
-          minimized: true,
-          executionState: app?.pauseWhenMinimized ? 'paused' : 'running',
-        }
+        ...item,
+        minimized: true,
+        executionState: app?.pauseWhenMinimized ? 'paused' : 'running',
+      }
       : item,
   );
 
@@ -178,31 +366,28 @@ export function minimizeApp(state, instanceId) {
   };
 }
 
+/* ----- Restauração ----- */
 export function restoreApp(state, instanceId) {
-  if (!state.instances.some((item) => item.id === instanceId)) {
-    return state;
-  }
+  if (!state.instances.some((item) => item.id === instanceId)) return state;
 
   const instances = state.instances.map((item) =>
     item.id === instanceId
       ? {
-          ...item,
-          minimized: false,
-          executionState: 'running',
-        }
+        ...item,
+        minimized: false,
+        executionState: 'running',
+      }
       : item,
   );
 
   return activateApp({ ...state, instances }, instanceId);
 }
 
+/* ----- Fechamento ----- */
 export function closeApp(state, instanceId) {
-  if (!state.instances.some((item) => item.id === instanceId)) {
-    return state;
-  }
+  if (!state.instances.some((item) => item.id === instanceId)) return state;
 
   const instances = state.instances.filter((item) => item.id !== instanceId);
-
   const focusHistory = state.focusHistory.filter((id) => id !== instanceId);
 
   return {

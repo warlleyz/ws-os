@@ -146,3 +146,169 @@ test('guards de fechamento são independentes por instância e liberam ao desmon
   remove();
   assert.equal(m.canCloseApp('dirty'), true);
 });
+
+
+/* === Proteção de ações do sistema === */
+/* ----- Execução sem alterações pendentes ----- */
+test('ação protegida executa imediatamente quando a instância está limpa', () => {
+  const m = load(
+    'src/core/appCloseGuards.js',
+    {},
+    [
+      'requestGuardedAction',
+      'canCloseApp',
+    ],
+  );
+
+  let executions = 0;
+
+  const result = m.requestGuardedAction(
+    'clean',
+    () => {
+      executions += 1;
+    },
+    'navigate',
+  );
+
+  assert.equal(result, true);
+  assert.equal(executions, 1);
+  assert.equal(m.canCloseApp('clean'), true);
+});
+
+/* ----- Cancelamento de navegação ----- */
+test('cancelar navegação protegida preserva alterações e não executa a ação', () => {
+  const m = load(
+    'src/core/appCloseGuards.js',
+    {},
+    [
+      'registerCloseGuard',
+      'requestGuardedAction',
+      'cancelCloseConfirmation',
+      'confirmAppClose',
+    ],
+  );
+
+  let executions = 0;
+
+  const unregister = m.registerCloseGuard('editor', () => false);
+
+  const result = m.requestGuardedAction(
+    'editor',
+    () => {
+      executions += 1;
+    },
+    'navigate',
+  );
+
+  assert.equal(result, false);
+  assert.equal(executions, 0);
+
+  m.cancelCloseConfirmation();
+  m.confirmAppClose();
+
+  assert.equal(executions, 0);
+
+  unregister();
+});
+
+/* ----- Confirmação de navegação ----- */
+test('confirmar navegação protegida executa a ação uma única vez', () => {
+  const m = load(
+    'src/core/appCloseGuards.js',
+    {},
+    [
+      'registerCloseGuard',
+      'requestGuardedAction',
+      'confirmAppClose',
+    ],
+  );
+
+  let executions = 0;
+
+  const unregister = m.registerCloseGuard('editor', () => false);
+
+  m.requestGuardedAction(
+    'editor',
+    () => {
+      executions += 1;
+    },
+    'navigate',
+  );
+
+  assert.equal(executions, 0);
+
+  m.confirmAppClose();
+  m.confirmAppClose();
+
+  assert.equal(executions, 1);
+
+  unregister();
+});
+
+/* ----- Exclusividade da confirmação ----- */
+test('confirmação pendente não pode ser substituída por outra operação', () => {
+  const m = load(
+    'src/core/appCloseGuards.js',
+    {},
+    [
+      'registerCloseGuard',
+      'requestGuardedAction',
+      'confirmAppClose',
+    ],
+  );
+
+  const actions = [];
+
+  const unregister = m.registerCloseGuard('editor', () => false);
+
+  const first = m.requestGuardedAction(
+    'editor',
+    () => actions.push('first'),
+    'navigate',
+  );
+
+  const second = m.requestGuardedAction(
+    'editor',
+    () => actions.push('second'),
+    'close',
+  );
+
+  assert.equal(first, false);
+  assert.equal(second, false);
+
+  m.confirmAppClose();
+
+  assert.deepEqual(actions, ['first']);
+
+  unregister();
+});
+
+/* ----- Desmontagem da instância ----- */
+test('desmontar instância cancela confirmação pendente', () => {
+  const m = load(
+    'src/core/appCloseGuards.js',
+    {},
+    [
+      'registerCloseGuard',
+      'requestGuardedAction',
+      'confirmAppClose',
+    ],
+  );
+
+  let executed = false;
+
+  const unregister = m.registerCloseGuard('editor', () => false);
+
+  m.requestGuardedAction(
+    'editor',
+    () => {
+      executed = true;
+    },
+    'navigate',
+  );
+
+  unregister();
+  m.confirmAppClose();
+
+  assert.equal(executed, false);
+});

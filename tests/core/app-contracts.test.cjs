@@ -29,6 +29,7 @@ function core() {
     registry,
     manager: moduleAt('src/core/appManager.js', {
       getAppDefinition: registry.getAppDefinition,
+      getAppNavigationContract: registry.getAppNavigationContract,
       isAdminAuthenticated: () => false,
     }),
   };

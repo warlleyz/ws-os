@@ -182,3 +182,158 @@ test('retorno interno do Mobile é registrado por instância e limpa ao desmonta
   remove();
   assert.equal(m.handleAppBack('a'), false);
 });
+
+
+/* === Testes de navegação contextual === */
+/* ----- Retorno à instância de origem ----- */
+test('retorno contextual identifica a instância exata de origem', () => {
+  const m = load(
+    'src/core/navigationManager.js',
+    {},
+    ['createNavigationOrigin', 'resolveNavigationOrigin', 'resolveContextualBack'],
+  );
+
+  const state = {
+    instances: [
+      { id: 'projects-a', appId: 'projects' },
+      { id: 'projects-b', appId: 'projects' },
+      { id: 'demo', appId: 'demo-viewer' },
+    ],
+    focusHistory: ['projects-a', 'projects-b', 'demo'],
+  };
+
+  const getAppDefinition = (id) => ({
+    id,
+    public: true,
+  });
+
+  const origin = m.createNavigationOrigin(state, 'projects-a');
+
+  assert.equal(origin.instanceId, 'projects-a');
+  assert.equal(origin.appId, 'projects');
+
+  const resolved = m.resolveNavigationOrigin(state, origin);
+
+  assert.equal(resolved.id, 'projects-a');
+
+  const destination = m.resolveContextualBack(
+    state,
+    origin,
+    getAppDefinition,
+  );
+
+  assert.equal(destination.type, 'instance');
+  assert.equal(destination.instanceId, 'projects-a');
+});
+
+/* ----- Origem encerrada ----- */
+test('retorno contextual utiliza outra instância pública quando a origem foi fechada', () => {
+  const m = load(
+    'src/core/navigationManager.js',
+    {},
+    ['resolveContextualBack'],
+  );
+
+  const state = {
+    instances: [
+      { id: 'about', appId: 'about-me' },
+      { id: 'projects', appId: 'projects' },
+    ],
+    focusHistory: ['about', 'projects'],
+  };
+
+  const destination = m.resolveContextualBack(
+    state,
+    {
+      instanceId: 'closed',
+      appId: 'projects',
+    },
+    () => ({ public: true }),
+  );
+
+  assert.equal(destination.type, 'instance');
+  assert.equal(destination.instanceId, 'projects');
+});
+
+/* ----- Proteção de aplicativos restritos ----- */
+test('retorno contextual não seleciona aplicativos privados como fallback', () => {
+  const m = load(
+    'src/core/navigationManager.js',
+    {},
+    ['resolveContextualBack'],
+  );
+
+  const state = {
+    instances: [
+      { id: 'admin', appId: 'administration' },
+      { id: 'about', appId: 'about-me' },
+    ],
+    focusHistory: ['about', 'admin'],
+  };
+
+  const getAppDefinition = (appId) => ({
+    public: appId !== 'administration',
+  });
+
+  const destination = m.resolveContextualBack(
+    state,
+    {
+      instanceId: 'closed',
+      appId: 'projects',
+    },
+    getAppDefinition,
+  );
+
+  assert.equal(destination.type, 'instance');
+  assert.equal(destination.instanceId, 'about');
+});
+
+/* ----- Ausência de destino seguro ----- */
+test('retorno contextual utiliza a tela inicial quando não existe destino público', () => {
+  const m = load(
+    'src/core/navigationManager.js',
+    {},
+    ['resolveContextualBack'],
+  );
+
+  const state = {
+    instances: [
+      { id: 'admin', appId: 'administration' },
+    ],
+    focusHistory: ['admin'],
+  };
+
+  const destination = m.resolveContextualBack(
+    state,
+    {
+      instanceId: 'closed',
+      appId: 'projects',
+    },
+    () => ({ public: false }),
+  );
+
+  assert.equal(destination.type, 'home');
+});
+
+/* ----- Origem incompatível ----- */
+test('retorno contextual rejeita origem cujo aplicativo não corresponde à instância', () => {
+  const m = load(
+    'src/core/navigationManager.js',
+    {},
+    ['resolveNavigationOrigin'],
+  );
+
+  const state = {
+    instances: [
+      { id: 'first', appId: 'projects' },
+    ],
+    focusHistory: ['first'],
+  };
+
+  const resolved = m.resolveNavigationOrigin(state, {
+    instanceId: 'first',
+    appId: 'administration',
+  });
+
+  assert.equal(resolved, null);
+});

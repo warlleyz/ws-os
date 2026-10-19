@@ -1,6 +1,7 @@
 import {
   Award,
   Calculator,
+  ChartNoAxesCombined,
   Contact,
   FilePenLine,
   FileSearch,
@@ -10,7 +11,6 @@ import {
   FolderOpen,
   Gamepad2,
   Info,
-  ChartNoAxesCombined,
   NotebookPen,
   Settings,
   Shield,
@@ -19,17 +19,9 @@ import {
   UserRound,
 } from 'lucide-react';
 
-// category: classe arquitetural do aplicativo.
-// menuCategory: categoria de navegação do WS Menu.
-// desktopShortcut: exibição inicial na área de trabalho.
-// public: permissão de abertura pública.
-// showInMenu: visibilidade na listagem do WS Menu.
-// implemented: existe um componente funcional integrado, ainda que parcial.
-// loadComponent: entrada lazy explícita dos aplicativos implementados.
-
+/* === Registro de aplicativos === */
 const appDefinitions = [
-  // Aplicativos Desktop
-
+  /* ----- Aplicativos Desktop ----- */
   {
     id: 'about-me',
     name: 'Sobre Mim',
@@ -199,8 +191,7 @@ const appDefinitions = [
     showInMenu: true,
   },
 
-  // Aplicativos de Sistema
-
+  /* ----- Aplicativos de Sistema ----- */
   {
     id: 'file-viewer',
     name: 'Visualizador de Arquivos',
@@ -287,10 +278,75 @@ const appDefinitions = [
   },
 ];
 
+/* === Contratos de navegação === */
+const navigationContracts = {
+  /* ----- Aplicativos Desktop ----- */
+  projects: {
+    params: {
+      projectId: 'string',
+    },
+    reusePolicy: 'contextual',
+  },
+  notes: {
+    params: {
+      postId: 'string',
+    },
+    reusePolicy: 'existing',
+  },
+  settings: {
+    params: {
+      section: 'string',
+    },
+    reusePolicy: 'existing',
+  },
+
+  /* ----- Aplicativos de Sistema ----- */
+  'file-viewer': {
+    params: {
+      fileId: 'string',
+      url: 'string',
+      name: 'string',
+    },
+    reusePolicy: 'multiple',
+  },
+  'file-editor': {
+    params: {
+      fileId: 'string',
+    },
+    reusePolicy: 'multiple',
+  },
+  'demo-viewer': {
+    params: {
+      projectId: 'string',
+      demoId: 'string',
+    },
+    reusePolicy: 'multiple',
+  },
+};
+
+/* === Consultas do Registry === */
+/* ----- Definição de aplicativo ----- */
 export function getAppDefinition(appId) {
   return appDefinitions.find((app) => app.id === appId) ?? null;
 }
 
+/* ----- Lista de aplicativos ----- */
 export function getRegisteredApps() {
   return [...appDefinitions];
+}
+
+/* ----- Contrato de navegação ----- */
+export function getAppNavigationContract(appId) {
+  const app = getAppDefinition(appId);
+
+  if (!app) return null;
+
+  const contract = navigationContracts[appId];
+
+  return {
+    params: contract?.params ?? null,
+    reusePolicy:
+      contract?.reusePolicy ??
+      (app.allowMultipleInstances ? 'multiple' : 'existing'),
+  };
 }

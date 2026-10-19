@@ -1,79 +1,157 @@
 import { useCallback, useMemo, useState } from 'react';
-import { portfolio, contentText } from '../../content/portfolioContent';
-import { useLocale, translate as t } from '../../shared/i18n/i18n';
-import { useSystem } from '../../core/useSystem';
 import { openApp } from '../../core/appManager';
-import usePublicResource from '../../shared/hooks/usePublicResource';
-import useAppBack from '../../shared/hooks/useAppBack';
+import { useSystem } from '../../core/useSystem';
+import { portfolio, contentText } from '../../content/portfolioContent';
 import { fetchGithubPortfolio } from '../../services/githubService';
-import { safeExternalUrl, publicAssetUrl } from '../../shared/utils/urls';
-import { mergeProjects, filterProjects } from './projectModel';
+import useAppBack from '../../shared/hooks/useAppBack';
+import usePublicResource from '../../shared/hooks/usePublicResource';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
+import { publicAssetUrl, safeExternalUrl } from '../../shared/utils/urls';
+import { filterProjects, mergeProjects } from './projectModel';
 import '../../styles/apps.css';
 
 export default function Projects({ instance }) {
+  /* === Integrações e contexto === */
   const locale = useLocale();
   const { run } = useSystem();
-  const load = useCallback((options) => fetchGithubPortfolio(portfolio.githubUser, options), []);
+
+  /* === Catálogo de projetos === */
+  /* ----- Carregamento remoto ----- */
+  const load = useCallback(
+    (options) => fetchGithubPortfolio(portfolio.githubUser, options),
+    [],
+  );
+
   const remote = usePublicResource(load, 'github', Boolean(portfolio.githubUser));
+
+  /* ----- Consolidação do catálogo ----- */
   const projects = useMemo(
     () => mergeProjects(portfolio.projects, remote.data?.repositories ?? []),
     [remote.data],
   );
+
+  /* === Filtros e ordenação === */
   const [search, setSearch] = useState('');
   const [technology, setTechnology] = useState('all');
   const [order, setOrder] = useState('updated');
+
+  const visible = filterProjects(
+    projects,
+    search,
+    technology,
+    order,
+    locale,
+    contentText,
+  );
+
+  const technologies = useMemo(
+    () => [...new Set(projects.flatMap((item) => item.technologies))].sort(),
+    [projects],
+  );
+
+  /* === Navegação interna === */
+  /* ----- Contexto de navegação ----- */
   const navigation = instance?.navigationRequestId ?? 0;
+
   const [selection, setSelection] = useState({
     request: navigation,
     id: instance?.params?.projectId ?? null,
   });
+
   const selectedId =
-    selection.request === navigation ? selection.id : (instance?.params?.projectId ?? null);
+    selection.request === navigation
+      ? selection.id
+      : (instance?.params?.projectId ?? null);
+
+  /* ----- Seleção de projeto ----- */
   function setSelectedId(id) {
-    setSelection({ request: navigation, id });
+    setSelection({
+      request: navigation,
+      id,
+    });
   }
+
+  /* ----- Retorno ao catálogo ----- */
   useAppBack(instance?.id, () => {
     if (!selectedId) return false;
+
     setSelectedId(null);
     return true;
   });
+
+  /* ----- Projeto selecionado ----- */
   const selected = projects.find((item) => item.id === selectedId);
-  const visible = filterProjects(projects, search, technology, order, locale, contentText);
-  const link = (value) => safeExternalUrl(value);
+
+  /* === Ações de projetos === */
+  /* ----- Abertura de demonstrações ----- */
+  function openDemo(demoId) {
+    if (!selected || !instance?.id) return;
+
+    run(openApp, 'demo-viewer', {
+      origin: 'projects',
+      originInstanceId: instance.id,
+      params: {
+        projectId: selected.id,
+        demoId,
+      },
+    });
+  }
+
+  /* === Renderização === */
   return (
     <article className="desktop-window__content ws-app ws-projects">
+      {/* === Apresentação === */}
       <header>
         <h2>{t('Projetos')}</h2>
         <p>{t('Projetos selecionados e repositórios públicos do GitHub.')}</p>
       </header>
+
+      {/* === Barra de ferramentas === */}
       <div className="ws-app__toolbar">
-        <button type="button" onClick={remote.refresh} disabled={remote.status === 'loading'}>
+        <button
+          type="button"
+          onClick={remote.refresh}
+          disabled={remote.status === 'loading'}
+        >
           {t('Atualizar dados')}
         </button>
+
         {selectedId && (
           <button type="button" onClick={() => setSelectedId(null)}>
             {t('Voltar ao catálogo')}
           </button>
         )}
       </div>
-      {remote.status === 'loading' && <p role="status">{t('Carregando dados públicos…')}</p>}
+
+      {/* === Estado dos dados remotos === */}
+      {remote.status === 'loading' && (
+        <p role="status">{t('Carregando dados públicos…')}</p>
+      )}
+
       {remote.status === 'error' && (
         <p role="status">
           {t(remote.error)} {t('O conteúdo cadastrado continua disponível.')}
         </p>
       )}
-      {remote.status === 'ready' && (
+
+      {remote.status === 'ready' && remote.data && (
         <p className="ws-app__muted">
           {t(remote.source === 'cache' ? 'Cache desta sessão' : 'Dados atualizados')}:{' '}
-          {new Date(remote.updatedAt).toLocaleString(locale)}. {t(remote.warning ?? '')}
-          {!remote.data.complete && t('Catálogo limitado aos primeiros 1000 repositórios.')}
+          {new Date(remote.updatedAt).toLocaleString(locale)}.{' '}
+          {t(remote.warning ?? '')}
+          {!remote.data.complete &&
+            t('Catálogo limitado aos primeiros 1000 repositórios.')}
         </p>
       )}
+
+      {/* === Conteúdo principal === */}
       {selectedId ? (
         selected ? (
           <section>
+            {/* ----- Informações do projeto ----- */}
             <h3>{contentText(selected.name, locale)}</h3>
             <p>{contentText(selected.description, locale)}</p>
+
             {publicAssetUrl(selected.image) && (
               <img
                 className="ws-app__cover"
@@ -84,29 +162,37 @@ export default function Projects({ instance }) {
                 }}
               />
             )}
+
             <p>{selected.technologies.join(' · ')}</p>
             <p>{t(selected.status ?? 'Público')}</p>
+
+            {/* ----- Links e demonstrações ----- */}
             <div className="ws-app__toolbar">
-              {link(selected.repository) && (
-                <a href={link(selected.repository)} target="_blank" rel="noopener noreferrer">
+              {safeExternalUrl(selected.repository) && (
+                <a
+                  href={safeExternalUrl(selected.repository)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {t('Repositório externo')}
                 </a>
               )}
-              {link(selected.homepage) && (
-                <a href={link(selected.homepage)} target="_blank" rel="noopener noreferrer">
+
+              {safeExternalUrl(selected.homepage) && (
+                <a
+                  href={safeExternalUrl(selected.homepage)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {t('Site externo')}
                 </a>
               )}
+
               {selected.demos.map((demo) => (
                 <button
                   key={demo.id}
                   type="button"
-                  onClick={() =>
-                    run(openApp, 'demo-viewer', {
-                      origin: 'projects',
-                      params: { projectId: selected.id, demoId: demo.id },
-                    })
-                  }
+                  onClick={() => openDemo(demo.id)}
                 >
                   {contentText(demo.title, locale) || t('Abrir demonstração')}
                 </button>
@@ -120,6 +206,7 @@ export default function Projects({ instance }) {
         )
       ) : (
         <>
+          {/* ----- Pesquisa e filtros ----- */}
           <div className="ws-app__filters">
             <label>
               {t('Pesquisar projetos')}
@@ -129,47 +216,72 @@ export default function Projects({ instance }) {
                 onChange={(event) => setSearch(event.target.value)}
               />
             </label>
+
             <label>
               {t('Tecnologia')}
-              <select value={technology} onChange={(event) => setTechnology(event.target.value)}>
+              <select
+                value={technology}
+                onChange={(event) => setTechnology(event.target.value)}
+              >
                 <option value="all">{t('Todas')}</option>
-                {[...new Set(projects.flatMap((item) => item.technologies))].sort().map((item) => (
-                  <option key={item}>{item}</option>
+
+                {technologies.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
                 ))}
               </select>
             </label>
+
             <label>
               {t('Ordenar')}
-              <select value={order} onChange={(event) => setOrder(event.target.value)}>
+              <select
+                value={order}
+                onChange={(event) => setOrder(event.target.value)}
+              >
                 <option value="updated">{t('Atualização')}</option>
                 <option value="name">{t('Nome')}</option>
               </select>
             </label>
           </div>
+
+          {/* ----- Contagem de resultados ----- */}
           <p role="status">
             {t('Resultados')}: {visible.length}
           </p>
+
+          {/* ----- Listagem de projetos ----- */}
           <div className="ws-app__grid">
             {visible.map((item) => (
               <section className="ws-app__card" key={item.id}>
                 <h3>{contentText(item.name, locale)}</h3>
-                <p>{contentText(item.description, locale) || t('Sem descrição cadastrada.')}</p>
+                <p>
+                  {contentText(item.description, locale) ||
+                    t('Sem descrição cadastrada.')}
+                </p>
+
                 <p className="ws-app__muted">
                   {item.technologies.join(' · ')} · {t(item.source)}
                 </p>
+
                 {Number.isFinite(item.stars) && (
                   <p>
                     ★ {item.stars} · {t('Forks')}: {item.forks}
                   </p>
                 )}
+
                 <button type="button" onClick={() => setSelectedId(item.id)}>
                   {t('Ver detalhes')}
                 </button>
               </section>
             ))}
           </div>
+
+          {/* ----- Estado vazio ----- */}
           {visible.length === 0 && remote.status !== 'loading' && (
-            <p>{t('Nenhum projeto encontrado. Ajuste os filtros ou cadastre projetos.')}</p>
+            <p>
+              {t('Nenhum projeto encontrado. Ajuste os filtros ou cadastre projetos.')}
+            </p>
           )}
         </>
       )}
