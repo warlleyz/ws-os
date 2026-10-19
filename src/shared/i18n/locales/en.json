@@ -766,5 +766,14 @@
   "A gravação falhou e a recuperação não foi concluída. Verifique a organização após recarregar.": "Saving failed and recovery was incomplete. Check the arrangement after reloading.",
   "Não foi possível salvar as posições dos atalhos. A organização anterior foi mantida na interface.": "Could not save shortcut positions. The previous arrangement was kept in the interface.",
   "Mover {0}": "Move {0}",
-  "Arquivo grande demais para prévia. Utilize o download.": "File too large to preview. Use the download."
+  "Arquivo grande demais para prévia. Utilize o download.": "File too large to preview. Use the download.",
+  "Locais": "Locations",
+  "Caminho da pasta": "Folder path",
+  "Modo de visualização": "View mode",
+  "Visualização em grade": "Grid view",
+  "Visualização em lista": "List view",
+  "Acesse seus arquivos e documentos em um só lugar.": "Access your files and documents in one place.",
+  "Arquivos e pastas salvos neste navegador.": "Files and folders saved in this browser.",
+  "Documentos públicos do portfólio.": "Public portfolio documents.",
+  "Itens excluídos que podem ser recuperados.": "Deleted items that can be recovered."
 }

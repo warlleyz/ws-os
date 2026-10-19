@@ -45,6 +45,25 @@ async function component(file, props, bindings = {}) {
     .replace(/^import[\s\S]*?;\s*$/gm, '')
     .replace('export default function', 'function');
   const Component = vm.runInNewContext(`${clean}; ${name}`, {
+    ...Object.fromEntries(
+      [
+        'House',
+        'FolderOpen',
+        'ShieldCheck',
+        'Trash2',
+        'LayoutGrid',
+        'List',
+        'Folder',
+        'FileText',
+        'FileImage',
+        'FileCode2',
+        'FileJson',
+        'FileSpreadsheet',
+        'FileType',
+        'File',
+      ].map((name) => [name, name]),
+    ),
+    localStorage: { getItem: () => null, setItem() {} },
     React,
     ...React,
     URL,
@@ -473,6 +492,8 @@ test('gerenciador impede criar na raiz por engano quando a pasta aberta é remov
       },
     },
   );
+  ui.button('Meus arquivos').props.onClick();
+  ui.render();
   ui.button('Abrir').props.onClick();
   ui.render();
   store.entries = [];
@@ -507,6 +528,8 @@ test('Arquivos abre visualizador/editor pelo contrato fileId e mantém oficiais 
       openApp: 'open',
     },
   );
+  ui.button('Meus arquivos').props.onClick();
+  ui.render();
   ui.button('Abrir').props.onClick();
   ui.button('Editar').props.onClick();
   assert.equal(calls[0][1], 'file-viewer');

@@ -1,0 +1,320 @@
+/* =========================================
+   ARQUIVOS — ESTRUTURA DO EXPLORADOR
+   ========================================= */
+
+.ws-files__layout {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  min-height: 350px;
+  height: 100%;
+  gap: 0;
+}
+
+.ws-files__sidebar {
+  min-width: 0;
+  padding: 12px;
+  border-right: 1px solid var(--border-default);
+}
+
+.ws-files__navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ws-files__navigation button {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ws-files__navigation button:hover {
+  background: var(--surface-secondary);
+}
+
+.ws-files__navigation button[aria-pressed='true'] {
+  background: var(--accent-soft, rgba(90, 150, 255, 0.16));
+  border-color: var(--accent-secondary);
+}
+
+.ws-files__main {
+  min-width: 0;
+  padding: 16px;
+}
+
+@media (max-width: 650px) {
+  .ws-files__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ws-files__sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .ws-files__navigation {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .ws-files__navigation button {
+    width: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Arquivos — itens da navegação lateral */
+
+.ws-files__navigation button {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.ws-files__navigation button svg {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.ws-files__navigation button[aria-pressed='true'] svg {
+  opacity: 1;
+}
+
+/* Arquivos — tela inicial */
+
+.ws-files__home {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ws-files__home-header h3 {
+  margin: 0 0 6px;
+}
+
+.ws-files__home-header p {
+  margin: 0;
+}
+
+.ws-files__home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 12px;
+}
+
+.ws-files__home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 145px;
+  padding: 18px;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  background: var(--surface-secondary, rgba(127, 127, 127, 0.07));
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.ws-files__home-card:hover {
+  background: var(--surface-secondary);
+  border-color: var(--accent, rgba(90, 150, 255, 0.4));
+}
+
+.ws-files__home-card svg {
+  opacity: 0.85;
+}
+
+.ws-files__home-card span {
+  font-size: 0.82rem;
+  opacity: 0.75;
+  line-height: 1.45;
+}
+
+.ws-files__home-card:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Arquivos — barra de caminhos */
+
+.ws-files__breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 42px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-control);
+  border-radius: 9px;
+  background: var(--surface-secondary);
+}
+
+.ws-files__breadcrumbs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+}
+
+.ws-files__breadcrumbs button:hover {
+  background: var(--surface-secondary);
+}
+
+.ws-files__breadcrumb-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ws-files__breadcrumbs button {
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   ARQUIVOS — CONTROLES DE VISUALIZAÇÃO
+   ========================================= */
+
+.ws-files__view-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 4px;
+  border: 1px solid var(--border-control);
+  border-radius: 10px;
+  background: var(--surface-secondary);
+}
+
+.ws-files__view-controls .ws-files__view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 7px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+}
+
+.ws-files__view-button[aria-pressed='true'] {
+  background: var(--surface-tertiary, rgba(127, 127, 127, 0.15));
+  border-color: var(--accent-secondary);
+}
+
+.ws-files__view-button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+/* =========================================
+   ARQUIVOS — GRADE E LISTA
+   ========================================= */
+
+.ws-files__list--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr));
+  gap: 12px;
+  align-content: start;
+}
+
+.ws-files__list--details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ws-files__list > li {
+  min-width: 0;
+}
+
+.ws-files__list > li strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.ws-files__list--grid > li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ws-files__list--grid > li .ws-app__toolbar {
+  margin-top: auto;
+}
+
+.ws-files__list--details > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.ws-files__list--details > li > p {
+  margin: 0;
+}
+
+.ws-files__list--details > li > .ws-app__toolbar {
+  margin: 0 0 0 auto;
+}
+
+/* Janelas estreitas usam apresentação em lista. */
+
+@media (max-width: 650px) {
+  .ws-files__list--grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ws-files__list--details > li > .ws-app__toolbar {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* Arquivos — identificação visual dos itens */
+
+.ws-files__item-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ws-files__item-heading svg {
+  flex-shrink: 0;
+  color: var(--accent-secondary);
+}
+
+.ws-files__item-heading strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ws-files__list--grid .ws-files__item-heading {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ws-files__list--details .ws-files__item-heading {
+  flex: 1;
+}
+
+.ws-files__list--details .ws-files__item-heading strong {
+  font-size: 13px;
+}

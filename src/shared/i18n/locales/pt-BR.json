@@ -766,5 +766,14 @@
   "A gravação falhou e a recuperação não foi concluída. Verifique a organização após recarregar.": "A gravação falhou e a recuperação não foi concluída. Verifique a organização após recarregar.",
   "Não foi possível salvar as posições dos atalhos. A organização anterior foi mantida na interface.": "Não foi possível salvar as posições dos atalhos. A organização anterior foi mantida na interface.",
   "Mover {0}": "Mover {0}",
-  "Arquivo grande demais para prévia. Utilize o download.": "Arquivo grande demais para prévia. Utilize o download."
+  "Arquivo grande demais para prévia. Utilize o download.": "Arquivo grande demais para prévia. Utilize o download.",
+  "Locais": "Locais",
+  "Caminho da pasta": "Caminho da pasta",
+  "Modo de visualização": "Modo de visualização",
+  "Visualização em grade": "Visualização em grade",
+  "Visualização em lista": "Visualização em lista",
+  "Acesse seus arquivos e documentos em um só lugar.": "Acesse seus arquivos e documentos em um só lugar.",
+  "Arquivos e pastas salvos neste navegador.": "Arquivos e pastas salvos neste navegador.",
+  "Documentos públicos do portfólio.": "Documentos públicos do portfólio.",
+  "Itens excluídos que podem ser recuperados.": "Itens excluídos que podem ser recuperados."
 }
