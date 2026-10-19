@@ -1,3 +1,4 @@
+import { isContractData } from '../shared/utils/contractValidation.js';
 /* === Códigos de erro === */
 /* ----- Categorias compartilhadas ----- */
 export const API_ERROR_CODES = Object.freeze({
@@ -38,13 +39,15 @@ function isPlainObject(value) {
 /* === Resposta de sucesso === */
 /* ----- Criação da resposta ----- */
 export function createApiSuccess(data, meta) {
+  if (!isContractData(data))
+    return createApiError(API_ERROR_CODES.VALIDATION, 'Dados de resposta inválidos.');
   const response = {
     ok: true,
     data,
   };
 
   if (meta !== undefined) {
-    if (!isPlainObject(meta)) {
+    if (!isPlainObject(meta) || !isContractData(meta)) {
       return {
         ok: false,
         error: {
@@ -97,8 +100,10 @@ export function validateApiResponse(response) {
   if (response.ok) {
     if (
       !Object.hasOwn(response, 'data') ||
+      !isContractData(response.data) ||
       Object.hasOwn(response, 'error') ||
-      (response.meta !== undefined && !isPlainObject(response.meta))
+      (response.meta !== undefined &&
+        (!isPlainObject(response.meta) || !isContractData(response.meta)))
     ) {
       return {
         ok: false,

@@ -9,6 +9,16 @@ const root = path.resolve(__dirname, '../..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
 function loadPureModule(file, bindings = {}) {
+  if (file === 'src/core/appManager.js')
+    bindings = {
+      ...require('../helpers/contract-loader.cjs').loadContract(
+        path.join(root, 'src/shared/utils/contractValidation.js'),
+      ),
+      ...require('../helpers/contract-loader.cjs').loadContract(
+        path.join(root, 'src/core/authorizationContract.js'),
+      ),
+      ...bindings,
+    };
   const source = read(file)
     .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];\s*/gm, '')
     .replace(/\bexport\s+(?=(?:const|function|async function)\b)/g, '');
@@ -490,10 +500,9 @@ test('geometria inalterada não reescreve estilos a cada resize', () => {
 /* === Dependências de arquivos === */
 /* ----- Carregamento do contrato compartilhado ----- */
 function loadFileResourceContract() {
-  const source = fs.readFileSync(
-    path.join(root, 'src/services/storage/fileResourceContract.js'),
-    'utf8',
-  ).replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
+  const source = fs
+    .readFileSync(path.join(root, 'src/services/storage/fileResourceContract.js'), 'utf8')
+    .replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
 
   const context = vm.createContext({});
   vm.runInContext(source, context);

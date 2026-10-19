@@ -174,3 +174,8 @@ test('não repete automaticamente uma operação com falha', () => {
   assert.equal(result.ok, true);
   assert.equal(result.action, 'check_retry_policy');
 });
+
+/* === Entrada de fronteira inválida === */
+test('entrada nula não lança exceção nem cria operação idempotente', () => {
+  assert.equal(loadContract().createIdempotencyRequest(null).ok, false);
+});

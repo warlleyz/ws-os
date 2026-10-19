@@ -63,3 +63,8 @@ Alterações posteriores dos contratos compartilhados exigem testes de regressã
 Próxima parte: **01.3 — APIs, erros e atualização de dados**.
 
 Os arquivos de tradução PT-BR/EN permanecem reservados para consolidação na revisão final.
+
+
+## Auditoria de consolidação — 19/10/2026
+
+O commit original foi preservado. A Parte 01.6 verificou consumidores e testes de navegação/descritores, corrigiu resultado contextual e cópia profunda de parâmetros, declaratividade da capacidade administrativa e carregadores de testes. Visualizador mantém rotas local/estática e indisponibilidade segura de managed, sem backend R2 antecipado. Evidências, validação completa e limites em [01.6](ETAPA-01-PARTE-01.6-CONCLUSAO.md).

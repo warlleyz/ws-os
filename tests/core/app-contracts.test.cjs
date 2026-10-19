@@ -6,6 +6,16 @@ const { webcrypto } = require('node:crypto');
 const { test } = require('node:test');
 const root = path.resolve(__dirname, '../..');
 function moduleAt(file, bindings = {}) {
+  if (file === 'src/core/appManager.js')
+    bindings = {
+      ...require('../helpers/contract-loader.cjs').loadContract(
+        path.join(root, 'src/shared/utils/contractValidation.js'),
+      ),
+      ...require('../helpers/contract-loader.cjs').loadContract(
+        path.join(root, 'src/core/authorizationContract.js'),
+      ),
+      ...bindings,
+    };
   const source = fs
     .readFileSync(path.join(root, file), 'utf8')
     .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];\s*/gm, '')
@@ -139,13 +149,45 @@ test('minimização preserva dados e comunica pausa seletiva sem destruir instâ
 /* === Dependências de arquivos === */
 /* ----- Carregamento do contrato compartilhado ----- */
 function loadFileResourceContract() {
-  const source = fs.readFileSync(
-    path.join(root, 'src/services/storage/fileResourceContract.js'),
-    'utf8',
-  ).replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
+  const source = fs
+    .readFileSync(path.join(root, 'src/services/storage/fileResourceContract.js'), 'utf8')
+    .replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
 
   const context = vm.createContext({});
   vm.runInContext(source, context);
 
   return context;
 }
+/* === Auditoria de contratos da Etapa 01 === */
+test('reutilização contextual distingue navegação efetiva de restauração', () => {
+  const { manager: m } = core();
+  const first = m.requestAppOpen(initial(), 'notes', { params: { postId: 'one' } });
+  const changed = m.requestAppOpen(first.state, 'notes', { params: { postId: 'two' } });
+  assert.equal(changed.result.instanceId, first.result.instanceId);
+  assert.equal(changed.result.status, 'navigated');
+  assert.equal(changed.state.instances[0].params.postId, 'two');
+  assert.equal(
+    m.requestAppOpen(changed.state, 'notes', { params: { postId: 'two' } }).result.status,
+    'restored',
+  );
+});
+test('parâmetros legados continuam aceitos mas valores executáveis e referências mutáveis não entram na instância', () => {
+  const { manager: m } = core();
+  const before = initial();
+  assert.equal(
+    m.requestAppOpen(before, 'about-system', { params: { run: () => {} } }).result.error.code,
+    'INVALID_NAVIGATION_PARAMS',
+  );
+  const options = { params: { resource: { source: 'local', fileId: 'one' } } };
+  const result = m.requestAppOpen(before, 'file-viewer', options);
+  options.params.resource.fileId = 'changed';
+  assert.equal(result.state.instances[0].params.resource.fileId, 'one');
+});
+test('política administrativa está declarada no Registry e não no appId do gerenciador', () => {
+  const { registry } = core();
+  assert.equal(
+    registry.getAppNavigationContract('administration').requiredCapability,
+    'administration.access',
+  );
+  assert.equal(registry.getAppNavigationContract('administration').requiresAuthentication, true);
+});

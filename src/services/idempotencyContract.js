@@ -39,7 +39,10 @@ export function createIdempotencyKey() {
 }
 
 /* ----- Descritor da operação ----- */
-export function createIdempotencyRequest({ key, operation, scope } = {}) {
+export function createIdempotencyRequest(input = {}) {
+  if (!input || typeof input !== 'object' || Array.isArray(input))
+    return { ok: false, code: IDEMPOTENCY_ERRORS.INVALID_KEY };
+  const { key, operation, scope } = input;
   if (!isValidIdempotencyKey(key)) {
     return {
       ok: false,

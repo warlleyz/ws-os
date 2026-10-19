@@ -1,8 +1,101 @@
-# Contratos atuais e evolução necessária
+# Contratos compartilhados — estado atual da Etapa 01
+
+Atualizado em 19/10/2026. Fonte de decisões: [Etapa 01](finalizacao/ETAPA-01-DECISOES-TECNICAS.md). Evidências e limites: [conclusão técnica](finalizacao/ETAPA-01-PARTE-01.6-CONCLUSAO.md).
+
+## Responsabilidades e compatibilidade
+
+Core coordena instâncias e navegação; aplicativos mantêm seus fluxos; serviços validam e adaptam dados; Workers autorizam operações remotas; banco garante persistência e integridade. Os contratos desta etapa não equivalem à implementação de todos os domínios futuros. Não há backend R2 novo, migração aplicada ou armazenamento remoto de arquivos pessoais nesta entrega.
+
+Os módulos de contrato exportam validadores e resultados estruturados. Consumidores devem verificar a propriedade ok ou o resultado específico do módulo, sem inferir sucesso de um status HTTP isolado. Falhas de validação não autorizam gravar valores corrigidos silenciosamente. Erros preservam códigos estáveis e mensagens seguras; dados brutos do servidor não são apresentados como mensagens confiáveis.
+
+## Navegação, instâncias e proteção
+
+- Fonte: src/core/appRegistry.js, appManager.js, navigationManager.js e appCloseGuards.js.
+- Registry declara parâmetros, política de instâncias, contextos e capacidade necessária. Administração exige administration.access e sessão válida; isso não substitui autorização do servidor.
+- requestAppOpen(state, appId, options?) retorna {state,result}. Sucesso: {ok:true,instanceId,status}, com status opened, restored ou navigated. Falha: {ok:false,error:{code,message}}, preservando o estado. openApp mantém o retorno legado de estado.
+- Estado: {instances,activeInstanceId,focusHistory}; instância preserva id, appId, origin, params e contexto de retorno. IDs de recurso não são IDs de instância.
+- Parâmetros são dados JSON validados e copiados profundamente. Campos contextuais declarados são atualizados em instância reutilizada; conteúdo executável, ciclos e descritores inválidos são rejeitados. Parâmetros legados simples de apps sem campos contextuais continuam aceitos.
+- Origem e retorno são contexto, nunca credenciais. Retorno usa instância/origem pública segura ou Home; não recria formulários privados. Navegação pendente revalida sessão, parâmetros e existência após confirmação.
+- Alterações não salvas usam guard por instância e confirmação central. Cancelar preserva rascunho; confirmar executa uma vez; desmontagem libera o guard. Desktop e Mobile usam o mesmo Core. Navegação interna não modifica a URL; compartilhamento continua restrito aos recursos públicos aprovados.
+- Consumidores: shells, Busca, Wally, Currículo, Certificados, Projetos, Notas, Arquivos e visualizadores.
+
+## Arquivos, documentos e anexos
+
+Fontes: src/services/storage/fileResourceContract.js, managedFileContract.js, noteAttachmentContract.js, fileModel.js e localFilesStorage.js.
+
+- Descritor identifica origem local, static ou managed, com identificador e metadados próprios. URL arbitrária não concede acesso a um recurso gerenciado. Manter os formatos exatos dos validadores ao construir descritores.
+- Arquivos pessoais ficam no IndexedDB do navegador: limite existente de 10 MB por arquivo, 50 MB no total e 500 entradas; integridade, ciclos, nomes, quota, concorrência e revisão são tratados na camada de armazenamento.
+- Recursos estáticos aprovados são somente leitura. Recursos managed possuem contrato de estado, revisão, visibilidade e integridade; seu provedor remoto permanece indisponível de forma explícita até a etapa de backend.
+- Anexos: no máximo cinco por publicação, com limite de 10 MB por arquivo, IDs estáveis, validação de tipo/metadados e acesso coerente com o estado editorial. O contrato não realiza upload remoto.
+- Visualizador recebe descritor ou entradas legadas compatíveis (fileId/url permitida). Encaminha arquivos locais ao leitor local, estáticos ao fluxo público e managed ao estado seguro de indisponibilidade. Editor permanece restrito a texto local compatível, com revisão e proteção de alterações. URLs temporárias pertencem ao consumidor e precisam ser liberadas.
+- Erros de recurso inválido, inexistente, acesso negado, quota, conflito e leitura são distintos; falha não deve ser apresentada como salvamento bem-sucedido.
+
+## APIs, revisões e idempotência
+
+Fontes: apiContract.js, apiResponseAdapter.js, revisionContract.js, idempotencyContract.js e httpRequestContract.js em src/services.
+
+- Envelope padrão: sucesso {ok:true,data,meta?}; erro {ok:false,error:{code,message},requestId?}. Validadores rejeitam formatos contraditórios e dados que se perderiam na serialização JSON. Adaptadores mantêm respostas legadas usadas pelos serviços atuais e verificam status e payload.
+- Revisão é inteiro seguro não negativo; atualização exige revisão conhecida, conflito é explícito e próxima revisão não ultrapassa o limite seguro. Endpoints existentes que usam updatedAt continuam compatíveis: adoção de colunas numéricas será feita pelo proprietário do domínio com migração.
+- Idempotência vincula chave, operação, escopo e fingerprint SHA-256 canônico do pedido. Registro concluído reutiliza o resultado; chave reaproveitada com outro pedido conflita; resultado incerto exige reconciliação. Ausência de registro exige reserva atômica no servidor, não autorização para repetir cegamente. O contrato não oferece armazenamento de registros nem transação de banco.
+- executeJsonRequest limita o tempo da requisição e leitura do JSON, propaga cancelamento e retorna {response,payload}. Leitura pode ser repetida conforme política; escrita enviada cuja resposta não chegou é HTTP_RESULT_UNKNOWN, sem reenvio automático. O serviço consumidor deve conferir status e adaptar a resposta.
+- Consumidores atuais: autenticação, conteúdo público, Notas e serviços de consulta. Aplicações futuras devem reutilizar os contratos, mantendo autorização real no Worker.
+
+## Cache público e sincronização
+
+Fontes: publicCacheContract.js, publicDataService.js e usePublicResource.js.
+
+- Cache em memória, no máximo 32 entradas por contexto; chave inclui URL e query. TTL de 5 minutos (padrão/conteúdo/projetos/estatísticas) e 10 minutos (clima).
+- Requisições simultâneas para o mesmo recurso são deduplicadas. Cancelar um consumidor não cancela os demais. Revalidação forçada ignora a entrada fresca.
+- Em indisponibilidade de rede, último dado válido pode ser usado por menos de 24 horas, identificado como obsoleto e exigindo revalidação. Cancelamento do consumidor ou invalidação não entregam esse fallback.
+- invalidatePublicData invalida o cache e impede entrega/repopulação por tarefas antigas. Consumidores inscritos atualizam seletivamente os recursos afetados.
+- subscribePublicData usa BroadcastChannel, sinalização storage e revalidação por foco, com limpeza dos listeners e deduplicação limitada de sinais. Transporte entre abas aceita apenas sinais públicos conhecidos de /api/posts e /api/content; não transmite conteúdo, tokens, parâmetros privados ou localização. Outros recursos públicos têm a política temporal normal.
+- Resultado legado preservado: {data,updatedAt,source,warning?}; cacheStatus e requiresRevalidation acrescentam informação. Notas, conteúdo administrativo, Busca, Arquivos e Calendário participam da invalidação pertinente.
+
+## Modelos de domínio
+
+Fontes: privateRequestContract.js e publicContentContract.js.
+
+- Solicitação privada: valida identificação, contato, mensagem, tipo, estado, timestamps, revisão e chave de idempotência. Estados new, in_review, awaiting_response, responded, completed e archived; transições exigem revisão e preservam histórico mínimo sem duplicar dados pessoais.
+- Retenção: 180 dias após término; arquivar um pedido concluído não prorroga a retenção. Reabertura é explícita. Existe cálculo/validação; não há rotina automática de exclusão implantada.
+- Agendamento exige instante futuro e fuso, sem confirmar reunião ou publicar evento. Entrega EmailJS é independente de persistência; falha ou resultado desconhecido não vira confirmação.
+- Evento público separa data, horário, fuso e dia inteiro, estado, revisão e timestamps. Adaptador legado de dia inteiro não inventa revisão. Projeção rejeita campos privados.
+- Projeto valida destaque/ordem e demonstração embedded, external ou unavailable. Uma URL não concede capacidade de incorporação.
+- Publicação preserva ciclo editorial e anexos; projeção pública exclui rascunhos. Ranking aplica limites por jogo (Snake 222; Flappy 100000) e só projeta campos públicos, sem tokens ou hashes privados.
+- Estes contratos são a base dos domínios das etapas proprietárias. Não constituem novas telas administrativas, schemas de banco ou integração remota homologada.
+
+## Preferências
+
+Fontes: preferenceContract.js e preferencesManager.js.
+
+Versão lógica 1, inventário explícito das chaves existentes e adaptação dos formatos raw/json/boolean/json-or-raw. Leitura de formato inválido ou versão futura não regrava dados. Valores são estruturais; gerenciadores existentes conservam a normalização específica e as chaves legadas. Reset aceita somente ações/categorias da allowlist e tenta as operações existentes, relatando falhas parciais. Não apaga arquivos pessoais, conteúdo de apps, sessão, posições ou imagem persistida fora de seu escopo aprovado. Migrações físicas futuras pertencem às etapas 04/14.
+
+## Permissões, sessão e catálogo de ações
+
+Fontes: authorizationContract.js, actionContract.js, actionService.js e authService.js.
+
+- Capacidades públicas, locais e administrativas são distintas. Escrita local requer contexto do navegador; papel administrativo não autoriza acessar arquivos pessoais remotamente. Operações remotas protegidas sempre exigem autorização do servidor.
+- Sessão mantém token somente em memória, valida expiração, isola falha de assinantes e invalida respostas de versões antigas. Logout/expiração cancelam escopos administrativos pendentes. createAdminRequestScope oferece signal/isCurrent/dispose e é usado pelo editor de conteúdo; o rascunho permanece no consumidor quando a sessão termina.
+- Catálogo declara id, descrição, esquema de parâmetros, capacidade, contextos, confirmação e nome de executor confiável. Ações: app.open, content.search, appearance.set-theme, personal-files.create-folder, personal-files.rename, personal-files.trash, preferences.reset e administration.open.
+- executeRegisteredAction rejeita parâmetros extras/código, copia argumentos aprovados e revalida autorização após confirmação. Executor vem de mapa local, nunca do pedido/IA. Sem adaptador disponível, retorna ACTION_UNAVAILABLE.
+- Busca e Wally usam o catálogo para abrir apps públicos. Adaptador legado do Wally aceita somente sugestão explícita open-app. Isso não habilita ferramentas privilegiadas ou novas interfaces de automação; integrações completas pertencem às etapas 11/12.
+
+## Validação e evolução
+
+Testes de contrato usam tests/helpers/contract-loader.cjs para resolver as dependências reais dos módulos puros; harnesses de Core/UI fornecem somente as dependências de ambiente necessárias. Testes de API simulam transporte para verificar regras negativas e não homologam provedores. A conclusão 01.6 registra os testes manuais, resultados e dependências externas.
+
+Mudanças incompatíveis exigem versão/adaptador, identificação dos consumidores e teste de regressão. Traduções serão feitas na fase final; os dois JSON de idioma permanecem intactos. Não iniciar a Etapa 02 a partir desta documentação.
+
+---
+
+## Histórico anterior à consolidação da Etapa 01
+
+O conteúdo abaixo é preservado para rastreabilidade. Descreve momentos anteriores do projeto; afirmações como ausência de autenticação, IndexedDB ou atualização contextual não representam o contrato atual. Em divergência, prevalecem as seções atuais acima e os validadores executáveis.
+
+### Contratos atuais e evolução necessária
 
 Referência: DEC-411–449. O que está marcado como futuro não é implementação existente.
 
-## Registry
+#### Registry
 
 getRegisteredApps retorna cópia do array com os mesmos objetos; getAppDefinition(appId) retorna definição ou null. Campos atuais: id, name, icon, category, menuCategory, desktopShortcut, implemented, loadComponent (quando implementado), allowMultipleInstances, pauseWhenMinimized, public e showInMenu.
 
@@ -10,7 +103,7 @@ Há 12 Desktop e 6 Sistema. category é classificação arquitetural; menuCatego
 
 A entrada lazy é explícita no Registry: loadComponent retorna a promessa do módulo com export default. Cada app implementado possui sua entrada. AppHost não descobre componentes a partir de arquivos vazios. Futuro: elegibilidade por shell, capacidades e regras específicas de acesso e parâmetros, preservando os IDs existentes.
 
-## Instâncias
+#### Instâncias
 
 Estado atual: `{ instances, activeInstanceId, focusHistory }`. Instância: `{ id, appId, minimized, executionState, origin, params }`. ID da instância usa crypto.randomUUID; não equivale ao appId ou a ID de recurso externo.
 
@@ -26,7 +119,7 @@ Entradas inexistentes devolvem estado sem alteração. openApp aceita um terceir
 
 Aplicativos de instância única restauram a instância existente sem atualizar seus parâmetros. O Core bloqueia aplicativos não públicos, incluindo Administração. openApp mantém o retorno de estado para compatibilidade. requestAppOpen fornece o resultado explícito descrito abaixo. A validação dos campos de domínio permanece específica de cada aplicativo futuro. origin e params não representam autorização. Hoje não há operações administrativas reais. Corrigir antes de conectar dados protegidos.
 
-### Solicitação com resultado
+##### Solicitação com resultado
 
 requestAppOpen(state, appId, options?) retorna { state, result }:
 
@@ -48,19 +141,19 @@ const { state: nextState, result } = requestAppOpen(state, 'projects', {
 
 Instância única conserva origin e params originais ao ser restaurada. Nova instância recebe cópia superficial de params. Isso não representa validação de um projectId real, autorização ou persistência de dados.
 
-## Sessão
+#### Sessão
 
 useSystem exige SystemProvider acima. Superfície: appState, notificationState, visibleToasts, run, minimizeAllApps, handleNotificationAction, dismissToast e handleNotificationOpen.
 
 run(operation,id,options?) aplica a função de estado. Para openApp primeiro valida a solicitação: falhas geram aviso de erro sem criar instância ou aviso falso de sucesso. Abertura válida produz o aviso existente, inclusive ao restaurar app único. Não oferece transação, autorização ou isolamento de erro. minimizeAllApps preserva a redução de minimização usada antes pelo Desktop; não é desligamento/reinício completo.
 
-## Painéis
+#### Painéis
 
 resolvePanel(value,current,panel) recebe booleano ou função. Abrir substitui o ativo; fechar painel diferente preserva o atual. Taskbar usa o painel ativo para garantir exclusividade, incluindo calendário. Clique externo, Escape, abertura de outro painel/prévia e mudança de foco dos apps fecham os elementos transitórios. A revisão complementar da R1 adicionou prévias por teclado e limpeza dos timers.
 
 PanelLayer recebe referência/filhos e não administra autenticação ou navegação.
 
-## Janelas
+#### Janelas
 
 Window recebe instância, app, ativo, zIndex, offset e callbacks de ativar/minimizar/fechar. Geometria local; minimizar conserva modo/tamanho na sessão; fechar e reabrir cria outra instância; reload não restaura janelas.
 
@@ -74,13 +167,13 @@ O boundary cobre erros de renderização e rejeição do carregamento lazy. Erro
 
 Lifecycle atual: minimizar mantém AppHost montado e transmite instance.executionState; apps que admitem pausa precisam consumir esse campo para suspender trabalho e retomá-lo. Não há suspensão mágica de qualquer efeito React. Fechar remove a instância e desmonta o conteúdo, executando os cleanups dos efeitos. Cada app deve cancelar seus próprios recursos. Reabrir cria novo estado local; reload não restaura janelas. Editor e Contato agora registram guards de alterações pendentes. run(closeApp, instanceId) retorna false enquanto a confirmação está pendente; cancelar mantém a instância, confirmar aplica o fechamento. O diálogo central contém foco e fundo inert. Reload usa beforeunload; a aplicação não persiste o rascunho após reload.
 
-## Notificações
+#### Notificações
 
 Campos: id/title/message/source/type/createdAt/read/action. Tipos info/success/warning/error; ação atual open-app com appId. Histórico até 100, até 3 toasts, duração-base 5 s com pausas existentes por interação/foco. Sem persistência após reload.
 
 Abertura por notificação verifica app público e procura instância existente. UI permite ler/ler todas/remover/limpar. Operações protegidas futuras sempre precisarão de autorização própria.
 
-## Persistência
+#### Persistência
 
 | Chave                            | Conteúdo                      |
 | -------------------------------- | ----------------------------- |
@@ -93,13 +186,13 @@ Abertura por notificação verifica app público e procura instância existente.
 
 Widget ativo clock-default: visible, position `{column,row}`, size `{columns,rows}`. UI oferece 2×2, 3×2, 3×3. Validação de formato usa fallback. Falhas de leitura/salvamento são avisadas; preferências inválidas não são sobrescritas automaticamente na inicialização. Não apagar chaves ou converter formatos sem migração. IndexedDB de arquivos ainda não existe.
 
-## Clima
+#### Clima
 
 fetchCurrentWeather(latitude,longitude) consulta Open-Meteo, verifica resposta HTTP/temperatura e retorna data.current ou erro. useWeather mantém loading/error/data e pede localização somente por ação. Timeout de geolocalização 10 s; HTTP ainda sem timeout.
 
 Futuro: previsão, validação completa, cancelamento, resultados obsoletos, cache e atualização visível. Sem segredos no cliente.
 
-## Contratos futuros
+#### Contratos futuros
 
 1. Abertura com origem/parâmetros/resultado e histórico Mobile sem alterar URL comum.
 2. Lifecycle com pausa seletiva, cancelamento e fechamento de alterações pendentes.
@@ -110,7 +203,7 @@ Futuro: previsão, validação completa, cancelamento, resultados obsoletos, cac
 7. Ferramentas Wally permitidas com validação, permissão e confirmação quando sensível.
 8. Testes negativos, limpeza, compatibilidade de shells e recuperação.
 
-## Registro da primeira passagem da R2 — 14/10/2026 (histórico)
+#### Registro da primeira passagem da R2 — 14/10/2026 (histórico)
 
 A base de contratos e isolamento foi integrada e validada
 com 15 testes automatizados e verificações manuais.
@@ -141,13 +234,13 @@ Os contratos adicionais serão implementados conforme
 as necessidades dos aplicativos, sem reabrir a fundação
 desnecessariamente.
 
-## Revisão complementar da R2 — 14/10/2026
+#### Revisão complementar da R2 — 14/10/2026
 
 A primeira passagem acima descreve o estado anterior. Nesta revisão foram acrescentados resultado tipado no Core, validação estrutural de entrada, feedback de rejeição, entrada lazy explícita no Registry e recuperação de carregamento/renderização por app. Os contratos atuais estão nas seções anteriores.
 
 Permanecem para as etapas dos aplicativos: schemas de domínio, autenticação/autorização backend, confirmação de descarte de documentos, cancelamento de serviços específicos e API de confirmação de abertura na sessão React quando houver consumidor real. Não foram implementados apps novos ou habilitada Administração.
 
-## R3 — organização do Desktop, widgets e armazenamento
+#### R3 — organização do Desktop, widgets e armazenamento
 
 desktopPreferences preserva as chaves/formato iniciados na R3.3 guardada. O stash
 original permanece intacto como referência; sua funcionalidade foi incorporada e
@@ -185,7 +278,7 @@ falhar por quota/bloqueio: o uso continua na sessão com aviso. O salvamento con
 em chaves separadas, sem transação entre elas ou migração de formato. Tema, favoritos
 e demais chaves existentes não são removidos por esta etapa.
 
-## R4 — idioma, efeitos e acessibilidade da interface
+#### R4 — idioma, efeitos e acessibilidade da interface
 
 - shared/i18n fornece useLocale, getLocale, setLocale e translate. Idiomas pt-BR/en;
   chave nova ws-os:locale; fallback pt-BR para valor inválido ou leitura bloqueada.
@@ -220,18 +313,18 @@ WCAG AA. Leitor de tela real, zoom nativo e toque físico ainda dependem de vali
 manual. Wallpapers personalizados e seu tratamento de arquivos permanecem futuros;
 nenhum upload remoto ou mudança de persistência de imagens foi introduzido.
 
-## Configurações — 15/10/2026
+#### Configurações — 15/10/2026
 
 Contratos de wallpapers, preferências compartilhadas, widgets, restauração e preferências particulares de apps: consulte docs/settings.md. A restauração usa allowlist e preserva arquivos, imagem pessoal e organização. Desktop/Mobile têm seleções próprias; preferências de acessibilidade prevalecem sobre os efeitos.
 
-## Etapa 01.3 — contrato vigente de APIs e cache
+#### Etapa 01.3 — contrato vigente de APIs e cache
 
 As descrições antigas deste documento que dizem que cache ou APIs não têm contratos foram superadas. Envelopes, adaptação legada, revisão, idempotência e cancelamento estão em src/services/*Contract.js e apiResponseAdapter.js. requestPublicJson mantém data/source/updatedAt, acrescenta cacheStatus e requiresRevalidation; subscribePublicData recebe sinais públicos e retorna unsubscribe. invalidatePublicData cancela dados em trânsito antigos e sinaliza reconsulta. Detalhes, consumidores e limites: [conclusão 01.3](finalizacao/ETAPA-01-PARTE-01.3-CONCLUSAO.md). Nenhum desses contratos implementa por si só uma escrita idempotente no banco.
 
-## Etapa 01.4 — modelos vigentes
+#### Etapa 01.4 — modelos vigentes
 
 Contratos puros: privateRequestContract (estados privados/revisão/retenção e resultado de envio), publicContentContract (eventos, projetos/demos, publicações/anexos e ranking), preferenceContract (versão lógica e formato legado). restoreSystemPreferences aceita categorias opcionais validadas; sem argumentos mantém o reset existente. Ver [conclusão 01.4](finalizacao/ETAPA-01-PARTE-01.4-CONCLUSAO.md). Rotinas de banco/R2 e interfaces completas continuam nas etapas proprietárias.
 
-## Etapa 01.5 — sessão e ações
+#### Etapa 01.5 — sessão e ações
 
 Catálogo e capacidades em core/actionContract e authorizationContract; adaptadores confiáveis em services/actionService. Busca e Wally consomem o catálogo para navegação. createAdminRequestScope cancela operações na mudança de versão da sessão e requer dispose; o token permanece em memória. Nenhuma pré-checagem local confere autorização ao Worker. Ver [conclusão 01.5](finalizacao/ETAPA-01-PARTE-01.5-CONCLUSAO.md).

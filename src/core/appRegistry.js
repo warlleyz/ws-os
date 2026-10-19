@@ -264,6 +264,7 @@ const appDefinitions = [
   },
   {
     id: 'administration',
+    requiredCapability: 'administration.access',
     name: 'Administração',
     icon: Shield,
     category: 'system',
@@ -345,9 +346,9 @@ export function getAppNavigationContract(appId) {
   const contract = navigationContracts[appId];
 
   return {
+    requiredCapability: app.requiredCapability ?? null,
+    requiresAuthentication: !app.public,
     params: contract?.params ?? null,
-    reusePolicy:
-      contract?.reusePolicy ??
-      (app.allowMultipleInstances ? 'multiple' : 'existing'),
+    reusePolicy: contract?.reusePolicy ?? (app.allowMultipleInstances ? 'multiple' : 'existing'),
   };
 }

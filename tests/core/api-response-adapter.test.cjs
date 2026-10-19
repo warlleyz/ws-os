@@ -1,7 +1,5 @@
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
 const path = require('node:path');
-const vm = require('node:vm');
 const { test } = require('node:test');
 
 /* === Configuração === */
@@ -9,25 +7,8 @@ const { test } = require('node:test');
 const root = path.resolve(__dirname, '../..');
 
 function loadAdapter() {
-  const contract = fs
-    .readFileSync(path.join(root, 'src/services/apiContract.js'), 'utf8')
-    .replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
-
-  const adapter = fs
-    .readFileSync(path.join(root, 'src/services/apiResponseAdapter.js'), 'utf8')
-    .replace(/^import\s*\{[\s\S]*?\}\s*from\s*['"][^'"]+['"];?\s*/gm, '')
-    .replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
-
-  return vm.runInNewContext(
-    `(() => {
-      ${contract}
-      ${adapter}
-
-      return {
-        adaptApiResponse,
-        unwrapApiResponse,
-      };
-    })()`,
+  return require('../helpers/contract-loader.cjs').loadContract(
+    path.join(root, 'src/services/apiResponseAdapter.js'),
   );
 }
 

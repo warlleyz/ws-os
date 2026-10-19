@@ -1,9 +1,11 @@
 # WS OS V2 — Etapa 01: Decisões técnicas e contratos compartilhados
 
 **Referência:** Documento mestre v0.16.0, Etapa 00 e DEC-FIN-001 a DEC-FIN-029  
-**Status:** Especificação técnica consolidada — implementação e testes pendentes  
+**Status:** Contratos da Etapa 01 implementados e validados tecnicamente; aceite do proprietário e homologações externas conforme conclusão 01.6
 **Stack existente:** React, JavaScript, Vite, Cloudflare Workers, Supabase, Cloudflare R2 e IndexedDB  
-**Método:** Desenvolvimento manual, um incremento validado por vez
+**Método:** Um incremento validado e commitado por parte; execução contínua autorizada pelo proprietário. Traduções exclusivamente na fase final, sem alterações nos JSON nesta etapa.
+
+**Evidências:** [Conclusão e matriz TEC-001–048](ETAPA-01-PARTE-01.6-CONCLUSAO.md). As decisões abaixo mantêm seu texto-alvo; responsabilidades de etapas futuras não significam integração já homologada.
 
 ---
 

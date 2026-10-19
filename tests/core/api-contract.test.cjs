@@ -1,7 +1,5 @@
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
 const path = require('node:path');
-const vm = require('node:vm');
 const { test } = require('node:test');
 
 /* === Configuração dos testes === */
@@ -10,22 +8,7 @@ const contractPath = path.resolve(__dirname, '../../src/services/apiContract.js'
 
 /* ----- Carregamento isolado ----- */
 function loadContract() {
-  const source = fs
-    .readFileSync(contractPath, 'utf8')
-    .replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
-
-  return vm.runInNewContext(
-    `(() => {
-      ${source}
-
-      return {
-        API_ERROR_CODES,
-        createApiSuccess,
-        createApiError,
-        validateApiResponse,
-      };
-    })()`,
-  );
+  return require('../helpers/contract-loader.cjs').loadContract(contractPath);
 }
 
 /* === Respostas de sucesso === */
@@ -182,4 +165,14 @@ test('declara os códigos previstos no planejamento', () => {
   for (const code of expected) {
     assert.ok(Object.values(API_ERROR_CODES).includes(code));
   }
+});
+
+/* === Integridade da serialização JSON === */
+test('envelopes não aceitam funções, ciclos ou sucesso que perderia data ao serializar', () => {
+  const api = loadContract();
+  const cycle = {};
+  cycle.self = cycle;
+  for (const data of [undefined, () => {}, cycle, NaN])
+    assert.equal(api.createApiSuccess(data).ok, false);
+  assert.equal(api.validateApiResponse({ ok: true, data: () => {} }).ok, false);
 });

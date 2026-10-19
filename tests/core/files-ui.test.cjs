@@ -583,3 +583,24 @@ test('leitura do gerenciador ignora resposta antiga e preserva listagem ao falha
   assert.equal(state.error, 'Falha de leitura');
   assert.equal(state.entries[0].name, 'atual.txt');
 });
+
+/* === Compatibilidade dos descritores com o Visualizador === */
+test('Visualizador roteia descritor local e recusa recurso gerenciado sem consultar URL arbitrária', async () => {
+  const { loadContract } = require('../helpers/contract-loader.cjs');
+  const { validateFileResource } = loadContract(
+    path.join(root, 'src/services/storage/fileResourceContract.js'),
+  );
+  const local = await component(
+    'src/apps/file-viewer/FileViewer.jsx',
+    { instance: { params: { resource: { source: 'local', fileId: 'one' } } } },
+    { validateFileResource, LocalFileViewer: 'LocalViewer' },
+  );
+  assert.equal(local.nodes()[0].type, 'LocalViewer');
+  assert.equal(local.nodes()[0].props.fileId, 'one');
+  const managed = await component(
+    'src/apps/file-viewer/FileViewer.jsx',
+    { instance: { params: { resource: { source: 'managed', resourceId: 'one' } } } },
+    { validateFileResource },
+  );
+  assert.equal(managed.nodes()[0].props.source, 'managed');
+});

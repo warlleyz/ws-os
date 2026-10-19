@@ -1,3 +1,5 @@
+import { isContractData } from '../shared/utils/contractValidation';
+import { checkCapability } from './authorizationContract';
 import { getAppDefinition, getAppNavigationContract } from './appRegistry';
 import { isAdminAuthenticated } from '../services/authService';
 import { validateFileResource } from '../services/storage/fileResourceContract';
@@ -68,9 +70,8 @@ function validateNavigationParams(appId, params) {
 
   const acceptedParams = contract.params;
 
-  if (acceptedParams === null) {
-    return { ok: true };
-  }
+  if (!isContractData(params)) return { ok: false, code: 'INVALID_NAVIGATION_PARAMS' };
+  if (acceptedParams === null) return { ok: true };
 
   for (const [key, value] of Object.entries(params)) {
     /* ----- Verificação dos campos declarados ----- */
@@ -96,11 +97,7 @@ function validateNavigationParams(appId, params) {
     }
 
     /* ----- Validação dos parâmetros simples ----- */
-    if (
-      expectedType !== 'string' ||
-      typeof value !== 'string' ||
-      !value.trim()
-    ) {
+    if (expectedType !== 'string' || typeof value !== 'string' || !value.trim()) {
       return {
         ok: false,
         code: 'INVALID_NAVIGATION_PARAMS',
@@ -125,7 +122,14 @@ export function validateAppOpen(appId, options = {}) {
     };
   }
 
-  if (!app.public && !(appId === 'administration' && isAdminAuthenticated())) {
+  const navigationContract = getAppNavigationContract(appId);
+  if (
+    !app.public &&
+    (!navigationContract?.requiredCapability ||
+      !checkCapability(navigationContract.requiredCapability, {
+        administrator: isAdminAuthenticated(),
+      }).ok)
+  ) {
     return {
       ok: false,
       error: {
@@ -141,8 +145,7 @@ export function validateAppOpen(appId, options = {}) {
       (typeof options.origin !== 'string' || !options.origin.trim())) ||
     (options.params !== undefined && !isPlainRecord(options.params)) ||
     (options.originInstanceId !== undefined &&
-      (typeof options.originInstanceId !== 'string' ||
-        !options.originInstanceId.trim()))
+      (typeof options.originInstanceId !== 'string' || !options.originInstanceId.trim()))
   ) {
     return {
       ok: false,
@@ -170,7 +173,7 @@ export function validateAppOpen(appId, options = {}) {
     ok: true,
     app,
     origin: options.origin ?? 'system',
-    params,
+    params: JSON.parse(JSON.stringify(params)),
   };
 }
 
@@ -194,9 +197,7 @@ function findReusableInstance(state, appId, params) {
 
   if (!contract) return null;
 
-  const instances = state.instances.filter(
-    (instance) => instance.appId === appId,
-  );
+  const instances = state.instances.filter((instance) => instance.appId === appId);
 
   if (contract.reusePolicy === 'multiple') return null;
 
@@ -212,11 +213,8 @@ function findReusableInstance(state, appId, params) {
     }
 
     return (
-      instances.find((instance) =>
-        keys.every(
-          (key) => instance.params?.[key] === params[key],
-        ),
-      ) ?? null
+      instances.find((instance) => keys.every((key) => instance.params?.[key] === params[key])) ??
+      null
     );
   }
 
@@ -230,9 +228,7 @@ function resolveOpeningOrigin(state, options) {
 
   if (!instanceId) return null;
 
-  const instance = state.instances.find(
-    (item) => item.id === instanceId,
-  );
+  const instance = state.instances.find((item) => item.id === instanceId);
 
   if (!instance) return null;
 
@@ -247,8 +243,11 @@ function updateInstanceNavigation(state, instanceId, appId, params) {
   const contract = getAppNavigationContract(appId);
   const acceptedParams = contract?.params ?? {};
 
-  const hasContextualNavigation = Object.entries(acceptedParams).some(
-    ([key, type]) => typeof params[key] === type,
+  const target = state.instances.find((instance) => instance.id === instanceId);
+  const hasContextualNavigation = Object.keys(acceptedParams).some(
+    (key) =>
+      Object.hasOwn(params, key) &&
+      JSON.stringify(target?.params?.[key]) !== JSON.stringify(params[key]),
   );
 
   if (!hasContextualNavigation) return state;
@@ -258,13 +257,13 @@ function updateInstanceNavigation(state, instanceId, appId, params) {
     instances: state.instances.map((instance) =>
       instance.id === instanceId
         ? {
-          ...instance,
-          params: {
-            ...instance.params,
-            ...params,
-          },
-          navigationRequestId: (instance.navigationRequestId ?? 0) + 1,
-        }
+            ...instance,
+            params: {
+              ...instance.params,
+              ...params,
+            },
+            navigationRequestId: (instance.navigationRequestId ?? 0) + 1,
+          }
         : instance,
     ),
   };
@@ -290,22 +289,15 @@ export function requestAppOpen(state, appId, options = {}) {
   const existing = findReusableInstance(state, appId, params);
 
   if (existing) {
-    const nextState = updateInstanceNavigation(
-      state,
-      existing.id,
-      appId,
-      params,
-    );
+    const nextState = updateInstanceNavigation(state, existing.id, appId, params);
 
     const stateWithOrigin = navigationOrigin
       ? {
-        ...nextState,
-        instances: nextState.instances.map((instance) =>
-          instance.id === existing.id
-            ? { ...instance, navigationOrigin }
-            : instance,
-        ),
-      }
+          ...nextState,
+          instances: nextState.instances.map((instance) =>
+            instance.id === existing.id ? { ...instance, navigationOrigin } : instance,
+          ),
+        }
       : nextState;
 
     return {
@@ -313,7 +305,7 @@ export function requestAppOpen(state, appId, options = {}) {
       result: {
         ok: true,
         instanceId: existing.id,
-        status: 'restored',
+        status: nextState === state ? 'restored' : 'navigated',
       },
     };
   }
@@ -361,10 +353,10 @@ export function minimizeApp(state, instanceId) {
   const instances = state.instances.map((item) =>
     item.id === instanceId
       ? {
-        ...item,
-        minimized: true,
-        executionState: app?.pauseWhenMinimized ? 'paused' : 'running',
-      }
+          ...item,
+          minimized: true,
+          executionState: app?.pauseWhenMinimized ? 'paused' : 'running',
+        }
       : item,
   );
 
@@ -393,10 +385,10 @@ export function restoreApp(state, instanceId) {
   const instances = state.instances.map((item) =>
     item.id === instanceId
       ? {
-        ...item,
-        minimized: false,
-        executionState: 'running',
-      }
+          ...item,
+          minimized: false,
+          executionState: 'running',
+        }
       : item,
   );
 
