@@ -108,3 +108,35 @@ test('limites de tamanho e integridade rejeitam operação sem alterar dados ant
   assert.throws(() => m.validateFileEntries([{ ...before[0], parentId: 'missing' }]), /inválidos/);
   assert.throws(() => m.validateFileEntries([{ ...before[0], blob: 'not blob' }]), /inválidos/);
 });
+
+test('operações diretas não modificam a lixeira nem restauram itens ativos', () => {
+  const m = model();
+  const original = m.applyFileOperation([], create('a', 'a.txt', null, 'file'));
+  assert.throws(() => m.applyFileOperation(original, { type: 'restore', id: 'a' }), /lixeira/);
+  const trashed = m.applyFileOperation(original, { type: 'trash', id: 'a' });
+  for (const operation of [
+    { type: 'rename', name: 'b.txt' },
+    { type: 'move', parentId: null },
+    { type: 'write', text: 'x', revision: 2 },
+    { type: 'trash' },
+  ])
+    assert.throws(() => m.applyFileOperation(trashed, { ...operation, id: 'a' }), /lixeira/);
+  assert.throws(() => m.applyFileOperation(original, null), /inválida/);
+});
+
+test('movimento e restauração rejeitam colisões e preservam a árvore original', () => {
+  const m = model();
+  let entries = m.applyFileOperation([], create('p', 'Pasta'));
+  entries = m.applyFileOperation(entries, create('a', 'a.txt', 'p', 'file'));
+  entries = m.applyFileOperation(entries, create('b', 'a.txt', null, 'file'));
+  assert.throws(
+    () => m.applyFileOperation(entries, { type: 'move', id: 'a', parentId: null }),
+    /Já existe/,
+  );
+  entries = m.applyFileOperation(entries, { type: 'trash', id: 'b' });
+  entries = m.applyFileOperation(entries, create('c', 'A.TXT', null, 'file'));
+  assert.throws(() => m.applyFileOperation(entries, { type: 'restore', id: 'b' }), /Já existe/);
+  assert.equal(entries.find((item) => item.id === 'a').parentId, 'p');
+  assert.equal(m.fileKind(null), null);
+  assert.equal(m.fileKind('txt'), null);
+});

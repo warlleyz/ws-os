@@ -2,6 +2,7 @@ export const FILE_LIMIT = 10 * 1024 * 1024;
 export const TEXT_LIMIT = 1024 * 1024;
 export const TOTAL_LIMIT = 50 * 1024 * 1024;
 export function fileKind(name) {
+  if (typeof name !== 'string' || !name.includes('.')) return null;
   const extension = name.split('.').at(-1).toLowerCase();
   if (['txt', 'md', 'json', 'csv', 'log', 'js', 'css', 'html'].includes(extension)) return 'text';
   if (['png', 'jpg', 'jpeg', 'webp'].includes(extension)) return 'image';
@@ -18,7 +19,7 @@ export function validateFileName(name) {
     ['.', '..'].includes(name.trim())
   )
     throw new Error('Nome inválido. Use até 120 caracteres, sem barras.');
-  return name.trim();
+  return name.trim().normalize('NFC');
 }
 function parentIsValid(entries, id) {
   return (
@@ -32,7 +33,7 @@ function ensureUnique(entries, name, parentId, except) {
         !item.trashed &&
         item.id !== except &&
         item.parentId === parentId &&
-        item.name.toLocaleLowerCase() === name.toLocaleLowerCase(),
+        item.name.normalize('NFC').toLowerCase() === name.normalize('NFC').toLowerCase(),
     )
   )
     throw new Error('Já existe um item com esse nome nesta pasta.');
@@ -95,6 +96,14 @@ export function applyFileOperation(entries, operation) {
     )
   )
     throw new Error('Dados locais inválidos. Os arquivos não foram substituídos.');
+  if (
+    !operation ||
+    typeof operation !== 'object' ||
+    Array.isArray(operation) ||
+    typeof operation.id !== 'string' ||
+    !operation.id.trim()
+  )
+    throw new Error('Operação de arquivo inválida.');
   const now = operation.now ?? Date.now();
   let next;
   const item = entries.find((item) => item.id === operation.id);
@@ -126,6 +135,10 @@ export function applyFileOperation(entries, operation) {
     ];
   } else {
     if (!item) throw new Error('Arquivo ou pasta não encontrado.');
+    if (item.trashed && !['restore', 'purge'].includes(operation.type))
+      throw new Error('Restaure o item da lixeira antes de modificá-lo.');
+    if (operation.type === 'restore' && !item.trashed)
+      throw new Error('Este item não está na lixeira.');
     if (operation.type === 'rename') {
       const name = validateFileName(operation.name);
       ensureUnique(entries, name, item.parentId, item.id);

@@ -28,7 +28,10 @@ export default function Files({ instance }) {
     busyRef = useRef(false);
   const folder = store.entries.find((item) => item.id === folderId && !item.trashed);
   const parentId = folder?.id ?? null;
+  const unavailableFolder = folderId !== null && !folder && !store.loading;
+  const officialFiles = portfolio.officialFiles.filter((item) => publicAssetUrl(item.url));
   useAppBack(instance?.id, () => {
+    if (busyRef.current) return true;
     if (action) {
       setAction(null);
       return true;
@@ -75,12 +78,16 @@ export default function Files({ instance }) {
     .filter((item) =>
       space === 'trash'
         ? item.trashed && !store.entries.find((parent) => parent.id === item.parentId)?.trashed
-        : !item.trashed && item.parentId === parentId,
+        : !unavailableFolder && !item.trashed && item.parentId === parentId,
     )
     .sort((a, b) =>
       a.kind === b.kind ? a.name.localeCompare(b.name, locale) : a.kind === 'folder' ? -1 : 1,
     );
   async function create(kind) {
+    if (unavailableFolder) {
+      setMessage('Pasta de destino indisponível.');
+      return;
+    }
     await perform(async () => {
       const entry = await (kind === 'folder'
         ? createLocalFolder(name, parentId)
@@ -108,6 +115,7 @@ export default function Files({ instance }) {
             key={id}
             type="button"
             aria-pressed={space === id}
+            disabled={busy}
             onClick={() => {
               setSpace(id);
               setFolderId(null);
@@ -126,37 +134,40 @@ export default function Files({ instance }) {
       <p role="status">{t(message)}</p>
       {space === 'official' ? (
         <div className="ws-app__grid">
-          {portfolio.officialFiles
-            .filter((item) => publicAssetUrl(item.url))
-            .map((item) => (
-              <section key={item.id} className="ws-app__card">
-                <h3>{contentText(item.name, locale)}</h3>
-                <p>{contentText(item.description, locale)}</p>
-                <button
-                  type="button"
-                  onClick={() =>
-                    run(openApp, 'file-viewer', {
-                      origin: 'files',
-                      params: {
-                        url: publicAssetUrl(item.url),
-                        name: contentText(item.name, locale),
-                      },
-                    })
-                  }
-                >
-                  {t('Visualizar')}
-                </button>
-              </section>
-            ))}
-          {!portfolio.officialFiles.length && <p>{t('Nenhum arquivo oficial cadastrado.')}</p>}
+          {officialFiles.map((item) => (
+            <section key={item.id} className="ws-app__card">
+              <h3>{contentText(item.name, locale)}</h3>
+              <p>{contentText(item.description, locale)}</p>
+              <button
+                type="button"
+                onClick={() =>
+                  run(openApp, 'file-viewer', {
+                    origin: 'files',
+                    params: {
+                      url: publicAssetUrl(item.url),
+                      name: contentText(item.name, locale),
+                    },
+                  })
+                }
+              >
+                {t('Visualizar')}
+              </button>
+            </section>
+          ))}
+          {!officialFiles.length && <p>{t('Nenhum arquivo oficial cadastrado.')}</p>}
         </div>
       ) : (
         <>
           {space === 'personal' && (
             <>
               <h3>{folder?.name ?? t('Meus arquivos')}</h3>
-              {parentId && (
-                <button type="button" onClick={() => setFolderId(folder.parentId)}>
+              {unavailableFolder && <p role="status">{t('Pasta de destino indisponível.')}</p>}
+              {(parentId || unavailableFolder) && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setFolderId(folder?.parentId ?? null)}
+                >
                   {t('Pasta anterior')}
                 </button>
               )}
@@ -166,24 +177,29 @@ export default function Files({ instance }) {
                   <input
                     value={name}
                     maxLength={120}
+                    disabled={busy}
                     onChange={(event) => setName(event.target.value)}
                   />
                 </label>
                 <button
                   type="button"
-                  disabled={busy || !name.trim()}
+                  disabled={busy || store.loading || unavailableFolder || !name.trim()}
                   onClick={() => create('folder')}
                 >
                   {t('Criar pasta')}
                 </button>
                 <button
                   type="button"
-                  disabled={busy || !name.trim()}
+                  disabled={busy || store.loading || unavailableFolder || !name.trim()}
                   onClick={() => create('file')}
                 >
                   {t('Criar arquivo de texto')}
                 </button>
-                <button type="button" disabled={busy} onClick={() => inputRef.current?.click()}>
+                <button
+                  type="button"
+                  disabled={busy || store.loading || unavailableFolder}
+                  onClick={() => inputRef.current?.click()}
+                >
                   {t('Importar arquivo')}
                 </button>
                 <input
@@ -195,7 +211,7 @@ export default function Files({ instance }) {
                     const input = event.currentTarget,
                       file = input.files?.[0];
                     input.value = '';
-                    if (file) perform(() => uploadLocalFile(file, parentId));
+                    if (file && !unavailableFolder) perform(() => uploadLocalFile(file, parentId));
                   }}
                 />
               </div>
@@ -216,6 +232,7 @@ export default function Files({ instance }) {
                 <label>
                   {t('Novo nome')}
                   <input
+                    disabled={busy}
                     value={action.name}
                     onChange={(event) =>
                       setAction((current) => ({ ...current, name: event.target.value }))
@@ -227,6 +244,7 @@ export default function Files({ instance }) {
                 <label>
                   {t('Pasta de destino')}
                   <select
+                    disabled={busy}
                     value={action.parentId ?? ''}
                     onChange={(event) =>
                       setAction((current) => ({ ...current, parentId: event.target.value || null }))
@@ -260,7 +278,7 @@ export default function Files({ instance }) {
                 >
                   {t('Confirmar')}
                 </button>
-                <button type="button" onClick={() => setAction(null)}>
+                <button type="button" disabled={busy} onClick={() => setAction(null)}>
                   {t('Cancelar')}
                 </button>
               </div>
@@ -287,6 +305,7 @@ export default function Files({ instance }) {
                       </button>
                       <button
                         type="button"
+                        disabled={busy}
                         onClick={() => setAction({ type: 'purge', id: item.id })}
                       >
                         {t('Excluir definitivamente')}
@@ -294,22 +313,24 @@ export default function Files({ instance }) {
                     </>
                   ) : (
                     <>
-                      <button type="button" onClick={() => open(item)}>
+                      <button type="button" disabled={busy} onClick={() => open(item)}>
                         {t('Abrir')}
                       </button>
                       {item.kind === 'file' && fileKind(item.name) === 'text' && (
-                        <button type="button" onClick={() => open(item, true)}>
+                        <button type="button" disabled={busy} onClick={() => open(item, true)}>
                           {t('Editar')}
                         </button>
                       )}
                       <button
                         type="button"
+                        disabled={busy}
                         onClick={() => setAction({ type: 'rename', id: item.id, name: item.name })}
                       >
                         {t('Renomear')}
                       </button>
                       <button
                         type="button"
+                        disabled={busy}
                         onClick={() =>
                           setAction({ type: 'move', id: item.id, parentId: item.parentId })
                         }
