@@ -148,64 +148,23 @@ export default function Mobile({ theme, onThemeChange }) {
   }
 
   function navigateTo(nextScreen) {
-    closePanel();
-    setSelectedAppId(null);
-    setScreen(nextScreen);
+    const finish=()=>{closePanel();setSelectedAppId(null);setScreen(nextScreen);};
+    if(selectedInstance)run(closeApp,selectedInstance.id,{onClosed:finish});else finish();
   }
-
   function goBack() {
     closePanel();
-    if (handleAppBack(selectedInstance?.id)) return;
-
-    const originAppId = selectedInstance?.origin;
-
-    if (selectedInstance?.appId !== originAppId && originAppId && originAppId !== 'mobile') {
-      const originInstance = [...appState.instances]
-        .reverse()
-        .find((instance) => instance.appId === originAppId);
-
-      if (originInstance) {
-        run(originInstance.minimized ? restoreApp : activateApp, originInstance.id);
-
-        setSelectedAppId(originAppId);
-        setScreen('app');
-        return;
-      }
-    }
-
-    setSelectedAppId(null);
-    setScreen(appOrigin);
+    if(handleAppBack(selectedInstance?.id))return;
+    closeMobileApp();
   }
-
   function closeMobileApp() {
-    const instanceToClose = selectedInstance;
-
-    if (!instanceToClose) {
-      goBack();
-      return;
-    }
-
-    const originInstance = [...appState.instances]
-      .reverse()
-      .find(
-        (instance) =>
-          instance.appId === instanceToClose.origin && instance.id !== instanceToClose.id,
-      );
-
-    if (run(closeApp, instanceToClose.id) === false) return;
-
-    if (originInstance) {
-      run(originInstance.minimized ? restoreApp : activateApp, originInstance.id);
-
-      setSelectedAppId(originInstance.appId);
-      setScreen('app');
+    const current=selectedInstance;
+    const finish=()=>{
+      const origin=[...appState.instances].reverse().find(item=>item.appId===current?.origin&&item.id!==current?.id);
+      if(origin){run(origin.minimized?restoreApp:activateApp,origin.id);setSelectedAppId(origin.appId);setScreen('app');}
+      else{setSelectedAppId(null);setScreen(appOrigin);}
       closePanel();
-      return;
-    }
-
-    setSelectedAppId(null);
-    setScreen(appOrigin);
-    closePanel();
+    };
+    if(current)run(closeApp,current.id,{onClosed:finish});else finish();
   }
 
   function openNotificationApp(notification) {

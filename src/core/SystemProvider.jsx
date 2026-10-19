@@ -89,8 +89,14 @@ export default function SystemProvider({ children }) {
   // Único ponto de entrada para ações de aplicativos e avisos do sistema.
   function run(operation, id, options) {
     if (operation === closeApp && !canCloseApp(id)) {
-      requestCloseConfirmation(id, () => setAppState((current) => closeApp(current, id)));
+      requestCloseConfirmation(id, () => {
+        setAppState((current) => closeApp(current,id));
+        options?.onClosed?.();
+      });
       return false;
+    }
+    if(operation===closeApp){
+      setAppState(current=>closeApp(current,id));options?.onClosed?.();return true;
     }
     if (operation === openApp) {
       const request = validateAppOpen(id, options);
