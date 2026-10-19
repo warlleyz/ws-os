@@ -11,30 +11,38 @@ export default function LocalFileViewer({ fileId }) {
   useLocale();
   const [zoom, setZoom] = useState(1);
   const revision = useSyncExternalStore(subscribeLocalFiles, localFilesRevision, () => 0);
-  const [state, setState] = useState({ file: null, url: null, text: '', error: '' });
+  const requestKey = `${fileId}:${revision}`;
+  const [state, setState] = useState({ file: null, url: null, text: '', error: '', key: '' });
   useEffect(() => {
     let active = true,
       url = null;
     readLocalFile(fileId)
       .then(async (file) => {
         const kind = fileKind(file.name);
-        url = URL.createObjectURL(file.blob);
         const text = kind === 'text' && file.blob.size <= TEXT_LIMIT ? await file.blob.text() : '';
-        if (active) setState({ file, url, text, kind, error: '' });
-        else URL.revokeObjectURL(url);
+        if (!active) return;
+        url = URL.createObjectURL(file.blob);
+        setState({ file, url, text, kind, error: '', previewError: false, key: requestKey });
       })
       .catch((error) => {
-        if (active) setState({ file: null, url: null, text: '', error: error.message });
+        if (url) {
+          URL.revokeObjectURL(url);
+          url = null;
+        }
+        if (active)
+          setState({ file: null, url: null, text: '', error: error.message, key: requestKey });
       });
     return () => {
       active = false;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [fileId, revision]);
+  }, [fileId, revision, requestKey]);
   return (
     <article className="desktop-window__content ws-app">
       <h2>{t('Visualizador de Arquivos')}</h2>
-      {state.error ? (
+      {state.key !== requestKey ? (
+        <p role="status">{t('Carregando')}</p>
+      ) : state.error ? (
         <p role="status">{t(state.error)}</p>
       ) : !state.file ? (
         <p role="status">{t('Carregando')}</p>
@@ -53,6 +61,7 @@ export default function LocalFileViewer({ fileId }) {
             ) : (
               <pre>{state.text}</pre>
             ))}
+          {state.previewError && <p role="alert">{t('Não foi possível abrir o arquivo')}</p>}
           {state.kind === 'image' && (
             <>
               <div className="ws-app__toolbar">
@@ -78,6 +87,9 @@ export default function LocalFileViewer({ fileId }) {
                   alt={state.file.name}
                   onError={(event) => {
                     event.currentTarget.hidden = true;
+                    setState((current) =>
+                      current.url === state.url ? { ...current, previewError: true } : current,
+                    );
                   }}
                 />
               </div>

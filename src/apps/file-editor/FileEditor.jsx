@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import {
   readLocalFile,
   saveLocalText,
   createLocalText,
+  listLocalFiles,
+  subscribeLocalFiles,
+  localFilesRevision,
 } from '../../services/storage/localFilesStorage';
 import { fileKind, TEXT_LIMIT } from '../../services/storage/fileModel';
 import useUnsavedChanges from '../../shared/hooks/useUnsavedChanges';
@@ -19,8 +22,18 @@ export default function FileEditor({ instance }) {
     [copyName, setCopyName] = useState(''),
     [reloadConfirm, setReloadConfirm] = useState(false);
   const saving = useRef(false);
+  const mounted = useRef(false);
+  const fileRef = useRef(null);
+  const [externalMessage, setExternalMessage] = useState('');
+  const revision = useSyncExternalStore(subscribeLocalFiles, localFilesRevision, () => 0);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const dirty = text !== baseline;
-  useUnsavedChanges(instance?.id, dirty);
+  useUnsavedChanges(instance?.id, dirty || busy);
   useEffect(() => {
     let active = true;
     if (typeof fileId !== 'string') return;
@@ -30,6 +43,7 @@ export default function FileEditor({ instance }) {
           throw new Error('O editor aceita textos de até 1 MB.');
         const value = await item.blob.text();
         if (active) {
+          fileRef.current = item;
           setFile(item);
           setText(value);
           setBaseline(value);
@@ -43,39 +57,82 @@ export default function FileEditor({ instance }) {
       active = false;
     };
   }, [fileId]);
+  useEffect(() => {
+    if (typeof fileId !== 'string') return;
+    let active = true;
+    readLocalFile(fileId)
+      .then((current) => {
+        if (!active || !fileRef.current) return;
+        setExternalMessage(
+          current.revision === fileRef.current.revision
+            ? ''
+            : 'O arquivo foi alterado em outra janela. Recarregue ou salve uma cópia.',
+        );
+      })
+      .catch((error) => {
+        if (active) setExternalMessage(error.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [fileId, revision, file?.revision]);
+
   async function save(copy = false) {
     if (!file || saving.current) return;
     saving.current = true;
     setBusy(true);
+    setMessage('');
+    const content = text;
     try {
       if (copy) {
-        await createLocalText(copyName, file.parentId, text);
-        setMessage('Cópia salva. O rascunho original foi preservado.');
+        const entries = await listLocalFiles();
+        const latest = entries.find((entry) => entry.id === file.id && !entry.trashed);
+        const parentId = latest ? latest.parentId : file.parentId;
+        const available =
+          parentId === null ||
+          entries.some(
+            (entry) => entry.id === parentId && entry.kind === 'folder' && !entry.trashed,
+          );
+        await createLocalText(copyName, available ? parentId : null, content);
+        if (mounted.current) setMessage('Cópia salva. O rascunho original foi preservado.');
       } else {
-        const updated = await saveLocalText(file.id, text, file.revision);
+        const updated = await saveLocalText(file.id, content, file.revision);
+        if (!mounted.current) return;
+        fileRef.current = updated;
         setFile(updated);
-        setBaseline(text);
+        setBaseline(content);
+        setExternalMessage('');
         setMessage('Arquivo salvo neste navegador.');
       }
     } catch (error) {
-      setMessage(error.message);
+      if (mounted.current) setMessage(error.message);
     } finally {
       saving.current = false;
-      setBusy(false);
+      if (mounted.current) setBusy(false);
     }
   }
   async function reload() {
+    if (saving.current) return;
+    saving.current = true;
+    setBusy(true);
     try {
       const item = await readLocalFile(fileId);
-      if (item.blob.size > TEXT_LIMIT) throw new Error('O editor aceita textos de até 1 MB.');
+      if (fileKind(item.name) !== 'text' || item.blob.size > TEXT_LIMIT)
+        throw new Error('O editor aceita textos de até 1 MB.');
       const value = await item.blob.text();
+      if (!mounted.current) return;
+      fileRef.current = item;
       setFile(item);
       setText(value);
       setBaseline(value);
+      setExternalMessage('');
       setMessage('Arquivo recarregado.');
       setReloadConfirm(false);
     } catch (error) {
-      setMessage(error.message);
+      if (mounted.current) setMessage(error.message);
+    } finally {
+      saving.current = false;
+      if (mounted.current) setBusy(false);
     }
   }
   return (
@@ -122,10 +179,10 @@ export default function FileEditor({ instance }) {
           {reloadConfirm && (
             <section className="ws-app__card">
               <p>{t('Descartar o rascunho e recarregar o arquivo salvo?')}</p>
-              <button type="button" onClick={reload}>
+              <button type="button" disabled={busy} onClick={reload}>
                 {t('Descartar rascunho e recarregar')}
               </button>
-              <button type="button" onClick={() => setReloadConfirm(false)}>
+              <button type="button" disabled={busy} onClick={() => setReloadConfirm(false)}>
                 {t('Cancelar')}
               </button>
             </section>
@@ -133,6 +190,7 @@ export default function FileEditor({ instance }) {
           <label>
             {t('Nome da cópia')}
             <input
+              disabled={busy}
               value={copyName}
               maxLength={120}
               onChange={(event) => setCopyName(event.target.value)}
@@ -146,6 +204,7 @@ export default function FileEditor({ instance }) {
               'Ctrl+S salva localmente. Alterações feitas em outra janela são detectadas antes de sobrescrever.',
             )}
           </p>
+          {externalMessage && <p role="alert">{t(externalMessage)}</p>}
           <p role="status">{t(message)}</p>
         </>
       )}
