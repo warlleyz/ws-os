@@ -3,7 +3,10 @@ import { publicAssetUrl, safeExternalUrl } from '../shared/utils/urls';
 
 export async function fetchManagedContent(kind, options = {}) {
   if (!['events', 'files'].includes(kind)) throw Error('INVALID_KIND');
-  const result = await requestPublicJson('/api/content?kind=' + kind, options);
+  const result = await requestPublicJson('/api/content?kind=' + kind, {
+    category: 'content',
+    ...options,
+  });
   if (!Array.isArray(result.data?.items)) throw Error('INVALID_CONTENT');
   return {
     ...result,

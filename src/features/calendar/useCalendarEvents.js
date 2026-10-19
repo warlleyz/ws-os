@@ -1,3 +1,4 @@
+import { subscribePublicData } from '../../services/publicDataService';
 import { useEffect, useState } from 'react';
 import { fetchManagedContent } from '../../services/contentService';
 export default function useCalendarEvents() {
@@ -17,10 +18,12 @@ export default function useCalendarEvents() {
         });
     }
     load();
-    window.addEventListener('ws-os:content-changed', load);
+    const unsubscribe = subscribePublicData(({ prefix }) => {
+      if (prefix.startsWith('/api/content')) load();
+    });
     return () => {
       controller?.abort();
-      window.removeEventListener('ws-os:content-changed', load);
+      unsubscribe();
     };
   }, []);
   return result;

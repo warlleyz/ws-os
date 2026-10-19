@@ -1,3 +1,4 @@
+import { subscribePublicData } from '../../services/publicDataService';
 import { useEffect, useState } from 'react';
 import { Search, ArrowUpRight } from 'lucide-react';
 import { portfolio, contentText } from '../../content/portfolioContent';
@@ -13,20 +14,27 @@ export default function GlobalSearchResults({ query, onOpen }) {
   useEffect(() => {
     if (term.length < 2) return;
     const controller = new AbortController();
-    const timer = setTimeout(() => {
+    let generation = 0;
+    const load = () => {
+      const request = ++generation;
       Promise.allSettled([
         fetchGithubPortfolio(portfolio.githubUser, { signal: controller.signal }),
         fetchNotes({ signal: controller.signal }),
       ]).then(([github, notes]) => {
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted || request !== generation) return;
         setRemote({
           query: term,
           projects: github.status === 'fulfilled' ? github.value.data.repositories : [],
           posts: notes.status === 'fulfilled' ? notes.value.data : [],
         });
       });
-    }, 300);
+    };
+    const timer = setTimeout(load, 300);
+    const unsubscribe = subscribePublicData(({ prefix }) => {
+      if (prefix.startsWith('/api/posts')) load();
+    });
     return () => {
+      unsubscribe();
       clearTimeout(timer);
       controller.abort();
     };

@@ -1,3 +1,4 @@
+import { invalidatePublicData } from '../../services/publicDataService';
 import { useEffect, useRef, useState } from 'react';
 import {
   getAdminAccessToken,
@@ -96,7 +97,7 @@ export default function AdminContent({ kind, instanceId, authorized }) {
       setSelected(null);
       setBaseline('');
       setMessage(t('Alterações salvas.'));
-      window.dispatchEvent(new Event('ws-os:content-changed'));
+      invalidatePublicData('/api/content');
       await load();
     } catch (error) {
       setMessage(error.message);

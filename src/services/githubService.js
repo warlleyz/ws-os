@@ -28,8 +28,11 @@ export async function fetchGithubPortfolio(username, options = {}) {
     throw new Error('Usuário GitHub inválido.');
   const base = `https://api.github.com/users/${encodeURIComponent(username)}`;
   const [profile, first] = await Promise.all([
-    requestPublicJson(base, options),
-    requestPublicJson(`${base}/repos?per_page=100&sort=pushed&page=1`, options),
+    requestPublicJson(base, { category: 'projects', ...options }),
+    requestPublicJson(`${base}/repos?per_page=100&sort=pushed&page=1`, {
+      category: 'projects',
+      ...options,
+    }),
   ]);
   if (typeof profile.data?.login !== 'string' || !Array.isArray(first.data))
     throw new Error('Resposta do serviço inválida.');
@@ -38,7 +41,7 @@ export async function fetchGithubPortfolio(username, options = {}) {
   for (let page = 2; pages.at(-1).data.length === 100 && page <= 10; page += 1) {
     const response = await requestPublicJson(
       `${base}/repos?per_page=100&sort=pushed&page=${page}`,
-      options,
+      { category: 'projects', ...options },
     );
     if (!Array.isArray(response.data)) throw new Error('Resposta do serviço inválida.');
     raw = raw.concat(response.data);

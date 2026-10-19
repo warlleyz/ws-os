@@ -42,6 +42,9 @@ export async function fetchNotes(options = {}) {
     return { data: normalizeNotes(portfolio.posts ?? []), source: 'local', updatedAt: Date.now() };
   if (!/^\/api\/[a-z\d/_-]+$/i.test(portfolio.notesEndpoint))
     throw new Error('Endpoint de publicações inválido.');
-  const result = await requestPublicJson(portfolio.notesEndpoint, options);
+  const result = await requestPublicJson(portfolio.notesEndpoint, {
+    category: 'content',
+    ...options,
+  });
   return { ...result, data: normalizeNotes(result.data?.posts) };
 }

@@ -4,7 +4,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const root = path.resolve(__dirname, '../..');
+const { loadContract } = require('../helpers/contract-loader.cjs');
 function load(file, bindings, names) {
+  if (file === 'src/services/publicDataService.js')
+    return loadContract(path.join(root, file), bindings);
   const source = fs
     .readFileSync(path.join(root, file), 'utf8')
     .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];\s*/gm, '')
@@ -183,15 +186,14 @@ test('retorno interno do Mobile é registrado por instância e limpa ao desmonta
   assert.equal(m.handleAppBack('a'), false);
 });
 
-
 /* === Testes de navegação contextual === */
 /* ----- Retorno à instância de origem ----- */
 test('retorno contextual identifica a instância exata de origem', () => {
-  const m = load(
-    'src/core/navigationManager.js',
-    {},
-    ['createNavigationOrigin', 'resolveNavigationOrigin', 'resolveContextualBack'],
-  );
+  const m = load('src/core/navigationManager.js', {}, [
+    'createNavigationOrigin',
+    'resolveNavigationOrigin',
+    'resolveContextualBack',
+  ]);
 
   const state = {
     instances: [
@@ -216,11 +218,7 @@ test('retorno contextual identifica a instância exata de origem', () => {
 
   assert.equal(resolved.id, 'projects-a');
 
-  const destination = m.resolveContextualBack(
-    state,
-    origin,
-    getAppDefinition,
-  );
+  const destination = m.resolveContextualBack(state, origin, getAppDefinition);
 
   assert.equal(destination.type, 'instance');
   assert.equal(destination.instanceId, 'projects-a');
@@ -228,11 +226,7 @@ test('retorno contextual identifica a instância exata de origem', () => {
 
 /* ----- Origem encerrada ----- */
 test('retorno contextual utiliza outra instância pública quando a origem foi fechada', () => {
-  const m = load(
-    'src/core/navigationManager.js',
-    {},
-    ['resolveContextualBack'],
-  );
+  const m = load('src/core/navigationManager.js', {}, ['resolveContextualBack']);
 
   const state = {
     instances: [
@@ -257,11 +251,7 @@ test('retorno contextual utiliza outra instância pública quando a origem foi f
 
 /* ----- Proteção de aplicativos restritos ----- */
 test('retorno contextual não seleciona aplicativos privados como fallback', () => {
-  const m = load(
-    'src/core/navigationManager.js',
-    {},
-    ['resolveContextualBack'],
-  );
+  const m = load('src/core/navigationManager.js', {}, ['resolveContextualBack']);
 
   const state = {
     instances: [
@@ -290,16 +280,10 @@ test('retorno contextual não seleciona aplicativos privados como fallback', () 
 
 /* ----- Ausência de destino seguro ----- */
 test('retorno contextual utiliza a tela inicial quando não existe destino público', () => {
-  const m = load(
-    'src/core/navigationManager.js',
-    {},
-    ['resolveContextualBack'],
-  );
+  const m = load('src/core/navigationManager.js', {}, ['resolveContextualBack']);
 
   const state = {
-    instances: [
-      { id: 'admin', appId: 'administration' },
-    ],
+    instances: [{ id: 'admin', appId: 'administration' }],
     focusHistory: ['admin'],
   };
 
@@ -317,16 +301,10 @@ test('retorno contextual utiliza a tela inicial quando não existe destino públ
 
 /* ----- Origem incompatível ----- */
 test('retorno contextual rejeita origem cujo aplicativo não corresponde à instância', () => {
-  const m = load(
-    'src/core/navigationManager.js',
-    {},
-    ['resolveNavigationOrigin'],
-  );
+  const m = load('src/core/navigationManager.js', {}, ['resolveNavigationOrigin']);
 
   const state = {
-    instances: [
-      { id: 'first', appId: 'projects' },
-    ],
+    instances: [{ id: 'first', appId: 'projects' }],
     focusHistory: ['first'],
   };
 

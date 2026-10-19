@@ -1,3 +1,4 @@
+import { invalidatePublicData } from '../../services/publicDataService';
 import { useSyncExternalStore, useState, useEffect } from 'react';
 import { contentText } from '../../content/portfolioContent';
 import { fetchNotes } from '../../services/notesService';
@@ -17,7 +18,7 @@ const searchText = (value) =>
     .toLowerCase();
 export default function Notes({ instance }) {
   const locale = useLocale();
-  const resource = usePublicResource(fetchNotes, 'notes');
+  const resource = usePublicResource(fetchNotes, 'notes', true, { invalidateOn: ['/api/posts'] });
   useEffect(() => {
     const refresh = resource.refresh;
     window.addEventListener('ws-os:posts-changed', refresh);
@@ -70,7 +71,7 @@ export default function Notes({ instance }) {
       <NotesAdmin
         instanceId={instance.id}
         isAdmin={isAdmin}
-        refreshPublicPosts={resource.refresh}
+        refreshPublicPosts={() => invalidatePublicData('/api/posts')}
         onDeletePublicPost={(id) => {
           setSelectedId((current) => (current === id ? null : current));
         }}

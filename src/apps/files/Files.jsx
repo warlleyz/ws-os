@@ -1,3 +1,4 @@
+import { subscribePublicData } from '../../services/publicDataService';
 import { fetchManagedContent } from '../../services/contentService';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -126,10 +127,12 @@ export default function Files({ instance }) {
         });
     }
     load();
-    window.addEventListener('ws-os:content-changed', load);
+    const unsubscribe = subscribePublicData(({ prefix }) => {
+      if (prefix.startsWith('/api/content')) load();
+    });
     return () => {
       controller?.abort();
-      window.removeEventListener('ws-os:content-changed', load);
+      unsubscribe();
     };
   }, []);
   const staticOfficial = [

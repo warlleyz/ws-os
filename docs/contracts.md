@@ -223,3 +223,7 @@ nenhum upload remoto ou mudança de persistência de imagens foi introduzido.
 ## Configurações — 15/10/2026
 
 Contratos de wallpapers, preferências compartilhadas, widgets, restauração e preferências particulares de apps: consulte docs/settings.md. A restauração usa allowlist e preserva arquivos, imagem pessoal e organização. Desktop/Mobile têm seleções próprias; preferências de acessibilidade prevalecem sobre os efeitos.
+
+## Etapa 01.3 — contrato vigente de APIs e cache
+
+As descrições antigas deste documento que dizem que cache ou APIs não têm contratos foram superadas. Envelopes, adaptação legada, revisão, idempotência e cancelamento estão em src/services/*Contract.js e apiResponseAdapter.js. requestPublicJson mantém data/source/updatedAt, acrescenta cacheStatus e requiresRevalidation; subscribePublicData recebe sinais públicos e retorna unsubscribe. invalidatePublicData cancela dados em trânsito antigos e sinaliza reconsulta. Detalhes, consumidores e limites: [conclusão 01.3](finalizacao/ETAPA-01-PARTE-01.3-CONCLUSAO.md). Nenhum desses contratos implementa por si só uma escrita idempotente no banco.

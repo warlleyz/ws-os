@@ -7,7 +7,10 @@ export async function fetchWakatimeStats(range, options = {}) {
   const endpoint = portfolio.wakatimeProxy;
   if (!endpoint || !/^\/api\/[a-z\d/_-]+$/i.test(endpoint))
     throw new Error('WakaTime ainda não configurado.');
-  const result = await requestPublicJson(`${endpoint}?range=${range}`, options);
+  const result = await requestPublicJson(`${endpoint}?range=${range}`, {
+    category: 'statistics',
+    ...options,
+  });
   const data = result.data?.data;
   if (
     !Number.isFinite(data?.total_seconds) ||
