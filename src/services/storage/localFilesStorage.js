@@ -9,16 +9,39 @@ const NAME = 'ws-os-personal-files',
   STORE = 'entries';
 const listeners = new Set();
 let revision = 0;
-const channel =
-  typeof BroadcastChannel === 'function' ? new BroadcastChannel('ws-os-personal-files') : null;
+let channel = null;
+try {
+  if (typeof BroadcastChannel === 'function') channel = new BroadcastChannel(NAME);
+} catch {
+  /* A sincronização por foco/storage continua disponível. */
+}
 function emit() {
   revision++;
-  listeners.forEach((listener) => listener());
+  for (const listener of listeners) {
+    try {
+      listener();
+    } catch {
+      /* Um consumidor não invalida a gravação concluída. */
+    }
+  }
 }
 if (channel) channel.onmessage = emit;
+function onStorage(event) {
+  if (event.key === 'ws-os:files-changed') emit();
+}
 export function subscribeLocalFiles(listener) {
+  if (!listeners.size && typeof window !== 'undefined') {
+    window.addEventListener('focus', emit);
+    window.addEventListener('storage', onStorage);
+  }
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+    if (!listeners.size && typeof window !== 'undefined') {
+      window.removeEventListener('focus', emit);
+      window.removeEventListener('storage', onStorage);
+    }
+  };
 }
 export const localFilesRevision = () => revision;
 function open() {
@@ -39,10 +62,17 @@ function open() {
       else resolve(db);
     }
     request.onupgradeneeded = () => {
+      if (finished) {
+        request.transaction.abort();
+        return;
+      }
       if (!request.result.objectStoreNames.contains(STORE))
         request.result.createObjectStore(STORE, { keyPath: 'id' });
     };
-    request.onsuccess = () => finish(null, request.result);
+    request.onsuccess = () => {
+      request.result.onversionchange = () => request.result.close();
+      finish(null, request.result);
+    };
     request.onerror = () => finish(request.error ?? new Error('Armazenamento local indisponível.'));
     request.onblocked = () => finish(new Error('Armazenamento local bloqueado.'));
   });
@@ -74,10 +104,10 @@ async function transact(operation) {
       };
       tx.oncomplete = () => resolve(next);
       tx.onabort = () => reject(problem ?? tx.error ?? new Error('A gravação foi cancelada.'));
-      tx.onerror = (event) =>
-        reject(
-          tx.error ?? event.target?.error ?? new Error('Não foi possível salvar os arquivos.'),
-        );
+      tx.onerror = (event) => {
+        problem ??=
+          tx.error ?? event.target?.error ?? new Error('Não foi possível salvar os arquivos.');
+      };
     });
   } catch (cause) {
     if (cause?.name === 'QuotaExceededError')
@@ -96,9 +126,18 @@ export async function readLocalFile(id) {
   return item;
 }
 export async function changeLocalFile(operation) {
+  if (!operation || typeof operation !== 'object') throw new Error('Operação de arquivo inválida.');
+  if (operation.type === 'create' && operation.kind === 'file')
+    operation = { ...operation, blob: await validateLocalBlob(operation.blob, operation.name) };
   const result = await transact(operation);
   emit();
-  channel?.postMessage('change');
+  try {
+    if (channel) channel.postMessage('change');
+    else if (typeof localStorage !== 'undefined')
+      localStorage.setItem('ws-os:files-changed', crypto.randomUUID());
+  } catch {
+    /* O commit local já foi confirmado; o foco também força atualização. */
+  }
   return result.find((item) => item.id === operation.id) ?? null;
 }
 export function createLocalFolder(name, parentId = null) {
@@ -111,7 +150,7 @@ export function createLocalFolder(name, parentId = null) {
   });
 }
 export function createLocalText(name, parentId = null, text = '') {
-  if (fileKind(name) !== 'text' || new Blob([text]).size > TEXT_LIMIT)
+  if (typeof text !== 'string' || fileKind(name) !== 'text' || new Blob([text]).size > TEXT_LIMIT)
     throw new Error('O editor aceita textos de até 1 MB.');
   return changeLocalFile({
     type: 'create',
@@ -125,22 +164,29 @@ export function createLocalText(name, parentId = null, text = '') {
 export function saveLocalText(id, text, revision) {
   return changeLocalFile({ type: 'write', id, text, revision });
 }
-export async function uploadLocalFile(file, parentId = null) {
-  if (!file || typeof file.name !== 'string' || file.size > FILE_LIMIT)
+async function validateLocalBlob(file, name) {
+  if (!(file instanceof Blob) || file.size > FILE_LIMIT)
     throw new Error('Formato não suportado ou arquivo maior que 10 MB.');
-  const kind = fileKind(file.name);
+  const kind = fileKind(name);
   if (!kind) throw new Error('Formato não suportado ou arquivo maior que 10 MB.');
   const buffer = await file.arrayBuffer(),
     bytes = new Uint8Array(buffer);
   let type = 'text/plain;charset=utf-8';
+  if (kind === 'text') {
+    try {
+      new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch {
+      throw new Error('O conteúdo não corresponde ao formato do arquivo.');
+    }
+  }
   if (kind === 'pdf') {
     if (String.fromCharCode(...bytes.slice(0, 5)) !== '%PDF-')
       throw new Error('O conteúdo não corresponde ao formato do arquivo.');
     type = 'application/pdf';
   }
   if (kind === 'image') {
-    const ext = file.name.split('.').at(-1).toLowerCase();
-    const png = bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71;
+    const ext = name.split('.').at(-1).toLowerCase();
+    const png = [137, 80, 78, 71, 13, 10, 26, 10].every((value, index) => bytes[index] === value);
     const jpeg = bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
     const webp =
       String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' &&
@@ -148,20 +194,29 @@ export async function uploadLocalFile(file, parentId = null) {
     if (!(ext === 'png' ? png : ext === 'webp' ? webp : jpeg))
       throw new Error('O conteúdo não corresponde ao formato do arquivo.');
     type = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
-    const image = await createImageBitmap(new Blob([buffer], { type }));
+    let image;
     try {
-      if (image.width * image.height > 32000000)
+      image = await createImageBitmap(new Blob([buffer], { type }));
+      if (!image.width || !image.height || image.width * image.height > 32000000)
         throw new Error('A imagem deve ter até 32 megapixels.');
+    } catch (error) {
+      if (image) throw error;
+      throw new Error('O conteúdo não corresponde ao formato do arquivo.', { cause: error });
     } finally {
-      image.close();
+      image?.close();
     }
   }
+  return new Blob([buffer], { type });
+}
+export async function uploadLocalFile(file, parentId = null) {
+  if (!(file instanceof Blob) || typeof file.name !== 'string')
+    throw new Error('Formato não suportado ou arquivo maior que 10 MB.');
   return changeLocalFile({
     type: 'create',
     kind: 'file',
     id: crypto.randomUUID(),
     name: file.name,
     parentId,
-    blob: new Blob([buffer], { type }),
+    blob: file,
   });
 }

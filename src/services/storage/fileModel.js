@@ -46,6 +46,7 @@ function descendants(entries, id) {
     for (const item of entries)
       if (ids.has(item.parentId) && !ids.has(item.id)) {
         ids.add(item.id);
+
         changed = true;
       }
   }
@@ -59,17 +60,23 @@ export function validateFileEntries(entries) {
     if (
       !item ||
       typeof item.id !== 'string' ||
+      !item.id.trim() ||
+      (item.parentId !== null && typeof item.parentId !== 'string') ||
+      typeof item.trashed !== 'boolean' ||
+      (item.trashed && typeof item.trashRootId !== 'string') ||
       ids.has(item.id) ||
       !['folder', 'file'].includes(item.kind) ||
-      !Number.isInteger(item.revision) ||
+      !Number.isSafeInteger(item.revision) ||
       item.revision < 1 ||
-      (item.kind === 'file' && !(item.blob instanceof Blob))
+      (item.kind === 'file' &&
+        (!(item.blob instanceof Blob) || item.blob.size > FILE_LIMIT || !fileKind(item.name)))
     )
       throw new Error('Dados locais inválidos. Os arquivos não foram substituídos.');
     validateFileName(item.name);
     ids.add(item.id);
   }
   for (const item of entries) {
+    if (!item.trashed) ensureUnique(entries, item.name, item.parentId, item.id);
     const visited = new Set([item.id]);
     let parent = item.parentId;
     while (parent !== null) {
@@ -78,9 +85,13 @@ export function validateFileEntries(entries) {
       visited.add(parent);
       const folder = entries.find((entry) => entry.id === parent && entry.kind === 'folder');
       if (!folder) throw new Error('Dados locais inválidos. Os arquivos não foram substituídos.');
+      if (!item.trashed && folder.trashed)
+        throw new Error('Dados locais inválidos. Os arquivos não foram substituídos.');
       parent = folder.parentId;
     }
   }
+  if (entries.reduce((sum, item) => sum + (item.blob?.size ?? 0), 0) > TOTAL_LIMIT)
+    throw new Error('Limite local de 500 itens ou 50 MB atingido. Revise a lixeira.');
   return entries;
 }
 export function applyFileOperation(entries, operation) {
@@ -208,5 +219,5 @@ export function applyFileOperation(entries, operation) {
     next.reduce((sum, item) => sum + (item.blob?.size ?? 0), 0) > TOTAL_LIMIT
   )
     throw new Error('Limite local de 500 itens ou 50 MB atingido. Revise a lixeira.');
-  return next;
+  return validateFileEntries(next);
 }

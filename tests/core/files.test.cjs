@@ -140,3 +140,47 @@ test('movimento e restauração rejeitam colisões e preservam a árvore origina
   assert.equal(m.fileKind(null), null);
   assert.equal(m.fileKind('txt'), null);
 });
+
+test('integridade rejeita duplicidade persistida, pai na lixeira e limites corrompidos', () => {
+  const m = model();
+  let entries = m.applyFileOperation([], create('p', 'Pasta'));
+  entries = m.applyFileOperation(entries, create('a', 'a.txt', 'p', 'file'));
+  assert.throws(() => m.validateFileEntries([...entries, { ...entries[1], id: 'b' }]), /Já existe/);
+  assert.throws(
+    () => m.validateFileEntries([{ ...entries[0], trashed: true, trashRootId: 'p' }, entries[1]]),
+    /inválidos/,
+  );
+  assert.throws(
+    () =>
+      m.validateFileEntries([
+        { ...entries[1], parentId: null, blob: new Blob(['x'.repeat(10 * 1024 * 1024 + 1)]) },
+      ]),
+    /inválidos/,
+  );
+  assert.throws(() => m.validateFileEntries([{ ...entries[1], parentId: undefined }]), /inválidos/);
+});
+
+test('limite de 500 itens e 50 MB inclui a lixeira sem alterar a coleção', () => {
+  const m = model();
+  const single = m.applyFileOperation([], create('a', 'a.txt', null, 'file'))[0];
+  const full = Array.from({ length: 500 }, (_, i) => ({
+    ...single,
+    id: 'id' + i,
+    name: i + '.txt',
+  }));
+  assert.throws(() => m.applyFileOperation(full, create('extra', 'extra')), /500 itens/);
+  const blob = new Blob(['x'.repeat(10 * 1024 * 1024)]);
+  const large = Array.from({ length: 5 }, (_, i) => ({
+    ...single,
+    id: 'big' + i,
+    name: i + '.txt',
+    blob,
+    trashed: true,
+    trashRootId: 'big' + i,
+  }));
+  assert.throws(
+    () => m.applyFileOperation(large, create('extra', 'extra.txt', null, 'file', 'x')),
+    /50 MB/,
+  );
+  assert.equal(full.length, 500);
+});
