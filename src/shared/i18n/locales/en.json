@@ -842,5 +842,14 @@
   "Descrição": "Description",
   "Data": "Date",
   "Despublicar": "Unpublish",
-  "Publicar": "Publish"
+  "Publicar": "Publish",
+  "Evolução e créditos": "Evolution and credits",
+  "A V2 integra experiências Desktop e Mobile, conteúdo profissional e aplicativos locais com permissões explícitas.": "V2 combines Desktop and Mobile experiences, professional content and local applications with explicit permissions.",
+  "Construído com React, React DOM, Lucide e Vite. As licenças das dependências acompanham seus respectivos pacotes.": "Built with React, React DOM, Lucide and Vite. Dependency licenses are included in their respective packages.",
+  "Propriedades do arquivo": "File properties",
+  "Modificado": "Modified",
+  "Desconhecido": "Unknown",
+  "Acesso": "Access",
+  "Somente leitura": "Read-only",
+  "Ajustar à janela": "Fit to window"
 }

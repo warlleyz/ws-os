@@ -25,3 +25,9 @@ export function publicAssetUrl(value) {
     return null;
   }
 }
+
+export function safeContactUrl(value) {
+  const external=safeExternalUrl(value);if(external)return external;
+  if(typeof value!=='string'||value.length>320||/%0[ad]/i.test(value))return null;
+  return /^mailto:[a-z\d.!#$%&'*+/=?^_`{|}~-]+@[a-z\d.-]+\.[a-z]{2,}$/i.test(value)?value:null;
+}

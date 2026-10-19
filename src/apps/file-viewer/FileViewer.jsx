@@ -143,7 +143,7 @@ function OfficialFileViewer({ instance }) {
         objectUrl = URL.createObjectURL(
           new Blob([bytes], { type: isText ? 'text/plain;charset=utf-8' : contentType }),
         );
-        setResult({ url: documentUrl, status: 'ready', text, objectUrl, previewError: false });
+        setResult({ url: documentUrl, status: 'ready', text, objectUrl, size:bytes.length, previewError: false });
       } catch {
         if (active) {
           setResult({
@@ -205,6 +205,7 @@ function OfficialFileViewer({ instance }) {
         </div>
       )}
 
+      {document&&status==='ready'&&<details><summary>{t('Propriedades do arquivo')}</summary><dl><dt>{t('Nome')}</dt><dd>{document.filename}</dd><dt>{t('Tipo')}</dt><dd>{document.extension.toUpperCase()}</dd><dt>{t('Tamanho')}</dt><dd>{result.size} bytes</dd><dt>{t('Acesso')}</dt><dd>{t('Somente leitura')}</dd></dl></details>}
       {status === 'loading' && <p role="status">{t('Carregando arquivo...')}</p>}
 
       {status === 'error' && (
@@ -242,7 +243,7 @@ function OfficialFileViewer({ instance }) {
               {t('Ampliar')}
             </button>
             <button type="button" onClick={() => setZoom(1)}>
-              {t('Restaurar zoom')}
+              {t('Ajustar à janela')}
             </button>
           </div>
           <img

@@ -1,3 +1,4 @@
+import packageInfo from '../../../package.json';
 
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
@@ -23,7 +24,7 @@ export default function AboutSystem() {
   useLocale();
 
   return (
-    <article className="desktop-window__content">
+    <article className="desktop-window__content ws-app">
       <header>
         <h2>WS OS</h2>
         <p>
@@ -35,7 +36,7 @@ export default function AboutSystem() {
 
       <section aria-labelledby="system-version">
         <h3 id="system-version">{t('Versão')}</h3>
-        <p>0.0.0</p>
+        <p>WS OS V2 · {packageInfo.version}</p>
         <small>
           {t('Versão técnica atual do projeto, sujeita a alterações durante o desenvolvimento.')}
         </small>
@@ -80,6 +81,7 @@ export default function AboutSystem() {
         </p>
       </section>
 
+      <section><h3>{t('Evolução e créditos')}</h3><p>{t('A V2 integra experiências Desktop e Mobile, conteúdo profissional e aplicativos locais com permissões explícitas.')}</p><p>{t('Construído com React, React DOM, Lucide e Vite. As licenças das dependências acompanham seus respectivos pacotes.')}</p></section>
       <section aria-labelledby="system-source">
         <h3 id="system-source">{t('Código-fonte')}</h3>
 

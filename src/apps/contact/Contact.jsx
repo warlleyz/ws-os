@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { portfolio, contentText } from '../../content/portfolioContent';
-import { safeExternalUrl } from '../../shared/utils/urls';
+import { safeContactUrl } from '../../shared/utils/urls';
 import { sendContact, isContactConfigured } from '../../services/contactService';
 import useUnsavedChanges from '../../shared/hooks/useUnsavedChanges';
 import '../../styles/apps.css';
@@ -58,10 +58,10 @@ export default function Contact({ instance }) {
       <p>{t('Envie uma mensagem profissional ou solicite um horário para análise.')}</p>
       <ul>
         {portfolio.contact.links
-          .filter((item) => safeExternalUrl(item.url))
+          .filter((item) => safeContactUrl(item.url))
           .map((item) => (
             <li key={item.url}>
-              <a href={safeExternalUrl(item.url)} target="_blank" rel="noopener noreferrer">
+              <a href={safeContactUrl(item.url)} target="_blank" rel="noopener noreferrer">
                 {contentText(item.label, locale)}
               </a>
             </li>

@@ -49,7 +49,7 @@ export default function LocalFileViewer({ fileId }) {
       ) : (
         <>
           <h3>{state.file.name}</h3>
-          <p>{state.file.blob.size} bytes</p>
+          <details><summary>{t('Propriedades do arquivo')}</summary><dl><dt>{t('Tipo')}</dt><dd>{state.file.blob.type||t('Desconhecido')}</dd><dt>{t('Tamanho')}</dt><dd>{state.file.blob.size} bytes</dd><dt>{t('Modificado')}</dt><dd>{new Date(state.file.updatedAt).toLocaleString()}</dd></dl></details>
           <p>
             <a href={state.url} download={state.file.name}>
               {t('Baixar arquivo')}
@@ -75,7 +75,7 @@ export default function LocalFileViewer({ fileId }) {
                   {t('Ampliar')}
                 </button>
                 <button type="button" onClick={() => setZoom(1)}>
-                  {t('Restaurar zoom')}
+                  {t('Ajustar à janela')}
                 </button>
                 <span>{Math.round(zoom * 100)}%</span>
               </div>

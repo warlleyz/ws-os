@@ -1,0 +1,4 @@
+const{test}=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');const path=require('node:path');
+const source=fs.readFileSync(path.join(__dirname,'../../src/shared/utils/urls.js'),'utf8').replace(/export /g,'').replaceAll('import.meta.env.BASE_URL',"'/'");
+const api=vm.runInNewContext('(()=>{'+source+';return {safeContactUrl,safeExternalUrl}})()',{URL});
+test('canais de contato aceitam e-mail sem ampliar URLs de outros consumidores',()=>{assert.equal(api.safeContactUrl('mailto:developer@example.com'),'mailto:developer@example.com');assert.equal(api.safeExternalUrl('mailto:developer@example.com'),null);for(const value of ['javascript:alert(1)','mailto:a@example.com?body=spam','mailto:a@example.com%0abcc:other@example.com','mailto:a@example.com\nBCC:other@example.com'])assert.equal(api.safeContactUrl(value),null);});
