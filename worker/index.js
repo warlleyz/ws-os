@@ -1,3 +1,4 @@
+import { onRequest as handleContent } from '../functions/api/managedContent.js';
 import { onRequestPost as handleWally } from '../functions/api/wally.js';
 import { onRequestGet as handlePosts } from '../functions/api/posts.js';
 import {
@@ -14,7 +15,6 @@ import {
   onRequestDelete as handleDeleteNote,
 } from '../functions/api/adminPosts.js';
 
-
 import {
   onRequestLogin,
   onRequestMe,
@@ -23,6 +23,8 @@ import {
 } from '../functions/api/auth.js';
 
 const routes = {
+  '/api/content': { method: 'GET', handler: handleContent },
+
   '/api/wally': { method: 'POST', handler: handleWally },
   '/api/posts': { method: 'GET', handler: handlePosts },
   '/api/posts/likes': {
@@ -66,6 +68,7 @@ function error(code, status, headers = {}) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.pathname === '/api/admin/content') return handleContent({ request, env, ctx });
     const route = routes[url.pathname];
     if (route) {
       if (request.method !== route.method)

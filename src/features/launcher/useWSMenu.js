@@ -1,3 +1,9 @@
+import { useSyncExternalStore } from 'react';
+import {
+  subscribeAdminSession,
+  getAdminSessionVersion,
+  isAdminAuthenticated,
+} from '../../services/authService';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { normalizeSearch } from '../search/searchService';
 import useMenuPreferences from './useMenuPreferences';
@@ -8,6 +14,8 @@ import { getRegisteredApps } from '../../core/appRegistry';
 // Utilitários e preferências persistentes do WS Menu.
 export default function useWSMenu({ onAppAction, closePanels, menuOpen, appState }) {
   const locale = useLocale();
+  useSyncExternalStore(subscribeAdminSession, getAdminSessionVersion, getAdminSessionVersion);
+  const authorized = isAdminAuthenticated();
   const { favoriteIds, toggleFavorite, MAX_FAVORITES } = useMenuPreferences();
   const [menuView, setMenuView] = useState('home');
   const [menuSearch, setMenuSearch] = useState('');
@@ -15,10 +23,8 @@ export default function useWSMenu({ onAppAction, closePanels, menuOpen, appState
     ...new Set(
       [...appState.focusHistory]
         .reverse()
-        .map((instanceId) =>
-          appState.instances.find(
-            (instance) => instance.id === instanceId,
-          )?.appId,
+        .map(
+          (instanceId) => appState.instances.find((instance) => instance.id === instanceId)?.appId,
         )
         .filter(Boolean),
     ),
@@ -76,7 +82,10 @@ export default function useWSMenu({ onAppAction, closePanels, menuOpen, appState
     }
   }
   const menuApps = getRegisteredApps()
-    .filter((app) => app.public && app.showInMenu !== false)
+    .filter(
+      (app) =>
+        (app.public && app.showInMenu !== false) || (authorized && app.id === 'administration'),
+    )
     .sort((a, b) => t(a.name).localeCompare(t(b.name), locale));
   const searchTerm = normalizeSearch(menuSearch.trim());
   const searchResults = menuApps.filter((app) => {
@@ -85,21 +94,15 @@ export default function useWSMenu({ onAppAction, closePanels, menuOpen, appState
     const searchableFields = [
       t(app.name),
       app.id,
-      app.category === 'system'
-        ? t('Aplicativo de Sistema')
-        : t('Aplicativo Desktop'),
+      app.category === 'system' ? t('Aplicativo de Sistema') : t('Aplicativo Desktop'),
     ];
 
-    return searchableFields.some((field) =>
-      normalizeSearch(field).includes(searchTerm),
-    );
+    return searchableFields.some((field) => normalizeSearch(field).includes(searchTerm));
   });
   const favoriteApps = favoriteIds
     .map((id) => menuApps.find((app) => app.id === id))
     .filter(Boolean);
-  const recentApps = recentIds
-    .map((id) => menuApps.find((app) => app.id === id))
-    .filter(Boolean);
+  const recentApps = recentIds.map((id) => menuApps.find((app) => app.id === id)).filter(Boolean);
 
   const visibleMenuApps = searchTerm
     ? searchResults

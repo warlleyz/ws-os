@@ -70,3 +70,7 @@ export function requestPublicJson(url, { signal, force = false } = {}) {
     );
   });
 }
+
+export function invalidatePublicData(prefix) {
+  for (const key of cache.keys()) if (key.startsWith(prefix)) cache.delete(key);
+}

@@ -50,20 +50,26 @@ export function getBrazilianHolidays(year) {
 
 export function getPublicCalendarEvents(year) {
   return PUBLIC_CALENDAR_EVENTS.filter((event) => {
-    if (!event || typeof event.title !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(event.date)) return false;
+    if (!event || typeof event.title !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(event.date))
+      return false;
     const [y, m, d] = event.date.split('-').map(Number);
     const check = new Date(y, m - 1, d);
-    return y === year && check.getFullYear() === y && check.getMonth() === m - 1 && check.getDate() === d;
-  }).map((event) => ({
-    date: event.date,
-    name: event.title,
-    type: 'event',
-    description: typeof event.description === 'string' ? event.description : '',
-    url: typeof event.url === 'string' && /^https:\/\//i.test(event.url) ? event.url : '',
-  })).sort((a, b) => a.date.localeCompare(b.date));
+    return (
+      y === year && check.getFullYear() === y && check.getMonth() === m - 1 && check.getDate() === d
+    );
+  })
+    .map((event) => ({
+      date: event.date,
+      name: event.title,
+      type: 'event',
+      description: typeof event.description === 'string' ? event.description : '',
+      url: typeof event.url === 'string' && /^https:\/\//i.test(event.url) ? event.url : '',
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export function getCalendarEntries(year) {
-  return [...getBrazilianHolidays(year), ...getPublicCalendarEvents(year)]
-    .sort((a, b) => a.date.localeCompare(b.date));
+  return [...getBrazilianHolidays(year), ...getPublicCalendarEvents(year)].sort((a, b) =>
+    a.date.localeCompare(b.date),
+  );
 }

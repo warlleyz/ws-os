@@ -1,171 +1,136 @@
-
 import { useEffect, useState } from 'react';
-import {
-    verifyAdminSession,
-    getAdminSessionExpiresAt,
-} from '../../services/authService';
+import { verifyAdminSession, subscribeAdminSession } from '../../services/authService';
+import { canCloseApp } from '../../core/appCloseGuards';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
+import AdminPosts from './AdminPosts';
+import AdminContent from './AdminContent';
 import '../../styles/apps.css';
 import './Administration.css';
-import AdminPosts from './AdminPosts';
 
-const ADMIN_SECTIONS = [
-    { id: 'overview', title: 'Visão geral', description: 'Resumo do ambiente administrativo.' },
-    { id: 'posts', title: 'Publicações', description: 'Gerenciamento de notas e artigos.' },
-    { id: 'files', title: 'Arquivos', description: 'Gerenciamento dos arquivos oficiais.' },
-    { id: 'events', title: 'Eventos', description: 'Eventos públicos e calendário.' },
-    { id: 'requests', title: 'Solicitações', description: 'Solicitações privadas e agendamentos.' },
-    { id: 'system', title: 'Sistema', description: 'Informações e ferramentas administrativas.' },
+const sections = [
+  ['overview', 'Visão geral'],
+  ['posts', 'Publicações'],
+  ['files', 'Arquivos'],
+  ['events', 'Eventos'],
+  ['requests', 'Solicitações'],
+  ['system', 'Sistema'],
 ];
-
-export default function Administration() {
-    const [status, setStatus] = useState('checking');
-
-    const [activeSection, setActiveSection] = useState('overview');
-
-    const currentSection =
-        ADMIN_SECTIONS.find((section) => section.id === activeSection)
-        ?? ADMIN_SECTIONS[0];
-
-    useEffect(() => {
-        let active = true;
-        let expirationTimer;
-
-        async function checkAccess() {
-            if (!active) return;
-
-            setStatus('checking');
-            clearTimeout(expirationTimer);
-
-            const authorized = await verifyAdminSession();
-
-            if (!active) return;
-
-            if (!authorized) {
-                setStatus('denied');
-                return;
-            }
-
-            const expiresAt = getAdminSessionExpiresAt();
-
-            if (!expiresAt || expiresAt <= Date.now()) {
-                setStatus('denied');
-                return;
-            }
-
-            setStatus('authorized');
-
-            expirationTimer = setTimeout(() => {
-                if (active) setStatus('denied');
-            }, expiresAt - Date.now());
-        }
-
-        function handleVisibilityChange() {
-            if (!document.hidden) {
-                void checkAccess();
-            }
-        }
-
-        function handleFocus() {
-            void checkAccess();
-        }
-
-        void checkAccess();
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('focus', handleFocus);
-
-        return () => {
-            active = false;
-            clearTimeout(expirationTimer);
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('focus', handleFocus);
-        };
-    }, []);
-
-
-    if (status === 'checking') {
-        return (
-            <article className="desktop-window__content ws-app">
-                <p>Verificando autorização administrativa...</p>
-            </article>
-        );
+export default function Administration({ instance }) {
+  useLocale();
+  const [status, setStatus] = useState('checking'),
+    [activeSection, setActiveSection] = useState('overview');
+  useEffect(() => {
+    let active = true,
+      request = 0;
+    async function check() {
+      const current = ++request;
+      const allowed = await verifyAdminSession();
+      if (active && current === request) setStatus(allowed ? 'authorized' : 'denied');
     }
-
-    if (status === 'denied') {
-        return (
-            <article className="desktop-window__content ws-app">
-                <h2>Acesso negado</h2>
-                <p>
-                    Sua sessão administrativa expirou ou não está autorizada.
-                    Realize novamente o login pelo Terminal.
-                </p>
-            </article>
-        );
-    }
-
-
-    return (
-        <article className="desktop-window__content ws-app ws-administration">
-            <header className="ws-administration__header">
-                <div>
-                    <h2>Central de Administração</h2>
-                    <p>Gerenciamento do WS OS</p>
-                </div>
-                <span>Administrador autenticado</span>
-            </header>
-
-            <div className="ws-administration__layout">
-                <nav
-                    className="ws-administration__navigation"
-                    aria-label="Seções administrativas"
-                >
-                    {ADMIN_SECTIONS.map((section) => (
-                        <button
-                            key={section.id}
-                            type="button"
-                            aria-current={
-                                activeSection === section.id
-                                    ? 'page'
-                                    : undefined
-                            }
-                            onClick={() => setActiveSection(section.id)}
-                        >
-                            {section.title}
-                        </button>
-                    ))}
-                </nav>
-
-                <section
-                    className="ws-administration__content"
-                    aria-labelledby="admin-section-title"
-                >
-                    <h3 id="admin-section-title">
-                        {currentSection.title}
-                    </h3>
-
-                    <p>{currentSection.description}</p>
-
-                    {activeSection === 'posts' ? (
-                        <AdminPosts />
-                    ) : activeSection === 'overview' ? (
-                        <div>
-                            <h4>Ambiente administrativo</h4>
-                            <p>
-                                Autenticação e autorização verificadas.
-                            </p>
-                            <p>
-                                Selecione uma seção para acessar os módulos
-                                administrativos.
-                            </p>
-                        </div>
-                    ) : (
-                        <p>
-                            As ferramentas desta seção serão conectadas
-                            nas próximas etapas.
-                        </p>
-                    )}
-                </section>
-            </div>
-        </article>
-    );
+    const visibility = () => {
+      if (!document.hidden) void check();
+    };
+    const unsubscribe = subscribeAdminSession(() => {
+      void check();
+    });
+    void check();
+    window.addEventListener('focus', visibility);
+    document.addEventListener('visibilitychange', visibility);
+    return () => {
+      active = false;
+      unsubscribe();
+      window.removeEventListener('focus', visibility);
+      document.removeEventListener('visibilitychange', visibility);
+    };
+  }, []);
+  const authorized = status === 'authorized';
+  function navigate(id) {
+    if (id === activeSection) return;
+    if (!canCloseApp(instance.id) && !window.confirm(t('Descartar alterações não salvas?'))) return;
+    setActiveSection(id);
+  }
+  return (
+    <article className="desktop-window__content ws-app ws-administration">
+      <header className="ws-administration__header">
+        <div>
+          <h2>{t('Central de Administração')}</h2>
+          <p>{t('Gerenciamento do WS OS')}</p>
+        </div>
+        <span>
+          {t(
+            authorized
+              ? 'Administrador autenticado'
+              : status === 'checking'
+                ? 'Verificando autorização administrativa...'
+                : 'Acesso negado',
+          )}
+        </span>
+      </header>
+      {!authorized && (
+        <p role="status">
+          {t(
+            'Sua sessão administrativa expirou ou não está autorizada. Realize novamente o login pelo Terminal.',
+          )}
+        </p>
+      )}
+      <div className="ws-administration__layout">
+        <nav className="ws-administration__navigation" aria-label={t('Seções administrativas')}>
+          {sections.map(([id, title]) => (
+            <button
+              key={id}
+              disabled={!authorized}
+              aria-current={id === activeSection ? 'page' : undefined}
+              onClick={() => navigate(id)}
+            >
+              {t(title)}
+            </button>
+          ))}
+        </nav>
+        <section
+          className="ws-administration__content"
+          aria-label={t(sections.find(([id]) => id === activeSection)[1])}
+        >
+          {activeSection === 'posts' ? (
+            <AdminPosts instanceId={instance.id} authorized={authorized} />
+          ) : ['files', 'events'].includes(activeSection) ? (
+            <AdminContent
+              key={activeSection}
+              kind={activeSection}
+              instanceId={instance.id}
+              authorized={authorized}
+            />
+          ) : activeSection === 'requests' ? (
+            <p>
+              {t(
+                'As solicitações atuais são entregues pelo EmailJS aos canais privados configurados. Elas não são eventos públicos nem reuniões confirmadas.',
+              )}
+            </p>
+          ) : activeSection === 'system' ? (
+            <>
+              <h3>{t('Sistema')}</h3>
+              <p>
+                {t(
+                  'Arquivos pessoais permanecem exclusivamente no navegador do visitante. Administração não fornece acesso remoto a esses dados.',
+                )}
+              </p>
+              <p>
+                {t(
+                  'Migrações, segredos, publicação e configurações de produção são aplicados fora deste painel.',
+                )}
+              </p>
+            </>
+          ) : (
+            <>
+              <h3>{t('Ambiente administrativo')}</h3>
+              <p>
+                {t(
+                  'Selecione uma seção para gerenciar conteúdo. As permissões são verificadas em cada operação no servidor.',
+                )}
+              </p>
+            </>
+          )}
+        </section>
+      </div>
+    </article>
+  );
 }

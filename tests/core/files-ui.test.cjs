@@ -69,6 +69,8 @@ async function component(file, props, bindings = {}) {
         'File',
       ].map((name) => [name, name]),
     ),
+    fetchManagedContent:async()=>({data:[]}),
+    window:{addEventListener(){},removeEventListener(){}},
     localStorage: { getItem: () => null, setItem() {} },
     React,
     ...React,

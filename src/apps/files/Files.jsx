@@ -1,3 +1,4 @@
+import { fetchManagedContent } from '../../services/contentService';
 import { useEffect, useRef, useState } from 'react';
 import {
   House,
@@ -105,7 +106,48 @@ export default function Files({ instance }) {
   );
   const unavailableFolder = space === 'personal' && folderId !== null && !folder && !store.loading;
   const parentId = folder?.id ?? null;
-  const officialFiles = portfolio.officialFiles.filter((item) => publicAssetUrl(item.url));
+  const [remoteOfficial, setRemoteOfficial] = useState([]),
+    [officialError, setOfficialError] = useState(false);
+  useEffect(() => {
+    let controller;
+    function load() {
+      controller?.abort();
+      controller = new AbortController();
+      const current = controller;
+      fetchManagedContent('files', { signal: current.signal, force: true })
+        .then((result) => {
+          if (!current.signal.aborted) {
+            setRemoteOfficial(result.data.map((item) => ({ ...item, name: item.title })));
+            setOfficialError(false);
+          }
+        })
+        .catch(() => {
+          if (!current.signal.aborted) setOfficialError(true);
+        });
+    }
+    load();
+    window.addEventListener('ws-os:content-changed', load);
+    return () => {
+      controller?.abort();
+      window.removeEventListener('ws-os:content-changed', load);
+    };
+  }, []);
+  const staticOfficial = [
+    ...portfolio.officialFiles,
+    ...(portfolio.resume?.url
+      ? [{ id: 'resume', name: t('Currículo'), url: portfolio.resume.url }]
+      : []),
+    ...(portfolio.certificates ?? [])
+      .filter((item) => item.url)
+      .map((item) => ({ ...item, name: item.title })),
+  ];
+  const officialFiles = [
+    ...new Map(
+      [...staticOfficial, ...remoteOfficial]
+        .filter((item) => publicAssetUrl(item.url))
+        .map((item) => [item.url, item]),
+    ).values(),
+  ];
   const currentSelection = store.entries.filter(
     (item) => selected.includes(item.id) && (space === 'trash' ? item.trashed : !item.trashed),
   );
@@ -614,6 +656,13 @@ export default function Files({ instance }) {
               )}
               {space === 'official' ? (
                 <div className="ws-app__grid">
+                  {officialError && (
+                    <p role="status">
+                      {t(
+                        'Catálogo remoto indisponível. Os documentos versionados continuam disponíveis.',
+                      )}
+                    </p>
+                  )}
                   {officialFiles
                     .filter(
                       (item) => !term || normalized(contentText(item.name, locale)).includes(term),

@@ -1,3 +1,9 @@
+import { useSyncExternalStore } from 'react';
+import {
+  subscribeAdminSession,
+  getAdminSessionVersion,
+  isAdminAuthenticated,
+} from '../../services/authService';
 import { handleAppBack } from '../../core/navigationManager';
 
 import { useEffect, useRef, useState } from 'react';
@@ -26,6 +32,8 @@ import './Mobile.css';
 
 export default function Mobile({ theme, onThemeChange }) {
   useLocale();
+  useSyncExternalStore(subscribeAdminSession, getAdminSessionVersion, getAdminSessionVersion);
+  const authorized = isAdminAuthenticated();
 
   const mobilePreferences = useMobilePreferences();
   const wallpaper = useWallpaper('mobile');
@@ -50,7 +58,9 @@ export default function Mobile({ theme, onThemeChange }) {
   const unreadCount = notifications.filter((item) => !item.read).length;
 
   const apps = getRegisteredApps().filter(
-    (app) => app.public && (app.showInMenu !== false || app.id === 'wally-extended'),
+    (app) =>
+      (app.public && (app.showInMenu !== false || app.id === 'wally-extended')) ||
+      (authorized && app.id === 'administration'),
   );
 
   const activeInstance = appState.instances.find(
@@ -302,7 +312,10 @@ export default function Mobile({ theme, onThemeChange }) {
           aria-label={t(currentApp?.name ?? 'Aplicativos')}
         >
           {appState.instances
-            .filter((instance) => getAppDefinition(instance.appId)?.public)
+            .filter(
+              (instance) =>
+                getAppDefinition(instance.appId)?.public || instance.appId === 'administration',
+            )
             .map((instance) => {
               const app = getAppDefinition(instance.appId);
               const isVisible = visibleScreen === 'app' && selectedInstance?.id === instance.id;
