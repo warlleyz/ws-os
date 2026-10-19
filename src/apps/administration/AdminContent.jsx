@@ -2,6 +2,7 @@ import { invalidatePublicData } from '../../services/publicDataService';
 import { useEffect, useRef, useState } from 'react';
 import {
   getAdminAccessToken,
+  createAdminRequestScope,
   getAdminSessionVersion,
   invalidateAdminSession,
   subscribeAdminSession,
@@ -27,26 +28,33 @@ export default function AdminContent({ kind, instanceId, authorized }) {
     const version = getAdminSessionVersion(),
       token = getAdminAccessToken();
     if (!token) throw Error(t('Sessão administrativa indisponível.'));
-    const response = await fetch('/api/admin/content?kind=' + kind, {
-      method,
-      cache: 'no-store',
-      signal,
-      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-      ...(body ? { body: JSON.stringify(body) } : {}),
-    });
-    if ([401, 403].includes(response.status)) invalidateAdminSession(version);
-    const result = await response.json();
-    if (version !== getAdminSessionVersion()) throw Error(t('A sessão foi alterada.'));
-    if (!response.ok)
-      throw Error(
-        t(
-          response.status === 409
-            ? 'O conteúdo mudou em outra janela. Atualize a lista.'
-            : 'Não foi possível concluir a operação.',
-        ),
-      );
-    if (!Array.isArray(result.items)) throw Error(t('Resposta inválida do servidor.'));
-    return result.items;
+    const scope = createAdminRequestScope(signal);
+    if (!scope.ok) throw Error(t('Sessão administrativa indisponível.'));
+    try {
+      const response = await fetch('/api/admin/content?kind=' + kind, {
+        method,
+        cache: 'no-store',
+        signal: scope.signal,
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      });
+      if ([401, 403].includes(response.status)) invalidateAdminSession(version);
+      const result = await response.json();
+      if (!scope.isCurrent() || version !== getAdminSessionVersion())
+        throw Error(t('A sessão foi alterada.'));
+      if (!response.ok)
+        throw Error(
+          t(
+            response.status === 409
+              ? 'O conteúdo mudou em outra janela. Atualize a lista.'
+              : 'Não foi possível concluir a operação.',
+          ),
+        );
+      if (!Array.isArray(result.items)) throw Error(t('Resposta inválida do servidor.'));
+      return result.items;
+    } finally {
+      scope.dispose();
+    }
   }
   async function load() {
     controllerRef.current?.abort();

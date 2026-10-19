@@ -1,3 +1,4 @@
+import { executeSystemAction } from '../../services/actionService';
 import {
   ArrowUp,
   Bot,
@@ -15,7 +16,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useSystem } from '../../core/useSystem';
-import { openApp } from '../../core/appManager';
 import { getAppDefinition } from '../../core/appRegistry';
 import Tooltip from '../../shared/components/Tooltip';
 import useSharedWallyConversation from './useSharedWallyConversation';
@@ -61,12 +61,15 @@ export default function WallyPanel({ setWallyOpen }) {
     });
   }, [messages]);
 
-  function open(appId) {
+  async function open(appId) {
     const app = getAppDefinition(appId);
     if (!app) return;
 
-    const opened = run(openApp, appId, { origin: 'system' });
-    if (opened) setWallyOpen(false);
+    const opened = await executeSystemAction(
+      { id: 'app.open', params: { appId } },
+      { run, context: 'wally', origin: 'system' },
+    );
+    if (opened.ok) setWallyOpen(false);
   }
 
   async function ask(value) {

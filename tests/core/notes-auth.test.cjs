@@ -1,39 +1,34 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
 const path = require('node:path');
-const vm = require('node:vm');
 
+/* === Sessão real em ambiente de rede e relógio isolados === */
 function loadAuth(fetchMock) {
-  let now = 1000;
-  let timer;
-  const source = fs.readFileSync(
+  let now = 1000,
+    nextId = 0;
+  const timers = new Map();
+  const api = require('../helpers/contract-loader.cjs').loadContract(
     path.resolve(__dirname, '../../src/services/authService.js'),
-    'utf8',
-  );
-  const api = vm.runInNewContext(
-    `(() => {
-    ${source.replace(/\bexport\s+/g, '')}
-    return { loginAdmin, logoutAdmin, getAdminAccessToken, verifyAdminSession,
-      subscribeAdminSession, getAdminSessionVersion, invalidateAdminSession };
-  })()`,
     {
       fetch: fetchMock,
       Date: { now: () => now },
-      setTimeout: (callback) => {
-        timer = callback;
-        return 1;
+      setTimeout: (callback, delay) => {
+        const id = ++nextId;
+        timers.set(id, { callback, at: now + delay });
+        return id;
       },
-      clearTimeout: () => {
-        timer = null;
-      },
+      clearTimeout: (id) => timers.delete(id),
     },
   );
   return {
     ...api,
     expire: () => {
       now += 2000;
-      timer();
+      for (const [id, timer] of [...timers])
+        if (timer.at <= now) {
+          timers.delete(id);
+          timer.callback();
+        }
     },
   };
 }
@@ -109,5 +104,33 @@ test('resposta não autorizada invalida apenas a sessão correspondente', async 
   api.invalidateAdminSession(oldVersion);
   assert.equal(api.getAdminAccessToken(), 'token');
   api.invalidateAdminSession(api.getAdminSessionVersion());
+  assert.equal(api.getAdminAccessToken(), null);
+});
+
+/* === Escopos e isolamento dos observadores === */
+test('mudança de sessão cancela operação privilegiada e não divulga token em escopo', async () => {
+  const api = loadAuth(async () =>
+    Response.json({ access_token: 'private-token', expires_in: 3600 }),
+  );
+  await api.loginAdmin('admin@test.dev', 'password');
+  const scope = api.createAdminRequestScope();
+  assert.equal(scope.ok, true);
+  assert.equal(scope.isCurrent(), true);
+  assert.equal(scope.accessToken, undefined);
+  await api.logoutAdmin();
+  assert.equal(scope.signal.aborted, true);
+  assert.equal(scope.isCurrent(), false);
+  scope.dispose();
+});
+test('observador com falha não impede expiração ou aviso a outros consumidores', async () => {
+  const api = loadAuth(async () => Response.json({ access_token: 'token', expires_in: 1 }));
+  let calls = 0;
+  api.subscribeAdminSession(() => {
+    throw Error('broken subscriber');
+  });
+  api.subscribeAdminSession(() => calls++);
+  await api.loginAdmin('admin@test.dev', 'password');
+  api.expire();
+  assert.equal(calls, 2);
   assert.equal(api.getAdminAccessToken(), null);
 });

@@ -1,3 +1,4 @@
+import { executeSystemAction } from '../../services/actionService';
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowUp,
@@ -16,7 +17,6 @@ import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
 import { getAppDefinition } from '../../core/appRegistry';
 import { useSystem } from '../../core/useSystem';
-import { openApp } from '../../core/appManager';
 
 import useSharedWallyConversation from '../../features/wally/useSharedWallyConversation';
 import WallyTurnstile from '../../features/wally/WallyTurnstile';
@@ -132,9 +132,10 @@ export default function WallyExtended() {
 
     if (!app?.public) return;
 
-    run(openApp, appId, {
-      origin: 'wally-extended',
-    });
+    void executeSystemAction(
+      { id: 'app.open', params: { appId } },
+      { run, context: 'wally', origin: 'wally-extended' },
+    );
   }
 
   return (

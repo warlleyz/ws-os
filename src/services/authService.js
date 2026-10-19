@@ -1,4 +1,7 @@
+import { executeJsonRequest } from './httpRequestContract';
+import { unwrapApiResponse } from './apiResponseAdapter';
 const AUTH_ENDPOINT = '/api/auth';
+const pendingAuthRequests = new Set();
 
 let session = null;
 
@@ -17,7 +20,11 @@ function notifySessionChange() {
   sessionVersion += 1;
 
   for (const listener of sessionListeners) {
-    listener();
+    try {
+      listener();
+    } catch {
+      /* ----- Um consumidor não bloqueia a invalidação dos demais ----- */
+    }
   }
 }
 
@@ -78,23 +85,29 @@ export function subscribeAdminSession(listener) {
   };
 }
 
+/* === Requisições de autenticação isoladas do cache público === */
 async function authRequest(path, options = {}) {
-  const response = await fetch(`${AUTH_ENDPOINT}${path}`, {
-    ...options,
-    cache: 'no-store',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(data.error || 'Falha na autenticação.');
+  const controller = new AbortController();
+  pendingAuthRequests.add(controller);
+  try {
+    const { response, payload } = await executeJsonRequest(
+      AUTH_ENDPOINT + path,
+      {
+        ...options,
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json', ...options.headers },
+      },
+      { operation: options.method === 'POST' ? 'write' : 'read', signal: controller.signal },
+    );
+    const result = unwrapApiResponse(payload, { status: response.status });
+    if (!response.ok || !result.ok)
+      throw Object.assign(new Error('Falha na autenticação.'), {
+        code: result.error?.code ?? 'UNAUTHENTICATED',
+      });
+    return result.data;
+  } finally {
+    pendingAuthRequests.delete(controller);
   }
-
-  return data;
 }
 
 export async function loginAdmin(email, password) {
@@ -109,6 +122,9 @@ export async function loginAdmin(email, password) {
       email: email.trim(),
       password,
     }),
+  }).catch((error) => {
+    if (requestVersion !== loginRequestVersion) throw new Error('Solicitação de login cancelada.');
+    throw error;
   });
 
   if (requestVersion !== loginRequestVersion) {
@@ -117,8 +133,11 @@ export async function loginAdmin(email, password) {
   if (
     typeof data.access_token !== 'string' ||
     !data.access_token.trim() ||
+    /\s/.test(data.access_token) ||
+    data.access_token.length > 8192 ||
     !Number.isFinite(data.expires_in) ||
-    data.expires_in <= 0
+    data.expires_in <= 0 ||
+    !Number.isSafeInteger(Date.now() + data.expires_in * 1000)
   ) {
     throw new Error('Resposta de autenticação inválida.');
   }
@@ -187,6 +206,7 @@ export function getAdminSessionExpiresAt() {
 
 export async function logoutAdmin() {
   loginRequestVersion += 1;
+  for (const controller of pendingAuthRequests) controller.abort();
   const token = getAdminAccessToken();
 
   clearAdminSession();
@@ -205,4 +225,31 @@ export async function logoutAdmin() {
   } catch {
     return false;
   }
+}
+
+/* === Escopo de operações privilegiadas da sessão atual === */
+export function createAdminRequestScope(signal) {
+  const token = getAdminAccessToken();
+  if (!token) return { ok: false, code: 'UNAUTHENTICATED' };
+  const version = getAdminSessionVersion(),
+    controller = new AbortController();
+  const abort = () => controller.abort();
+  signal?.addEventListener('abort', abort, { once: true });
+  if (signal?.aborted) abort();
+  const unsubscribe = subscribeAdminSession(() => {
+    if (getAdminSessionVersion() !== version) abort();
+  });
+  return {
+    ok: true,
+    version,
+    signal: controller.signal,
+    isCurrent: () =>
+      !controller.signal.aborted &&
+      getAdminSessionVersion() === version &&
+      getAdminAccessToken() === token,
+    dispose: () => {
+      unsubscribe();
+      signal?.removeEventListener('abort', abort);
+    },
+  };
 }

@@ -231,3 +231,7 @@ As descrições antigas deste documento que dizem que cache ou APIs não têm co
 ## Etapa 01.4 — modelos vigentes
 
 Contratos puros: privateRequestContract (estados privados/revisão/retenção e resultado de envio), publicContentContract (eventos, projetos/demos, publicações/anexos e ranking), preferenceContract (versão lógica e formato legado). restoreSystemPreferences aceita categorias opcionais validadas; sem argumentos mantém o reset existente. Ver [conclusão 01.4](finalizacao/ETAPA-01-PARTE-01.4-CONCLUSAO.md). Rotinas de banco/R2 e interfaces completas continuam nas etapas proprietárias.
+
+## Etapa 01.5 — sessão e ações
+
+Catálogo e capacidades em core/actionContract e authorizationContract; adaptadores confiáveis em services/actionService. Busca e Wally consomem o catálogo para navegação. createAdminRequestScope cancela operações na mudança de versão da sessão e requer dispose; o token permanece em memória. Nenhuma pré-checagem local confere autorização ao Worker. Ver [conclusão 01.5](finalizacao/ETAPA-01-PARTE-01.5-CONCLUSAO.md).

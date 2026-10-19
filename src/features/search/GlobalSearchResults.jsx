@@ -1,3 +1,4 @@
+import { executeSystemAction } from '../../services/actionService';
 import { subscribePublicData } from '../../services/publicDataService';
 import { useEffect, useState } from 'react';
 import { Search, ArrowUpRight } from 'lucide-react';
@@ -55,7 +56,16 @@ export default function GlobalSearchResults({ query, onOpen }) {
         {t('Conteúdo e configurações')}
       </h3>
       {results.map((item) => (
-        <button type="button" key={item.key} onClick={() => onOpen(item.appId, item.params)}>
+        <button
+          type="button"
+          key={item.key}
+          onClick={() => {
+            void executeSystemAction(
+              { id: 'app.open', params: { appId: item.appId, params: item.params } },
+              { context: 'search', onOpen },
+            );
+          }}
+        >
           <span>
             <strong>{item.label}</strong>
             <small>
