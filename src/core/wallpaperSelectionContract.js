@@ -11,6 +11,12 @@ export const WALLPAPER_SHELLS = Object.freeze([
     'mobile',
 ]);
 
+export const WALLPAPER_THEMES = Object.freeze([
+    'dark',
+    'light',
+]);
+
+/* ----- Chaves de persistência ----- */
 export const WALLPAPER_SELECTION_KEYS = Object.freeze({
     desktop: Object.freeze({
         dark: 'ws-os:wallpaper:desktop:dark',
@@ -28,12 +34,57 @@ export const LEGACY_WALLPAPER_KEYS = Object.freeze({
     mobile: 'ws-os:mobile-wallpaper',
 });
 
+/* === Wallpapers pessoais === */
+/* ----- Identificador legado ----- */
+export const LEGACY_CUSTOM_WALLPAPER_ID = 'custom';
+
+/* ----- Prefixo dos wallpapers da coleção ----- */
+export const PERSONAL_WALLPAPER_PREFIX = 'personal:';
+
+/* ----- Validação dos identificadores ----- */
+export function isPersonalWallpaperId(id) {
+    if (typeof id !== 'string') {
+        return false;
+    }
+
+    if (!id.startsWith(PERSONAL_WALLPAPER_PREFIX)) {
+        return false;
+    }
+
+    const personalId = id.slice(
+        PERSONAL_WALLPAPER_PREFIX.length,
+    );
+
+    return /^[a-zA-Z0-9_-]{1,64}$/.test(personalId);
+}
+
+/* ----- Extrair identificador de armazenamento ----- */
+export function getPersonalWallpaperStorageId(id) {
+    if (!isPersonalWallpaperId(id)) {
+        return null;
+    }
+
+    return id.slice(PERSONAL_WALLPAPER_PREFIX.length);
+}
+
+/* ----- Construir identificador de seleção ----- */
+export function createPersonalWallpaperSelectionId(id) {
+    if (
+        typeof id !== 'string' ||
+        !/^[a-zA-Z0-9_-]{1,64}$/.test(id)
+    ) {
+        return null;
+    }
+
+    return `${PERSONAL_WALLPAPER_PREFIX}${id}`;
+}
+
 /* === Validação === */
 /* ----- Contexto de seleção ----- */
 export function isWallpaperContext(shell, theme) {
     return (
         WALLPAPER_SHELLS.includes(shell) &&
-        Object.hasOwn(WALLPAPER_SELECTION_KEYS[shell], theme)
+        WALLPAPER_THEMES.includes(theme)
     );
 }
 
@@ -49,6 +100,15 @@ export function normalizeWallpaperSelection(
     return getDefaultWallpaper(theme);
 }
 
+/* ----- Identificador aceito pelo contrato ----- */
+export function isWallpaperSelectionId(id, theme) {
+    return (
+        isOfficialWallpaper(id, theme) ||
+        id === LEGACY_CUSTOM_WALLPAPER_ID ||
+        isPersonalWallpaperId(id)
+    );
+}
+
 /* === Migração de preferências === */
 /* ----- Resolução da seleção existente ----- */
 export function resolveWallpaperSelection({
@@ -56,41 +116,24 @@ export function resolveWallpaperSelection({
     legacyId,
     theme = 'dark',
 } = {}) {
-    if (!['dark', 'light'].includes(theme)) {
+    if (!WALLPAPER_THEMES.includes(theme)) {
         return {
             ok: false,
             code: 'INVALID_WALLPAPER_THEME',
         };
     }
 
-    if (isOfficialWallpaper(savedId, theme)) {
+    if (isWallpaperSelectionId(savedId, theme)) {
         return {
             ok: true,
             id: savedId,
             source: 'saved',
-            requiresMigration: false,
+            requiresMigration:
+                savedId === LEGACY_CUSTOM_WALLPAPER_ID,
         };
     }
 
-    if (savedId === 'custom') {
-        return {
-            ok: true,
-            id: 'custom',
-            source: 'saved',
-            requiresMigration: true,
-        };
-    }
-
-    if (legacyId === 'custom') {
-        return {
-            ok: true,
-            id: 'custom',
-            source: 'legacy',
-            requiresMigration: true,
-        };
-    }
-
-    if (isOfficialWallpaper(legacyId, theme)) {
+    if (isWallpaperSelectionId(legacyId, theme)) {
         return {
             ok: true,
             id: legacyId,
@@ -129,10 +172,7 @@ export function updateWallpaperSelection(
 ) {
     if (
         !isWallpaperContext(shell, theme) ||
-        !(
-            id === 'custom' ||
-            isOfficialWallpaper(id, theme)
-        )
+        !isWallpaperSelectionId(id, theme)
     ) {
         return {
             ok: false,
@@ -150,4 +190,21 @@ export function updateWallpaperSelection(
             },
         },
     };
+}
+
+/* === Proteção de exclusão === */
+/* ----- Verificar uso nas quatro seleções ----- */
+export function isWallpaperSelectedAnywhere(
+    selections,
+    id,
+) {
+    if (!isPersonalWallpaperId(id)) {
+        return false;
+    }
+
+    return WALLPAPER_SHELLS.some((shell) =>
+        WALLPAPER_THEMES.some(
+            (theme) => selections?.[shell]?.[theme] === id,
+        ),
+    );
 }

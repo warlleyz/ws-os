@@ -91,6 +91,14 @@ function wallpaperContracts() {
       'resolveWallpaperSelection',
       'createDefaultWallpaperSelections',
       'updateWallpaperSelection',
+      'WALLPAPER_THEMES',
+      'LEGACY_CUSTOM_WALLPAPER_ID',
+      'PERSONAL_WALLPAPER_PREFIX',
+      'isPersonalWallpaperId',
+      'getPersonalWallpaperStorageId',
+      'createPersonalWallpaperSelectionId',
+      'isWallpaperSelectionId',
+      'isWallpaperSelectedAnywhere',
     ],
   );
 
@@ -117,27 +125,83 @@ function png() {
 
 /* === Ambiente de wallpapers === */
 /* ----- Gerenciador isolado ----- */
+/* === Ambiente de wallpapers === */
+/* ----- Gerenciador e coleção simulados ----- */
 async function wallpaper(options = {}) {
   const storage = options.localStorage ?? memory();
   const image = { file: options.file ?? null };
+  const files = new Map(options.personalFiles ?? []);
   const revoked = [];
 
   let urls = 0;
+  let nextId = 0;
 
   const theme = options.theme ?? 'dark';
   const contracts = wallpaperContracts();
 
+  /* ----- Simulação da coleção pessoal ----- */
+  const collection = {
+    loadPersonalWallpaperCollection: async () => {
+      if (image.file && !files.has('legacy')) {
+        files.set('legacy', image.file);
+      }
+
+      return Array.from(files, ([id, file]) => ({
+        id,
+        name: file.name || 'Imagem pessoal',
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified ?? null,
+      }));
+    },
+
+    getPersonalWallpaperFile: async (id) =>
+      files.get(id) ?? null,
+
+    addPersonalWallpaper: async (file, validate) => {
+      await validate(file);
+
+      const id = `test-${++nextId}`;
+      files.set(id, file);
+
+      return {
+        id,
+        name: file.name || 'Imagem pessoal',
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified ?? null,
+      };
+    },
+
+    removeStoredWallpaper: async (id, isInUse) => {
+      if (isInUse(id)) {
+        return { ok: false, code: 'WALLPAPER_IN_USE' };
+      }
+
+      if (!files.has(id)) {
+        return { ok: false, code: 'WALLPAPER_NOT_FOUND' };
+      }
+
+      files.delete(id);
+
+      return { ok: true, id };
+    },
+  };
+
+  /* ----- Instância isolada do gerenciador ----- */
   const manager = load(
     'src/core/wallpaperManager.js',
     {
       ...contracts,
+      ...collection,
 
       localStorage: storage,
 
       getTheme: () => theme,
       useTheme: () => theme,
 
-      useSyncExternalStore: (_subscribe, snapshot) => snapshot(),
+      useSyncExternalStore: (_subscribe, snapshot) =>
+        snapshot(),
 
       URL: {
         createObjectURL: () => `blob:test-${++urls}`,
@@ -150,12 +214,6 @@ async function wallpaper(options = {}) {
         close() { },
       }),
 
-      readWallpaperImage: async () => image.file,
-
-      writeWallpaperImage: async (file) => {
-        image.file = file;
-      },
-
       ...options.bindings,
     },
     [
@@ -164,6 +222,10 @@ async function wallpaper(options = {}) {
       'setWallpaper',
       'getWallpaperDefinition',
       'uploadCustomWallpaper',
+      'addWallpaperToCollection',
+      'deleteWallpaperFromCollection',
+      'isPersonalWallpaperInUse',
+      'getPersonalWallpapers',
       'restoreCustomWallpaper',
       'getWallpaperStatus',
       'getCustomWallpaperAvailable',
@@ -176,6 +238,7 @@ async function wallpaper(options = {}) {
   return {
     m: manager,
     image,
+    files,
     storage,
     revoked,
     contracts,
@@ -218,30 +281,41 @@ test('catálogo contém apenas seis wallpapers oficiais', () => {
 
 /* === Preferências de wallpapers === */
 /* ----- Seleções independentes ----- */
-test('wallpapers preservam quatro seleções independentes', async () => {
+test('wallpapers sincronizam cores entre temas e separam plataformas', async () => {
   const { m, storage } = await wallpaper();
 
+  /* ----- Seleções iniciais ----- */
   assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-blue');
   assert.equal(m.getWallpaper('desktop', 'light'), 'light-blue');
-
   assert.equal(m.getWallpaper('mobile', 'dark'), 'dark-blue');
   assert.equal(m.getWallpaper('mobile', 'light'), 'light-blue');
 
-  assert.equal(m.setWallpaper('dark-green', 'desktop', 'dark'), true);
-  assert.equal(m.setWallpaper('light-violeta', 'desktop', 'light'), true);
+  /* ----- Desktop: selecionar violeta no Light ----- */
+  assert.equal(
+    m.setWallpaper('light-violeta', 'desktop', 'light'),
+    true,
+  );
 
-  assert.equal(m.setWallpaper('dark-violeta', 'mobile', 'dark'), true);
-  assert.equal(m.setWallpaper('light-green', 'mobile', 'light'), true);
-
-  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-green');
+  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-violeta');
   assert.equal(m.getWallpaper('desktop', 'light'), 'light-violeta');
 
-  assert.equal(m.getWallpaper('mobile', 'dark'), 'dark-violeta');
+  /* ----- Mobile: selecionar verde no Dark ----- */
+  assert.equal(
+    m.setWallpaper('dark-green', 'mobile', 'dark'),
+    true,
+  );
+
+  assert.equal(m.getWallpaper('mobile', 'dark'), 'dark-green');
   assert.equal(m.getWallpaper('mobile', 'light'), 'light-green');
 
+  /* ----- Desktop e Mobile permanecem independentes ----- */
+  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-violeta');
+  assert.equal(m.getWallpaper('mobile', 'dark'), 'dark-green');
+
+  /* ----- Persistência das quatro variantes ----- */
   assert.equal(
     storage.getItem('ws-os:wallpaper:desktop:dark'),
-    'dark-green',
+    'dark-violeta',
   );
 
   assert.equal(
@@ -251,7 +325,7 @@ test('wallpapers preservam quatro seleções independentes', async () => {
 
   assert.equal(
     storage.getItem('ws-os:wallpaper:mobile:dark'),
-    'dark-violeta',
+    'dark-green',
   );
 
   assert.equal(
@@ -259,11 +333,14 @@ test('wallpapers preservam quatro seleções independentes', async () => {
     'light-green',
   );
 
+  /* ----- Identificadores inválidos ----- */
   assert.equal(m.setWallpaper('original'), false);
   assert.equal(m.setWallpaper('aurora'), false);
   assert.equal(m.setWallpaper('minimal'), false);
-
-  assert.equal(m.setWallpaper('dark-blue', 'desktop', 'light'), false);
+  assert.equal(
+    m.setWallpaper('dark-blue', 'desktop', 'light'),
+    false,
+  );
   assert.equal(m.setWallpaper('invalid'), false);
   assert.equal(m.setWallpaper('custom'), false);
 });
@@ -294,17 +371,50 @@ test('preferências legadas são normalizadas sem apagar dados', async () => {
 });
 
 /* ----- Prioridade das preferências novas ----- */
-test('seleções novas prevalecem sobre identificadores legados', async () => {
+test('seleções novas prevalecem e harmonizam os dois temas', async () => {
   const storage = memory({
     'ws-os:wallpaper': 'original',
     'ws-os:wallpaper:desktop:dark': 'dark-green',
     'ws-os:wallpaper:desktop:light': 'light-violeta',
   });
 
-  const { m } = await wallpaper({ localStorage: storage });
+  const { m } = await wallpaper({
+    localStorage: storage,
+    theme: 'dark',
+  });
 
-  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-green');
-  assert.equal(m.getWallpaper('desktop', 'light'), 'light-violeta');
+  /* ----- Dark ativo determina a variante inicial ----- */
+  assert.equal(
+    m.getWallpaper('desktop', 'dark'),
+    'dark-green',
+  );
+
+  assert.equal(
+    m.getWallpaper('desktop', 'light'),
+    'light-green',
+  );
+
+  /* ----- Preferência legada permanece preservada ----- */
+  assert.equal(
+    storage.getItem('ws-os:wallpaper'),
+    'original',
+  );
+
+  /* ----- Nova seleção sincroniza os dois temas ----- */
+  assert.equal(
+    m.setWallpaper('light-violeta', 'desktop', 'light'),
+    true,
+  );
+
+  assert.equal(
+    m.getWallpaper('desktop', 'dark'),
+    'dark-violeta',
+  );
+
+  assert.equal(
+    m.getWallpaper('desktop', 'light'),
+    'light-violeta',
+  );
 });
 
 /* ----- Definições visuais ----- */
@@ -336,35 +446,84 @@ test('wallpapers oficiais utilizam arquivos correspondentes ao tema', async () =
 
 /* === Imagem pessoal === */
 /* ----- Upload e reseleção ----- */
-test('upload permite reseleção e substituição da imagem pessoal', async () => {
-  const { m, image, revoked } = await wallpaper();
+test('uploads preservam imagens anteriores e seleções independentes', async () => {
+  const { m, files } = await wallpaper();
 
-  const file = png();
-
-  assert.equal(await m.uploadCustomWallpaper(file), true);
-  assert.equal(image.file, file);
-
-  const first = m.getWallpaperDefinition('custom').background;
-
-  assert.equal(m.setWallpaper('dark-blue'), true);
-  assert.equal(m.getCustomWallpaperAvailable(), true);
-
-  assert.equal(m.setWallpaper('custom'), true);
+  const firstFile = png();
+  const secondFile = png();
 
   assert.equal(
-    await m.uploadCustomWallpaper(png(), 'mobile'),
+    await m.uploadCustomWallpaper(firstFile, 'desktop'),
     true,
   );
 
-  assert.equal(m.getWallpaper('desktop', 'dark'), 'custom');
-  assert.equal(m.getWallpaper('mobile', 'dark'), 'custom');
+  const firstId = m.getWallpaper('desktop', 'dark');
 
-  assert.notEqual(
-    m.getWallpaperDefinition('custom').background,
-    first,
+  assert.equal(firstId, 'personal:test-1');
+
+  assert.equal(
+    await m.uploadCustomWallpaper(secondFile, 'mobile'),
+    true,
   );
 
-  assert.deepEqual(revoked, ['blob:test-1']);
+  const secondId = m.getWallpaper('mobile', 'dark');
+
+  assert.equal(secondId, 'personal:test-2');
+
+  assert.equal(m.getWallpaper('desktop', 'dark'), firstId);
+  assert.equal(m.getWallpaper('mobile', 'dark'), secondId);
+
+  assert.equal(files.get('test-1'), firstFile);
+  assert.equal(files.get('test-2'), secondFile);
+
+  assert.equal(m.getPersonalWallpapers().length, 2);
+
+  assert.match(
+    m.getWallpaperDefinition(firstId).background,
+    /blob:test-1/,
+  );
+
+  assert.match(
+    m.getWallpaperDefinition(secondId).background,
+    /blob:test-2/,
+  );
+});
+
+test('imagem selecionada não pode ser excluída', async () => {
+  const { m, files } = await wallpaper();
+
+  const entry = await m.addWallpaperToCollection(png());
+
+  assert.equal(
+    m.setWallpaper(entry.id, 'desktop', 'dark'),
+    true,
+  );
+
+  assert.equal(
+    m.isPersonalWallpaperInUse(entry.id),
+    true,
+  );
+
+  const blocked = await m.deleteWallpaperFromCollection(
+    entry.id,
+  );
+
+  assert.equal(blocked.ok, false);
+  assert.equal(blocked.code, 'WALLPAPER_IN_USE');
+
+  assert.ok(files.has('test-1'));
+
+  assert.equal(
+    m.setWallpaper('dark-blue', 'desktop', 'dark'),
+    true,
+  );
+
+  const removed = await m.deleteWallpaperFromCollection(
+    entry.id,
+  );
+
+  assert.equal(removed.ok, true);
+  assert.equal(files.has('test-1'), false);
 });
 
 /* ----- Recuperação após atualização ----- */
@@ -386,7 +545,7 @@ test('imagem persistida é recuperada sem perder seleção ou dados', async () =
     localStorage,
 
     bindings: {
-      readWallpaperImage: async () => {
+      loadPersonalWallpaperCollection: async () => {
         throw Error('blocked');
       },
     },
@@ -474,8 +633,8 @@ test('falha de gravação preserva imagem pessoal anterior', async () => {
     }),
 
     bindings: {
-      writeWallpaperImage: async () => {
-        const error = Error('quota');
+      addPersonalWallpaper: async () => {
+        const error = new Error('Sem espaço para salvar a imagem.');
         error.name = 'QuotaExceededError';
         throw error;
       },
@@ -499,7 +658,7 @@ test('falha de gravação preserva imagem pessoal anterior', async () => {
 
 /* ----- Armazenamento local indisponível ----- */
 test('falha no localStorage mantém imagem e seleção na sessão', async () => {
-  const { m, image } = await wallpaper({
+  const { m, files } = await wallpaper({
     localStorage: {
       getItem: () => null,
 
@@ -514,14 +673,20 @@ test('falha no localStorage mantém imagem e seleção na sessão', async () => 
     false,
   );
 
-  assert.ok(image.file);
-  assert.equal(m.getWallpaper('mobile', 'dark'), 'custom');
+  assert.equal(files.size, 1);
+  assert.equal(
+    m.getWallpaper('mobile', 'dark'),
+    'personal:test-1',
+  );
 });
+
 
 /* ----- Concorrência e hidratação ----- */
 test('hidratação atrasada não substitui upload novo', async () => {
   let resolveRead;
   let resolveWrite;
+
+  const storedFiles = new Map();
 
   const m = load(
     'src/core/wallpaperManager.js',
@@ -530,7 +695,9 @@ test('hidratação atrasada não substitui upload novo', async () => {
 
       getTheme: () => 'dark',
       useTheme: () => 'dark',
-      useSyncExternalStore: (_subscribe, snapshot) => snapshot(),
+
+      useSyncExternalStore: (_subscribe, snapshot) =>
+        snapshot(),
 
       localStorage: memory(),
 
@@ -545,20 +712,42 @@ test('hidratação atrasada não substitui upload novo', async () => {
         close() { },
       }),
 
-      readWallpaperImage: () =>
+      /* ----- Recuperação inicialmente pendente ----- */
+      loadPersonalWallpaperCollection: () =>
         new Promise((resolve) => {
           resolveRead = resolve;
         }),
 
-      writeWallpaperImage: () =>
-        new Promise((resolve) => {
+      getPersonalWallpaperFile: async (id) =>
+        storedFiles.get(id) ?? null,
+
+      /* ----- Gravação inicialmente pendente ----- */
+      addPersonalWallpaper: async (file, validate) => {
+        await validate(file);
+
+        await new Promise((resolve) => {
           resolveWrite = resolve;
-        }),
+        });
+
+        storedFiles.set('test-1', file);
+
+        return {
+          id: 'test-1',
+          name: 'Imagem pessoal',
+          type: file.type,
+          size: file.size,
+        };
+      },
+
+      removeStoredWallpaper: async () => ({
+        ok: true,
+      }),
     },
     [
       'uploadCustomWallpaper',
       'restoreCustomWallpaper',
       'getWallpaperDefinition',
+      'getWallpaper',
     ],
   );
 
@@ -574,16 +763,25 @@ test('hidratação atrasada não substitui upload novo', async () => {
   }
 
   resolveWrite();
-  await pending;
 
-  resolveRead(null);
+  assert.equal(await pending, true);
+
+  /* ----- Finalizar leitura antiga após o upload ----- */
+  resolveRead([]);
+
   await m.restoreCustomWallpaper();
 
   assert.equal(
-    m.getWallpaperDefinition('custom').background,
+    m.getWallpaper('desktop', 'dark'),
+    'personal:test-1',
+  );
+
+  assert.equal(
+    m.getWallpaperDefinition('personal:test-1').background,
     'url("blob:new") center / cover no-repeat',
   );
 });
+
 
 /* === Widgets === */
 /* ----- Organização e capacidade ----- */

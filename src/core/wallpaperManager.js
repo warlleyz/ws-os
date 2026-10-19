@@ -1,27 +1,38 @@
+
 import { useSyncExternalStore } from 'react';
 import { getTheme, useTheme } from './themeManager';
+
 import {
   OFFICIAL_WALLPAPERS,
   getDefaultWallpaper,
   getOfficialWallpaper,
   isOfficialWallpaper,
 } from './wallpaperCatalog';
+
 import {
   WALLPAPER_SHELLS,
+  WALLPAPER_THEMES,
   WALLPAPER_SELECTION_KEYS,
   LEGACY_WALLPAPER_KEYS,
   createDefaultWallpaperSelections,
   isWallpaperContext,
+  isPersonalWallpaperId,
+  getPersonalWallpaperStorageId,
+  createPersonalWallpaperSelectionId,
+  isWallpaperSelectedAnywhere,
   resolveWallpaperSelection,
   updateWallpaperSelection,
 } from './wallpaperSelectionContract';
-import {
-  readWallpaperImage,
-  writeWallpaperImage,
-} from '../services/storage/wallpaperStorage';
 
-/* === Catálogo === */
-/* ----- Wallpapers oficiais ----- */
+import {
+  loadPersonalWallpaperCollection,
+  getPersonalWallpaperFile,
+  addPersonalWallpaper,
+  removePersonalWallpaper as removeStoredWallpaper,
+} from './personalWallpaperCollection';
+
+/* === Configuração === */
+/* ----- Catálogo oficial ----- */
 export const WALLPAPERS = Object.freeze(
   OFFICIAL_WALLPAPERS.map((item) =>
     Object.freeze({
@@ -34,24 +45,21 @@ export const WALLPAPERS = Object.freeze(
 export const MAX_WALLPAPER_BYTES = 5 * 1024 * 1024;
 
 const IMAGE_REVISION_KEY = 'ws-os:wallpaper-image-revision';
+const LEGACY_ID = 'personal:legacy';
 
-/* === Seleções === */
-/* ----- Leitura de preferências ----- */
+/* === Persistência das seleções === */
+/* ----- Leitura protegida ----- */
 function readSelection(shell, theme) {
   const fallback = getDefaultWallpaper(theme);
 
   try {
-    const savedId = localStorage.getItem(
-      WALLPAPER_SELECTION_KEYS[shell][theme],
-    );
-
-    const legacyId = localStorage.getItem(
-      LEGACY_WALLPAPER_KEYS[shell],
-    );
-
     const result = resolveWallpaperSelection({
-      savedId,
-      legacyId,
+      savedId: localStorage.getItem(
+        WALLPAPER_SELECTION_KEYS[shell][theme],
+      ),
+      legacyId: localStorage.getItem(
+        LEGACY_WALLPAPER_KEYS[shell],
+      ),
       theme,
     });
 
@@ -61,44 +69,69 @@ function readSelection(shell, theme) {
   }
 }
 
-/* ----- Estado inicial ----- */
+/* ----- Carregamento das quatro seleções ----- */
 function loadSelections() {
   const next = createDefaultWallpaperSelections();
 
   for (const shell of WALLPAPER_SHELLS) {
-    for (const theme of ['dark', 'light']) {
+    for (const theme of WALLPAPER_THEMES) {
       next[shell][theme] = readSelection(shell, theme);
+    }
+  }
+
+  /* ----- Harmonizar seleções anteriores ----- */
+  const activeTheme = getTheme();
+  const otherTheme = activeTheme === 'dark' ? 'light' : 'dark';
+
+  for (const shell of WALLPAPER_SHELLS) {
+    const activeId = next[shell][activeTheme];
+
+    if (activeId === 'custom' || isPersonalWallpaperId(activeId)) {
+      next[shell][otherTheme] = activeId;
+      continue;
+    }
+
+    const suffix = activeId.slice(`${activeTheme}-`.length);
+    const pairedId = `${otherTheme}-${suffix}`;
+
+    if (isOfficialWallpaper(pairedId, otherTheme)) {
+      next[shell][otherTheme] = pairedId;
     }
   }
 
   return next;
 }
 
-let selected = loadSelections();
-
 /* === Estado compartilhado === */
-/* ----- Imagem pessoal e operações ----- */
-let customUrl = null;
+/* ----- Preferências e coleção ----- */
+let selected = loadSelections();
+let personalWallpapers = [];
+let personalUrls = new Map();
+
 let revision = 0;
 let status = 'loading';
 let generation = 0;
 let uploading = false;
-let restorePromise;
+let restoringPromise = null;
 
 const listeners = new Set();
 
-/* ----- Assinaturas ----- */
+/* ----- Assinatura e atualização ----- */
 function subscribe(listener) {
   listeners.add(listener);
+
   return () => listeners.delete(listener);
 }
 
 function emit() {
   revision += 1;
-  listeners.forEach((listener) => listener());
+
+  for (const listener of listeners) {
+    listener();
+  }
 }
 
-/* === Consultas === */
+/* === Consultas às seleções === */
 /* ----- Seleção por plataforma e tema ----- */
 export function getWallpaper(
   shell = 'desktop',
@@ -111,7 +144,7 @@ export function getWallpaper(
   return selected[shell][theme];
 }
 
-/* ----- Hook de seleção ----- */
+/* ----- Assinatura React ----- */
 export function useWallpaper(shell = 'desktop') {
   const theme = useTheme();
 
@@ -122,7 +155,7 @@ export function useWallpaper(shell = 'desktop') {
   );
 }
 
-/* ----- Hook de atualização visual ----- */
+/* ----- Revisão visual ----- */
 export function useWallpaperRevision() {
   return useSyncExternalStore(
     subscribe,
@@ -131,9 +164,24 @@ export function useWallpaperRevision() {
   );
 }
 
-/* ----- Disponibilidade da imagem pessoal ----- */
+/* === Consultas à coleção pessoal === */
+/* ----- Lista de imagens disponíveis ----- */
+export function getPersonalWallpapers() {
+  return personalWallpapers;
+}
+
+/* ----- Assinatura da coleção ----- */
+export function usePersonalWallpapers() {
+  return useSyncExternalStore(
+    subscribe,
+    getPersonalWallpapers,
+    () => [],
+  );
+}
+
+/* ----- Disponibilidade ----- */
 export function getCustomWallpaperAvailable() {
-  return Boolean(customUrl);
+  return personalUrls.size > 0;
 }
 
 export function useCustomWallpaperAvailable() {
@@ -158,23 +206,39 @@ export function useWallpaperStatus() {
 }
 
 /* === Definições visuais === */
+/* ----- Identificador pessoal legado ----- */
+function resolvePersonalId(id) {
+  return id === 'custom' ? LEGACY_ID : id;
+}
+
 /* ----- Wallpaper oficial ou pessoal ----- */
 export function getWallpaperDefinition(
   id,
   shell = 'desktop',
   theme = getTheme(),
 ) {
-  const resolvedTheme = ['dark', 'light'].includes(theme)
+  const resolvedTheme = WALLPAPER_THEMES.includes(theme)
     ? theme
     : 'dark';
 
-  if (id === 'custom' && customUrl) {
-    return {
-      id: 'custom',
-      name: 'Personalizado',
-      theme: resolvedTheme,
-      background: `url("${customUrl}") center / cover no-repeat`,
-    };
+  const personalId = resolvePersonalId(id);
+
+  if (isPersonalWallpaperId(personalId)) {
+    const url = personalUrls.get(personalId);
+
+    if (url) {
+      const metadata = personalWallpapers.find(
+        (item) => item.id === personalId,
+      );
+
+      return {
+        id,
+        name: metadata?.name ?? 'Personalizado',
+        theme: resolvedTheme,
+        shell,
+        background: `url("${url}") center / cover no-repeat`,
+      };
+    }
   }
 
   const officialId = isOfficialWallpaper(id, resolvedTheme)
@@ -186,12 +250,47 @@ export function getWallpaperDefinition(
   return {
     ...item,
     shell,
-    background: `url("/${item.file}") center / cover no-repeat`
+    background: `url("/${item.file}") center / cover no-repeat`,
   };
 }
 
-/* === Atualização de preferências === */
-/* ----- Seleção independente ----- */
+/* === Alterações de preferência === */
+/* ----- Verificação da imagem pessoal ----- */
+function isAvailableSelection(id) {
+  if (id === 'custom') {
+    return personalUrls.has(LEGACY_ID);
+  }
+
+  if (isPersonalWallpaperId(id)) {
+    return personalUrls.has(id);
+  }
+
+  return true;
+}
+
+/* ----- Variante correspondente entre temas ----- */
+function getPairedWallpaper(id, theme) {
+  if (id === 'custom' || isPersonalWallpaperId(id)) {
+    return id;
+  }
+
+  const wallpaper = getOfficialWallpaper(id);
+
+  if (!wallpaper || wallpaper.theme !== theme) {
+    return null;
+  }
+
+  const oppositeTheme = theme === 'dark' ? 'light' : 'dark';
+
+  const suffix = id.slice(`${theme}-`.length);
+  const pairedId = `${oppositeTheme}-${suffix}`;
+
+  return isOfficialWallpaper(pairedId, oppositeTheme)
+    ? pairedId
+    : null;
+}
+
+/* ----- Seleção sincronizada entre temas ----- */
 export function setWallpaper(
   id,
   shell = 'desktop',
@@ -201,50 +300,64 @@ export function setWallpaper(
     return false;
   }
 
-  if (id === 'custom' && !customUrl) {
+  if (!isAvailableSelection(id)) {
     return false;
   }
 
-  const result = updateWallpaperSelection(selected, {
+  const oppositeTheme = theme === 'dark' ? 'light' : 'dark';
+  const pairedId = getPairedWallpaper(id, theme);
+
+  if (!pairedId) {
+    return false;
+  }
+
+  const currentResult = updateWallpaperSelection(selected, {
     shell,
     theme,
     id,
   });
 
-  if (!result.ok) {
+  if (!currentResult.ok) {
     return false;
   }
 
-  selected = result.selections;
-  emit();
+  const pairedResult = updateWallpaperSelection(
+    currentResult.selections,
+    {
+      shell,
+      theme: oppositeTheme,
+      id: pairedId,
+    },
+  );
 
-  try {
-    localStorage.setItem(
-      WALLPAPER_SELECTION_KEYS[shell][theme],
-      id,
-    );
-
-    return true;
-  } catch {
+  if (!pairedResult.ok) {
     return false;
   }
-}
 
-/* === Imagem personalizada === */
-/* ----- Instalação da imagem ----- */
-function install(file) {
-  const previous = customUrl;
-
-  customUrl = URL.createObjectURL(file);
-  status = 'ready';
+  selected = pairedResult.selections;
   emit();
 
-  if (previous) {
-    URL.revokeObjectURL(previous);
+  let saved = true;
+
+  for (const [targetTheme, targetId] of [
+    [theme, id],
+    [oppositeTheme, pairedId],
+  ]) {
+    try {
+      localStorage.setItem(
+        WALLPAPER_SELECTION_KEYS[shell][targetTheme],
+        targetId,
+      );
+    } catch {
+      saved = false;
+    }
   }
+
+  return saved;
 }
 
-/* ----- Validação de arquivo ----- */
+/* === Validação de imagens === */
+/* ----- MIME, assinatura e tamanho ----- */
 export async function validateWallpaper(file) {
   if (
     !file ||
@@ -282,13 +395,13 @@ export async function validateWallpaper(file) {
     String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' &&
     String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP';
 
-  const signatures = {
+  const validSignature = {
     'image/png': png,
     'image/jpeg': jpeg,
     'image/webp': webp,
-  };
+  }[file.type];
 
-  if (!signatures[file.type]) {
+  if (!validSignature) {
     throw new Error(
       'O conteúdo não corresponde ao formato da imagem.',
     );
@@ -321,7 +434,151 @@ export async function validateWallpaper(file) {
   }
 }
 
-/* ----- Upload e seleção ----- */
+/* === Instalação da coleção === */
+/* ----- Metadados públicos ----- */
+function createPublicEntry(entry) {
+  return {
+    ...entry,
+    id: createPersonalWallpaperSelectionId(entry.id),
+  };
+}
+
+/* ----- Atualização das imagens carregadas ----- */
+async function installCollection(entries, version) {
+  const nextUrls = new Map();
+  const nextEntries = [];
+
+  try {
+    for (const entry of entries) {
+      const file = await getPersonalWallpaperFile(entry.id);
+
+      if (!file) {
+        continue;
+      }
+
+      await validateWallpaper(file);
+
+      const selectionId = createPersonalWallpaperSelectionId(
+        entry.id,
+      );
+
+      if (!selectionId) {
+        continue;
+      }
+
+      const existingUrl = personalUrls.get(selectionId);
+      const url = existingUrl ?? URL.createObjectURL(file);
+
+      nextUrls.set(selectionId, url);
+      nextEntries.push(createPublicEntry(entry));
+    }
+  } catch (error) {
+    for (const [id, url] of nextUrls) {
+      if (!personalUrls.has(id)) {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    throw error;
+  }
+
+  if (version !== generation) {
+    for (const [id, url] of nextUrls) {
+      if (!personalUrls.has(id)) {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    return;
+  }
+
+  const previousUrls = personalUrls;
+
+  personalUrls = nextUrls;
+  personalWallpapers = nextEntries;
+
+  for (const [id, url] of previousUrls) {
+    if (!nextUrls.has(id)) {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  status = personalWallpapers.length ? 'ready' : 'empty';
+  emit();
+}
+
+/* === Recuperação === */
+/* ----- Carregar e migrar coleção pessoal ----- */
+export function restoreCustomWallpaper() {
+  if (restoringPromise) {
+    return restoringPromise;
+  }
+
+  const version = generation;
+
+  status = 'loading';
+  emit();
+
+  restoringPromise = loadPersonalWallpaperCollection()
+    .then((entries) => installCollection(entries, version))
+    .catch(() => {
+      if (version === generation) {
+        status = 'error';
+        emit();
+      }
+    })
+    .finally(() => {
+      restoringPromise = null;
+    });
+
+  return restoringPromise;
+}
+
+/* === Upload === */
+/* ----- Adicionar nova imagem pessoal ----- */
+export async function addWallpaperToCollection(file) {
+  if (uploading) {
+    throw new Error('Aguarde o salvamento da imagem.');
+  }
+
+  uploading = true;
+
+  try {
+    const entry = await addPersonalWallpaper(
+      file,
+      validateWallpaper,
+    );
+
+    const selectionId = createPersonalWallpaperSelectionId(
+      entry.id,
+    );
+
+    const url = URL.createObjectURL(file);
+
+    personalUrls = new Map(personalUrls);
+    personalUrls.set(selectionId, url);
+
+    personalWallpapers = [
+      ...personalWallpapers,
+      createPublicEntry(entry),
+    ];
+
+    generation += 1;
+    status = 'ready';
+    emit();
+
+    signalImageChange();
+
+    return {
+      ...entry,
+      id: selectionId,
+    };
+  } finally {
+    uploading = false;
+  }
+}
+
+/* ----- Compatibilidade com upload anterior ----- */
 export async function uploadCustomWallpaper(
   file,
   shell = 'desktop',
@@ -330,92 +587,126 @@ export async function uploadCustomWallpaper(
     throw new Error('Preferência inválida.');
   }
 
-  if (uploading) {
-    throw new Error('Aguarde o salvamento da imagem.');
-  }
+  const theme = getTheme();
+  const entry = await addWallpaperToCollection(file);
 
-  uploading = true;
-
-  try {
-    await validateWallpaper(file);
-
-    try {
-      await writeWallpaperImage(file);
-    } catch (error) {
-      throw new Error(
-        error?.name === 'QuotaExceededError'
-          ? 'Sem espaço para salvar a imagem. A imagem anterior foi preservada.'
-          : 'Não foi possível salvar a imagem. A imagem anterior foi preservada.',
-        { cause: error },
-      );
-    }
-
-    generation += 1;
-    install(file);
-
-    try {
-      localStorage.setItem(
-        IMAGE_REVISION_KEY,
-        String(Date.now()),
-      );
-    } catch {
-      /* ----- Falha de persistência não apaga a imagem ----- */
-    }
-
-    return setWallpaper('custom', shell);
-  } finally {
-    uploading = false;
-  }
+  return setWallpaper(entry.id, shell, theme);
 }
 
-/* === Recuperação === */
-/* ----- Imagem persistida no IndexedDB ----- */
-export function restoreCustomWallpaper() {
-  if (restorePromise) {
-    return restorePromise;
+/* === Exclusão segura === */
+/* ----- Verificação de uso nas quatro seleções ----- */
+export function isPersonalWallpaperInUse(id) {
+  const selectionId = id === 'custom'
+    ? LEGACY_ID
+    : isPersonalWallpaperId(id)
+      ? id
+      : createPersonalWallpaperSelectionId(id);
+
+  if (!selectionId) {
+    return false;
   }
 
-  const version = generation;
+  if (
+    selectionId === LEGACY_ID &&
+    WALLPAPER_SHELLS.some((shell) =>
+      WALLPAPER_THEMES.some(
+        (theme) => selected[shell][theme] === 'custom',
+      ),
+    )
+  ) {
+    return true;
+  }
 
-  restorePromise = readWallpaperImage()
-    .then(async (file) => {
-      if (file) {
-        await validateWallpaper(file);
-      }
+  return isWallpaperSelectedAnywhere(
+    selected,
+    selectionId,
+  );
+}
 
-      if (version !== generation) {
-        return;
-      }
+/* ----- Remover imagem não utilizada ----- */
+export async function deleteWallpaperFromCollection(id) {
+  const selectionId = isPersonalWallpaperId(id)
+    ? id
+    : createPersonalWallpaperSelectionId(id);
 
-      if (file) {
-        install(file);
-      } else {
-        status = WALLPAPER_SHELLS.some((shell) =>
-          ['dark', 'light'].some(
-            (theme) => selected[shell][theme] === 'custom',
-          ),
-        )
-          ? 'missing'
-          : 'empty';
+  if (!selectionId || !personalUrls.has(selectionId)) {
+    return {
+      ok: false,
+      code: 'WALLPAPER_NOT_FOUND',
+    };
+  }
 
-        emit();
-      }
-    })
-    .catch(() => {
-      if (version === generation) {
-        status = 'error';
-        emit();
-      }
-    });
+  if (isPersonalWallpaperInUse(selectionId)) {
+    return {
+      ok: false,
+      code: 'WALLPAPER_IN_USE',
+    };
+  }
 
-  return restorePromise;
+  // A cópia original da imagem legada permanece protegida.
+  if (selectionId === LEGACY_ID) {
+    return {
+      ok: false,
+      code: 'WALLPAPER_LEGACY_PROTECTED',
+    };
+  }
+
+  const storageId = getPersonalWallpaperStorageId(
+    selectionId,
+  );
+
+  const result = await removeStoredWallpaper(
+    storageId,
+    () => isPersonalWallpaperInUse(selectionId),
+  );
+
+  if (!result.ok) {
+    return result;
+  }
+
+  const url = personalUrls.get(selectionId);
+
+  personalUrls = new Map(personalUrls);
+  personalUrls.delete(selectionId);
+
+  personalWallpapers = personalWallpapers.filter(
+    (entry) => entry.id !== selectionId,
+  );
+
+  generation += 1;
+  status = personalWallpapers.length ? 'ready' : 'empty';
+
+  emit();
+
+  if (url) {
+    URL.revokeObjectURL(url);
+  }
+
+  signalImageChange();
+
+  return {
+    ok: true,
+    id: selectionId,
+  };
 }
 
 /* === Sincronização === */
-/* ----- Inicialização da imagem pessoal ----- */
+/* ----- Notificar outras abas ----- */
+function signalImageChange() {
+  try {
+    localStorage.setItem(
+      IMAGE_REVISION_KEY,
+      String(Date.now()),
+    );
+  } catch {
+    /* ----- Persistência bloqueada: sessão preservada ----- */
+  }
+}
+
+/* ----- Inicialização ----- */
 restoreCustomWallpaper();
 
-/* ----- Alterações em outras abas ----- */
+/* ----- Alterações externas ----- */
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event) => {
     const selectionKeys = Object.values(
@@ -439,7 +730,6 @@ if (typeof window !== 'undefined') {
       event.key === null ||
       event.key === IMAGE_REVISION_KEY
     ) {
-      restorePromise = null;
       restoreCustomWallpaper();
     }
   });

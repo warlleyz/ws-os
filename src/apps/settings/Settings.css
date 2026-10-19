@@ -1,3 +1,5 @@
+/* === Estrutura principal === */
+/* ----- Container e variáveis locais ----- */
 .ws-settings {
   --settings-border: var(--border-default);
   --settings-accent-soft: color-mix(in srgb, var(--accent-primary) 11%, var(--surface-primary));
@@ -13,6 +15,9 @@
   color: var(--text-primary);
   container: settings / inline-size;
 }
+
+/* === Cabeçalho === */
+/* ----- Identidade e informações do sistema ----- */
 .ws-settings__header {
   display: flex;
   flex: 0 0 auto;
@@ -22,6 +27,7 @@
   border-bottom: 1px solid var(--settings-border);
   background: var(--surface-primary);
 }
+
 .ws-settings__brand-icon {
   display: grid;
   width: 46px;
@@ -33,20 +39,24 @@
   background: var(--settings-accent-soft);
   color: var(--accent-secondary);
 }
+
 .ws-settings__brand {
   min-width: 0;
   flex: 1;
 }
+
 .ws-settings__brand h2 {
   margin: 0 0 4px;
   font-size: 19px;
   font-weight: 800;
 }
+
 .ws-settings__brand p {
   margin: 0;
   color: var(--text-secondary);
   font-size: 12px;
 }
+
 .ws-settings__brand-tag {
   padding: 5px 9px;
   border: 1px solid var(--settings-border);
@@ -54,6 +64,9 @@
   color: var(--text-secondary);
   font-size: 10px;
 }
+
+/* === Navegação e layout === */
+/* ----- Colunas, sidebar e conteúdo ----- */
 .ws-settings__layout {
   display: grid;
   flex: 1;
@@ -61,6 +74,7 @@
   min-height: 0;
   grid-template-columns: 210px minmax(0, 1fr);
 }
+
 .ws-settings__sidebar {
   display: flex;
   min-width: 0;
@@ -70,12 +84,14 @@
   padding: 20px 12px 14px;
   border-right: 1px solid var(--settings-border);
 }
+
 .ws-settings__sidebar-heading {
   padding: 0 12px 14px;
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 800;
 }
+
 .ws-settings__navigation {
   display: flex;
   min-height: 0;
@@ -84,6 +100,7 @@
   overflow-y: auto;
   scrollbar-width: thin;
 }
+
 .ws-settings__navigation-button {
   position: relative;
   display: flex;
@@ -103,21 +120,26 @@
   text-align: left;
   cursor: pointer;
 }
+
 .ws-settings__navigation-button svg {
   flex: 0 0 auto;
 }
+
 .ws-settings__navigation-button span {
   overflow-wrap: anywhere;
 }
+
 .ws-settings__navigation-button:hover {
   background: var(--settings-hover);
   color: var(--text-primary);
 }
+
 .ws-settings__navigation-button.is-active {
   border-color: var(--accent-secondary);
   background: var(--settings-accent-soft);
   color: var(--accent-secondary);
 }
+
 .ws-settings__sidebar-footer {
   display: flex;
   flex: 0 0 auto;
@@ -128,12 +150,16 @@
   color: var(--text-secondary);
   font-size: 10px;
 }
+
 .ws-settings__status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: var(--accent-secondary);
 }
+
+/* === Área de conteúdo === */
+/* ----- Rolagem e painéis ----- */
 .ws-settings__content {
   min-width: 0;
   min-height: 0;
@@ -144,6 +170,7 @@
   outline-offset: -3px;
   background: color-mix(in srgb, var(--surface-canvas) 45%, var(--surface-primary));
 }
+
 .ws-settings__content-inner {
   width: 100%;
   max-width: 900px;
@@ -151,9 +178,11 @@
   margin: 0 auto;
   padding: 28px 28px 40px;
 }
+
 .ws-settings__section-heading {
   margin-bottom: 24px;
 }
+
 .ws-settings__eyebrow {
   display: inline-block;
   margin-bottom: 10px;
@@ -161,10 +190,12 @@
   font-size: 10px;
   font-weight: 700;
 }
+
 .ws-settings__section-heading h3 {
   margin: 0 0 8px;
   font-size: 24px;
 }
+
 .ws-settings__section-heading p,
 .ws-settings__card-heading p {
   margin: 8px 0 0;
@@ -172,10 +203,12 @@
   font-size: 13px;
   line-height: 1.65;
 }
+
 .ws-settings__stack {
   display: grid;
   gap: 18px;
 }
+
 .ws-settings__card {
   min-width: 0;
   padding: 22px;
@@ -184,21 +217,27 @@
   background: var(--surface-primary);
   box-shadow: 0 3px 16px rgb(0 0 0 / 4%);
 }
+
 .ws-settings__card-heading {
   margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--settings-border);
 }
+
 .ws-settings__card-heading h4 {
   margin: 0;
   font-size: 15px;
   font-weight: 800;
 }
+
+/* === Tema e aparência === */
+/* ----- Cartões de seleção visual ----- */
 .ws-settings__theme-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
+
 .ws-settings__theme-option,
 .ws-settings__wallpaper-option {
   display: flex;
@@ -214,15 +253,18 @@
   text-align: left;
   cursor: pointer;
 }
+
 .ws-settings__theme-option:hover,
 .ws-settings__wallpaper-option:hover {
   border-color: var(--accent-secondary);
 }
+
 .ws-settings__theme-option.is-active,
 .ws-settings__wallpaper-option.is-active {
   border-color: var(--accent-secondary);
   box-shadow: 0 0 0 1px var(--accent-secondary);
 }
+
 .ws-settings__theme-preview {
   display: flex;
   height: 92px;
@@ -230,14 +272,17 @@
   gap: 8px;
   background: #182230;
 }
+
 .ws-settings__theme-option--light .ws-settings__theme-preview {
   background: #edf2f7;
 }
+
 .ws-settings__theme-preview-sidebar {
   width: 25%;
   border-radius: 5px;
   background: #ffffff20;
 }
+
 .ws-settings__theme-preview-panel {
   display: grid;
   flex: 1;
@@ -246,15 +291,18 @@
   border-radius: 5px;
   background: #ffffff30;
 }
+
 .ws-settings__theme-option--light .ws-settings__theme-preview-panel,
 .ws-settings__theme-option--light .ws-settings__theme-preview-sidebar {
   background: #14283e20;
 }
+
 .ws-settings__theme-preview-panel span {
   height: 6px;
   border-radius: 4px;
   background: #378ce4;
 }
+
 .ws-settings__theme-label {
   display: flex;
   align-items: center;
@@ -262,14 +310,19 @@
   padding: 12px;
   font-size: 13px;
 }
+
 .ws-settings__theme-option.is-active .ws-settings__theme-label {
   background: var(--settings-accent-soft);
 }
+
+/* === Controles gerais === */
+/* ----- Campos, toggles e ações ----- */
 .ws-settings__field-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
   gap: 16px;
 }
+
 .ws-settings__field {
   display: flex;
   min-width: 0;
@@ -277,6 +330,7 @@
   gap: 9px;
   font-size: 13px;
 }
+
 .ws-settings__field select {
   width: 100%;
   min-height: 44px;
@@ -286,10 +340,12 @@
   color: var(--text-primary);
   background: var(--surface-secondary);
 }
+
 .ws-settings__options {
   display: grid;
   gap: 16px;
 }
+
 .ws-settings__toggle {
   display: flex;
   min-height: 48px;
@@ -302,16 +358,19 @@
   background: var(--surface-secondary);
   cursor: pointer;
 }
+
 .ws-settings__toggle-copy {
   min-width: 0;
   font-size: 13px;
 }
+
 .ws-settings__toggle input {
   width: 22px;
   height: 22px;
   flex: 0 0 auto;
   accent-color: var(--action-background);
 }
+
 .ws-settings__hint,
 .ws-settings__reset p {
   color: var(--text-secondary);
@@ -319,6 +378,7 @@
   line-height: 1.65;
   overflow-wrap: anywhere;
 }
+
 .ws-settings__reset-button,
 .ws-settings__confirm button,
 .ws-settings__upload button {
@@ -335,14 +395,17 @@
   font-size: 13px;
   cursor: pointer;
 }
+
 .ws-settings__confirm {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
+
 .ws-settings__confirm p {
   flex-basis: 100%;
 }
+
 .ws-settings__accent {
   display: flex;
   flex-wrap: wrap;
@@ -352,10 +415,12 @@
   padding: 0;
   border: 0;
 }
+
 .ws-settings__accent legend {
   margin-bottom: 12px;
   font-size: 13px;
 }
+
 .ws-settings__accent button {
   display: flex;
   min-height: 44px;
@@ -370,37 +435,47 @@
   font-size: 13px;
   cursor: pointer;
 }
+
 .ws-settings__accent button[aria-pressed='true'] {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 1px;
 }
+
 .ws-settings__accent button span {
   width: 18px;
   height: 18px;
   border-radius: 50%;
   background: #378ce4;
 }
+
 .ws-settings__accent button[data-color='violet'] span {
   background: #9270ed;
 }
+
 .ws-settings__accent button[data-color='green'] span {
   background: #08775f;
 }
+
+/* === Wallpapers === */
+/* ----- Galerias e prévias ----- */
 .ws-settings__wallpaper-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
   gap: 14px;
 }
+
 .ws-settings__wallpaper-preview {
   position: relative;
   display: block;
   width: 100%;
   aspect-ratio: 16 / 10;
 }
+
 .ws-settings__wallpaper-grid[data-shell='mobile'] .ws-settings__wallpaper-preview {
   aspect-ratio: 9 / 16;
   max-height: 230px;
 }
+
 .ws-settings__wallpaper-check {
   position: absolute;
   top: 9px;
@@ -413,6 +488,7 @@
   background: var(--action-background);
   color: var(--action-text);
 }
+
 .ws-settings__wallpaper-info {
   display: flex;
   min-height: 56px;
@@ -421,153 +497,238 @@
   gap: 4px;
   padding: 11px 12px;
 }
+
 .ws-settings__wallpaper-info strong {
   font-size: 13px;
 }
+
 .ws-settings__wallpaper-info small {
   font-size: 12px;
   color: var(--text-secondary);
 }
+
 .ws-settings__wallpaper-option.is-active .ws-settings__wallpaper-info {
   background: var(--settings-accent-soft);
 }
+
+/* === Coleção de wallpapers pessoais === */
+/* ----- Cartão e controles ----- */
+.ws-settings__personal-wallpaper {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ws-settings__personal-wallpaper .ws-settings__wallpaper-option {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+}
+
+.ws-settings__personal-wallpaper .ws-settings__wallpaper-info strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ----- Excluir imagem não utilizada ----- */
+.ws-settings__personal-wallpaper-delete {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.ws-settings__personal-wallpaper-delete:hover:not(:disabled) {
+  border-color: var(--accent-secondary);
+  background: var(--settings-hover);
+}
+
+.ws-settings__personal-wallpaper-delete:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+.ws-settings__personal-wallpaper-delete:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* === Upload de imagens === */
+/* ----- Entrada de arquivos ----- */
 .ws-settings__upload {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 16px;
 }
+
 .ws-settings__upload input {
   width: 100%;
   min-width: 0;
   font-size: 12px;
 }
+
+/* === Mensagens === */
+/* ----- Feedback de operação ----- */
 .ws-settings__message {
   color: var(--text-secondary);
   font-size: 13px;
   overflow-wrap: anywhere;
 }
+
 .ws-settings__message.is-error {
   color: var(--status-error);
 }
+
 .ws-settings button:disabled {
   cursor: wait;
   opacity: 0.6;
 }
+
 .ws-settings button {
   transition:
     background var(--transition-fast),
     border-color var(--transition-fast);
 }
+
+/* === Responsividade === */
+/* ----- Área de Configurações compacta ----- */
 @container settings (max-width: 650px) {
   .ws-settings__layout {
     display: flex;
     flex-direction: column;
   }
+
   .ws-settings__sidebar {
     flex: 0 0 auto;
     padding: 10px 12px;
     border-right: 0;
     border-bottom: 1px solid var(--settings-border);
   }
+
   .ws-settings__sidebar-heading,
   .ws-settings__sidebar-footer {
     display: none;
   }
+
   .ws-settings__navigation {
     flex-direction: row;
     overflow: auto;
   }
+
   .ws-settings__navigation-button {
     width: auto;
     white-space: nowrap;
   }
+
   .ws-settings__content {
     flex: 1;
   }
+
   .ws-settings__content-inner {
     padding: 20px 14px 30px;
   }
+
   .ws-settings__card {
     padding: 16px;
   }
+
   .ws-settings__header {
     padding: 12px 16px;
   }
+
   .ws-settings__brand-tag {
     display: none;
   }
 }
+
 @container settings (max-width: 340px) {
   .ws-settings__brand p {
     display: none;
   }
+
   .ws-settings__theme-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* === Integração Mobile === */
+/* ----- Layout dentro do shell Mobile ----- */
 .ws-mobile__app-content .ws-settings {
   height: auto;
   min-height: 100%;
   overflow: visible;
 }
+
 .ws-mobile__app-content .ws-settings__content {
   overflow: visible;
 }
+
+/* === Acessibilidade === */
+/* ----- Alto contraste forçado ----- */
 @media (forced-colors: active) {
   .ws-settings [aria-pressed='true'] {
     outline: 2px solid Highlight;
   }
 }
 
-
-/* Scrollbars do aplicativo Configurações */
-
+/* === Scrollbars do aplicativo Configurações === */
 .ws-settings {
-    --settings-scrollbar-track: transparent;
-    --settings-scrollbar-thumb: color-mix(in srgb,
-            var(--text-secondary) 34%,
-            transparent);
-    --settings-scrollbar-hover: color-mix(in srgb,
-            var(--accent-primary) 70%,
-            var(--border-default));
+  --settings-scrollbar-track: transparent;
+
+  --settings-scrollbar-thumb: color-mix(in srgb,
+      var(--text-secondary) 34%,
+      transparent);
+
+  --settings-scrollbar-hover: color-mix(in srgb,
+      var(--accent-primary) 70%,
+      var(--border-default));
 }
 
 .ws-settings__content,
 .ws-settings__navigation,
 .ws-settings__sidebar {
-    scrollbar-width: thin;
-    scrollbar-color:
-        var(--settings-scrollbar-thumb) var(--settings-scrollbar-track);
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--settings-scrollbar-thumb) var(--settings-scrollbar-track);
 }
 
 .ws-settings__content::-webkit-scrollbar,
 .ws-settings__navigation::-webkit-scrollbar,
 .ws-settings__sidebar::-webkit-scrollbar {
-    width: 9px;
-    height: 7px;
+  width: 9px;
+  height: 7px;
 }
 
 .ws-settings__content::-webkit-scrollbar-track,
 .ws-settings__navigation::-webkit-scrollbar-track,
 .ws-settings__sidebar::-webkit-scrollbar-track {
-    background: var(--settings-scrollbar-track);
+  background: var(--settings-scrollbar-track);
 }
 
 .ws-settings__content::-webkit-scrollbar-thumb,
 .ws-settings__navigation::-webkit-scrollbar-thumb,
 .ws-settings__sidebar::-webkit-scrollbar-thumb {
-    border: 2px solid var(--surface-primary);
-    border-radius: 999px;
-    background: var(--settings-scrollbar-thumb);
+  border: 2px solid var(--surface-primary);
+  border-radius: 999px;
+  background: var(--settings-scrollbar-thumb);
 }
 
 .ws-settings__content::-webkit-scrollbar-thumb:hover,
 .ws-settings__navigation::-webkit-scrollbar-thumb:hover,
 .ws-settings__sidebar::-webkit-scrollbar-thumb:hover {
-    background: var(--settings-scrollbar-hover);
+  background: var(--settings-scrollbar-hover);
 }
 
 .ws-settings__content::-webkit-scrollbar-corner {
-    background: transparent;
+  background: transparent;
 }

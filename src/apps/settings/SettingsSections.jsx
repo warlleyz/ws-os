@@ -6,9 +6,11 @@ import {
   useWallpaper,
   useWallpaperRevision,
   useWallpaperStatus,
-  useCustomWallpaperAvailable,
+  usePersonalWallpapers,
   setWallpaper,
   uploadCustomWallpaper,
+  deleteWallpaperFromCollection,
+  isPersonalWallpaperInUse,
   getWallpaperDefinition,
 } from '../../core/wallpaperManager';
 
@@ -76,8 +78,9 @@ function SettingsToggle({ label, checked, onChange }) {
   );
 }
 
+
 /* === Galeria de wallpapers === */
-/* ----- Seleção e upload por plataforma e tema ----- */
+/* ----- Seleção por plataforma e tema ----- */
 function WallpaperGallery({ shell, report, announce }) {
   const theme = useTheme();
   const selected = useWallpaper(shell);
@@ -85,14 +88,15 @@ function WallpaperGallery({ shell, report, announce }) {
   useWallpaperRevision();
 
   const status = useWallpaperStatus();
-  const available = useCustomWallpaperAvailable();
+  const personalWallpapers = usePersonalWallpapers();
 
   const [busy, setBusy] = useState(false);
 
   const inputRef = useRef(null);
   const mounted = useRef(false);
 
-  /* ----- Ciclo de vida ----- */
+  /* === Ciclo de vida === */
+  /* ----- Evitar atualização após desmontagem ----- */
   useEffect(() => {
     mounted.current = true;
 
@@ -101,14 +105,27 @@ function WallpaperGallery({ shell, report, announce }) {
     };
   }, []);
 
-  /* ----- Upload da imagem pessoal ----- */
+  /* === Catálogos === */
+  /* ----- Wallpapers correspondentes ao tema ----- */
+  const officialChoices = getOfficialWallpapersByTheme(theme);
+
+  /* === Seleção === */
+  /* ----- Aplicar wallpaper à plataforma ----- */
+  function selectWallpaper(id) {
+    report(setWallpaper(id, shell, theme));
+  }
+
+  /* === Upload === */
+  /* ----- Adicionar imagem pessoal à coleção ----- */
   async function upload(event) {
     const input = event.currentTarget;
     const file = input.files?.[0];
 
     input.value = '';
 
-    if (!file) return;
+    if (!file || busy) {
+      return;
+    }
 
     setBusy(true);
 
@@ -129,17 +146,37 @@ function WallpaperGallery({ shell, report, announce }) {
     }
   }
 
-  /* ----- Catálogo correspondente ao tema ----- */
-  const officialChoices = getOfficialWallpapersByTheme(theme);
+  /* === Exclusão === */
+  /* ----- Remover imagem que não está em uso ----- */
+  async function removeWallpaper(id) {
+    if (
+      busy ||
+      id === 'personal:legacy' ||
+      isPersonalWallpaperInUse(id)
+    ) {
+      return;
+    }
 
-  const choices = available
-    ? [
-      ...officialChoices,
-      { id: 'custom', name: 'Personalizado' },
-    ]
-    : officialChoices;
+    setBusy(true);
 
-  /* ----- Renderização da galeria ----- */
+    try {
+      const result = await deleteWallpaperFromCollection(id);
+
+      if (result.ok) {
+        report(true);
+      } else {
+        report(false);
+      }
+    } catch {
+      report(false);
+    } finally {
+      if (mounted.current) {
+        setBusy(false);
+      }
+    }
+  }
+
+  /* === Renderização === */
   return (
     <SettingsCard
       title={t(
@@ -151,12 +188,14 @@ function WallpaperGallery({ shell, report, announce }) {
         'A seleção é independente para cada shell. A imagem pessoal fica somente neste navegador.',
       )}
     >
+      {/* === Wallpapers oficiais === */}
+      {/* ----- Galeria do tema ativo ----- */}
       <div
         className="ws-settings__wallpaper-grid"
         data-shell={shell}
         aria-busy={busy}
       >
-        {choices.map((item) => {
+        {officialChoices.map((item) => {
           const isActive = selected === item.id;
 
           return (
@@ -166,7 +205,7 @@ function WallpaperGallery({ shell, report, announce }) {
               className={`ws-settings__wallpaper-option${isActive ? ' is-active' : ''}`}
               aria-pressed={isActive}
               disabled={busy}
-              onClick={() => report(setWallpaper(item.id, shell, theme))}
+              onClick={() => selectWallpaper(item.id)}
             >
               <span
                 className="ws-settings__wallpaper-preview"
@@ -181,14 +220,13 @@ function WallpaperGallery({ shell, report, announce }) {
               >
                 {isActive && (
                   <span className="ws-settings__wallpaper-check">
-                    <Check size={16} />
+                    <Check size={16} aria-hidden="true" />
                   </span>
                 )}
               </span>
 
               <span className="ws-settings__wallpaper-info">
                 <strong>{t(item.name)}</strong>
-
                 <small>
                   {t(isActive ? 'Em uso' : 'Selecionar')}
                 </small>
@@ -198,7 +236,94 @@ function WallpaperGallery({ shell, report, announce }) {
         })}
       </div>
 
-      {/* ----- Upload de wallpapers pessoais ----- */}
+      {/* === Coleção pessoal === */}
+      {/* ----- Imagens cadastradas no navegador ----- */}
+      {personalWallpapers.length > 0 && (
+        <div
+          className="ws-settings__wallpaper-grid"
+          data-shell={shell}
+          aria-busy={busy}
+        >
+          {personalWallpapers.map((item) => {
+            const isActive =
+              selected === item.id ||
+              (
+                selected === 'custom' &&
+                item.id === 'personal:legacy'
+              );
+
+            const protectedImage =
+              item.id === 'personal:legacy';
+
+            const inUse =
+              isPersonalWallpaperInUse(item.id);
+
+            const cannotRemove =
+              busy || protectedImage || inUse;
+
+            return (
+              <div
+                key={item.id}
+                className="ws-settings__personal-wallpaper"
+              >
+                {/* ----- Selecionar imagem ----- */}
+                <button
+                  type="button"
+                  className={`ws-settings__wallpaper-option${isActive ? ' is-active' : ''}`}
+                  aria-pressed={isActive}
+                  disabled={busy}
+                  onClick={() => selectWallpaper(item.id)}
+                >
+                  <span
+                    className="ws-settings__wallpaper-preview"
+                    style={{
+                      background: getWallpaperDefinition(
+                        item.id,
+                        shell,
+                        theme,
+                      ).background,
+                    }}
+                    aria-hidden="true"
+                  >
+                    {isActive && (
+                      <span className="ws-settings__wallpaper-check">
+                        <Check size={16} aria-hidden="true" />
+                      </span>
+                    )}
+                  </span>
+
+                  <span className="ws-settings__wallpaper-info">
+                    <strong title={item.name}>
+                      {item.name}
+                    </strong>
+
+                    <small>
+                      {t(isActive ? 'Em uso' : 'Selecionar')}
+                    </small>
+                  </span>
+                </button>
+
+                {/* ----- Exclusão segura ----- */}
+                <button
+                  type="button"
+                  className="ws-settings__personal-wallpaper-delete"
+                  disabled={cannotRemove}
+                  onClick={() => removeWallpaper(item.id)}
+                  title={t(
+                    inUse ? 'Em uso' : 'Excluir',
+                  )}
+                  aria-label={`${t('Excluir')}: ${item.name}`}
+                >
+                  {t('Excluir')}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* === Inclusão de imagens === */}
+      {/* ----- Seleção de arquivo local ----- */}
       <div className="ws-settings__upload">
         <input
           ref={inputRef}
@@ -217,26 +342,28 @@ function WallpaperGallery({ shell, report, announce }) {
           {t(
             busy
               ? 'Salvando imagem…'
-              : available
-                ? 'Substituir imagem pessoal'
-                : 'Adicionar imagem pessoal',
+              : 'Adicionar imagem pessoal',
           )}
         </button>
       </div>
 
+      {/* === Orientações da coleção pessoal === */}
+      {/* ----- Formatos e limites ----- */}
       <p className="ws-settings__hint">
         {t(
           'PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Substituir atualiza a imagem compartilhada pelos shells que a utilizam.',
         )}
       </p>
-
-      {/* ----- Estado de recuperação da imagem pessoal ----- */}
+      
+      {/* === Recuperação === */}
+      {/* ----- Estado de carregamento ----- */}
       {status === 'loading' && (
         <p role="status">
           {t('Recuperando imagem pessoal…')}
         </p>
       )}
 
+      {/* ----- Falha de recuperação ----- */}
       {['missing', 'error'].includes(status) && (
         <p role="status">
           {t(
