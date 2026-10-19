@@ -445,3 +445,102 @@ test('HTML oficial é exibido como texto, nunca como iframe executável', async 
     undefined,
   );
 });
+
+test('gerenciador impede criar na raiz por engano quando a pasta aberta é removida', async () => {
+  const store = {
+    entries: [entry({ id: 'folder', kind: 'folder', name: 'Pasta', blob: null })],
+    loading: false,
+    error: '',
+    refresh() {},
+  };
+  let back,
+    created = 0;
+  const ui = await component(
+    'src/apps/files/Files.jsx',
+    { instance: { id: 'files' } },
+    {
+      useLocalFiles: () => store,
+      useSystem: () => ({ run() {} }),
+      useAppBack: (_id, handler) => {
+        back = handler;
+      },
+      portfolio: { officialFiles: [] },
+      contentText: (value) => value,
+      publicAssetUrl: () => null,
+      openApp: 'open',
+      createLocalFolder: async () => {
+        created++;
+      },
+    },
+  );
+  ui.button('Abrir').props.onClick();
+  ui.render();
+  store.entries = [];
+  ui.render();
+  assert.match(ui.text(), /Pasta de destino indisponível/);
+  ui.nodes()
+    .find((n) => n.type === 'input')
+    .props.onChange({ target: { value: 'Nova' } });
+  ui.render();
+  assert.equal(ui.button('Criar pasta').props.disabled, true);
+  await ui.button('Criar pasta').props.onClick();
+  ui.render();
+  assert.equal(created, 0);
+  assert.equal(back(), true);
+  ui.render();
+  assert.equal(ui.button('Pasta anterior'), undefined);
+});
+
+test('Arquivos abre visualizador/editor pelo contrato fileId e mantém oficiais sem escrita', async () => {
+  const calls = [];
+  const store = { entries: [entry()], loading: false, error: '', refresh() {} };
+  const ui = await component(
+    'src/apps/files/Files.jsx',
+    { instance: { id: 'files' } },
+    {
+      useLocalFiles: () => store,
+      useSystem: () => ({ run: (...args) => calls.push(args) }),
+      useAppBack() {},
+      portfolio: { officialFiles: [{ id: 'official', name: 'PDF oficial', url: '/oficial.pdf' }] },
+      contentText: (value) => value,
+      publicAssetUrl: (url) => url,
+      openApp: 'open',
+    },
+  );
+  ui.button('Abrir').props.onClick();
+  ui.button('Editar').props.onClick();
+  assert.equal(calls[0][1], 'file-viewer');
+  assert.equal(calls[0][2].params.fileId, 'file');
+  assert.equal(calls[1][1], 'file-editor');
+  ui.button('Arquivos oficiais').props.onClick();
+  ui.render();
+  assert.equal(ui.button('Criar pasta'), undefined);
+  assert.equal(ui.button('Editar'), undefined);
+  ui.button('Visualizar').props.onClick();
+  assert.equal(calls[2][2].params.url, '/oficial.pdf');
+});
+
+test('leitura do gerenciador ignora resposta antiga e preserva listagem ao falhar atualização', async () => {
+  const requests = [];
+  const ui = await component(
+    'src/shared/hooks/useLocalFiles.js',
+    {},
+    {
+      listLocalFiles: () => new Promise((resolve, reject) => requests.push({ resolve, reject })),
+    },
+  );
+  ui.render().refresh();
+  ui.render();
+  requests[1].resolve([entry({ name: 'atual.txt' })]);
+  await ui.flush();
+  requests[0].resolve([entry({ name: 'antigo.txt' })]);
+  await ui.flush();
+  assert.equal(ui.render().entries[0].name, 'atual.txt');
+  ui.render().refresh();
+  ui.render();
+  requests[2].reject(Error('Falha de leitura'));
+  await ui.flush();
+  const state = ui.render();
+  assert.equal(state.error, 'Falha de leitura');
+  assert.equal(state.entries[0].name, 'atual.txt');
+});

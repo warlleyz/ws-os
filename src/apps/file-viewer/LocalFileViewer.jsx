@@ -83,10 +83,10 @@ export default function LocalFileViewer({ fileId }) {
                 <img
                   className="ws-app__cover"
                   style={{ width: `${zoom * 100}%`, maxWidth: 'none', maxHeight: 'none' }}
+                  hidden={state.previewError}
                   src={state.url}
                   alt={state.file.name}
-                  onError={(event) => {
-                    event.currentTarget.hidden = true;
+                  onError={() => {
                     setState((current) =>
                       current.url === state.url ? { ...current, previewError: true } : current,
                     );

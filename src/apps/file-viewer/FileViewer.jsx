@@ -246,11 +246,11 @@ function OfficialFileViewer({ instance }) {
             </button>
           </div>
           <img
+            hidden={result.previewError}
             src={result.objectUrl}
             alt={name}
             style={{ width: zoom * 100 + '%', maxWidth: 'none' }}
-            onError={(event) => {
-              event.currentTarget.hidden = true;
+            onError={() => {
               setResult((current) => ({ ...current, previewError: true }));
             }}
           />

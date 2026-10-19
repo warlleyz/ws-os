@@ -36,8 +36,8 @@ export default function Files({ instance }) {
       setAction(null);
       return true;
     }
-    if (parentId) {
-      setFolderId(folder.parentId);
+    if (parentId || unavailableFolder) {
+      setFolderId(folder?.parentId ?? null);
       return true;
     }
     if (space !== 'personal') {
