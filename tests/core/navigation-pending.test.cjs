@@ -52,6 +52,7 @@ function createCore() {
             getAppDefinition: registry.getAppDefinition,
             getAppNavigationContract: registry.getAppNavigationContract,
             isAdminAuthenticated: () => authorized,
+            validateFileResource: loadFileResourceContract().validateFileResource,
         },
         [
             'openApp',
@@ -275,3 +276,17 @@ test('segunda navegação não substitui a primeira confirmação pendente', () 
 
     unregister();
 });
+
+/* === Dependências de arquivos === */
+/* ----- Carregamento do contrato compartilhado ----- */
+function loadFileResourceContract() {
+    const source = fs.readFileSync(
+        path.join(root, 'src/services/storage/fileResourceContract.js'),
+        'utf8',
+    ).replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
+
+    const context = vm.createContext({});
+    vm.runInContext(source, context);
+
+    return context;
+}

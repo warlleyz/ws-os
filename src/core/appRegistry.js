@@ -306,6 +306,7 @@ const navigationContracts = {
       fileId: 'string',
       url: 'string',
       name: 'string',
+      resource: 'file-resource',
     },
     reusePolicy: 'multiple',
   },

@@ -1,5 +1,6 @@
 import { getAppDefinition, getAppNavigationContract } from './appRegistry';
 import { isAdminAuthenticated } from '../services/authService';
+import { validateFileResource } from '../services/storage/fileResourceContract';
 
 /* === Estado inicial === */
 export const initialAppState = {
@@ -68,15 +69,36 @@ function validateNavigationParams(appId, params) {
   const acceptedParams = contract.params;
 
   if (acceptedParams === null) {
-    return {
-      ok: true,
-    };
+    return { ok: true };
   }
 
   for (const [key, value] of Object.entries(params)) {
+    /* ----- Verificação dos campos declarados ----- */
+    if (!Object.hasOwn(acceptedParams, key)) {
+      return {
+        ok: false,
+        code: 'INVALID_NAVIGATION_PARAMS',
+      };
+    }
+
+    const expectedType = acceptedParams[key];
+
+    /* ----- Validação de descritores de arquivos ----- */
+    if (expectedType === 'file-resource') {
+      if (!validateFileResource(value).ok) {
+        return {
+          ok: false,
+          code: 'INVALID_NAVIGATION_PARAMS',
+        };
+      }
+
+      continue;
+    }
+
+    /* ----- Validação dos parâmetros simples ----- */
     if (
-      !Object.hasOwn(acceptedParams, key) ||
-      typeof value !== acceptedParams[key] ||
+      expectedType !== 'string' ||
+      typeof value !== 'string' ||
       !value.trim()
     ) {
       return {
@@ -86,9 +108,7 @@ function validateNavigationParams(appId, params) {
     }
   }
 
-  return {
-    ok: true,
-  };
+  return { ok: true };
 }
 
 /* ----- Solicitação de abertura ----- */

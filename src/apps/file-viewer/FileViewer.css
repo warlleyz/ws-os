@@ -1,7 +1,12 @@
+/* === Estrutura principal === */
+/* ----- Contêiner do visualizador ----- */
 .ws-file-viewer {
+    box-sizing: border-box;
     min-width: 0;
+    width: 100%;
 }
 
+/* ----- Cabeçalho ----- */
 .ws-file-viewer__header {
     display: flex;
     align-items: flex-start;
@@ -17,34 +22,93 @@
 
 .ws-file-viewer__header p {
     margin: 0;
-    overflow-wrap: anywhere;
     color: var(--text-secondary);
+    overflow-wrap: anywhere;
 }
 
+/* === Ações e controles === */
+/* ----- Grupo de ações ----- */
 .ws-file-viewer__actions {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
     gap: 10px;
 }
 
-.ws-file-viewer__actions a {
+/* ----- Links e botões ----- */
+.ws-file-viewer__actions a,
+.ws-file-viewer__actions button {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
+    box-sizing: border-box;
     min-height: 36px;
     padding: 8px 12px;
     border: 1px solid var(--border-default);
     border-radius: 8px;
+    background: transparent;
     color: var(--text-primary);
+    font: inherit;
+    line-height: 1.3;
     text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color 150ms ease,
+        border-color 150ms ease;
 }
 
-.ws-file-viewer__actions a:hover {
+/* ----- Interações ----- */
+.ws-file-viewer__actions a:hover,
+.ws-file-viewer__actions button:hover {
     background: var(--surface-secondary);
 }
 
+.ws-file-viewer__actions a:focus-visible,
+.ws-file-viewer__actions button:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+}
+
+/* === Propriedades dos arquivos === */
+/* ----- Painel de informações ----- */
+.ws-file-viewer details {
+    min-width: 0;
+    margin-bottom: 16px;
+    padding: 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+}
+
+.ws-file-viewer details summary {
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ws-file-viewer details dl {
+    display: grid;
+    grid-template-columns: minmax(90px, auto) minmax(0, 1fr);
+    gap: 8px 16px;
+    margin: 12px 0 0;
+}
+
+.ws-file-viewer details dt {
+    color: var(--text-secondary);
+}
+
+.ws-file-viewer details dd {
+    min-width: 0;
+    margin: 0;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+/* === Pré-visualização de documentos === */
+/* ----- PDF oficial ----- */
 .ws-file-viewer__preview {
     box-sizing: border-box;
+    display: block;
     width: 100%;
     height: min(65vh, 680px);
     min-height: 280px;
@@ -53,25 +117,71 @@
     background: white;
 }
 
+/* ----- PDF local ----- */
+.ws-file-viewer .ws-app__demo {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    height: min(65vh, 680px);
+    min-height: 280px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: white;
+}
+
+/* === Pré-visualização de imagens === */
+/* ----- Contêiner da imagem ----- */
 .ws-file-viewer__image-container {
     display: grid;
-    min-height: 220px;
-    place-items: center;
+    min-width: 0;
+    gap: 16px;
     padding: 16px;
     border: 1px solid var(--border-default);
     border-radius: 8px;
     background: var(--surface-secondary);
 }
 
-.ws-file-viewer__image-container img {
+/* ----- Área de rolagem ----- */
+.ws-file-viewer__image-viewport {
+    display: grid;
+    min-width: 0;
+    max-height: 65vh;
+    overflow: auto;
+    place-items: center;
+}
+
+/* ----- Imagem oficial ----- */
+.ws-file-viewer__image-container>img {
     display: block;
     max-width: 100%;
     max-height: 65vh;
+    margin-inline: auto;
     object-fit: contain;
 }
 
+/* ----- Imagem local ----- */
+.ws-file-viewer__image-viewport img {
+    display: block;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+}
+
+/* ----- Zoom e informações ----- */
+.ws-file-viewer__image-container .ws-app__toolbar {
+    min-width: 0;
+}
+
+.ws-file-viewer__actions span {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* === Pré-visualização de texto === */
+/* ----- Conteúdo textual ----- */
 .ws-file-viewer__text {
     box-sizing: border-box;
+    max-width: 100%;
     max-height: 65vh;
     margin: 0;
     padding: 16px;
@@ -86,6 +196,16 @@
     overflow-wrap: anywhere;
 }
 
+/* ----- Código e texto pré-formatado ----- */
+.ws-file-viewer__text code {
+    color: inherit;
+    font: inherit;
+    white-space: inherit;
+    overflow-wrap: inherit;
+}
+
+/* === Estados da interface === */
+/* ----- Nenhum arquivo ou recurso indisponível ----- */
 .ws-file-viewer__empty {
     display: flex;
     min-height: 200px;
@@ -93,11 +213,77 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    padding: 20px;
     color: var(--text-secondary);
     text-align: center;
 }
 
+.ws-file-viewer__empty h2,
 .ws-file-viewer__empty h3,
 .ws-file-viewer__empty p {
     margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.ws-file-viewer__empty h2,
+.ws-file-viewer__empty h3 {
+    color: var(--text-primary);
+}
+
+/* ----- Mensagens de estado ----- */
+.ws-file-viewer [role='status'],
+.ws-file-viewer [role='alert'] {
+    overflow-wrap: anywhere;
+}
+
+/* === Responsividade === */
+/* ----- Janelas compactas e dispositivos móveis ----- */
+@media (max-width: 600px) {
+    .ws-file-viewer__header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .ws-file-viewer__actions {
+        gap: 8px;
+    }
+
+    .ws-file-viewer__actions a,
+    .ws-file-viewer__actions button {
+        min-height: 40px;
+        padding: 8px 10px;
+    }
+
+    .ws-file-viewer__image-container {
+        gap: 12px;
+        padding: 10px;
+    }
+
+    .ws-file-viewer__text {
+        padding: 12px;
+        font-size: 12px;
+    }
+
+    .ws-file-viewer__preview,
+    .ws-file-viewer .ws-app__demo {
+        height: 55dvh;
+        min-height: 240px;
+    }
+
+    .ws-file-viewer details dl {
+        grid-template-columns: minmax(70px, auto) minmax(0, 1fr);
+        gap: 8px 10px;
+    }
+}
+
+/* === Acessibilidade === */
+/* ----- Preferência por movimento reduzido ----- */
+@media (prefers-reduced-motion: reduce) {
+
+    .ws-file-viewer__actions a,
+    .ws-file-viewer__actions button {
+        transition: none;
+    }
 }

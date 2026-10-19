@@ -32,6 +32,7 @@ function loadCore() {
     getAppDefinition: registry.getAppDefinition,
     getAppNavigationContract: registry.getAppNavigationContract,
     isAdminAuthenticated: () => false,
+    validateFileResource: loadFileResourceContract().validateFileResource,
   });
   return { registry, manager };
 }
@@ -485,3 +486,17 @@ test('geometria inalterada não reescreve estilos a cada resize', () => {
   m.applyGeometry(element, { ...geometry, x: 50 }, bounds);
   assert.equal(writes, 5);
 });
+
+/* === Dependências de arquivos === */
+/* ----- Carregamento do contrato compartilhado ----- */
+function loadFileResourceContract() {
+  const source = fs.readFileSync(
+    path.join(root, 'src/services/storage/fileResourceContract.js'),
+    'utf8',
+  ).replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
+
+  const context = vm.createContext({});
+  vm.runInContext(source, context);
+
+  return context;
+}

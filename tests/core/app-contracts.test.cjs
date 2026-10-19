@@ -31,6 +31,7 @@ function core() {
       getAppDefinition: registry.getAppDefinition,
       getAppNavigationContract: registry.getAppNavigationContract,
       isAdminAuthenticated: () => false,
+      validateFileResource: loadFileResourceContract().validateFileResource,
     }),
   };
 }
@@ -134,3 +135,17 @@ test('minimização preserva dados e comunica pausa seletiva sem destruir instâ
   assert.equal(state.instances[0].executionState, 'running');
   assert.equal(state.instances[0].params, params);
 });
+
+/* === Dependências de arquivos === */
+/* ----- Carregamento do contrato compartilhado ----- */
+function loadFileResourceContract() {
+  const source = fs.readFileSync(
+    path.join(root, 'src/services/storage/fileResourceContract.js'),
+    'utf8',
+  ).replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
+
+  const context = vm.createContext({});
+  vm.runInContext(source, context);
+
+  return context;
+}
