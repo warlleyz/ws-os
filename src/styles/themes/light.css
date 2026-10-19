@@ -1,17 +1,39 @@
+/* === Tema Light === */
+/* ----- Configuração do navegador ----- */
 :root[data-theme='light'] {
   color-scheme: light;
+}
 
+/* === Superfícies === */
+/* ----- Fundos e áreas de conteúdo ----- */
+:root[data-theme='light'] {
   --surface-canvas: #f1f5f9;
   --surface-primary: #ffffff;
   --surface-secondary: #e2e8f0;
+}
 
+/* === Tipografia === */
+/* ----- Cores de texto ----- */
+:root[data-theme='light'] {
   --text-primary: #172334;
   --text-secondary: #506176;
+}
 
+/* === Bordas === */
+/* ----- Contornos principais ----- */
+:root[data-theme='light'] {
   --border-default: #cbd5e1;
+}
 
+/* === Destaques === */
+/* ----- Paleta inicial azul ----- */
+:root[data-theme='light'] {
   --accent-primary: #2876d0;
   --accent-secondary: #147d96;
+}
 
+/* === Elevação === */
+/* ----- Compatibilidade com sombras existentes ----- */
+:root[data-theme='light'] {
   --shadow-floating: 0 16px 45px rgb(25 45 70 / 16%);
 }

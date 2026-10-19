@@ -1,75 +1,109 @@
-/* Controlled appearance; accessibility rules come last. */
+/* === Configuração visual === */
+/* ----- Valores padrão ----- */
 :root {
   --motion-scale: 1;
+
   --ws-glass-opacity: 0.92;
   --ws-glass-rgb: 24 34 48;
   --ws-glass: rgb(var(--ws-glass-rgb) / var(--ws-glass-opacity));
+
   --taskbar-background: var(--ws-glass);
   --panel-background: var(--ws-glass);
 }
+
+/* ----- Tema Light ----- */
 :root[data-theme='light'] {
   --ws-glass-rgb: 255 255 255;
+
   --taskbar-background: var(--ws-glass);
   --panel-background: var(--ws-glass);
 }
+
+/* === Cores de destaque === */
+/* ----- Violet Dark ----- */
 :root[data-accent='violet'][data-theme='dark'] {
   --accent-primary: #9270ed;
   --accent-secondary: #c3abff;
   --action-background: #6439a9;
   --link-color: #c3abff;
 }
+
+/* ----- Violet Light ----- */
 :root[data-accent='violet'][data-theme='light'] {
   --accent-primary: #6942bb;
   --accent-secondary: #6439a9;
   --action-background: #6439a9;
   --link-color: #6439a9;
 }
+
+/* ----- Green Dark ----- */
 :root[data-accent='green'][data-theme='dark'] {
   --accent-primary: #229b83;
   --accent-secondary: #7de1c4;
   --action-background: #08634f;
   --link-color: #7de1c4;
 }
+
+/* ----- Green Light ----- */
 :root[data-accent='green'][data-theme='light'] {
   --accent-primary: #08775f;
   --accent-secondary: #08634f;
   --action-background: #08634f;
   --link-color: #08634f;
 }
+
+/* === Intensidade de blur === */
+/* ----- Desativado ----- */
 :root[data-blur='off'] {
   --blur-light: 0px;
   --blur-medium: 0px;
   --blur-strong: 0px;
 }
+
+/* ----- Suave ----- */
 :root[data-blur='soft'] {
   --blur-light: 4px;
   --blur-medium: 8px;
   --blur-strong: 12px;
 }
+
+/* ----- Normal ----- */
 :root[data-blur='normal'] {
   --blur-light: 8px;
   --blur-medium: 24px;
   --blur-strong: 28px;
 }
+
+/* ----- Forte ----- */
 :root[data-blur='strong'] {
   --blur-light: 12px;
   --blur-medium: 28px;
   --blur-strong: 30px;
 }
+
+/* === Transparência === */
+/* ----- Superfícies sólidas ----- */
 :root[data-transparency='solid'] {
   --ws-glass-opacity: 1;
   --blur-light: 0px;
   --blur-medium: 0px;
   --blur-strong: 0px;
 }
+
+/* ----- Transparência elevada ----- */
 :root[data-transparency='high'] {
   --ws-glass-opacity: 0.88;
 }
+
+/* === Movimento === */
+/* ----- Animações discretas ----- */
 :root[data-motion-intensity='subtle'] {
   --motion-scale: 0.5;
   --transition-fast: 60ms;
   --transition-normal: 100ms;
 }
+
+/* ----- Animações desativadas ----- */
 :root[data-motion-intensity='off'] *,
 :root[data-motion-intensity='off'] *::before,
 :root[data-motion-intensity='off'] *::after {
@@ -77,37 +111,65 @@
   animation: none !important;
   scroll-behavior: auto !important;
 }
-.desktop-window__header,
+
+/* === Composição visual existente === */
+/* ----- Contextos do Desktop ----- */
 .desktop__context {
   background: var(--ws-glass);
   backdrop-filter: blur(var(--blur-medium));
 }
+
+/* ----- Superfície das janelas ----- */
 .desktop-window {
   background: transparent;
 }
+
 .desktop-window__content {
   background: var(--surface-primary);
 }
+
+/* ----- Indicação de foco da janela ----- */
 .desktop-window__focus[data-active='true'] {
-  box-shadow: 0 0 10px color-mix(in srgb, var(--accent-secondary) 35%, transparent);
+  box-shadow:
+    0 0 10px color-mix(in srgb,
+      var(--accent-secondary) 35%,
+      transparent);
 }
+
+/* ----- Prévia de encaixe ----- */
 .desktop-snap-preview {
-  background: color-mix(in srgb, var(--accent-primary) 16%, transparent) !important;
-  box-shadow: inset 0 0 24px color-mix(in srgb, var(--accent-primary) 8%, transparent) !important;
+  background:
+    color-mix(in srgb,
+      var(--accent-primary) 16%,
+      transparent) !important;
+
+  box-shadow:
+    inset 0 0 24px color-mix(in srgb,
+      var(--accent-primary) 8%,
+      transparent) !important;
 }
+
+/* ----- Painéis Mobile ----- */
 .ws-mobile__panel {
   backdrop-filter: blur(var(--blur-medium));
 }
+
+/* === Acessibilidade visual === */
+/* ----- Transparência reduzida e efeitos mínimos ----- */
 :root[data-reduced-transparency='true'],
 :root[data-low-effects='true'] {
   --ws-glass-opacity: 1;
+
   --blur-light: 0px;
   --blur-medium: 0px;
   --blur-strong: 0px;
+
   --taskbar-background: var(--surface-primary);
   --panel-background: var(--surface-primary);
   --ws-glass: var(--surface-primary);
 }
+
+/* ----- Movimento reduzido ----- */
 :root[data-reduced-motion='true'] *,
 :root[data-reduced-motion='true'] *::before,
 :root[data-reduced-motion='true'] *::after,
@@ -118,34 +180,40 @@
   animation: none !important;
   scroll-behavior: auto !important;
 }
-:root[data-low-effects='true'] .desktop__wallpaper,
-:root[data-low-effects='true'] .ws-mobile__wallpaper {
-  background: var(--surface-canvas) !important;
-}
+
+/* ----- Preferência de movimento do sistema ----- */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --transition-fast: 0ms;
     --transition-normal: 0ms;
   }
 }
+
+/* ----- Preferência de transparência do sistema ----- */
 @media (prefers-reduced-transparency: reduce) {
+
   :root,
   :root[data-theme],
   :root[data-blur],
   :root[data-transparency] {
     --ws-glass-opacity: 1;
+
     --blur-light: 0px;
     --blur-medium: 0px;
     --blur-strong: 0px;
+
     --ws-glass: var(--surface-primary);
     --taskbar-background: var(--surface-primary);
     --panel-background: var(--surface-primary);
   }
+
   .ws-mobile__catalog,
   .ws-mobile__welcome {
     background: var(--surface-primary);
   }
 }
+
+/* ----- Superfícies Mobile sem transparência ----- */
 :root[data-reduced-transparency='true'] .ws-mobile__catalog,
 :root[data-reduced-transparency='true'] .ws-mobile__welcome,
 :root[data-low-effects='true'] .ws-mobile__catalog,
@@ -153,6 +221,8 @@
   background: var(--surface-primary);
 }
 
+/* === Painéis compartilhados === */
+/* ----- Superfícies flutuantes ----- */
 .taskbar-launcher--redesign,
 .taskbar-notifications,
 .taskbar-quick-controls,
@@ -165,6 +235,9 @@
   backdrop-filter: blur(var(--blur-medium));
   box-shadow: var(--panel-shadow);
 }
+
+/* === Transições compartilhadas === */
+/* ----- Controles do sistema ----- */
 .taskbar button,
 .ws-menu__search,
 .ws-menu__app-item,
@@ -172,6 +245,8 @@
 .desktop-window__control::after {
   transition-duration: var(--transition-fast);
 }
+
+/* ----- Notificações ----- */
 .ws-toast {
   animation-duration: var(--transition-normal);
 }

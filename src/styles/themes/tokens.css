@@ -1,16 +1,55 @@
+/* === Geometria === */
+/* ----- Raios de borda ----- */
 :root {
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 18px;
+}
 
-  --blur-strength: 14px;
-  --surface-opacity: 0.94;
-  --shadow-floating: 0 16px 45px rgb(0 0 0 / 28%);
+/* === Tipografia === */
+/* ----- Famílias oficiais ----- */
+:root {
+  --font-interface: 'Nunito Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
 
+/* === Espaçamento === */
+/* ----- Escala compartilhada ----- */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+}
+
+/* === Controles === */
+/* ----- Dimensões mínimas ----- */
+:root {
+  --control-height-sm: 32px;
+  --control-height-md: 40px;
+  --control-height-lg: 44px;
+}
+
+/* === Transições === */
+/* ----- Durações compartilhadas ----- */
+:root {
   --transition-fast: 120ms;
   --transition-normal: 200ms;
 }
 
+/* === Compatibilidade === */
+/* ----- Tokens existentes ainda utilizados ----- */
+:root {
+  --blur-strength: 14px;
+  --surface-opacity: 0.94;
+  --shadow-floating: 0 16px 45px rgb(0 0 0 / 28%);
+}
+
+/* === Acessibilidade === */
+/* ----- Movimento reduzido ----- */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --transition-fast: 0ms;

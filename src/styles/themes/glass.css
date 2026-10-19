@@ -1,32 +1,58 @@
-/* Vidro inspirado na v1 c2e51be; uma camada de blur por janela/painel. */
+/* === Sistema de vidro === */
+/* ----- Saturação padrão ----- */
 :root {
   --ws-glass-saturation: 135%;
 }
+
+/* ----- Vidro desativado ----- */
 :root[data-blur='off'],
 :root[data-transparency='solid'] {
   --ws-glass-saturation: 100%;
 }
+
+/* === Janelas === */
+/* ----- Superfície principal ----- */
 .desktop-window {
   border: 1px solid var(--panel-border);
   background: var(--ws-glass);
-  backdrop-filter: blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
-  -webkit-backdrop-filter: blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
+
+  backdrop-filter:
+    blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
+
+  -webkit-backdrop-filter:
+    blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
 }
-.desktop-window > .desktop-window__header {
-  background: color-mix(in srgb, var(--surface-secondary) 45%, transparent);
+
+/* ----- Cabeçalho ----- */
+.desktop-window>.desktop-window__header {
+  background:
+    color-mix(in srgb,
+      var(--surface-secondary) 45%,
+      transparent);
+
   backdrop-filter: none;
 }
-.desktop-window > .desktop-window__content,
-.desktop-window > .ws-settings,
+
+/* ----- Conteúdo interno ----- */
+.desktop-window>.desktop-window__content,
+.desktop-window>.ws-settings,
 .desktop-window .ws-settings__content,
 .desktop-window .ws-settings__header,
 .desktop-window .ws-settings__sidebar {
   background: transparent;
 }
+
+/* ----- Cards internos ----- */
 .desktop-window .ws-settings__card,
 .desktop-window .ws-app__card {
-  background: color-mix(in srgb, var(--surface-primary) 92%, transparent);
+  background:
+    color-mix(in srgb,
+      var(--surface-primary) 92%,
+      transparent);
 }
+
+/* === Painéis flutuantes === */
+/* ----- Efeito de vidro compartilhado ----- */
 .taskbar-launcher--redesign,
 .taskbar-notifications,
 .taskbar-quick-controls,
@@ -36,44 +62,94 @@
 .taskbar-preview,
 .taskbar-context,
 .ws-mobile__panel {
-  backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
-  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
+  backdrop-filter:
+    blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
+
+  -webkit-backdrop-filter:
+    blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
 }
-.ws-mobile__panel > .taskbar-quick-controls,
-.ws-mobile__panel > .taskbar-notifications {
+
+/* ----- Evitar vidro duplicado no Mobile ----- */
+.ws-mobile__panel>.taskbar-quick-controls,
+.ws-mobile__panel>.taskbar-notifications,
+.ws-mobile__panel>.taskbar-quick-controls.ws-controls {
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
+
+/* === Interações de janelas === */
+/* ----- Prévia de encaixe ----- */
 .desktop-snap-preview {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-/* O efeito custoso não é mantido na janela durante o gesto. */
+
+/* ----- Desativar blur durante movimento ou redimensionamento ----- */
 .desktop-window[data-interacting='true'] {
   background: var(--surface-primary);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
+
+/* === Acessibilidade === */
+/* ----- Redução da saturação ----- */
 :root[data-reduced-transparency='true'],
 :root[data-low-effects='true'] {
   --ws-glass-saturation: 100%;
 }
-:root[data-reduced-transparency='true'] .desktop-window,
-:root[data-low-effects='true'] .desktop-window {
+
+/* ----- Remoção dos efeitos de vidro ----- */
+:root:is([data-blur='off'],
+  [data-transparency='solid'],
+  [data-reduced-transparency='true'],
+  [data-low-effects='true']) :is(.desktop-window,
+  .desktop__widget,
+  .ws-widget,
+  .taskbar,
+  .desktop__context,
+  .taskbar-launcher--redesign,
+  .taskbar-notifications,
+  .taskbar-quick-controls,
+  .taskbar-calendar,
+  .taskbar-weather-panel,
+  .taskbar-wally,
+  .taskbar-preview,
+  .taskbar-context,
+  .ws-mobile__panel) {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
+
+/* ----- Preferência do sistema operacional ----- */
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --ws-glass-saturation: 100%;
   }
-  .desktop-window {
+
+  :is(.desktop-window,
+    .desktop__widget,
+    .ws-widget,
+    .taskbar,
+    .desktop__context,
+    .taskbar-launcher--redesign,
+    .taskbar-notifications,
+    .taskbar-quick-controls,
+    .taskbar-calendar,
+    .taskbar-weather-panel,
+    .taskbar-wally,
+    .taskbar-preview,
+    .taskbar-context,
+    .ws-mobile__panel) {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 }
+
+/* === Compatibilidade do navegador === */
+/* ----- Fallback sem suporte a backdrop-filter ----- */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+
   :root,
   :root[data-theme] {
     --ws-glass: var(--surface-primary);
@@ -82,71 +158,21 @@
   }
 }
 
-/* Rótulos sem fundo, com contraste sobre o wallpaper. */
+/* === Legibilidade sobre wallpapers === */
+/* ----- Rótulos dos atalhos do Desktop ----- */
 .desktop__shortcut-label {
   padding: 0;
   border-radius: 0;
   color: #ffffff;
   background: transparent;
+
   text-shadow:
     0 1px 3px rgb(0 0 0 / 90%),
     0 2px 6px rgb(0 0 0 / 60%);
 }
+
+/* ----- Foco nos atalhos ----- */
 .desktop__shortcut:focus-visible {
   background: rgb(17 25 37 / 92%);
   outline-color: #ffffff;
-}
-
-/* Uma camada de vidro por superfície, incluindo as composições novas. */
-.ws-mobile__panel > .taskbar-quick-controls.ws-controls,
-.ws-mobile__panel > .taskbar-notifications {
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-:root:is(
-    [data-blur='off'],
-    [data-transparency='solid'],
-    [data-reduced-transparency='true'],
-    [data-low-effects='true']
-  )
-  :is(
-    .desktop-window,
-    .desktop__widget,
-    .ws-widget,
-    .taskbar,
-    .desktop__context,
-    .taskbar-launcher--redesign,
-    .taskbar-notifications,
-    .taskbar-quick-controls,
-    .taskbar-calendar,
-    .taskbar-weather-panel,
-    .taskbar-wally,
-    .taskbar-preview,
-    .taskbar-context,
-    .ws-mobile__panel
-  ) {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-@media (prefers-reduced-transparency: reduce) {
-  :is(
-    .desktop-window,
-    .desktop__widget,
-    .ws-widget,
-    .taskbar,
-    .desktop__context,
-    .taskbar-launcher--redesign,
-    .taskbar-notifications,
-    .taskbar-quick-controls,
-    .taskbar-calendar,
-    .taskbar-weather-panel,
-    .taskbar-wally,
-    .taskbar-preview,
-    .taskbar-context,
-    .ws-mobile__panel
-  ) {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
 }

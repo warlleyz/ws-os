@@ -1,3 +1,4 @@
+
 import { createPreferenceResetPlan } from './preferenceContract';
 import { setTheme } from './themeManager';
 import { setLocale } from '../shared/i18n/i18n';
@@ -6,32 +7,78 @@ import { setAccessibility } from './effectsManager';
 import { setTaskbarAutoHide } from './taskbarPreferences';
 import { resetMobilePreferences } from './mobilePreferences';
 import { setWallpaper } from './wallpaperManager';
+import { getDefaultWallpaper } from './wallpaperCatalog';
 import { resetWidgetPreferences } from './widgetPreferences';
 
-/* ----- Explicit allowlist: never clear storage, delete databases, or touch app documents. ----- */
+/* === Restauração de wallpapers === */
+/* ----- Restaurar os dois temas de uma plataforma ----- */
+function resetShellWallpapers(shell) {
+  const dark = setWallpaper(
+    getDefaultWallpaper('dark'),
+    shell,
+    'dark',
+  );
+
+  const light = setWallpaper(
+    getDefaultWallpaper('light'),
+    shell,
+    'light',
+  );
+
+  return dark && light;
+}
+
+/* === Restauração do sistema === */
+/* ----- Preferências autorizadas ----- */
 export function restoreSystemPreferences(categories) {
   const plan = createPreferenceResetPlan(categories);
-  if (!plan.ok) return { ok: false, failed: [], code: plan.code };
+
+  if (!plan.ok) {
+    return {
+      ok: false,
+      failed: [],
+      code: plan.code,
+    };
+  }
+
   const actions = {
     theme: () => setTheme('dark'),
     locale: () => setLocale('pt-BR'),
     appearance: resetAppearance,
+
     accessibility: () =>
-      setAccessibility({ motion: false, transparency: false, lowEffects: false }),
+      setAccessibility({
+        motion: false,
+        transparency: false,
+        lowEffects: false,
+      }),
+
     taskbar: () => setTaskbarAutoHide(false),
     mobile: resetMobilePreferences,
-    desktopWallpaper: () => setWallpaper('original', 'desktop'),
-    mobileWallpaper: () => setWallpaper('original', 'mobile'),
+
+    desktopWallpaper: () => resetShellWallpapers('desktop'),
+    mobileWallpaper: () => resetShellWallpapers('mobile'),
+
     widgets: resetWidgetPreferences,
   };
+
+  /* ----- Executar todas as ações solicitadas ----- */
   const failed = [];
+
   for (const key of plan.actions) {
     const apply = actions[key];
+
     try {
-      if (!apply()) failed.push(key);
+      if (!apply()) {
+        failed.push(key);
+      }
     } catch {
       failed.push(key);
     }
   }
-  return { ok: failed.length === 0, failed };
+
+  return {
+    ok: failed.length === 0,
+    failed,
+  };
 }
