@@ -1,20 +1,33 @@
 import { useEffect, useState } from 'react';
+
 import { translate as t, useLocale } from './shared/i18n/i18n';
-import { applyAccessibility, useAccessibility } from './core/effectsManager';
 
 import { applyTheme, useTheme, setTheme } from './core/themeManager';
 import { applyAppearance, useAppearance } from './core/appearanceManager';
-import BootScreen from './features/boot/BootScreen';
-import WelcomeDialog from './features/welcome/WelcomeDialog';
-import Desktop from './shells/desktop/Desktop';
-import Mobile from './shells/mobile/Mobile';
+import { applyAccessibility, useAccessibility } from './core/effectsManager';
+import { useCursorMode } from './core/cursorManager';
+import {
+  CURSOR_VARIANTS,
+  getCursorCssValue,
+} from './core/cursorCatalog';
 
 import SystemProvider from './core/SystemProvider';
 import WallyConversationProvider from './features/wally/WallyConversationProvider';
 
+import BootScreen from './features/boot/BootScreen';
+import WelcomeDialog from './features/welcome/WelcomeDialog';
+
+import Desktop from './shells/desktop/Desktop';
+import Mobile from './shells/mobile/Mobile';
+
+/* === Configurações iniciais === */
+/* ----- Constantes do sistema ----- */
 const WELCOME_STORAGE_KEY = 'ws-os:welcome-seen';
 const BOOT_DURATION = 1500;
+const MOBILE_BREAKPOINT = '(max-width: 767px)';
 
+/* === Preferências iniciais === */
+/* ----- Verificar apresentação de boas-vindas ----- */
 function shouldShowWelcome() {
   try {
     return localStorage.getItem(WELCOME_STORAGE_KEY) !== 'true';
@@ -23,30 +36,76 @@ function shouldShowWelcome() {
   }
 }
 
-export default function App() {
-  const locale = useLocale();
-  const accessibility = useAccessibility();
-  const appearance = useAppearance();
+/* ----- Identificar shell inicial ----- */
+function isMobileViewport() {
+  return window.matchMedia(MOBILE_BREAKPOINT).matches;
+}
 
-  useEffect(() => {
-    applyAppearance(appearance);
-  }, [appearance]);
+/* === Aplicativo principal === */
+export default function App() {
+  /* ----- Preferências globais ----- */
+  const locale = useLocale();
+  const theme = useTheme();
+  const appearance = useAppearance();
+  const accessibility = useAccessibility();
+  const cursorMode = useCursorMode();
+
+  /* ----- Estados da aplicação ----- */
+  const [bootComplete, setBootComplete] = useState(false);
+  const [welcomeOpen, setWelcomeOpen] = useState(shouldShowWelcome);
+  const [isMobile, setIsMobile] = useState(isMobileViewport);
+
+  /* === Aplicação das preferências === */
+  /* ----- Idioma ----- */
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
+
+  /* ----- Tema ----- */
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  /* ----- Aparência ----- */
+  useEffect(() => {
+    applyAppearance(appearance);
+  }, [appearance]);
+
+  /* ----- Acessibilidade e efeitos ----- */
   useEffect(() => {
     applyAccessibility(accessibility);
   }, [accessibility]);
-  const [bootComplete, setBootComplete] = useState(false);
-  const theme = useTheme();
-  const [welcomeOpen, setWelcomeOpen] = useState(shouldShowWelcome);
 
-  const [isMobile, setIsMobile] = useState(
-    () => window.matchMedia('(max-width: 767px)').matches,
-  );
-
+  /* ----- Cursores personalizados ----- */
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 767px)');
+    const root = document.documentElement;
+
+    root.dataset.cursorMode = cursorMode;
+
+    for (const variant of CURSOR_VARIANTS) {
+      const property = `--ws-cursor-${variant}`;
+
+      const value = getCursorCssValue(
+        variant,
+        theme,
+        cursorMode,
+        import.meta.env.BASE_URL,
+      );
+
+      root.style.setProperty(property, value);
+    }
+
+    return () => {
+      for (const variant of CURSOR_VARIANTS) {
+        root.style.removeProperty(`--ws-cursor-${variant}`);
+      }
+    };
+  }, [cursorMode, theme]);
+
+  /* === Responsividade === */
+  /* ----- Alternância entre Desktop e Mobile ----- */
+  useEffect(() => {
+    const media = window.matchMedia(MOBILE_BREAKPOINT);
 
     function updateShell(event) {
       setIsMobile(event.matches);
@@ -54,45 +113,62 @@ export default function App() {
 
     media.addEventListener('change', updateShell);
 
-    return () => media.removeEventListener('change', updateShell);
+    return () => {
+      media.removeEventListener('change', updateShell);
+    };
   }, []);
 
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
+  /* === Inicialização do sistema === */
+  /* ----- Temporização do boot ----- */
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setBootComplete(true);
     }, BOOT_DURATION);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, []);
 
+  /* === Boas-vindas === */
+  /* ----- Encerrar apresentação inicial ----- */
   function closeWelcome() {
     try {
       localStorage.setItem(WELCOME_STORAGE_KEY, 'true');
     } catch {
-      // A apresentação funciona mesmo sem armazenamento.
+      /* ----- A apresentação funciona sem armazenamento ----- */
     }
 
     setWelcomeOpen(false);
   }
 
+  /* === Navegação acessível === */
+  /* ----- Ir diretamente para o shell ativo ----- */
+  function focusActiveShell(event) {
+    event.preventDefault();
+
+    const shellId = isMobile ? 'ws-mobile' : 'ws-desktop';
+
+    document.getElementById(shellId)?.focus();
+  }
+
+  /* === Renderização === */
+  /* ----- Tela de inicialização ----- */
   if (!bootComplete) {
     return <BootScreen />;
   }
 
+  /* ----- Sistema principal ----- */
   return (
     <>
-      <div inert={welcomeOpen} aria-hidden={welcomeOpen || undefined}>
+      <div
+        inert={welcomeOpen}
+        aria-hidden={welcomeOpen || undefined}
+      >
         <a
           className="ws-skip-link"
-          href="#ws-desktop"
-          onClick={(event) => {
-            event.preventDefault();
-            document.getElementById(isMobile ? 'ws-mobile' : 'ws-desktop')?.focus();
-          }}
+          href={isMobile ? '#ws-mobile' : '#ws-desktop'}
+          onClick={focusActiveShell}
         >
           {t('Ir para a área de trabalho')}
         </a>
@@ -100,16 +176,24 @@ export default function App() {
         <SystemProvider>
           <WallyConversationProvider>
             {isMobile ? (
-              <Mobile theme={theme} onThemeChange={setTheme} />
+              <Mobile
+                theme={theme}
+                onThemeChange={setTheme}
+              />
             ) : (
-              <Desktop theme={theme} onThemeChange={setTheme} />
+              <Desktop
+                theme={theme}
+                onThemeChange={setTheme}
+              />
             )}
           </WallyConversationProvider>
         </SystemProvider>
-
       </div>
 
-      {welcomeOpen && <WelcomeDialog onClose={closeWelcome} />}
+      {/* ----- Janela de boas-vindas ----- */}
+      {welcomeOpen && (
+        <WelcomeDialog onClose={closeWelcome} />
+      )}
     </>
   );
 }

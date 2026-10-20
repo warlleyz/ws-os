@@ -1,0 +1,60 @@
+/* === Cursores personalizados === */
+/* ----- Apontadores compatíveis ----- */
+@media (hover: hover) and (pointer: fine) {
+
+    /* === Cursor padrão === */
+    html[data-cursor-mode='custom'],
+    html[data-cursor-mode='custom'] body,
+    html[data-cursor-mode='custom'] #root {
+        cursor: var(--ws-cursor-default, default);
+    }
+
+    /* === Elementos interativos === */
+    html[data-cursor-mode='custom'] :is(button,
+        a[href],
+        select,
+        summary,
+        [role='button']):not(:disabled):not([aria-disabled='true']) {
+        cursor: var(--ws-cursor-pointer, pointer);
+    }
+
+    /* === Entrada de texto === */
+    html[data-cursor-mode='custom'] :is(textarea,
+        input:not([type]),
+        input[type='text'],
+        input[type='search'],
+        input[type='email'],
+        input[type='password'],
+        input[type='url'],
+        input[type='tel'],
+        input[type='number'],
+        [contenteditable='true']):not(:disabled) {
+        cursor: var(--ws-cursor-text, text);
+    }
+
+    /* === Controles indisponíveis === */
+    html[data-cursor-mode='custom'] :is(button,
+        input,
+        textarea,
+        select):disabled,
+    html[data-cursor-mode='custom'] [aria-disabled='true'] {
+        cursor: var(--ws-cursor-not-allowed, not-allowed);
+    }
+
+    /* === Áreas de arraste === */
+    html[data-cursor-mode='custom'] .desktop-window__drag-area {
+        cursor: var(--ws-cursor-grab, grab);
+    }
+
+    html[data-cursor-mode='custom'] .desktop-window__drag-area:active {
+        cursor: var(--ws-cursor-grabbing, grabbing);
+    }
+}
+
+/* === Estados especiais das janelas === */
+/* ----- Janela maximizada não pode ser arrastada ----- */
+@media (hover: hover) and (pointer: fine) {
+    html[data-cursor-mode='custom'] .desktop-window--maximized .desktop-window__drag-area {
+        cursor: var(--ws-cursor-default, default);
+    }
+}

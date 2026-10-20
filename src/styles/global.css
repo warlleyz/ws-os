@@ -1,14 +1,27 @@
+/* === Fontes === */
+/* ----- Tipografia do sistema ----- */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
 
+/* === Design System === */
+/* ----- Tokens e temas ----- */
 @import './themes/tokens.css';
 @import './themes/dark.css';
 @import './themes/light.css';
 @import './themes/effects.css';
+
+/* ----- Componentes e estrutura do sistema ----- */
 @import './system.css';
+
+/* ----- Fundamentos visuais ----- */
 @import './themes/foundation.css';
 @import './themes/customization.css';
 @import './themes/glass.css';
 
+/* ----- Cursores personalizados ----- */
+@import './themes/cursors.css';
+
+/* === Configuração global === */
+/* ----- Tipografia e aparência ----- */
 :root {
   font-family: 'Nunito Sans', sans-serif;
   font-synthesis: none;
@@ -19,10 +32,15 @@
   background: var(--surface-canvas);
 }
 
-* {
+/* === Reset global === */
+/* ----- Dimensionamento dos elementos ----- */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
+/* ----- Área principal do sistema ----- */
 html,
 body,
 #root {
@@ -35,41 +53,55 @@ body {
   min-width: 320px;
 }
 
+/* === Elementos interativos === */
+/* ----- Tipografia dos controles ----- */
 button,
 input,
 textarea {
   font: inherit;
 }
 
+/* ----- Cursor nativo de segurança ----- */
 button {
   cursor: pointer;
 }
 
+/* === Acessibilidade === */
+/* ----- Foco visível ----- */
 button:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 4px;
 }
 
+/* ----- Seleção de texto ----- */
 ::selection {
   background: var(--accent-primary);
   color: #ffffff;
 }
 
+/* === Scrollbars globais === */
+/* ----- Aparência padrão ----- */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border-control) transparent;
 }
+
+/* ----- Dimensões ----- */
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
+
+/* ----- Indicador de rolagem ----- */
 *::-webkit-scrollbar-thumb {
-  background: var(--border-control);
   border: 2px solid transparent;
-  background-clip: padding-box;
   border-radius: 20px;
+  background: var(--border-control);
+  background-clip: padding-box;
 }
+
+/* ----- Trilho de rolagem ----- */
 *::-webkit-scrollbar-track {
   background: transparent;
 }
