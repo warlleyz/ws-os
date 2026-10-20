@@ -165,9 +165,6 @@ a {
   --taskbar-background: var(--surface-primary);
   --panel-background: var(--surface-primary);
 }
-:root[data-low-effects='true'] .desktop__wallpaper {
-  background: var(--surface-canvas);
-}
 :root[data-low-effects='true'] *,
 :root[data-low-effects='true'] *::before,
 :root[data-low-effects='true'] *::after {

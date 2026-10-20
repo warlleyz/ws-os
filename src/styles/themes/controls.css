@@ -168,28 +168,23 @@
     border-top-color: transparent;
 }
 
-/* ----- Pressionado ----- */
-.ws-button:not(:disabled):not([aria-disabled='true']):not([aria-busy='true']):active {
-    box-shadow: inset 0 2px 5px rgb(0 0 0 / 12%);
+/* === Feedback acessível de carregamento === */
+/* ----- Indicador estático com movimento reduzido ----- */
+@media (prefers-reduced-motion: reduce) {
+    .ws-button[aria-busy='true']::after {
+        animation: none;
+        border-top-color: transparent;
+        border-right-color: currentColor;
+    }
 }
 
-/* ----- Foco por teclado ----- */
-.ws-button:focus-visible {
-    outline: 2px solid var(--accent-secondary);
-    outline-offset: 3px;
-}
-
-/* ----- Desabilitado ----- */
-.ws-button:disabled,
-.ws-button[aria-disabled='true'] {
-    opacity: 0.55;
-    cursor: not-allowed;
-}
-
-/* ----- Carregando ----- */
-.ws-button[aria-busy='true'] {
-    opacity: 0.75;
-    cursor: progress;
+/* ----- Preferências internas de movimento ----- */
+:root:is([data-reduced-motion='true'],
+    [data-low-effects='true'],
+    [data-motion-intensity='off']) .ws-button[aria-busy='true']::after {
+    animation: none;
+    border-top-color: transparent;
+    border-right-color: currentColor;
 }
 
 /* === Dimensões === */
@@ -639,4 +634,12 @@
     .ws-badge {
         border-color: CanvasText;
     }
+}
+
+/* === Preferências de acessibilidade === */
+/* ----- Tooltip sem animação ----- */
+:root:is([data-reduced-motion='true'],
+    [data-low-effects='true'],
+    [data-motion-intensity='off']) .ws-tooltip {
+    animation: none;
 }
