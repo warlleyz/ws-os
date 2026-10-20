@@ -121,47 +121,70 @@ test('assinaturas de arquivo recusam MIME falso, SVG e texto binário', () => {
   assert.equal(validateFileBytes(new Uint8Array([0]), 'text/plain'), false);
 });
 
-test('publicação privada ou inexistente não chega ao bucket e falha de R2 não vira sucesso', async () => {
-  let reads = 0;
-  const bucket = {
-    get: async () => {
-      reads++;
-      return null;
-    },
-  };
-  const api = load('managedFiles.js', () => Response.json([]));
-  assert.equal(
-    (
-      await api.onRequest({
-        request: req('api/files?id=one'),
-        env: { ...env, OFFICIAL_FILES: bucket },
-      })
-    ).status,
-    404,
-  );
-  assert.equal(reads, 0);
-  const missing = load('managedFiles.js', () =>
-    Response.json([
-      {
-        id: 'one',
-        name: 'test.pdf',
-        mime_type: 'application/pdf',
-        size: 5,
-        object_key: 'official/one',
-      },
-    ]),
-  );
-  assert.equal(
-    (
-      await missing.onRequest({
-        request: req('api/files?id=one'),
-        env: { ...env, OFFICIAL_FILES: bucket },
-      })
-    ).status,
-    503,
-  );
-  assert.equal(reads, 1);
+
+/* ----- Controle de acesso e falhas do armazenamento privado ----- */
+test('arquivo não autorizado não acessa o Storage e falhas não viram sucesso', async () => {
+  const objectKey =
+    'official/123e4567-e89b-42d3-a456-426614174000';
+
+  let storageReads = 0;
+
+  const missing = load('managedFiles.js', (url) => {
+    if (url.pathname === '/rest/v1/rpc/read_public_file') {
+      return Response.json([]);
+    }
+
+    if (url.pathname.startsWith('/storage/v1/')) {
+      storageReads++;
+    }
+
+    throw Error(`Requisição inesperada: ${url.pathname}`);
+  });
+
+  const notFound = await missing.onRequest({
+    request: req('api/files?id=one'),
+    env,
+  });
+
+  assert.equal(notFound.status, 404);
+  assert.equal(storageReads, 0);
+
+  const unavailable = load('managedFiles.js', (url) => {
+    if (url.pathname === '/rest/v1/rpc/read_public_file') {
+      return Response.json([
+        {
+          id: 'one',
+          name: 'documento.pdf',
+          mime_type: 'application/pdf',
+          size: 8,
+          sha256: 'a'.repeat(64),
+          object_key: objectKey,
+        },
+      ]);
+    }
+
+    if (
+      url.pathname ===
+      `/storage/v1/object/authenticated/ws-os-official-files/${objectKey}`
+    ) {
+      storageReads++;
+      return Response.json({ error: 'StorageUnavailable' }, {
+        status: 503,
+      });
+    }
+
+    throw Error(`Requisição inesperada: ${url.pathname}`);
+  });
+
+  const response = await unavailable.onRequest({
+    request: req('api/files?id=one'),
+    env,
+  });
+
+  assert.equal(response.status, 503);
+  assert.equal(storageReads, 1);
 });
+
 
 test('metadados de criação são projetados sem chave do bucket e resposta de ID diferente conflita', async () => {
   for (const returnedId of ['one', 'other']) {
@@ -177,7 +200,7 @@ test('metadados de criação são projetados sem chave do bucket e resposta de I
         visibility: 'private',
         purpose: 'attachment',
       }),
-      env: { ...env, OFFICIAL_FILES: {} },
+      env,
     });
     assert.equal(response.status, returnedId === 'one' ? 201 : 409);
     if (returnedId === 'one') assert.equal('object_key' in (await response.json()).item, false);
@@ -297,81 +320,212 @@ test('envio protegido persiste uma vez e retry reutiliza resultado e notificaç�
   assert.equal((await send({ ...payload, message: 'Outro pedido com a mesma chave' })).status, 409);
 });
 
-test('upload verifica bytes e revisão, recupera resposta incerta e exclusão só confirma após R2', async () => {
+
+/* ----- Upload, reconciliação e exclusão no Supabase Storage ----- */
+test('upload confirma integridade e exclusão exige remoção física', async () => {
+  const objectKey =
+    'official/123e4567-e89b-42d3-a456-426614174000';
+
+  const content = '%PDF-1.7';
+  const bytes = new TextEncoder().encode(content);
+
   let row = {
     id: 'one',
-    name: 'doc.pdf',
+    name: 'documento.pdf',
     mime_type: 'application/pdf',
-    size: 8,
-    object_key: 'official/one',
+    size: bytes.byteLength,
+    object_key: objectKey,
     revision: 1,
     state: 'pending',
     visibility: 'private',
     purpose: 'attachment',
   };
-  let object = null,
-    puts = 0,
-    deletes = 0;
-  const bucket = {
-    put: async (key, bytes, options) => {
-      puts++;
-      if (object) return null;
-      object = { size: bytes.length, customMetadata: options.customMetadata };
-      return object;
-    },
-    head: async () => object,
-    delete: async () => {
-      deletes++;
-      object = null;
-    },
-  };
-  const api = load('managedFiles.js', (url, options) => {
-    if (options.method === 'PATCH') {
-      if (url.searchParams.get('revision') !== 'eq.' + row.revision) return Response.json([]);
-      row = { ...row, ...JSON.parse(options.body) };
+
+  let storedBytes = null;
+  let uploads = 0;
+  let deletions = 0;
+
+  const api = load('managedFiles.js', async (url, options) => {
+    if (url.pathname === '/rest/v1/official_files') {
+      if (options.method === 'PATCH') {
+        if (
+          url.searchParams.get('revision') !==
+          `eq.${row.revision}`
+        ) {
+          return Response.json([]);
+        }
+
+        row = {
+          ...row,
+          ...JSON.parse(options.body),
+        };
+      }
+
+      return Response.json([row]);
     }
-    return Response.json([row]);
-  });
-  const configured = { ...env, OFFICIAL_FILES: bucket };
-  const send = (revision) =>
-    api.onRequest({
-      request: new Request('https://test/api/admin/files?id=one', {
-        method: 'PUT',
+
+    const objectPath =
+      `/storage/v1/object/ws-os-official-files/${objectKey}`;
+
+    const metadataPath =
+      `/storage/v1/object/info/ws-os-official-files/${objectKey}`;
+
+    const downloadPath =
+      `/storage/v1/object/authenticated/ws-os-official-files/${objectKey}`;
+
+    /* ----- Upload sem sobrescrita ----- */
+    if (
+      url.pathname === objectPath &&
+      options.method === 'POST'
+    ) {
+      uploads++;
+
+      assert.equal(
+        options.headers.get('x-upsert'),
+        'false',
+      );
+
+      if (storedBytes !== null) {
+        return Response.json({
+          code: 'Duplicate',
+        }, {
+          status: 409,
+        });
+      }
+
+      storedBytes = new Uint8Array(options.body);
+
+      return Response.json({
+        Key: objectKey,
+      });
+    }
+
+    /* ----- Consulta dos metadados ----- */
+    if (
+      url.pathname === metadataPath &&
+      options.method === 'GET'
+    ) {
+      if (storedBytes === null) {
+        return Response.json(
+          {
+            code: 'NoSuchKey',
+            statusCode: '404',
+          },
+          {
+            status: 400,
+          },
+        );
+      }
+
+      return Response.json({
+        size: storedBytes.byteLength,
+        content_type: 'application/pdf',
+        metadata: {},
+      });
+    }
+
+    /* ----- Download privado ----- */
+    if (
+      url.pathname === downloadPath &&
+      options.method === 'GET'
+    ) {
+      if (storedBytes === null) {
+        return new Response(null, { status: 404 });
+      }
+
+      return new Response(storedBytes, {
         headers: {
-          Authorization: 'Bearer valid',
-          'If-Match': String(revision),
           'Content-Type': 'application/pdf',
         },
-        body: '%PDF-1.7',
-      }),
-      env: configured,
+      });
+    }
+
+    /* ----- Exclusão pelo endpoint do bucket ----- */
+    if (
+      url.pathname ===
+      '/storage/v1/object/ws-os-official-files' &&
+      options.method === 'DELETE'
+    ) {
+      assert.deepEqual(
+        JSON.parse(options.body).prefixes,
+        [objectKey],
+      );
+
+      deletions++;
+      storedBytes = null;
+
+      return Response.json([]);
+    }
+
+    throw Error(`Requisição inesperada: ${url.pathname}`);
+  });
+
+  /* === Fluxo administrativo === */
+  /* ----- Envio com controle de revisão ----- */
+  const send = (revision) =>
+    api.onRequest({
+      request: new Request(
+        'https://test/api/admin/files?id=one',
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: 'Bearer valid',
+            'If-Match': String(revision),
+            'Content-Type': 'application/pdf',
+          },
+          body: content,
+        },
+      ),
+      env,
     });
-  assert.equal((await send(0)).status, 409);
-  assert.equal(puts, 0);
+
+  const outdated = await send(0);
+
+  assert.equal(outdated.status, 409);
+  assert.equal(uploads, 0);
+
   const uploaded = await send(1);
+
   assert.equal(uploaded.status, 200);
   assert.equal(row.state, 'available');
   assert.equal(row.revision, 3);
-  assert.equal(puts, 1);
-  /* ----- Uma interrupção após gravar o objeto mantém uploading; repetir os mesmos bytes reconcilia sem sobrescrever. ----- */
-  row = { ...row, state: 'uploading' };
-  assert.equal((await send(3)).status, 200);
+  assert.equal(uploads, 1);
+  assert.equal(row.sha256?.length, 64);
+
+  /* ----- Recuperação de upload já realizado ----- */
+  row = {
+    ...row,
+    state: 'uploading',
+  };
+
+  const recovered = await send(3);
+
+  assert.equal(recovered.status, 200);
   assert.equal(row.state, 'available');
+  assert.equal(uploads, 2);
+
+  /* ----- Exclusão com confirmação explícita ----- */
   const deleted = await api.onRequest({
-    request: new Request('https://test/api/admin/files?id=one', {
-      method: 'DELETE',
-      headers: {
-        Authorization: 'Bearer valid',
-        'If-Match': String(row.revision),
-        'X-Confirm-Delete': 'true',
+    request: new Request(
+      'https://test/api/admin/files?id=one',
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Bearer valid',
+          'If-Match': String(row.revision),
+          'X-Confirm-Delete': 'true',
+        },
       },
-    }),
-    env: configured,
+    ),
+    env,
   });
+
   assert.equal(deleted.status, 200);
   assert.equal(row.state, 'deleted');
-  assert.equal(deletes, 1);
+  assert.equal(deletions, 1);
+  assert.equal(storedBytes, null);
 });
+
 
 test('migrações D1 executam em SQLite e manutenção remove somente registros vencidos', async () => {
   const { DatabaseSync } = require('node:sqlite'),

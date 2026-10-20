@@ -1,6 +1,7 @@
 # WS OS V2 — plano de conclusão por partes encerráveis
 
-Referência de execução: 18/10/2026, após `c7f794b`. Produto: documento mestre v0.16.0 e decisões posteriores aprovadas. Estado atual das Etapas 03/04: [entrega e pendências](finalizacao/ETAPAS-03-04-ENTREGA.md).
+Referência de execução: **Execução em 20/10/2026:** implementação local consolidada, testes automatizados aprovados e homologação real dos arquivos oficiais concluída com Supabase Storage. Rankings públicos e D1 local validados. Permanecem pendências de homologação externa, segurança operacional e produção. Consultar [Entregas, migrações, testes e homologação](finalizacao/ETAPAS-03-04-ENTREGA.md).
+
 
 ## 1. Objetivo e regra de execução
 

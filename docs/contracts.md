@@ -1,8 +1,45 @@
-> **Atualização de 20/10/2026 — Etapas 03/04:** os contratos/backend novos, os formatos HTTP, as migrações e os limites atuais estão na [entrega consolidada](finalizacao/ETAPAS-03-04-ENTREGA.md) e no [mapa de rotas](backend/WORKER.md). Solicitações, arquivos oficiais R2, vínculos e moderação possuem implementação local; homologação real continua pendente. O texto da Etapa 01 abaixo é a base congelada, não uma declaração atual de inexistência desses serviços. Preferências incluem agora cursor e Não perturbe no reset/sincronização.
+
+> **Atualização de 20/10/2026 — Etapas 03/04 e revisão do armazenamento:** os contratos/backend, formatos HTTP, migrações e limites estão na [entrega consolidada](finalizacao/ETAPAS-03-04-ENTREGA.md) e no [mapa de rotas](backend/WORKER.md). O armazenamento de arquivos oficiais foi alterado de Cloudflare R2 para Supabase Storage privado, conforme revisão posterior da DEC-FIN-003, DEC-FIN-011 e DEC-FIN-017. Solicitações, arquivos oficiais, vínculos e moderação possuem implementação local em revisão; homologação real continua pendente. O texto da Etapa 01 abaixo é uma referência histórica, não uma descrição integral do backend atual. Preferências incluem cursor e Não perturbe no reset/sincronização.
 
 # Contratos compartilhados — estado atual da Etapa 01
 
 Atualizado em 19/10/2026. Fonte de decisões: [Etapa 01](finalizacao/ETAPA-01-DECISOES-TECNICAS.md). Evidências e limites: [conclusão técnica](finalizacao/ETAPA-01-PARTE-01.6-CONCLUSAO.md).
+
+
+## Revisão vigente — Armazenamento de arquivos oficiais
+
+A implementação da Etapa 03 substitui Cloudflare R2 por Supabase Storage, preservando os contratos compartilhados entre Core, aplicativos e serviços.
+
+- **Provedor:** Supabase Storage, bucket privado `ws-os-official-files`.
+- **Backend:** Cloudflare Worker, responsável por autenticação, autorização, validação, upload, download e exclusão.
+- **Persistência:** PostgreSQL, com tabela `official_files`, revisões, estados, visibilidade, finalidade e integridade SHA-256.
+- **Tipos aceitos:** PDF, TXT, PNG, JPEG e WebP, com limite de 10 MB por arquivo.
+- **Arquivos pessoais:** permanecem exclusivamente no IndexedDB do visitante.
+- **Arquivos estáticos:** continuam disponíveis sem migração automática para o Storage.
+- **Controle de acesso:** visitantes não recebem credenciais, URLs administrativas ou acesso direto ao bucket.
+- **Publicação:** somente recursos autorizados, disponíveis e efetivamente publicáveis podem ser entregues pela API.
+- **Integridade:** operações incertas não são consideradas concluídas sem reconciliação entre PostgreSQL e Storage.
+
+### Contratos HTTP preservados
+
+| Rota | Responsabilidade |
+|---|---|
+| `GET /api/files` | Listar recursos públicos disponíveis |
+| `GET /api/files?id=...` | Entregar arquivo autorizado |
+| `GET /api/admin/files` | Listar recursos administrativos |
+| `POST /api/admin/files` | Criar metadados |
+| `GET /api/admin/files?id=...` | Consultar recurso |
+| `GET /api/admin/files?id=...&download=1` | Download administrativo |
+| `PUT /api/admin/files?id=...` | Enviar conteúdo binário |
+| `PATCH /api/admin/files?id=...` | Alterar visibilidade |
+| `DELETE /api/admin/files?id=...` | Excluir recurso com confirmação |
+
+As mutações que exigem revisão continuam utilizando `If-Match`. A exclusão continua exigindo `X-Confirm-Delete: true`.
+
+A mudança de provedor não autoriza alterações nos modelos públicos, nos identificadores de recursos nem nos contratos de navegação dos aplicativos.
+
+**Estado:** testes locais informados como aprovados; integração real com Supabase Storage ainda não homologada. As seções históricas abaixo permanecem preservadas para rastreabilidade.
+
 
 ## Responsabilidades e compatibilidade
 

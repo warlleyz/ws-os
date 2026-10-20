@@ -21,7 +21,7 @@ Atualizado em 20/10/2026. O backend usa Worker com assets, `wrangler.jsonc` e `w
 | /api/requests | POST | Opt-in, Turnstile, D1, idempotência e service-role restrito ao Worker. |
 | /api/admin/requests | GET, PATCH, DELETE | Administrador/RLS; revisão e confirmação em exclusão. |
 | /api/files | GET | Opt-in e RPC público mediado; bucket privado. Sem id lista catálogo; com id entrega bytes autorizados. |
-| /api/admin/files | GET, POST, PUT, PATCH, DELETE | Administrador/RLS/R2; revisão nas mutações e confirmação em exclusão. |
+| /api/admin/files | GET, POST, PUT, PATCH, DELETE | Administrador/RLS/Supabase Storage privado; revisão nas mutações, integridade SHA-256 e confirmação em exclusão. |
 | /api/posts/attachments | GET | postId; somente metadados de anexos efetivamente públicos. |
 | /api/admin/attachments | POST, DELETE | Administrador e RPC transacional, revisão da publicação. |
 | /api/rankings | GET, POST | Opt-in, projeção mínima e escrita protegida/RPC. |
@@ -33,4 +33,6 @@ Rotas desconhecidas sob `/api/` retornam JSON 404; métodos incompatíveis retor
 
 `scheduled` chama manutenção D1 e, somente com opt-in, retenção. Nenhum cron ou binding remoto foi criado nesta entrega.
 
-`npm run dev`/`preview` servem frontend. Os testes Node executam o entrypoint real com Requests/Responses e dependências controladas; não são homologação workerd/Cloudflare, R2, RLS ou fornecedor real. Ver [configuração](CONFIGURACAO.md) e [evidências/limites](../finalizacao/ETAPAS-03-04-ENTREGA.md).
+
+`npm run dev`/`preview` servem o frontend. Os testes Node executam o entrypoint real com Requests/Responses e dependências controladas; não comprovam o funcionamento no runtime Cloudflare nem a integração com Supabase Storage, RLS ou provedores reais. O armazenamento dos arquivos oficiais utiliza o bucket privado `ws-os-official-files`, acessado exclusivamente pelo Worker com credenciais de serviço. Ver [configuração](CONFIGURACAO.md) e [evidências/limites](../finalizacao/ETAPAS-03-04-ENTREGA.md).
+ Os testes Node executam o entrypoint real com Requests/Responses e dependências controladas; não substituem a homologação no runtime workerd/Cloudflare, a validação das políticas RLS ou os testes reais com fornecedores. A integração com Supabase Storage foi homologada separadamente no Worker local. Ver [configuração](CONFIGURACAO.md) e [evidências/limites](../finalizacao/ETAPAS-03-04-ENTREGA.md).

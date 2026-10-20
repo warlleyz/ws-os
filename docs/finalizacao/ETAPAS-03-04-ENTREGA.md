@@ -2,6 +2,29 @@
 
 Data: 20/10/2026. Base: `d7167db`. Alterações locais para revisão, sem commit ou push. Nenhuma migração, credencial, binding remoto, flag de produção ou serviço externo foi alterado.
 
+
+## Atualização posterior — Migração para Supabase Storage
+
+Em 20/10/2026, foi aprovada a substituição do Cloudflare R2 pelo Supabase Storage para os arquivos oficiais.
+
+O projeto Supabase `ws-os-dev` recebeu o bucket privado `ws-os-official-files`, limitado a 10 MB por objeto e aos formatos PDF, TXT, PNG, JPEG e WebP.
+
+A implementação local foi adaptada para utilizar a API do Supabase Storage, mantendo o Worker como intermediário e o PostgreSQL como fonte dos metadados e estados.
+
+Foram atualizados os testes simulados de armazenamento. Durante a validação, foram corrigidas uma atribuição desnecessária identificada pelo ESLint e a construção da URL do bucket. O usuário informou que os testes passaram após essas correções.
+
+**Homologação ainda pendente:**
+
+- Validar operações reais no Supabase Storage.
+- Confirmar leitura de metadados e tratamento de erros do provedor.
+- Testar permissões com sessões reais.
+- Verificar concorrência e recuperação de operações interrompidas.
+- Executar os testes de RLS e confirmar a configuração do Worker no ambiente autorizado.
+
+As referências a R2 nas seções históricas seguintes descrevem a implementação original e não representam a arquitetura vigente.
+
+**Situação da Etapa 03:** em execução; não homologada integralmente.
+
 ## Estado verdadeiro
 
 | Etapa | Estado |
@@ -145,3 +168,52 @@ Inventário do working tree relativo a `d7167db`, incluindo arquivos novos ainda
 - tests/core/worker.test.cjs
 - tests/helpers/contract-loader.cjs
 - worker/index.js
+
+
+## Atualização de homologação — 20/10/2026
+
+### Estado da Etapa 03
+
+**Implementação local concluída e testes principais aprovados. Homologação integral para produção ainda pendente.**
+
+### Homologações aprovadas
+
+- `npm run lint`, `npm run build` e `npm run test` aprovados.
+- Supabase PostgreSQL com migrações 005–009 aplicadas no projeto `ws-os-dev`.
+- Auditoria de RLS, privilégios de tabelas e execução de funções RPC.
+- Autenticação administrativa real pelo Worker.
+- Supabase Storage privado substituindo Cloudflare R2 como armazenamento oficial.
+- Criação de metadados, upload, verificação SHA-256 e download administrativo de arquivo real.
+- Recuperação de upload interrompido e exclusão interrompida.
+- Exclusão física confirmada no Storage e estado `deleted` confirmado no PostgreSQL.
+- Arquivos privados protegidos contra acesso público.
+- Rankings Snake e Flappy consultados pelo Worker com HTTP 200.
+- Validação negativa de jogo inválido, administração sem autenticação e arquivo excluído.
+- Quatro tabelas de limitadores presentes no D1 local.
+- Migrações D1 003 e 004 aplicadas localmente.
+
+### Ajustes realizados durante a homologação
+
+- Substituição do adaptador R2 pelo adaptador Supabase Storage.
+- Adequação à resposta real de metadados do Supabase Storage.
+- Tratamento de HTTP 400 com código `NoSuchKey` e status interno 404.
+- Correção da leitura pública de rankings para utilizar `service_role` exclusivamente no Worker.
+- Atualização dos testes de regressão relacionados ao Storage.
+
+### Pendências externas e operacionais
+
+- Homologação completa de RLS com identidades reais de visitante, usuário comum e administrador.
+- Validação do D1 remoto e da execução agendada de limpeza dos limitadores.
+- Homologação de escrita real nos rankings com Turnstile e limitação de requisições.
+- Homologação dos serviços externos que permanecem desabilitados ou indisponíveis.
+- Aplicação e validação da migração incremental 010 para o índice `post_attachments(resource_id)`.
+- Rotação de credenciais expostas e revogação das sessões administrativas comprometidas.
+- Revisão das configurações e autorização formal antes de qualquer publicação em produção.
+
+### Critério de continuidade
+
+Os contratos de backend podem ser utilizados pelas próximas etapas de implementação local.
+
+Nenhuma pendência externa deverá ser considerada aprovada sem evidência. As flags e integrações ainda não homologadas devem permanecer desabilitadas fora do ambiente de teste.
+
+Esta atualização substitui as referências históricas ao R2 como armazenamento vigente, preservando-as apenas como registro da implementação anterior.

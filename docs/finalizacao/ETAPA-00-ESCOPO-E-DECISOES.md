@@ -38,6 +38,42 @@ Cada etapa deverá ser finalizada funcionalmente, visualmente e tecnicamente, co
 | DEC-FIN-021 | B | Revisão funcional e visual antes do aceite de cada etapa |
 | DEC-FIN-022 | B | Conteúdo profissional fornecido e aprovado por aplicativo |
 
+
+### Revisão posterior — Supabase Storage (20/10/2026)
+
+**Decisão aprovada:** substituir Cloudflare R2 por Supabase Storage no armazenamento dos arquivos oficiais da WS OS V2.
+
+**Justificativa:** a ativação do Cloudflare R2 exige a configuração de uma forma de pagamento, que não será utilizada neste momento. O Supabase Storage aproveita a infraestrutura já disponível no projeto.
+
+**Decisões revisadas:**
+
+- **DEC-FIN-003:** o provedor de arquivos oficiais passa a ser Supabase Storage.
+- **DEC-FIN-011:** utilizar bucket privado `ws-os-official-files`, com autorização e transferência dos arquivos mediadas pelo Cloudflare Worker.
+- **DEC-FIN-017:** preservar os documentos estáticos existentes e permitir substituição administrativa por novos recursos armazenados no Supabase Storage.
+
+**Requisitos preservados:**
+
+- Upload administrativo de arquivos oficiais.
+- Limite de 10 MB por arquivo.
+- Formatos PDF, TXT, PNG, JPEG e WebP.
+- Até cinco anexos por publicação.
+- Metadados e revisões no PostgreSQL.
+- Validação de MIME, assinatura e SHA-256.
+- Arquivos pessoais exclusivamente no armazenamento local do navegador.
+- Nenhuma exposição da chave de serviço ou acesso público direto ao bucket.
+
+**Infraestrutura confirmada:**
+
+- Projeto Supabase: `ws-os-dev`.
+- Bucket: `ws-os-official-files`.
+- Bucket privado, com limite de 10 MB e restrição dos cinco tipos MIME.
+- Migrações PostgreSQL 005–009 aplicadas anteriormente.
+
+**Estado:** implementação e testes locais em andamento. A homologação real de upload, download, exclusão, permissões e concorrência permanece pendente.
+
+Esta revisão altera exclusivamente o provedor de armazenamento e suas integrações técnicas. Os demais requisitos aprovados permanecem válidos.
+
+
 ## 3. Método de desenvolvimento
 
 - Desenvolvimento manual, orientado passo a passo, sem delegação de implementação ao Codex.
@@ -67,7 +103,7 @@ Dependências externas não homologadas não serão consideradas concluídas.
 ## 5. Dependências e insumos
 
 - Supabase de homologação separado: provisionamento e validação pendentes.
-- Cloudflare R2: configuração de teste, permissões, limites e regras de acesso pendentes.
+- Supabase Storage: bucket privado `ws-os-official-files` configurado; integração e homologação real pelo Worker pendentes.
 - EmailJS: entrega real autorizada pendente.
 - Gemini/Wally: configuração e homologação pendentes.
 - Rankings: banco, limites e proteção contra abuso sujeitos a testes reais.
