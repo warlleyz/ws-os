@@ -75,6 +75,30 @@ test('Worker: login, criar, editar, publicar, curtir, despublicar, excluir e log
     );
     return { status: response.status, data: await response.json() };
   }
+
+  /* === Política de cache das publicações === */
+  /* ----- Respostas públicas não ficam no cache HTTP ----- */
+  test('API de publicações impede cache HTTP de respostas públicas', async (t) => {
+    const worker = (await import('../../worker/index.js')).default;
+
+    t.mock.method(globalThis, 'fetch', async () =>
+      Response.json([]),
+    );
+
+    const env = {
+      SUPABASE_URL: 'https://test-project.supabase.co',
+      SUPABASE_ANON_KEY: 'anon-test',
+    };
+
+    const response = await worker.fetch(
+      new Request('https://ws.test/api/posts'),
+      env,
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+  });
+
   assert.equal(
     (
       await call('/api/auth/login', 'POST', {

@@ -4,7 +4,7 @@ export async function onRequestGet({ env }) {
     Response.json(body, {
       status,
       headers: {
-        'Cache-Control': status === 200 ? 'public, max-age=60' : 'no-store',
+        'Cache-Control': 'no-store',
         'X-Content-Type-Options': 'nosniff',
       },
     });

@@ -108,6 +108,7 @@ export default function AdminContent({ kind, instanceId, authorized }) {
       invalidatePublicData('/api/content');
       await load();
     } catch (error) {
+      /* ----- Preservar o formulário após falhas ----- */
       setMessage(error.message);
     } finally {
       mutation.current = false;

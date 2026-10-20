@@ -137,8 +137,16 @@ export async function onRequest({ request, env }) {
       );
     const rows = await response.json();
     if (!Array.isArray(rows)) return json({ error: 'INVALID_RESPONSE' }, 502);
-    if (request.method !== 'GET' && rows.length !== 1)
-      return json({ error: 'CONTENT_CONFLICT' }, 409);
+    /* ----- Confirmar a identidade da operação administrativa ----- */
+    if (request.method !== 'GET') {
+      if (
+        rows.length !== 1 ||
+        rows[0]?.id !== query.get('id') &&
+        rows[0]?.id !== JSON.parse(body ?? '{}').id
+      ) {
+        return json({ error: 'CONTENT_CONFLICT' }, 409);
+      }
+    }
     // Nunca devolver colunas extras, mesmo se a consulta upstream mudar.
     return json({
       items: rows

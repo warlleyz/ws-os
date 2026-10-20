@@ -1,16 +1,21 @@
+
 import { invalidatePublicData } from '../../services/publicDataService';
 import NotesAdmin from '../notes/NotesAdmin';
-const refresh = () => {
+
+/* === Administração de publicações === */
+/* ----- Invalidação do conteúdo público ----- */
+function refreshPublicPosts() {
   invalidatePublicData('/api/posts');
-  window.dispatchEvent(new Event('ws-os:posts-changed'));
-};
+}
+
+/* === Componente administrativo === */
 export default function AdminPosts({ instanceId, authorized }) {
   return (
     <NotesAdmin
       instanceId={instanceId}
       isAdmin={authorized}
-      refreshPublicPosts={refresh}
-      onDeletePublicPost={refresh}
+      refreshPublicPosts={refreshPublicPosts}
+      onDeletePublicPost={() => { }}
     />
   );
 }

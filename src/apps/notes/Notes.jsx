@@ -1,5 +1,5 @@
 import { invalidatePublicData } from '../../services/publicDataService';
-import { useSyncExternalStore, useState, useEffect } from 'react';
+import { useSyncExternalStore, useState } from 'react';
 import { contentText } from '../../content/portfolioContent';
 import { fetchNotes } from '../../services/notesService';
 import { isAdminAuthenticated, subscribeAdminSession } from '../../services/authService';
@@ -19,11 +19,6 @@ const searchText = (value) =>
 export default function Notes({ instance }) {
   const locale = useLocale();
   const resource = usePublicResource(fetchNotes, 'notes', true, { invalidateOn: ['/api/posts'] });
-  useEffect(() => {
-    const refresh = resource.refresh;
-    window.addEventListener('ws-os:posts-changed', refresh);
-    return () => window.removeEventListener('ws-os:posts-changed', refresh);
-  }, [resource.refresh]);
   const [query, setQuery] = useState('');
   const [tag, setTag] = useState('');
   const navigation = instance?.navigationRequestId ?? 0;
