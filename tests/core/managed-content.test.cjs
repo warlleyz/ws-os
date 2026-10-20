@@ -22,6 +22,9 @@ function load(
   const api = vm.runInNewContext(
     '(()=>{' + source + ';return {onRequest,validateManagedContent}})()',
     {
+      ...require('../helpers/contract-loader.cjs').loadContract(
+        path.join(__dirname, '../../src/shared/utils/contractValidation.js'),
+      ),
       URL,
       Response,
       AbortSignal,
@@ -97,4 +100,63 @@ test('edição exige revisão, limita corpo e retorna conflito sem sobrescrever'
   assert.equal((await send({ ...payload, updatedAt: '2026-10-18T00:00:00Z' })).status, 409);
   assert.match(api.calls[0].url, /updated_at=eq/);
   assert.equal((await send({ ...payload, data: { title: 'a'.repeat(9000) } })).status, 400);
+});
+
+/* === Confirmação de identidade nas mutações === */
+test('POST, PATCH e DELETE confirmam o ID validado do corpo, nunca da query', async () => {
+  for (const method of ['POST', 'PATCH', 'DELETE']) {
+    for (const returnedId of ['one', 'other']) {
+      const api = load(true, [{ id: returnedId, status: 'draft' }]);
+      const response = await api.onRequest({
+        request: new Request('https://test/api/admin/content?kind=events&id=other', {
+          method,
+          body: JSON.stringify({
+            id: 'one',
+            updatedAt: '2026-10-18T00:00:00Z',
+            status: 'draft',
+            data: { title: 'Evento', date: '2026-10-18' },
+          }),
+        }),
+        env,
+      });
+      assert.equal(response.status, returnedId === 'one' ? 200 : 409, method);
+      if (method !== 'POST')
+        assert.equal(new URL(api.calls[0].url).searchParams.get('id'), 'eq.one');
+    }
+    for (const rows of [[], [{ id: 'one' }, { id: 'one' }]]) {
+      const api = load(true, rows);
+      const result = await api.onRequest({
+        request: new Request('https://test/api/admin/content?kind=events', {
+          method,
+          body: JSON.stringify({
+            id: 'one',
+            updatedAt: '2026-10-18T00:00:00Z',
+            status: 'draft',
+            data: { title: 'Evento', date: '2026-10-18' },
+          }),
+        }),
+        env,
+      });
+      assert.equal(result.status, 409);
+    }
+  }
+});
+
+test('eventos com horário preservam fuso e recusam datas impossíveis ou dados privados', () => {
+  const { validateManagedContent: validate } = load();
+  const event = {
+    title: 'Evento',
+    date: '2026-10-20',
+    allDay: false,
+    startsAt: '2026-10-20T13:00:00Z',
+    timezone: 'America/Sao_Paulo',
+  };
+  assert.equal(validate('events', event).allDay, false);
+  assert.throws(() => validate('events', { ...event, startsAt: '2026-02-30T13:00:00Z' }));
+  assert.throws(() => validate('events', { ...event, timezone: 'Invalid/Zone' }));
+  assert.throws(() => validate('events', { ...event, email: 'private@test.dev' }));
+  assert.equal(validate('files', { title: 'Oficial', resourceId: 'file-1' }).resourceId, 'file-1');
+  assert.throws(() =>
+    validate('files', { title: 'Oficial', resourceId: 'file-1', url: 'documents/x.pdf' }),
+  );
 });

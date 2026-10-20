@@ -12,6 +12,7 @@ export default function useWindowInteraction({ instance, app }) {
   const windowRef = useRef(null);
   const geometryRef = useRef(null);
   const interactionRef = useRef(null);
+  const interactionFrameRef = useRef(0);
   const previewRef = useRef(null);
   const modeRef = useRef('normal');
   const [mode, setMode] = useState('normal');
@@ -22,10 +23,18 @@ export default function useWindowInteraction({ instance, app }) {
       const interaction = interactionRef.current;
       if (!interaction) return;
       const element = windowRef.current;
+      cancelAnimationFrame(interactionFrameRef.current);
+      interactionFrameRef.current = 0;
       interactionRef.current = null;
       if (element) {
         element.removeAttribute('data-interacting');
-        geometryRef.current = applyGeometry(element, interaction.geometry);
+        geometryRef.current = applyGeometry(
+          element,
+          interaction.cancelGeometry,
+          getBounds(element),
+          true,
+        );
+        if (modeRef.current !== interaction.initialMode) changeMode(interaction.initialMode);
       }
       previewRef.current?.remove();
       previewRef.current = null;
@@ -43,6 +52,8 @@ export default function useWindowInteraction({ instance, app }) {
     if (!instance.minimized) return;
     windowRef.current?.removeAttribute('data-interacting');
     const interaction = interactionRef.current;
+    cancelAnimationFrame(interactionFrameRef.current);
+    interactionFrameRef.current = 0;
     interactionRef.current = null;
     if (interaction) {
       const target = interaction.captureTarget;
@@ -82,6 +93,7 @@ export default function useWindowInteraction({ instance, app }) {
     setMode(nextMode);
   }
   function toggleMaximize() {
+    if (interactionRef.current) return;
     if (modeRef.current === 'normal') {
       changeMode('maximized');
     } else {
@@ -89,19 +101,22 @@ export default function useWindowInteraction({ instance, app }) {
     }
   }
 
-  // A geometria normal permanece preservada durante o snap.
+  /* ----- A geometria normal permanece preservada durante o snap. ----- */
   useLayoutEffect(() => {
     const element = windowRef.current;
     if (!element) return;
     if (!geometryRef.current) {
-      geometryRef.current = readGeometry(element);
+      const defaults = app?.window;
+      geometryRef.current = defaults
+        ? { ...readGeometry(element), width: defaults.width, height: defaults.height }
+        : readGeometry(element);
     }
     if (mode === 'normal') {
-      geometryRef.current = applyGeometry(element, geometryRef.current);
+      geometryRef.current = applyGeometry(element, geometryRef.current, getBounds(element), true);
     }
-  }, [mode]);
+  }, [mode, app]);
 
-  // Observa somente alterações reais no tamanho do Desktop.
+  /* ----- Observa somente alterações reais no tamanho do Desktop. ----- */
   useLayoutEffect(() => {
     const element = windowRef.current;
     const parent = element?.offsetParent;
@@ -114,7 +129,7 @@ export default function useWindowInteraction({ instance, app }) {
         if (modeRef.current !== 'normal' || !geometryRef.current) {
           return;
         }
-        geometryRef.current = applyGeometry(element, geometryRef.current, bounds);
+        geometryRef.current = applyGeometry(element, geometryRef.current, bounds, true);
       });
     });
     observer.observe(parent);
@@ -125,13 +140,9 @@ export default function useWindowInteraction({ instance, app }) {
   }, []);
   useLayoutEffect(() => {
     return () => {
-      previewRef.current?.remove();
-      previewRef.current = null;
-    };
-  }, []);
-  useLayoutEffect(() => {
-    return () => {
       const interaction = interactionRef.current;
+      cancelAnimationFrame(interactionFrameRef.current);
+      interactionFrameRef.current = 0;
       interactionRef.current = null;
 
       if (interaction) {
@@ -147,7 +158,7 @@ export default function useWindowInteraction({ instance, app }) {
     };
   }, []);
   function startInteraction(event, type, direction = '') {
-    if (event.button !== 0) return;
+    if (event.button !== 0 || interactionRef.current) return;
     if (type === 'drag' && event.target.closest('button')) {
       return;
     }
@@ -158,6 +169,8 @@ export default function useWindowInteraction({ instance, app }) {
     if (!element) return;
     const bounds = getBounds(element);
     let geometry = geometryRef.current ?? readGeometry(element);
+    const cancelGeometry = { ...geometry };
+    const initialMode = modeRef.current;
     if (type === 'drag' && modeRef.current !== 'normal') {
       const rect = element.getBoundingClientRect();
       const parentRect = element.offsetParent.getBoundingClientRect();
@@ -178,6 +191,8 @@ export default function useWindowInteraction({ instance, app }) {
     interactionRef.current = {
       type,
       direction,
+      cancelGeometry,
+      initialMode,
       pointerId: event.pointerId,
       captureTarget: event.currentTarget,
       startX: event.clientX,
@@ -191,7 +206,7 @@ export default function useWindowInteraction({ instance, app }) {
     event.currentTarget.setPointerCapture(event.pointerId);
     event.preventDefault();
   }
-  function moveInteraction(event) {
+  function applyInteraction(event) {
     const interaction = interactionRef.current;
     if (!interaction || interaction.pointerId !== event.pointerId) {
       return;
@@ -219,13 +234,36 @@ export default function useWindowInteraction({ instance, app }) {
     } else {
       next = resizeGeometry(initial, interaction.direction, dx, dy, getBounds(element));
     }
-    geometryRef.current = applyGeometry(element, next);
+    geometryRef.current = applyGeometry(
+      element,
+      next,
+      getBounds(element),
+      interaction.type === 'drag',
+    );
+  }
+  function moveInteraction(event) {
+    const interaction = interactionRef.current;
+    if (!interaction || interaction.pointerId !== event.pointerId) return;
+    interaction.lastX = event.clientX;
+    interaction.lastY = event.clientY;
+    if (interactionFrameRef.current) return;
+    interactionFrameRef.current = requestAnimationFrame(() => {
+      interactionFrameRef.current = 0;
+      applyInteraction({
+        pointerId: interaction.pointerId,
+        clientX: interaction.lastX,
+        clientY: interaction.lastY,
+      });
+    });
   }
   function endInteraction(event) {
     const interaction = interactionRef.current;
     if (!interaction || interaction.pointerId !== event.pointerId) {
       return;
     }
+    cancelAnimationFrame(interactionFrameRef.current);
+    interactionFrameRef.current = 0;
+    if (event.type === 'pointerup') applyInteraction(event);
     interactionRef.current = null;
     windowRef.current?.removeAttribute('data-interacting');
     removeSnapPreview();
@@ -259,7 +297,26 @@ export default function useWindowInteraction({ instance, app }) {
     const next = resizeGeometry(initial, direction, dx, dy, getBounds(element));
     geometryRef.current = applyGeometry(element, next);
   }
+  function handleMoveKeyDown(event) {
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    const element = windowRef.current;
+    if (!element || modeRef.current !== 'normal') return;
+    const step = event.shiftKey ? 20 : 10;
+    const initial = geometryRef.current ?? readGeometry(element);
+    geometryRef.current = applyGeometry(
+      element,
+      {
+        ...initial,
+        x: initial.x + (event.key === 'ArrowRight' ? step : event.key === 'ArrowLeft' ? -step : 0),
+        y: initial.y + (event.key === 'ArrowDown' ? step : event.key === 'ArrowUp' ? -step : 0),
+      },
+      getBounds(element),
+      true,
+    );
+  }
   return {
+    handleMoveKeyDown,
     windowRef,
     mode,
     appName,

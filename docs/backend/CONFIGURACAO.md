@@ -1,34 +1,67 @@
-> **Estado mais recente — 18/10/2026:** consulte [Pendências e continuidade](../PENDENCIAS-FINALIZACAO.md). O texto abaixo é histórico; não descreve integralmente o estado atual de auth, Notas, Administração, Arquivos, rankings e testes.
+# Configuração do backend — Etapa 03
 
-# Integrações preparadas — não ativadas
+Atualizado em 20/10/2026. Estado: código local preparado; homologação externa pendente. [Entrega e limites](../finalizacao/ETAPAS-03-04-ENTREGA.md). Nenhuma instrução deste guia autoriza produção.
 
-Estas funções usam o roteamento por arquivos do Cloudflare Pages. `npm run dev` e `npm run preview` servem o frontend; **não executam Pages Functions**. A validação atual usa Requests/Responses e fetch simulado em Node, sem contas reais.
+## Ambiente isolado
 
-## WakaTime
+Usar projeto Supabase separado, bucket R2 **privado**, D1 de teste e origem de prévia autorizada. `npm run dev`/`preview` executam somente o frontend. Testar também `worker/index.js` no runtime Cloudflare/Worker autorizado; não confundir os testes Node do entrypoint com workerd ou deploy real.
 
-1. No ambiente de teste do Pages, cadastrar o segredo `WAKATIME_API_KEY`. Nunca usar prefixo `VITE_`, arquivo público ou commit de credencial.
-2. Revisar a exposição pública: o endpoint retorna somente tempo agregado e linguagens; qualquer visitante poderá consultar essas métricas.
-3. Em `src/content/portfolioContent.js`, definir `wakatimeProxy: '/api/wakatime'`.
-4. Testar os três períodos, chave inválida, timeout e limite do provedor. O cliente tem cache em sessão; o endpoint anuncia cache HTTP de cinco minutos. Aplicar proteção de tráfego no provedor antes da produção.
+O `wrangler.jsonc` existente não foi alterado. Não reaproveitar seu binding remoto para experimentar migrações. Preparar configuração própria de homologação, fora de commits de configurações locais/segredos. Usar bucket sem domínio público e sem exposição por `r2.dev`.
 
-## Notas com Supabase
+## Variáveis e bindings
 
-O app funciona sem backend com `posts: []` e `notesEndpoint: ''`. Tudo nesse arquivo entra no bundle público: **não colocar rascunhos privados ali**, mesmo com status `draft`.
+| Nome | Uso |
+|---|---|
+| SUPABASE_URL | Origem HTTPS do projeto de homologação no formato aceito pelo código. |
+| SUPABASE_ANON_KEY | Chave pública legada compatível com PostgREST/Auth; RLS continua obrigatória. |
+| SUPABASE_SERVICE_ROLE_KEY | **Segredo exclusivamente no Worker** para RPCs restritos, submissões protegidas e moderação; nunca VITE_ ou bundle. |
+| WALLY_LIMITS_DB | Binding D1 isolado dos quatro limitadores. |
+| ADMIN_LOGIN_RATE_LIMIT_SALT | Segredo do limitador de login. |
+| POST_LIKES_HASH_SALT | Segredo do identificador de curtidas conforme handler existente. |
+| PUBLIC_WRITE_HASH_SALT | Segredo estável para solicitações/rankings; trocar altera o vínculo de idempotência por visitante. |
+| TURNSTILE_SECRET_KEY | Verificação no backend; hostname da prévia e action `public-write` para solicitações/rankings. |
+| REQUESTS_ENABLED | Literal `true` somente após migração/RLS e testes de solicitações. Ausente mantém indisponível. |
+| MANAGED_FILES_ENABLED | Literal `true` somente após migrações e homologação de arquivos. |
+| OFFICIAL_FILES | Binding R2 privado de teste para arquivos oficiais; não é armazenamento dos visitantes. |
+| RANKINGS_ENABLED | Literal `true` somente após homologar migração 006, RPC, proteção e moderação. |
+| EMAILJS_NOTIFICATIONS_ENABLED | Literal `true` habilita notificação independente após persistência; ausente não envia. |
+| EMAILJS_SERVICE_ID / EMAILJS_TEMPLATE_ID | Serviço/template dedicado ao aviso administrativo; não aceitar destino/template vindos do formulário. |
+| EMAILJS_PUBLIC_KEY / EMAILJS_PRIVATE_KEY | Configuração apenas no Worker para o envio preparado. Homologar suporte ao envio servidor no plano/conta autorizados. |
+| REQUEST_RETENTION_ENABLED | Opt-in da rotina de exclusão após validar retenção, migrações e cron de homologação. |
+| WAKATIME_API_KEY | Segredo exclusivamente no Worker, para agregados públicos permitidos. |
+| WALLY_AI_ENABLED / GEMINI_MODEL / GEMINI_API_KEY / WALLY_RATE_LIMIT_SALT | Manter IA desligada até autorização/homologação; respeitar configuração e proteção existentes do handler. |
 
-1. Revisar `posts.sql` e aplicá-lo em um projeto de teste. Fazer backup de tabelas/políticas prévias; `IF NOT EXISTS` não migra uma tabela incompatível existente.
-2. Cadastrar `SUPABASE_URL` (origem `https://<projeto>.supabase.co`) e `SUPABASE_ANON_KEY` (chave anon legada JWT) no Pages. O endpoint NÃO precisa nem deve receber `service_role`. Chaves publishable novas exigem adaptar a autenticação da requisição; não substituí-las cegamente.
-3. Testar REST com usuário anon: publicação passada legível; draft e publicação futura invisíveis; insert/update/delete negados. Validar também políticas já existentes: políticas permissivas adicionais podem ampliar acesso.
-4. Publicar um registro por SQL administrativo com textos JSON string ou objeto de idiomas, status `published`, data passada e tags.
-5. Definir `notesEndpoint: '/api/posts'` no conteúdo. Com endpoint ativado, falha exibe erro/cache identificado; não simula leitura remota com conteúdo local.
+As flags novas não foram inseridas na configuração de produção. Não há valores de credenciais neste guia. Chaves publishable diferentes do formato suportado exigem validar compatibilidade, não substituir anon/service-role cegamente.
 
-O endpoint traz no máximo 200 publicações recentes. Paginação, curtidas anônimas com antiabuso, escrita/admin autenticados, anexos e editor editorial continuam pendentes. A leitura exibe texto simples escapado pelo React; Markdown/HTML não é interpretado.
+## Banco e políticas
 
-## Execução e publicação
+1. Revisar/aplicar 001–006 conforme o histórico **do projeto de teste**. Não reaplicar migrações antigas para esconder divergência de schema.
+2. Aplicar 007, 008 e 009 em ordem, em homologação. Elas usam transações e acrescentam entidades/rotinas; não foram executadas nesta entrega.
+3. Conferir políticas permissivas preexistentes, grants de tabelas/colunas, execução de RPCs e papel administrativo. Testar acesso direto como anon, usuário comum e administrador, não só pelos botões.
+4. Executar o roteiro `database/tests/etapa03_rls.sql` com `ON_ERROR_STOP` e UUID de usuário administrador de teste existente. Ele termina com ROLLBACK; confirmar que o alvo é descartável antes de executar.
+5. Homologar concorrência real: criação simultânea da mesma chave, chave com outro payload, revisão antiga, sexto anexo concorrente, exclusão durante acesso e transições de retenção.
+6. Aplicar as migrações D1 001–004 no D1 isolado e conferir índices. Nenhuma migração D1 remota foi executada aqui.
 
-Se Wrangler já estiver disponível na sua máquina, executar Pages localmente com a pasta `dist` e variáveis locais ignoradas. Nenhuma ferramenta foi instalada nesta etapa. Antes de publicar, validar as Functions no runtime Cloudflare e configurar segredos no ambiente correto. Não houve deploy, escrita no Supabase ou chamada autenticada ao WakaTime.
+## Fluxos de homologação
 
-## Referências oficiais consultadas
+- Auth: login incorreto/correto, usuário comum, cadastro administrativo, expiração, logout e operação já iniciada; confirmar a semântica efetiva de revogação dos JWTs no Supabase e o prazo de validade. Frontend guarda sessão só em memória.
+- Notas/curtidas: ciclo editorial completo, revisão antiga, anexo privado, publicação futura, acesso direto negado, limites e indisponibilidade do D1. Nada disso foi escrito em conta real nesta entrega.
+- Solicitações: enviar mensagem/agendamento com consentimento e desafio, perder resposta, reenviar **a mesma chave/conteúdo**, confirmar um único ID; outro conteúdo deve conflitar. Nunca confirmar reunião por haver persistência ou e-mail entregue.
+- EmailJS: conferir template/destino fixos, recebimento real, falha e timeout. O resultado técnico é `persisted` e `email` independentes. Não reutilizar o envio direto antigo do formulário junto ao novo fluxo, para não duplicar notificações; migração da UI pertence à Etapa 07.
+- Arquivos: criar metadados, PUT com `If-Match` e MIME real, consultar a nova revisão; testar arquivo inválido, corpo maior/menor, perda de resposta, repetição com bytes iguais/diferentes e duas gravações. Upload ativo bloqueia exclusão até reconciliar. Para remover, enviar revisão atual e confirmação; conferir R2 antes/depois e reconciliação de `deleting`.
+- Anexos: vincular cinco recursos, recusar o sexto inclusive com concorrência; rascunho/futuro não pode entregar bytes. Despublicar deve retirar o acesso imediatamente em novas requisições. Excluir publicação retira vínculos; excluir recurso retira referências pela migração 009.
+- Catálogo: recursos `catalog` privados/incompletos não entram na listagem; estáticos antigos continuam funcionando. Integração visual/Editor/Visualizador pertence às Etapas 05/06/08.
+- Rankings: manter melhor pontuação, não expor hash publicamente, testar limite de cada jogo, desafio, quota e remoção administrativa. Registrar a confiança limitada em pontuações vindas do navegador.
+- GitHub/WakaTime/clima/Gemini: conferir respostas reais, limites, atualização, cache identificado e falhas/cancelamento; não ativar Gemini durante testes genéricos do portfólio.
 
-- [Roteamento de Pages Functions](https://developers.cloudflare.com/pages/functions/routing/)
-- [RLS no Supabase](https://supabase.com/docs/guides/database/postgres/row-level-security)
-- [API WakaTime](https://wakatime.com/developers)
+## Agendamento e recuperação
+
+Hook `scheduled` chama a limpeza D1; a retenção de pedidos só roda com opt-in. Configurar cron **somente em homologação autorizada** e observar duração/cotas/resultados antes de produção. Não é rotina artificial para impedir pausa do Supabase, cuja adoção continua condicionada ao planejamento.
+
+`sending`/`unknown` em e-mail não voltam automaticamente para `not_sent`: conferir provedor e pedido antes de qualquer reenvio operacional. Em R2, `uploading`/`deleting` indicam reconciliação, não sucesso final. Preservar dados/objetos até verificar qual lado confirmou a operação; não aplicar limpeza em massa ou apagar objetos pela idade sem revisar vínculos/estado.
+
+Os procedimentos operacionais de backup/restauração, limites reais, alertas e autorização de publicação continuam obrigatórios antes de ativar serviços remotos.
+
+## Referência técnica consultada
+
+Gravação condicional, checksum e objetos de retorno seguem a [API Workers do R2](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/). A consulta à documentação não substitui a homologação do binding real.

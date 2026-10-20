@@ -57,3 +57,27 @@ test('IA continua desativada antes de rede, Turnstile ou D1', async (t) => {
   );
   assert.equal(config.vars.WALLY_AI_ENABLED, 'false');
 });
+
+test('Worker real roteia novos domínios e métodos sem cair nos assets', async () => {
+  const app = await worker();
+  const routes = [
+    ['requests', 'POST'],
+    ['admin/requests', 'GET'],
+    ['files', 'GET'],
+    ['admin/files', 'GET'],
+    ['posts/attachments', 'GET'],
+    ['admin/attachments', 'POST'],
+    ['admin/rankings', 'GET'],
+  ];
+  for (const [route, method] of routes) {
+    const response = await app.fetch(new Request('https://test/api/' + route, { method }), {});
+    assert.equal(response.status, 503, route);
+    assert.match(response.headers.get('content-type'), /application\/json/);
+    const wrong = await app.fetch(
+      new Request('https://test/api/' + route, { method: 'OPTIONS' }),
+      {},
+    );
+    assert.equal(wrong.status, 405, route);
+    assert.ok(wrong.headers.get('allow'));
+  }
+});

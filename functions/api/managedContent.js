@@ -1,3 +1,4 @@
+import { validInstant, validTimezone } from '../../src/shared/utils/contractValidation.js';
 import { requireAdministrator } from './auth.js';
 
 const json = (body, status = 200) =>
@@ -14,6 +15,12 @@ export function validateManagedContent(kind, input) {
   if (!title || title.length > 160 || description.length > 2000) throw Error('INVALID_CONTENT');
   const data = { title, description };
   if (kind === 'events') {
+    if (
+      ['email', 'message', 'requestId', 'attendees', 'privateRequest'].some((key) =>
+        Object.hasOwn(input, key),
+      )
+    )
+      throw Error('INVALID_CONTENT');
     const date = input.date;
     if (
       typeof date !== 'string' ||
@@ -23,11 +30,34 @@ export function validateManagedContent(kind, input) {
     )
       throw Error('INVALID_DATE');
     data.date = date;
+    if (input.allDay !== undefined && typeof input.allDay !== 'boolean')
+      throw Error('INVALID_DATE');
+    data.allDay = input.allDay ?? true;
+    if (!data.allDay) {
+      if (
+        !validInstant(input.startsAt) ||
+        (input.endsAt != null &&
+          (!validInstant(input.endsAt) || Date.parse(input.endsAt) < Date.parse(input.startsAt)))
+      )
+        throw Error('INVALID_DATE');
+      if (!validTimezone(input.timezone)) throw Error('INVALID_DATE');
+      data.startsAt = input.startsAt;
+      data.endsAt = input.endsAt ?? null;
+      data.timezone = input.timezone;
+    }
   }
   const url = input.url || '';
   if (typeof url !== 'string' || url.length > 2048) throw Error('INVALID_URL');
-  if (kind === 'files') {
-    // O catálogo publica somente artefatos estáticos versionados, nunca APIs ou arquivos privados.
+  if (kind === 'files' && input.resourceId !== undefined) {
+    if (
+      typeof input.resourceId !== 'string' ||
+      !/^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,199}$/.test(input.resourceId) ||
+      url
+    )
+      throw Error('INVALID_URL');
+    data.resourceId = input.resourceId;
+  } else if (kind === 'files') {
+    /* ----- O catálogo publica somente artefatos estáticos versionados, nunca APIs ou arquivos privados. ----- */
     if (
       !/^(?:documents|certificates)\/[a-z\d/_-]+\.(?:pdf|png|jpg|jpeg|webp|gif|txt|md|json|csv)$/i.test(
         url,
@@ -72,6 +102,7 @@ export async function onRequest({ request, env }) {
       : request.headers.get('authorization'),
   };
   let body;
+  let expectedId;
   if (request.method === 'GET') {
     url.searchParams.set('select', 'id,kind,data,status,updated_at');
     url.searchParams.set('limit', '200');
@@ -102,7 +133,8 @@ export async function onRequest({ request, env }) {
         offset += chunk.length;
       }
       const input = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
-      if (!validId(input.id)) throw Error('INVALID_ID');
+      if (!validId(input?.id)) throw Error('INVALID_ID');
+      expectedId = input.id;
       if (request.method !== 'POST') {
         if (typeof input.updatedAt !== 'string' || !Number.isFinite(Date.parse(input.updatedAt)))
           throw Error('REVISION_REQUIRED');
@@ -139,15 +171,11 @@ export async function onRequest({ request, env }) {
     if (!Array.isArray(rows)) return json({ error: 'INVALID_RESPONSE' }, 502);
     /* ----- Confirmar a identidade da operação administrativa ----- */
     if (request.method !== 'GET') {
-      if (
-        rows.length !== 1 ||
-        rows[0]?.id !== query.get('id') &&
-        rows[0]?.id !== JSON.parse(body ?? '{}').id
-      ) {
+      if (rows.length !== 1 || rows[0]?.id !== expectedId) {
         return json({ error: 'CONTENT_CONFLICT' }, 409);
       }
     }
-    // Nunca devolver colunas extras, mesmo se a consulta upstream mudar.
+    /* ----- Nunca devolver colunas extras, mesmo se a consulta upstream mudar. ----- */
     return json({
       items: rows
         .filter((row) => !publicRead || row.status === 'published')

@@ -1,17 +1,24 @@
+import { executeJsonRequest } from './httpRequestContract.js';
 
 const API_URL = 'https://api.open-meteo.com/v1/forecast';
 const TIMEOUT_MS = 10000;
 
 export async function fetchWeatherData(latitude, longitude, signal) {
+  if (
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude) ||
+    Math.abs(latitude) > 90 ||
+    Math.abs(longitude) > 180
+  )
+    throw new Error('Dados meteorológicos indisponíveis.');
   const controller = new AbortController();
 
   const timeout = setTimeout(() => {
     controller.abort(new Error('Tempo limite ao consultar o clima.'));
   }, TIMEOUT_MS);
 
-  const abort = () => controller.abort(
-    signal?.reason ?? new DOMException('Operação cancelada.', 'AbortError'),
-  );
+  const abort = () =>
+    controller.abort(signal?.reason ?? new DOMException('Operação cancelada.', 'AbortError'));
 
   if (signal?.aborted) abort();
   else signal?.addEventListener('abort', abort, { once: true });
@@ -26,11 +33,7 @@ export async function fetchWeatherData(latitude, longitude, signal) {
       'weather_code',
       'wind_speed_10m',
     ].join(','),
-    daily: [
-      'weather_code',
-      'temperature_2m_max',
-      'temperature_2m_min',
-    ].join(','),
+    daily: ['weather_code', 'temperature_2m_max', 'temperature_2m_min'].join(','),
     forecast_days: '5',
     timezone: 'auto',
   });
@@ -46,10 +49,7 @@ export async function fetchWeatherData(latitude, longitude, signal) {
 
     const data = await response.json();
 
-    if (
-      !data.current ||
-      !Number.isFinite(data.current.temperature_2m)
-    ) {
+    if (!data.current || !Number.isFinite(data.current.temperature_2m)) {
       throw new Error('Dados meteorológicos indisponíveis.');
     }
 
@@ -65,17 +65,20 @@ export async function fetchWeatherData(latitude, longitude, signal) {
       throw new Error('Previsão meteorológica indisponível.');
     }
 
-    const forecast = daily.time.map((date, index) => ({
-      date,
-      weatherCode: daily.weather_code[index],
-      max: daily.temperature_2m_max[index],
-      min: daily.temperature_2m_min[index],
-    })).filter((day) =>
-      typeof day.date === 'string' &&
-      Number.isFinite(day.max) &&
-      Number.isFinite(day.min) &&
-      Number.isFinite(day.weatherCode)
-    );
+    const forecast = daily.time
+      .map((date, index) => ({
+        date,
+        weatherCode: daily.weather_code[index],
+        max: daily.temperature_2m_max[index],
+        min: daily.temperature_2m_min[index],
+      }))
+      .filter(
+        (day) =>
+          typeof day.date === 'string' &&
+          Number.isFinite(day.max) &&
+          Number.isFinite(day.min) &&
+          Number.isFinite(day.weatherCode),
+      );
 
     return {
       current: data.current,
@@ -105,15 +108,13 @@ export async function fetchWeatherData(latitude, longitude, signal) {
   }
 }
 
-// Mantém compatibilidade com consumidores anteriores.
+/* ----- Mantém compatibilidade com consumidores anteriores. ----- */
 export async function fetchCurrentWeather(latitude, longitude, signal) {
   const result = await fetchWeatherData(latitude, longitude, signal);
   return result.current;
 }
 
-
-const GEOCODING_API_URL =
-  'https://geocoding-api.open-meteo.com/v1/search';
+const GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 
 export async function searchWeatherCities(query, signal) {
   const search = String(query ?? '').trim();
@@ -129,42 +130,30 @@ export async function searchWeatherCities(query, signal) {
     format: 'json',
   });
 
-  let response;
-
+  if (search.length > 100) throw new Error('Não foi possível pesquisar cidades.');
+  let result;
   try {
-    response = await fetch(
+    result = await executeJsonRequest(
       `${GEOCODING_API_URL}?${params.toString()}`,
-      { signal },
+      {},
+      { signal, timeout: TIMEOUT_MS },
     );
   } catch (error) {
-    if (signal?.aborted) {
-      throw error;
-    }
-
-    throw new Error(
-      'Falha de conexão ao pesquisar cidades.',
-      { cause: error },
-    );
+    if (signal?.aborted) throw error;
+    throw new Error('Falha de conexão ao pesquisar cidades.', { cause: error });
   }
-
-  if (!response.ok) {
-    throw new Error(
-      'Não foi possível pesquisar cidades.',
-    );
-  }
-
-  const data = await response.json();
-
-  if (!Array.isArray(data.results)) {
+  if (!result.response.ok) throw new Error('Não foi possível pesquisar cidades.');
+  const data = result.payload;
+  if (!Array.isArray(data?.results)) {
     return [];
   }
 
-
   return data.results
-    .filter((city) =>
-      Number.isFinite(city.latitude) &&
-      Number.isFinite(city.longitude) &&
-      typeof city.name === 'string'
+    .filter(
+      (city) =>
+        Number.isFinite(city.latitude) &&
+        Number.isFinite(city.longitude) &&
+        typeof city.name === 'string',
     )
     .map((city) => ({
       id: city.id,

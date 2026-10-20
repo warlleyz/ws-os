@@ -1,6 +1,6 @@
 # WS OS V2 — plano de conclusão por partes encerráveis
 
-Referência de execução: 18/10/2026, após `c7f794b`. Produto: documento mestre v0.16.0 e decisões posteriores aprovadas. Estado detalhado anterior: [Pendências](PENDENCIAS-FINALIZACAO.md).
+Referência de execução: 18/10/2026, após `c7f794b`. Produto: documento mestre v0.16.0 e decisões posteriores aprovadas. Estado atual das Etapas 03/04: [entrega e pendências](finalizacao/ETAPAS-03-04-ENTREGA.md).
 
 ## 1. Objetivo e regra de execução
 
@@ -136,6 +136,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 ## Etapa 03 — Encerrar backend, políticas e serviços
 
+**Execução em 20/10/2026:** implementação local preparada; bloqueada externamente para aceite integral. [Entregas, migrações, testes e homologação](finalizacao/ETAPAS-03-04-ENTREGA.md).
+
 **Arquivos:** `functions/api/*`; `functions/_lib/*`; `worker/index.js`; `database/migrations/*`; `database/d1/migrations/*`; `src/services/*` correspondentes; `src/shared/hooks/usePublicResource.js`; `docs/backend/WORKER.md`, `CONFIGURACAO.md`; testes de APIs/serviços.
 
 **Trabalho, em subblocos validados:**
@@ -161,6 +163,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Commits sugeridos por subbloco:** `fix: consolida autorizacao e contratos das apis`; `feat: implementa solicitacoes privadas e anexos`; `test: homologa servicos e politicas de acesso`. Usar somente os correspondentes ao trabalho efetivamente realizado.
 
 ## Etapa 04 — Encerrar Core, janelas e mecanismos de preferências
+
+**Execução em 20/10/2026:** correções e validação local concluídas para revisão; aceite físico/visual e limitações descritos na [entrega](finalizacao/ETAPAS-03-04-ENTREGA.md).
 
 **Arquivos:** `src/core/*`; `src/features/windows/*`; `src/shared/hooks/useAppBack.js`, `useUnsavedChanges.js`; `src/shared/components/AppCloseDialog*`, `AppErrorBoundary.jsx`; armazenamento de preferências/wallpapers; testes de contratos, janelas, Desktop e configurações.
 

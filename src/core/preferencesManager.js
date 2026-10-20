@@ -1,3 +1,5 @@
+import { resetCursorMode } from './cursorManager';
+import { setDoNotDisturb } from './notificationPreferences';
 
 import { createPreferenceResetPlan } from './preferenceContract';
 import { setTheme } from './themeManager';
@@ -13,17 +15,9 @@ import { resetWidgetPreferences } from './widgetPreferences';
 /* === Restauração de wallpapers === */
 /* ----- Restaurar os dois temas de uma plataforma ----- */
 function resetShellWallpapers(shell) {
-  const dark = setWallpaper(
-    getDefaultWallpaper('dark'),
-    shell,
-    'dark',
-  );
+  const dark = setWallpaper(getDefaultWallpaper('dark'), shell, 'dark');
 
-  const light = setWallpaper(
-    getDefaultWallpaper('light'),
-    shell,
-    'light',
-  );
+  const light = setWallpaper(getDefaultWallpaper('light'), shell, 'light');
 
   return dark && light;
 }
@@ -43,6 +37,8 @@ export function restoreSystemPreferences(categories) {
 
   const actions = {
     theme: () => setTheme('dark'),
+    cursor: resetCursorMode,
+    notifications: () => setDoNotDisturb(false),
     locale: () => setLocale('pt-BR'),
     appearance: resetAppearance,
 

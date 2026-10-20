@@ -20,6 +20,16 @@ import {
 } from 'lucide-react';
 
 /* === Registro de aplicativos === */
+/* === Dimensões iniciais por tarefa; geometria permanece somente na sessão === */
+const windowProfiles = {
+  calculator: { width: 360, height: 520 },
+  contact: { width: 680, height: 660 },
+  settings: { width: 980, height: 680 },
+  'file-editor': { width: 1000, height: 700 },
+  'file-viewer': { width: 900, height: 660 },
+  notes: { width: 900, height: 660 },
+  projects: { width: 900, height: 660 },
+};
 const appDefinitions = [
   /* ----- Aplicativos Desktop ----- */
   {
@@ -277,7 +287,14 @@ const appDefinitions = [
     public: false,
     showInMenu: false,
   },
-];
+].map((app) => ({
+  ...app,
+  window: Object.freeze({
+    minWidth: 300,
+    minHeight: 220,
+    ...(windowProfiles[app.id] ?? { width: 720, height: 480 }),
+  }),
+}));
 
 /* === Contratos de navegação === */
 const navigationContracts = {

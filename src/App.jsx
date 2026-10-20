@@ -1,3 +1,4 @@
+import { requestGuardedTransition } from './core/appCloseGuards';
 import { useEffect, useState } from 'react';
 
 import { translate as t, useLocale } from './shared/i18n/i18n';
@@ -6,10 +7,7 @@ import { applyTheme, useTheme, setTheme } from './core/themeManager';
 import { applyAppearance, useAppearance } from './core/appearanceManager';
 import { applyAccessibility, useAccessibility } from './core/effectsManager';
 import { useCursorMode } from './core/cursorManager';
-import {
-  CURSOR_VARIANTS,
-  getCursorCssValue,
-} from './core/cursorCatalog';
+import { CURSOR_VARIANTS, getCursorCssValue } from './core/cursorCatalog';
 
 import SystemProvider from './core/SystemProvider';
 import WallyConversationProvider from './features/wally/WallyConversationProvider';
@@ -85,12 +83,7 @@ export default function App() {
     for (const variant of CURSOR_VARIANTS) {
       const property = `--ws-cursor-${variant}`;
 
-      const value = getCursorCssValue(
-        variant,
-        theme,
-        cursorMode,
-        import.meta.env.BASE_URL,
-      );
+      const value = getCursorCssValue(variant, theme, cursorMode, import.meta.env.BASE_URL);
 
       root.style.setProperty(property, value);
     }
@@ -108,7 +101,11 @@ export default function App() {
     const media = window.matchMedia(MOBILE_BREAKPOINT);
 
     function updateShell(event) {
-      setIsMobile(event.matches);
+      const requested = event.matches;
+      if (requested === isMobile) return;
+      requestGuardedTransition(() => {
+        if (media.matches === requested) setIsMobile(requested);
+      });
     }
 
     media.addEventListener('change', updateShell);
@@ -116,7 +113,7 @@ export default function App() {
     return () => {
       media.removeEventListener('change', updateShell);
     };
-  }, []);
+  }, [isMobile]);
 
   /* === Inicialização do sistema === */
   /* ----- Temporização do boot ----- */
@@ -161,10 +158,7 @@ export default function App() {
   /* ----- Sistema principal ----- */
   return (
     <>
-      <div
-        inert={welcomeOpen}
-        aria-hidden={welcomeOpen || undefined}
-      >
+      <div inert={welcomeOpen} aria-hidden={welcomeOpen || undefined}>
         <a
           className="ws-skip-link"
           href={isMobile ? '#ws-mobile' : '#ws-desktop'}
@@ -176,24 +170,16 @@ export default function App() {
         <SystemProvider>
           <WallyConversationProvider>
             {isMobile ? (
-              <Mobile
-                theme={theme}
-                onThemeChange={setTheme}
-              />
+              <Mobile theme={theme} onThemeChange={setTheme} />
             ) : (
-              <Desktop
-                theme={theme}
-                onThemeChange={setTheme}
-              />
+              <Desktop theme={theme} onThemeChange={setTheme} />
             )}
           </WallyConversationProvider>
         </SystemProvider>
       </div>
 
       {/* ----- Janela de boas-vindas ----- */}
-      {welcomeOpen && (
-        <WelcomeDialog onClose={closeWelcome} />
-      )}
+      {welcomeOpen && <WelcomeDialog onClose={closeWelcome} />}
     </>
   );
 }

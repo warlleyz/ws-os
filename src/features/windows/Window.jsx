@@ -22,6 +22,7 @@ export default function Window({
     endInteraction,
     toggleMaximize,
     handleResizeKeyDown,
+    handleMoveKeyDown,
   } = useWindowInteraction({
     instance,
     app,
@@ -30,6 +31,8 @@ export default function Window({
     <section
       ref={windowRef}
       data-app-id={instance.appId}
+      data-window-min-width={app.window?.minWidth}
+      data-window-min-height={app.window?.minHeight}
       data-instance-id={instance.id}
       className={[
         'desktop-window',
@@ -64,6 +67,10 @@ export default function Window({
         <strong className="desktop-window__title">{t(appName)}</strong>
 
         <div
+          tabIndex={0}
+          role="button"
+          aria-label={t('Arrastar para mover ou encaixar')}
+          onKeyDown={handleMoveKeyDown}
           className="desktop-window__drag-area"
           onPointerDown={(event) => startInteraction(event, 'drag')}
           onPointerMove={moveInteraction}

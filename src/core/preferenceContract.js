@@ -5,6 +5,7 @@ import { isContractData, isRecord, validId } from '../shared/utils/contractValid
 export const PREFERENCE_SCHEMA_VERSION = 1;
 export const PREFERENCE_KEYS = Object.freeze({
   'ws-os:theme': { category: 'appearance', encoding: 'raw' },
+  'ws-os:cursor-mode': { category: 'appearance', encoding: 'raw' },
   'ws-os:appearance': { category: 'appearance', encoding: 'json' },
   'ws-os:locale': { category: 'language', encoding: 'raw' },
   'ws-os:accessibility': { category: 'accessibility', encoding: 'json' },
@@ -27,6 +28,7 @@ export function validatePreferenceValue(key, value) {
   if (!Object.hasOwn(PREFERENCE_KEYS, key) || !isContractData(value)) return false;
   const enums = {
     'ws-os:theme': ['dark', 'light'],
+    'ws-os:cursor-mode': ['custom', 'native'],
     'ws-os:locale': ['pt-BR', 'en'],
     'ws-os:desktop-shortcut-order': ['default', 'name'],
     'ws-os:files-view': ['grid', 'list'],
@@ -175,6 +177,8 @@ export function encodeStoredPreference(record) {
 /* === Redefinição seletiva: ações confiáveis, sem clear ou bancos pessoais === */
 export const PREFERENCE_RESET_ACTIONS = Object.freeze({
   theme: 'appearance',
+  cursor: 'appearance',
+  notifications: 'notifications',
   locale: 'language',
   appearance: 'appearance',
   accessibility: 'accessibility',

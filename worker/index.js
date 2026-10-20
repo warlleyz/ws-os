@@ -1,4 +1,8 @@
-import {onRequest as handleRankings} from '../functions/api/rankings.js';
+import { runMaintenance } from '../functions/_lib/maintenance.js';
+import { onRequest as handleRequests } from '../functions/api/requests.js';
+import { onRequest as handleFiles } from '../functions/api/managedFiles.js';
+import { onRequest as handleAttachments } from '../functions/api/attachments.js';
+import { onRequest as handleRankings } from '../functions/api/rankings.js';
 import { onRequest as handleContent } from '../functions/api/managedContent.js';
 import { onRequestPost as handleWally } from '../functions/api/wally.js';
 import { onRequestGet as handlePosts } from '../functions/api/posts.js';
@@ -24,6 +28,15 @@ import {
 } from '../functions/api/auth.js';
 
 const routes = {
+  '/api/admin/rankings': { methods: ['GET', 'DELETE'], handler: handleRankings },
+  '/api/requests': { methods: ['POST'], handler: handleRequests },
+  '/api/admin/requests': { methods: ['GET', 'PATCH', 'DELETE'], handler: handleRequests },
+  '/api/files': { methods: ['GET'], handler: handleFiles },
+  '/api/admin/files': { methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], handler: handleFiles },
+  '/api/posts/attachments': { methods: ['GET'], handler: handleAttachments },
+  '/api/admin/attachments': { methods: ['POST', 'DELETE'], handler: handleAttachments },
+  '/api/rankings': { methods: ['GET', 'POST'], handler: handleRankings },
+  '/api/admin/content': { methods: ['GET', 'POST', 'PATCH', 'DELETE'], handler: handleContent },
   '/api/content': { method: 'GET', handler: handleContent },
 
   '/api/wally': { method: 'POST', handler: handleWally },
@@ -67,14 +80,16 @@ function error(code, status, headers = {}) {
   );
 }
 export default {
+  async scheduled(_event, env) {
+    await runMaintenance(env);
+  },
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if(url.pathname==='/api/rankings')return handleRankings({request,env,ctx});
-    if (url.pathname === '/api/admin/content') return handleContent({ request, env, ctx });
     const route = routes[url.pathname];
     if (route) {
-      if (request.method !== route.method)
-        return error('METHOD_NOT_ALLOWED', 405, { Allow: route.method });
+      const methods = route.methods ?? [route.method];
+      if (!methods.includes(request.method))
+        return error('METHOD_NOT_ALLOWED', 405, { Allow: methods.join(', ') });
       try {
         return await route.handler({ request, env, ctx });
       } catch {

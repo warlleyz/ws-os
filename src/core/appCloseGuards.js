@@ -15,12 +15,8 @@ function emit() {
 /* === Registro de proteções === */
 /* ----- Registro por instância ----- */
 export function registerCloseGuard(instanceId, guard) {
-  if (
-    typeof instanceId !== 'string' ||
-    !instanceId ||
-    typeof guard !== 'function'
-  ) {
-    return () => { };
+  if (typeof instanceId !== 'string' || !instanceId || typeof guard !== 'function') {
+    return () => {};
   }
 
   guards.set(instanceId, guard);
@@ -108,4 +104,18 @@ export function useCloseConfirmation() {
     () => pending,
     () => null,
   );
+}
+/* === Mudança de shell: validar todos os rascunhos antes de desmontar apps === */
+export function requestGuardedTransition(proceed) {
+  if (typeof proceed !== 'function' || pending) return false;
+  const instances = [...guards.keys()];
+  function next(index) {
+    if (index >= instances.length) {
+      proceed();
+      return;
+    }
+    requestGuardedAction(instances[index], () => next(index + 1), 'navigate');
+  }
+  next(0);
+  return true;
 }

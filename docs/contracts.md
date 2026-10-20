@@ -1,3 +1,5 @@
+> **Atualização de 20/10/2026 — Etapas 03/04:** os contratos/backend novos, os formatos HTTP, as migrações e os limites atuais estão na [entrega consolidada](finalizacao/ETAPAS-03-04-ENTREGA.md) e no [mapa de rotas](backend/WORKER.md). Solicitações, arquivos oficiais R2, vínculos e moderação possuem implementação local; homologação real continua pendente. O texto da Etapa 01 abaixo é a base congelada, não uma declaração atual de inexistência desses serviços. Preferências incluem agora cursor e Não perturbe no reset/sincronização.
+
 # Contratos compartilhados — estado atual da Etapa 01
 
 Atualizado em 19/10/2026. Fonte de decisões: [Etapa 01](finalizacao/ETAPA-01-DECISOES-TECNICAS.md). Evidências e limites: [conclusão técnica](finalizacao/ETAPA-01-PARTE-01.6-CONCLUSAO.md).

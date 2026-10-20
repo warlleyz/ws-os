@@ -3,12 +3,12 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 /* === Carregamento de contratos com dependências reais === */
-function loadContract(file, bindings = {}) {
+function loadContract(file, bindings = {}, { transformSource = (source) => source } = {}) {
   const modules = new Map();
   function read(filename) {
     const resolved = path.resolve(filename);
     if (modules.has(resolved)) return modules.get(resolved);
-    const source = fs.readFileSync(resolved, 'utf8');
+    const source = transformSource(fs.readFileSync(resolved, 'utf8'), resolved);
     const names = [
       ...source.matchAll(/\bexport\s+(?:async\s+)?(?:function|const|let|class)\s+(\w+)/g),
     ].map((match) => match[1]);

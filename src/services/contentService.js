@@ -1,3 +1,4 @@
+import { validInstant, validTimezone } from '../shared/utils/contractValidation.js';
 import { adaptLegacyPublicEvent } from './publicContentContract';
 import { requestPublicJson } from './publicDataService';
 import { publicAssetUrl, safeExternalUrl } from '../shared/utils/urls';
@@ -14,7 +15,15 @@ export async function fetchManagedContent(kind, options = {}) {
     data: result.data.items
       .filter((item) => item?.status === 'published' && typeof item.data?.title === 'string')
       .map((item) => ({ ...item.data, id: item.id }))
-      .map((item) => (kind === 'events' ? (adaptLegacyPublicEvent(item).data ?? null) : item))
+      .map((item) =>
+        kind === 'events'
+          ? item.allDay === false
+            ? validInstant(item.startsAt) && validTimezone(item.timezone)
+              ? item
+              : null
+            : (adaptLegacyPublicEvent(item).data ?? null)
+          : item,
+      )
       .filter(Boolean)
       .filter((item) =>
         kind === 'files'
