@@ -1,16 +1,17 @@
-
 import { useEffect, useRef } from 'react';
 
 import {
   cancelCloseConfirmation,
   confirmAppClose,
 } from '../../core/appCloseGuards';
+
 import { translate as t, useLocale } from '../i18n/i18n';
 
 import './AppCloseDialog.css';
 
+/* === Diálogo de alterações não salvas === */
 export default function AppCloseDialog({ request }) {
-  /* === Idioma e referências === */
+  /* ----- Idioma e referências ----- */
   useLocale();
 
   const panelRef = useRef(null);
@@ -30,7 +31,7 @@ export default function AppCloseDialog({ request }) {
   /* === Acessibilidade === */
   /* ----- Foco inicial e restauração ----- */
   useEffect(() => {
-    if (!request) return;
+    if (!request) return undefined;
 
     const previousFocus = document.activeElement;
 
@@ -81,7 +82,6 @@ export default function AppCloseDialog({ request }) {
 
   return (
     <div className="ws-close-overlay">
-      {/* === Diálogo de confirmação === */}
       <section
         ref={panelRef}
         className="ws-close-dialog"
@@ -91,29 +91,34 @@ export default function AppCloseDialog({ request }) {
         aria-describedby="ws-close-message"
         onKeyDown={handleKeyDown}
       >
-        {/* ----- Título e descrição ----- */}
+        {/* ----- Cabeçalho ----- */}
         <h2 id="ws-close-title">
           {t('Alterações não salvas')}
         </h2>
 
+        {/* ----- Descrição ----- */}
         <p id="ws-close-message">
           {t(message)}
         </p>
 
-        {/* ----- Ações disponíveis ----- */}
-        <button
-          type="button"
-          onClick={cancelCloseConfirmation}
-        >
-          {t('Continuar editando')}
-        </button>
+        {/* ----- Ações ----- */}
+        <div className="ws-close-dialog__actions">
+          <button
+            type="button"
+            className="ws-button ws-button--secondary"
+            onClick={cancelCloseConfirmation}
+          >
+            {t('Continuar editando')}
+          </button>
 
-        <button
-          type="button"
-          onClick={confirmAppClose}
-        >
-          {t(confirmLabel)}
-        </button>
+          <button
+            type="button"
+            className="ws-button ws-button--danger"
+            onClick={confirmAppClose}
+          >
+            {t(confirmLabel)}
+          </button>
+        </div>
       </section>
     </div>
   );

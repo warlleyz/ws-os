@@ -20,6 +20,12 @@
 /* ----- Cursores personalizados ----- */
 @import './themes/cursors.css';
 
+/* ----- Controles compartilhados ----- */
+@import './themes/controls.css';
+
+/* ----- Padrões responsivos compartilhados ----- */
+@import './themes/responsive.css';
+
 /* === Configuração global === */
 /* ----- Tipografia e aparência ----- */
 :root {

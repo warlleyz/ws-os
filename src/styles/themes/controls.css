@@ -1,0 +1,642 @@
+/* === Controles compartilhados === */
+/* ----- Base dos botões ----- */
+.ws-button {
+    --ws-button-background: var(--surface-secondary);
+    --ws-button-color: var(--text-primary);
+    --ws-button-border: var(--border-control);
+
+    display: inline-flex;
+    min-width: 0;
+    min-height: var(--control-height-md);
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+
+    padding: 9px 16px;
+    border: 1px solid var(--ws-button-border);
+    border-radius: var(--radius-md);
+
+    background: var(--ws-button-background);
+    color: var(--ws-button-color);
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+
+    cursor: pointer;
+    user-select: none;
+
+    transition:
+        background-color var(--transition-fast) ease,
+        border-color var(--transition-fast) ease,
+        color var(--transition-fast) ease,
+        box-shadow var(--transition-fast) ease,
+        opacity var(--transition-fast) ease;
+}
+
+/* === Hierarquia visual === */
+/* ----- Primário ----- */
+.ws-button--primary {
+    --ws-button-background: var(--action-background);
+    --ws-button-color: var(--action-text);
+    --ws-button-border: var(--action-background);
+}
+
+/* ----- Secundário ----- */
+.ws-button--secondary {
+    --ws-button-background: var(--surface-secondary);
+    --ws-button-color: var(--text-primary);
+    --ws-button-border: var(--border-control);
+}
+
+/* ----- Discreto ----- */
+.ws-button--ghost {
+    --ws-button-background: transparent;
+    --ws-button-color: var(--text-primary);
+    --ws-button-border: transparent;
+}
+
+/* ----- Destrutivo ----- */
+.ws-button--danger {
+    --ws-button-background: var(--surface-primary);
+    --ws-button-color: var(--status-error);
+    --ws-button-border: var(--status-error);
+}
+
+/* === Estados interativos === */
+/* ----- Hover ----- */
+@media (hover: hover) {
+    .ws-button:not(:disabled):not([aria-disabled='true']):not([aria-busy='true']):hover {
+        background: color-mix(in srgb,
+                var(--ws-button-background) 88%,
+                var(--text-primary));
+    }
+
+    .ws-button--ghost:not(:disabled):not([aria-disabled='true']):not([aria-busy='true']):hover {
+        background: var(--surface-secondary);
+    }
+}
+
+/* ----- Pressionado ----- */
+.ws-button:not(:disabled):not([aria-disabled='true']):not([aria-busy='true']):active {
+    box-shadow: inset 0 2px 5px rgb(0 0 0 / 12%);
+    transform: translateY(1px);
+}
+
+/* ----- Foco por teclado ----- */
+.ws-button:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 3px;
+}
+
+/* ----- Desabilitado ----- */
+.ws-button:disabled,
+.ws-button[aria-disabled='true'] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* ----- Carregando ----- */
+.ws-button[aria-busy='true'] {
+    position: relative;
+    opacity: 0.8;
+    cursor: progress;
+    box-shadow: none;
+}
+
+/* ----- Indicador de carregamento ----- */
+.ws-button[aria-busy='true']::after {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 auto;
+
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+
+    content: '';
+    animation: ws-button-loading 650ms linear infinite;
+}
+
+/* ----- Animação do carregamento ----- */
+@keyframes ws-button-loading {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* === Preferências de movimento === */
+/* ----- Movimento reduzido ----- */
+@media (prefers-reduced-motion: reduce) {
+    .ws-button {
+        transition: none;
+    }
+
+    .ws-button:active {
+        transform: none;
+    }
+
+    .ws-button[aria-busy='true']::after {
+        animation: none;
+        border-right-color: currentColor;
+        border-top-color: transparent;
+    }
+}
+
+/* ----- Movimento desativado nas Configurações ----- */
+:root[data-reduced-motion='true'] .ws-button,
+:root[data-low-effects='true'] .ws-button,
+:root[data-motion-intensity='off'] .ws-button {
+    transition: none;
+}
+
+:root[data-reduced-motion='true'] .ws-button:active,
+:root[data-low-effects='true'] .ws-button:active,
+:root[data-motion-intensity='off'] .ws-button:active {
+    transform: none;
+}
+
+:root[data-reduced-motion='true'] .ws-button[aria-busy='true']::after,
+:root[data-low-effects='true'] .ws-button[aria-busy='true']::after,
+:root[data-motion-intensity='off'] .ws-button[aria-busy='true']::after {
+    animation: none;
+    border-right-color: currentColor;
+    border-top-color: transparent;
+}
+
+/* ----- Pressionado ----- */
+.ws-button:not(:disabled):not([aria-disabled='true']):not([aria-busy='true']):active {
+    box-shadow: inset 0 2px 5px rgb(0 0 0 / 12%);
+}
+
+/* ----- Foco por teclado ----- */
+.ws-button:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 3px;
+}
+
+/* ----- Desabilitado ----- */
+.ws-button:disabled,
+.ws-button[aria-disabled='true'] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ----- Carregando ----- */
+.ws-button[aria-busy='true'] {
+    opacity: 0.75;
+    cursor: progress;
+}
+
+/* === Dimensões === */
+/* ----- Pequeno ----- */
+.ws-button--sm {
+    min-height: var(--control-height-sm);
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* ----- Grande ----- */
+.ws-button--lg {
+    min-height: var(--control-height-lg);
+    padding: 11px 20px;
+    font-size: 14px;
+}
+
+/* ----- Largura completa ----- */
+.ws-button--block {
+    display: flex;
+    width: 100%;
+}
+
+/* === Acessibilidade === */
+/* ----- Área de toque ----- */
+@media (pointer: coarse) {
+    .ws-button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* === Campos compartilhados === */
+/* ----- Estrutura dos formulários ----- */
+.ws-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+/* ----- Rótulos ----- */
+.ws-field__label {
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+/* ----- Descrições auxiliares ----- */
+.ws-field__hint {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* === Controles de entrada === */
+/* ----- Base compartilhada ----- */
+.ws-input,
+.ws-textarea,
+.ws-select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: var(--control-height-md);
+
+    padding: 9px 12px;
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-md);
+
+    background: var(--surface-primary);
+    color: var(--text-primary);
+
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+
+    transition:
+        border-color var(--transition-fast) ease,
+        background-color var(--transition-fast) ease,
+        box-shadow var(--transition-fast) ease;
+}
+
+/* ----- Texto de preenchimento ----- */
+.ws-input::placeholder,
+.ws-textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+/* ----- Área de texto ----- */
+.ws-textarea {
+    min-height: 112px;
+    resize: vertical;
+}
+
+/* ----- Seletor ----- */
+.ws-select {
+    padding-right: 32px;
+    cursor: pointer;
+}
+
+/* === Estados dos campos === */
+/* ----- Hover ----- */
+@media (hover: hover) {
+    :is(.ws-input, .ws-textarea, .ws-select):not(:disabled):hover {
+        border-color: var(--accent-secondary);
+    }
+}
+
+/* ----- Foco ----- */
+:is(.ws-input, .ws-textarea, .ws-select):focus-visible {
+    border-color: var(--accent-secondary);
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+}
+
+/* ----- Erro ----- */
+:is(.ws-input, .ws-textarea, .ws-select):is([aria-invalid='true'],
+    .ws-field--error) {
+    border-color: var(--status-error);
+}
+
+.ws-field--error :is(.ws-input, .ws-textarea, .ws-select) {
+    border-color: var(--status-error);
+}
+
+.ws-field__error {
+    color: var(--status-error);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+/* ----- Desabilitado ----- */
+:is(.ws-input, .ws-textarea, .ws-select):disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ----- Somente leitura ----- */
+:is(.ws-input, .ws-textarea):read-only {
+    background: var(--surface-secondary);
+}
+
+/* === Checkbox compartilhado === */
+/* ----- Estrutura ----- */
+.ws-checkbox {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: flex-start;
+    gap: var(--space-2);
+
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+
+    cursor: pointer;
+}
+
+/* ----- Controle nativo personalizado ----- */
+.ws-checkbox input[type='checkbox'] {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    margin: 1px 0 0;
+
+    accent-color: var(--accent-primary);
+    cursor: inherit;
+}
+
+/* ----- Desabilitado ----- */
+.ws-checkbox:has(input:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ----- Foco por teclado ----- */
+.ws-checkbox input[type='checkbox']:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 3px;
+}
+
+/* === Responsividade === */
+/* ----- Áreas de toque ----- */
+@media (pointer: coarse) {
+
+    .ws-input,
+    .ws-textarea,
+    .ws-select {
+        min-height: 44px;
+    }
+
+    .ws-checkbox {
+        min-height: 44px;
+        align-items: center;
+    }
+
+    .ws-checkbox input[type='checkbox'] {
+        width: 22px;
+        height: 22px;
+        margin-top: 0;
+    }
+}
+
+/* === Preferências de movimento === */
+/* ----- Animações desativadas ----- */
+@media (prefers-reduced-motion: reduce) {
+
+    .ws-input,
+    .ws-textarea,
+    .ws-select {
+        transition: none;
+    }
+}
+
+:root[data-reduced-motion='true'] :is(.ws-input,
+    .ws-textarea,
+    .ws-select),
+:root[data-low-effects='true'] :is(.ws-input,
+    .ws-textarea,
+    .ws-select),
+:root[data-motion-intensity='off'] :is(.ws-input,
+    .ws-textarea,
+    .ws-select) {
+    transition: none;
+}
+
+/* === Superfícies compartilhadas === */
+/* ----- Card padrão ----- */
+.ws-card {
+    min-width: 0;
+    padding: var(--space-4);
+
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+
+    background: var(--surface-primary);
+    color: var(--text-primary);
+}
+
+/* ----- Card secundário ----- */
+.ws-card--secondary {
+    background: var(--surface-secondary);
+}
+
+/* ----- Card com destaque ----- */
+.ws-card--accent {
+    border-color: var(--accent-primary);
+    background: color-mix(in srgb,
+            var(--accent-primary) 8%,
+            var(--surface-primary));
+}
+
+/* ----- Card interativo ----- */
+.ws-card--interactive {
+    transition:
+        border-color var(--transition-fast) ease,
+        background-color var(--transition-fast) ease,
+        box-shadow var(--transition-fast) ease;
+}
+
+@media (hover: hover) {
+    .ws-card--interactive:hover {
+        border-color: var(--accent-secondary);
+    }
+}
+
+/* ----- Foco de card interativo ----- */
+.ws-card--interactive:focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 3px;
+}
+
+/* === Organização dos containers === */
+/* ----- Cabeçalho ----- */
+.ws-card__header {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+
+    margin-bottom: var(--space-3);
+}
+
+/* ----- Título ----- */
+.ws-card__title {
+    margin: 0;
+
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+/* ----- Descrição ----- */
+.ws-card__description {
+    margin: 0;
+
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* ----- Conteúdo ----- */
+.ws-card__content {
+    min-width: 0;
+}
+
+/* ----- Rodapé ----- */
+.ws-card__footer {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+
+    margin-top: var(--space-4);
+}
+
+/* === Mensagens compartilhadas === */
+/* ----- Estrutura ----- */
+.ws-message {
+    --ws-message-accent: var(--accent-secondary);
+
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    gap: var(--space-3);
+
+    padding: var(--space-3) var(--space-4);
+
+    border: 1px solid var(--ws-message-accent);
+    border-radius: var(--radius-md);
+
+    background: color-mix(in srgb,
+            var(--ws-message-accent) 8%,
+            var(--surface-primary));
+
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* ----- Informação ----- */
+.ws-message--info {
+    --ws-message-accent: var(--accent-secondary);
+}
+
+/* ----- Sucesso ----- */
+.ws-message--success {
+    --ws-message-accent: var(--status-success);
+}
+
+/* ----- Aviso ----- */
+.ws-message--warning {
+    --ws-message-accent: var(--status-warning);
+}
+
+/* ----- Erro ----- */
+.ws-message--error {
+    --ws-message-accent: var(--status-error);
+}
+
+/* ----- Conteúdo da mensagem ----- */
+.ws-message__content {
+    min-width: 0;
+    flex: 1;
+}
+
+/* ----- Título da mensagem ----- */
+.ws-message__title {
+    margin: 0 0 var(--space-1);
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+/* ----- Texto da mensagem ----- */
+.ws-message__description {
+    margin: 0;
+}
+
+/* === Badges compartilhadas === */
+/* ----- Estrutura ----- */
+.ws-badge {
+    --ws-badge-accent: var(--accent-secondary);
+
+    display: inline-flex;
+    min-width: 0;
+    min-height: 24px;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+
+    padding: 3px 9px;
+
+    border: 1px solid var(--ws-badge-accent);
+    border-radius: 999px;
+
+    background: color-mix(in srgb,
+            var(--ws-badge-accent) 10%,
+            var(--surface-primary));
+
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+/* ----- Variações semânticas ----- */
+.ws-badge--success {
+    --ws-badge-accent: var(--status-success);
+}
+
+.ws-badge--warning {
+    --ws-badge-accent: var(--status-warning);
+}
+
+.ws-badge--error {
+    --ws-badge-accent: var(--status-error);
+}
+
+/* === Acessibilidade das superfícies === */
+/* ----- Movimento reduzido ----- */
+@media (prefers-reduced-motion: reduce) {
+    .ws-card--interactive {
+        transition: none;
+    }
+}
+
+/* ----- Efeitos mínimos ----- */
+:root[data-reduced-motion='true'] .ws-card--interactive,
+:root[data-low-effects='true'] .ws-card--interactive,
+:root[data-motion-intensity='off'] .ws-card--interactive {
+    transition: none;
+}
+
+/* ----- Contraste forçado ----- */
+@media (forced-colors: active) {
+
+    .ws-card,
+    .ws-message,
+    .ws-badge {
+        border-color: CanvasText;
+    }
+}

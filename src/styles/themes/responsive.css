@@ -1,0 +1,363 @@
+/* === Fundamentos responsivos === */
+/* ----- Área adaptativa ----- */
+.ws-layout {
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    container-type: inline-size;
+}
+
+/* === Toolbars compartilhadas === */
+/* ----- Estrutura principal ----- */
+.ws-toolbar {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+/* ----- Grupos de ações ----- */
+.ws-toolbar__group {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+/* ----- Área flexível ----- */
+.ws-toolbar__main {
+    min-width: 0;
+    flex: 1 1 240px;
+}
+
+/* ----- Ações secundárias ----- */
+.ws-toolbar__actions {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+/* === Grades compartilhadas === */
+/* ----- Grade adaptativa ----- */
+.ws-grid {
+    --ws-grid-minimum: 220px;
+
+    display: grid;
+    min-width: 0;
+    grid-template-columns: repeat(auto-fit,
+            minmax(min(100%, var(--ws-grid-minimum)), 1fr));
+    gap: var(--space-4);
+}
+
+/* ----- Densidades ----- */
+.ws-grid--compact {
+    --ws-grid-minimum: 160px;
+    gap: var(--space-3);
+}
+
+.ws-grid--wide {
+    --ws-grid-minimum: 300px;
+}
+
+/* ----- Elementos internos ----- */
+.ws-grid>* {
+    min-width: 0;
+}
+
+/* === Listas compartilhadas === */
+/* ----- Organização vertical ----- */
+.ws-list {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+/* ----- Itens de lista ----- */
+.ws-list>* {
+    min-width: 0;
+}
+
+/* === Formulários adaptativos === */
+/* ----- Grade de campos ----- */
+.ws-form-grid {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: repeat(2,
+            minmax(0, 1fr));
+    gap: var(--space-4);
+}
+
+/* ----- Campo de largura completa ----- */
+.ws-form-grid__full {
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+/* ----- Ações do formulário ----- */
+.ws-form-actions {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+/* === Layout com painel lateral === */
+/* ----- Estrutura master/detail ----- */
+.ws-master-detail {
+    display: grid;
+    min-width: 0;
+    min-height: 0;
+    grid-template-columns:
+        minmax(180px, 280px) minmax(0, 1fr);
+    gap: var(--space-4);
+}
+
+/* ----- Lista e detalhes ----- */
+.ws-master-detail__master,
+.ws-master-detail__detail {
+    min-width: 0;
+    min-height: 0;
+}
+
+/* === Áreas de leitura === */
+/* ----- Conteúdo textual ----- */
+.ws-reading-area {
+    width: 100%;
+    max-width: 760px;
+    min-width: 0;
+    margin-inline: auto;
+
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+/* ----- Documentos e editores ----- */
+.ws-reading-area--fluid {
+    max-width: none;
+}
+
+/* === Adaptação ao container === */
+/* ----- Área intermediária ----- */
+@container (max-width: 680px) {
+    .ws-layout .ws-master-detail {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ws-layout .ws-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ----- Área compacta ----- */
+@container (max-width: 420px) {
+    .ws-layout .ws-toolbar {
+        align-items: stretch;
+    }
+
+    .ws-layout .ws-toolbar__main,
+    .ws-layout .ws-toolbar__actions {
+        flex-basis: 100%;
+    }
+
+    .ws-layout .ws-form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ws-layout .ws-form-actions>* {
+        width: 100%;
+    }
+}
+
+/* === Segurança de layout === */
+/* ----- Conteúdo longo ----- */
+.ws-toolbar,
+.ws-grid,
+.ws-list,
+.ws-form-grid,
+.ws-master-detail {
+    overflow-wrap: anywhere;
+}
+
+/* === Acessibilidade === */
+/* ----- Áreas de toque ----- */
+@media (pointer: coarse) {
+    .ws-toolbar__actions {
+        row-gap: var(--space-3);
+    }
+}
+
+/* === Regiões adaptativas === */
+/* ----- Containers flexíveis e grids ----- */
+.ws-responsive-region {
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+}
+
+/* ----- Região com rolagem independente ----- */
+.ws-scroll-region {
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-control) transparent;
+}
+
+/* ----- Rolagem somente vertical ----- */
+.ws-scroll-region--vertical {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* === Conteúdo e leitura === */
+/* ----- Elementos extensos ----- */
+.ws-content-fluid {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* ----- Textos e conteúdos longos ----- */
+.ws-content-fluid :is(p,
+    h1,
+    h2,
+    h3,
+    h4,
+    li,
+    blockquote) {
+    overflow-wrap: anywhere;
+}
+
+/* ----- Imagens e vídeos ----- */
+.ws-content-fluid :is(img, video) {
+    max-width: 100%;
+    height: auto;
+}
+
+/* === Tabelas responsivas === */
+/* ----- Container com rolagem horizontal ----- */
+.ws-table-scroll {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ----- Estrutura da tabela ----- */
+.ws-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* ----- Células e cabeçalhos ----- */
+.ws-table :is(th, td) {
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--border-default);
+
+    text-align: left;
+    vertical-align: top;
+}
+
+/* ----- Cabeçalhos ----- */
+.ws-table th {
+    color: var(--text-primary);
+    font-weight: 800;
+}
+
+/* ----- Conteúdo das células ----- */
+.ws-table td {
+    color: var(--text-secondary);
+}
+
+/* ----- Tabela que preserva colunas ----- */
+.ws-table--nowrap {
+    width: max-content;
+    min-width: 100%;
+}
+
+.ws-table--nowrap :is(th, td) {
+    white-space: nowrap;
+}
+
+/* ----- Tabela com quebra de texto ----- */
+.ws-table--wrap {
+    table-layout: fixed;
+}
+
+.ws-table--wrap :is(th, td) {
+    overflow-wrap: anywhere;
+}
+
+/* === Estados interativos das tabelas === */
+/* ----- Linhas destacáveis ----- */
+@media (hover: hover) {
+    .ws-table tbody tr:hover {
+        background: var(--surface-secondary);
+    }
+}
+
+/* ----- Foco em elementos interativos ----- */
+.ws-table :is(button, a, input, select):focus-visible {
+    outline: 2px solid var(--accent-secondary);
+    outline-offset: 2px;
+}
+
+/* === Adaptação à largura disponível === */
+/* ----- Regiões extremamente estreitas ----- */
+@container (max-width: 360px) {
+
+    .ws-layout .ws-toolbar__group,
+    .ws-layout .ws-toolbar__actions {
+        align-items: stretch;
+    }
+
+    .ws-layout .ws-toolbar__actions {
+        flex-direction: column;
+    }
+
+    .ws-layout .ws-toolbar__actions>* {
+        max-width: 100%;
+    }
+
+    .ws-layout .ws-reading-area {
+        max-width: 100%;
+    }
+}
+
+/* === Compatibilidade touch === */
+/* ----- Rolagem por toque ----- */
+@media (pointer: coarse) {
+
+    .ws-scroll-region,
+    .ws-table-scroll {
+        touch-action: pan-x pan-y;
+    }
+}
+
+/* === Contraste forçado === */
+/* ----- Delimitação das tabelas ----- */
+@media (forced-colors: active) {
+    .ws-table :is(th, td) {
+        border-bottom-color: CanvasText;
+    }
+}
