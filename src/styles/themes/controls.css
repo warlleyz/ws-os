@@ -37,7 +37,7 @@
         opacity var(--transition-fast) ease;
 }
 
-/* === Hierarquia visual === */
+/* === Hierarquia visual dos botões === */
 /* ----- Primário ----- */
 .ws-button--primary {
     --ws-button-background: var(--action-background);
@@ -66,7 +66,7 @@
     --ws-button-border: var(--status-error);
 }
 
-/* === Estados interativos === */
+/* === Estados interativos dos botões === */
 /* ----- Hover ----- */
 @media (hover: hover) {
     .ws-button:not(:disabled):not([aria-disabled='true']):not([aria-busy='true']):hover {
@@ -122,72 +122,14 @@
     animation: ws-button-loading 650ms linear infinite;
 }
 
-/* ----- Animação do carregamento ----- */
+/* ----- Animação de carregamento ----- */
 @keyframes ws-button-loading {
     to {
         transform: rotate(360deg);
     }
 }
 
-/* === Preferências de movimento === */
-/* ----- Movimento reduzido ----- */
-@media (prefers-reduced-motion: reduce) {
-    .ws-button {
-        transition: none;
-    }
-
-    .ws-button:active {
-        transform: none;
-    }
-
-    .ws-button[aria-busy='true']::after {
-        animation: none;
-        border-right-color: currentColor;
-        border-top-color: transparent;
-    }
-}
-
-/* ----- Movimento desativado nas Configurações ----- */
-:root[data-reduced-motion='true'] .ws-button,
-:root[data-low-effects='true'] .ws-button,
-:root[data-motion-intensity='off'] .ws-button {
-    transition: none;
-}
-
-:root[data-reduced-motion='true'] .ws-button:active,
-:root[data-low-effects='true'] .ws-button:active,
-:root[data-motion-intensity='off'] .ws-button:active {
-    transform: none;
-}
-
-:root[data-reduced-motion='true'] .ws-button[aria-busy='true']::after,
-:root[data-low-effects='true'] .ws-button[aria-busy='true']::after,
-:root[data-motion-intensity='off'] .ws-button[aria-busy='true']::after {
-    animation: none;
-    border-right-color: currentColor;
-    border-top-color: transparent;
-}
-
-/* === Feedback acessível de carregamento === */
-/* ----- Indicador estático com movimento reduzido ----- */
-@media (prefers-reduced-motion: reduce) {
-    .ws-button[aria-busy='true']::after {
-        animation: none;
-        border-top-color: transparent;
-        border-right-color: currentColor;
-    }
-}
-
-/* ----- Preferências internas de movimento ----- */
-:root:is([data-reduced-motion='true'],
-    [data-low-effects='true'],
-    [data-motion-intensity='off']) .ws-button[aria-busy='true']::after {
-    animation: none;
-    border-top-color: transparent;
-    border-right-color: currentColor;
-}
-
-/* === Dimensões === */
+/* === Dimensões dos botões === */
 /* ----- Pequeno ----- */
 .ws-button--sm {
     min-height: var(--control-height-sm);
@@ -208,13 +150,53 @@
     width: 100%;
 }
 
-/* === Acessibilidade === */
-/* ----- Área de toque ----- */
+/* === Acessibilidade dos botões === */
+/* ----- Áreas de toque ----- */
 @media (pointer: coarse) {
     .ws-button {
         min-width: 44px;
         min-height: 44px;
     }
+}
+
+/* ----- Movimento reduzido do navegador ----- */
+@media (prefers-reduced-motion: reduce) {
+    .ws-button {
+        transition: none;
+    }
+
+    .ws-button:active {
+        transform: none;
+    }
+
+    .ws-button[aria-busy='true']::after {
+        animation: none;
+        border-top-color: transparent;
+        border-right-color: currentColor;
+    }
+}
+
+/* ----- Movimento reduzido nas Configurações ----- */
+:root:is([data-reduced-motion='true'],
+    [data-low-effects='true'],
+    [data-motion-intensity='off']) .ws-button {
+    transition: none;
+}
+
+/* ----- Pressionamento sem movimento ----- */
+:root:is([data-reduced-motion='true'],
+    [data-low-effects='true'],
+    [data-motion-intensity='off']) .ws-button:active {
+    transform: none;
+}
+
+/* ----- Carregamento estático ----- */
+:root:is([data-reduced-motion='true'],
+    [data-low-effects='true'],
+    [data-motion-intensity='off']) .ws-button[aria-busy='true']::after {
+    animation: none;
+    border-top-color: transparent;
+    border-right-color: currentColor;
 }
 
 /* === Campos compartilhados === */
@@ -302,16 +284,17 @@
     outline-offset: 2px;
 }
 
-/* ----- Erro ----- */
-:is(.ws-input, .ws-textarea, .ws-select):is([aria-invalid='true'],
-    .ws-field--error) {
+/* ----- Erro indicado pelo controle ----- */
+:is(.ws-input, .ws-textarea, .ws-select)[aria-invalid='true'] {
     border-color: var(--status-error);
 }
 
+/* ----- Erro indicado pelo grupo ----- */
 .ws-field--error :is(.ws-input, .ws-textarea, .ws-select) {
     border-color: var(--status-error);
 }
 
+/* ----- Mensagem de erro ----- */
 .ws-field__error {
     color: var(--status-error);
     font-size: 12px;
@@ -368,7 +351,7 @@
     outline-offset: 3px;
 }
 
-/* === Responsividade === */
+/* === Responsividade dos campos === */
 /* ----- Áreas de toque ----- */
 @media (pointer: coarse) {
 
@@ -390,8 +373,8 @@
     }
 }
 
-/* === Preferências de movimento === */
-/* ----- Animações desativadas ----- */
+/* === Movimento dos campos === */
+/* ----- Preferência do navegador ----- */
 @media (prefers-reduced-motion: reduce) {
 
     .ws-input,
@@ -401,13 +384,10 @@
     }
 }
 
-:root[data-reduced-motion='true'] :is(.ws-input,
-    .ws-textarea,
-    .ws-select),
-:root[data-low-effects='true'] :is(.ws-input,
-    .ws-textarea,
-    .ws-select),
-:root[data-motion-intensity='off'] :is(.ws-input,
+/* ----- Preferências internas ----- */
+:root:is([data-reduced-motion='true'],
+    [data-low-effects='true'],
+    [data-motion-intensity='off']) :is(.ws-input,
     .ws-textarea,
     .ws-select) {
     transition: none;
@@ -447,19 +427,20 @@
         box-shadow var(--transition-fast) ease;
 }
 
+/* ----- Hover ----- */
 @media (hover: hover) {
     .ws-card--interactive:hover {
         border-color: var(--accent-secondary);
     }
 }
 
-/* ----- Foco de card interativo ----- */
+/* ----- Foco ----- */
 .ws-card--interactive:focus-visible {
     outline: 2px solid var(--accent-secondary);
     outline-offset: 3px;
 }
 
-/* === Organização dos containers === */
+/* === Organização dos cards === */
 /* ----- Cabeçalho ----- */
 .ws-card__header {
     display: flex;
@@ -551,13 +532,14 @@
     --ws-message-accent: var(--status-error);
 }
 
-/* ----- Conteúdo da mensagem ----- */
+/* === Conteúdo das mensagens === */
+/* ----- Corpo ----- */
 .ws-message__content {
     min-width: 0;
     flex: 1;
 }
 
-/* ----- Título da mensagem ----- */
+/* ----- Título ----- */
 .ws-message__title {
     margin: 0 0 var(--space-1);
 
@@ -565,7 +547,7 @@
     font-weight: 800;
 }
 
-/* ----- Texto da mensagem ----- */
+/* ----- Descrição ----- */
 .ws-message__description {
     margin: 0;
 }
@@ -598,31 +580,33 @@
     white-space: nowrap;
 }
 
-/* ----- Variações semânticas ----- */
+/* ----- Sucesso ----- */
 .ws-badge--success {
     --ws-badge-accent: var(--status-success);
 }
 
+/* ----- Aviso ----- */
 .ws-badge--warning {
     --ws-badge-accent: var(--status-warning);
 }
 
+/* ----- Erro ----- */
 .ws-badge--error {
     --ws-badge-accent: var(--status-error);
 }
 
 /* === Acessibilidade das superfícies === */
-/* ----- Movimento reduzido ----- */
+/* ----- Movimento reduzido do navegador ----- */
 @media (prefers-reduced-motion: reduce) {
     .ws-card--interactive {
         transition: none;
     }
 }
 
-/* ----- Efeitos mínimos ----- */
-:root[data-reduced-motion='true'] .ws-card--interactive,
-:root[data-low-effects='true'] .ws-card--interactive,
-:root[data-motion-intensity='off'] .ws-card--interactive {
+/* ----- Preferências internas de movimento ----- */
+:root:is([data-reduced-motion='true'],
+    [data-low-effects='true'],
+    [data-motion-intensity='off']) .ws-card--interactive {
     transition: none;
 }
 
@@ -636,7 +620,7 @@
     }
 }
 
-/* === Preferências de acessibilidade === */
+/* === Acessibilidade dos tooltips === */
 /* ----- Tooltip sem animação ----- */
 :root:is([data-reduced-motion='true'],
     [data-low-effects='true'],

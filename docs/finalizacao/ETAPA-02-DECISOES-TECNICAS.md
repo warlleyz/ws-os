@@ -541,3 +541,124 @@ Qualquer alteração que transforme esses detalhes em **nova funcionalidade, lim
 | Aprovação final do planejamento | **Pendente de manifestação expressa do proprietário** |
 
 **Próxima ação após aprovação:** iniciar a Parte 02.1, inventariando os arquivos atuais, consumidores de tokens e mecanismos de wallpaper/aparência antes de qualquer alteração.
+
+
+
+---
+
+## 17. Registro de implementação — Etapa 02
+
+### 17.1. Entregas implementadas
+
+| Parte | Entrega | Estado |
+|---|---|---|
+| 02.1 | Temas, tokens, wallpapers e cursores | Implementada |
+| 02.2 | Controles e componentes compartilhados | Implementada |
+| 02.3 | Padrões responsivos compartilhados | Implementada |
+| 02.4 | Acessibilidade e desempenho visual | Implementada |
+| 02.5 | Auditoria e consolidação | Em encerramento |
+
+### 17.2. Organização técnica
+
+- `src/styles/themes/`: tokens, temas, efeitos, glass,
+  cursores, controles e responsividade.
+- `src/core/`: gerenciamento de preferências e cursores.
+- `src/shared/components/`: componentes reutilizáveis.
+- `public/assets/`: recursos visuais dos cursores e wallpapers.
+
+Os estilos responsivos compartilhados são opt-in.
+A integração visual definitiva permanece sob responsabilidade
+das etapas específicas dos aplicativos.
+
+### 17.3. Validações realizadas
+
+O proprietário informou resultados positivos para:
+
+- `npm run lint`
+- `npm run build`
+- `npm run test`
+
+As verificações foram executadas após os conjuntos de
+alterações das partes 02.2, 02.3, 02.4 e a reorganização
+final de `controls.css`.
+
+As verificações manuais de temas, wallpapers e cursores
+realizadas anteriormente também foram aprovadas.
+
+A matriz visual completa da seção 14.2 ainda requer
+conferência final dos cenários não comprovados
+individualmente.
+
+### 17.4. Persistência e compatibilidade
+
+- Preferências de acessibilidade preservadas.
+- Sincronização entre abas mantida.
+- Wallpapers pessoais mantidos pelo mecanismo existente.
+- Contratos públicos dos componentes compartilhados preservados.
+- Sem alterações nos catálogos de tradução.
+
+### 17.5. Pendências de outras etapas
+
+- Etapa 04: revisão completa de persistência e recuperação.
+- Etapas dos aplicativos: adoção dos padrões compartilhados
+  e homologação visual individual.
+- Etapa 14: interface definitiva de Configurações.
+- Etapa 15: regressão integrada e validação em dispositivos reais.
+- Fase final: atualização dos catálogos PT-BR e EN.
+
+### 17.6. Commits de referência
+
+- `b6a80cf` — temas, wallpapers e cursores.
+- `41a96c1` — componentes e padrões responsivos.
+- `52a41b2` — acessibilidade e desempenho visual.
+
+A limpeza final de `controls.css` e esta documentação
+ainda dependem de commit e push.
+
+
+### 17.7. Estado e aprovação final
+
+**Estado: CONCLUÍDA E APROVADA.**
+
+**Data do aceite:** 20/10/2026.
+
+O proprietário aprovou expressamente a conclusão da Etapa 02
+da WS OS V2 após a implementação e a revisão final do Design System.
+
+#### Evidências de validação
+
+- `npm run lint` — aprovado.
+- `npm run build` — aprovado.
+- `npm run test` — aprovado.
+- Conferência manual — sete itens aprovados.
+
+#### Conferência manual aprovada
+
+1. Temas Dark e Light.
+2. Wallpapers oficiais e pessoais.
+3. Cursores personalizados e nativos.
+4. Controles compartilhados.
+5. Responsividade das áreas verificadas.
+6. Acessibilidade e efeitos visuais.
+7. Persistência das preferências.
+
+#### Delimitação do aceite
+
+O aceite confirma a conclusão do escopo aprovado para
+a Etapa 02, sem antecipar as entregas das etapas posteriores.
+
+Continuam sob responsabilidade das respectivas etapas:
+
+- Etapa 04: persistência e recuperação avançadas.
+- Etapas dos aplicativos: integração e revisão visual individual.
+- Etapa 14: interface definitiva de Configurações.
+- Etapa 15: homologação integrada e dispositivos reais.
+- Fase final: atualização dos arquivos de tradução.
+
+#### Política de manutenção
+
+A Etapa 02 fica encerrada. Alterações posteriores em seus
+contratos serão realizadas somente para corrigir defeitos,
+regressões ou mudanças de escopo expressamente aprovadas.
+
+**Aceite final: APROVADO EXPRESSAMENTE PELO PROPRIETÁRIO.**
