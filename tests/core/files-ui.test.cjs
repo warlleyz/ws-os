@@ -48,6 +48,12 @@ async function component(file, props, bindings = {}) {
     ...Object.fromEntries(
       [
         'Search',
+        'FilePlus2',
+        'ChevronRight',
+        'HardDrive',
+        'Sparkles',
+        'RotateCcw',
+        'Copy',
         'MoreHorizontal',
         'Info',
         'Upload',
@@ -73,6 +79,8 @@ async function component(file, props, bindings = {}) {
     window: { addEventListener() {}, removeEventListener() {} },
     subscribePublicData: () => () => {},
     localStorage: { getItem: () => null, setItem() {} },
+    createPortal: (node) => node,
+    document: { body: {}, activeElement: null },
     React,
     ...React,
     URL,
@@ -513,10 +521,6 @@ test('gerenciador impede criar na raiz por engano quando a pasta aberta é remov
   store.entries = [];
   ui.render();
   assert.match(ui.text(), /Pasta de destino indisponível/);
-  ui.nodes()
-    .find((n) => n.type === 'input')
-    .props.onChange({ target: { value: 'Nova' } });
-  ui.render();
   assert.equal(ui.button('Criar pasta').props.disabled, true);
 
   assert.equal(created, 0);
@@ -603,4 +607,179 @@ test('Visualizador roteia descritor local e recusa recurso gerenciado sem consul
     { validateFileResource },
   );
   assert.equal(managed.nodes()[0].props.source, 'managed');
+});
+
+/* === Menus de contexto do explorador === */
+const contextEvent = (extra = {}) => ({
+  preventDefault() {},
+  stopPropagation() {},
+  clientX: 310,
+  clientY: 240,
+  currentTarget: { getBoundingClientRect: () => ({ left: 100, top: 80 }), focus() {} },
+  ...extra,
+});
+async function filesMenu(store, extra = {}) {
+  return component(
+    'src/apps/files/Files.jsx',
+    { instance: { id: 'files' } },
+    {
+      useLocalFiles: () => store,
+      useSystem: () => ({ run() {} }),
+      useAppBack() {},
+      portfolio: { officialFiles: [{ id: 'pdf', name: 'Oficial', url: '/oficial.pdf' }] },
+      contentText: (value) => value,
+      publicAssetUrl: (url) => url,
+      openApp: 'open',
+      ...extra,
+    },
+  );
+}
+const menuNode = (ui) => ui.nodes().find((node) => node.props.role === 'menu');
+
+test('clique direito no espaço vazio oferece criação apenas no espaço pessoal', async () => {
+  let refreshed = 0;
+  const store = {
+    entries: [entry()],
+    loading: false,
+    error: '',
+    refresh() {
+      refreshed++;
+    },
+  };
+  const ui = await filesMenu(store);
+  const background = () => ui.nodes().find((node) => node.type === 'main');
+  const event = () => contextEvent({ target: { closest: () => null } });
+  background().props.onContextMenu(event());
+  ui.render();
+  assert.ok(menuNode(ui));
+  assert.equal(ui.button('Criar pasta'), undefined);
+  ui.button('Atualizar').props.onClick();
+  ui.render();
+  assert.equal(refreshed, 1);
+  ui.button('Meus arquivos').props.onClick();
+  ui.render();
+  background().props.onContextMenu(event());
+  ui.render();
+  const menu = menuNode(ui);
+  assert.equal(menu.props.style.left, 310);
+  assert.equal(menu.props.style.top, 240);
+  const create = ui
+    .nodes(menu)
+    .find((node) => node.type === 'button' && ui.text(node).trim() === 'Criar pasta');
+  create.props.onClick();
+  menu.props.onClick();
+  ui.render();
+  assert.ok(ui.nodes().find((node) => node.type === 'form' && node.props.onSubmit));
+  assert.equal(menuNode(ui), undefined);
+  ui.unmount();
+});
+
+test('menu local preserva seleção múltipla e expõe ações próprias da lixeira', async () => {
+  let operations;
+  const store = {
+    entries: [entry(), entry({ id: 'second', name: 'b.txt' })],
+    loading: false,
+    error: '',
+    refresh() {},
+  };
+  const ui = await filesMenu(store, {
+    changeLocalFiles: async (items) => {
+      operations = items;
+    },
+  });
+  ui.button('Meus arquivos').props.onClick();
+  ui.render();
+  const rows = () => ui.nodes().filter((node) => node.type === 'li' && node.props.onContextMenu);
+  rows()[0].props.onClick({});
+  ui.render();
+  rows()[1].props.onClick({ ctrlKey: true });
+  ui.render();
+  rows()[0].props.onContextMenu(contextEvent());
+  ui.render();
+  assert.equal(
+    ui
+      .nodes(menuNode(ui))
+      .find((node) => node.type === 'button' && ui.text(node).trim() === 'Renomear').props.disabled,
+    true,
+  );
+  const trash = ui
+    .nodes(menuNode(ui))
+    .find((node) => node.type === 'button' && ui.text(node).trim() === 'Mover para lixeira');
+  await trash.props.onClick();
+  ui.render();
+  assert.deepEqual(
+    Array.from(operations, (item) => item.id),
+    ['file', 'second'],
+  );
+  store.entries = [entry({ trashed: true })];
+  ui.button('Lixeira').props.onClick();
+  ui.render();
+  rows()[0].props.onContextMenu(contextEvent());
+  ui.render();
+  assert.match(ui.text(menuNode(ui)), /Restaurar.*Excluir definitivamente/);
+  assert.doesNotMatch(ui.text(menuNode(ui)), /Renomear|Editar/);
+  ui.unmount();
+});
+
+test('menu oficial por teclado permite visualizar e nunca expõe alterações', async () => {
+  const calls = [];
+  const ui = await filesMenu(
+    { entries: [], loading: false, error: '', refresh() {} },
+    {
+      useSystem: () => ({ run: (...args) => calls.push(args) }),
+    },
+  );
+  ui.button('Arquivos oficiais').props.onClick();
+  ui.render();
+  const card = ui.nodes().find((node) => node.props.className?.includes('ws-files__official-card'));
+  const target = { getBoundingClientRect: () => ({ left: 120, top: 90 }) };
+  card.props.onKeyDown(
+    contextEvent({
+      key: 'F10',
+      shiftKey: true,
+      clientX: undefined,
+      clientY: undefined,
+      currentTarget: target,
+      target,
+    }),
+  );
+  ui.render();
+  assert.equal(menuNode(ui).props.style.left, 132);
+  assert.equal(menuNode(ui).props.style.top, 102);
+  assert.doesNotMatch(ui.text(menuNode(ui)), /Renomear|Mover|Excluir|Criar|Editar/);
+  ui.nodes(menuNode(ui))
+    .find((node) => node.type === 'button' && ui.text(node) === 'Visualizar')
+    .props.onClick();
+  assert.equal(calls[0][1], 'file-viewer');
+  assert.equal(calls[0][2].params.url, '/oficial.pdf');
+  ui.unmount();
+});
+
+test('pesquisa em todas as pastas alterna escopo sem modificar os arquivos', async () => {
+  const store = {
+    entries: [entry(), entry({ id: 'nested', parentId: 'folder', name: 'oculto.txt' })],
+    loading: false,
+    error: '',
+    refresh() {},
+  };
+  const ui = await filesMenu(store);
+  ui.button('Meus arquivos').props.onClick();
+  ui.render();
+  ui.nodes()
+    .find((node) => node.type === 'input' && node.props.type === 'search')
+    .props.onChange({ target: { value: 'oculto' } });
+  ui.render();
+  assert.equal(
+    ui.nodes().filter((node) => node.type === 'li' && node.props.onDoubleClick).length,
+    0,
+  );
+  ui.button('Todas as pastas').props.onClick();
+  ui.render();
+  assert.equal(ui.button('Todas as pastas').props['aria-pressed'], true);
+  assert.equal(
+    ui.nodes().filter((node) => node.type === 'li' && node.props.onDoubleClick).length,
+    1,
+  );
+  assert.equal(store.entries.length, 2);
+  ui.unmount();
 });
