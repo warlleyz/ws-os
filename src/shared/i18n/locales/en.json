@@ -861,5 +861,17 @@
   "Apelido público": "Public nickname",
   "Enviar recorde": "Submit record",
   "Verificação de segurança não configurada.": "Security verification is not configured.",
-  "Não foi possível concluir a verificação.": "Unable to complete verification."
+  "Não foi possível concluir a verificação.": "Unable to complete verification.",
+  "Arquivo pessoal": "Personal file",
+  "Todas as alterações salvas": "All changes saved",
+  "Linha": "Line",
+  "Não salvo": "Unsaved",
+  "Salvo": "Saved",
+  "Criar cópia": "Create copy",
+  "Alteração externa detectada": "External modification detected",
+  "Recarregar": "Reload",
+  "Substituir por": "Replace with",
+  "As alterações não salvas serão perdidas.": "Unsaved changes will be lost.",
+  "Localizar e substituir": "Find and replace",
+  "Fechar pesquisa": "Close search"
 }

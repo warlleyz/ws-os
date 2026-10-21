@@ -2021,3 +2021,155 @@
     margin-left: 0;
   }
 }
+
+/* === Janela modal de operações === */
+/* ----- Camada sobre o explorador ----- */
+.ws-files__modal-backdrop {
+  position: fixed;
+  z-index: 9000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(0 0 0 / 54%);
+  backdrop-filter: blur(5px);
+}
+
+/* ----- Janela de operação ----- */
+.ws-files .ws-files__dialog {
+  box-sizing: border-box;
+  width: min(440px, 100%);
+  max-height: min(85dvh, 680px);
+  margin: 0;
+  padding: 24px;
+  overflow-y: auto;
+  border: 1px solid var(--border-default);
+  border-radius: 15px;
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-floating);
+}
+
+.ws-files__dialog-hint {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ws-files .ws-files__dialog .ws-app__toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 22px;
+}
+
+/* === Barra de seleção === */
+/* ----- Distribuição das ações ----- */
+.ws-files .ws-files__selection {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 54px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: var(--surface-secondary);
+}
+
+.ws-files__selection .ws-files__check {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ws-files .ws-files__selection>button {
+  flex: 0 0 auto;
+  min-height: 35px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.ws-files .ws-files__selection>button:first-of-type {
+  border-color: color-mix(in srgb, var(--accent-primary) 38%, var(--border-default));
+  background: color-mix(in srgb, var(--accent-primary) 10%, var(--surface-primary));
+}
+
+/* === Arquivos oficiais em lista === */
+/* ----- Estrutura horizontal ----- */
+.ws-files .ws-files__official-grid--list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ws-files .ws-files__official-grid--list .ws-files__official-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 10px 14px;
+  border-radius: 9px;
+}
+
+/* ----- Elementos dos arquivos ----- */
+.ws-files .ws-files__official-grid--list .ws-files__official-heading {
+  order: 3;
+  flex: 0 0 auto;
+  width: auto;
+  margin-left: auto;
+}
+
+.ws-files .ws-files__official-grid--list .ws-files__official-icon {
+  order: 1;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+}
+
+.ws-files .ws-files__official-grid--list .ws-files__official-description {
+  order: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ws-files .ws-files__official-grid--list .ws-files__official-description h3 {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-files .ws-files__official-grid--list .ws-files__official-card>button {
+  order: 4;
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
+}
+
+/* === Janelas compactas === */
+@container (max-width: 620px) {
+  .ws-files .ws-files__selection {
+    align-items: stretch;
+  }
+
+  .ws-files__selection .ws-files__check {
+    flex: 1 1 100%;
+  }
+
+  .ws-files .ws-files__official-grid--list .ws-files__official-badge {
+    display: none;
+  }
+
+  .ws-files .ws-files__official-grid--list .ws-files__official-card {
+    gap: 9px;
+    padding: 9px;
+  }
+}

@@ -45,7 +45,31 @@
   tab-size: 2;
   border: 0 !important;
   border-radius: 0 !important;
-  min-height: 320px;
+  min-height: 420px;
+}
+
+/* === Superfície de edição === */
+/* ----- Dimensões e comportamento ----- */
+.ws-editor .ws-editor__text {
+  box-sizing: border-box;
+  min-height: 420px;
+  max-height: 75dvh;
+  overflow: auto;
+  color: var(--text-primary);
+  tab-size: 2;
+}
+
+/* ----- Texto e destaque sincronizados ----- */
+.ws-editor__surface {
+  isolation: isolate;
+}
+
+.ws-editor__syntax {
+  z-index: 0;
+}
+
+.ws-editor .ws-editor__text {
+  z-index: 1;
 }
 .ws-editor .ws-editor__text {
   position: relative;
@@ -74,13 +98,42 @@
 .token-number {
   color: var(--status-warning);
 }
+/* === Barra inferior do editor === */
+/* ----- Estrutura e distribuição ----- */
 .ws-editor__status {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
+  gap: 8px 18px;
+  padding: 11px 13px;
+  margin-top: 0;
+  border: 1px solid var(--border-default);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  background: var(--surface-secondary);
   color: var(--text-secondary);
-  font: 11px monospace;
-  padding-block: 10px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- Grupos de informações ----- */
+.ws-editor__status-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ----- Arquivo modificado ----- */
+.ws-editor__status-unsaved {
+  color: var(--status-warning);
+  font-weight: 600;
+}
+
+/* ----- Integração com a barra inferior ----- */
+.ws-editor__surface {
+  border-radius: 10px 10px 0 0;
 }
 @container (max-width:480px) {
   .ws-editor__tools label {
@@ -89,4 +142,453 @@
   .ws-editor__tools button {
     min-height: 40px;
   }
+}
+
+/* === Cabeçalho do editor === */
+/* ----- Estrutura principal ----- */
+.ws-editor__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+/* ----- Identificação do documento ----- */
+.ws-editor__identity {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.ws-editor__file-icon {
+  display: grid;
+  flex: 0 0 46px;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  color: var(--accent-secondary);
+}
+
+.ws-editor__identity-content {
+  min-width: 0;
+}
+
+.ws-editor__eyebrow {
+  color: var(--accent-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.ws-editor__identity-content h2 {
+  margin: 5px 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 17px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-editor__identity-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ws-editor__dirty-mark {
+  color: var(--status-warning);
+}
+
+/* ----- Ações principais ----- */
+.ws-editor__header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ws-editor__header-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ws-editor__header-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ws-editor__header-actions .ws-editor__save-button:not(:disabled) {
+  border-color: var(--accent-primary);
+  background: color-mix(in srgb, var(--accent-primary) 15%, var(--surface-secondary));
+  color: var(--accent-secondary);
+}
+
+/* === Responsividade do cabeçalho === */
+@container (max-width: 600px) {
+  .ws-editor__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ws-editor__header-actions {
+    width: 100%;
+  }
+}
+
+/* === Barra de ferramentas do editor === */
+/* ----- Organização principal ----- */
+.ws-editor__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: var(--surface-secondary);
+}
+
+/* ----- Grupos de comandos ----- */
+.ws-editor__toolbar-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ws-editor__toolbar button,
+.ws-editor__search-panel button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ws-editor__toolbar button:hover,
+.ws-editor__search-panel button:hover:not(:disabled) {
+  background: var(--surface-primary);
+}
+
+.ws-editor__toolbar button[aria-pressed='true'],
+.ws-editor__toolbar button[aria-expanded='true'] {
+  border-color: var(--border-default);
+  background: var(--surface-primary);
+  color: var(--accent-secondary);
+}
+
+.ws-editor__font-indicator {
+  min-width: 38px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* === Painel de pesquisa === */
+/* ----- Estrutura e alinhamento ----- */
+.ws-editor__search-panel {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: var(--surface-secondary);
+}
+
+.ws-editor__search-fields {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ws-editor__search-fields label {
+  display: flex;
+  flex: 1 1 170px;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ws-editor__search-fields input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 35px;
+  border-radius: 7px;
+}
+
+.ws-editor__search-panel .ws-editor__search-close {
+  flex: 0 0 34px;
+  width: 34px;
+  padding: 7px;
+}
+
+.ws-editor__search-panel button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* === Adaptação a janelas compactas === */
+@container (max-width: 600px) {
+  .ws-editor__toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ws-editor__search-panel {
+    align-items: flex-start;
+  }
+
+  .ws-editor__search-fields {
+    align-items: stretch;
+  }
+}
+
+/* === Editor em janelas compactas === */
+@container (max-width: 500px) {
+
+  .ws-editor .ws-editor__text,
+  .ws-editor__syntax {
+    min-height: 320px;
+  }
+
+  .ws-editor__status {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ws-editor__status-group {
+    gap: 8px 12px;
+  }
+}
+
+/* === Janelas de operações do editor === */
+/* ----- Fundo e posicionamento ----- */
+.ws-editor__modal-backdrop {
+  position: fixed;
+  z-index: 9000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(0 0 0 / 55%);
+  backdrop-filter: blur(5px);
+}
+
+/* ----- Estrutura da janela ----- */
+.ws-editor__modal {
+  box-sizing: border-box;
+  width: min(440px, 100%);
+  max-height: 85dvh;
+  overflow-y: auto;
+  border: 1px solid var(--border-default);
+  border-radius: 14px;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-floating);
+}
+
+/* ----- Cabeçalho ----- */
+.ws-editor__modal-header {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.ws-editor__modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+/* ----- Conteúdo e campos ----- */
+.ws-editor__modal-content {
+  display: grid;
+  gap: 14px;
+  padding: 20px 22px;
+}
+
+.ws-editor__modal-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.ws-editor__modal-content .ws-editor__modal-hint {
+  color: var(--status-warning);
+}
+
+.ws-editor__modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.ws-editor__modal-field input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+/* ----- Ações da janela ----- */
+.ws-editor__modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 9px;
+  padding: 15px 22px;
+  border-top: 1px solid var(--border-default);
+}
+
+.ws-editor__modal-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ws-editor__modal-actions .ws-editor__modal-primary {
+  border-color: var(--accent-primary);
+  background: color-mix(in srgb,
+      var(--accent-primary) 15%,
+      var(--surface-secondary));
+  color: var(--accent-secondary);
+}
+
+.ws-editor__modal-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* === Responsividade das janelas === */
+@container (max-width: 480px) {
+
+  .ws-editor__modal-header,
+  .ws-editor__modal-content,
+  .ws-editor__modal-actions {
+    padding-inline: 16px;
+  }
+}
+
+/* === Avisos e feedback do Editor === */
+/* ----- Apresentação das mensagens ----- */
+.ws-editor__notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 14px;
+  margin: 12px 0;
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.ws-editor__notice strong {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.ws-editor__notice p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ----- Conflitos de edição ----- */
+.ws-editor__notice--warning {
+  border-color: color-mix(in srgb,
+      var(--status-warning) 35%,
+      var(--border-default));
+  background: color-mix(in srgb,
+      var(--status-warning) 6%,
+      var(--surface-secondary));
+}
+
+/* ----- Ações de recuperação ----- */
+.ws-editor__notice-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ws-editor__notice-actions button {
+  min-height: 34px;
+  padding: 7px 11px;
+  border: 1px solid var(--border-default);
+  border-radius: 7px;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.ws-editor__notice-actions button:disabled {
+  opacity: 0.45;
+}
+
+/* === Acessibilidade dos modais === */
+/* ----- Destaque de navegação por teclado ----- */
+.ws-editor__modal :focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+.ws-editor__modal:focus {
+  outline: none;
 }

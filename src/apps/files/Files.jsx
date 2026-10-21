@@ -609,8 +609,12 @@ export default function Files({ instance }) {
     }
     await perform(async () => {
       if (action.type === 'create-folder') return createLocalFolder(action.name, parentId);
+      /* ----- Criação de documento de texto ----- */
       if (action.type === 'create-file') {
-        const file = await createLocalText(action.name, parentId);
+        const name = action.name.trim();
+        const filename = /\.txt$/i.test(name) ? name : `${name}.txt`;
+
+        const file = await createLocalText(filename, parentId);
         open(file, true);
         return file;
       }
@@ -1256,7 +1260,11 @@ export default function Files({ instance }) {
                 {/* ----- Fim da barra unificada ----- */}
               </div>
               {space !== 'official' && currentSelection.length > 0 && (
-                <div className="ws-app__toolbar ws-files__selection">
+                  <div
+                    className="ws-files__selection"
+                    role="group"
+                    aria-label={t('Ações dos arquivos selecionados')}
+                  >
                   <label className="ws-files__check">
                     <input
                       type="checkbox"
@@ -1277,8 +1285,16 @@ export default function Files({ instance }) {
               {store.error && <p role="alert">{t(store.error)}</p>}
               {unavailableFolder && <p role="status">{t('Pasta de destino indisponível.')}</p>}
               <p role="status">{t(message)}</p>
-              {action && (
-                <form className="ws-app__card ws-files__dialog" onSubmit={submitAction}>
+                {/* === Janela de operações === */}
+                {action && (
+                  <div className="ws-files__modal-backdrop">
+                    <form
+                      className="ws-files__dialog"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-label={t('Operação de arquivo')}
+                      onSubmit={submitAction}
+                    >
                   <h3>
                     {t(
                       action.type === 'rename'
@@ -1305,6 +1321,13 @@ export default function Files({ instance }) {
                         onChange={(event) => setAction({ ...action, name: event.target.value })}
                       />
                     </label>
+                  )}
+                  
+                  {/* ----- Orientação para arquivos de texto ----- */}
+                  {action.type === 'create-file' && (
+                    <p className="ws-files__dialog-hint">
+                      A extensão .txt será adicionada automaticamente.
+                    </p>
                   )}
                   {action.type === 'move' && (
                     <label>
@@ -1347,7 +1370,8 @@ export default function Files({ instance }) {
                       {t('Cancelar')}
                     </button>
                   </div>
-                </form>
+                  </form>
+                </div>
               )}
               {/* ----- Catálogo oficial ou arquivos pessoais ----- */}
               {space === 'official' ? (
@@ -1368,7 +1392,10 @@ export default function Files({ instance }) {
                       )}
                     </p>
                   )}
-                  <div className="ws-files__official-grid">
+                    <div
+                      className={`ws-files__official-grid ${viewMode === 'list' ? 'ws-files__official-grid--list' : ''
+                        }`}
+                    >
                     {filteredOfficial.map((item) => (
                       <article
                         className="ws-app__card ws-files__official-card"
@@ -1408,7 +1435,6 @@ export default function Files({ instance }) {
                           <h3 title={contentText(item.name, locale)}>
                             {contentText(item.name, locale)}
                           </h3>
-                          {item.description && <p>{contentText(item.description, locale)}</p>}
                           {item.source === 'managed' && Number.isFinite(item.size) && (
                             <small>
                               {(item.size / 1024).toLocaleString(locale, {

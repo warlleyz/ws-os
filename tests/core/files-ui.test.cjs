@@ -54,6 +54,9 @@ async function component(file, props, bindings = {}) {
         'Sparkles',
         'RotateCcw',
         'Copy',
+        'Save',
+        'Replace',
+        'X',
         'MoreHorizontal',
         'Info',
         'Upload',
@@ -193,7 +196,8 @@ test('editor detecta alterações externas sem apagar rascunho e não sobrescrev
   ui.render();
   await ui.flush();
   assert.match(ui.text(), /outra janela/);
-  await ui.button('Salvar').props.onClick();
+  /* ----- Conflito bloqueia o salvamento direto ----- */
+  assert.equal(ui.button('Salvar').props.disabled, true);
   ui.render();
   assert.equal(ui.nodes().find((n) => n.type === 'textarea').props.value, 'rascunho');
   assert.equal(ui.dirty(), true);
@@ -224,8 +228,27 @@ test('salvar cópia recupera rascunho na raiz quando pasta e arquivo foram remov
   ui.render();
   await ui.flush();
   assert.match(ui.text(), /não encontrado/);
-  await ui.button('Salvar cópia').props.onClick();
+  /* ----- Abertura do diálogo e confirmação da cópia ----- */
+  ui.button('Salvar cópia').props.onClick();
   ui.render();
+
+  assert.ok(ui.button('Criar cópia'));
+
+  /* ----- Confirmação do formulário de cópia ----- */
+  const copyForm = ui.nodes().find(
+    (node) =>
+      node.type === 'form' &&
+      node.props.className === 'ws-editor__modal',
+  );
+
+  assert.ok(copyForm, 'O formulário de cópia deve estar aberto.');
+
+  copyForm.props.onSubmit({
+    preventDefault() { },
+  });
+
+  await ui.flush();
+
   assert.equal(saved[1], null);
   assert.equal(saved[2], 'recuperado');
   assert.equal(ui.dirty(), true);
