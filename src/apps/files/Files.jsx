@@ -28,7 +28,7 @@ import { portfolio, contentText } from '../../content/portfolioContent';
 import { openApp } from '../../core/appManager';
 import { useSystem } from '../../core/useSystem';
 import { subscribePublicData } from '../../services/publicDataService';
-import { fileKind } from '../../services/storage/fileModel';
+import { fileKind, validateFileName } from '../../services/storage/fileModel';
 import {
   changeLocalFile,
   changeLocalFiles,
@@ -141,6 +141,8 @@ export default function Files({ instance }) {
   const inputRef = useRef(null),
     busyRef = useRef(false),
     contextRef = useRef(null);
+  const dialogRef = useRef(null);
+  const actionTriggerRef = useRef(null);
   /* ----- Controle da barra de endereços ----- */
   const addressInputRef = useRef(null);
   const addressAreaRef = useRef(null);
@@ -255,23 +257,23 @@ export default function Files({ instance }) {
   const searchableLocal = store.entries.filter((item) => !item.trashed);
   const homeResults = homeQuery.trim()
     ? [
-      ...searchableLocal.map((item) => ({
-        source: 'local',
-        id: item.id,
-        name: item.name,
-        kind: item.kind,
-        entry: item,
-      })),
-      ...officialFiles.map((item) => ({
-        source: item.source,
-        id: item.source === 'managed' ? item.resourceId : item.id,
-        name: contentText(item.name, locale),
-        kind: 'file',
-        entry: item,
-      })),
-    ]
-      .filter((item) => normalized(item.name).includes(normalized(homeQuery.trim())))
-      .slice(0, 20)
+        ...searchableLocal.map((item) => ({
+          source: 'local',
+          id: item.id,
+          name: item.name,
+          kind: item.kind,
+          entry: item,
+        })),
+        ...officialFiles.map((item) => ({
+          source: item.source,
+          id: item.source === 'managed' ? item.resourceId : item.id,
+          name: contentText(item.name, locale),
+          kind: 'file',
+          entry: item,
+        })),
+      ]
+        .filter((item) => normalized(item.name).includes(normalized(homeQuery.trim())))
+        .slice(0, 20)
     : [];
   /* ----- Histórico válido dos arquivos acessados ----- */
   const availableRecentFiles = recentFiles
@@ -314,12 +316,12 @@ export default function Files({ instance }) {
     ...(space === 'home'
       ? []
       : [
-        space === 'personal'
-          ? 'Meus arquivos'
-          : space === 'official'
-            ? 'Arquivos oficiais'
-            : 'Lixeira',
-      ]),
+          space === 'personal'
+            ? 'Meus arquivos'
+            : space === 'official'
+              ? 'Arquivos oficiais'
+              : 'Lixeira',
+        ]),
     ...(space === 'personal' ? breadcrumbs.map((item) => item.name) : []),
   ];
   const addressPath = addressSegments.join('/');
@@ -331,8 +333,8 @@ export default function Files({ instance }) {
         space === 'trash'
           ? item.trashed && !store.entries.find((parent) => parent.id === item.parentId)?.trashed
           : !unavailableFolder &&
-          !item.trashed &&
-          (globalSearch && term ? true : item.parentId === parentId);
+            !item.trashed &&
+            (globalSearch && term ? true : item.parentId === parentId);
       return inSpace && (!term || normalized(item.name).includes(term));
     })
     .sort((a, b) =>
@@ -517,6 +519,55 @@ export default function Files({ instance }) {
       window.removeEventListener('scroll', scroll, true);
     };
   }, [context]);
+  /* === Diálogos de operações === */
+  function beginAction(next) {
+    actionTriggerRef.current = context?.trigger ?? document.activeElement;
+    setContext(null);
+    setAction(next);
+  }
+  const actionOpen = Boolean(action);
+  useEffect(() => {
+    if (!actionOpen || !dialogRef.current) return;
+    const dialog = dialogRef.current;
+    const origin = actionTriggerRef.current;
+    const fallback = dialog.closest('.ws-files')?.querySelector('.ws-files__main');
+    const controls = () => [
+      ...dialog.querySelectorAll(
+        'input:not(:disabled), select:not(:disabled), button:not(:disabled), [tabindex="0"]',
+      ),
+    ];
+    controls()[0]?.focus();
+    function key(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!busyRef.current) setAction(null);
+      }
+      if (event.key === 'Tab') {
+        const items = controls();
+        const index = items.indexOf(document.activeElement);
+        if (!items.length) {
+          event.preventDefault();
+          dialog.focus();
+        } else if (
+          index < 0 ||
+          (!event.shiftKey && index === items.length - 1) ||
+          (event.shiftKey && index === 0)
+        ) {
+          event.preventDefault();
+          items[event.shiftKey ? items.length - 1 : 0].focus();
+        }
+      }
+    }
+    document.addEventListener('keydown', key, true);
+    return () => {
+      document.removeEventListener('keydown', key, true);
+      const owner = fallback?.closest('.desktop-window');
+      if (!owner || owner.classList.contains('desktop-window--active')) {
+        (origin?.isConnected ? origin : fallback)?.focus();
+      }
+    };
+  }, [actionOpen]);
   /* === Operações locais === */
   /* ----- Execução, bloqueio e feedback ----- */
   async function perform(operation) {
@@ -594,7 +645,7 @@ export default function Files({ instance }) {
   async function batch(type) {
     if (!currentSelection.length) return;
     if (type === 'purge') {
-      setAction({ type: 'purge', ids: currentSelection.map((item) => item.id) });
+      beginAction({ type: 'purge', ids: currentSelection.map((item) => item.id) });
       return;
     }
     await perform(() => changeLocalFiles(currentSelection.map((item) => ({ type, id: item.id }))));
@@ -611,7 +662,7 @@ export default function Files({ instance }) {
       if (action.type === 'create-folder') return createLocalFolder(action.name, parentId);
       /* ----- Criação de documento de texto ----- */
       if (action.type === 'create-file') {
-        const name = action.name.trim();
+        const name = validateFileName(action.name);
         const filename = /\.txt$/i.test(name) ? name : `${name}.txt`;
 
         const file = await createLocalText(filename, parentId);
@@ -686,7 +737,7 @@ export default function Files({ instance }) {
             type="button"
             disabled={busy || !item}
             onClick={() => {
-              setAction({ type: 'rename', id: item.id, name: item.name });
+              beginAction({ type: 'rename', id: item.id, name: item.name });
               setContext(null);
             }}
           >
@@ -697,7 +748,7 @@ export default function Files({ instance }) {
             type="button"
             disabled={busy || !ids.length}
             onClick={() => {
-              setAction({ type: 'move', ids, parentId: null });
+              beginAction({ type: 'move', ids, parentId: null });
               setContext(null);
             }}
           >
@@ -1222,7 +1273,7 @@ export default function Files({ instance }) {
                     <button
                       type="button"
                       disabled={busy || store.loading || unavailableFolder}
-                      onClick={() => setAction({ type: 'create-folder', name: '' })}
+                      onClick={() => beginAction({ type: 'create-folder', name: '' })}
                     >
                       <Plus size={16} />
                       {t('Criar pasta')}
@@ -1230,7 +1281,7 @@ export default function Files({ instance }) {
                     <button
                       type="button"
                       disabled={busy || store.loading || unavailableFolder}
-                      onClick={() => setAction({ type: 'create-file', name: '' })}
+                      onClick={() => beginAction({ type: 'create-file', name: '' })}
                     >
                       <FilePlus2 size={16} aria-hidden="true" />
                       {t('Criar arquivo de texto')}
@@ -1260,11 +1311,7 @@ export default function Files({ instance }) {
                 {/* ----- Fim da barra unificada ----- */}
               </div>
               {space !== 'official' && currentSelection.length > 0 && (
-                  <div
-                    className="ws-files__selection"
-                    role="group"
-                    aria-label={t('Ações dos arquivos selecionados')}
-                  >
+                <div className="ws-files__selection" role="group" aria-label={t('Ações')}>
                   <label className="ws-files__check">
                     <input
                       type="checkbox"
@@ -1285,91 +1332,93 @@ export default function Files({ instance }) {
               {store.error && <p role="alert">{t(store.error)}</p>}
               {unavailableFolder && <p role="status">{t('Pasta de destino indisponível.')}</p>}
               <p role="status">{t(message)}</p>
-                {/* === Janela de operações === */}
-                {action && (
-                  <div className="ws-files__modal-backdrop">
-                    <form
-                      className="ws-files__dialog"
-                      role="dialog"
-                      aria-modal="true"
-                      aria-label={t('Operação de arquivo')}
-                      onSubmit={submitAction}
-                    >
-                  <h3>
-                    {t(
-                      action.type === 'rename'
-                        ? 'Renomear'
-                        : action.type === 'move'
-                          ? 'Mover item'
-                          : action.type === 'purge'
-                            ? 'Excluir definitivamente'
-                            : action.type === 'create-folder'
-                              ? 'Criar pasta'
-                              : 'Criar arquivo de texto',
-                    )}
-                  </h3>
-                  {['rename', 'create-folder', 'create-file'].includes(action.type) && (
-                    <label>
-                      {t('Nome')}
-                      <input
-                        aria-label={t('Nome do novo item')}
-                        autoFocus
-                        value={action.name}
-                        maxLength={120}
-                        required
-                        disabled={busy}
-                        onChange={(event) => setAction({ ...action, name: event.target.value })}
-                      />
-                    </label>
-                  )}
-                  
-                  {/* ----- Orientação para arquivos de texto ----- */}
-                  {action.type === 'create-file' && (
-                    <p className="ws-files__dialog-hint">
-                      A extensão .txt será adicionada automaticamente.
-                    </p>
-                  )}
-                  {action.type === 'move' && (
-                    <label>
-                      {t('Pasta de destino')}
-                      <select
-                        value={action.parentId ?? ''}
-                        disabled={busy}
-                        onChange={(event) =>
-                          setAction({ ...action, parentId: event.target.value || null })
-                        }
-                      >
-                        <option value="">{t('Meus arquivos')}</option>
-                        {store.entries
-                          .filter(
-                            (item) =>
-                              item.kind === 'folder' &&
-                              !item.trashed &&
-                              !action.ids.includes(item.id),
-                          )
-                          .map((item) => (
-                            <option value={item.id} key={item.id}>
-                              {item.name}
-                            </option>
-                          ))}
-                      </select>
-                    </label>
-                  )}
-                  {action.type === 'purge' && (
-                    <p>
+              {/* === Janela de operações === */}
+              {action && (
+                <div className="ws-files__modal-backdrop">
+                  <form
+                    className="ws-files__dialog"
+                    ref={dialogRef}
+                    tabIndex={-1}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby={`ws-files-${instance?.id ?? 'standalone'}-operation`}
+                    onSubmit={submitAction}
+                  >
+                    <h3 id={`ws-files-${instance?.id ?? 'standalone'}-operation`}>
                       {t(
-                        'Esta exclusão é permanente e inclui o conteúdo da pasta. Confirme somente se não precisar recuperá-lo.',
+                        action.type === 'rename'
+                          ? 'Renomear'
+                          : action.type === 'move'
+                            ? 'Mover item'
+                            : action.type === 'purge'
+                              ? 'Excluir definitivamente'
+                              : action.type === 'create-folder'
+                                ? 'Criar pasta'
+                                : 'Criar arquivo de texto',
                       )}
-                    </p>
-                  )}
-                  <div className="ws-app__toolbar">
-                    <button disabled={busy} type="submit">
-                      {t('Confirmar')}
-                    </button>
-                    <button disabled={busy} type="button" onClick={() => setAction(null)}>
-                      {t('Cancelar')}
-                    </button>
-                  </div>
+                    </h3>
+                    {['rename', 'create-folder', 'create-file'].includes(action.type) && (
+                      <label>
+                        {t('Nome')}
+                        <input
+                          aria-label={t('Nome do novo item')}
+                          autoFocus
+                          value={action.name}
+                          maxLength={120}
+                          required
+                          disabled={busy}
+                          onChange={(event) => setAction({ ...action, name: event.target.value })}
+                        />
+                      </label>
+                    )}
+
+                    {/* ----- Orientação para arquivos de texto ----- */}
+                    {action.type === 'create-file' && (
+                      <p className="ws-files__dialog-hint">
+                        A extensão .txt será adicionada automaticamente.
+                      </p>
+                    )}
+                    {action.type === 'move' && (
+                      <label>
+                        {t('Pasta de destino')}
+                        <select
+                          value={action.parentId ?? ''}
+                          disabled={busy}
+                          onChange={(event) =>
+                            setAction({ ...action, parentId: event.target.value || null })
+                          }
+                        >
+                          <option value="">{t('Meus arquivos')}</option>
+                          {store.entries
+                            .filter(
+                              (item) =>
+                                item.kind === 'folder' &&
+                                !item.trashed &&
+                                !action.ids.includes(item.id),
+                            )
+                            .map((item) => (
+                              <option value={item.id} key={item.id}>
+                                {item.name}
+                              </option>
+                            ))}
+                        </select>
+                      </label>
+                    )}
+                    {action.type === 'purge' && (
+                      <p>
+                        {t(
+                          'Esta exclusão é permanente e inclui o conteúdo da pasta. Confirme somente se não precisar recuperá-lo.',
+                        )}
+                      </p>
+                    )}
+                    <div className="ws-app__toolbar">
+                      <button disabled={busy} type="submit">
+                        {t('Confirmar')}
+                      </button>
+                      <button disabled={busy} type="button" onClick={() => setAction(null)}>
+                        {t('Cancelar')}
+                      </button>
+                    </div>
                   </form>
                 </div>
               )}
@@ -1392,10 +1441,11 @@ export default function Files({ instance }) {
                       )}
                     </p>
                   )}
-                    <div
-                      className={`ws-files__official-grid ${viewMode === 'list' ? 'ws-files__official-grid--list' : ''
-                        }`}
-                    >
+                  <div
+                    className={`ws-files__official-grid ${
+                      viewMode === 'list' ? 'ws-files__official-grid--list' : ''
+                    }`}
+                  >
                     {filteredOfficial.map((item) => (
                       <article
                         className="ws-app__card ws-files__official-card"
@@ -1425,7 +1475,7 @@ export default function Files({ instance }) {
                         </div>
                         <div className="ws-files__official-icon">
                           {item.mimeType?.startsWith('image/') ||
-                            /\.(png|jpe?g|webp)$/i.test(contentText(item.name, locale)) ? (
+                          /\.(png|jpe?g|webp)$/i.test(contentText(item.name, locale)) ? (
                             <FileImage size={23} aria-hidden="true" />
                           ) : (
                             <FileText size={23} aria-hidden="true" />
@@ -1542,8 +1592,8 @@ export default function Files({ instance }) {
                             {item.kind === 'folder'
                               ? t('Pasta')
                               : (item.blob.size / 1024).toLocaleString(locale, {
-                                maximumFractionDigits: 1,
-                              }) + ' KB'}
+                                  maximumFractionDigits: 1,
+                                }) + ' KB'}
                           </small>
                           <button
                             type="button"
@@ -1583,7 +1633,7 @@ export default function Files({ instance }) {
                           <button
                             type="button"
                             disabled={busy || store.loading}
-                            onClick={() => setAction({ type: 'create-folder', name: '' })}
+                            onClick={() => beginAction({ type: 'create-folder', name: '' })}
                           >
                             <Plus size={15} aria-hidden="true" /> {t('Criar pasta')}
                           </button>
@@ -1662,7 +1712,7 @@ export default function Files({ instance }) {
                       type="button"
                       role="menuitem"
                       disabled={busy || store.loading || unavailableFolder}
-                      onClick={() => setAction({ type: 'create-folder', name: '' })}
+                      onClick={() => beginAction({ type: 'create-folder', name: '' })}
                     >
                       <Folder size={16} />
                       {t('Criar pasta')}
@@ -1671,7 +1721,7 @@ export default function Files({ instance }) {
                       type="button"
                       role="menuitem"
                       disabled={busy || store.loading || unavailableFolder}
-                      onClick={() => setAction({ type: 'create-file', name: '' })}
+                      onClick={() => beginAction({ type: 'create-file', name: '' })}
                     >
                       <FilePlus2 size={16} />
                       {t('Criar arquivo de texto')}

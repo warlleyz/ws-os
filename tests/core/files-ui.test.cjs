@@ -17,7 +17,10 @@ async function component(file, props, bindings = {}) {
   const slots = [],
     effects = [];
   const React = {
-    createElement: (type, props, ...children) => ({ type, props: { ...props, children } }),
+    createElement: (type, props, ...children) => {
+      if (props?.ref && bindings.attachRef) props.ref.current = bindings.attachRef(type, props);
+      return { type, props: { ...props, children } };
+    },
     useState: (initial) => {
       const i = cursor++;
       if (!(i in slots)) slots[i] = typeof initial === 'function' ? initial() : initial;
@@ -78,6 +81,9 @@ async function component(file, props, bindings = {}) {
         'File',
         'DocumentView',
         'PdfPreview',
+        'ChevronLeft',
+        'Minus',
+        'RotateCw',
       ].map((name) => [name, name]),
     ),
     fetchManagedContent: async () => ({ data: [] }),
@@ -105,6 +111,9 @@ async function component(file, props, bindings = {}) {
           : name.endsWith('.pdf')
             ? 'pdf'
             : null,
+    validateFileName: require('../helpers/contract-loader.cjs').loadContract(
+      path.join(root, 'src/services/storage/fileModel.js'),
+    ).validateFileName,
     TEXT_LIMIT: 1024 * 1024,
     FILE_LIMIT: 10 * 1024 * 1024,
     Uint8Array,
@@ -235,16 +244,14 @@ test('salvar cópia recupera rascunho na raiz quando pasta e arquivo foram remov
   assert.ok(ui.button('Criar cópia'));
 
   /* ----- Confirmação do formulário de cópia ----- */
-  const copyForm = ui.nodes().find(
-    (node) =>
-      node.type === 'form' &&
-      node.props.className === 'ws-editor__modal',
-  );
+  const copyForm = ui
+    .nodes()
+    .find((node) => node.type === 'form' && node.props.className === 'ws-editor__modal');
 
   assert.ok(copyForm, 'O formulário de cópia deve estar aberto.');
 
   copyForm.props.onSubmit({
-    preventDefault() { },
+    preventDefault() {},
   });
 
   await ui.flush();
@@ -372,13 +379,12 @@ test('visualizador não cria URL após fechamento e informa arquivo removido', a
   assert.match(documentView(removed).error, /não encontrado/);
 });
 
-
 test('visualizador local encaminha imagens e PDFs à interface compartilhada', async () => {
   const bindings = {
     readLocalFile: async () => entry({ name: 'a.png' }),
     URL: {
       createObjectURL: () => 'blob:x',
-      revokeObjectURL() { },
+      revokeObjectURL() {},
     },
   };
 
@@ -426,7 +432,6 @@ test('visualizador local encaminha imagens e PDFs à interface compartilhada', a
 
   pdf.unmount();
 });
-
 
 function officialBindings(fetchMock, overrides = {}) {
   const revoked = [];
@@ -653,7 +658,6 @@ test('leitura do gerenciador ignora resposta antiga e preserva listagem ao falha
   assert.equal(state.entries[0].name, 'atual.txt');
 });
 
-
 /* === Compatibilidade dos descritores com o Visualizador === */
 /* ----- Roteamento de arquivos locais e gerenciados ----- */
 test('Visualizador roteia descritores locais e gerenciados validados', async () => {
@@ -715,7 +719,6 @@ test('Visualizador roteia descritores locais e gerenciados validados', async () 
 
   assert.equal(invalid.nodes()[0].props.source, 'invalid');
 });
-
 
 /* === Menus de contexto do explorador === */
 const contextEvent = (extra = {}) => ({
@@ -890,4 +893,405 @@ test('pesquisa em todas as pastas alterna escopo sem modificar os arquivos', asy
   );
   assert.equal(store.entries.length, 2);
   ui.unmount();
+});
+
+/* === Regressões do fechamento da Etapa 05: Editor === */
+test('cópia mantém a pasta atual e preserva o rascunho quando a gravação falha', async () => {
+  let destination;
+  const file = entry({ parentId: 'original' });
+  const ui = await component('src/apps/file-editor/FileEditor.jsx', editorProps(), {
+    readLocalFile: async () => file,
+    listLocalFiles: async () => [
+      entry({ parentId: 'moved' }),
+      entry({ id: 'moved', kind: 'folder', blob: null }),
+    ],
+    createLocalText: async (...args) => {
+      destination = args;
+      throw Error('Não foi possível salvar o arquivo.');
+    },
+  });
+  await ui.flush();
+  ui.nodes()
+    .find((node) => node.type === 'textarea')
+    .props.onChange({ target: { value: 'rascunho seguro' } });
+  ui.render();
+  ui.button('Salvar cópia').props.onClick();
+  ui.render();
+  ui.nodes()
+    .find((node) => node.type === 'form')
+    .props.onSubmit({ preventDefault() {} });
+  await ui.flush();
+  assert.equal(destination[1], 'moved');
+  assert.equal(destination[2], 'rascunho seguro');
+  assert.equal(ui.nodes().find((node) => node.type === 'textarea').props.value, 'rascunho seguro');
+  assert.equal(ui.dirty(), true);
+  assert.ok(ui.button('Criar cópia'));
+  assert.match(ui.text(), /Não foi possível salvar/);
+  ui.unmount();
+});
+
+test('controles do Editor têm identificadores por instância e recarregar registra o foco de origem', async () => {
+  const trigger = { focus() {}, isConnected: true };
+  const first = await component('src/apps/file-editor/FileEditor.jsx', editorProps(), {
+    readLocalFile: async () => entry(),
+    document: { activeElement: trigger },
+  });
+  const second = await component(
+    'src/apps/file-editor/FileEditor.jsx',
+    { instance: { id: 'other-editor', params: { fileId: 'file' } } },
+    {
+      readLocalFile: async () => entry(),
+    },
+  );
+  await first.flush();
+  await second.flush();
+  const panelA = first.button('Localizar').props['aria-controls'];
+  const panelB = second.button('Localizar').props['aria-controls'];
+  assert.notEqual(panelA, panelB);
+  first.button('Localizar').props.onClick();
+  first.render();
+  assert.ok(first.nodes().some((node) => node.props.id === panelA));
+  first
+    .nodes()
+    .find((node) => node.type === 'textarea')
+    .props.onChange({ target: { value: 'alterado' } });
+  first.render();
+  first.button('Recarregar arquivo').props.onClick();
+  first.render();
+  const dialog = first.nodes().find((node) => node.props.role === 'dialog');
+  assert.ok(first.nodes(dialog).some((node) => node.props.id === dialog.props['aria-labelledby']));
+  first.button('Cancelar').props.onClick();
+  first.render();
+  assert.equal(first.nodes().find((node) => node.type === 'textarea').props.value, 'alterado');
+  first.unmount();
+  second.unmount();
+});
+
+/* === Regressões do fechamento da Etapa 05: PDF e catálogo === */
+function pdfBindings(getDocument, extra = {}) {
+  const canvas = { getContext: () => ({}), style: {} };
+  return {
+    pdfjs: { GlobalWorkerOptions: {}, getDocument },
+    workerSrc: '/worker.mjs',
+    window: { devicePixelRatio: 1 },
+    attachRef: (type) =>
+      type === 'canvas' ? canvas : type === 'div' ? { clientWidth: 600 } : null,
+    ...extra,
+  };
+}
+function pdfDocument(overrides = {}) {
+  return {
+    numPages: 3,
+    getPage: async () => ({
+      getViewport: ({ scale }) => ({ width: 500 * scale, height: 700 * scale }),
+      render: () => ({ promise: Promise.resolve(), cancel() {} }),
+      getTextContent: async () => ({ items: [{ str: 'conteúdo do documento' }] }),
+    }),
+    ...overrides,
+  };
+}
+
+test('PDF troca documento sem manter página antiga e recupera falha anterior', async () => {
+  let attempt = 0,
+    destroyed = 0;
+  const props = { blob: new Blob(['bad']), name: 'teste.pdf' };
+  const ui = await component(
+    'src/apps/file-viewer/PdfPreview.jsx',
+    props,
+    pdfBindings(() => ({
+      promise:
+        ++attempt === 1 ? Promise.reject(Error('PDF inválido')) : Promise.resolve(pdfDocument()),
+      destroy: async () => {
+        destroyed++;
+      },
+    })),
+  );
+  await ui.flush();
+  assert.match(ui.text(), /Não foi possível interpretar/);
+  props.blob = new Blob(['good']);
+  ui.render();
+  assert.match(ui.text(), /Carregando PDF/);
+  await ui.flush();
+  await ui.flush();
+  assert.doesNotMatch(ui.text(), /Não foi possível interpretar/);
+  assert.equal(ui.nodes().find((node) => node.type === 'canvas').props.hidden, false);
+  ui.nodes()
+    .find((node) => node.props['aria-label'] === 'Próxima página')
+    .props.onClick();
+  ui.render();
+  assert.match(ui.text(), /2.*3/);
+  props.blob = new Blob(['next']);
+  ui.render();
+  await ui.flush();
+  await ui.flush();
+  assert.match(ui.text(), /1.*3/);
+  ui.unmount();
+  assert.equal(destroyed, 3);
+});
+
+test('PDF cancela renderização e rejeita ajuste de largura atrasado ao trocar página', async () => {
+  let cancelled = 0,
+    resolveFit,
+    count = 0;
+  const page = {
+    getViewport: ({ scale }) => ({ width: 500 * scale, height: 700 * scale }),
+    render: () => ({
+      promise: Promise.resolve(),
+      cancel() {
+        cancelled++;
+      },
+    }),
+  };
+  const document = pdfDocument({
+    getPage: () =>
+      ++count === 2
+        ? new Promise((resolve) => {
+            resolveFit = resolve;
+          })
+        : Promise.resolve(page),
+  });
+  const ui = await component(
+    'src/apps/file-viewer/PdfPreview.jsx',
+    { blob: new Blob(['pdf']), name: 'teste.pdf' },
+    pdfBindings(() => ({ promise: Promise.resolve(document), destroy: async () => {} })),
+  );
+  await ui.flush();
+  await ui.flush();
+  ui.button('Ajustar largura').props.onClick();
+  ui.nodes()
+    .find((node) => node.props['aria-label'] === 'Próxima página')
+    .props.onClick();
+  ui.render();
+  resolveFit(page);
+  await ui.flush();
+  assert.match(ui.text(), /100\s*%/);
+  assert.equal(cancelled, 1);
+  ui.unmount();
+  assert.equal(cancelled, 2);
+});
+
+test('PDF encerra pesquisa cancelada antes de ler o texto de outra página', async () => {
+  let getTextCalls = 0,
+    resolvePage;
+  const document = pdfDocument({
+    getPage: (number) =>
+      number === 2
+        ? new Promise((resolve) => {
+            resolvePage = resolve;
+          })
+        : Promise.resolve({
+            getViewport: () => ({ width: 500, height: 700 }),
+            render: () => ({ promise: Promise.resolve(), cancel() {} }),
+            getTextContent: async () => {
+              getTextCalls++;
+              return { items: [{ str: 'busca' }] };
+            },
+          }),
+  });
+  const ui = await component(
+    'src/apps/file-viewer/PdfPreview.jsx',
+    { blob: new Blob(['pdf']), name: 'teste.pdf' },
+    pdfBindings(() => ({ promise: Promise.resolve(document), destroy: async () => {} })),
+  );
+  await ui.flush();
+  await ui.flush();
+  const input = () => ui.nodes().find((node) => node.type === 'input');
+  input().props.onChange({ target: { value: 'busca' } });
+  ui.render();
+  await ui.flush();
+  input().props.onChange({ target: { value: '' } });
+  ui.render();
+  resolvePage({
+    getTextContent: async () => {
+      getTextCalls++;
+      return { items: [] };
+    },
+  });
+  await ui.flush();
+  assert.equal(getTextCalls, 1);
+  assert.equal(ui.button('Ir ao resultado'), undefined);
+  ui.unmount();
+});
+
+test('catálogo gerenciado informa timeout e limpa o temporizador', async () => {
+  let abort,
+    cleared = 0;
+  const ui = await component(
+    'src/apps/file-viewer/FileViewer.jsx',
+    { instance: {}, resourceId: 'one' },
+    {
+      componentName: 'ManagedFileViewer',
+      setTimeout: (callback) => {
+        abort = callback;
+        return 1;
+      },
+      clearTimeout: () => {
+        cleared++;
+      },
+      fetch: (_url, { signal }) =>
+        new Promise((_resolve, reject) =>
+          signal.addEventListener('abort', () => reject(Error('abort'))),
+        ),
+    },
+  );
+  abort();
+  await ui.flush();
+  assert.match(documentView(ui).error, /Tempo de carregamento esgotado/);
+  assert.equal(cleared, 1);
+  ui.unmount();
+});
+
+test('arquivo oficial com tamanho declarado acima do limite cancela o corpo e mantém download', async () => {
+  let cancelled = 0;
+  const ui = await component(
+    'src/apps/file-viewer/FileViewer.jsx',
+    officialProps('/grande.txt'),
+    officialBindings(
+      async () =>
+        new Response(
+          new ReadableStream({
+            cancel() {
+              cancelled++;
+            },
+          }),
+          {
+            headers: { 'Content-Type': 'text/plain', 'Content-Length': String(1024 * 1024 + 1) },
+          },
+        ),
+    ),
+  );
+  await ui.flush();
+  assert.equal(cancelled, 1);
+  assert.match(documentView(ui).error, /grande demais/);
+  assert.equal(documentView(ui).url, 'https://ws.test/grande.txt');
+  ui.unmount();
+});
+
+/* === Regressões do fechamento da Etapa 05: gerenciador === */
+test('criação de texto valida o nome antes de adicionar a extensão', async () => {
+  const created = [];
+  const ui = await filesMenu(
+    { entries: [], loading: false, error: '', refresh() {} },
+    {
+      createLocalText: async (name) => {
+        created.push(name);
+        return entry({ name });
+      },
+    },
+  );
+  ui.button('Meus arquivos').props.onClick();
+  ui.render();
+  ui.button('Criar arquivo de texto').props.onClick();
+  ui.render();
+  const nameInput = () =>
+    ui.nodes().find((node) => node.props['aria-label'] === 'Nome do novo item');
+  for (const name of [' ', '.', '..', 'x'.repeat(121)]) {
+    nameInput().props.onChange({ target: { value: name } });
+    ui.render();
+    await ui
+      .nodes()
+      .find((node) => node.type === 'form' && node.props.role === 'dialog')
+      .props.onSubmit({ preventDefault() {} });
+    ui.render();
+    assert.match(ui.text(), /Nome inválido/);
+    assert.equal(created.length, 0);
+  }
+  nameInput().props.onChange({ target: { value: 'novo' } });
+  ui.render();
+  await ui
+    .nodes()
+    .find((node) => node.type === 'form' && node.props.role === 'dialog')
+    .props.onSubmit({ preventDefault() {} });
+  ui.render();
+  ui.button('Criar arquivo de texto').props.onClick();
+  ui.render();
+  nameInput().props.onChange({ target: { value: 'OUTRO.TXT' } });
+  ui.render();
+  await ui
+    .nodes()
+    .find((node) => node.type === 'form' && node.props.role === 'dialog')
+    .props.onSubmit({ preventDefault() {} });
+  ui.render();
+  assert.deepEqual(created, ['novo.txt', 'OUTRO.TXT']);
+  ui.unmount();
+});
+
+test('diálogo de Arquivos restringe foco, impede Escape durante gravação e restaura a origem', async () => {
+  const handlers = new Map();
+  const document = {
+    activeElement: null,
+    body: {},
+    addEventListener: (name, handler) => handlers.set(name, handler),
+    removeEventListener: (name) => handlers.delete(name),
+  };
+  const trigger = {
+    isConnected: true,
+    focus() {
+      document.activeElement = this;
+    },
+  };
+  document.activeElement = trigger;
+  const controls = [0, 1].map(() => ({
+    focus() {
+      document.activeElement = this;
+    },
+  }));
+  const dialog = { closest: () => null, querySelectorAll: () => controls, focus() {} };
+  let finish;
+  const ui = await filesMenu(
+    { entries: [], loading: false, error: '', refresh() {} },
+    {
+      document,
+      attachRef: (type) => (type === 'form' ? dialog : null),
+      createLocalFolder: () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    },
+  );
+  ui.button('Meus arquivos').props.onClick();
+  ui.render();
+  ui.button('Criar pasta').props.onClick();
+  ui.render();
+  assert.equal(document.activeElement, controls[0]);
+  document.activeElement = controls[1];
+  handlers.get('keydown')({ key: 'Tab', preventDefault() {} });
+  assert.equal(document.activeElement, controls[0]);
+  handlers.get('keydown')({ key: 'Tab', shiftKey: true, preventDefault() {} });
+  assert.equal(document.activeElement, controls[1]);
+  const form = () =>
+    ui.nodes().find((node) => node.type === 'form' && node.props.role === 'dialog');
+  const pending = form().props.onSubmit({ preventDefault() {} });
+  ui.render();
+  handlers.get('keydown')({ key: 'Escape', preventDefault() {}, stopPropagation() {} });
+  ui.render();
+  assert.ok(form());
+  finish(entry({ kind: 'folder', blob: null }));
+  await pending;
+  ui.render();
+  assert.equal(form(), undefined);
+  assert.equal(document.activeElement, trigger);
+  assert.equal(handlers.has('keydown'), false);
+  ui.unmount();
+});
+
+/* ----- Foco do Editor não interfere em janelas de fundo ----- */
+test('Editor foca o texto ao abrir somente quando sua janela está ativa', async () => {
+  for (const active of [true, false]) {
+    let focused = 0;
+    const area = {
+      closest: () => ({ classList: { contains: () => active } }),
+      focus() {
+        focused++;
+      },
+    };
+    const ui = await component('src/apps/file-editor/FileEditor.jsx', editorProps(), {
+      readLocalFile: async () => entry(),
+      attachRef: (type) => (type === 'textarea' ? area : null),
+    });
+    await ui.flush();
+    ui.render();
+    assert.equal(focused, active ? 1 : 0);
+    ui.unmount();
+  }
 });

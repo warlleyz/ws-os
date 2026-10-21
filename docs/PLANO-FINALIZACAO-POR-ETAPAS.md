@@ -188,6 +188,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 ## Etapa 05 — Encerrar Arquivos, Visualizador e Editor juntos
 
+**Execução em 21/10/2026:** correções técnicas locais validadas, 411 testes aprovados. Aceite integral ainda pendente de revisão visual/física, traduções finais e revalidação remota pertinente. [Checkpoint e retomada exata](finalizacao/ETAPA-05-ANDAMENTO.md).
+
 **Arquivos:** `src/apps/files/*`, `file-viewer/*`, `file-editor/*`; `src/services/storage/fileModel.js`, `localFilesStorage.js`; `src/shared/hooks/useLocalFiles.js`; serviço de catálogo; `tests/core/files*.test.cjs`; `docs/ARQUIVOS-A5-FINALIZACAO.md`.
 
 **Trabalho:**

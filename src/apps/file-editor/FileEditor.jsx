@@ -1,13 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import {
-  FileText,
-  Save,
-  RotateCcw,
-  Copy,
-  Search,
-  Replace,
-  X,
-} from 'lucide-react';
+import { FileText, Save, RotateCcw, Copy, Search, Replace, X } from 'lucide-react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import {
   readLocalFile,
@@ -23,7 +15,8 @@ import '../../styles/apps.css';
 import { findText, replaceText, tokenizeText } from './textTools';
 import './FileEditor.css';
 export default function FileEditor({ instance }) {
-  useLocale();
+  const locale = useLocale();
+  const controlId = `ws-editor-${instance?.id ?? 'standalone'}`;
   const fileId = instance?.params?.fileId;
   const [file, setFile] = useState(null),
     [text, setText] = useState(''),
@@ -88,8 +81,7 @@ export default function FileEditor({ instance }) {
       '[tabindex]:not([tabindex="-1"])',
     ].join(', ');
 
-    const focusable = () =>
-      [...modal.querySelectorAll(focusableSelector)];
+    const focusable = () => [...modal.querySelectorAll(focusableSelector)];
 
     const originalFocus = modalTriggerRef.current;
 
@@ -122,10 +114,7 @@ export default function FileEditor({ instance }) {
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
-      } else if (
-        !event.shiftKey &&
-        document.activeElement === last
-      ) {
+      } else if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault();
         first.focus();
       } else if (!modal.contains(document.activeElement)) {
@@ -144,6 +133,13 @@ export default function FileEditor({ instance }) {
       }
     };
   }, [copyDialogOpen, reloadConfirm]);
+  /* ----- Foco inicial apenas na instância visível e ativa ----- */
+  const openedFileId = file?.id;
+  useEffect(() => {
+    if (!openedFileId || !textRef.current) return;
+    const window = textRef.current.closest('.desktop-window');
+    if (!window || window.classList.contains('desktop-window--active')) textRef.current.focus();
+  }, [openedFileId]);
   const dirty = text !== baseline;
   /* ----- Informações da posição atual ----- */
   const cursor = cursorLocation(text, cursorPosition);
@@ -204,11 +200,9 @@ export default function FileEditor({ instance }) {
     };
   }
 
-  /* ----- Atualização da posição do cursor ----- */
   /* ----- Atualização segura da posição do cursor ----- */
   function updateCursorPosition(event) {
-    const position = event.currentTarget?.selectionStart
-      ?? event.target?.selectionStart;
+    const position = event.currentTarget?.selectionStart ?? event.target?.selectionStart;
 
     if (Number.isInteger(position)) {
       setCursorPosition(position);
@@ -295,7 +289,6 @@ export default function FileEditor({ instance }) {
     }
   }
   return (
-
     <article
       className="desktop-window__content ws-app ws-editor"
       onKeyDown={(event) => {
@@ -334,13 +327,13 @@ export default function FileEditor({ instance }) {
             setReloadConfirm(false);
           } else if (searchMode) {
             event.preventDefault();
+            event.stopPropagation();
             setSearchMode(null);
             textRef.current?.focus();
           }
         }
       }}
     >
-
       {/* === Cabeçalho do editor === */}
       <header className="ws-editor__header">
         <div className="ws-editor__identity">
@@ -349,9 +342,7 @@ export default function FileEditor({ instance }) {
           </span>
 
           <div className="ws-editor__identity-content">
-            <span className="ws-editor__eyebrow">
-              {t('Editor de Arquivos')}
-            </span>
+            <span className="ws-editor__eyebrow">{t('Editor de Arquivos')}</span>
 
             <h2 title={file?.name}>
               {file?.name ?? t('Nenhum arquivo selecionado')}
@@ -380,17 +371,13 @@ export default function FileEditor({ instance }) {
             <button
               type="button"
               disabled={busy}
-              onClick={() => (dirty ? setReloadConfirm(true) : reload())}
+              onClick={() => (dirty ? openModal('reload') : reload())}
             >
               <RotateCcw size={16} aria-hidden="true" />
               {t('Recarregar arquivo')}
             </button>
 
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => openModal('copy')}
-            >
+            <button type="button" disabled={busy} onClick={() => openModal('copy')}>
               <Copy size={16} aria-hidden="true" />
               {t('Salvar cópia')}
             </button>
@@ -402,150 +389,127 @@ export default function FileEditor({ instance }) {
         <p role="status">{t(message || 'Selecione um arquivo de texto em Meus arquivos.')}</p>
       ) : (
         <>
+          {/* === Ferramentas de edição === */}
+          <div className="ws-editor__toolbar">
+            {/* ----- Pesquisa e substituição ----- */}
+            <div className="ws-editor__toolbar-group">
+              <button
+                type="button"
+                aria-expanded={searchMode === 'find'}
+                aria-controls={`${controlId}-search`}
+                onClick={() => setSearchMode((mode) => (mode === 'find' ? null : 'find'))}
+              >
+                <Search size={16} aria-hidden="true" />
+                {t('Localizar')}
+              </button>
 
-            {/* === Ferramentas de edição === */}
-            <div className="ws-editor__toolbar">
-              {/* ----- Pesquisa e substituição ----- */}
-              <div className="ws-editor__toolbar-group">
-                <button
-                  type="button"
-                  aria-expanded={searchMode === 'find'}
-                  aria-controls="ws-editor-search-panel"
-                  onClick={() =>
-                    setSearchMode((mode) => (mode === 'find' ? null : 'find'))
-                  }
-                >
-                  <Search size={16} aria-hidden="true" />
-                  {t('Localizar')}
-                </button>
-
-                <button
-                  type="button"
-                  aria-expanded={searchMode === 'replace'}
-                  aria-controls="ws-editor-search-panel"
-                  onClick={() =>
-                    setSearchMode((mode) => (mode === 'replace' ? null : 'replace'))
-                  }
-                >
-                  <Replace size={16} aria-hidden="true" />
-                  {t('Substituir')}
-                </button>
-              </div>
-
-              {/* ----- Preferências de edição ----- */}
-              <div className="ws-editor__toolbar-group">
-                <button
-                  type="button"
-                  aria-pressed={wrap}
-                  onClick={() => setWrap((value) => !value)}
-                >
-                  {t('Quebra de linha')}
-                </button>
-
-                <button
-                  type="button"
-                  aria-pressed={highlight}
-                  onClick={() => setHighlight((value) => !value)}
-                >
-                  {t('Destaque de sintaxe')}
-                </button>
-
-                <button
-                  type="button"
-                  aria-label={t('Reduzir texto')}
-                  onClick={() => setFontSize((size) => Math.max(11, size - 1))}
-                >
-                  A−
-                </button>
-
-                <span className="ws-editor__font-indicator">
-                  {fontSize}px
-                </span>
-
-                <button
-                  type="button"
-                  aria-label={t('Ampliar texto')}
-                  onClick={() => setFontSize((size) => Math.min(24, size + 1))}
-                >
-                  A+
-                </button>
-              </div>
+              <button
+                type="button"
+                aria-expanded={searchMode === 'replace'}
+                aria-controls={`${controlId}-search`}
+                onClick={() => setSearchMode((mode) => (mode === 'replace' ? null : 'replace'))}
+              >
+                <Replace size={16} aria-hidden="true" />
+                {t('Substituir')}
+              </button>
             </div>
 
-            {/* === Painel recolhível de pesquisa === */}
-            {searchMode && (
-              <section
-                id="ws-editor-search-panel"
-                className="ws-editor__search-panel"
-                aria-label={t('Localizar e substituir')}
+            {/* ----- Preferências de edição ----- */}
+            <div className="ws-editor__toolbar-group">
+              <button type="button" aria-pressed={wrap} onClick={() => setWrap((value) => !value)}>
+                {t('Quebra de linha')}
+              </button>
+
+              <button
+                type="button"
+                aria-pressed={highlight}
+                onClick={() => setHighlight((value) => !value)}
               >
-                <div className="ws-editor__search-fields">
-                  <label>
-                    {t('Localizar')}
-                    <input
-                      type="search"
-                      value={find}
-                      autoFocus
-                      onChange={(event) => {
-                        setFind(event.target.value);
-                        setSearchPosition(0);
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          event.preventDefault();
-                          findNext();
-                        }
-                      }}
-                    />
-                  </label>
+                {t('Destaque de sintaxe')}
+              </button>
 
-                  <button
-                    type="button"
-                    disabled={!find || busy}
-                    onClick={findNext}
-                  >
-                    {t('Próximo')}
-                  </button>
+              <button
+                type="button"
+                aria-label={t('Reduzir texto')}
+                onClick={() => setFontSize((size) => Math.max(11, size - 1))}
+              >
+                A−
+              </button>
 
-                  {searchMode === 'replace' && (
-                    <>
-                      <label>
-                        {t('Substituir por')}
-                        <input
-                          value={replacement}
-                          onChange={(event) => setReplacement(event.target.value)}
-                        />
-                      </label>
+              <span className="ws-editor__font-indicator">{fontSize}px</span>
 
-                      <button
-                        type="button"
-                        disabled={!find || busy}
-                        onClick={() => replace(false)}
-                      >
-                        {t('Substituir')}
-                      </button>
+              <button
+                type="button"
+                aria-label={t('Ampliar texto')}
+                onClick={() => setFontSize((size) => Math.min(24, size + 1))}
+              >
+                A+
+              </button>
+            </div>
+          </div>
 
-                      <button
-                        type="button"
-                        disabled={!find || busy}
-                        onClick={() => replace(true)}
-                      >
-                        {t('Substituir tudo')}
-                      </button>
-                    </>
-                  )}
-                </div>
+          {/* === Painel recolhível de pesquisa === */}
+          {searchMode && (
+            <section
+              id={`${controlId}-search`}
+              className="ws-editor__search-panel"
+              aria-label={t('Localizar e substituir')}
+            >
+              <div className="ws-editor__search-fields">
+                <label>
+                  {t('Localizar')}
+                  <input
+                    type="search"
+                    value={find}
+                    autoFocus
+                    onChange={(event) => {
+                      setFind(event.target.value);
+                      setSearchPosition(0);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        findNext();
+                      }
+                    }}
+                  />
+                </label>
 
-                <button
-                  type="button"
-                  className="ws-editor__search-close"
-                  aria-label={t('Fechar pesquisa')}
-                  onClick={() => setSearchMode(null)}
-                >
-                  <X size={17} aria-hidden="true" />
+                <button type="button" disabled={!find || busy} onClick={findNext}>
+                  {t('Próximo')}
                 </button>
-              </section>
-            )}
+
+                {searchMode === 'replace' && (
+                  <>
+                    <label>
+                      {t('Substituir por')}
+                      <input
+                        value={replacement}
+                        onChange={(event) => setReplacement(event.target.value)}
+                      />
+                    </label>
+
+                    <button type="button" disabled={!find || busy} onClick={() => replace(false)}>
+                      {t('Substituir')}
+                    </button>
+
+                    <button type="button" disabled={!find || busy} onClick={() => replace(true)}>
+                      {t('Substituir tudo')}
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <button
+                type="button"
+                className="ws-editor__search-close"
+                aria-label={t('Fechar pesquisa')}
+                onClick={() => setSearchMode(null)}
+              >
+                <X size={17} aria-hidden="true" />
+              </button>
+            </section>
+          )}
           <label>
             {t('Conteúdo do arquivo')}
             <div
@@ -584,195 +548,172 @@ export default function FileEditor({ instance }) {
                     syntaxRef.current.scrollLeft = event.target.scrollLeft;
                   }
                 }}
-                  rows={20}
-                  value={text}
-                  disabled={busy}
-                  spellCheck={false}
-                  onChange={(event) => {
-                    setText(event.target.value);
-                    updateCursorPosition(event);
-                  }}
-                  onClick={updateCursorPosition}
-                  onKeyUp={updateCursorPosition}
-                  onSelect={updateCursorPosition}
+                rows={20}
+                value={text}
+                disabled={busy}
+                spellCheck={false}
+                onChange={(event) => {
+                  setText(event.target.value);
+                  updateCursorPosition(event);
+                }}
+                onClick={updateCursorPosition}
+                onKeyUp={updateCursorPosition}
+                onSelect={updateCursorPosition}
               />
             </div>
           </label>
-            {/* === Barra de status do editor === */}
-            <footer className="ws-editor__status">
-              <div className="ws-editor__status-group">
-                <span>
-                  {t('Linha')} {cursor.line}, {t('Coluna')} {cursor.column}
-                </span>
+          {/* === Barra de status do editor === */}
+          <footer className="ws-editor__status">
+            <div className="ws-editor__status-group">
+              <span>
+                {t('Linha')} {cursor.line}, {t('Coluna')} {cursor.column}
+              </span>
 
-                <span>
-                  {lineCount} {t('linhas')}
-                </span>
-              </div>
+              <span>
+                {lineCount} {t('linhas')}
+              </span>
+            </div>
 
-              <div className="ws-editor__status-group">
-                <span>
-                  {new Blob([text]).size.toLocaleString('pt-BR')} bytes
-                </span>
+            <div className="ws-editor__status-group">
+              <span>{new Blob([text]).size.toLocaleString(locale)} bytes</span>
 
-                <span>UTF-8</span>
+              <span>UTF-8</span>
 
-                <span>{fontSize}px</span>
+              <span>{fontSize}px</span>
 
-                <span className={dirty ? 'ws-editor__status-unsaved' : ''}>
-                  {dirty ? t('Não salvo') : t('Salvo')}
-                </span>
-              </div>
-            </footer>
+              <span className={dirty ? 'ws-editor__status-unsaved' : ''}>
+                {dirty ? t('Não salvo') : t('Salvo')}
+              </span>
+            </div>
+          </footer>
 
-            {/* === Confirmação de recarregamento === */}
-            {reloadConfirm && (
-              <div className="ws-editor__modal-backdrop">
-                <section
-                  ref={modalRef}
-                  tabIndex={-1}
-                  className="ws-editor__modal"
-                  role="dialog"
-                  aria-modal="true"
-                  aria-labelledby="ws-editor-reload-title"
-                >
-                  <header className="ws-editor__modal-header">
-                    <h3 id="ws-editor-reload-title">
-                      {t('Recarregar arquivo')}
-                    </h3>
-                  </header>
+          {/* === Confirmação de recarregamento === */}
+          {reloadConfirm && (
+            <div className="ws-editor__modal-backdrop">
+              <section
+                ref={modalRef}
+                tabIndex={-1}
+                className="ws-editor__modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={`${controlId}-reload-title`}
+              >
+                <header className="ws-editor__modal-header">
+                  <h3 id={`${controlId}-reload-title`}>{t('Recarregar arquivo')}</h3>
+                </header>
 
-                  <div className="ws-editor__modal-content">
-                    <p>
-                      {t('Descartar o rascunho e recarregar o arquivo salvo?')}
-                    </p>
-                    <p className="ws-editor__modal-hint">
-                      {t('As alterações não salvas serão perdidas.')}
-                    </p>
-                  </div>
+                <div className="ws-editor__modal-content">
+                  <p>{t('Descartar o rascunho e recarregar o arquivo salvo?')}</p>
+                  <p className="ws-editor__modal-hint">
+                    {t('As alterações não salvas serão perdidas.')}
+                  </p>
+                </div>
 
-                  <footer className="ws-editor__modal-actions">
-                    <button
-                      type="button"
+                <footer className="ws-editor__modal-actions">
+                  <button type="button" disabled={busy} onClick={() => setReloadConfirm(false)}>
+                    {t('Cancelar')}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="ws-editor__modal-primary"
+                    disabled={busy}
+                    onClick={reload}
+                  >
+                    {t('Descartar rascunho e recarregar')}
+                  </button>
+                </footer>
+              </section>
+            </div>
+          )}
+
+          {/* === Salvamento de cópia === */}
+          {copyDialogOpen && (
+            <div className="ws-editor__modal-backdrop">
+              <form
+                ref={modalRef}
+                tabIndex={-1}
+                className="ws-editor__modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={`${controlId}-copy-title`}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  save(true);
+                }}
+              >
+                <header className="ws-editor__modal-header">
+                  <h3 id={`${controlId}-copy-title`}>{t('Salvar cópia')}</h3>
+                </header>
+
+                <div className="ws-editor__modal-content">
+                  <p>{t('Arquivos pessoais ficam neste navegador.')}</p>
+
+                  <label className="ws-editor__modal-field">
+                    {t('Nome da cópia')}
+                    <input
+                      autoFocus
+                      required
+                      maxLength={120}
                       disabled={busy}
-                      onClick={() => setReloadConfirm(false)}
-                    >
-                      {t('Cancelar')}
-                    </button>
+                      value={copyName}
+                      onChange={(event) => setCopyName(event.target.value)}
+                    />
+                  </label>
+                </div>
 
-                    <button
-                      type="button"
-                      className="ws-editor__modal-primary"
-                      disabled={busy}
-                      onClick={reload}
-                    >
-                      {t('Descartar rascunho e recarregar')}
-                    </button>
-                  </footer>
-                </section>
-              </div>
-            )}
+                <footer className="ws-editor__modal-actions">
+                  <button type="button" disabled={busy} onClick={() => setCopyDialogOpen(false)}>
+                    {t('Cancelar')}
+                  </button>
 
-            {/* === Salvamento de cópia === */}
-            {copyDialogOpen && (
-              <div className="ws-editor__modal-backdrop">
-                <form
-                  ref={modalRef}
-                  tabIndex={-1}
-                  className="ws-editor__modal"
-                  role="dialog"
-                  aria-modal="true"
-                  aria-labelledby="ws-editor-copy-title"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    save(true);
-                  }}
-                >
-                  <header className="ws-editor__modal-header">
-                    <h3 id="ws-editor-copy-title">
-                      {t('Salvar cópia')}
-                    </h3>
-                  </header>
-
-                  <div className="ws-editor__modal-content">
-                    <p>
-                      {t('Uma nova cópia será criada em Meus arquivos.')}
-                    </p>
-
-                    <label className="ws-editor__modal-field">
-                      {t('Nome da cópia')}
-                      <input
-                        autoFocus
-                        required
-                        maxLength={120}
-                        disabled={busy}
-                        value={copyName}
-                        onChange={(event) => setCopyName(event.target.value)}
-                      />
-                    </label>
-                  </div>
-
-                  <footer className="ws-editor__modal-actions">
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => setCopyDialogOpen(false)}
-                    >
-                      {t('Cancelar')}
-                    </button>
-
-                    <button
-                      type="submit"
-                      className="ws-editor__modal-primary"
-                      disabled={busy || !copyName.trim()}
-                    >
-                      <Copy size={15} aria-hidden="true" />
-                      {t('Criar cópia')}
-                    </button>
-                  </footer>
-                </form>
-              </div>
-            )}
+                  <button
+                    type="submit"
+                    className="ws-editor__modal-primary"
+                    disabled={busy || !copyName.trim()}
+                  >
+                    <Copy size={15} aria-hidden="true" />
+                    {t('Criar cópia')}
+                  </button>
+                </footer>
+              </form>
+            </div>
+          )}
           <p className="ws-app__muted">
             {t(
               'Ctrl+S salva localmente. Alterações feitas em outra janela são detectadas antes de sobrescrever.',
             )}
           </p>
 
-            {/* === Avisos e feedback de operações === */}
-            {externalMessage && (
-              <section className="ws-editor__notice ws-editor__notice--warning" role="alert">
-                <div>
-                  <strong>{t('Alteração externa detectada')}</strong>
-                  <p>{t(externalMessage)}</p>
-                </div>
+          {/* === Avisos e feedback de operações === */}
+          {externalMessage && (
+            <section className="ws-editor__notice ws-editor__notice--warning" role="alert">
+              <div>
+                <strong>{t('Alteração externa detectada')}</strong>
+                <p>{t(externalMessage)}</p>
+              </div>
 
-                <div className="ws-editor__notice-actions">
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => (dirty ? openModal('reload') : reload())}
-                  >
-                    {t('Recarregar')}
-                  </button>
+              <div className="ws-editor__notice-actions">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => (dirty ? openModal('reload') : reload())}
+                >
+                  {t('Recarregar')}
+                </button>
 
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => openModal('copy')}
-                  >
-                    {t('Salvar cópia')}
-                  </button>
-                </div>
-              </section>
-            )}
+                <button type="button" disabled={busy} onClick={() => openModal('copy')}>
+                  {t('Salvar cópia')}
+                </button>
+              </div>
+            </section>
+          )}
 
-            {message && (
-              <p className="ws-editor__notice" role="status">
-                {t(message)}
-              </p>
-            )}
-
+          {message && (
+            <p className="ws-editor__notice" role="status">
+              {t(message)}
+            </p>
+          )}
         </>
       )}
     </article>

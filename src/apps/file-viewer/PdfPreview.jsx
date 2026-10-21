@@ -10,32 +10,55 @@ pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 export default function PdfPreview({ blob, name }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
-  const [document, setDocument] = useState(null);
+  const [result, setResult] = useState({ blob: null, document: null, error: '' });
+  const document = result.blob === blob ? result.document : null;
+  const loading = Boolean(blob && result.blob !== blob);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [query, setQuery] = useState('');
   const [matches, setMatches] = useState([]);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [renderError, setRenderError] = useState(null);
+  const error =
+    result.blob === blob
+      ? result.error ||
+        (renderError?.document === document &&
+        renderError.pageNumber === pageNumber &&
+        renderError.scale === scale &&
+        renderError.rotation === rotation
+          ? renderError.message
+          : '')
+      : '';
+  const fitRequest = useRef({ version: 0 });
+  useEffect(() => {
+    const request = fitRequest.current;
+    return () => {
+      request.version++;
+    };
+  }, [document, pageNumber, rotation]);
 
   useEffect(() => {
     if (!blob) return undefined;
     let active = true;
     let task;
-    let loaded;
 
     async function load() {
       try {
         const bytes = new Uint8Array(await blob.arrayBuffer());
         if (!active) return;
         task = pdfjs.getDocument({ data: bytes, isEvalSupported: false });
-        loaded = await task.promise;
-        if (active) setDocument(loaded);
+        const loaded = await task.promise;
+        if (active) {
+          setPageNumber(1);
+          setScale(1);
+          setRotation(0);
+          setQuery('');
+          setMatches([]);
+          setResult({ blob, document: loaded, error: '' });
+        }
       } catch {
-        if (active) setError('Não foi possível interpretar este PDF.');
-      } finally {
-        if (active) setLoading(false);
+        if (active)
+          setResult({ blob, document: null, error: 'Não foi possível interpretar este PDF.' });
       }
     }
     load();
@@ -63,11 +86,22 @@ export default function PdfPreview({ blob, name }) {
         canvas.height = Math.ceil(viewport.height * pixelRatio);
         canvas.style.width = `${Math.ceil(viewport.width)}px`;
         canvas.style.height = `${Math.ceil(viewport.height)}px`;
-        renderTask = page.render({ canvas, canvasContext: context, viewport, transform: pixelRatio === 1 ? undefined : [pixelRatio, 0, 0, pixelRatio, 0, 0] });
+        renderTask = page.render({
+          canvas,
+          canvasContext: context,
+          viewport,
+          transform: pixelRatio === 1 ? undefined : [pixelRatio, 0, 0, pixelRatio, 0, 0],
+        });
         await renderTask.promise;
       } catch (reason) {
         if (active && reason?.name !== 'RenderingCancelledException') {
-          setError('Falha ao desenhar a página do PDF.');
+          setRenderError({
+            document,
+            pageNumber,
+            scale,
+            rotation,
+            message: 'Falha ao desenhar a página do PDF.',
+          });
         }
       }
     }
@@ -87,39 +121,96 @@ export default function PdfPreview({ blob, name }) {
     const term = query.trim().toLocaleLowerCase();
     async function search() {
       const found = [];
-      for (let pageIndex = 1; pageIndex <= document.numPages; pageIndex++) {
+      for (let pageIndex = 1; active && pageIndex <= document.numPages; pageIndex++) {
         const page = await document.getPage(pageIndex);
+        if (!active) return;
         const content = await page.getTextContent();
         if (!active) return;
-        if (content.items.map((item) => item.str || '').join(' ').toLocaleLowerCase().includes(term)) found.push(pageIndex);
+        if (
+          content.items
+            .map((item) => item.str || '')
+            .join(' ')
+            .toLocaleLowerCase()
+            .includes(term)
+        )
+          found.push(pageIndex);
       }
       if (active) setMatches(found);
     }
-    search().catch(() => { if (active) setMatches([]); });
-    return () => { active = false; };
+    search().catch(() => {
+      if (active) setMatches([]);
+    });
+    return () => {
+      active = false;
+    };
   }, [document, query]);
 
   function fitWidth() {
     if (!document || !containerRef.current) return;
-    document.getPage(pageNumber).then((page) => {
-      const original = page.getViewport({ scale: 1, rotation });
-      const available = containerRef.current?.clientWidth ?? 0;
-      if (available > 32) setScale(Math.min(3, Math.max(0.25, (available - 32) / original.width)));
-    }).catch(() => {});
+    const request = ++fitRequest.current.version;
+    document
+      .getPage(pageNumber)
+      .then((page) => {
+        if (request !== fitRequest.current.version) return;
+        const original = page.getViewport({ scale: 1, rotation });
+        const available = containerRef.current?.clientWidth ?? 0;
+        if (available > 32)
+          setScale(Math.min(3, Math.max(0.25, (available - 32) / original.width)));
+      })
+      .catch(() => {});
   }
 
   return (
     <section className="ws-file-viewer__pdf" aria-label={`PDF: ${name}`}>
       <div className="ws-file-viewer__pdf-tools" role="toolbar" aria-label="Controles do PDF">
-        <button type="button" aria-label="Página anterior" disabled={!document || pageNumber === 1} onClick={() => setPageNumber((page) => Math.max(1, page - 1))}><ChevronLeft size={17} /></button>
-        <span className="ws-file-viewer__page-count">{pageNumber} / {document?.numPages ?? '—'}</span>
-        <button type="button" aria-label="Próxima página" disabled={!document || pageNumber >= document.numPages} onClick={() => setPageNumber((page) => Math.min(document.numPages, page + 1))}><ChevronRight size={17} /></button>
+        <button
+          type="button"
+          aria-label="Página anterior"
+          disabled={!document || pageNumber === 1}
+          onClick={() => setPageNumber((page) => Math.max(1, page - 1))}
+        >
+          <ChevronLeft size={17} />
+        </button>
+        <span className="ws-file-viewer__page-count">
+          {pageNumber} / {document?.numPages ?? '—'}
+        </span>
+        <button
+          type="button"
+          aria-label="Próxima página"
+          disabled={!document || pageNumber >= document.numPages}
+          onClick={() => setPageNumber((page) => Math.min(document.numPages, page + 1))}
+        >
+          <ChevronRight size={17} />
+        </button>
         <span className="ws-file-viewer__tool-divider" aria-hidden="true" />
-        <button type="button" aria-label="Reduzir zoom" disabled={!document || scale <= 0.25} onClick={() => setScale((value) => Math.max(0.25, +(value - 0.25).toFixed(2)))}><Minus size={17} /></button>
+        <button
+          type="button"
+          aria-label="Reduzir zoom"
+          disabled={!document || scale <= 0.25}
+          onClick={() => setScale((value) => Math.max(0.25, +(value - 0.25).toFixed(2)))}
+        >
+          <Minus size={17} />
+        </button>
         <span className="ws-file-viewer__zoom-value">{Math.round(scale * 100)}%</span>
-        <button type="button" aria-label="Aumentar zoom" disabled={!document || scale >= 3} onClick={() => setScale((value) => Math.min(3, +(value + 0.25).toFixed(2)))}><Plus size={17} /></button>
-        <button type="button" disabled={!document} onClick={fitWidth}>Ajustar largura</button>
-        <button type="button" aria-label="Girar página" disabled={!document} onClick={() => setRotation((value) => (value + 90) % 360)}><RotateCw size={17} /></button>
+        <button
+          type="button"
+          aria-label="Aumentar zoom"
+          disabled={!document || scale >= 3}
+          onClick={() => setScale((value) => Math.min(3, +(value + 0.25).toFixed(2)))}
+        >
+          <Plus size={17} />
+        </button>
+        <button type="button" disabled={!document} onClick={fitWidth}>
+          Ajustar largura
+        </button>
+        <button
+          type="button"
+          aria-label="Girar página"
+          disabled={!document}
+          onClick={() => setRotation((value) => (value + 90) % 360)}
+        >
+          <RotateCw size={17} />
+        </button>
 
         {/* ----- Pesquisa e navegação pelos resultados ----- */}
         <div className="ws-file-viewer__search-group">
@@ -153,12 +244,15 @@ export default function PdfPreview({ blob, name }) {
             </button>
           )}
         </div>
-
       </div>
       <div className="ws-file-viewer__pdf-viewport" ref={containerRef}>
         {loading && <p role="status">Carregando PDF...</p>}
         {error && <p role="alert">{error}</p>}
-        <canvas ref={canvasRef} aria-label={`Página ${pageNumber} de ${document?.numPages ?? 0}`} hidden={!document || Boolean(error)} />
+        <canvas
+          ref={canvasRef}
+          aria-label={`Página ${pageNumber} de ${document?.numPages ?? 0}`}
+          hidden={!document || Boolean(error)}
+        />
       </div>
     </section>
   );
