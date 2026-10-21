@@ -1,558 +1,175 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, ExternalLink, FileQuestion } from 'lucide-react';
 import { FILE_LIMIT, TEXT_LIMIT } from '../../services/storage/fileModel';
 import { validateFileResource } from '../../services/storage/fileResourceContract';
 import { resolveStaticFile } from '../../services/storage/staticFileCatalog';
-import { translate as t, useLocale } from '../../shared/i18n/i18n';
+import { publicAssetUrl } from '../../shared/utils/urls';
 import LocalFileViewer from './LocalFileViewer';
+import DocumentView from './DocumentView';
 import './FileViewer.css';
 
-/* === Configuração dos formatos === */
-/* ----- Tipos compatíveis ----- */
-const MIME_TYPES = {
-  pdf: 'pdf',
-  png: 'image',
-  jpg: 'image',
-  jpeg: 'image',
-  webp: 'image',
-  gif: 'image',
-  txt: 'text',
-  md: 'text',
-  json: 'text',
-  csv: 'text',
-  log: 'text',
-  js: 'text',
-  css: 'text',
-  html: 'text',
+/* === Tipos de documentos para pré-visualização === */
+const TYPES = {
+  pdf: 'pdf', png: 'image', jpg: 'image', jpeg: 'image', webp: 'image', gif: 'image',
+  txt: 'text', md: 'text', json: 'text', csv: 'text', log: 'text', js: 'text', css: 'text', html: 'text',
 };
 
-/* === Resolução de documentos === */
-/* ----- Validação de URL local ----- */
-function resolveDocument(rawUrl) {
-  if (typeof rawUrl !== 'string' || !rawUrl.trim()) {
-    return null;
-  }
-
+/* ----- Resolução de URL restrita ao próprio domínio ----- */
+function resolveDocument(rawUrl, suppliedName = '') {
+  if (typeof rawUrl !== 'string' || !rawUrl.trim()) return null;
   try {
     const url = new URL(rawUrl, window.location.href);
-    const basePath = new URL(
-      import.meta.env.BASE_URL,
-      window.location.origin,
-    ).pathname;
-
-    if (url.origin !== window.location.origin) return null;
-    if (url.username || url.password) return null;
-    if (url.search || url.hash) return null;
-    if (!url.pathname.startsWith(basePath)) return null;
-
-    const extension = url.pathname
-      .split('.')
-      .at(-1)
-      ?.toLowerCase();
-
-    const type = MIME_TYPES[extension];
-
-    if (!type) return null;
-
-    return {
-      url: url.href,
-      type,
-      extension,
-      filename: decodeURIComponent(
-        url.pathname.split('/').at(-1),
-      ),
-    };
-  } catch {
-    return null;
-  }
+    const basePath = new URL(import.meta.env.BASE_URL, window.location.origin).pathname;
+    if (url.origin !== window.location.origin || url.username || url.password || url.hash) return null;
+    const managed = url.pathname === '/api/files' && url.searchParams.size === 1 &&
+      url.searchParams.has('id') && /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,199}$/.test(url.searchParams.get('id') ?? '');
+    if (!managed && (url.search || !url.pathname.startsWith(basePath))) return null;
+    const filename = managed ? suppliedName : decodeURIComponent(url.pathname.split('/').at(-1));
+    const extension = filename.split('.').at(-1)?.toLowerCase();
+    const kind = TYPES[extension];
+    return kind ? { url: url.href, filename, kind, extension, managed } : null;
+  } catch { return null; }
 }
 
-/* === Leitura de arquivos === */
-/* ----- Leitura limitada da resposta HTTP ----- */
-async function readPreview(response, limit) {
+/* ----- Tipo de conteúdo esperado pelo arquivo ----- */
+function validMime(document, contentType) {
+  const mime = contentType.split(';')[0].trim().toLowerCase();
+  if (document.kind === 'pdf') return mime === 'application/pdf';
+  if (document.kind === 'image') return ['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(mime);
+  return mime === 'application/json' || mime === 'application/javascript' ||
+    (mime.startsWith('text/') && (mime !== 'text/html' || document.extension === 'html'));
+}
+
+/* ----- Leitura limitada para não carregar arquivos arbitrariamente grandes ----- */
+async function readBounded(response, limit) {
   const reader = response.body?.getReader();
-
-  if (!reader) {
-    return new Uint8Array();
-  }
-
+  if (!reader) throw new Error('Resposta de arquivo sem conteúdo.');
   const chunks = [];
   let size = 0;
-
   try {
     while (true) {
-      const { done, value } = await reader.read();
-
+      const { value, done } = await reader.read();
       if (done) break;
-
       size += value.byteLength;
-
-      if (size > limit) {
-        return null;
-      }
-
+      if (size > limit) return null;
       chunks.push(value);
     }
-  } finally {
-    await reader.cancel().catch(() => { });
-    reader.releaseLock();
-  }
-
-  const bytes = new Uint8Array(size);
+  } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
+  const output = new Uint8Array(size);
   let offset = 0;
-
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-
-  return bytes;
+  for (const chunk of chunks) { output.set(chunk, offset); offset += chunk.byteLength; }
+  return output;
 }
 
-/* ----- Validação do tipo recebido ----- */
-function isValidContentType(document, contentType) {
-  const mime = contentType.split(';')[0].trim();
+/* === Visualizador oficial === */
+/* ----- Carregamento por URL pública validada ----- */
+function OfficialFileViewer({ instance }) {
+  const params = instance?.params ?? {};
+  const rawUrl = typeof params.url === 'string' ? params.url : '';
+  const document = useMemo(() => resolveDocument(rawUrl, params.name), [rawUrl, params.name]);
+  const [result, setResult] = useState({ key: '', blob: null, url: '', text: '', error: '', loading: true, size: null, mime: '', previewError: false });
+  const key = document?.url ?? '';
 
-  if (document.type === 'pdf') {
-    return mime === 'application/pdf';
-  }
+  useEffect(() => {
+    if (!document) return undefined;
+    const controller = new AbortController();
+    let active = true;
+    let objectUrl = '';
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    async function load() {
+      try {
+        const response = await fetch(document.url, { method: 'GET', redirect: 'error', credentials: 'same-origin', cache: 'no-store', signal: controller.signal });
+        if (!response.ok) throw new Error('Arquivo não disponível.');
+        const mime = response.headers.get('content-type') ?? '';
+        if (!validMime(document, mime)) throw new Error('O servidor retornou um formato incompatível.');
+        const limit = document.kind === 'text' ? TEXT_LIMIT : FILE_LIMIT;
+        const declared = response.headers.get('content-length');
+        const declaredSize = declared === null ? null : Number(declared);
+        const bytes = declaredSize !== null && Number.isFinite(declaredSize) && declaredSize > limit ? null : await readBounded(response, limit);
+        if (!active || controller.signal.aborted) return;
+        if (!bytes) {
+          setResult({ key, blob: null, url: document.url, text: '', error: 'Arquivo grande demais para pré-visualização. Utilize o download.', loading: false, size: declaredSize, mime, previewError: false });
+          return;
+        }
+        if (document.kind === 'pdf' && String.fromCharCode(...bytes.slice(0, 5)) !== '%PDF-') throw new Error('Assinatura de PDF inválida.');
+        const text = document.kind === 'text' ? new TextDecoder('utf-8', { fatal: true }).decode(bytes) : '';
+        const blob = new Blob([bytes], { type: document.kind === 'text' ? 'text/plain;charset=utf-8' : mime });
+        objectUrl = URL.createObjectURL(blob);
+        if (!active || controller.signal.aborted) return;
+        setResult({ key, blob, url: objectUrl, text, error: '', loading: false, size: bytes.length, mime, previewError: false });
+      } catch (error) {
+        if (active) setResult({ key, blob: null, url: '', text: '', error: controller.signal.aborted ? 'Tempo de carregamento esgotado.' : (error?.message || 'Não foi possível abrir o arquivo.'), loading: false, size: null, mime: '', previewError: false });
+      } finally { clearTimeout(timeout); }
+    }
+    load();
+    return () => { active = false; clearTimeout(timeout); controller.abort(); if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [document, key]);
 
-  if (document.type === 'image') {
-    return [
-      'image/png',
-      'image/jpeg',
-      'image/webp',
-      'image/gif',
-    ].includes(mime);
-  }
-
+  const loading = Boolean(document && result.key !== key);
   return (
-    (contentType.startsWith('text/') &&
-      (mime !== 'text/html' || document.extension === 'html')) ||
-    mime === 'application/json' ||
-    (document.extension === 'js' &&
-      mime === 'application/javascript')
+    <DocumentView
+      name={document?.filename ?? ''}
+      origin="Arquivo oficial"
+      kind={document?.kind}
+      blob={loading ? null : result.blob}
+      url={loading ? '' : result.url}
+      text={result.text}
+      size={result.size}
+      mimeType={result.mime}
+      loading={loading}
+      error={!document ? 'Nenhum documento compatível foi selecionado.' : result.error}
+      previewError={result.previewError}
+      onImageError={() => setResult((previous) => previous.key === key ? { ...previous, previewError: true } : previous)}
+    />
   );
+}
+
+/* === Arquivos públicos gerenciados === */
+/* ----- Metadados devem vir exclusivamente do catálogo público ----- */
+function ManagedFileViewer({ instance, resourceId }) {
+  const [state, setState] = useState({ resourceId: null, name: '', error: '' });
+  useEffect(() => {
+    const controller = new AbortController();
+    async function load() {
+      try {
+        const response = await fetch('/api/files', { credentials: 'same-origin', cache: 'no-store', headers: { Accept: 'application/json' }, signal: controller.signal });
+        if (!response.ok) throw new Error('Catálogo público indisponível.');
+        const payload = await response.json();
+        if (!Array.isArray(payload.items)) throw new Error('Catálogo inválido.');
+        const file = payload.items.find((item) => item?.resourceId === resourceId && item.visibility === 'public' && item.state === 'available');
+        if (!file || typeof file.name !== 'string' || !TYPES[file.name.split('.').at(-1)?.toLowerCase()]) throw new Error('Arquivo indisponível ou incompatível.');
+        if (!controller.signal.aborted) setState({ resourceId, name: file.name, error: '' });
+      } catch (error) { if (!controller.signal.aborted) setState({ resourceId, name: '', error: error.message }); }
+    }
+    load();
+    return () => controller.abort();
+  }, [resourceId]);
+  if (state.resourceId !== resourceId) return <DocumentView origin="Arquivo oficial" loading />;
+  if (state.error) return <DocumentView origin="Arquivo oficial" error={state.error} />;
+  return <OfficialFileViewer instance={{ ...instance, params: { name: state.name, url: `/api/files?id=${encodeURIComponent(resourceId)}` } }} />;
 }
 
 /* === Recursos não disponíveis === */
-/* ----- Mensagens por origem ----- */
+/* ----- Compatibilidade com o contrato de erros ----- */
 function UnavailableFileResource({ source }) {
-  useLocale();
-
-  const message =
-    source === 'managed'
-      ? 'O acesso a este arquivo depende de autorização do servidor.'
-      : source === 'static'
-        ? 'Este documento ainda não está disponível no catálogo oficial.'
-        : 'O identificador do arquivo é inválido.';
-
-  return (
-    <section className="desktop-window__content ws-file-viewer">
-      <div className="ws-file-viewer__empty" role="status">
-        <FileQuestion size={36} aria-hidden="true" />
-
-        <h2>{t('Visualizador de Arquivos')}</h2>
-        <p>{t(message)}</p>
-      </div>
-    </section>
-  );
+  return <DocumentView origin="Arquivo" error={source === 'static' ? 'Documento não encontrado no catálogo.' : 'Identificador de arquivo inválido.'} />;
 }
 
-/* === Visualizador de documentos oficiais === */
-/* ----- Visualização de recursos por URL ----- */
-function OfficialFileViewer({ instance }) {
-  useLocale();
-
-  /* ----- Parâmetros do documento ----- */
-  const params = instance?.params ?? {};
-
-  const documentUrl =
-    typeof params.url === 'string' ? params.url : '';
-
-  const document = useMemo(
-    () => resolveDocument(documentUrl),
-    [documentUrl],
-  );
-
-  /* ----- Estado da visualização ----- */
-  const [zoom, setZoom] = useState(1);
-
-  const [result, setResult] = useState({
-    url: null,
-    status: 'idle',
-    text: '',
-    objectUrl: null,
-    size: 0,
-    previewError: false,
-  });
-
-  /* ----- Carregamento do documento ----- */
-  useEffect(() => {
-    if (!document) return;
-
-    const controller = new AbortController();
-    const currentUrl = document.url;
-    const isText = document.type === 'text';
-
-    let active = true;
-    let objectUrl = null;
-
-    const timeout = setTimeout(() => {
-      controller.abort();
-    }, 15000);
-
-    async function load() {
-      try {
-        const response = await fetch(currentUrl, {
-          method: 'GET',
-          redirect: 'error',
-          credentials: 'same-origin',
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error('Arquivo indisponível');
-        }
-
-        /* ----- Verificação do formato ----- */
-        const contentType = (
-          response.headers.get('content-type') ?? ''
-        ).toLowerCase();
-
-        if (!isValidContentType(document, contentType)) {
-          await response.body?.cancel();
-          throw new Error('Formato inválido');
-        }
-
-        /* ----- Limites de pré-visualização ----- */
-        const limit = isText ? TEXT_LIMIT : FILE_LIMIT;
-
-        const rawSize = response.headers.get('content-length');
-        const declaredSize =
-          rawSize === null ? null : Number(rawSize);
-
-        let bytes = null;
-
-        if (
-          declaredSize !== null &&
-          Number.isFinite(declaredSize) &&
-          declaredSize > limit
-        ) {
-          await response.body?.cancel();
-        } else {
-          bytes = await readPreview(response, limit);
-        }
-
-        if (!active || controller.signal.aborted) return;
-
-        if (bytes === null) {
-          setResult({
-            url: currentUrl,
-            status: 'download',
-            text: '',
-            objectUrl: null,
-            size: 0,
-            previewError: false,
-          });
-
-          return;
-        }
-
-        /* ----- Verificação do conteúdo PDF ----- */
-        if (
-          document.type === 'pdf' &&
-          String.fromCharCode(...bytes.slice(0, 5)) !== '%PDF-'
-        ) {
-          throw new Error('Formato inválido');
-        }
-
-        /* ----- Preparação da pré-visualização ----- */
-        const text = isText
-          ? new TextDecoder('utf-8', { fatal: true }).decode(bytes)
-          : '';
-
-        objectUrl = URL.createObjectURL(
-          new Blob([bytes], {
-            type: isText
-              ? 'text/plain;charset=utf-8'
-              : contentType,
-          }),
-        );
-
-        if (!active || controller.signal.aborted) return;
-
-        setResult({
-          url: currentUrl,
-          status: 'ready',
-          text,
-          objectUrl,
-          size: bytes.length,
-          previewError: false,
-        });
-      } catch {
-        if (active) {
-          setResult({
-            url: currentUrl,
-            status: 'error',
-            text: '',
-            objectUrl: null,
-            size: 0,
-            previewError: false,
-          });
-        }
-      } finally {
-        clearTimeout(timeout);
-      }
-    }
-
-    load();
-
-    /* ----- Cancelamento e limpeza ----- */
-    return () => {
-      active = false;
-      clearTimeout(timeout);
-      controller.abort();
-
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [document]);
-
-  /* ----- Resolução do estado exibido ----- */
-  const status = !document
-    ? 'invalid'
-    : result.url !== document.url
-      ? 'loading'
-      : result.status;
-
-  const name =
-    typeof params.name === 'string' && params.name.trim()
-      ? params.name.trim()
-      : (document?.filename ?? t('Nenhum arquivo selecionado'));
-
-  const isReady = status === 'ready';
-  const canDownload = ['ready', 'download'].includes(status);
-
-  /* ----- Interface do visualizador ----- */
-  return (
-    <section className="desktop-window__content ws-file-viewer">
-      {/* ----- Cabeçalho e ações ----- */}
-      <header className="ws-file-viewer__header">
-        <div>
-          <h2>{t('Visualizador de Arquivos')}</h2>
-          <p>{name}</p>
-        </div>
-
-        {document && canDownload && (
-          <div className="ws-file-viewer__actions">
-            <a
-              href={result.objectUrl ?? document.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <ExternalLink size={16} aria-hidden="true" />
-              {t('Abrir')}
-            </a>
-
-            <a
-              href={result.objectUrl ?? document.url}
-              download={document.filename}
-            >
-              <Download size={16} aria-hidden="true" />
-              {t('Baixar')}
-            </a>
-          </div>
-        )}
-      </header>
-
-      {/* ----- Documento não selecionado ----- */}
-      {status === 'invalid' && (
-        <div className="ws-file-viewer__empty" role="status">
-          <FileQuestion size={36} aria-hidden="true" />
-
-          <h3>{t('Nenhum arquivo selecionado')}</h3>
-          <p>
-            {t('Selecione um arquivo compatível para visualização.')}
-          </p>
-        </div>
-      )}
-
-      {/* ----- Propriedades do documento ----- */}
-      {document && isReady && (
-        <details>
-          <summary>{t('Propriedades do arquivo')}</summary>
-
-          <dl>
-            <dt>{t('Nome')}</dt>
-            <dd>{document.filename}</dd>
-
-            <dt>{t('Tipo')}</dt>
-            <dd>{document.extension.toUpperCase()}</dd>
-
-            <dt>{t('Tamanho')}</dt>
-            <dd>{result.size} bytes</dd>
-
-            <dt>{t('Acesso')}</dt>
-            <dd>{t('Somente leitura')}</dd>
-          </dl>
-        </details>
-      )}
-
-      {/* ----- Carregamento ----- */}
-      {status === 'loading' && (
-        <p role="status">{t('Carregando arquivo...')}</p>
-      )}
-
-      {/* ----- Falha de carregamento ----- */}
-      {status === 'error' && (
-        <div role="alert">
-          <h3>{t('Não foi possível abrir o arquivo')}</h3>
-          <p>
-            {t(
-              'Verifique se o documento está disponível e em um formato compatível.',
-            )}
-          </p>
-        </div>
-      )}
-
-      {/* ----- Arquivo acima do limite de prévia ----- */}
-      {status === 'download' && (
-        <p role="status">
-          {t('Arquivo grande demais para prévia. Utilize o download.')}
-        </p>
-      )}
-
-      {/* ----- Falha de apresentação ----- */}
-      {result.url === document?.url && result.previewError && (
-        <p role="alert">{t('Não foi possível abrir o arquivo')}</p>
-      )}
-
-      {/* ----- Pré-visualização de PDF ----- */}
-      {isReady && document.type === 'pdf' && (
-        <>
-          <p>
-            {t('Se a prévia não aparecer, utilize o download do PDF.')}
-          </p>
-
-          <iframe
-            className="ws-file-viewer__preview"
-            src={result.objectUrl}
-            title={name}
-            sandbox=""
-          />
-        </>
-      )}
-
-      {/* ----- Pré-visualização de imagem ----- */}
-      {isReady && document.type === 'image' && (
-        <div className="ws-file-viewer__image-container">
-          <div className="ws-file-viewer__actions">
-            <button
-              type="button"
-              onClick={() =>
-                setZoom((value) => Math.max(0.25, value - 0.25))
-              }
-            >
-              {t('Reduzir')}
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                setZoom((value) => Math.min(3, value + 0.25))
-              }
-            >
-              {t('Ampliar')}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setZoom(1)}
-            >
-              {t('Ajustar à janela')}
-            </button>
-          </div>
-
-          <img
-            hidden={result.previewError}
-            src={result.objectUrl}
-            alt={name}
-            style={{
-              width: `${zoom * 100}%`,
-              maxWidth: 'none',
-            }}
-            onError={() => {
-              setResult((current) =>
-                current.url === document.url
-                  ? { ...current, previewError: true }
-                  : current,
-              );
-            }}
-          />
-        </div>
-      )}
-
-      {/* ----- Pré-visualização de texto ----- */}
-      {isReady && document.type === 'text' && (
-        <pre className="ws-file-viewer__text">
-          <code>{result.text}</code>
-        </pre>
-      )}
-    </section>
-  );
-}
-
-/* === Visualizador de Arquivos === */
-/* ----- Seleção da origem do recurso ----- */
+/* === Roteamento de origens === */
 export default function FileViewer({ instance }) {
   const params = instance?.params ?? {};
-
-  /* ----- Descritores compartilhados ----- */
   if (Object.hasOwn(params, 'resource')) {
     const validation = validateFileResource(params.resource);
-
-    if (!validation.ok) {
-      return <UnavailableFileResource source="invalid" />;
-    }
-
+    if (!validation.ok) return <UnavailableFileResource source="invalid" />;
     const resource = validation.resource;
-
-    if (resource.source === 'local') {
-      return <LocalFileViewer fileId={resource.fileId} />;
-    }
-
-    /* ----- Documentos do catálogo oficial ----- */
+    if (resource.source === 'local') return <LocalFileViewer fileId={resource.fileId} />;
+    if (resource.source === 'managed') return <ManagedFileViewer instance={instance} resourceId={resource.resourceId} />;
     if (resource.source === 'static') {
-      const resolved = resolveStaticFile(resource.catalogId);
-
-      if (!resolved.ok) {
-        return <UnavailableFileResource source="static" />;
-      }
-
-      return (
-        <OfficialFileViewer
-          instance={{
-            ...instance,
-            params: {
-              url: resolved.resource.url,
-              name: resolved.resource.name,
-            },
-          }}
-        />
-      );
+      const staticFile = resolveStaticFile(resource.catalogId);
+      if (!staticFile.ok) return <UnavailableFileResource source="static" />;
+      return <OfficialFileViewer instance={{ ...instance, params: { name: staticFile.resource.name, url: staticFile.resource.url } }} />;
     }
-
-    /* ----- Recursos gerenciados pelo servidor ----- */
-    return <UnavailableFileResource source={resource.source} />;
+    return <UnavailableFileResource source="invalid" />;
   }
-
-  /* ----- Compatibilidade com arquivos pessoais ----- */
-  if (typeof params.fileId === 'string') {
-    return <LocalFileViewer fileId={params.fileId} />;
-  }
-
-  /* ----- Compatibilidade com documentos oficiais ----- */
-  return <OfficialFileViewer instance={instance} />;
+  if (typeof params.fileId === 'string') return <LocalFileViewer fileId={params.fileId} />;
+  return <OfficialFileViewer instance={{ ...instance, params: { ...params, url: typeof params.url === 'string' ? publicAssetUrl(params.url) || params.url : '' } }} />;
 }

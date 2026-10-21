@@ -1,0 +1,165 @@
+import { useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight, Minus, Plus, RotateCw, Search } from 'lucide-react';
+import * as pdfjs from 'pdfjs-dist';
+import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+
+/* === Pré-visualização de PDF === */
+/* ----- Abertura de documento PDF em memória ----- */
+export default function PdfPreview({ blob, name }) {
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const [document, setDocument] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [scale, setScale] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [query, setQuery] = useState('');
+  const [matches, setMatches] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!blob) return undefined;
+    let active = true;
+    let task;
+    let loaded;
+
+    async function load() {
+      try {
+        const bytes = new Uint8Array(await blob.arrayBuffer());
+        if (!active) return;
+        task = pdfjs.getDocument({ data: bytes, isEvalSupported: false });
+        loaded = await task.promise;
+        if (active) setDocument(loaded);
+      } catch {
+        if (active) setError('Não foi possível interpretar este PDF.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      active = false;
+      task?.destroy().catch(() => {});
+    };
+  }, [blob]);
+
+  /* ----- Renderização e descarte da página ----- */
+  useEffect(() => {
+    if (!document || !canvasRef.current) return undefined;
+    let active = true;
+    let renderTask;
+    async function render() {
+      try {
+        const page = await document.getPage(pageNumber);
+        if (!active) return;
+        const viewport = page.getViewport({ scale, rotation });
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const context = canvas.getContext('2d', { alpha: false });
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.ceil(viewport.width * pixelRatio);
+        canvas.height = Math.ceil(viewport.height * pixelRatio);
+        canvas.style.width = `${Math.ceil(viewport.width)}px`;
+        canvas.style.height = `${Math.ceil(viewport.height)}px`;
+        renderTask = page.render({ canvas, canvasContext: context, viewport, transform: pixelRatio === 1 ? undefined : [pixelRatio, 0, 0, pixelRatio, 0, 0] });
+        await renderTask.promise;
+      } catch (reason) {
+        if (active && reason?.name !== 'RenderingCancelledException') {
+          setError('Falha ao desenhar a página do PDF.');
+        }
+      }
+    }
+    render();
+    return () => {
+      active = false;
+      renderTask?.cancel();
+    };
+  }, [document, pageNumber, scale, rotation]);
+
+  /* ----- Pesquisa textual por páginas ----- */
+  useEffect(() => {
+    if (!document || !query.trim()) {
+      return undefined;
+    }
+    let active = true;
+    const term = query.trim().toLocaleLowerCase();
+    async function search() {
+      const found = [];
+      for (let pageIndex = 1; pageIndex <= document.numPages; pageIndex++) {
+        const page = await document.getPage(pageIndex);
+        const content = await page.getTextContent();
+        if (!active) return;
+        if (content.items.map((item) => item.str || '').join(' ').toLocaleLowerCase().includes(term)) found.push(pageIndex);
+      }
+      if (active) setMatches(found);
+    }
+    search().catch(() => { if (active) setMatches([]); });
+    return () => { active = false; };
+  }, [document, query]);
+
+  function fitWidth() {
+    if (!document || !containerRef.current) return;
+    document.getPage(pageNumber).then((page) => {
+      const original = page.getViewport({ scale: 1, rotation });
+      const available = containerRef.current?.clientWidth ?? 0;
+      if (available > 32) setScale(Math.min(3, Math.max(0.25, (available - 32) / original.width)));
+    }).catch(() => {});
+  }
+
+  return (
+    <section className="ws-file-viewer__pdf" aria-label={`PDF: ${name}`}>
+      <div className="ws-file-viewer__pdf-tools" role="toolbar" aria-label="Controles do PDF">
+        <button type="button" aria-label="Página anterior" disabled={!document || pageNumber === 1} onClick={() => setPageNumber((page) => Math.max(1, page - 1))}><ChevronLeft size={17} /></button>
+        <span className="ws-file-viewer__page-count">{pageNumber} / {document?.numPages ?? '—'}</span>
+        <button type="button" aria-label="Próxima página" disabled={!document || pageNumber >= document.numPages} onClick={() => setPageNumber((page) => Math.min(document.numPages, page + 1))}><ChevronRight size={17} /></button>
+        <span className="ws-file-viewer__tool-divider" aria-hidden="true" />
+        <button type="button" aria-label="Reduzir zoom" disabled={!document || scale <= 0.25} onClick={() => setScale((value) => Math.max(0.25, +(value - 0.25).toFixed(2)))}><Minus size={17} /></button>
+        <span className="ws-file-viewer__zoom-value">{Math.round(scale * 100)}%</span>
+        <button type="button" aria-label="Aumentar zoom" disabled={!document || scale >= 3} onClick={() => setScale((value) => Math.min(3, +(value + 0.25).toFixed(2)))}><Plus size={17} /></button>
+        <button type="button" disabled={!document} onClick={fitWidth}>Ajustar largura</button>
+        <button type="button" aria-label="Girar página" disabled={!document} onClick={() => setRotation((value) => (value + 90) % 360)}><RotateCw size={17} /></button>
+
+        {/* ----- Pesquisa e navegação pelos resultados ----- */}
+        <div className="ws-file-viewer__search-group">
+          <label className="ws-file-viewer__pdf-search">
+            <Search size={16} aria-hidden="true" />
+            <input
+              type="search"
+              aria-label="Pesquisar no PDF"
+              placeholder="Buscar no PDF"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setMatches([]);
+              }}
+            />
+          </label>
+
+          {query.trim() && (
+            <span className="ws-file-viewer__search-count" role="status">
+              {matches.length} pág.
+            </span>
+          )}
+
+          {matches.length > 0 && (
+            <button
+              type="button"
+              className="ws-file-viewer__search-action"
+              onClick={() => setPageNumber(matches[0])}
+            >
+              Ir ao resultado
+            </button>
+          )}
+        </div>
+
+      </div>
+      <div className="ws-file-viewer__pdf-viewport" ref={containerRef}>
+        {loading && <p role="status">Carregando PDF...</p>}
+        {error && <p role="alert">{error}</p>}
+        <canvas ref={canvasRef} aria-label={`Página ${pageNumber} de ${document?.numPages ?? 0}`} hidden={!document || Boolean(error)} />
+      </div>
+    </section>
+  );
+}

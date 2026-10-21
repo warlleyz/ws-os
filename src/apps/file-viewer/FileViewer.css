@@ -1,289 +1,228 @@
-/* === Estrutura principal === */
-/* ----- Contêiner do visualizador ----- */
+/* === Superfície do visualizador === */
 .ws-file-viewer {
-    box-sizing: border-box;
-    min-width: 0;
-    width: 100%;
+  --viewer-border: color-mix(in srgb, var(--border-default) 70%, transparent);
+  --viewer-soft: color-mix(in srgb, var(--surface-secondary) 60%, transparent);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  padding: 18px !important;
+  color: var(--text-primary);
+  background: var(--surface-primary);
+  container-type: inline-size;
 }
+.ws-file-viewer *, .ws-file-viewer *::before, .ws-file-viewer *::after { box-sizing: border-box; }
+.ws-file-viewer button, .ws-file-viewer input { font: inherit; }
+.ws-file-viewer button:focus-visible, .ws-file-viewer a:focus-visible, .ws-file-viewer input:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+.ws-file-viewer button:disabled { opacity: .4; cursor: not-allowed; }
 
-/* ----- Cabeçalho ----- */
+/* === Cabeçalho unificado === */
 .ws-file-viewer__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: none;
+  min-width: 0;
+  padding-bottom: 14px;
+  margin-bottom: 13px;
+  border-bottom: 1px solid var(--viewer-border);
+}
+.ws-file-viewer__identity { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 220px; }
+.ws-file-viewer__file-icon {
+  display: grid; place-items: center; flex: none; width: 43px; height: 43px;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 22%, transparent);
+  border-radius: 11px; background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  color: var(--accent-secondary);
+}
+.ws-file-viewer__identity-content { display: grid; gap: 3px; min-width: 0; }
+.ws-file-viewer__eyebrow { color: var(--accent-secondary); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.ws-file-viewer__identity-content h2 { overflow: hidden; margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; }
+.ws-file-viewer__identity-content p { margin: 0; color: var(--text-secondary); font-size: 11px; }
+.ws-file-viewer__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.ws-file-viewer__actions a, .ws-file-viewer__actions button, .ws-file-viewer__pdf-tools button, .ws-file-viewer__properties-heading button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 34px; padding: 6px 10px; margin: 0;
+  border: 1px solid var(--viewer-border); border-radius: 8px;
+  background: transparent; color: var(--text-primary);
+  font-size: 11px; font-weight: 500; text-decoration: none;
+  cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease;
+}
+.ws-file-viewer__actions :is(button,a):hover, .ws-file-viewer__pdf-tools button:hover:not(:disabled), .ws-file-viewer__properties-heading button:hover { background: var(--viewer-soft); border-color: var(--accent-secondary); }
+.ws-file-viewer__actions button[aria-pressed='true'] { color: var(--accent-secondary); background: color-mix(in srgb, var(--accent-primary) 10%, transparent); }
+
+/* === Conteúdo e propriedades === */
+.ws-file-viewer__workspace { display: grid; flex: 1 1 auto; min-height: 0; min-width: 0; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.ws-file-viewer__workspace.has-details { grid-template-columns: minmax(0, 1fr) minmax(210px, 26%); }
+.ws-file-viewer__content { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+.ws-file-viewer__properties { min-width: 0; overflow-y: auto; padding: 14px; border: 1px solid var(--viewer-border); border-radius: 11px; background: var(--viewer-soft); }
+.ws-file-viewer__properties-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--viewer-border); }
+.ws-file-viewer__properties-heading h3 { margin: 0; font-size: 13px; }
+.ws-file-viewer__properties-heading button { width: 30px; height: 30px; min-height: 30px; padding: 0; }
+.ws-file-viewer__properties dl { margin: 0; overflow-wrap: anywhere; }
+.ws-file-viewer__properties dt { margin-top: 15px; color: var(--text-secondary); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; }
+.ws-file-viewer__properties dd { margin: 4px 0 0; font-size: 12px; }
+
+/* === Toolbar de leitura === */
+.ws-file-viewer__pdf, .ws-file-viewer__image-container { display: flex; flex: 1 1 auto; flex-direction: column; min-height: 0; min-width: 0; overflow: hidden; }
+.ws-file-viewer__pdf-tools { display: flex; flex: none; align-items: center; flex-wrap: wrap; gap: 5px; min-height: 46px; padding: 5px 8px; margin-bottom: 10px; border: 1px solid var(--viewer-border); border-radius: 9px; background: var(--viewer-soft); }
+.ws-file-viewer__pdf-tools button { min-width: 32px; min-height: 30px; padding: 4px 8px; }
+.ws-file-viewer__zoom-value, .ws-file-viewer__page-count { min-width: 38px; text-align: center; color: var(--text-secondary); font-size: 11px; font-variant-numeric: tabular-nums; }
+.ws-file-viewer__tool-divider { width: 1px; height: 22px; margin: 0 5px; background: var(--viewer-border); }
+/* === Pesquisa do visualizador de PDF === */
+/* ----- Alinhamento do grupo ----- */
+.ws-file-viewer__search-group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  min-width: 0;
+  margin-left: auto;
 }
 
-.ws-file-viewer__header h2 {
-    margin: 0 0 8px;
+/* ----- Campo de pesquisa ----- */
+.ws-file-viewer .ws-file-viewer__pdf-search {
+  display: flex;
+  flex: 0 1 220px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  width: 220px;
+  height: 36px;
+  min-width: 150px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0 11px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-secondary);
 }
 
-.ws-file-viewer__header p {
-    margin: 0;
-    color: var(--text-secondary);
-    overflow-wrap: anywhere;
+/* ----- Ícone da pesquisa ----- */
+.ws-file-viewer .ws-file-viewer__pdf-search>svg {
+  position: static;
+  display: block;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  color: var(--text-secondary);
+  transform: none;
 }
 
-/* === Ações e controles === */
-/* ----- Grupo de ações ----- */
-.ws-file-viewer__actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
+/* ----- Entrada de texto ----- */
+.ws-file-viewer .ws-file-viewer__pdf-search>input {
+  display: block;
+  flex: 1 1 auto;
+  align-self: center;
+  width: 100%;
+  height: 32px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: normal;
 }
 
-/* ----- Links e botões ----- */
-.ws-file-viewer__actions a,
-.ws-file-viewer__actions button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    box-sizing: border-box;
-    min-height: 36px;
-    padding: 8px 12px;
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text-primary);
-    font: inherit;
-    line-height: 1.3;
-    text-decoration: none;
-    cursor: pointer;
-    transition:
-        background-color 150ms ease,
-        border-color 150ms ease;
+/* ----- Realce ao pesquisar ----- */
+.ws-file-viewer .ws-file-viewer__pdf-search:focus-within {
+  border-color: var(--accent-secondary);
 }
 
-/* ----- Interações ----- */
-.ws-file-viewer__actions a:hover,
-.ws-file-viewer__actions button:hover {
-    background: var(--surface-secondary);
+/* ----- Contagem dos resultados ----- */
+.ws-file-viewer__search-count {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+  font-size: 11px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
-.ws-file-viewer__actions a:focus-visible,
-.ws-file-viewer__actions button:focus-visible {
-    outline: 2px solid var(--text-primary);
-    outline-offset: 2px;
+/* ----- Botão de navegação ----- */
+.ws-file-viewer__search-action {
+  flex: 0 0 auto;
+  min-height: 36px;
+  white-space: nowrap;
 }
 
-/* === Propriedades dos arquivos === */
-/* ----- Painel de informações ----- */
-.ws-file-viewer details {
-    min-width: 0;
-    margin-bottom: 16px;
-    padding: 12px;
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
+/* === PDF, imagem e texto === */
+.ws-file-viewer__pdf-viewport, .ws-file-viewer__image-viewport {
+  display: flex; align-items: flex-start; justify-content: safe center;
+  flex: 1 1 auto; min-width: 0; min-height: 200px;
+  padding: 18px; overflow: auto; border: 1px solid var(--viewer-border); border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-secondary) 70%, var(--surface-primary));
+  scrollbar-width: thin; scrollbar-color: var(--border-control) transparent;
 }
-
-.ws-file-viewer details summary {
-    color: var(--text-primary);
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.ws-file-viewer details dl {
-    display: grid;
-    grid-template-columns: minmax(90px, auto) minmax(0, 1fr);
-    gap: 8px 16px;
-    margin: 12px 0 0;
-}
-
-.ws-file-viewer details dt {
-    color: var(--text-secondary);
-}
-
-.ws-file-viewer details dd {
-    min-width: 0;
-    margin: 0;
-    color: var(--text-primary);
-    overflow-wrap: anywhere;
-}
-
-/* === Pré-visualização de documentos === */
-/* ----- PDF oficial ----- */
-.ws-file-viewer__preview {
-    box-sizing: border-box;
-    display: block;
-    width: 100%;
-    height: min(65vh, 680px);
-    min-height: 280px;
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    background: white;
-}
-
-/* ----- PDF local ----- */
-.ws-file-viewer .ws-app__demo {
-    box-sizing: border-box;
-    display: block;
-    width: 100%;
-    height: min(65vh, 680px);
-    min-height: 280px;
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    background: white;
-}
-
-/* === Pré-visualização de imagens === */
-/* ----- Contêiner da imagem ----- */
-.ws-file-viewer__image-container {
-    display: grid;
-    min-width: 0;
-    gap: 16px;
-    padding: 16px;
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    background: var(--surface-secondary);
-}
-
-/* ----- Área de rolagem ----- */
-.ws-file-viewer__image-viewport {
-    display: grid;
-    min-width: 0;
-    max-height: 65vh;
-    overflow: auto;
-    place-items: center;
-}
-
-/* ----- Imagem oficial ----- */
-.ws-file-viewer__image-container>img {
-    display: block;
-    max-width: 100%;
-    max-height: 65vh;
-    margin-inline: auto;
-    object-fit: contain;
-}
-
-/* ----- Imagem local ----- */
-.ws-file-viewer__image-viewport img {
-    display: block;
-    height: auto;
-    max-height: none;
-    object-fit: contain;
-}
-
-/* ----- Zoom e informações ----- */
-.ws-file-viewer__image-container .ws-app__toolbar {
-    min-width: 0;
-}
-
-.ws-file-viewer__actions span {
-    color: var(--text-secondary);
-    font-variant-numeric: tabular-nums;
-}
-
-/* === Pré-visualização de texto === */
-/* ----- Conteúdo textual ----- */
+.ws-file-viewer__pdf-viewport canvas { display: block; flex: none; max-width: none; background: white; box-shadow: 0 7px 24px rgb(0 0 0 / 18%); }
+.ws-file-viewer__image-viewport { align-items: center; }
+.ws-file-viewer__image-viewport img { display: block; flex: none; height: auto; object-fit: contain; transform-origin: center center; }
 .ws-file-viewer__text {
-    box-sizing: border-box;
-    max-width: 100%;
-    max-height: 65vh;
-    margin: 0;
-    padding: 16px;
-    overflow: auto;
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    background: var(--surface-secondary);
-    color: var(--text-primary);
-    font-size: 13px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
+  flex: 1 1 auto; min-height: 200px; max-width: 100%; margin: 0; padding: 18px;
+  overflow: auto; border: 1px solid var(--viewer-border); border-radius: 10px;
+  background: var(--viewer-soft); color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px; line-height: 1.6; white-space: pre; tab-size: 2;
 }
+.ws-file-viewer__text code { font: inherit; color: inherit; }
+.ws-file-viewer__empty { display: flex; flex: 1 1 auto; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 160px; padding: 24px; text-align: center; color: var(--text-secondary); }
+.ws-file-viewer__empty h3 { color: var(--text-primary); margin: 0; }
+.ws-file-viewer__empty p { margin: 0; max-width: 50ch; }
 
-/* ----- Código e texto pré-formatado ----- */
-.ws-file-viewer__text code {
-    color: inherit;
-    font: inherit;
-    white-space: inherit;
-    overflow-wrap: inherit;
+/* === Responsividade por largura da janela === */
+@container (max-width: 740px) {
+  .ws-file-viewer__workspace.has-details { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(210px, 1fr) auto; }
+  .ws-file-viewer__properties { max-height: 210px; }
+  .ws-file-viewer__pdf-search { margin-left: 0; }
 }
-
-/* === Estados da interface === */
-/* ----- Nenhum arquivo ou recurso indisponível ----- */
-.ws-file-viewer__empty {
-    display: flex;
-    min-height: 200px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 20px;
-    color: var(--text-secondary);
-    text-align: center;
+@container (max-width: 480px) {
+  .ws-file-viewer__header { flex-direction: column; align-items: stretch; }
+  .ws-file-viewer__actions { justify-content: flex-start; }
+  .ws-file-viewer__pdf-tools { gap: 4px; }
+  .ws-file-viewer__pdf-viewport, .ws-file-viewer__image-viewport { padding: 8px; min-height: 170px; }
+  .ws-file-viewer__text { padding: 12px; }
 }
-
-.ws-file-viewer__empty h2,
-.ws-file-viewer__empty h3,
-.ws-file-viewer__empty p {
-    margin: 0;
-    overflow-wrap: anywhere;
-}
-
-.ws-file-viewer__empty h2,
-.ws-file-viewer__empty h3 {
-    color: var(--text-primary);
-}
-
-/* ----- Mensagens de estado ----- */
-.ws-file-viewer [role='status'],
-.ws-file-viewer [role='alert'] {
-    overflow-wrap: anywhere;
-}
-
-/* === Responsividade === */
-/* ----- Janelas compactas e dispositivos móveis ----- */
-@media (max-width: 600px) {
-    .ws-file-viewer__header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        margin-bottom: 16px;
-    }
-
-    .ws-file-viewer__actions {
-        gap: 8px;
-    }
-
-    .ws-file-viewer__actions a,
-    .ws-file-viewer__actions button {
-        min-height: 40px;
-        padding: 8px 10px;
-    }
-
-    .ws-file-viewer__image-container {
-        gap: 12px;
-        padding: 10px;
-    }
-
-    .ws-file-viewer__text {
-        padding: 12px;
-        font-size: 12px;
-    }
-
-    .ws-file-viewer__preview,
-    .ws-file-viewer .ws-app__demo {
-        height: 55dvh;
-        min-height: 240px;
-    }
-
-    .ws-file-viewer details dl {
-        grid-template-columns: minmax(70px, auto) minmax(0, 1fr);
-        gap: 8px 10px;
-    }
-}
-
-/* === Acessibilidade === */
-/* ----- Preferência por movimento reduzido ----- */
 @media (prefers-reduced-motion: reduce) {
+  .ws-file-viewer__actions :is(button,a), .ws-file-viewer__pdf-tools button, .ws-file-viewer__properties-heading button { transition: none; }
+}
 
-    .ws-file-viewer__actions a,
-    .ws-file-viewer__actions button {
-        transition: none;
-    }
+/* ----- Pesquisa em janelas compactas ----- */
+@container (max-width: 760px) {
+  .ws-file-viewer__search-group {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    margin-left: 0;
+  }
+
+  .ws-file-viewer .ws-file-viewer__pdf-search {
+    flex: 1 1 auto;
+    width: auto;
+    max-width: 320px;
+  }
+}
+
+@container (max-width: 420px) {
+  .ws-file-viewer__search-group {
+    flex-wrap: wrap;
+  }
+
+  .ws-file-viewer .ws-file-viewer__pdf-search {
+    flex: 1 1 100%;
+    max-width: none;
+  }
 }

@@ -73,6 +73,8 @@ async function component(file, props, bindings = {}) {
         'FileSpreadsheet',
         'FileType',
         'File',
+        'DocumentView',
+        'PdfPreview',
       ].map((name) => [name, name]),
     ),
     fetchManagedContent: async () => ({ data: [] }),
@@ -148,6 +150,17 @@ async function component(file, props, bindings = {}) {
     },
   };
 }
+
+/* === Testes do Visualizador de Arquivos === */
+/* ----- Localização da interface compartilhada ----- */
+function documentView(ui) {
+  const node = ui.nodes().find((item) => item.type === 'DocumentView');
+
+  assert.ok(node, 'O visualizador deve utilizar DocumentView.');
+
+  return node.props;
+}
+
 const entry = (overrides = {}) => ({
   id: 'file',
   kind: 'file',
@@ -287,8 +300,9 @@ test('visualizador mostra texto escapado, download e libera URLs ao atualizar e 
     },
   );
   await ui.flush();
-  assert.match(ui.text(), /<script>literal/);
-  assert.equal(ui.nodes().find((n) => n.type === 'a').props.download, 'a.txt');
+  assert.match(documentView(ui).text, /<script>literal/);
+  assert.equal(documentView(ui).name, 'a.txt');
+  assert.equal(documentView(ui).url, 'blob:1');
   current = entry({ revision: 2 });
   revision++;
   ui.render();
@@ -332,40 +346,64 @@ test('visualizador não cria URL após fechamento e informa arquivo removido', a
     },
   );
   await removed.flush();
-  assert.match(removed.text(), /não encontrado/);
+  assert.match(documentView(removed).error, /não encontrado/);
 });
 
-test('visualizador mantém download ao falhar imagem, limita zoom e isola PDF', async () => {
+
+test('visualizador local encaminha imagens e PDFs à interface compartilhada', async () => {
   const bindings = {
     readLocalFile: async () => entry({ name: 'a.png' }),
-    URL: { createObjectURL: () => 'blob:x', revokeObjectURL() {} },
+    URL: {
+      createObjectURL: () => 'blob:x',
+      revokeObjectURL() { },
+    },
   };
+
+  /* ----- Pré-visualização de imagem ----- */
   const image = await component(
     'src/apps/file-viewer/LocalFileViewer.jsx',
     { fileId: 'file' },
     bindings,
   );
+
   await image.flush();
-  for (let i = 0; i < 20; i++) {
-    image.button('Ampliar').props.onClick();
-    image.render();
-  }
-  assert.match(image.text(), /300\s*%/);
-  image
-    .nodes()
-    .find((n) => n.type === 'img')
-    .props.onError({ currentTarget: {} });
+
+  const imageProps = documentView(image);
+
+  assert.equal(imageProps.kind, 'image');
+  assert.equal(imageProps.name, 'a.png');
+  assert.equal(imageProps.url, 'blob:x');
+  assert.ok(imageProps.blob instanceof Blob);
+  assert.equal(typeof imageProps.onImageError, 'function');
+
+  imageProps.onImageError();
   image.render();
-  assert.match(image.text(), /Não foi possível/);
-  assert.ok(image.nodes().find((n) => n.type === 'a'));
+
+  assert.equal(documentView(image).previewError, true);
+
+  image.unmount();
+
+  /* ----- Pré-visualização de PDF ----- */
   const pdf = await component(
     'src/apps/file-viewer/LocalFileViewer.jsx',
     { fileId: 'file' },
-    { ...bindings, readLocalFile: async () => entry({ name: 'a.pdf' }) },
+    {
+      ...bindings,
+      readLocalFile: async () => entry({ name: 'a.pdf' }),
+    },
   );
+
   await pdf.flush();
-  assert.equal(pdf.nodes().find((n) => n.type === 'iframe').props.sandbox, '');
+
+  const pdfProps = documentView(pdf);
+
+  assert.equal(pdfProps.kind, 'pdf');
+  assert.equal(pdfProps.name, 'a.pdf');
+  assert.ok(pdfProps.blob instanceof Blob);
+
+  pdf.unmount();
 });
+
 
 function officialBindings(fetchMock, overrides = {}) {
   const revoked = [];
@@ -400,11 +438,12 @@ test('documentos oficiais aceitam contrato url/name e isolam PDF validado', asyn
   await ui.flush();
   assert.equal(request.url, 'https://ws.test/curriculo.pdf');
   assert.equal(request.options.redirect, 'error');
-  assert.equal(ui.nodes().find((n) => n.type === 'iframe').props.sandbox, '');
-  assert.equal(
-    ui.nodes().find((n) => n.type === 'a' && n.props.download).props.href,
-    'blob:official',
-  );
+  const props = documentView(ui);
+
+  assert.equal(props.kind, 'pdf');
+  assert.ok(props.blob instanceof Blob);
+  assert.equal(props.url, 'blob:official');
+  assert.equal(documentView(ui).url, 'blob:official');
   ui.unmount();
   assert.deepEqual(bindings.revoked, ['blob:official']);
 });
@@ -426,7 +465,12 @@ test('visualizador oficial recusa origens externas, credenciais, consultas e PDF
       }),
     );
     await ui.flush();
-    assert.match(ui.text(), /Nenhum arquivo selecionado/);
+
+    /* ----- URL inválida não disponibiliza o documento ----- */
+    const props = documentView(ui);
+
+    assert.equal(Boolean(props.blob), false);
+    assert.equal(Boolean(props.url), false);
   }
   assert.equal(calls, 0);
   for (const [body, type] of [
@@ -439,11 +483,11 @@ test('visualizador oficial recusa origens externas, credenciais, consultas e PDF
       officialBindings(async () => new Response(body, { headers: { 'Content-Type': type } })),
     );
     await ui.flush();
-    assert.match(ui.text(), /Não foi possível abrir/);
-    assert.equal(
-      ui.nodes().find((n) => n.type === 'iframe'),
-      undefined,
-    );
+    /* ----- Rejeição de conteúdo inválido ----- */
+    const props = documentView(ui);
+
+    assert.ok(props.error);
+    assert.equal(Boolean(props.blob), false);
   }
 });
 
@@ -457,15 +501,12 @@ test('prévia oficial limita leitura por stream mesmo sem Content-Length e ofere
     ),
   );
   await ui.flush();
-  assert.match(ui.text(), /grande demais/);
-  assert.equal(
-    ui.nodes().find((n) => n.type === 'a' && n.props.download).props.href,
-    'https://ws.test/grande.txt',
-  );
-  assert.equal(
-    ui.nodes().find((n) => n.type === 'pre'),
-    undefined,
-  );
+  /* ----- Limite de pré-visualização ----- */
+  const props = documentView(ui);
+
+  assert.equal(props.kind, 'text');
+  assert.equal(Boolean(props.blob), false);
+  assert.ok(props.error);
 });
 
 test('HTML oficial é exibido como texto, nunca como iframe executável', async () => {
@@ -478,11 +519,12 @@ test('HTML oficial é exibido como texto, nunca como iframe executável', async 
     ),
   );
   await ui.flush();
-  assert.match(ui.text(), /<script>literal/);
-  assert.equal(
-    ui.nodes().find((n) => n.type === 'iframe'),
-    undefined,
-  );
+  /* ----- HTML apresentado como texto ----- */
+  const props = documentView(ui);
+
+  assert.equal(props.kind, 'text');
+  assert.match(props.text, /<script>literal/);
+  assert.ok(props.blob instanceof Blob);
 });
 
 test('gerenciador impede criar na raiz por engano quando a pasta aberta é removida', async () => {
@@ -588,26 +630,69 @@ test('leitura do gerenciador ignora resposta antiga e preserva listagem ao falha
   assert.equal(state.entries[0].name, 'atual.txt');
 });
 
+
 /* === Compatibilidade dos descritores com o Visualizador === */
-test('Visualizador roteia descritor local e recusa recurso gerenciado sem consultar URL arbitrária', async () => {
+/* ----- Roteamento de arquivos locais e gerenciados ----- */
+test('Visualizador roteia descritores locais e gerenciados validados', async () => {
   const { loadContract } = require('../helpers/contract-loader.cjs');
+
   const { validateFileResource } = loadContract(
     path.join(root, 'src/services/storage/fileResourceContract.js'),
   );
+
+  /* ----- Arquivo pessoal ----- */
   const local = await component(
     'src/apps/file-viewer/FileViewer.jsx',
-    { instance: { params: { resource: { source: 'local', fileId: 'one' } } } },
-    { validateFileResource, LocalFileViewer: 'LocalViewer' },
+    {
+      instance: {
+        params: {
+          resource: { source: 'local', fileId: 'one' },
+        },
+      },
+    },
+    {
+      validateFileResource,
+      LocalFileViewer: 'LocalViewer',
+    },
   );
+
   assert.equal(local.nodes()[0].type, 'LocalViewer');
   assert.equal(local.nodes()[0].props.fileId, 'one');
+
+  /* ----- Arquivo gerenciado autorizado pelo contrato ----- */
   const managed = await component(
     'src/apps/file-viewer/FileViewer.jsx',
-    { instance: { params: { resource: { source: 'managed', resourceId: 'one' } } } },
+    {
+      instance: {
+        params: {
+          resource: { source: 'managed', resourceId: 'one' },
+        },
+      },
+    },
     { validateFileResource },
   );
-  assert.equal(managed.nodes()[0].props.source, 'managed');
+
+  assert.equal(managed.nodes()[0].props.resourceId, 'one');
+
+  /* ----- Identificador inválido ----- */
+  const invalid = await component(
+    'src/apps/file-viewer/FileViewer.jsx',
+    {
+      instance: {
+        params: {
+          resource: {
+            source: 'managed',
+            resourceId: '../arquivo',
+          },
+        },
+      },
+    },
+    { validateFileResource },
+  );
+
+  assert.equal(invalid.nodes()[0].props.source, 'invalid');
 });
+
 
 /* === Menus de contexto do explorador === */
 const contextEvent = (extra = {}) => ({
