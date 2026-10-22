@@ -10,7 +10,13 @@ import { searchContent } from './searchService';
 
 export default function GlobalSearchResults({ query, onOpen }) {
   const locale = useLocale(),
-    [remote, setRemote] = useState({ query: '', projects: [], posts: [] });
+    [remote, setRemote] = useState({
+      query: '',
+      projects: [],
+      posts: [],
+      failed: false,
+      warnings: [],
+    });
   const term = query.trim();
   useEffect(() => {
     if (term.length < 2) return;
@@ -19,14 +25,22 @@ export default function GlobalSearchResults({ query, onOpen }) {
     const load = () => {
       const request = ++generation;
       Promise.allSettled([
-        fetchGithubPortfolio(portfolio.githubUser, { signal: controller.signal }),
+        portfolio.githubUser
+          ? fetchGithubPortfolio(portfolio.githubUser, { signal: controller.signal })
+          : Promise.resolve({ data: { repositories: [] } }),
         fetchNotes({ signal: controller.signal }),
       ]).then(([github, notes]) => {
         if (controller.signal.aborted || request !== generation) return;
         setRemote({
           query: term,
           projects: github.status === 'fulfilled' ? github.value.data.repositories : [],
-          posts: notes.status === 'fulfilled' ? notes.value.data : [],
+          posts:
+            notes.status === 'fulfilled' ? notes.value.data : normalizeNotes(portfolio.posts ?? []),
+          failed: github.status === 'rejected' || notes.status === 'rejected',
+          warnings: [
+            github.status === 'fulfilled' && github.value.warning,
+            notes.status === 'fulfilled' && notes.value.warning,
+          ].filter(Boolean),
         });
       });
     };
@@ -55,6 +69,18 @@ export default function GlobalSearchResults({ query, onOpen }) {
         <Search size={14} />
         {t('Conteúdo e configurações')}
       </h3>
+      {remote.query !== term && <p role="status">{t('Carregando')}</p>}
+      {remote.query === term && remote.failed && (
+        <p role="status">
+          {t('Não foi possível atualizar a busca remota. Resultados locais continuam disponíveis.')}
+        </p>
+      )}
+      {remote.query === term &&
+        remote.warnings.map((warning) => (
+          <p role="status" key={warning}>
+            {t(warning)}
+          </p>
+        ))}
       {results.map((item) => (
         <button
           type="button"
@@ -85,7 +111,9 @@ export default function GlobalSearchResults({ query, onOpen }) {
           <ArrowUpRight size={16} />
         </button>
       ))}
-      {!results.length && <p role="status">{t('Nenhum conteúdo encontrado.')}</p>}
+      {remote.query === term && !results.length && (
+        <p role="status">{t('Nenhum conteúdo encontrado.')}</p>
+      )}
     </section>
   );
 }

@@ -1,4 +1,3 @@
-
 import { requireAdministrator } from './auth.js';
 import { database, domainFailure } from '../_lib/backend.js';
 import { readBoundedJson, protectPublicWrite } from '../_lib/publicWriteProtection.js';
@@ -76,8 +75,7 @@ export function validateScore(input) {
     throw Error('INVALID_SCORE');
   }
 
-  const alias =
-    typeof input.alias === 'string' ? input.alias.trim() : '';
+  const alias = typeof input.alias === 'string' ? input.alias.trim() : '';
 
   if (!/^[\p{L}\p{N} _-]{2,24}$/u.test(alias)) {
     throw Error('INVALID_ALIAS');
@@ -122,6 +120,10 @@ async function deleteAdministrativeScore(request, env) {
   if (
     !isValidGame(input.game) ||
     !/^[a-f0-9]{64}$/.test(input.visitorHash ?? '') ||
+    (input.score !== undefined &&
+      (!Number.isSafeInteger(input.score) ||
+        input.score < 1 ||
+        input.score > MAX_SCORES[input.game])) ||
     input.confirm !== true
   ) {
     throw Error('INVALID_SCORE');
@@ -130,22 +132,20 @@ async function deleteAdministrativeScore(request, env) {
   const params = new URLSearchParams({
     game: `eq.${input.game}`,
     visitor_hash: `eq.${input.visitorHash}`,
+    ...(input.score !== undefined ? { score: `eq.${input.score}` } : {}),
   });
 
-  const rows = await database(
-    env,
-    `game_scores?${params}`,
-    {
-      method: 'DELETE',
-      service: true,
-    },
-  );
+  const rows = await database(env, `game_scores?${params}`, {
+    method: 'DELETE',
+    service: true,
+  });
 
   if (
     !Array.isArray(rows) ||
     rows.length !== 1 ||
     rows[0].game !== input.game ||
-    rows[0].visitor_hash !== input.visitorHash
+    rows[0].visitor_hash !== input.visitorHash ||
+    (input.score !== undefined && rows[0].score !== input.score)
   ) {
     throw Error('CONFLICT');
   }
@@ -225,17 +225,9 @@ async function submitPublicScore(request, env) {
   const input = await readBoundedJson(request);
   const score = validateScore(input);
 
-  const visitor = await protectPublicWrite(
-    request,
-    env,
-    input.turnstileToken,
-    'rankings',
-  );
+  const visitor = await protectPublicWrite(request, env, input.turnstileToken, 'rankings');
 
-  const url = new URL(
-    '/rest/v1/rpc/submit_game_score',
-    env.SUPABASE_URL,
-  );
+  const url = new URL('/rest/v1/rpc/submit_game_score', env.SUPABASE_URL);
 
   const response = await fetch(url, {
     method: 'POST',

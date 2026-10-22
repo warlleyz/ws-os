@@ -1,22 +1,26 @@
-
 import { memo, useEffect, useState } from 'react';
-import {
-  translate as t,
-  useLocale,
-} from '../../../shared/i18n/i18n';
+import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 import { useWidgetPreferences } from '../../../core/widgetPreferences';
 
 import './ClockWidget.css';
 
-function ClockWidget() {
+function ClockWidget({ widget: suppliedWidget } = {}) {
   const locale = useLocale();
   const { widgets } = useWidgetPreferences();
 
-  const clock = widgets.find(
-    (widget) => widget.instanceId === 'clock-default',
-  );
+  const clock = suppliedWidget ?? widgets.find((widget) => widget.instanceId === 'clock-default');
 
-  const timeZone = clock?.settings?.timeZone || undefined;
+  /* === Preferência antiga inválida não interrompe o Desktop === */
+  let timeZone;
+  const requestedZone = clock?.settings?.timeZone;
+  if (typeof requestedZone === 'string' && requestedZone) {
+    try {
+      new Intl.DateTimeFormat(locale, { timeZone: requestedZone });
+      timeZone = requestedZone;
+    } catch {
+      /* O relógio continua no fuso local sem apagar a preferência. */
+    }
+  }
 
   const [now, setNow] = useState(() => new Date());
 
@@ -27,29 +31,29 @@ function ClockWidget() {
       const current = new Date();
       setNow(current);
 
-      const remaining =
-        60000 -
-        current.getSeconds() * 1000 -
-        current.getMilliseconds();
+      const remaining = 60000 - current.getSeconds() * 1000 - current.getMilliseconds();
 
-      timeout = window.setTimeout(
-        updateClock,
-        Math.max(100, remaining + 50),
-      );
+      timeout = window.setTimeout(updateClock, Math.max(100, remaining + 50));
     }
 
     updateClock();
 
     function refreshOnFocus() {
+      if (document.hidden) {
+        window.clearTimeout(timeout);
+        return;
+      }
       window.clearTimeout(timeout);
       updateClock();
     }
 
     window.addEventListener('focus', refreshOnFocus);
+    document.addEventListener('visibilitychange', refreshOnFocus);
 
     return () => {
       window.clearTimeout(timeout);
       window.removeEventListener('focus', refreshOnFocus);
+      document.removeEventListener('visibilitychange', refreshOnFocus);
     };
   }, []);
 
@@ -80,51 +84,29 @@ function ClockWidget() {
     month: 'short',
   }).format(now);
 
-  const zoneLabel =
-    timeZone ||
-    Intl.DateTimeFormat().resolvedOptions().timeZone ||
-    'Local';
+  const zoneLabel = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local';
 
   return (
-    <section
-      className="ws-widget ws-widget--clock"
-      aria-label={t('Widget de relógio')}
-    >
+    <section className="ws-widget ws-widget--clock" aria-label={t('Widget de relógio')}>
       <div className="ws-clock__content">
-        <span className="ws-clock__caption">
-          {t('Hora local')}
-        </span>
+        <span className="ws-clock__caption">{t('Hora local')}</span>
 
-        <time
-          className="ws-clock__time"
-          dateTime={now.toISOString()}
-        >
+        <time className="ws-clock__time" dateTime={now.toISOString()}>
           {time}
         </time>
 
         <div className="ws-clock__date">
-          <span className="ws-clock__weekday">
-            {weekday}
-          </span>
+          <span className="ws-clock__weekday">{weekday}</span>
 
-          <span className="ws-clock__full-date">
-            {fullDate}
-          </span>
+          <span className="ws-clock__full-date">{fullDate}</span>
 
-          <span className="ws-clock__short-date">
-            {shortDate}
-          </span>
+          <span className="ws-clock__short-date">{shortDate}</span>
         </div>
 
-        <span className="ws-clock__timezone">
-          {zoneLabel.replaceAll('_', ' ')}
-        </span>
+        <span className="ws-clock__timezone">{zoneLabel.replaceAll('_', ' ')}</span>
       </div>
 
-      <div
-        className="ws-clock__decoration"
-        aria-hidden="true"
-      />
+      <div className="ws-clock__decoration" aria-hidden="true" />
     </section>
   );
 }

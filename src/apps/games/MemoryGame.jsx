@@ -47,7 +47,7 @@ export default function MemoryGame({ paused }) {
             <button
               key={index}
               type="button"
-              disabled={paused || matched.includes(index)}
+              disabled={paused || matched.includes(index) || flipped.length === 2}
               aria-label={shown ? `${t('Carta')} ${value}` : `${t('Carta fechada')} ${index + 1}`}
               onClick={() => flip(index)}
             >
@@ -58,6 +58,7 @@ export default function MemoryGame({ paused }) {
       </div>
       <button
         type="button"
+        disabled={paused}
         onClick={() => {
           setCards(deck());
           setFlipped([]);

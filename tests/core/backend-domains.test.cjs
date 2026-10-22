@@ -121,11 +121,9 @@ test('assinaturas de arquivo recusam MIME falso, SVG e texto binário', () => {
   assert.equal(validateFileBytes(new Uint8Array([0]), 'text/plain'), false);
 });
 
-
 /* ----- Controle de acesso e falhas do armazenamento privado ----- */
 test('arquivo não autorizado não acessa o Storage e falhas não viram sucesso', async () => {
-  const objectKey =
-    'official/123e4567-e89b-42d3-a456-426614174000';
+  const objectKey = 'official/123e4567-e89b-42d3-a456-426614174000';
 
   let storageReads = 0;
 
@@ -163,14 +161,14 @@ test('arquivo não autorizado não acessa o Storage e falhas não viram sucesso'
       ]);
     }
 
-    if (
-      url.pathname ===
-      `/storage/v1/object/authenticated/ws-os-official-files/${objectKey}`
-    ) {
+    if (url.pathname === `/storage/v1/object/authenticated/ws-os-official-files/${objectKey}`) {
       storageReads++;
-      return Response.json({ error: 'StorageUnavailable' }, {
-        status: 503,
-      });
+      return Response.json(
+        { error: 'StorageUnavailable' },
+        {
+          status: 503,
+        },
+      );
     }
 
     throw Error(`Requisição inesperada: ${url.pathname}`);
@@ -184,7 +182,6 @@ test('arquivo não autorizado não acessa o Storage e falhas não viram sucesso'
   assert.equal(response.status, 503);
   assert.equal(storageReads, 1);
 });
-
 
 test('metadados de criação são projetados sem chave do bucket e resposta de ID diferente conflita', async () => {
   for (const returnedId of ['one', 'other']) {
@@ -320,11 +317,9 @@ test('envio protegido persiste uma vez e retry reutiliza resultado e notificaç�
   assert.equal((await send({ ...payload, message: 'Outro pedido com a mesma chave' })).status, 409);
 });
 
-
 /* ----- Upload, reconciliação e exclusão no Supabase Storage ----- */
 test('upload confirma integridade e exclusão exige remoção física', async () => {
-  const objectKey =
-    'official/123e4567-e89b-42d3-a456-426614174000';
+  const objectKey = 'official/123e4567-e89b-42d3-a456-426614174000';
 
   const content = '%PDF-1.7';
   const bytes = new TextEncoder().encode(content);
@@ -348,10 +343,7 @@ test('upload confirma integridade e exclusão exige remoção física', async ()
   const api = load('managedFiles.js', async (url, options) => {
     if (url.pathname === '/rest/v1/official_files') {
       if (options.method === 'PATCH') {
-        if (
-          url.searchParams.get('revision') !==
-          `eq.${row.revision}`
-        ) {
+        if (url.searchParams.get('revision') !== `eq.${row.revision}`) {
           return Response.json([]);
         }
 
@@ -364,33 +356,27 @@ test('upload confirma integridade e exclusão exige remoção física', async ()
       return Response.json([row]);
     }
 
-    const objectPath =
-      `/storage/v1/object/ws-os-official-files/${objectKey}`;
+    const objectPath = `/storage/v1/object/ws-os-official-files/${objectKey}`;
 
-    const metadataPath =
-      `/storage/v1/object/info/ws-os-official-files/${objectKey}`;
+    const metadataPath = `/storage/v1/object/info/ws-os-official-files/${objectKey}`;
 
-    const downloadPath =
-      `/storage/v1/object/authenticated/ws-os-official-files/${objectKey}`;
+    const downloadPath = `/storage/v1/object/authenticated/ws-os-official-files/${objectKey}`;
 
     /* ----- Upload sem sobrescrita ----- */
-    if (
-      url.pathname === objectPath &&
-      options.method === 'POST'
-    ) {
+    if (url.pathname === objectPath && options.method === 'POST') {
       uploads++;
 
-      assert.equal(
-        options.headers.get('x-upsert'),
-        'false',
-      );
+      assert.equal(options.headers.get('x-upsert'), 'false');
 
       if (storedBytes !== null) {
-        return Response.json({
-          code: 'Duplicate',
-        }, {
-          status: 409,
-        });
+        return Response.json(
+          {
+            code: 'Duplicate',
+          },
+          {
+            status: 409,
+          },
+        );
       }
 
       storedBytes = new Uint8Array(options.body);
@@ -401,10 +387,7 @@ test('upload confirma integridade e exclusão exige remoção física', async ()
     }
 
     /* ----- Consulta dos metadados ----- */
-    if (
-      url.pathname === metadataPath &&
-      options.method === 'GET'
-    ) {
+    if (url.pathname === metadataPath && options.method === 'GET') {
       if (storedBytes === null) {
         return Response.json(
           {
@@ -425,10 +408,7 @@ test('upload confirma integridade e exclusão exige remoção física', async ()
     }
 
     /* ----- Download privado ----- */
-    if (
-      url.pathname === downloadPath &&
-      options.method === 'GET'
-    ) {
+    if (url.pathname === downloadPath && options.method === 'GET') {
       if (storedBytes === null) {
         return new Response(null, { status: 404 });
       }
@@ -441,15 +421,8 @@ test('upload confirma integridade e exclusão exige remoção física', async ()
     }
 
     /* ----- Exclusão pelo endpoint do bucket ----- */
-    if (
-      url.pathname ===
-      '/storage/v1/object/ws-os-official-files' &&
-      options.method === 'DELETE'
-    ) {
-      assert.deepEqual(
-        JSON.parse(options.body).prefixes,
-        [objectKey],
-      );
+    if (url.pathname === '/storage/v1/object/ws-os-official-files' && options.method === 'DELETE') {
+      assert.deepEqual(JSON.parse(options.body).prefixes, [objectKey]);
 
       deletions++;
       storedBytes = null;
@@ -464,18 +437,15 @@ test('upload confirma integridade e exclusão exige remoção física', async ()
   /* ----- Envio com controle de revisão ----- */
   const send = (revision) =>
     api.onRequest({
-      request: new Request(
-        'https://test/api/admin/files?id=one',
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: 'Bearer valid',
-            'If-Match': String(revision),
-            'Content-Type': 'application/pdf',
-          },
-          body: content,
+      request: new Request('https://test/api/admin/files?id=one', {
+        method: 'PUT',
+        headers: {
+          Authorization: 'Bearer valid',
+          'If-Match': String(revision),
+          'Content-Type': 'application/pdf',
         },
-      ),
+        body: content,
+      }),
       env,
     });
 
@@ -506,17 +476,14 @@ test('upload confirma integridade e exclusão exige remoção física', async ()
 
   /* ----- Exclusão com confirmação explícita ----- */
   const deleted = await api.onRequest({
-    request: new Request(
-      'https://test/api/admin/files?id=one',
-      {
-        method: 'DELETE',
-        headers: {
-          Authorization: 'Bearer valid',
-          'If-Match': String(row.revision),
-          'X-Confirm-Delete': 'true',
-        },
+    request: new Request('https://test/api/admin/files?id=one', {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Bearer valid',
+        'If-Match': String(row.revision),
+        'X-Confirm-Delete': 'true',
       },
-    ),
+    }),
     env,
   });
 
@@ -525,7 +492,6 @@ test('upload confirma integridade e exclusão exige remoção física', async ()
   assert.equal(deletions, 1);
   assert.equal(storedBytes, null);
 });
-
 
 test('migrações D1 executam em SQLite e manutenção remove somente registros vencidos', async () => {
   const { DatabaseSync } = require('node:sqlite'),
@@ -746,4 +712,46 @@ test('moderação de ranking exige administrador e confirma exatamente a linha r
     });
     assert.equal(response.status, actual === hash ? 200 : 409);
   }
+});
+
+test('solicitações aceitam mensagem Unicode no limite com token sem exceder o limite HTTP', async () => {
+  const api = load('requests.js', () => {
+    throw Error('No upstream calls expected');
+  });
+  const input = {
+    type: 'message',
+    name: 'Pessoa',
+    email: 'p@test.dev',
+    message: '漢'.repeat(5000),
+    consent: true,
+    idempotencyKey: 'request-1234567890123456',
+    turnstileToken: 't'.repeat(2048),
+  };
+  const response = await api.onRequest({ request: req('api/requests', 'POST', input), env });
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).error, 'SERVICE_UNAVAILABLE');
+  assert.equal(api.calls.length, 0);
+  const tooLarge = await api.onRequest({
+    request: req('api/requests', 'POST', { ...input, message: 'x'.repeat(50000) }),
+    env,
+  });
+  assert.equal(tooLarge.status, 413);
+});
+
+test('moderação recusa confirmação de pontuação que mudou desde a consulta', async () => {
+  const hash = 'a'.repeat(64);
+  const api = load('rankings.js', (url) => {
+    assert.equal(url.searchParams.get('score'), 'eq.5');
+    return Response.json([{ game: 'snake', visitor_hash: hash, score: 8 }]);
+  });
+  const response = await api.onRequest({
+    request: req('api/admin/rankings', 'DELETE', {
+      game: 'snake',
+      visitorHash: hash,
+      score: 5,
+      confirm: true,
+    }),
+    env: { ...env, RANKINGS_ENABLED: 'true' },
+  });
+  assert.equal(response.status, 409);
 });

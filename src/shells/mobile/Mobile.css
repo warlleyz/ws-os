@@ -450,3 +450,37 @@
   border: 1px solid var(--border-default);
   border-radius: 16px;
 }
+
+/* === Área disponível e alvos de toque === */
+.ws-mobile[data-screen='app'] .ws-mobile__content-shell {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.ws-mobile__header {
+  flex-shrink: 0;
+  padding-inline: max(12px, env(safe-area-inset-left, 0px))
+    max(12px, env(safe-area-inset-right, 0px));
+}
+.ws-mobile__header strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ws-mobile__header button,
+.ws-mobile__system-actions button,
+.ws-mobile__section-header button,
+.ws-mobile__navigation button {
+  min-height: 44px;
+  min-width: 44px;
+}
+.ws-mobile__system-bar {
+  padding-top: max(6px, env(safe-area-inset-top, 0px));
+}
+@media (min-width: 600px) {
+  .ws-mobile[data-grid-density='default'] .ws-mobile__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ws-mobile[data-grid-density='comfortable'] .ws-mobile__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

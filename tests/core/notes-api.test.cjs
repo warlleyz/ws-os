@@ -81,19 +81,14 @@ test('Worker: login, criar, editar, publicar, curtir, despublicar, excluir e log
   test('API de publicações impede cache HTTP de respostas públicas', async (t) => {
     const worker = (await import('../../worker/index.js')).default;
 
-    t.mock.method(globalThis, 'fetch', async () =>
-      Response.json([]),
-    );
+    t.mock.method(globalThis, 'fetch', async () => Response.json([]));
 
     const env = {
       SUPABASE_URL: 'https://test-project.supabase.co',
       SUPABASE_ANON_KEY: 'anon-test',
     };
 
-    const response = await worker.fetch(
-      new Request('https://ws.test/api/posts'),
-      env,
-    );
+    const response = await worker.fetch(new Request('https://ws.test/api/posts'), env);
 
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('cache-control'), 'no-store');
@@ -155,4 +150,48 @@ test('Worker: login, criar, editar, publicar, curtir, despublicar, excluir e log
   assert.equal(post, null);
   assert.equal((await call('/api/admin/posts', 'GET', undefined, 'expired-token')).status, 403);
   assert.equal((await call('/api/auth/logout', 'POST')).data.success, true);
+});
+
+test('criação com identidade estável reconcilia confirmação perdida e rejeita conteúdo diferente', async (t) => {
+  const worker = (await import('../../worker/index.js')).default;
+  const env = { SUPABASE_URL: 'https://test-project.supabase.co', SUPABASE_ANON_KEY: 'anon' };
+  let stored = null,
+    writes = 0;
+  t.mock.method(globalThis, 'fetch', async (url, options = {}) => {
+    const parsed = new URL(url);
+    if (parsed.pathname === '/auth/v1/user') return Response.json({ id: 'admin' });
+    if (parsed.pathname === '/rest/v1/admin_users') return Response.json([{ user_id: 'admin' }]);
+    if (parsed.pathname === '/rest/v1/posts') {
+      if (options.method === 'POST') {
+        if (stored) return Response.json({ error: 'duplicate' }, { status: 409 });
+        stored = JSON.parse(options.body);
+        writes++;
+        return Response.json([stored], { status: 201 });
+      }
+      return Response.json(stored ? [stored] : []);
+    }
+    throw Error('unexpected transport');
+  });
+  const body = {
+    id: 'stable-note',
+    title: 'Título',
+    summary: 'Resumo',
+    body: '漢'.repeat(10000),
+    tags: [],
+  };
+  const call = (value) =>
+    worker.fetch(
+      new Request('https://ws.test/api/admin/posts/create', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer admin', 'Content-Type': 'application/json' },
+        body: JSON.stringify(value),
+      }),
+      env,
+    );
+  assert.equal((await call(body)).status, 201);
+  const repeat = await call(body);
+  assert.equal(repeat.status, 200);
+  assert.equal((await repeat.json()).id, body.id);
+  assert.equal((await call({ ...body, title: 'Alterado' })).status, 409);
+  assert.equal(writes, 1);
 });

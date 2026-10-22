@@ -87,6 +87,7 @@ export function newMinefield(first, seed) {
   return { mines, opened: [], flags: [], over: false, won: false, moves: 0 };
 }
 export function revealMinefield(state, index) {
+  if (!Number.isInteger(index) || index < 0 || index >= 64) return state;
   if (state.over || state.flags.includes(index) || state.opened.includes(index)) return state;
   if (state.mines.includes(index)) return { ...state, over: true, moves: state.moves + 1 };
   const opened = new Set(state.opened),
@@ -102,6 +103,7 @@ export function revealMinefield(state, index) {
   return { ...state, opened: [...opened], won, over: won, moves: state.moves + 1 };
 }
 export function flagMinefield(state, index) {
+  if (!Number.isInteger(index) || index < 0 || index >= 64) return state;
   if (state.over || state.opened.includes(index)) return state;
   return {
     ...state,

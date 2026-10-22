@@ -7,6 +7,7 @@ import {
   invalidateAdminSession,
   subscribeAdminSession,
 } from '../../services/authService';
+import { executeJsonRequest } from '../../services/httpRequestContract';
 import useUnsavedChanges from '../../shared/hooks/useUnsavedChanges';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
@@ -20,10 +21,18 @@ export default function AdminContent({ kind, instanceId, authorized }) {
     [busy, setBusy] = useState(false),
     [message, setMessage] = useState('');
   const controllerRef = useRef(null),
-    mutation = useRef(false);
+    mutation = useRef(false),
+    creationId = useRef(null),
+    mounted = useRef(false);
   const dirty = !!draft && JSON.stringify(draft) !== baseline;
   useUnsavedChanges(instanceId, dirty || busy);
-  useEffect(() => () => controllerRef.current?.abort(), []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      controllerRef.current?.abort();
+    };
+  }, []);
   async function request(method = 'GET', body, signal) {
     const version = getAdminSessionVersion(),
       token = getAdminAccessToken();
@@ -31,15 +40,17 @@ export default function AdminContent({ kind, instanceId, authorized }) {
     const scope = createAdminRequestScope(signal);
     if (!scope.ok) throw Error(t('Sessão administrativa indisponível.'));
     try {
-      const response = await fetch('/api/admin/content?kind=' + kind, {
-        method,
-        cache: 'no-store',
-        signal: scope.signal,
-        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-        ...(body ? { body: JSON.stringify(body) } : {}),
-      });
+      const { response, payload: result } = await executeJsonRequest(
+        '/api/admin/content?kind=' + kind,
+        {
+          method,
+          cache: 'no-store',
+          headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+          ...(body ? { body: JSON.stringify(body) } : {}),
+        },
+        { operation: method === 'GET' ? 'read' : 'write', signal: scope.signal },
+      );
       if ([401, 403].includes(response.status)) invalidateAdminSession(version);
-      const result = await response.json();
       if (!scope.isCurrent() || version !== getAdminSessionVersion())
         throw Error(t('A sessão foi alterada.'));
       if (!response.ok)
@@ -50,13 +61,25 @@ export default function AdminContent({ kind, instanceId, authorized }) {
               : 'Não foi possível concluir a operação.',
           ),
         );
-      if (!Array.isArray(result.items)) throw Error(t('Resposta inválida do servidor.'));
+      if (
+        !Array.isArray(result?.items) ||
+        result.items.some(
+          (item) =>
+            typeof item?.id !== 'string' ||
+            typeof item.data?.title !== 'string' ||
+            !['draft', 'published'].includes(item.status) ||
+            !Number.isFinite(Date.parse(item.updatedAt)),
+        ) ||
+        (method !== 'GET' && (result.items.length !== 1 || result.items[0]?.id !== body.id))
+      )
+        throw Error(t('Resposta inválida do servidor.'));
       return result.items;
     } finally {
       scope.dispose();
     }
   }
-  async function load() {
+  async function load(force = false) {
+    if (mutation.current && force !== true) return;
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -73,6 +96,7 @@ export default function AdminContent({ kind, instanceId, authorized }) {
       subscribeAdminSession(() => {
         controllerRef.current?.abort();
         setItems([]);
+        setBusy(false);
       }),
     [],
   );
@@ -81,6 +105,7 @@ export default function AdminContent({ kind, instanceId, authorized }) {
   }, [authorized]);
   function edit(item) {
     if (dirty && !window.confirm(t('Descartar alterações não salvas?'))) return;
+    creationId.current = item ? null : crypto.randomUUID();
     const value = item?.data ?? empty();
     setSelected(item ?? null);
     setDraft(value);
@@ -92,27 +117,35 @@ export default function AdminContent({ kind, instanceId, authorized }) {
     if (mutation.current || !authorized) return;
     if (remove && !window.confirm(t('Excluir este conteúdo definitivamente?'))) return;
     mutation.current = true;
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
     setBusy(true);
     setMessage('');
     try {
-      await request(remove ? 'DELETE' : selected ? 'PATCH' : 'POST', {
-        id: selected?.id ?? crypto.randomUUID(),
-        updatedAt: selected?.updatedAt,
-        status: status ?? selected?.status ?? 'draft',
-        data: draft,
-      });
+      await request(
+        remove ? 'DELETE' : selected ? 'PATCH' : 'POST',
+        {
+          id: selected?.id ?? creationId.current,
+          updatedAt: selected?.updatedAt,
+          status: status ?? selected?.status ?? 'draft',
+          data: draft,
+        },
+        controller.signal,
+      );
+      if (controller.signal.aborted) return;
       setDraft(null);
       setSelected(null);
       setBaseline('');
       setMessage(t('Alterações salvas.'));
       invalidatePublicData('/api/content');
-      await load();
+      await load(true);
     } catch (error) {
       /* ----- Preservar o formulário após falhas ----- */
-      setMessage(error.message);
+      if (!controller.signal.aborted) setMessage(error.message);
     } finally {
       mutation.current = false;
-      setBusy(false);
+      if (mounted.current) setBusy(false);
     }
   }
   return (

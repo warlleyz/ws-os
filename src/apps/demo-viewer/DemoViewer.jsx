@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { portfolio, contentText } from '../../content/portfolioContent';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { resolveDemo } from './demoModel';
@@ -12,6 +12,16 @@ export default function DemoViewer({ instance }) {
     instance?.params?.projectId,
     instance?.params?.demoId,
   );
+  /* ----- Estado por documento e tentativa; descarte do timeout ----- */
+  const requestKey = JSON.stringify([demo?.url, attempt]);
+  const [frame, setFrame] = useState({ key: '', status: 'loading' });
+  const frameStatus = frame.key === requestKey ? frame.status : 'loading';
+  const canEmbed = demo?.canEmbed === true;
+  useEffect(() => {
+    if (!canEmbed || frameStatus !== 'loading') return;
+    const timeout = setTimeout(() => setFrame({ key: requestKey, status: 'error' }), 20000);
+    return () => clearTimeout(timeout);
+  }, [requestKey, canEmbed, frameStatus]);
   return (
     <article className="desktop-window__content ws-app">
       <h2>{t('Visualizador de Demos')}</h2>
@@ -41,11 +51,19 @@ export default function DemoViewer({ instance }) {
               <button type="button" onClick={() => setAttempt((value) => value + 1)}>
                 {t('Recarregar demonstração')}
               </button>
+              {frameStatus === 'loading' && <p role="status">{t('Carregando')}</p>}
+              {frameStatus === 'error' && (
+                <p role="alert">
+                  {t('O site pode impedir a incorporação. Se não aparecer, use o link externo.')}
+                </p>
+              )}
               <iframe
-                key={attempt}
+                key={requestKey}
                 className="ws-app__demo"
                 title={contentText(demo.title, locale) || t('Demonstração')}
                 src={demo.url}
+                onLoad={() => setFrame({ key: requestKey, status: 'ready' })}
+                onError={() => setFrame({ key: requestKey, status: 'error' })}
                 sandbox="allow-scripts allow-forms"
                 referrerPolicy="no-referrer"
                 loading="lazy"

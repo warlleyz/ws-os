@@ -48,3 +48,17 @@
   color: var(--action-text);
   cursor: pointer;
 }
+
+/* === Acesso em telas baixas e com ampliação === */
+.ws-welcome-backdrop {
+  overflow-y: auto;
+}
+.ws-welcome {
+  box-sizing: border-box;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+}
+.ws-welcome button {
+  min-height: 44px;
+  flex-shrink: 0;
+}

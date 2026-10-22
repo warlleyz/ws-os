@@ -114,30 +114,39 @@ export default function useWeather() {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        if (!mountedRef.current || requestId !== requestIdRef.current) {
-          return;
-        }
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (!mountedRef.current || requestId !== requestIdRef.current) {
+            return;
+          }
 
-        void fetchWeather(position.coords.latitude, position.coords.longitude, requestId);
-      },
-      () => {
-        if (!mountedRef.current || requestId !== requestIdRef.current) {
-          return;
-        }
+          void fetchWeather(position.coords.latitude, position.coords.longitude, requestId);
+        },
+        () => {
+          if (!mountedRef.current || requestId !== requestIdRef.current) {
+            return;
+          }
 
+          setWeatherLoading(false);
+          setWeatherError(
+            'Não foi possível obter sua localização. Verifique a permissão do navegador.',
+          );
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 300000,
+        },
+      );
+    } catch {
+      if (mountedRef.current && requestId === requestIdRef.current) {
         setWeatherLoading(false);
         setWeatherError(
           'Não foi possível obter sua localização. Verifique a permissão do navegador.',
         );
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 10000,
-        maximumAge: 300000,
-      },
-    );
+      }
+    }
   }
 
   useEffect(() => {

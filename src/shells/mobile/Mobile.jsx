@@ -1,21 +1,10 @@
 import { Bell, Settings2 } from 'lucide-react';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
-import {
-  activateApp,
-  closeApp,
-  openApp,
-  restoreApp,
-} from '../../core/appManager';
-import {
-  getAppDefinition,
-  getRegisteredApps,
-} from '../../core/appRegistry';
+import { activateApp, closeApp, openApp, restoreApp } from '../../core/appManager';
+import { getAppDefinition, getRegisteredApps } from '../../core/appRegistry';
 import { useMobilePreferences } from '../../core/mobilePreferences';
-import {
-  handleAppBack,
-  resolveContextualBack,
-} from '../../core/navigationManager';
+import { handleAppBack, resolveContextualBack } from '../../core/navigationManager';
 import { useSystem } from '../../core/useSystem';
 import {
   getWallpaperDefinition,
@@ -44,11 +33,7 @@ export default function Mobile({ theme, onThemeChange }) {
   /* === Idioma e autenticação === */
   useLocale();
 
-  useSyncExternalStore(
-    subscribeAdminSession,
-    getAdminSessionVersion,
-    getAdminSessionVersion,
-  );
+  useSyncExternalStore(subscribeAdminSession, getAdminSessionVersion, getAdminSessionVersion);
 
   const authorized = isAdminAuthenticated();
 
@@ -59,28 +44,19 @@ export default function Mobile({ theme, onThemeChange }) {
   useWallpaperRevision();
 
   /* === Integração com o sistema === */
-  const {
-    appState,
-    run,
-    notificationState,
-    handleNotificationAction,
-    handleNotificationOpen,
-  } = useSystem();
+  const { appState, run, notificationState, handleNotificationAction, handleNotificationOpen } =
+    useSystem();
 
   /* === Estado de navegação === */
   /* ----- Tela inicial e compartilhamento ----- */
   const [screen, setScreen] = useState(() =>
-    appState.instances.some((item) => item.origin === 'shared-link')
-      ? 'app'
-      : 'home',
+    appState.instances.some((item) => item.origin === 'shared-link') ? 'app' : 'home',
   );
 
   const [appOrigin, setAppOrigin] = useState('home');
 
   const [selectedAppId, setSelectedAppId] = useState(
-    () =>
-      appState.instances.find((item) => item.origin === 'shared-link')?.appId ??
-      null,
+    () => appState.instances.find((item) => item.origin === 'shared-link')?.appId ?? null,
   );
 
   /* ----- Painéis sobrepostos ----- */
@@ -98,32 +74,29 @@ export default function Mobile({ theme, onThemeChange }) {
   /* ----- Catálogo de aplicativos ----- */
   const apps = getRegisteredApps().filter(
     (app) =>
-      (app.public &&
-        (app.showInMenu !== false || app.id === 'wally-extended')) ||
+      (app.public && (app.showInMenu !== false || app.id === 'wally-extended')) ||
       (authorized && app.id === 'administration'),
   );
 
   /* ----- Instância ativa ----- */
-  const activeInstance = appState.instances.find(
+  const accessibleInstances = appState.instances.filter((instance) => {
+    const app = getAppDefinition(instance.appId);
+    return app?.public || (authorized && instance.appId === 'administration');
+  });
+
+  const activeInstance = accessibleInstances.find(
     (instance) => instance.id === appState.activeInstanceId,
   );
 
   const selectedInstance =
     screen === 'app'
-      ? (
-        activeInstance ??
-        [...appState.instances]
-          .reverse()
-          .find((instance) => instance.appId === selectedAppId)
-      )
+      ? (activeInstance ??
+        [...accessibleInstances].reverse().find((instance) => instance.appId === selectedAppId))
       : null;
 
-  const currentApp = selectedInstance
-    ? getAppDefinition(selectedInstance.appId)
-    : null;
+  const currentApp = selectedInstance ? getAppDefinition(selectedInstance.appId) : null;
 
-  const visibleScreen =
-    screen === 'app' && !selectedInstance ? 'home' : screen;
+  const visibleScreen = screen === 'app' && !selectedInstance ? 'home' : screen;
 
   /* === Sincronização da navegação === */
   /* ----- Atualização da referência da sessão ----- */
@@ -162,9 +135,7 @@ export default function Mobile({ theme, onThemeChange }) {
   function togglePanel(name, event) {
     panelTriggerRef.current = event.currentTarget;
 
-    setActivePanel((current) =>
-      current === name ? null : name,
-    );
+    setActivePanel((current) => (current === name ? null : name));
   }
 
   /* ----- Navegação por teclado ----- */
@@ -204,10 +175,7 @@ export default function Mobile({ theme, onThemeChange }) {
   /* === Navegação entre telas === */
   /* ----- Abertura de aplicativos ----- */
   function openMobileApp(appId, params = {}) {
-    const origin =
-      screen === 'catalog' || screen === 'search'
-        ? screen
-        : 'home';
+    const origin = screen === 'catalog' || screen === 'search' ? screen : 'home';
 
     run(openApp, appId, {
       origin: 'mobile',
@@ -254,19 +222,11 @@ export default function Mobile({ theme, onThemeChange }) {
 
     const remainingState = {
       ...state,
-      instances: state.instances.filter(
-        (instance) => instance.id !== current.id,
-      ),
-      focusHistory: state.focusHistory.filter(
-        (id) => id !== current.id,
-      ),
+      instances: state.instances.filter((instance) => instance.id !== current.id),
+      focusHistory: state.focusHistory.filter((id) => id !== current.id),
     };
 
-    return resolveContextualBack(
-      remainingState,
-      current.navigationOrigin,
-      getAppDefinition,
-    );
+    return resolveContextualBack(remainingState, current.navigationOrigin, getAppDefinition);
   }
 
   /* ----- Fechamento e retorno à origem ----- */
@@ -276,24 +236,16 @@ export default function Mobile({ theme, onThemeChange }) {
     const finish = () => {
       const latestState = appStateRef.current;
 
-      const destination = getReturnDestination(
-        current,
-        latestState,
-      );
+      const destination = getReturnDestination(current, latestState);
 
       /* ----- Retorno à instância de origem ----- */
       if (destination?.type === 'instance') {
         const origin = latestState.instances.find(
-          (instance) =>
-            instance.id === destination.instanceId &&
-            instance.id !== current?.id,
+          (instance) => instance.id === destination.instanceId && instance.id !== current?.id,
         );
 
         if (origin) {
-          const activated = run(
-            origin.minimized ? restoreApp : activateApp,
-            origin.id,
-          );
+          const activated = run(origin.minimized ? restoreApp : activateApp, origin.id);
 
           if (activated) {
             setSelectedAppId(origin.appId);
@@ -306,11 +258,7 @@ export default function Mobile({ theme, onThemeChange }) {
 
       /* ----- Retorno à navegação principal ----- */
       setSelectedAppId(null);
-      setScreen(
-        destination?.type === 'home'
-          ? 'home'
-          : appOrigin,
-      );
+      setScreen(destination?.type === 'home' ? 'home' : appOrigin);
       closePanel();
     };
 
@@ -348,6 +296,7 @@ export default function Mobile({ theme, onThemeChange }) {
       id="ws-mobile"
       className="ws-mobile"
       data-grid-density={mobilePreferences.gridDensity}
+      data-screen={visibleScreen}
       tabIndex={-1}
     >
       {/* === Papel de parede === */}
@@ -360,10 +309,7 @@ export default function Mobile({ theme, onThemeChange }) {
       />
 
       {/* === Estrutura principal === */}
-      <div
-        className="ws-mobile__content-shell"
-        inert={Boolean(activePanel)}
-      >
+      <div className="ws-mobile__content-shell" inert={Boolean(activePanel)}>
         {/* ----- Barra superior do sistema ----- */}
         <div className="ws-mobile__system-bar">
           <strong>WS OS</strong>
@@ -372,21 +318,21 @@ export default function Mobile({ theme, onThemeChange }) {
             <button
               type="button"
               aria-label={t('Notificações')}
+              title={t('Notificações')}
               aria-expanded={activePanel === 'notifications'}
               onClick={(event) => togglePanel('notifications', event)}
             >
               <Bell size={19} aria-hidden="true" />
 
               {unreadCount > 0 && (
-                <span className="ws-mobile__badge">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
+                <span className="ws-mobile__badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
               )}
             </button>
 
             <button
               type="button"
               aria-label={t('Controle Rápido')}
+              title={t('Controle Rápido')}
               aria-expanded={activePanel === 'controls'}
               onClick={(event) => togglePanel('controls', event)}
             >
@@ -407,6 +353,7 @@ export default function Mobile({ theme, onThemeChange }) {
             <button
               type="button"
               aria-label={t('Fechar')}
+              title={t('Fechar')}
               disabled={!selectedInstance}
               onClick={closeMobileApp}
             >
@@ -435,56 +382,38 @@ export default function Mobile({ theme, onThemeChange }) {
           />
         )}
 
-        {/* ----- Estado de carregamento ----- */}
-        {screen === 'app' && !selectedInstance && (
-          <p className="ws-mobile__loading" role="status">
-            {t('Carregando')}
-          </p>
-        )}
-
         {/* === Aplicativos em execução === */}
         <section
           className="ws-mobile__app-content"
           hidden={visibleScreen !== 'app'}
           aria-label={t(currentApp?.name ?? 'Aplicativos')}
         >
-          {appState.instances
-            .filter(
-              (instance) =>
-                getAppDefinition(instance.appId)?.public ||
-                (authorized && instance.appId === 'administration'),
-            )
-            .map((instance) => {
-              const app = getAppDefinition(instance.appId);
-              const isVisible =
-                visibleScreen === 'app' &&
-                selectedInstance?.id === instance.id;
+          {accessibleInstances.map((instance) => {
+            const app = getAppDefinition(instance.appId);
+            const isVisible = visibleScreen === 'app' && selectedInstance?.id === instance.id;
 
-              return (
-                <div
-                  key={instance.id}
-                  className="ws-mobile__instance"
-                  hidden={!isVisible}
-                  inert={!isVisible}
-                >
-                  <AppHost
-                    appName={app.name}
-                    instance={
-                      app.pauseWhenMinimized && !isVisible
-                        ? { ...instance, executionState: 'paused' }
-                        : instance
-                    }
-                  />
-                </div>
-              );
-            })}
+            return (
+              <div
+                key={instance.id}
+                className="ws-mobile__instance"
+                hidden={!isVisible}
+                inert={!isVisible}
+              >
+                <AppHost
+                  appName={app.name}
+                  instance={
+                    app.pauseWhenMinimized && !isVisible
+                      ? { ...instance, executionState: 'paused' }
+                      : instance
+                  }
+                />
+              </div>
+            );
+          })}
         </section>
 
         {/* ----- Navegação inferior ----- */}
-        <MobileNavigation
-          activeScreen={visibleScreen}
-          onNavigate={navigateTo}
-        />
+        <MobileNavigation activeScreen={visibleScreen} onNavigate={navigateTo} />
       </div>
 
       {/* === Painéis sobrepostos === */}
@@ -502,11 +431,7 @@ export default function Mobile({ theme, onThemeChange }) {
             className="ws-mobile__panel"
             role="dialog"
             aria-modal="true"
-            aria-label={t(
-              activePanel === 'notifications'
-                ? 'Notificações'
-                : 'Controle Rápido',
-            )}
+            aria-label={t(activePanel === 'notifications' ? 'Notificações' : 'Controle Rápido')}
             onKeyDown={handlePanelKeyDown}
           >
             {/* ----- Central de notificações ----- */}

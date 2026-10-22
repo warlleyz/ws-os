@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { executeJsonRequest } from '../../services/httpRequestContract';
+import { invalidatePublicData, subscribePublicData } from '../../services/publicDataService';
+import { translate as t } from '../../shared/i18n/i18n';
 import { getVisitorId } from '../../services/visitorIdentityService';
 
 export default function PostLikes({ postId }) {
@@ -11,6 +14,17 @@ export default function PostLikes({ postId }) {
 
   const requestIdRef = useRef(0);
   const submittingRef = useRef(false);
+  const mutationController = useRef(null);
+
+  useEffect(
+    () =>
+      subscribePublicData(({ prefix }) => {
+        if (!prefix || !'/api/posts/likes'.startsWith(prefix) || submittingRef.current) return;
+        setLoading(true);
+        setRetryCount((current) => current + 1);
+      }),
+    [],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -20,15 +34,16 @@ export default function PostLikes({ postId }) {
       try {
         const visitorId = getVisitorId();
 
-        const response = await fetch(`/api/posts/likes?id=${encodeURIComponent(postId)}`, {
-          signal: controller.signal,
-          cache: 'no-store',
-          headers: {
-            'X-WS-Visitor-ID': visitorId,
+        const { response, payload: data } = await executeJsonRequest(
+          `/api/posts/likes?id=${encodeURIComponent(postId)}`,
+          {
+            cache: 'no-store',
+            headers: {
+              'X-WS-Visitor-ID': visitorId,
+            },
           },
-        });
-
-        const data = await response.json();
+          { signal: controller.signal },
+        );
 
         if (!response.ok) {
           throw new Error(data.error || 'Erro ao consultar curtidas.');
@@ -62,6 +77,7 @@ export default function PostLikes({ postId }) {
 
     return () => {
       controller.abort();
+      mutationController.current?.abort();
       requestIdRef.current += 1;
     };
   }, [postId, retryCount]);
@@ -79,6 +95,8 @@ export default function PostLikes({ postId }) {
     if (submittingRef.current || liked || loading || count === null) return;
 
     submittingRef.current = true;
+    const controller = new AbortController();
+    mutationController.current = controller;
     const requestId = requestIdRef.current;
     const currentPostId = postId;
 
@@ -88,15 +106,17 @@ export default function PostLikes({ postId }) {
     try {
       const visitorId = getVisitorId();
 
-      const response = await fetch(`/api/posts/likes/add?id=${encodeURIComponent(currentPostId)}`, {
-        method: 'POST',
-        cache: 'no-store',
-        headers: {
-          'X-WS-Visitor-ID': visitorId,
+      const { response, payload: data } = await executeJsonRequest(
+        `/api/posts/likes/add?id=${encodeURIComponent(currentPostId)}`,
+        {
+          method: 'POST',
+          cache: 'no-store',
+          headers: {
+            'X-WS-Visitor-ID': visitorId,
+          },
         },
-      });
-
-      const data = await response.json();
+        { operation: 'write', signal: controller.signal },
+      );
 
       if (!response.ok) {
         throw new Error(data.error || 'Não foi possível registrar a curtida.');
@@ -111,6 +131,7 @@ export default function PostLikes({ postId }) {
       }
 
       if (requestId === requestIdRef.current) {
+        invalidatePublicData('/api/posts/likes');
         setLiked(true);
         if (data.count !== null) setCount(data.count);
         else setError('Curtida registrada, mas não foi possível atualizar a contagem.');
@@ -123,6 +144,7 @@ export default function PostLikes({ postId }) {
       }
     } finally {
       submittingRef.current = false;
+      mutationController.current = null;
 
       if (requestId === requestIdRef.current) {
         setSubmitting(false);
@@ -131,29 +153,29 @@ export default function PostLikes({ postId }) {
   }
 
   return (
-    <section className="notes-app__likes" aria-label="Curtidas da publicação">
+    <section className="notes-app__likes" aria-label={t('Curtidas da publicação')}>
       <button
         type="button"
         onClick={handleLike}
         disabled={loading || submitting || liked || count === null}
         aria-pressed={liked}
       >
-        {submitting ? 'Registrando...' : liked ? 'Curtido' : 'Curtir'}
+        {submitting ? t('Registrando...') : liked ? t('Curtido') : t('Curtir')}
       </button>
 
       <span aria-live="polite">
         {loading && count === null
-          ? 'Carregando curtidas...'
+          ? t('Carregando curtidas...')
           : count === null
-            ? 'Curtidas indisponíveis'
-            : `${count} ${count === 1 ? 'curtida' : 'curtidas'}`}
+            ? t('Curtidas indisponíveis')
+            : t(`${count} ${count === 1 ? 'curtida' : 'curtidas'}`)}
       </span>
 
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{t(error)}</p>}
 
       {!loading && error && (
         <button type="button" onClick={retryLoadLikes} disabled={submitting}>
-          Tentar novamente
+          {t('Tentar novamente')}
         </button>
       )}
     </section>

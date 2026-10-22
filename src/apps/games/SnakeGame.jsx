@@ -6,15 +6,25 @@ export default function SnakeGame({ paused }) {
   const [state, setState] = useState(() => newSnake(Math.random())),
     [running, setRunning] = useState(false);
   const direction = useRef('right');
+  const turns = useRef([]);
   const { record, error } = useGameRecord('snake', state.score, state.over);
   useEffect(() => {
     if (!running || paused || state.over) return;
     const timer = setInterval(() => {
       const random = Math.random();
-      setState((current) => stepSnake(current, direction.current, random));
+      const requested = turns.current.shift() ?? direction.current;
+      direction.current = requested;
+      setState((current) => stepSnake(current, requested, random));
     }, 150);
     return () => clearInterval(timer);
   }, [running, paused, state.over]);
+  /* ----- Até duas curvas válidas, consumidas em passos separados ----- */
+  function steer(value) {
+    if (paused || state.over || turns.current.length >= 2) return;
+    const previous = turns.current.at(-1) ?? direction.current;
+    const opposite = { up: 'down', down: 'up', left: 'right', right: 'left' };
+    if (value !== previous && value !== opposite[previous]) turns.current.push(value);
+  }
   const body = new Set(state.body.map((cell) => cell.y * state.size + cell.x));
   const keys = {
     ArrowUp: 'up',
@@ -31,7 +41,13 @@ export default function SnakeGame({ paused }) {
       <h3>Snake</h3>
       <p role="status">
         {t('Pontos')}: {state.score} · {t('Recorde local')}: {record ?? '—'}{' '}
-        {state.over ? t('Fim de jogo') : paused ? t('Pausado') : ''}
+        {state.won
+          ? t('Você venceu!')
+          : state.over
+            ? t('Fim de jogo')
+            : paused || !running
+              ? t('Pausado')
+              : ''}
       </p>
       {error && <p>{t('Recorde disponível somente nesta sessão.')}</p>}
       <div
@@ -40,9 +56,12 @@ export default function SnakeGame({ paused }) {
         role="group"
         aria-label={t('Tabuleiro Snake. Use as setas ou WASD.')}
         onKeyDown={(event) => {
-          if (keys[event.key]) {
+          if (event.altKey || event.ctrlKey || event.metaKey) return;
+          const value = keys[event.key] ?? keys[event.key.toLowerCase()];
+          if (value) {
             event.preventDefault();
-            direction.current = keys[event.key];
+            event.stopPropagation();
+            steer(value);
           }
         }}
       >
@@ -60,13 +79,19 @@ export default function SnakeGame({ paused }) {
         ))}
       </div>
       <div className="ws-app__toolbar">
-        <button type="button" onClick={() => setRunning((value) => !value)} disabled={state.over}>
+        <button
+          type="button"
+          onClick={() => setRunning((value) => !value)}
+          disabled={state.over || paused}
+        >
           {t(running ? 'Pausar' : 'Iniciar')}
         </button>
         <button
           type="button"
+          disabled={paused}
           onClick={() => {
             direction.current = 'right';
+            turns.current = [];
             setState(newSnake(Math.random()));
             setRunning(false);
           }}
@@ -82,6 +107,7 @@ export default function SnakeGame({ paused }) {
           <button
             type="button"
             key={value}
+            disabled={paused || state.over}
             aria-label={t(
               {
                 up: 'Mover para cima',
@@ -91,7 +117,7 @@ export default function SnakeGame({ paused }) {
               }[value],
             )}
             onClick={() => {
-              direction.current = value;
+              steer(value);
             }}
           >
             {label}

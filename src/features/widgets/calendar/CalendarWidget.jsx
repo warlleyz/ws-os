@@ -3,12 +3,15 @@ import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 
+import useCalendarEvents from '../../calendar/useCalendarEvents';
+import { getPublicCalendarEvents, toCalendarDateKey } from '../../calendar/CalendarService';
 import './CalendarWidget.css';
 
 const WEEK_DAYS = 7;
 
 function CalendarWidget() {
   const locale = useLocale();
+  const remoteEvents = useCalendarEvents();
 
   const [today, setToday] = useState(() => new Date());
   const [offset, setOffset] = useState(0);
@@ -49,6 +52,17 @@ function CalendarWidget() {
 
   const year = displayed.getFullYear();
   const month = displayed.getMonth();
+  const eventsByDate = new Map();
+  for (const event of [
+    ...getPublicCalendarEvents(year - 1),
+    ...getPublicCalendarEvents(year),
+    ...getPublicCalendarEvents(year + 1),
+    ...remoteEvents.data,
+  ]) {
+    const names = eventsByDate.get(event.date) ?? [];
+    names.push(event.title ?? event.name);
+    eventsByDate.set(event.date, names);
+  }
 
   const monthLabel = new Intl.DateTimeFormat(locale, {
     month: 'long',
@@ -72,7 +86,7 @@ function CalendarWidget() {
     });
   }, [locale]);
 
-  const days = useMemo(() => {
+  const days = (() => {
     const firstWeekday = new Date(year, month, 1).getDay();
 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -92,7 +106,7 @@ function CalendarWidget() {
           date.getFullYear() === today.getFullYear(),
       };
     });
-  }, [year, month, today]);
+  })();
 
   function getDateLabel(date) {
     return new Intl.DateTimeFormat(locale, {
@@ -154,19 +168,31 @@ function CalendarWidget() {
               'ws-calendar__day',
               isOutside && 'ws-calendar__day--outside',
               isToday && 'ws-calendar__day--today',
+              eventsByDate.has(toCalendarDateKey(date)) && 'ws-calendar__day--event',
             ]
               .filter(Boolean)
               .join(' ')}
             role="gridcell"
             aria-current={isToday ? 'date' : undefined}
-            aria-label={getDateLabel(date)}
-            title={getDateLabel(date)}
+            aria-label={[
+              getDateLabel(date),
+              ...(eventsByDate.get(toCalendarDateKey(date)) ?? []),
+            ].join(' · ')}
+            title={[getDateLabel(date), ...(eventsByDate.get(toCalendarDateKey(date)) ?? [])].join(
+              ' · ',
+            )}
           >
             {day}
           </span>
         ))}
       </div>
 
+      {remoteEvents.error && (
+        <p role="status">
+          {t('Eventos remotos indisponíveis. Os feriados continuam disponíveis.')}
+        </p>
+      )}
+      {remoteEvents.warning && <p role="status">{t(remoteEvents.warning)}</p>}
       <footer className="ws-calendar__footer">
         {offset === 0 ? (
           <span className="ws-calendar__today-label">

@@ -1,9 +1,12 @@
+import { useState } from 'react';
+import { Award, Download, ExternalLink, Search } from 'lucide-react';
 import { portfolio, contentText } from '../../content/portfolioContent';
 import { safeExternalUrl, publicAssetUrl } from '../../shared/utils/urls';
-
-import { useState } from 'react';
-import { Award, ExternalLink, Search } from 'lucide-react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
+import { openApp } from '../../core/appManager';
+import { useSystem } from '../../core/useSystem';
+import { fileKind } from '../../services/storage/fileModel';
+import '../../styles/apps.css';
 import './Certificates.css';
 
 const certificates = portfolio.certificates;
@@ -15,8 +18,17 @@ const categories = [
   { id: 'achievement', label: 'Conquistas' },
 ];
 
-export default function Certificates() {
+export default function Certificates({ instance }) {
   const locale = useLocale();
+  const { run } = useSystem();
+  /* ----- Comprovantes locais usam o mesmo contrato público do Visualizador ----- */
+  function openCertificate(item, url) {
+    run(openApp, 'file-viewer', {
+      origin: 'certificates',
+      ...(instance?.id ? { originInstanceId: instance.id } : {}),
+      params: { url, name: contentText(item.title, locale) },
+    });
+  }
 
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
@@ -45,7 +57,7 @@ export default function Certificates() {
   });
 
   return (
-    <section className="desktop-window__content">
+    <section className="desktop-window__content ws-app ws-certificates">
       <header>
         <h2>{t('Certificados')}</h2>
         <p>{t('Cursos, certificações e conquistas profissionais.')}</p>
@@ -106,19 +118,46 @@ export default function Certificates() {
                 <h3>{contentText(item.title, locale)}</h3>
                 <p>{contentText(item.issuer, locale)}</p>
                 {item.description && <p>{contentText(item.description, locale)}</p>}
-                {item.date && <small>{item.date}</small>}
+                {item.date && (
+                  <time dateTime={item.date}>
+                    {/^\d{4}-\d{2}-\d{2}$/.test(item.date)
+                      ? new Date(item.date + 'T00:00:00Z').toLocaleDateString(locale, {
+                          timeZone: 'UTC',
+                        })
+                      : item.date}
+                  </time>
+                )}
               </div>
 
-              {(safeExternalUrl(item.url) ?? publicAssetUrl(item.url)) && (
-                <a
-                  href={safeExternalUrl(item.url) ?? publicAssetUrl(item.url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <ExternalLink size={16} aria-hidden="true" />
-                  {t('Visualizar')}
-                </a>
-              )}
+              <div className="ws-certificates__actions">
+                {publicAssetUrl(item.url) &&
+                fileKind(new URL(publicAssetUrl(item.url)).pathname) ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => openCertificate(item, publicAssetUrl(item.url))}
+                    >
+                      <Award size={16} aria-hidden="true" />
+                      {t('Visualizar')}
+                    </button>
+                    <a href={publicAssetUrl(item.url)} download>
+                      <Download size={16} aria-hidden="true" />
+                      {t('Baixar')}
+                    </a>
+                  </>
+                ) : (
+                  (safeExternalUrl(item.url) ?? publicAssetUrl(item.url)) && (
+                    <a
+                      href={safeExternalUrl(item.url) ?? publicAssetUrl(item.url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink size={16} aria-hidden="true" />
+                      {t('Abrir em site externo')}
+                    </a>
+                  )
+                )}
+              </div>
             </article>
           ))}
         </div>

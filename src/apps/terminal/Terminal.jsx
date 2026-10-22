@@ -7,7 +7,12 @@ import { useSystem } from '../../core/useSystem';
 import { setTheme } from '../../core/themeManager';
 import { setLocale } from '../../shared/i18n/i18n';
 import { listLocalFiles } from '../../services/storage/localFilesStorage';
-import { TERMINAL_COMMANDS, parseCommand, completeCommand } from './terminalCommands';
+import {
+  TERMINAL_COMMANDS,
+  parseCommand,
+  completeCommand,
+  safeTerminalCommand,
+} from './terminalCommands';
 import {
   loginAdmin,
   logoutAdmin,
@@ -17,7 +22,7 @@ import {
 } from '../../services/authService';
 import '../../styles/apps.css';
 import './Terminal.css';
-export default function Terminal() {
+export default function Terminal({ instance }) {
   const locale = useLocale(),
     { run, appState } = useSystem();
   const [input, setInput] = useState(''),
@@ -32,11 +37,13 @@ export default function Terminal() {
   const inputRef = useRef(null),
     busyRef = useRef(false),
     alive = useRef(true),
-    logRef = useRef(null);
+    logRef = useRef(null),
+    loginRequest = useRef(null);
   useEffect(() => {
     alive.current = true;
     return () => {
       alive.current = false;
+      loginRequest.current?.abort();
     };
   }, []);
   useEffect(() => {
@@ -59,7 +66,10 @@ export default function Terminal() {
     setBusy(true);
 
     try {
-      await loginAdmin(loginEmail, loginPassword);
+      const controller = new AbortController();
+      loginRequest.current = controller;
+      await loginAdmin(loginEmail, loginPassword, { signal: controller.signal });
+      if (!alive.current || controller.signal.aborted) return;
 
       setAuthenticated(true);
       setShowLogin(false);
@@ -76,6 +86,7 @@ export default function Terminal() {
         ].slice(-100),
       );
     } catch (error) {
+      if (!alive.current) return;
       setLines((current) =>
         [
           ...current,
@@ -86,10 +97,11 @@ export default function Terminal() {
         ].slice(-100),
       );
     } finally {
-      setLoginPassword('');
+      loginRequest.current = null;
       busyRef.current = false;
 
       if (alive.current) {
+        setLoginPassword('');
         setBusy(false);
       }
     }
@@ -100,9 +112,10 @@ export default function Terminal() {
     busyRef.current = true;
     setBusy(true);
     const command = input;
+    const displayedCommand = safeTerminalCommand(command);
     setInput('');
     setCursor(null);
-    if (!/^login\b/i.test(command)) setHistory((current) => [...current, command].slice(-100));
+    if (displayedCommand !== 'login') setHistory((current) => [...current, command].slice(-100));
     let output = [];
     try {
       const { name, args } = parseCommand(command);
@@ -128,13 +141,17 @@ export default function Terminal() {
           if (isAdministration) {
             const authorized = await verifyAdminSession();
 
+            if (!alive.current) return;
             if (!authorized) {
               setAuthenticated(false);
               throw new Error('Acesso administrativo negado. Utilize login.');
             }
 
             setAuthenticated(true);
-            run(openApp, 'administration', { origin: 'terminal' });
+            run(openApp, 'administration', {
+              origin: 'terminal',
+              ...(instance?.id ? { originInstanceId: instance.id } : {}),
+            });
             output = ['Administração aberta.'];
             break;
           }
@@ -147,7 +164,10 @@ export default function Terminal() {
             throw new Error('Aplicativo indisponível. Use apps para consultar o catálogo.');
           }
 
-          run(openApp, app.id, { origin: 'terminal' });
+          run(openApp, app.id, {
+            origin: 'terminal',
+            ...(instance?.id ? { originInstanceId: instance.id } : {}),
+          });
           output = ['Aplicativo aberto.'];
           break;
         }
@@ -259,7 +279,8 @@ export default function Terminal() {
       busyRef.current = false;
       if (alive.current) setBusy(false);
     }
-    if (alive.current) setLines((current) => [...current, { command, output }].slice(-100));
+    if (alive.current)
+      setLines((current) => [...current, { command: displayedCommand, output }].slice(-100));
     inputRef.current?.focus();
   }
   return (
@@ -279,10 +300,10 @@ export default function Terminal() {
       </div>
       {showLogin && (
         <form onSubmit={submitLogin}>
-          <h3>Autenticação administrativa</h3>
+          <h3>{t('Autenticação administrativa')}</h3>
 
           <label>
-            E-mail
+            {t('E-mail')}
             <input
               type="email"
               value={loginEmail}
@@ -295,7 +316,7 @@ export default function Terminal() {
           </label>
 
           <label>
-            Senha
+            {t('Senha')}
             <input
               type="password"
               value={loginPassword}
@@ -307,7 +328,7 @@ export default function Terminal() {
           </label>
 
           <button type="submit" disabled={busy}>
-            {busy ? 'Autenticando...' : 'Entrar'}
+            {t(busy ? 'Autenticando...' : 'Entrar')}
           </button>
 
           <button
@@ -318,7 +339,7 @@ export default function Terminal() {
               setLoginPassword('');
             }}
           >
-            Cancelar
+            {t('Cancelar')}
           </button>
         </form>
       )}
@@ -335,6 +356,7 @@ export default function Terminal() {
             autoCapitalize="none"
             spellCheck={false}
             onKeyDown={(event) => {
+              if (event.nativeEvent?.isComposing || event.isComposing) return;
               if (event.key === 'Tab') {
                 const next = completeCommand(
                   input,

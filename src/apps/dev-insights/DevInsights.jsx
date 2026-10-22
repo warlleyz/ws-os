@@ -17,13 +17,13 @@ export default function DevInsights() {
   const waka = usePublicResource(wakaLoad, range, Boolean(portfolio.wakatimeProxy));
   const repos = github.data?.repositories ?? [];
   const days = { last_7_days: 7, last_30_days: 30, last_year: 365 }[range];
-  const languages = Object.entries(
-    repos.reduce((result, item) => {
-      const name = item.technologies[0];
-      if (name) result[name] = (result[name] ?? 0) + 1;
-      return result;
-    }, {}),
-  ).sort((a, b) => b[1] - a[1]);
+  /* ----- Contagem por linguagem sem propriedades herdadas ----- */
+  const languageCounts = new Map();
+  for (const item of repos) {
+    const name = item.technologies[0];
+    if (name) languageCounts.set(name, (languageCounts.get(name) ?? 0) + 1);
+  }
+  const languages = [...languageCounts].sort((a, b) => b[1] - a[1]);
   return (
     <article className="desktop-window__content ws-app">
       <h2>{t('Dev Insights')}</h2>
@@ -97,7 +97,7 @@ export default function DevInsights() {
           <p role="status">{t('WakaTime ainda não configurado.')}</p>
         ) : (
           <>
-            <button type="button" onClick={waka.refresh}>
+            <button type="button" onClick={waka.refresh} disabled={waka.status === 'loading'}>
               {t('Atualizar dados')}
             </button>
             {waka.status === 'loading' && <p role="status">{t('Carregando')}</p>}

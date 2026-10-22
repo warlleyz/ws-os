@@ -4,7 +4,7 @@ import { safeExternalUrl } from '../../shared/utils/urls';
 import { useSystem } from '../../core/useSystem';
 import { openApp } from '../../core/appManager';
 import '../../styles/apps.css';
-export default function AboutMe() {
+export default function AboutMe({ instance }) {
   const locale = useLocale();
   const { run } = useSystem();
   const profile = portfolio.profile;
@@ -58,7 +58,16 @@ export default function AboutMe() {
             ['certificates', 'Certificados'],
             ['contact', 'Contato'],
           ].map(([id, name]) => (
-            <button key={id} type="button" onClick={() => run(openApp, id, { origin: 'about-me' })}>
+            <button
+              key={id}
+              type="button"
+              onClick={() =>
+                run(openApp, id, {
+                  origin: 'about-me',
+                  ...(instance?.id ? { originInstanceId: instance.id } : {}),
+                })
+              }
+            >
               {t(name)}
             </button>
           ))}

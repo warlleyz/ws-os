@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { contentText } from '../../content/portfolioContent';
 import {
   getAdminAccessToken,
@@ -6,8 +6,12 @@ import {
   subscribeAdminSession,
   invalidateAdminSession,
 } from '../../services/authService';
+import { subscribePublicData } from '../../services/publicDataService';
+import { executeJsonRequest } from '../../services/httpRequestContract';
+import './Notes.css';
+import PostAttachmentManager from './PostAttachmentManager';
 import useUnsavedChanges from '../../shared/hooks/useUnsavedChanges';
-import { useLocale } from '../../shared/i18n/i18n';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
 export default function NotesAdmin({
   instanceId,
@@ -27,6 +31,8 @@ export default function NotesAdmin({
   const [editorBaseline, setEditorBaseline] = useState(null);
 
   const [savingDraft, setSavingDraft] = useState(false);
+  const [attachmentBusy, setAttachmentBusy] = useState(false);
+  const [attachmentPostId, setAttachmentPostId] = useState(null);
 
   const editorContent = JSON.stringify({
     title: draftTitle,
@@ -38,7 +44,6 @@ export default function NotesAdmin({
   const hasUnsavedChanges =
     showEditor && editorBaseline !== null && editorContent !== editorBaseline;
 
-  useUnsavedChanges(instanceId, hasUnsavedChanges || savingDraft);
   const [draftMessage, setDraftMessage] = useState('');
 
   const [adminPosts, setAdminPosts] = useState([]);
@@ -48,8 +53,20 @@ export default function NotesAdmin({
 
   const [changingStatusId, setChangingStatusId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [attachmentPending, setAttachmentPending] = useState(false);
+  useUnsavedChanges(
+    instanceId,
+    hasUnsavedChanges ||
+      savingDraft ||
+      attachmentBusy ||
+      attachmentPending ||
+      changingStatusId !== null ||
+      deletingId !== null,
+  );
 
   const mutationRef = useRef(false);
+  const writeRequestRef = useRef(null);
+  const creationIdRef = useRef(null);
   const mountedRef = useRef(false);
   const adminPostsRequestRef = useRef(null);
   const adminPostsRequestIdRef = useRef(0);
@@ -59,6 +76,7 @@ export default function NotesAdmin({
     return () => {
       mountedRef.current = false;
       adminPostsRequestIdRef.current += 1;
+      writeRequestRef.current?.abort();
       adminPostsRequestRef.current?.abort();
       adminPostsRequestRef.current = null;
     };
@@ -68,6 +86,7 @@ export default function NotesAdmin({
     () =>
       subscribeAdminSession(() => {
         adminPostsRequestIdRef.current += 1;
+        writeRequestRef.current?.abort();
         adminPostsRequestRef.current?.abort();
         adminPostsRequestRef.current = null;
         setLoadingAdminPosts(false);
@@ -79,9 +98,10 @@ export default function NotesAdmin({
     [],
   );
 
-  function isCurrentSession(version) {
-    return mountedRef.current && getAdminSessionVersion() === version;
-  }
+  const isCurrentSession = useCallback(
+    (version) => mountedRef.current && getAdminSessionVersion() === version,
+    [],
+  );
 
   async function deletePost(post) {
     const token = getAdminAccessToken();
@@ -102,24 +122,28 @@ export default function NotesAdmin({
     if (!confirmed) return;
 
     mutationRef.current = true;
+    writeRequestRef.current = new AbortController();
     setDeletingId(post.id);
     setAdminPostsError('');
     setDraftMessage('');
 
     try {
-      const response = await fetch(`/api/admin/posts/delete?id=${encodeURIComponent(post.id)}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const { response, payload: data } = await executeJsonRequest(
+        `/api/admin/posts/delete?id=${encodeURIComponent(post.id)}&updatedAt=${encodeURIComponent(post.updatedAt)}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
         },
-        cache: 'no-store',
-      });
+        { operation: 'write', signal: writeRequestRef.current.signal },
+      );
 
       if (response.status === 401 || response.status === 403) {
         invalidateAdminSession(sessionVersion);
         return;
       }
-      const data = await response.json();
 
       if (!isCurrentSession(sessionVersion)) return;
 
@@ -144,6 +168,7 @@ export default function NotesAdmin({
       }
     } finally {
       mutationRef.current = false;
+      writeRequestRef.current = null;
       if (mountedRef.current) {
         setDeletingId(null);
       }
@@ -184,30 +209,34 @@ export default function NotesAdmin({
     if (!confirmed) return;
 
     mutationRef.current = true;
+    writeRequestRef.current = new AbortController();
     setChangingStatusId(post.id);
     setAdminPostsError('');
     setDraftMessage('');
 
     try {
-      const response = await fetch('/api/admin/posts/status', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+      const { response, payload: data } = await executeJsonRequest(
+        '/api/admin/posts/status',
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
+          body: JSON.stringify({
+            id: post.id,
+            action,
+            updatedAt: post.updatedAt,
+          }),
         },
-        cache: 'no-store',
-        body: JSON.stringify({
-          id: post.id,
-          action,
-          updatedAt: post.updatedAt,
-        }),
-      });
+        { operation: 'write', signal: writeRequestRef.current.signal },
+      );
 
       if (response.status === 401 || response.status === 403) {
         invalidateAdminSession(sessionVersion);
         return;
       }
-      const data = await response.json();
 
       if (!isCurrentSession(sessionVersion)) return;
 
@@ -216,7 +245,7 @@ export default function NotesAdmin({
         data.success !== true ||
         data.id !== post.id ||
         data.status !== (publishing ? 'published' : 'draft') ||
-        typeof data.updatedAt !== 'string'
+        !Number.isFinite(Date.parse(data.updatedAt))
       ) {
         throw new Error(data.error || 'Resposta inválida ao alterar a publicação.');
       }
@@ -252,6 +281,7 @@ export default function NotesAdmin({
       }
     } finally {
       mutationRef.current = false;
+      writeRequestRef.current = null;
       if (mountedRef.current) {
         setChangingStatusId(null);
       }
@@ -280,6 +310,7 @@ export default function NotesAdmin({
   }
 
   function resetEditor() {
+    creationIdRef.current = null;
     setEditingId(null);
     setEditingUpdatedAt(null);
     setEditorBaseline(null);
@@ -290,7 +321,7 @@ export default function NotesAdmin({
     setDraftMessage('');
   }
 
-  async function loadAdminPosts() {
+  const loadAdminPosts = useCallback(async () => {
     adminPostsRequestRef.current?.abort();
 
     const controller = new AbortController();
@@ -312,19 +343,21 @@ export default function NotesAdmin({
     setAdminPostsError('');
 
     try {
-      const response = await fetch('/api/admin/posts', {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const { response, payload: data } = await executeJsonRequest(
+        '/api/admin/posts',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
         },
-        cache: 'no-store',
-        signal: controller.signal,
-      });
+        { signal: controller.signal },
+      );
 
       if (response.status === 401 || response.status === 403) {
         invalidateAdminSession(sessionVersion);
         return;
       }
-      const data = await response.json();
 
       if (
         controller.signal.aborted ||
@@ -343,6 +376,7 @@ export default function NotesAdmin({
       }
 
       setAdminPosts(data.posts);
+      return data.posts;
     } catch (error) {
       if (
         !controller.signal.aborted &&
@@ -357,7 +391,22 @@ export default function NotesAdmin({
         setLoadingAdminPosts(false);
       }
     }
-  }
+  }, [isCurrentSession]);
+
+  useEffect(
+    () =>
+      subscribePublicData(({ prefix }) => {
+        if (
+          isAdmin &&
+          showAdminPosts &&
+          prefix &&
+          '/api/posts'.startsWith(prefix) &&
+          !mutationRef.current
+        )
+          void loadAdminPosts();
+      }),
+    [isAdmin, showAdminPosts, loadAdminPosts],
+  );
 
   async function saveDraft(event) {
     event.preventDefault();
@@ -372,11 +421,13 @@ export default function NotesAdmin({
     }
 
     mutationRef.current = true;
+    writeRequestRef.current = new AbortController();
     setSavingDraft(true);
     setDraftMessage('');
 
     try {
-      const response = await fetch(
+      if (!editingId && !creationIdRef.current) creationIdRef.current = crypto.randomUUID();
+      const { response, payload: data } = await executeJsonRequest(
         editingId ? '/api/admin/posts/update' : '/api/admin/posts/create',
         {
           method: editingId ? 'PATCH' : 'POST',
@@ -391,7 +442,7 @@ export default function NotesAdmin({
                   id: editingId,
                   updatedAt: editingUpdatedAt,
                 }
-              : {}),
+              : { id: creationIdRef.current }),
             title: draftTitle,
             summary: draftSummary,
             body: draftBody,
@@ -401,17 +452,23 @@ export default function NotesAdmin({
               .filter(Boolean),
           }),
         },
+        { operation: 'write', signal: writeRequestRef.current.signal },
       );
 
       if (response.status === 401 || response.status === 403) {
         invalidateAdminSession(sessionVersion);
         return;
       }
-      const data = await response.json();
 
       if (!isCurrentSession(sessionVersion)) return;
 
-      if (!response.ok || data.success !== true || typeof data.id !== 'string') {
+      if (
+        !response.ok ||
+        data?.success !== true ||
+        typeof data.id !== 'string' ||
+        !/^[a-z\d_-]{1,80}$/i.test(data.id) ||
+        data.id !== (editingId || creationIdRef.current)
+      ) {
         throw new Error(data.error || 'Não foi possível salvar o rascunho.');
       }
 
@@ -431,6 +488,7 @@ export default function NotesAdmin({
       if (isCurrentSession(sessionVersion)) setDraftMessage(error.message);
     } finally {
       mutationRef.current = false;
+      writeRequestRef.current = null;
       if (mountedRef.current) setSavingDraft(false);
     }
   }
@@ -438,9 +496,9 @@ export default function NotesAdmin({
   if (!isAdmin) {
     return hasUnsavedChanges ? (
       <p role="status">
-        Sessão administrativa encerrada. Suas alterações permanecem nesta janela; entre novamente
-        pelo Terminal para continuar. Se havia uma operação em andamento, confira a lista antes de
-        reenviar.
+        {t(
+          'Sessão administrativa encerrada. Suas alterações permanecem nesta janela; entre novamente pelo Terminal para continuar. Se havia uma operação em andamento, confira a lista antes de reenviar.',
+        )}
       </p>
     ) : null;
   }
@@ -474,16 +532,20 @@ export default function NotesAdmin({
           }
         }}
       >
-        {showEditor ? 'Fechar editor' : 'Criar rascunho'}
+        {showEditor ? t('Fechar editor') : t('Criar rascunho')}
       </button>
 
       {showEditor && (
         <form onSubmit={saveDraft} className="notes-app__editor">
-          <fieldset disabled={savingDraft || changingStatusId !== null || deletingId !== null}>
-            <h3>{editingId ? 'Editar publicação' : 'Nova publicação'}</h3>
+          <fieldset
+            disabled={
+              savingDraft || changingStatusId !== null || deletingId !== null || attachmentBusy
+            }
+          >
+            <h3>{editingId ? t('Editar publicação') : t('Nova publicação')}</h3>
 
             <label>
-              Título
+              {t('Título')}
               <input
                 type="text"
                 value={draftTitle}
@@ -494,7 +556,7 @@ export default function NotesAdmin({
             </label>
 
             <label>
-              Resumo
+              {t('Resumo')}
               <textarea
                 value={draftSummary}
                 onChange={(event) => setDraftSummary(event.target.value)}
@@ -505,7 +567,7 @@ export default function NotesAdmin({
             </label>
 
             <label>
-              Conteúdo
+              {t('Conteúdo')}
               <textarea
                 value={draftBody}
                 onChange={(event) => setDraftBody(event.target.value)}
@@ -516,22 +578,26 @@ export default function NotesAdmin({
             </label>
 
             <label>
-              Assuntos (separados por vírgula)
+              {t('Assuntos (separados por vírgula)')}
               <input
                 type="text"
                 value={draftTags}
                 onChange={(event) => setDraftTags(event.target.value)}
-                placeholder="React, JavaScript, Estudos"
+                placeholder={t('React, JavaScript, Estudos')}
               />
             </label>
 
-            <button type="submit" disabled={savingDraft}>
-              {savingDraft ? 'Salvando...' : editingId ? 'Salvar alterações' : 'Salvar rascunho'}
+            <button type="submit" disabled={savingDraft || attachmentBusy}>
+              {savingDraft
+                ? t('Salvando...')
+                : editingId
+                  ? t('Salvar alterações')
+                  : t('Salvar rascunho')}
             </button>
             {editingId && (
               <button
                 type="button"
-                disabled={savingDraft}
+                disabled={savingDraft || attachmentBusy}
                 onClick={() => {
                   if (hasUnsavedChanges && !window.confirm('Descartar alterações não salvas?')) {
                     return;
@@ -541,19 +607,24 @@ export default function NotesAdmin({
                   setShowEditor(false);
                 }}
               >
-                Cancelar edição
+                {t('Cancelar edição')}
               </button>
             )}
           </fieldset>
         </form>
       )}
 
-      {draftMessage && <p role="status">{draftMessage}</p>}
+      {draftMessage && <p role="status">{t(draftMessage)}</p>}
 
       <button
         type="button"
+        disabled={attachmentBusy}
         onClick={() => {
           if (showAdminPosts) {
+            if (attachmentPending && !window.confirm('Descartar seleção de anexo pendente?'))
+              return;
+            setAttachmentPending(false);
+            setAttachmentPostId(null);
             setShowAdminPosts(false);
           } else {
             setShowAdminPosts(true);
@@ -561,55 +632,101 @@ export default function NotesAdmin({
           }
         }}
       >
-        {showAdminPosts ? 'Ocultar minhas publicações' : 'Gerenciar publicações'}
+        {showAdminPosts ? t('Ocultar minhas publicações') : t('Gerenciar publicações')}
       </button>
 
       {showAdminPosts && (
         <section className="notes-app__management">
-          <h3>Publicações e rascunhos</h3>
+          <h3>{t('Publicações e rascunhos')}</h3>
 
           <button type="button" onClick={loadAdminPosts} disabled={loadingAdminPosts}>
-            {loadingAdminPosts ? 'Carregando...' : 'Atualizar lista'}
+            {loadingAdminPosts ? t('Carregando...') : t('Atualizar lista')}
           </button>
 
-          {adminPostsError && <p role="alert">{adminPostsError}</p>}
+          {adminPostsError && <p role="alert">{t(adminPostsError)}</p>}
 
-          {!loadingAdminPosts &&
-            !adminPostsError &&
+          {(adminPosts.length > 0 || (!loadingAdminPosts && !adminPostsError)) &&
             (adminPosts.length === 0 ? (
-              <p>Nenhuma publicação cadastrada.</p>
+              <p>{t('Nenhuma publicação cadastrada.')}</p>
             ) : (
               <ul>
                 {adminPosts.map((post) => (
                   <li key={post.id}>
                     <strong>{contentText(post.title, locale)}</strong>
                     {' — '}
-                    <span>{post.status === 'published' ? 'Publicado' : 'Rascunho'}</span>{' '}
+                    <span>{post.status === 'published' ? t('Publicado') : t('Rascunho')}</span>{' '}
                     <button
                       type="button"
                       onClick={() => editPost(post)}
-                      disabled={changingStatusId !== null || deletingId !== null || savingDraft}
+                      disabled={
+                        changingStatusId !== null ||
+                        deletingId !== null ||
+                        savingDraft ||
+                        attachmentBusy
+                      }
                     >
-                      Editar
+                      {t('Editar')}
                     </button>
                     <button
                       type="button"
-                      disabled={changingStatusId !== null || deletingId !== null || savingDraft}
+                      disabled={
+                        changingStatusId !== null ||
+                        deletingId !== null ||
+                        savingDraft ||
+                        attachmentBusy
+                      }
                       onClick={() => changePostStatus(post)}
                     >
                       {changingStatusId === post.id
-                        ? 'Processando...'
+                        ? t('Processando...')
                         : post.status === 'published'
-                          ? 'Despublicar'
-                          : 'Publicar'}
+                          ? t('Despublicar')
+                          : t('Publicar')}
                     </button>
                     <button
                       type="button"
-                      disabled={deletingId !== null || changingStatusId !== null || savingDraft}
+                      disabled={
+                        deletingId !== null ||
+                        changingStatusId !== null ||
+                        savingDraft ||
+                        attachmentBusy
+                      }
                       onClick={() => deletePost(post)}
                     >
-                      {deletingId === post.id ? 'Excluindo...' : 'Excluir'}
+                      {deletingId === post.id ? t('Excluindo...') : t('Excluir')}
                     </button>
+                    <button
+                      type="button"
+                      disabled={
+                        savingDraft ||
+                        changingStatusId !== null ||
+                        deletingId !== null ||
+                        attachmentBusy
+                      }
+                      onClick={() => {
+                        if (
+                          attachmentPending &&
+                          !window.confirm('Descartar seleção de anexo pendente?')
+                        )
+                          return;
+                        setAttachmentPending(false);
+                        setAttachmentPostId((current) => (current === post.id ? null : post.id));
+                      }}
+                    >
+                      {t('Anexos')}
+                    </button>
+                    {attachmentPostId === post.id && (
+                      <PostAttachmentManager
+                        key={post.id}
+                        post={post}
+                        onRefresh={loadAdminPosts}
+                        onPending={setAttachmentPending}
+                        onBusy={(value) => {
+                          mutationRef.current = value;
+                          setAttachmentBusy(value);
+                        }}
+                      />
+                    )}
                   </li>
                 ))}
               </ul>

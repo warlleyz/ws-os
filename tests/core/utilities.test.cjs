@@ -9,12 +9,14 @@ function load(file, bindings, names) {
   const source = fs
     .readFileSync(path.join(root, file), 'utf8')
     .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];\s*/gm, '')
-    .replace(/\bexport\s+(?=(?:const|function|async)\b)/g, '');
+    .replace(/\bexport\s+(?=(?:const|let|function|async)\b)/g, '')
+    .replaceAll('import.meta.env.VITE_TURNSTILE_SITE_KEY', '__siteKey');
   return vm.runInNewContext(`(()=>{${source};return {${names.join(',')}}})()`, {
     URL,
     AbortController,
     DOMException,
     crypto: webcrypto,
+    __siteKey: 'test-site-key',
     setTimeout,
     clearTimeout,
     ...bindings,
@@ -67,17 +69,33 @@ function fixture() {
   };
 }
 function contact(bindings = {}) {
+  const { loadContract } = require('../helpers/contract-loader.cjs');
+  const contracts = loadContract(path.join(root, 'src/services/privateRequestContract.js'));
+  const { isValidIdempotencyKey } = loadContract(
+    path.join(root, 'src/services/idempotencyContract.js'),
+  );
+  const { validInstant } = loadContract(path.join(root, 'src/shared/utils/contractValidation.js'));
   return load(
     'src/services/contactService.js',
     {
-      portfolio: {
-        contact: { emailService: 'test', emailTemplate: 'test', emailPublicKey: 'public-test' },
+      ...contracts,
+      isValidIdempotencyKey,
+      validInstant,
+      submitPrivateRequest: async () => {
+        throw Error('Unexpected network');
       },
       ...bindings,
     },
-    ['validateContact', 'sendContact', 'isContactConfigured'],
+    [
+      'validateContact',
+      'prepareContactRequest',
+      'sendContact',
+      'isContactConfigured',
+      'isContactResultUncertain',
+    ],
   );
 }
+
 test('contato valida nome, e-mail, mensagem, consentimento e honeypot', () => {
   const m = contact();
   assert.equal(m.validateContact(fixture()).name, 'Teste local');
@@ -101,6 +119,17 @@ test('agendamento deve ser futuro, privado e não confirma reunião', () => {
   );
   assert.equal(result.kind, 'schedule');
   assert.ok(result.requestedAt.endsWith('Z'));
+  assert.equal(typeof result.timezone, 'string');
+  for (const requestedAt of ['2027-02-30T10:00', '2027-02-30T10:00:00Z']) {
+    assert.throws(
+      () =>
+        m.validateContact(
+          { ...fixture(), kind: 'schedule', requestedAt },
+          Date.parse('2027-01-01T00:00:00Z'),
+        ),
+      /data futura/,
+    );
+  }
   assert.throws(() =>
     m.validateContact(
       { ...fixture(), kind: 'schedule', requestedAt: new Date(now - 1000).toISOString() },
@@ -108,36 +137,75 @@ test('agendamento deve ser futuro, privado e não confirma reunião', () => {
     ),
   );
 });
-test('contato não configurado ou falha do provedor não produz sucesso', async () => {
-  const m = contact({ portfolio: { contact: {} } });
-  await assert.rejects(m.sendContact(fixture()), /configurado/);
-  const failed = contact({ fetch: async () => ({ ok: false, status: 500 }) });
-  await assert.rejects(failed.sendContact(fixture()), /não confirmou/);
+test('contato exige configuração e não confirma persistência ausente', async () => {
+  const off = contact({ __siteKey: '' });
+  assert.equal(off.isContactConfigured(), false);
+  await assert.rejects(
+    off.sendContact(off.prepareContactRequest(fixture()), { turnstileToken: 'token' }),
+    /configurado/,
+  );
+  const malformed = contact({
+    submitPrivateRequest: async () => ({ persisted: false, email: 'confirmed' }),
+  });
+  await assert.rejects(
+    malformed.sendContact(malformed.prepareContactRequest(fixture()), { turnstileToken: 'token' }),
+    (error) => error.code === 'HTTP_RESULT_UNKNOWN',
+  );
 });
-test('envio só confirma após resposta técnica, com ID e limite de repetição', async () => {
-  let resolveRequest, body;
+
+test('contato só confirma após persistência, separa e-mail e limita outro pedido', async () => {
+  let resolveRequest, input;
   const m = contact({
-    fetch: (_url, options) => {
-      body = JSON.parse(options.body);
+    submitPrivateRequest: (body) => {
+      input = body;
       return new Promise((resolve) => {
         resolveRequest = resolve;
       });
     },
   });
-  let complete = false;
-  const pending = m.sendContact(fixture()).then((result) => {
-    complete = true;
+  const original = m.prepareContactRequest(fixture());
+  let completed = false;
+  const pending = m.sendContact(original, { turnstileToken: 'token' }).then((result) => {
+    completed = true;
     return result;
   });
-  assert.equal(complete, false);
-  assert.equal(body.template_params.request_type, 'message');
-  assert.ok(body.template_params.request_id);
-  assert.equal(body.accessToken, undefined);
-  resolveRequest({ ok: true });
+  assert.equal(completed, false);
+  assert.equal(input.type, 'message');
+  assert.equal(input.idempotencyKey, original.idempotencyKey);
+  assert.equal(input.turnstileToken, 'token');
+  assert.equal(input.service_id, undefined);
+  resolveRequest({ requestId: 'request-one', persisted: true, email: 'failed' });
   const result = await pending;
-  assert.ok(result.requestId);
-  await assert.rejects(m.sendContact(fixture()), /minuto/);
+  assert.equal(result.persisted, true);
+  assert.equal(result.emailConfirmed, false);
+  await assert.rejects(
+    m.sendContact(m.prepareContactRequest(fixture()), { turnstileToken: 'new-token' }),
+    /minuto/,
+  );
 });
+
+test('resultado incerto reutiliza pedido sem repetir envio direto de e-mail', async () => {
+  const calls = [];
+  const m = contact({
+    submitPrivateRequest: async (body) => {
+      calls.push(body);
+      if (calls.length === 1)
+        throw Object.assign(Error('timeout'), { code: 'HTTP_RESULT_UNKNOWN' });
+      return { requestId: 'same-request', persisted: true, email: 'unknown' };
+    },
+  });
+  const original = m.prepareContactRequest(fixture());
+  await assert.rejects(m.sendContact(original, { turnstileToken: 'first' }));
+  const result = await m.sendContact(original, { turnstileToken: 'second' });
+  assert.equal(calls[0].idempotencyKey, calls[1].idempotencyKey);
+  assert.equal(calls[0].message, calls[1].message);
+  assert.notEqual(calls[0].turnstileToken, calls[1].turnstileToken);
+  assert.equal(result.requestId, 'same-request');
+  assert.equal(result.emailConfirmed, false);
+  assert.equal(m.isContactResultUncertain({ code: 'SERVICE_UNAVAILABLE' }), true);
+  assert.equal(m.isContactResultUncertain({ code: 'VALIDATION_ERROR' }), false);
+});
+
 test('guards de fechamento são independentes por instância e liberam ao desmontar', () => {
   const m = load('src/core/appCloseGuards.js', {}, ['registerCloseGuard', 'canCloseApp']);
   const remove = m.registerCloseGuard('dirty', () => false);
@@ -147,18 +215,10 @@ test('guards de fechamento são independentes por instância e liberam ao desmon
   assert.equal(m.canCloseApp('dirty'), true);
 });
 
-
 /* === Proteção de ações do sistema === */
 /* ----- Execução sem alterações pendentes ----- */
 test('ação protegida executa imediatamente quando a instância está limpa', () => {
-  const m = load(
-    'src/core/appCloseGuards.js',
-    {},
-    [
-      'requestGuardedAction',
-      'canCloseApp',
-    ],
-  );
+  const m = load('src/core/appCloseGuards.js', {}, ['requestGuardedAction', 'canCloseApp']);
 
   let executions = 0;
 
@@ -177,16 +237,12 @@ test('ação protegida executa imediatamente quando a instância está limpa', (
 
 /* ----- Cancelamento de navegação ----- */
 test('cancelar navegação protegida preserva alterações e não executa a ação', () => {
-  const m = load(
-    'src/core/appCloseGuards.js',
-    {},
-    [
-      'registerCloseGuard',
-      'requestGuardedAction',
-      'cancelCloseConfirmation',
-      'confirmAppClose',
-    ],
-  );
+  const m = load('src/core/appCloseGuards.js', {}, [
+    'registerCloseGuard',
+    'requestGuardedAction',
+    'cancelCloseConfirmation',
+    'confirmAppClose',
+  ]);
 
   let executions = 0;
 
@@ -213,15 +269,11 @@ test('cancelar navegação protegida preserva alterações e não executa a aç�
 
 /* ----- Confirmação de navegação ----- */
 test('confirmar navegação protegida executa a ação uma única vez', () => {
-  const m = load(
-    'src/core/appCloseGuards.js',
-    {},
-    [
-      'registerCloseGuard',
-      'requestGuardedAction',
-      'confirmAppClose',
-    ],
-  );
+  const m = load('src/core/appCloseGuards.js', {}, [
+    'registerCloseGuard',
+    'requestGuardedAction',
+    'confirmAppClose',
+  ]);
 
   let executions = 0;
 
@@ -247,31 +299,19 @@ test('confirmar navegação protegida executa a ação uma única vez', () => {
 
 /* ----- Exclusividade da confirmação ----- */
 test('confirmação pendente não pode ser substituída por outra operação', () => {
-  const m = load(
-    'src/core/appCloseGuards.js',
-    {},
-    [
-      'registerCloseGuard',
-      'requestGuardedAction',
-      'confirmAppClose',
-    ],
-  );
+  const m = load('src/core/appCloseGuards.js', {}, [
+    'registerCloseGuard',
+    'requestGuardedAction',
+    'confirmAppClose',
+  ]);
 
   const actions = [];
 
   const unregister = m.registerCloseGuard('editor', () => false);
 
-  const first = m.requestGuardedAction(
-    'editor',
-    () => actions.push('first'),
-    'navigate',
-  );
+  const first = m.requestGuardedAction('editor', () => actions.push('first'), 'navigate');
 
-  const second = m.requestGuardedAction(
-    'editor',
-    () => actions.push('second'),
-    'close',
-  );
+  const second = m.requestGuardedAction('editor', () => actions.push('second'), 'close');
 
   assert.equal(first, false);
   assert.equal(second, false);
@@ -285,15 +325,11 @@ test('confirmação pendente não pode ser substituída por outra operação', (
 
 /* ----- Desmontagem da instância ----- */
 test('desmontar instância cancela confirmação pendente', () => {
-  const m = load(
-    'src/core/appCloseGuards.js',
-    {},
-    [
-      'registerCloseGuard',
-      'requestGuardedAction',
-      'confirmAppClose',
-    ],
-  );
+  const m = load('src/core/appCloseGuards.js', {}, [
+    'registerCloseGuard',
+    'requestGuardedAction',
+    'confirmAppClose',
+  ]);
 
   let executed = false;
 

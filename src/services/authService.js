@@ -88,6 +88,9 @@ export function subscribeAdminSession(listener) {
 /* === Requisições de autenticação isoladas do cache público === */
 async function authRequest(path, options = {}) {
   const controller = new AbortController();
+  const abort = () => controller.abort();
+  options.signal?.addEventListener('abort', abort, { once: true });
+  if (options.signal?.aborted) abort();
   pendingAuthRequests.add(controller);
   try {
     const { response, payload } = await executeJsonRequest(
@@ -107,10 +110,11 @@ async function authRequest(path, options = {}) {
     return result.data;
   } finally {
     pendingAuthRequests.delete(controller);
+    options.signal?.removeEventListener('abort', abort);
   }
 }
 
-export async function loginAdmin(email, password) {
+export async function loginAdmin(email, password, { signal } = {}) {
   if (!email?.trim() || !password) {
     throw new Error('Informe o e-mail e a senha.');
   }
@@ -118,6 +122,7 @@ export async function loginAdmin(email, password) {
   const requestVersion = ++loginRequestVersion;
   const data = await authRequest('/login', {
     method: 'POST',
+    signal,
     body: JSON.stringify({
       email: email.trim(),
       password,

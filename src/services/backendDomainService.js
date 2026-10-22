@@ -1,4 +1,8 @@
-import { createAdminRequestScope, getAdminAccessToken } from './authService.js';
+import {
+  createAdminRequestScope,
+  getAdminAccessToken,
+  invalidateAdminSession,
+} from './authService.js';
 import { executeJsonRequest } from './httpRequestContract.js';
 import { unwrapApiResponse } from './apiResponseAdapter.js';
 import { invalidatePublicData } from './publicDataService.js';
@@ -34,6 +38,7 @@ async function requestDomain(
       },
       { operation: method === 'GET' ? 'read' : 'write', signal: scope?.signal ?? signal },
     );
+    if (scope && [401, 403].includes(result.response.status)) invalidateAdminSession(scope.version);
     if (scope && !scope.isCurrent()) throw new DOMException('Operação cancelada.', 'AbortError');
     const parsed = unwrapApiResponse(result.payload, { status: result.response.status });
     if (!result.response.ok || !parsed.ok)
@@ -121,6 +126,19 @@ export function setPostAttachment(input, { signal, remove = false } = {}) {
 
 export function getOfficialFiles({ signal, offset = 0 } = {}) {
   return requestDomain('/api/admin/files?offset=' + encodeURIComponent(offset), {
+    administrative: true,
+    signal,
+  });
+}
+
+/* === Moderação de rankings; projeção privada somente para administrador === */
+export function getAdministrativeScores({ signal } = {}) {
+  return requestDomain('/api/admin/rankings', { administrative: true, signal });
+}
+export function deleteAdministrativeScore(input, { signal } = {}) {
+  return requestDomain('/api/admin/rankings', {
+    method: 'DELETE',
+    body: input,
     administrative: true,
     signal,
   });

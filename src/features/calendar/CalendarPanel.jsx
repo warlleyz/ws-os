@@ -104,6 +104,7 @@ export default function CalendarPanel({
         </div>
       </header>
 
+      {remoteEvents.warning && <p role="status">{t(remoteEvents.warning)}</p>}
       {remoteEvents.error && (
         <p role="status">
           {t('Eventos remotos indisponíveis. Os feriados continuam disponíveis.')}

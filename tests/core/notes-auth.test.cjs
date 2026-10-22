@@ -134,3 +134,21 @@ test('observador com falha não impede expiração ou aviso a outros consumidore
   assert.equal(calls, 2);
   assert.equal(api.getAdminAccessToken(), null);
 });
+
+test('login cancelado pela instância não cria sessão após resposta tardia', async () => {
+  let resolve;
+  const api = loadAuth(
+    () =>
+      new Promise((done) => {
+        resolve = done;
+      }),
+  );
+  const controller = new AbortController();
+  const pending = api.loginAdmin('admin@example.test', 'test-password', {
+    signal: controller.signal,
+  });
+  controller.abort();
+  resolve(Response.json({ access_token: 'late-token', expires_in: 3600 }));
+  await assert.rejects(pending);
+  assert.equal(api.getAdminAccessToken(), null);
+});

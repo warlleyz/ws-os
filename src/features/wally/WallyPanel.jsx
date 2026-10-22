@@ -88,7 +88,7 @@ export default function WallyPanel({ setWallyOpen }) {
 
     if (!sent) return;
 
-    setQuestion('');
+    setQuestion((current) => (current.trim() === String(value).trim() ? '' : current));
     inputRef.current?.focus();
   }
 

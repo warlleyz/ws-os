@@ -4,13 +4,18 @@ import { canCloseApp } from '../../core/appCloseGuards';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import AdminPosts from './AdminPosts';
 import AdminContent from './AdminContent';
+import AdminFiles from './AdminFiles';
+import AdminRequests from './AdminRequests';
+import AdminRankings from './AdminRankings';
 import '../../styles/apps.css';
 import './Administration.css';
 
 const sections = [
   ['overview', 'Visão geral'],
   ['posts', 'Publicações'],
-  ['files', 'Arquivos'],
+  ['files', 'Arquivos oficiais'],
+  ['documents', 'Catálogo de documentos'],
+  ['rankings', 'Moderação de rankings'],
   ['events', 'Eventos'],
   ['requests', 'Solicitações'],
   ['system', 'Sistema'],
@@ -69,7 +74,9 @@ export default function Administration({ instance }) {
       {!authorized && (
         <p role="status">
           {t(
-            'Sua sessão administrativa expirou ou não está autorizada. Realize novamente o login pelo Terminal.',
+            status === 'checking'
+              ? 'Verificando autorização administrativa...'
+              : 'Sua sessão administrativa expirou ou não está autorizada. Realize novamente o login pelo Terminal.',
           )}
         </p>
       )}
@@ -92,19 +99,19 @@ export default function Administration({ instance }) {
         >
           {activeSection === 'posts' ? (
             <AdminPosts instanceId={instance.id} authorized={authorized} />
-          ) : ['files', 'events'].includes(activeSection) ? (
+          ) : activeSection === 'files' ? (
+            <AdminFiles instanceId={instance.id} authorized={authorized} />
+          ) : activeSection === 'rankings' ? (
+            <AdminRankings instanceId={instance.id} authorized={authorized} />
+          ) : ['documents', 'events'].includes(activeSection) ? (
             <AdminContent
               key={activeSection}
-              kind={activeSection}
+              kind={activeSection === 'documents' ? 'files' : 'events'}
               instanceId={instance.id}
               authorized={authorized}
             />
           ) : activeSection === 'requests' ? (
-            <p>
-              {t(
-                'As solicitações atuais são entregues pelo EmailJS aos canais privados configurados. Elas não são eventos públicos nem reuniões confirmadas.',
-              )}
-            </p>
+            <AdminRequests instanceId={instance.id} authorized={authorized} />
           ) : activeSection === 'system' ? (
             <>
               <h3>{t('Sistema')}</h3>

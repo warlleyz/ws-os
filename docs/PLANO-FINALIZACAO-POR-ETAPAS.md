@@ -188,7 +188,7 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 ## Etapa 05 — Encerrar Arquivos, Visualizador e Editor juntos
 
-**Execução em 21/10/2026:** correções técnicas locais validadas, 411 testes aprovados. Aceite integral ainda pendente de revisão visual/física, traduções finais e revalidação remota pertinente. [Checkpoint e retomada exata](finalizacao/ETAPA-05-ANDAMENTO.md).
+**Execução em 21/10/2026:** fechamento técnico local concluído, 411 testes aprovados. Proprietário autorizou avançar à Etapa 06, mantendo revisão visual/física, traduções finais e homologação remota registradas para seus ciclos próprios. [Checkpoint e retomada exata](finalizacao/ETAPA-05-ANDAMENTO.md).
 
 **Arquivos:** `src/apps/files/*`, `file-viewer/*`, `file-editor/*`; `src/services/storage/fileModel.js`, `localFilesStorage.js`; `src/shared/hooks/useLocalFiles.js`; serviço de catálogo; `tests/core/files*.test.cjs`; `docs/ARQUIVOS-A5-FINALIZACAO.md`.
 
@@ -211,6 +211,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 ## Etapa 06 — Encerrar aplicativos profissionais e Demos
 
+**Execução em 21/10/2026:** implementação técnica local concluída e validada, 417 testes aprovados. Compartilhamento e integrações finalizados; conteúdo editorial/demos ainda não fornecidos, traduções finais e homologações reais permanecem explicitamente condicionados. [Entrega, limites e retomada na Etapa 07](finalizacao/ETAPA-06-ANDAMENTO.md).
+
 **Arquivos:** `src/apps/about-me/*`, `projects/*`, `dev-insights/*`, `resume/*`, `certificates/*`, `demo-viewer/*`; conteúdo/assets fornecidos; serviços GitHub/WakaTime apenas para defeitos de contrato identificados.
 
 **Trabalho por app, encerrando um antes de passar ao próximo:**
@@ -221,7 +223,7 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 - **Dev Insights:** períodos, indicadores/gráficos aprovados, origem dos dados, atualização e indisponibilidade sem métricas inventadas.
 - **Currículo:** documento existente, abertura via Visualizador, download e alternativa quando PDF não puder ser embutido.
 - **Certificados:** categorias/busca, metadados reais, documentos e abertura integrada.
-- [ ] Incluir cópia/compartilhamento conforme contrato aprovado, validando entradas inexistentes e BASE_URL.
+- [x] Incluir cópia/compartilhamento conforme contrato aprovado, validando entradas inexistentes e BASE_URL.
 - [ ] Completar estilo específico, textos, estados, acessibilidade e arquivos do app antes de encerrá-lo.
 
 **Aceite:** cada app funciona com dados reais autorizados e falhas simuladas, com revisão visual nos dois shells/temas/idiomas. Conteúdo ausente do autor é pendência explícita, não placeholder considerado pronto.
@@ -232,13 +234,15 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 ## Etapa 07 — Encerrar Contato e solicitações
 
+**Execução em 21/10/2026:** implementação local concluída e validada, 422 testes aprovados. Persistência privada, Turnstile, idempotência e guard do formulário integrados; entrega real/ambiente externo ainda condicionado. [Entrega, configuração manual e retomada](finalizacao/ETAPA-07-ANDAMENTO.md).
+
 **Arquivos:** `src/apps/contact/*`; contrato e serviço de contato/solicitações da etapa 03; traduções e testes pertinentes. O módulo de atendimento que Administração reutilizará deve ter responsabilidade definida aqui, sem duplicar o fluxo.
 
-- [ ] Finalizar formulário, canais, consentimento, horários/fuso, validação e proteção contra perda de texto.
-- [ ] Implementar na UI os contratos já fechados para solicitações e envio técnico.
-- [ ] Tratar resposta incerta/reenvio sem duplicação nem mensagem falsa de sucesso.
+- [x] Finalizar formulário, canais, consentimento, horários/fuso, validação e proteção contra perda de texto.
+- [x] Implementar na UI os contratos já fechados para solicitações e envio técnico.
+- [x] Tratar resposta incerta/reenvio sem duplicação nem mensagem falsa de sucesso.
 - [ ] Validar entrega EmailJS autorizada e persistência privada quando aplicável ao fluxo aprovado.
-- [ ] Conferir claramente que solicitação não é reunião confirmada nem evento público.
+- [x] Conferir claramente que solicitação não é reunião confirmada nem evento público.
 - [ ] Revisar formulário com teclado virtual, textos longos e tecnologias assistivas.
 
 **Aceite:** sucesso real autorizado, validações negativas, timeout e reenvio comprovados; dados privados inacessíveis ao público.
@@ -248,6 +252,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Commit sugerido:** `feat: finaliza contato e solicitacoes de agendamento`
 
 ## Etapa 08 — Encerrar Notas e gerenciamento editorial
+
+**Checkpoint:** implementação local e validação técnica concluídas (431 testes). Aceite de homologação real, toque/visual e traduções finais permanecem pendentes; detalhes em `docs/finalizacao/ETAPA-08-ANDAMENTO.md`. Nenhum commit/push ou operação remota realizado.
 
 **Arquivos:** `src/apps/notes/*`; integração de anexos/serviços definida anteriormente; `src/apps/administration/AdminPosts.jsx` apenas como composição/reuso; testes de Notas/curtidas/auth.
 
@@ -267,6 +273,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 ## Etapa 09 — Encerrar Calculadora
 
+**Checkpoint:** implementação técnica validada localmente; lint/build aprovados e 438 testes passando. Aceite visual/de toque nos dois shells permanece pendente. Detalhes em `docs/finalizacao/ETAPA-09-ANDAMENTO.md`. Etapa 10 não iniciada; nenhum commit/push realizado.
+
 **Arquivos:** `src/apps/calculator/*`; testes do motor e UI pertinentes.
 
 - [ ] Validar operações/modos previstos, precedência, decimal, percentuais, sinais e erros de domínio.
@@ -279,6 +287,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Commit sugerido:** `fix: finaliza calculadora e controles responsivos`
 
 ## Etapa 10 — Encerrar Jogos e rankings
+
+**Checkpoint:** cinco jogos e integração local corrigidos, com lint/build aprovados e 450 testes passando. Aceite real dos rankings, toque/dispositivos, traduções finais e DOOM licenciado continuam condicionados. Ver `docs/finalizacao/ETAPA-10-ANDAMENTO.md`. Etapa 11 não iniciada; nenhum commit/push ou operação remota.
 
 **Arquivos:** `src/apps/games/*`; contrato dos rankings e testes de modelos/UI. Backend já deve estar fechado na etapa 03.
 
@@ -295,6 +305,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Commits:** por jogo quando houver trabalho relevante; um específico para integração final dos rankings.
 
 ## Etapa 11 — Encerrar Terminal, Wally e Administração
+
+**Checkpoint:** implementação técnica local validada; lint/build aprovados e 462 testes passando. Homologação real, aceite visual e traduções finais pendentes. Wally remoto permanece desativado. Ver `docs/finalizacao/ETAPA-11-ANDAMENTO.md`. Etapa 12 não iniciada; nenhum commit/push ou operação remota.
 
 **Arquivos:** `src/apps/terminal/*`, `wally-extended/*`, `administration/*`; `src/features/wally/*`; consumidores dos serviços já estabilizados.
 
@@ -318,6 +330,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 ## Etapa 12 — Encerrar Desktop, Taskbar, menu, painéis e widgets
 
+**Checkpoint:** blocos técnicos locais validados, lint/build aprovados e 475 testes passando. Conferência visual real, provedores externos e traduções finais continuam pendentes; limites das miniaturas registrados em `docs/finalizacao/ETAPA-12-ANDAMENTO.md`. Etapa 13 não iniciada; nenhum commit/push ou operação remota.
+
 **Arquivos:** `src/shells/desktop/*`; `src/features/launcher/*`, `search/*`, `calendar/*`, `notifications/*`, `quick-controls/*`, `weather/*`, `panels/*`, `widgets/*`, `shortcuts/*`. Wally e janelas já encerrados entram como consumidores, sem redesign tardio.
 
 - [ ] Fechar grade compartilhada, atalhos, seleção/movimentação, contexto e persistência.
@@ -336,6 +350,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 ## Etapa 13 — Encerrar shell Mobile e tablets
 
+**Checkpoint local:** ver [ETAPA-13-ANDAMENTO.md](finalizacao/ETAPA-13-ANDAMENTO.md). Correções de integração validadas; aceite visual e em dispositivos reais pendente.
+
 **Arquivos:** `src/shells/mobile/*`; integração em `src/App.jsx` quando necessária. Aplicativos já devem ter passado pela revisão Mobile nas suas etapas.
 
 - [ ] Fechar Home profissional, catálogo, busca, navegação inferior e disposição em tablet.
@@ -352,6 +368,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 ## Etapa 14 — Encerrar Configurações e apresentação do sistema
 
+**Checkpoint local:** ver [ETAPA-14-ANDAMENTO.md](finalizacao/ETAPA-14-ANDAMENTO.md). Correções técnicas validadas; walkthrough visual e aceite editorial pendentes.
+
 **Arquivos:** `src/apps/settings/*`, `about-system/*`; `src/features/boot/*`, `welcome/*`; conteúdo final de versão/créditos. Mecanismos de preferências são da etapa 04, consumidores das etapas anteriores.
 
 - [ ] Conferir cada controle de Configurações alterando o consumidor real correspondente.
@@ -367,6 +385,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Commits:** um para Configurações; outro para apresentação/informações do sistema se houver mudanças relevantes independentes.
 
 ## Etapa 15 — Integração final e preparação de publicação
+
+**Checkpoint local:** ver [ETAPA-15-ANDAMENTO.md](finalizacao/ETAPA-15-ANDAMENTO.md). Preparação/validação local efetuadas; matriz de aceite manual, homologação, traduções finais e publicação continuam abertas.
 
 **Arquivos:** documentação de estado/contratos/validação; scripts/configuração existentes; `index.html`; workflow em `.github/workflows/` a criar somente para CI, se adotado; testes de integração.
 
@@ -427,3 +447,8 @@ Não usar percentual calculado por número de arquivos, componentes ou testes. C
 Os 202 testes do estado de referência são uma base de regressão, não um certificado de conclusão. Recursos condicionados como DOOM precisam de resolução explícita; dependências externas não podem desaparecer do relatório só porque o código está preparado.
 
 **Primeira ação prática:** executar as etapas 00 e 01 antes de reorganizar mais arquivos. Depois fechar o Design System e os serviços compartilhados, e só então encerrar cada pasta de aplicativo na sequência definida.
+
+
+## Auditoria posterior autorizada
+
+Ver [AUDITORIA-FINAL.md](finalizacao/AUDITORIA-FINAL.md). A orientação mais recente libera traduções/limpeza; JSONs atualizados, PDF.js corrigido e dicas revisadas. Registros de traduções adiadas nos checkpoints são históricos. Aceites visuais e externos continuam explícitos; nenhum percentual de conclusão foi inferido pelos testes.

@@ -24,7 +24,7 @@
   text-align: center;
   overflow-wrap: anywhere;
 
-  pointer-events: none;
+  pointer-events: auto;
   user-select: none;
 
   animation: ws-tooltip-enter calc(var(--motion-scale, 1) * 120ms) ease-out both;

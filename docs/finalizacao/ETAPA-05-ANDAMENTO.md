@@ -2,7 +2,7 @@
 
 Atualizado em 21/10/2026. Base desta execução: c79fc78.
 
-**Estado: correções técnicas locais validadas; aceite integral da etapa ainda pendente.** Este registro permite retomar sem depender do histórico da conversa. As alterações estão salvas no checkout e ainda não foram commitadas.
+**Estado: fechamento técnico local concluído; continuidade para a Etapa 06 autorizada pelo proprietário em 21/10/2026.** Este registro permite retomar sem depender do histórico da conversa. As alterações estão salvas no checkout e ainda não foram commitadas.
 
 ## Regras preservadas
 
@@ -63,7 +63,7 @@ Atualizado em 21/10/2026. Base desta execução: c79fc78.
 
 Sem alteração nos JSONs, no provedor remoto, nas migrações, nas dependências ou em aplicativos de etapas posteriores. Formatação organizada nos componentes modificados. Scripts e capturas de teste permaneceram fora do repositório.
 
-## Pendências para o aceite integral
+## Limitações registradas para revisão final
 
 1. Revisão visual do proprietário: Desktop/Mobile/tablet, Dark/Light, toque físico, leitor de tela e zoom do navegador. Os ensaios desta execução não certificam essa matriz completa.
 2. Traduções finais: completar os textos de Files, DocumentView e PdfPreview, incluindo apresentação inicial, caminhos/erros de navegação, histórico/resultados, indicação .txt, rótulos/propriedades do documento e controles/status/erros do PDF. Há textos ainda literais; não chamar PT/EN de integralmente concluído por causa do teste de chamadas t(). Nenhuma chave nova foi adicionada neste bloco.
@@ -73,6 +73,6 @@ Sem alteração nos JSONs, no provedor remoto, nas migrações, nas dependência
 ## Retomada exata
 
 1. Ler este checkpoint e verificar git status/diff, preservando todos os arquivos acima. Não executar novamente os scripts temporários de edição: eles podem acrescentar testes duplicados.
-2. Conferir as pendências de aceite da Etapa 05, sem refazer os três blocos locais aprovados. Registrar nova evidência/limitação aqui.
-3. A próxima etapa do plano é a 06 (Sobre Mim, Projetos, Demos, Dev Insights, Currículo e Certificados). **Não foi iniciada nesta execução.** Não declarar a 05 como 100% sem resolver ou aceitar explicitamente os limites acima.
+2. Não reabrir os blocos aprovados da Etapa 05 sem defeito demonstrado. O proprietário autorizou encerrar este ciclo e avançar, preservando as limitações acima para revisão final.
+3. A Etapa 06 foi iniciada. Consultar ETAPA-06-ANDAMENTO.md. Não confundir o fechamento técnico local da 05 com homologação integral de produção.
 4. Não há commit desta execução. Sugestão após revisão/autorização: fix: estabiliza edicao visualizacao e dialogos de arquivos. Push continua com o proprietário.

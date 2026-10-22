@@ -1,9 +1,5 @@
-
 import { Cpu } from 'lucide-react';
-import {
-  translate as t,
-  useLocale,
-} from '../../shared/i18n/i18n';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
 import './BootScreen.css';
 
@@ -11,10 +7,7 @@ export default function BootScreen() {
   useLocale();
 
   return (
-    <main
-      className="ws-boot"
-      aria-label={t('Inicializando WS OS')}
-    >
+    <main className="ws-boot" aria-label={t('Inicializando WS OS')}>
       <div className="ws-boot__ambient" aria-hidden="true" />
       <div className="ws-boot__grid" aria-hidden="true" />
 
@@ -29,25 +22,17 @@ export default function BootScreen() {
 
         <div className="ws-boot__identity">
           <h1 className="ws-boot__title">WS OS</h1>
-          <span className="ws-boot__subtitle">
-            PERSONAL OPERATING SYSTEM
-          </span>
+          <span className="ws-boot__subtitle">{t('Sistema operacional pessoal')}</span>
         </div>
 
         <div className="ws-boot__loading">
           <p>{t('Inicializando sistema...')}</p>
 
-          <div
-            className="ws-boot__progress"
-            aria-hidden="true"
-          >
+          <div className="ws-boot__progress" aria-hidden="true">
             <span />
           </div>
 
-          <div
-            className="ws-boot__loading-dots"
-            aria-hidden="true"
-          >
+          <div className="ws-boot__loading-dots" aria-hidden="true">
             <span />
             <span />
             <span />
@@ -56,8 +41,8 @@ export default function BootScreen() {
       </div>
 
       <footer className="ws-boot__footer">
-        <span>WS OS v2</span>
-        <span>INITIALIZATION</span>
+        <span>WS OS</span>
+        <span>{t('Inicialização')}</span>
       </footer>
     </main>
   );

@@ -1,3 +1,4 @@
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Minus, Plus, RotateCw, Search } from 'lucide-react';
 import * as pdfjs from 'pdfjs-dist';
@@ -8,6 +9,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 /* === Pré-visualização de PDF === */
 /* ----- Abertura de documento PDF em memória ----- */
 export default function PdfPreview({ blob, name }) {
+  useLocale();
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const [result, setResult] = useState({ blob: null, document: null, error: '' });
@@ -162,10 +164,11 @@ export default function PdfPreview({ blob, name }) {
 
   return (
     <section className="ws-file-viewer__pdf" aria-label={`PDF: ${name}`}>
-      <div className="ws-file-viewer__pdf-tools" role="toolbar" aria-label="Controles do PDF">
+      <div className="ws-file-viewer__pdf-tools" role="toolbar" aria-label={t('Controles do PDF')}>
         <button
           type="button"
-          aria-label="Página anterior"
+          aria-label={t('Página anterior')}
+          title={t('Página anterior')}
           disabled={!document || pageNumber === 1}
           onClick={() => setPageNumber((page) => Math.max(1, page - 1))}
         >
@@ -176,7 +179,8 @@ export default function PdfPreview({ blob, name }) {
         </span>
         <button
           type="button"
-          aria-label="Próxima página"
+          aria-label={t('Próxima página')}
+          title={t('Próxima página')}
           disabled={!document || pageNumber >= document.numPages}
           onClick={() => setPageNumber((page) => Math.min(document.numPages, page + 1))}
         >
@@ -185,7 +189,8 @@ export default function PdfPreview({ blob, name }) {
         <span className="ws-file-viewer__tool-divider" aria-hidden="true" />
         <button
           type="button"
-          aria-label="Reduzir zoom"
+          aria-label={t('Reduzir zoom')}
+          title={t('Reduzir zoom')}
           disabled={!document || scale <= 0.25}
           onClick={() => setScale((value) => Math.max(0.25, +(value - 0.25).toFixed(2)))}
         >
@@ -194,18 +199,20 @@ export default function PdfPreview({ blob, name }) {
         <span className="ws-file-viewer__zoom-value">{Math.round(scale * 100)}%</span>
         <button
           type="button"
-          aria-label="Aumentar zoom"
+          aria-label={t('Aumentar zoom')}
+          title={t('Aumentar zoom')}
           disabled={!document || scale >= 3}
           onClick={() => setScale((value) => Math.min(3, +(value + 0.25).toFixed(2)))}
         >
           <Plus size={17} />
         </button>
         <button type="button" disabled={!document} onClick={fitWidth}>
-          Ajustar largura
+          {t('Ajustar largura')}
         </button>
         <button
           type="button"
-          aria-label="Girar página"
+          aria-label={t('Girar página')}
+          title={t('Girar página')}
           disabled={!document}
           onClick={() => setRotation((value) => (value + 90) % 360)}
         >
@@ -218,8 +225,8 @@ export default function PdfPreview({ blob, name }) {
             <Search size={16} aria-hidden="true" />
             <input
               type="search"
-              aria-label="Pesquisar no PDF"
-              placeholder="Buscar no PDF"
+              aria-label={t('Pesquisar no PDF')}
+              placeholder={t('Buscar no PDF')}
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);
@@ -230,7 +237,7 @@ export default function PdfPreview({ blob, name }) {
 
           {query.trim() && (
             <span className="ws-file-viewer__search-count" role="status">
-              {matches.length} pág.
+              {t('{0} pág.').replace('{0}', matches.length)}
             </span>
           )}
 
@@ -240,17 +247,19 @@ export default function PdfPreview({ blob, name }) {
               className="ws-file-viewer__search-action"
               onClick={() => setPageNumber(matches[0])}
             >
-              Ir ao resultado
+              {t('Ir ao resultado')}
             </button>
           )}
         </div>
       </div>
       <div className="ws-file-viewer__pdf-viewport" ref={containerRef}>
-        {loading && <p role="status">Carregando PDF...</p>}
-        {error && <p role="alert">{error}</p>}
+        {loading && <p role="status">{t('Carregando PDF...')}</p>}
+        {error && <p role="alert">{t(error)}</p>}
         <canvas
           ref={canvasRef}
-          aria-label={`Página ${pageNumber} de ${document?.numPages ?? 0}`}
+          aria-label={t('Página {0} de {1}')
+            .replace('{0}', pageNumber)
+            .replace('{1}', document?.numPages ?? 0)}
           hidden={!document || Boolean(error)}
         />
       </div>

@@ -65,12 +65,7 @@ function calculatePosition(trigger, tooltip, pointer) {
 }
 
 /* === Componente Tooltip === */
-export default function Tooltip({
-  content,
-  children,
-  delay = DEFAULT_DELAY,
-  disabled = false,
-}) {
+export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disabled = false }) {
   /* ----- Identificação e referências ----- */
   const id = useId();
 
@@ -123,10 +118,7 @@ export default function Tooltip({
 
   /* === Referência externa === */
   /* ----- Preservar acesso ao elemento de origem ----- */
-  useImperativeHandle(
-    children?.props?.ref,
-    () => triggerRef.current,
-  );
+  useImperativeHandle(children?.props?.ref, () => triggerRef.current);
 
   /* === Ciclo de vida === */
   /* ----- Limpeza ao desmontar ----- */
@@ -154,17 +146,10 @@ export default function Tooltip({
     if (!trigger || !tooltip) return undefined;
 
     function updatePosition() {
-      const next = calculatePosition(
-        trigger,
-        tooltip,
-        pointerRef.current,
-      );
+      const next = calculatePosition(trigger, tooltip, pointerRef.current);
 
       setPosition((current) => {
-        if (
-          current.left === next.left &&
-          current.top === next.top
-        ) {
+        if (current.left === next.left && current.top === next.top) {
           return current;
         }
 
@@ -174,9 +159,8 @@ export default function Tooltip({
 
     updatePosition();
 
-    const observer = typeof ResizeObserver !== 'undefined'
-      ? new ResizeObserver(updatePosition)
-      : null;
+    const observer =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updatePosition) : null;
 
     observer?.observe(trigger);
     observer?.observe(tooltip);
@@ -230,9 +214,7 @@ export default function Tooltip({
 
     if (!trigger || !tooltip) return;
 
-    setPosition(
-      calculatePosition(trigger, tooltip, pointerRef.current),
-    );
+    setPosition(calculatePosition(trigger, tooltip, pointerRef.current));
   }
 
   /* ----- Saída do ponteiro ----- */
@@ -240,7 +222,8 @@ export default function Tooltip({
     children.props.onPointerLeave?.(event);
 
     pointerRef.current = null;
-    hide();
+    clearTimer();
+    timerRef.current = window.setTimeout(hide, 150);
   }
 
   /* ----- Pressionamento ----- */
@@ -266,21 +249,21 @@ export default function Tooltip({
 
   /* ----- Tecla Escape ----- */
   function handleKeyDown(event) {
-    children.props.onKeyDown?.(event);
-
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && visible) {
+      event.preventDefault();
+      event.stopPropagation();
       hide();
+      return;
     }
+    children.props.onKeyDown?.(event);
   }
 
   /* === Propriedades do elemento de origem === */
   /* ----- Preservar propriedades e eventos existentes ----- */
-  const describedBy = [
-    children.props['aria-describedby'],
-    visible && !disabled && content ? id : null,
-  ]
-    .filter(Boolean)
-    .join(' ') || undefined;
+  const describedBy =
+    [children.props['aria-describedby'], visible && !disabled && content ? id : null]
+      .filter(Boolean)
+      .join(' ') || undefined;
 
   /* ----- Preservar propriedades e eventos existentes ----- */
   const triggerProps = {
@@ -296,12 +279,7 @@ export default function Tooltip({
     onKeyDown: handleKeyDown,
   };
 
-  const trigger = (
-    <children.type
-      key={children.key}
-      {...triggerProps}
-    />
-  );
+  const trigger = <children.type key={children.key} {...triggerProps} />;
 
   /* === Renderização === */
   return (
@@ -318,6 +296,8 @@ export default function Tooltip({
             ref={tooltipRef}
             id={id}
             role="tooltip"
+            onPointerEnter={clearTimer}
+            onPointerLeave={hide}
             className="ws-tooltip"
             style={{
               left: position.left,

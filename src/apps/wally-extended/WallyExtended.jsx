@@ -45,7 +45,7 @@ const SUGGESTIONS = [
   },
 ];
 
-export default function WallyExtended() {
+export default function WallyExtended({ instance }) {
   useLocale();
 
   const { run } = useSystem();
@@ -102,7 +102,7 @@ export default function WallyExtended() {
     }
 
     if (sent) {
-      setQuestion('');
+      setQuestion((current) => (current.trim() === text ? '' : current));
       inputRef.current?.focus();
     }
   }
@@ -114,7 +114,7 @@ export default function WallyExtended() {
 
   function handleKeyDown(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
-      if (event.nativeEvent.isComposing) return;
+      if (event.nativeEvent?.isComposing) return;
 
       event.preventDefault();
       void submitQuestion(question);
@@ -134,7 +134,7 @@ export default function WallyExtended() {
 
     void executeSystemAction(
       { id: 'app.open', params: { appId } },
-      { run, context: 'wally', origin: 'wally-extended' },
+      { run, context: 'wally', origin: 'wally-extended', originInstanceId: instance?.id },
     );
   }
 
@@ -192,7 +192,7 @@ export default function WallyExtended() {
               <Sparkles size={32} strokeWidth={1.6} />
             </div>
 
-            <span className="wally-ext__eyebrow">WS OS INTELLIGENCE</span>
+            <span className="wally-ext__eyebrow">{t('Inteligência WS OS')}</span>
 
             <h3>{t('Como posso ajudar você?')}</h3>
 

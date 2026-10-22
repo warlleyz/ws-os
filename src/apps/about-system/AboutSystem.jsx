@@ -2,12 +2,14 @@ import packageInfo from '../../../package.json';
 
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
-const technologies = [
-  'React',
-  'JavaScript',
-  'Vite',
-  'CSS',
-  'Lucide React',
+const technologies = ['React / React DOM', 'JavaScript', 'Vite', 'CSS', 'Lucide React', 'PDF.js'];
+
+/* === Créditos das dependências distribuídas === */
+const credits = [
+  ['React / React DOM', 'MIT', 'https://github.com/facebook/react/blob/main/LICENSE'],
+  ['Vite', 'MIT', 'https://github.com/vitejs/vite/blob/main/LICENSE'],
+  ['Lucide', 'ISC', 'https://github.com/lucide-icons/lucide/blob/main/LICENSE'],
+  ['PDF.js', 'Apache-2.0', 'https://github.com/mozilla/pdf.js/blob/master/LICENSE'],
 ];
 
 const architecture = [
@@ -81,15 +83,34 @@ export default function AboutSystem() {
         </p>
       </section>
 
-      <section><h3>{t('Evolução e créditos')}</h3><p>{t('A V2 integra experiências Desktop e Mobile, conteúdo profissional e aplicativos locais com permissões explícitas.')}</p><p>{t('Construído com React, React DOM, Lucide e Vite. As licenças das dependências acompanham seus respectivos pacotes.')}</p></section>
+      <section>
+        <h3>{t('Evolução e créditos')}</h3>
+        <p>
+          {t(
+            'A V2 integra experiências Desktop e Mobile, conteúdo profissional e aplicativos locais com permissões explícitas.',
+          )}
+        </p>
+        <p>
+          {t(
+            'Construído com React, React DOM, Lucide e Vite. As licenças das dependências acompanham seus respectivos pacotes.',
+          )}
+        </p>
+      </section>
+      <section aria-label={t('Evolução e créditos')}>
+        <ul>
+          {credits.map(([name, license, url]) => (
+            <li key={name}>
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                {name} · {license} ↗
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
       <section aria-labelledby="system-source">
         <h3 id="system-source">{t('Código-fonte')}</h3>
 
-        <a
-          href="https://github.com/warlleyz/ws-os"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href="https://github.com/warlleyz/ws-os" target="_blank" rel="noopener noreferrer">
           {t('Repositório no GitHub')}
         </a>
       </section>

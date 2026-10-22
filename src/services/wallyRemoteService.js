@@ -52,7 +52,8 @@ export async function askWallyRemote({
       throw new Error(data.error || 'REMOTE_UNAVAILABLE');
     }
 
-    if (typeof data.message !== 'string' || !data.message.trim()) {
+    if (controller.signal.aborted) throw new DOMException('Operação cancelada.', 'AbortError');
+    if (typeof data?.message !== 'string' || !data.message.trim() || data.message.length > 4000) {
       throw new Error('EMPTY_RESPONSE');
     }
 

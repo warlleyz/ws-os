@@ -37,11 +37,11 @@ function WeatherGlyph({ code, ...props }) {
   return createElement(getWeatherIcon(code), props);
 }
 
-function WeatherWidget({ weatherData }) {
+function WeatherWidget({ weatherData, widget: suppliedWidget }) {
   const locale = useLocale();
   const { widgets } = useWidgetPreferences();
 
-  const widget = widgets.find((item) => item.instanceId === 'weather-default');
+  const widget = suppliedWidget ?? widgets.find((item) => item.instanceId === 'weather-default');
 
   const settings = widget?.settings ?? {};
   const useFahrenheit = settings.temperatureUnit === 'fahrenheit';
@@ -77,7 +77,16 @@ function WeatherWidget({ weatherData }) {
   function formatDay(value) {
     if (typeof value !== 'string') return '';
 
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return '';
     const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    if (
+      !Number.isFinite(date.getTime()) ||
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    )
+      return '';
 
     return new Intl.DateTimeFormat(locale, {
       weekday: 'short',

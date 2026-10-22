@@ -2,7 +2,7 @@ import { subscribePublicData } from '../../services/publicDataService';
 import { useEffect, useState } from 'react';
 import { fetchManagedContent } from '../../services/contentService';
 export default function useCalendarEvents() {
-  const [result, setResult] = useState({ data: [], error: false });
+  const [result, setResult] = useState({ data: [], error: false, warning: '' });
   useEffect(() => {
     let controller;
     function load() {
@@ -11,10 +11,11 @@ export default function useCalendarEvents() {
       const current = controller;
       fetchManagedContent('events', { signal: current.signal, force: true })
         .then((value) => {
-          if (!current.signal.aborted) setResult({ data: value.data, error: false });
+          if (!current.signal.aborted)
+            setResult({ data: value.data, error: false, warning: value.warning ?? '' });
         })
         .catch(() => {
-          if (!current.signal.aborted) setResult((previous) => ({ ...previous, error: true }));
+          if (!current.signal.aborted) setResult({ data: [], error: true, warning: '' });
         });
     }
     load();

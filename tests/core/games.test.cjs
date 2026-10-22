@@ -138,3 +138,12 @@ test('Paciência aplica cores/ranks e só aceita ases em base vazia', () => {
     1,
   );
 });
+
+test('Campo Minado recusa índices inválidos sem modificar o tabuleiro', () => {
+  const m = models(),
+    state = m.newMinefield(0, 123);
+  for (const index of [-1, 64, 1.5, NaN, '2']) {
+    assert.equal(m.revealMinefield(state, index), state);
+    assert.equal(m.flagMinefield(state, index), state);
+  }
+});

@@ -26,7 +26,7 @@ export async function onRequest({ request, env }) {
     return json({ error: 'METHOD_NOT_ALLOWED' }, 405);
   try {
     if (!administrative) {
-      const input = await readBoundedJson(request, 16384);
+      const input = await readBoundedJson(request, 40 * 1024);
       const parsed = validateRequestInput(input);
       if (
         !parsed.ok ||

@@ -13,14 +13,14 @@ export default function SolitaireGame({ paused }) {
   const won = state.foundations.every((pile) => pile.length === 13);
   const { record, error } = useGameRecord('solitaire', state.moves, won);
   function apply(next) {
-    if (!next || next === state) return;
+    if (paused || won || !next || next === state) return;
     setUndo((current) => [...current, state].slice(-20));
     setState(next);
     setSelection(null);
     setMessage('');
   }
   function pick(from) {
-    if (paused) return;
+    if (paused || won) return;
     if (selection) {
       const to = from.kind === 'waste' ? null : { kind: from.kind, column: from.column };
       const next = moveSolitaire(state, selection, to);
@@ -37,7 +37,7 @@ export default function SolitaireGame({ paused }) {
       <h3>{t('Paciência')}</h3>
       <p role="status">
         {t('Jogadas')}: {state.moves} · {t('Melhor número de jogadas')}: {record ?? '—'}{' '}
-        {won ? t('Você venceu!') : ''} {t(message)}
+        {won ? t('Você venceu!') : paused ? t('Pausado') : ''} {t(message)}
       </p>
       {error && <p>{t('Recorde disponível somente nesta sessão.')}</p>}
       <p>
@@ -51,7 +51,7 @@ export default function SolitaireGame({ paused }) {
         </button>
         <button
           type="button"
-          disabled={paused || !state.waste.length}
+          disabled={paused || won || !state.waste.length}
           onClick={() => pick({ kind: 'waste' })}
         >
           {t('Descarte')}: {label(state.waste.at(-1))}
@@ -60,7 +60,7 @@ export default function SolitaireGame({ paused }) {
           <button
             type="button"
             key={column}
-            disabled={paused}
+            disabled={paused || won}
             onClick={() => pick({ kind: 'foundation', column })}
           >
             {t('Base')} {suits[column]}: {label(pile.at(-1))}
@@ -72,12 +72,16 @@ export default function SolitaireGame({ paused }) {
           <div key={column} className="ws-solitaire__column">
             <button
               type="button"
-              disabled={paused}
-              onClick={() =>
-                selection
-                  ? apply(moveSolitaire(state, selection, { kind: 'tableau', column }))
-                  : setMessage('Selecione uma carta primeiro.')
-              }
+              disabled={paused || won}
+              onClick={() => {
+                if (!selection) {
+                  setMessage('Selecione uma carta primeiro.');
+                  return;
+                }
+                const next = moveSolitaire(state, selection, { kind: 'tableau', column });
+                if (next) apply(next);
+                else setMessage('Movimento inválido. Escolha outra carta ou destino.');
+              }}
             >
               {t('Coluna')} {column + 1}
             </button>
@@ -86,7 +90,7 @@ export default function SolitaireGame({ paused }) {
                 className={card.suit % 2 ? 'is-red' : ''}
                 key={card.id}
                 type="button"
-                disabled={!card.faceUp || paused}
+                disabled={!card.faceUp || paused || won}
                 aria-pressed={
                   selection?.kind === 'tableau' &&
                   selection.column === column &&
@@ -103,6 +107,7 @@ export default function SolitaireGame({ paused }) {
       <div className="ws-app__toolbar">
         <button
           type="button"
+          disabled={paused}
           onClick={() => {
             setSelection(null);
             setMessage('');
@@ -112,8 +117,9 @@ export default function SolitaireGame({ paused }) {
         </button>
         <button
           type="button"
-          disabled={!undo.length}
+          disabled={paused || !undo.length}
           onClick={() => {
+            setMessage('');
             setState(undo.at(-1));
             setUndo((current) => current.slice(0, -1));
             setSelection(null);
@@ -123,7 +129,9 @@ export default function SolitaireGame({ paused }) {
         </button>
         <button
           type="button"
+          disabled={paused}
           onClick={() => {
+            setMessage('');
             setState(newSolitaire(Math.floor(Math.random() * 4294967296)));
             setUndo([]);
             setSelection(null);

@@ -17,6 +17,7 @@ export default function useGlobalShortcuts({
 }) {
   useEffect(() => {
     function handleKeyDown(event) {
+      if (event.defaultPrevented || event.isComposing) return;
       const key = event.code;
       if (
         event.ctrlKey &&

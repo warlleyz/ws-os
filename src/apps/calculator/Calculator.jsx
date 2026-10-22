@@ -1,17 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { calculate } from './calculatorEngine';
 import '../../styles/apps.css';
 import './Calculator.css';
+/* === Histórico local limitado === */
 const KEY = 'ws-os:calculator-history';
 function loadHistory() {
   try {
-    const items = JSON.parse(localStorage.getItem(KEY) ?? '[]');
+    const stored = localStorage.getItem(KEY);
+    if (stored && stored.length > 20000) return [];
+    const items = JSON.parse(stored ?? '[]');
     return Array.isArray(items)
       ? items
           .filter(
             (item) =>
               typeof item?.expression === 'string' &&
+              item.expression.trim().length > 0 &&
               item.expression.length <= 256 &&
               Number.isFinite(item.result),
           )
@@ -21,6 +25,7 @@ function loadHistory() {
     return [];
   }
 }
+/* === Expressão, resultado e interação por instância === */
 export default function Calculator() {
   const locale = useLocale();
   const [expression, setExpression] = useState('');
@@ -29,6 +34,19 @@ export default function Calculator() {
   const [history, setHistory] = useState(loadHistory);
   const [scientific, setScientific] = useState(false);
   const [angle, setAngle] = useState('deg');
+  const inputRef = useRef(null);
+  const caretRef = useRef(null);
+  useEffect(() => {
+    if (caretRef.current !== null) {
+      inputRef.current?.setSelectionRange(caretRef.current, caretRef.current);
+      caretRef.current = null;
+    }
+  }, [expression]);
+  function replaceExpression(value) {
+    setExpression(value.slice(0, 256));
+    setResult(null);
+    setError('');
+  }
   function evaluate() {
     try {
       const value = calculate(expression, angle);
@@ -46,14 +64,29 @@ export default function Calculator() {
       setError(error.message);
     }
   }
+  /* ----- Teclas respeitam seleção e posição de edição ----- */
   function insert(value) {
+    if (value === '=') {
+      evaluate();
+      return;
+    }
     if (value === 'AC') {
-      setExpression('');
-      setResult(null);
-      setError('');
-    } else if (value === '⌫') setExpression((current) => current.slice(0, -1));
-    else if (value === '=') evaluate();
-    else setExpression((current) => (current + value).slice(0, 256));
+      replaceExpression('');
+      caretRef.current = expression ? 0 : null;
+      return;
+    }
+    const start = inputRef.current?.selectionStart ?? expression.length;
+    const end = inputRef.current?.selectionEnd ?? start;
+    const from = value === '⌫' && start === end ? Math.max(0, start - 1) : start;
+    const addition = value === '⌫' ? '' : value;
+    const next = expression.slice(0, from) + addition + expression.slice(end);
+    if (next.length > 256) return;
+    if (next === expression) {
+      inputRef.current?.setSelectionRange(from + addition.length, from + addition.length);
+      return;
+    }
+    caretRef.current = from + addition.length;
+    replaceExpression(next);
   }
   return (
     <article className="desktop-window__content ws-app ws-calculator">
@@ -61,16 +94,25 @@ export default function Calculator() {
       <label>
         {t('Expressão')}
         <input
+          ref={inputRef}
           value={expression}
           maxLength={256}
           inputMode="text"
-          onChange={(event) => setExpression(event.target.value)}
+          onChange={(event) => {
+            caretRef.current = null;
+            replaceExpression(event.target.value);
+          }}
           onKeyDown={(event) => {
-            if (event.key === 'Enter') {
+            if (event.nativeEvent?.isComposing || event.isComposing) return;
+            if (event.key === 'Enter' || event.key === '=') {
               event.preventDefault();
               evaluate();
             }
-            if (event.key === 'Escape') insert('AC');
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              event.stopPropagation();
+              insert('AC');
+            }
           }}
           autoComplete="off"
           spellCheck={false}
@@ -92,7 +134,14 @@ export default function Calculator() {
         <>
           <label>
             {t('Ângulos')}
-            <select value={angle} onChange={(event) => setAngle(event.target.value)}>
+            <select
+              value={angle}
+              onChange={(event) => {
+                setAngle(event.target.value);
+                setResult(null);
+                setError('');
+              }}
+            >
               <option value="deg">{t('Graus')}</option>
               <option value="rad">{t('Radianos')}</option>
             </select>
@@ -172,7 +221,13 @@ export default function Calculator() {
           <ol>
             {history.map((item, index) => (
               <li key={index}>
-                <button type="button" onClick={() => setExpression(item.expression)}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    caretRef.current = item.expression.length;
+                    replaceExpression(item.expression);
+                  }}
+                >
                   {item.expression} ={' '}
                   {item.result.toLocaleString(locale, { maximumSignificantDigits: 14 })}
                 </button>

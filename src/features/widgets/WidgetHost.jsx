@@ -76,7 +76,7 @@ export default function WidgetHost({
         <GripVertical size={15} aria-hidden="true" />
       </button>
 
-      <WidgetComponent weatherData={weatherData} />
+      <WidgetComponent widget={widget} weatherData={weatherData} />
     </div>
   );
 }

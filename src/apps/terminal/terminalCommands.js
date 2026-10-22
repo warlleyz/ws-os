@@ -62,3 +62,20 @@ export function completeCommand(input, appIds) {
   const matches = appIds.filter((item) => item.startsWith(prefix[1]));
   return matches.length === 1 ? 'open ' + matches[0] : input;
 }
+
+/* === Comandos de autenticação nunca conservam argumentos no log === */
+export function safeTerminalCommand(input) {
+  if (typeof input !== 'string') return '';
+  if (/^\s*["']?login(?:["']?(?:\s|$))/i.test(input)) return 'login';
+  try {
+    if (parseCommand(input.trim().split(/\s/)[0]).name === 'login') return 'login';
+  } catch {
+    /* Sem eco de argumentos de autenticação inválidos. */
+  }
+  try {
+    if (parseCommand(input).name === 'login') return 'login';
+  } catch {
+    /* A mensagem do parser não inclui o conteúdo digitado. */
+  }
+  return input;
+}

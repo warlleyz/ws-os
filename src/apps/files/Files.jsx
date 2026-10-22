@@ -816,7 +816,7 @@ export default function Files({ instance }) {
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={Math.round(storagePercent)}
-              aria-label="Armazenamento local utilizado"
+              aria-label={t('Armazenamento local utilizado')}
             >
               <span style={{ width: `${storagePercent}%` }} />
             </div>
@@ -861,7 +861,7 @@ export default function Files({ instance }) {
               <button
                 type="button"
                 className="ws-files__addressbar-back"
-                aria-label="Voltar"
+                aria-label={t('Voltar')}
                 disabled={space === 'home' || busy}
                 onClick={() => {
                   if (space === 'personal' && folderId) {
@@ -887,7 +887,7 @@ export default function Files({ instance }) {
                       ref={addressInputRef}
                       autoFocus
                       value={addressValue}
-                      aria-label="Editar caminho da pasta"
+                      aria-label={t('Editar caminho da pasta')}
                       onChange={(event) => {
                         setAddressValue(event.target.value);
                         setAddressError('');
@@ -941,7 +941,7 @@ export default function Files({ instance }) {
                     <button
                       type="button"
                       className="ws-files__addressbar-edit"
-                      aria-label="Digitar endereço"
+                      aria-label={t('Digitar endereço')}
                       onClick={editAddress}
                     >
                       <span> </span>
@@ -954,16 +954,16 @@ export default function Files({ instance }) {
                 type="button"
                 className="ws-files__addressbar-copy"
                 onClick={copyAddress}
-                title="Copiar caminho"
-                aria-label="Copiar caminho"
+                title={t('Copiar caminho')}
+                aria-label={t('Copiar caminho')}
               >
                 <Copy size={16} aria-hidden="true" />
               </button>
               <button
                 type="button"
                 className="ws-files__addressbar-refresh"
-                title="Atualizar"
-                aria-label="Atualizar"
+                title={t('Atualizar')}
+                aria-label={t('Atualizar')}
                 onClick={() => {
                   store.refresh();
                   setOfficialRevision((value) => value + 1);
@@ -974,7 +974,7 @@ export default function Files({ instance }) {
             </div>
             {addressError && (
               <p className="ws-files__address-error" role="alert">
-                {addressError}
+                {t(addressError)}
               </p>
             )}
             {/* ----- Pesquisa integrada à navegação ----- */}
@@ -1004,12 +1004,13 @@ export default function Files({ instance }) {
                 <div className="ws-files__home-heading-content">
                   <span className="ws-files__home-eyebrow">
                     <Sparkles size={13} aria-hidden="true" />
-                    EXPLORADOR DE ARQUIVOS
+                    {t('EXPLORADOR DE ARQUIVOS')}
                   </span>
-                  <h2>Bem-vindo ao WS Files</h2>
+                  <h2>{t('Bem-vindo ao WS Files')}</h2>
                   <p>
-                    Seus documentos e arquivos, organizados em um só lugar. Acesse seus espaços e
-                    continue de onde parou.
+                    {t(
+                      'Seus documentos e arquivos, organizados em um só lugar. Acesse seus espaços e continue de onde parou.',
+                    )}
                   </p>
                 </div>
                 <div className="ws-files__home-heading-art" aria-hidden="true">
@@ -1020,7 +1021,7 @@ export default function Files({ instance }) {
                 /* ----- Resultados da pesquisa ----- */
                 <section className="ws-files__home-section">
                   <div className="ws-files__section-heading">
-                    <h3>Resultados da pesquisa</h3>
+                    <h3>{t('Resultados da pesquisa')}</h3>
                     <span>{homeResults.length} resultados</span>
                   </div>
                   <div className="ws-files__recent-list">
@@ -1072,7 +1073,9 @@ export default function Files({ instance }) {
                       );
                     })}
                     {!homeResults.length && (
-                      <p className="ws-files__home-empty">Nenhum arquivo corresponde à pesquisa.</p>
+                      <p className="ws-files__home-empty">
+                        {t('Nenhum arquivo corresponde à pesquisa.')}
+                      </p>
                     )}
                   </div>
                 </section>
@@ -1081,8 +1084,8 @@ export default function Files({ instance }) {
                   {/* ----- Acesso rápido aos espaços ----- */}
                   <section className="ws-files__home-section">
                     <div className="ws-files__section-heading">
-                      <h3>Acesso rápido</h3>
-                      <span>Locais principais</span>
+                      <h3>{t('Acesso rápido')}</h3>
+                      <span>{t('Locais principais')}</span>
                     </div>
                     <div className="ws-files__home-grid">
                       {[
@@ -1135,7 +1138,7 @@ export default function Files({ instance }) {
                   {/* ----- Documentos acessados recentemente ----- */}
                   <section className="ws-files__home-section">
                     <div className="ws-files__section-heading">
-                      <h3>Acessados recentemente</h3>
+                      <h3>{t('Acessados recentemente')}</h3>
                       <span>{availableRecentFiles.length} arquivos</span>
                     </div>
                     {availableRecentFiles.length ? (
@@ -1185,7 +1188,7 @@ export default function Files({ instance }) {
                     ) : (
                       <div className="ws-files__home-empty">
                         <FileText size={23} aria-hidden="true" />
-                        <p>Seus arquivos abertos recentemente aparecerão aqui.</p>
+                        <p>{t('Seus arquivos abertos recentemente aparecerão aqui.')}</p>
                       </div>
                     )}
                   </section>
@@ -1375,7 +1378,7 @@ export default function Files({ instance }) {
                     {/* ----- Orientação para arquivos de texto ----- */}
                     {action.type === 'create-file' && (
                       <p className="ws-files__dialog-hint">
-                        A extensão .txt será adicionada automaticamente.
+                        {t('A extensão .txt será adicionada automaticamente.')}
                       </p>
                     )}
                     {action.type === 'move' && (
@@ -1520,7 +1523,9 @@ export default function Files({ instance }) {
                       </span>
                     </div>
                     {space === 'personal' && (
-                      <span className="ws-files__workspace-hint">Duplo clique para abrir</span>
+                      <span className="ws-files__workspace-hint">
+                        {t('Duplo clique para abrir')}
+                      </span>
                     )}
                   </div>
                   <ul
@@ -1626,8 +1631,8 @@ export default function Files({ instance }) {
                           {term
                             ? 'Tente pesquisar com outro nome.'
                             : space === 'trash'
-                              ? 'Os itens removidos aparecerão aqui.'
-                              : 'Crie uma pasta ou importe um documento para começar.'}
+                              ? t('Os itens removidos aparecerão aqui.')
+                              : t('Crie uma pasta ou importe um documento para começar.')}
                         </p>
                         {!term && space === 'personal' && !unavailableFolder && (
                           <button

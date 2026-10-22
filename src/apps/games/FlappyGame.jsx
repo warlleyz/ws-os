@@ -23,14 +23,14 @@ export default function FlappyGame({ paused }) {
   function jump() {
     if (paused || state.over) return;
     setRunning(true);
-    setState((current) => ({ ...current, velocity: -0.42 }));
+    setState((current) => (current.over ? current : { ...current, velocity: -0.42 }));
   }
   return (
     <section>
       <h3>Flappy Bird</h3>
       <p role="status">
         {t('Pontos')}: {state.score} · {t('Recorde local')}: {record ?? '—'}{' '}
-        {state.over ? t('Fim de jogo') : paused ? t('Pausado') : ''}
+        {state.over ? t('Fim de jogo') : paused || !running ? t('Pausado') : ''}
       </p>
       {error && <p>{t('Recorde disponível somente nesta sessão.')}</p>}
       <div
@@ -38,9 +38,10 @@ export default function FlappyGame({ paused }) {
         role="group"
         aria-label={t('Jogo de voo. Pressione Espaço para saltar.')}
         onKeyDown={(event) => {
-          if (event.code === 'Space') {
+          if (event.code === 'Space' && !event.altKey && !event.ctrlKey && !event.metaKey) {
             event.preventDefault();
-            jump();
+            event.stopPropagation();
+            if (!event.repeat) jump();
           }
         }}
       >
@@ -69,11 +70,16 @@ export default function FlappyGame({ paused }) {
         <button type="button" onClick={jump} disabled={state.over || paused}>
           {t('Saltar')}
         </button>
-        <button type="button" onClick={() => setRunning((value) => !value)} disabled={state.over}>
+        <button
+          type="button"
+          onClick={() => setRunning((value) => !value)}
+          disabled={state.over || paused}
+        >
           {t(running ? 'Pausar' : 'Iniciar')}
         </button>
         <button
           type="button"
+          disabled={paused}
           onClick={() => {
             setState(newFlappy());
             setRunning(false);

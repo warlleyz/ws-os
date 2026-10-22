@@ -9,6 +9,7 @@ import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import '../../styles/apps.css';
 import './Notes.css';
 import PostLikes from './PostLikes';
+import PostAttachments from './PostAttachments';
 import NotesAdmin from './NotesAdmin';
 
 const searchText = (value) =>
@@ -89,7 +90,17 @@ export default function Notes({ instance }) {
           </time>
           <p>{selected.tags.join(' · ')}</p>
           <div className="notes-app__body">{contentText(selected.body, locale)}</div>
+          <PostAttachments key={selected.id} postId={selected.id} instanceId={instance.id} />
           <PostLikes key={selected.id} postId={selected.id} />
+        </section>
+      ) : selectedId ? (
+        <section>
+          {resource.status === 'ready' && (
+            <p role="status">{t('Esta publicação não está disponível.')}</p>
+          )}
+          <button type="button" onClick={() => setSelectedId(null)}>
+            {t('Voltar para publicações')}
+          </button>
         </section>
       ) : (
         <>

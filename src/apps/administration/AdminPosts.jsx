@@ -1,4 +1,3 @@
-
 import { invalidatePublicData } from '../../services/publicDataService';
 import NotesAdmin from '../notes/NotesAdmin';
 
@@ -15,7 +14,7 @@ export default function AdminPosts({ instanceId, authorized }) {
       instanceId={instanceId}
       isAdmin={authorized}
       refreshPublicPosts={refreshPublicPosts}
-      onDeletePublicPost={() => { }}
+      onDeletePublicPost={() => {}}
     />
   );
 }

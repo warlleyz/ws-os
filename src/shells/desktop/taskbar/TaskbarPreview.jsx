@@ -1,6 +1,7 @@
 import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 import { getAppDefinition } from '../../../core/appRegistry';
 import { closeApp } from '../../../core/appManager';
+import TaskbarThumbnail from './TaskbarThumbnail';
 import { AppIcon } from '../../../shared/components/AppIcon';
 
 export default function TaskbarPreview({
@@ -70,18 +71,18 @@ export default function TaskbarPreview({
               <button
                 type="button"
                 className="taskbar-preview__open"
-                aria-label={`Ativar ${title}`}
+                aria-label={t(`Ativar ${title}`)}
                 onPointerEnter={() => highlightWindow(instance)}
                 onPointerLeave={clearWindowHighlight}
                 onFocus={() => highlightWindow(instance)}
                 onBlur={clearWindowHighlight}
                 onClick={() => activateInstance(instance)}
               >
-                <span className="taskbar-preview__placeholder" aria-hidden="true">
+                <TaskbarThumbnail instance={instance}>
                   <span className="taskbar-preview__placeholder-icon">
                     <AppIcon app={app} size={27} />
                   </span>
-                </span>
+                </TaskbarThumbnail>
                 <small>
                   {instance.minimized
                     ? t('Minimizada')

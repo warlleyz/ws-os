@@ -20,14 +20,15 @@ export default function MinesGame({ paused }) {
       <h3>{t('Campo Minado')}</h3>
       <p role="status">
         {t('Bandeiras')}: {state?.flags.length ?? 0}/10 · {t('Melhor número de jogadas')}:{' '}
-        {record ?? '—'} {state?.over ? t(state.won ? 'Você venceu!' : 'Fim de jogo') : ''}
+        {record ?? '—'}{' '}
+        {state?.over ? t(state.won ? 'Você venceu!' : 'Fim de jogo') : paused ? t('Pausado') : ''}
       </p>
       {error && <p>{t('Recorde disponível somente nesta sessão.')}</p>}
       <label>
         {t('Modo bandeira')}
         <input
           type="checkbox"
-          disabled={!state}
+          disabled={!state || paused || state.over}
           checked={flag}
           onChange={(event) => setFlag(event.target.checked)}
         />
@@ -59,6 +60,7 @@ export default function MinesGame({ paused }) {
       </div>
       <button
         type="button"
+        disabled={paused}
         onClick={() => {
           setState(null);
           setFlag(false);

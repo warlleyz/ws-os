@@ -11,7 +11,7 @@ export default function PanelLayer({ layerRef, children, onDismiss }) {
     const panel = layerRef.current?.firstElementChild;
     if (currentPanel.current === panel) return;
     currentPanel.current = panel;
-    if (!panel || panel.matches(".taskbar-preview")) return;
+    if (!panel || panel.matches('.taskbar-preview')) return;
     if (!panel.contains(document.activeElement)) {
       trigger.current = document.activeElement;
       const first =
@@ -42,7 +42,7 @@ export default function PanelLayer({ layerRef, children, onDismiss }) {
         event.preventDefault();
         event.stopPropagation();
         dismiss.current?.();
-        trigger.current?.focus();
+        if (trigger.current?.isConnected !== false) trigger.current?.focus();
       }}
       onClickCapture={(event) => {
         const button = event.target.closest('button');
@@ -50,7 +50,9 @@ export default function PanelLayer({ layerRef, children, onDismiss }) {
           button?.closest('header') &&
           /^(Fechar|Close)\b/.test(button.getAttribute('aria-label') ?? '')
         )
-          queueMicrotask(() => trigger.current?.focus());
+          queueMicrotask(() => {
+            if (trigger.current?.isConnected !== false) trigger.current?.focus();
+          });
       }}
     >
       {children}

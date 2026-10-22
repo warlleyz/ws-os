@@ -227,3 +227,10 @@
     font-size: 20px;
   }
 }
+
+/* === Conteúdo privado selecionável, com quebras preservadas === */
+.ws-admin-content__body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}

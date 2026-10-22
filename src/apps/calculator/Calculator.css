@@ -25,3 +25,25 @@
   width: 22px;
   min-height: 22px;
 }
+
+/* === Dimensões mínimas de toque e conteúdo extenso === */
+.ws-calculator__keys button {
+  min-height: 44px;
+}
+.ws-calculator label > input:not([type='checkbox']) {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ws-calculator ol {
+  padding-inline-start: 1.5rem;
+}
+.ws-calculator li button {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+.ws-calculator__result {
+  user-select: text;
+}

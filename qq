@@ -1,8 +1,0 @@
-warning: in the working copy of 'src/features/widgets/clock/ClockWidget.jsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/features/windows/WindowLayer.jsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/features/windows/useWindowInteraction.js', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/features/windows/windowGeometry.js', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/shared/components/AppIcon.jsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/shells/desktop/DesktopShortcuts.jsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/shells/desktop/taskbar/Taskbar.jsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'tests/core/refactor.test.cjs', LF will be replaced by CRLF the next time Git touches it

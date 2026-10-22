@@ -18,3 +18,38 @@
   min-height: 22px;
   flex: 0 0 auto;
 }
+
+/* === Campos e confirmação da solicitação === */
+.ws-contact__fields {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.ws-contact__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.ws-contact__verification {
+  min-width: 0;
+  max-width: 100%;
+}
+.ws-contact__form :is(input, textarea, select) {
+  box-sizing: border-box;
+  width: 100%;
+}
+.ws-contact__form textarea {
+  resize: vertical;
+}
+.ws-contact__receipt {
+  padding: 14px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  background: var(--surface-secondary);
+}

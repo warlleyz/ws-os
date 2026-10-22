@@ -5,7 +5,7 @@ const { test } = require('node:test'),
   vm = require('node:vm');
 const root = path.resolve(__dirname, '../..');
 const en = JSON.parse(fs.readFileSync(path.join(root, 'src/shared/i18n/locales/en.json'), 'utf8'));
-test('interfaces possuem tradução para chamadas literais de texto', () => {
+test('interfaces possuem tradução sem dispensas temporárias', () => {
   function walk(dir) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const file = path.join(dir, entry.name);
@@ -28,4 +28,59 @@ test('nomes e descrições do catálogo de widgets são traduzíveis', () => {
   for (const widget of widgets)
     for (const value of [widget.name, widget.description])
       assert.ok(Object.hasOwn(en, value), value);
+});
+
+test('catálogos têm as mesmas chaves e preservam placeholders', () => {
+  const pt = JSON.parse(
+    fs.readFileSync(path.join(root, 'src/shared/i18n/locales/pt-BR.json'), 'utf8'),
+  );
+  assert.deepEqual(Object.keys(en).sort(), Object.keys(pt).sort());
+  for (const [key, value] of Object.entries(en)) {
+    assert.equal(typeof value, 'string', key);
+    assert.ok(value.trim(), key);
+    assert.deepEqual(
+      (key.match(/\{\d+\}/g) ?? [])
+        .filter((token) => key !== '{0} não lida{1}' || token !== '{1}')
+        .sort(),
+      (value.match(/\{\d+\}/g) ?? []).sort(),
+      key,
+    );
+  }
+});
+
+test('traduções finais respondem à troca de idioma e preservam parâmetros', () => {
+  const source = fs
+    .readFileSync(path.join(root, 'src/shared/i18n/i18n.js'), 'utf8')
+    .replace(/^import.*$/gm, '')
+    .replace(/\bexport /g, '');
+  const i18n = vm.runInNewContext('(()=>{' + source + '; return {translate,setLocale};})()', {
+    english: en,
+    useSyncExternalStore() {},
+    localStorage: { getItem: () => 'en', setItem() {} },
+    document: { documentElement: { lang: 'en' } },
+  });
+  assert.equal(i18n.translate('Selecionar anexo'), 'Select attachment');
+  assert.equal(
+    i18n.translate('O caminho deve começar com WS Files.'),
+    'The path must start with WS Files.',
+  );
+  assert.equal(i18n.translate('Página 2 de 8'), 'Page 2 of 8');
+  assert.equal(i18n.setLocale('pt-BR'), true);
+  assert.equal(i18n.translate('Select attachment'), 'Selecionar anexo');
+  assert.equal(i18n.translate('Página 2 de 8'), 'Página 2 de 8');
+});
+
+test('Visualizador, PDF e Arquivos não reintroduzem texto literal traduzível', () => {
+  for (const file of [
+    'src/apps/files/Files.jsx',
+    'src/apps/file-viewer/DocumentView.jsx',
+    'src/apps/file-viewer/PdfPreview.jsx',
+  ]) {
+    const source = fs.readFileSync(path.join(root, file), 'utf8');
+    for (const match of source.matchAll(/>([^<>{}]+)</g)) {
+      const value = match[1].trim().replace(/\s+/g, ' ');
+      if (/^[\p{L}\p{N}\s.,:;!?/…+-]+$/u.test(value) && /[A-Za-zÀ-ÿ]{3}/.test(value))
+        assert.ok(['WS Files', 'WS OS / Explorer', 'PDF'].includes(value), file + ': ' + value);
+    }
+  }
 });

@@ -157,3 +157,13 @@
     min-width: 150px;
   }
 }
+
+/* === Miniatura estática da instância, descartada ao fechar a prévia === */
+.taskbar-preview__snapshot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: var(--surface-primary);
+}

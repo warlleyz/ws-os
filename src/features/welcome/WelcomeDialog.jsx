@@ -11,7 +11,7 @@ export default function WelcomeDialog({ onClose }) {
     return () => {
       if (previous instanceof HTMLElement && previous !== document.body && previous.isConnected)
         previous.focus();
-      else document.querySelector('.taskbar__menu-button')?.focus();
+      else document.querySelector('#ws-mobile, .taskbar__menu-button, #ws-desktop')?.focus();
     };
   }, []);
   return (
@@ -27,9 +27,9 @@ export default function WelcomeDialog({ onClose }) {
           }
           if (event.key === 'Tab') {
             const items = Array.from(
-              dialogRef.current.querySelectorAll(
+              dialogRef.current?.querySelectorAll(
                 'button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),[tabindex="0"]',
-              ),
+              ) ?? [],
             );
             const first = items[0],
               last = items.at(-1);

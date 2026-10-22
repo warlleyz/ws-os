@@ -47,7 +47,7 @@ As flags novas não foram inseridas na configuração de produção. Não há va
 - Auth: login incorreto/correto, usuário comum, cadastro administrativo, expiração, logout e operação já iniciada; confirmar a semântica efetiva de revogação dos JWTs no Supabase e o prazo de validade. Frontend guarda sessão só em memória.
 - Notas/curtidas: ciclo editorial completo, revisão antiga, anexo privado, publicação futura, acesso direto negado, limites e indisponibilidade do D1. Nada disso foi escrito em conta real nesta entrega.
 - Solicitações: enviar mensagem/agendamento com consentimento e desafio, perder resposta, reenviar **a mesma chave/conteúdo**, confirmar um único ID; outro conteúdo deve conflitar. Nunca confirmar reunião por haver persistência ou e-mail entregue.
-- EmailJS: conferir template/destino fixos, recebimento real, falha e timeout. O resultado técnico é `persisted` e `email` independentes. Não reutilizar o envio direto antigo do formulário junto ao novo fluxo, para não duplicar notificações; migração da UI pertence à Etapa 07.
+- EmailJS: conferir template/destino fixos, recebimento real, falha e timeout. O resultado técnico é `persisted` e `email` independentes. Não reutilizar o envio direto antigo do formulário junto ao novo fluxo, para não duplicar notificações; a Etapa 07 já migrou a UI para /api/requests e retirou o envio direto do navegador. Conferir VITE_TURNSTILE_SITE_KEY no frontend, hostname/action public-write e REQUESTS_ENABLED no Worker; presença de chave pública não comprova disponibilidade do serviço. [Entrega e homologação da Etapa 07](../finalizacao/ETAPA-07-ANDAMENTO.md).
 - Arquivos: criar metadados no PostgreSQL e enviar bytes ao bucket privado `ws-os-official-files` pelo Worker. Exigir `If-Match`, validar MIME, assinatura, tamanho e SHA-256. Testar arquivo inválido, corpo maior/menor, resposta perdida, repetição com bytes iguais/diferentes e uploads concorrentes. Conferir o objeto no Supabase Storage antes de confirmar o estado `available`. A exclusão exige revisão atual, confirmação explícita e verificação da remoção física antes do estado `deleted`. Testar reconciliação dos estados `uploading` e `deleting`, inclusive falhas do provedor. Visitantes não recebem credenciais nem acesso direto ao bucket.
 - Anexos: vincular cinco recursos, recusar o sexto inclusive com concorrência; rascunho/futuro não pode entregar bytes. Despublicar deve retirar o acesso imediatamente em novas requisições. Excluir publicação retira vínculos; excluir recurso retira referências pela migração 009.
 - Catálogo: recursos `catalog` privados/incompletos não entram na listagem; estáticos antigos continuam funcionando. Integração visual/Editor/Visualizador pertence às Etapas 05/06/08.
@@ -65,3 +65,18 @@ Os procedimentos operacionais de backup/restauração, limites reais, alertas e 
 ## Referência técnica consultada
 
 As operações de upload, download autenticado, consulta de metadados e exclusão utilizam a [API do Supabase Storage](https://supabase.com/docs/guides/storage). O bucket permanece privado e o Worker controla as permissões. A integridade SHA-256 e as revisões continuam gerenciadas pela aplicação e pelo PostgreSQL. Testes simulados não substituem a homologação real do armazenamento.
+
+
+### Notas — finalização técnica da Etapa 08
+
+O editor reutilizado por Notas/Administração envia uma identidade estável na criação e a revisão em edição/status/exclusão. A criação repetida só é confirmada quando conteúdo e estado do rascunho existente correspondem. Anexos utilizam as APIs existentes de arquivos e vínculos; a listagem administrativa inclui os metadados vinculados sob o token e RLS do administrador. Remover vínculo não exclui o objeto. Não há nova migração; conferir 008–010 e a configuração privada de Storage no ambiente de homologação antes do aceite real. Ver `docs/finalizacao/ETAPA-08-ANDAMENTO.md` para limites e pendências.
+
+
+### Jogos — validação local da Etapa 10
+
+Cliente de rankings utiliza o transporte compartilhado, confirma accepted=true e conserva o payload de tentativa incerta para retry explícito com novo Turnstile. Atualização de lista não serve como recibo individual de escrita. Limites públicos continuam Snake 222 e Flappy 100000; migração 006 e RPC existentes não foram alterados. O hash proporcional do backend e a pontuação originada no browser não garantem identidade global ou ausência de fraude. Homologação de envio/moderação depende do ambiente autorizado, flags de cliente/servidor e proteção pública configurada. Ver o checkpoint da Etapa 10 para pendências; nenhuma pontuação real foi enviada nesta tarefa.
+
+
+### Administração — integração local da Etapa 11
+
+O painel consome as APIs existentes de solicitações privadas, arquivos oficiais e moderação, com paginação onde oferecida pelo backend. Publicações reutilizam NotesAdmin; catálogo de documentos e eventos conservam AdminContent. Exclusão de ranking inclui pontuação observada para recusar alteração concorrente; clientes anteriores continuam compatíveis. Não há migração nova nem serviço ativado. Homologar operações administrativas e permissões no ambiente autorizado antes do aceite real. Wally remoto permanece desativado; não foram feitas chamadas de IA ou alterações em segredos. Ver o checkpoint da Etapa 11 para validação e limitações.

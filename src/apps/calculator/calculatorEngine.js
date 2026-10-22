@@ -1,5 +1,6 @@
+/* === Análise aritmética sem execução de código === */
 export function calculate(raw, angle = 'deg') {
-  if (typeof raw !== 'string' || raw.length > 256 || !raw.trim())
+  if (typeof raw !== 'string' || raw.length > 256 || !raw.trim() || !['deg', 'rad'].includes(angle))
     throw new Error('Expressão inválida.');
   const text = raw
     .replaceAll(',', '.')

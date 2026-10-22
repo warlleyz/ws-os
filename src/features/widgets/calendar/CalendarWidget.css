@@ -245,3 +245,17 @@
     transition: none;
   }
 }
+
+/* === Indicador discreto de evento público, também descrito no nome acessível === */
+.ws-calendar__day--event {
+  position: relative;
+}
+.ws-calendar__day--event::after {
+  content: '';
+  position: absolute;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}

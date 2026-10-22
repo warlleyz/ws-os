@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import { Check, Moon, RotateCcw, Sun } from 'lucide-react';
 
@@ -47,10 +46,7 @@ function SettingsSelect({ label, value, options, onChange }) {
     <label className="ws-settings__field">
       <span>{label}</span>
 
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      >
+      <select value={value} onChange={(event) => onChange(event.target.value)}>
         {options.map(([id, name]) => (
           <option key={id} value={id}>
             {t(name)}
@@ -77,7 +73,6 @@ function SettingsToggle({ label, checked, onChange }) {
     </label>
   );
 }
-
 
 /* === Galeria de wallpapers === */
 /* ----- Seleção por plataforma e tema ----- */
@@ -132,13 +127,15 @@ function WallpaperGallery({ shell, report, announce }) {
     try {
       const saved = await uploadCustomWallpaper(file, shell);
 
-      report(saved);
-
+      if (!mounted.current) return;
       if (saved) {
         announce('Imagem salva e aplicada.');
+      } else {
+        announce('Não foi possível salvar a imagem. A imagem anterior foi preservada.', true);
       }
     } catch (error) {
-      announce(error.message, true);
+      if (mounted.current)
+        announce(error?.message || 'Não foi possível concluir a operação.', true);
     } finally {
       if (mounted.current) {
         setBusy(false);
@@ -149,11 +146,7 @@ function WallpaperGallery({ shell, report, announce }) {
   /* === Exclusão === */
   /* ----- Remover imagem que não está em uso ----- */
   async function removeWallpaper(id) {
-    if (
-      busy ||
-      id === 'personal:legacy' ||
-      isPersonalWallpaperInUse(id)
-    ) {
+    if (busy || id === 'personal:legacy' || isPersonalWallpaperInUse(id)) {
       return;
     }
 
@@ -162,13 +155,14 @@ function WallpaperGallery({ shell, report, announce }) {
     try {
       const result = await deleteWallpaperFromCollection(id);
 
+      if (!mounted.current) return;
       if (result.ok) {
         report(true);
       } else {
-        report(false);
+        announce('Não foi possível concluir a operação.', true);
       }
     } catch {
-      report(false);
+      if (mounted.current) announce('Não foi possível concluir a operação.', true);
     } finally {
       if (mounted.current) {
         setBusy(false);
@@ -179,22 +173,14 @@ function WallpaperGallery({ shell, report, announce }) {
   /* === Renderização === */
   return (
     <SettingsCard
-      title={t(
-        shell === 'mobile'
-          ? 'Papel de parede do Mobile'
-          : 'Papel de parede do Desktop',
-      )}
+      title={t(shell === 'mobile' ? 'Papel de parede do Mobile' : 'Papel de parede do Desktop')}
       description={t(
         'A seleção é independente para cada shell. A imagem pessoal fica somente neste navegador.',
       )}
     >
       {/* === Wallpapers oficiais === */}
       {/* ----- Galeria do tema ativo ----- */}
-      <div
-        className="ws-settings__wallpaper-grid"
-        data-shell={shell}
-        aria-busy={busy}
-      >
+      <div className="ws-settings__wallpaper-grid" data-shell={shell} aria-busy={busy}>
         {officialChoices.map((item) => {
           const isActive = selected === item.id;
 
@@ -210,11 +196,7 @@ function WallpaperGallery({ shell, report, announce }) {
               <span
                 className="ws-settings__wallpaper-preview"
                 style={{
-                  background: getWallpaperDefinition(
-                    item.id,
-                    shell,
-                    theme,
-                  ).background,
+                  background: getWallpaperDefinition(item.id, shell, theme).background,
                 }}
                 aria-hidden="true"
               >
@@ -227,9 +209,7 @@ function WallpaperGallery({ shell, report, announce }) {
 
               <span className="ws-settings__wallpaper-info">
                 <strong>{t(item.name)}</strong>
-                <small>
-                  {t(isActive ? 'Em uso' : 'Selecionar')}
-                </small>
+                <small>{t(isActive ? 'Em uso' : 'Selecionar')}</small>
               </span>
             </button>
           );
@@ -239,33 +219,19 @@ function WallpaperGallery({ shell, report, announce }) {
       {/* === Coleção pessoal === */}
       {/* ----- Imagens cadastradas no navegador ----- */}
       {personalWallpapers.length > 0 && (
-        <div
-          className="ws-settings__wallpaper-grid"
-          data-shell={shell}
-          aria-busy={busy}
-        >
+        <div className="ws-settings__wallpaper-grid" data-shell={shell} aria-busy={busy}>
           {personalWallpapers.map((item) => {
             const isActive =
-              selected === item.id ||
-              (
-                selected === 'custom' &&
-                item.id === 'personal:legacy'
-              );
+              selected === item.id || (selected === 'custom' && item.id === 'personal:legacy');
 
-            const protectedImage =
-              item.id === 'personal:legacy';
+            const protectedImage = item.id === 'personal:legacy';
 
-            const inUse =
-              isPersonalWallpaperInUse(item.id);
+            const inUse = isPersonalWallpaperInUse(item.id);
 
-            const cannotRemove =
-              busy || protectedImage || inUse;
+            const cannotRemove = busy || protectedImage || inUse;
 
             return (
-              <div
-                key={item.id}
-                className="ws-settings__personal-wallpaper"
-              >
+              <div key={item.id} className="ws-settings__personal-wallpaper">
                 {/* ----- Selecionar imagem ----- */}
                 <button
                   type="button"
@@ -277,11 +243,7 @@ function WallpaperGallery({ shell, report, announce }) {
                   <span
                     className="ws-settings__wallpaper-preview"
                     style={{
-                      background: getWallpaperDefinition(
-                        item.id,
-                        shell,
-                        theme,
-                      ).background,
+                      background: getWallpaperDefinition(item.id, shell, theme).background,
                     }}
                     aria-hidden="true"
                   >
@@ -293,13 +255,9 @@ function WallpaperGallery({ shell, report, announce }) {
                   </span>
 
                   <span className="ws-settings__wallpaper-info">
-                    <strong title={item.name}>
-                      {item.name}
-                    </strong>
+                    <strong title={item.name}>{item.name}</strong>
 
-                    <small>
-                      {t(isActive ? 'Em uso' : 'Selecionar')}
-                    </small>
+                    <small>{t(isActive ? 'Em uso' : 'Selecionar')}</small>
                   </span>
                 </button>
 
@@ -309,9 +267,7 @@ function WallpaperGallery({ shell, report, announce }) {
                   className="ws-settings__personal-wallpaper-delete"
                   disabled={cannotRemove}
                   onClick={() => removeWallpaper(item.id)}
-                  title={t(
-                    inUse ? 'Em uso' : 'Excluir',
-                  )}
+                  title={t(inUse ? 'Em uso' : 'Excluir')}
                   aria-label={`${t('Excluir')}: ${item.name}`}
                 >
                   {t('Excluir')}
@@ -334,16 +290,8 @@ function WallpaperGallery({ shell, report, announce }) {
           aria-label={t('Escolher imagem personalizada')}
         />
 
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => inputRef.current?.click()}
-        >
-          {t(
-            busy
-              ? 'Salvando imagem…'
-              : 'Adicionar imagem pessoal',
-          )}
+        <button type="button" disabled={busy} onClick={() => inputRef.current?.click()}>
+          {t(busy ? 'Salvando imagem…' : 'Adicionar imagem pessoal')}
         </button>
       </div>
 
@@ -354,14 +302,10 @@ function WallpaperGallery({ shell, report, announce }) {
           'PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Substituir atualiza a imagem compartilhada pelos shells que a utilizam.',
         )}
       </p>
-      
+
       {/* === Recuperação === */}
       {/* ----- Estado de carregamento ----- */}
-      {status === 'loading' && (
-        <p role="status">
-          {t('Recuperando imagem pessoal…')}
-        </p>
-      )}
+      {status === 'loading' && <p role="status">{t('Recuperando imagem pessoal…')}</p>}
 
       {/* ----- Falha de recuperação ----- */}
       {['missing', 'error'].includes(status) && (
@@ -419,10 +363,7 @@ export default function SettingsSections({ activeSection }) {
   /* ----- Resultado de persistência ----- */
   function report(saved) {
     if (!saved) {
-      announce(
-        'Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.',
-        true,
-      );
+      announce('Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.', true);
     } else {
       setMessage(null);
     }
@@ -441,7 +382,8 @@ export default function SettingsSections({ activeSection }) {
         true,
       );
     } else {
-      report(result.saved);
+      if (result.saved) report(true);
+      else announce('Não foi possível concluir a operação.', true);
     }
   }
 
@@ -495,10 +437,7 @@ export default function SettingsSections({ activeSection }) {
                   aria-pressed={isActive}
                   onClick={() => report(setTheme(id))}
                 >
-                  <span
-                    className="ws-settings__theme-preview"
-                    aria-hidden="true"
-                  >
+                  <span className="ws-settings__theme-preview" aria-hidden="true">
                     <span className="ws-settings__theme-preview-sidebar" />
 
                     <span className="ws-settings__theme-preview-panel">
@@ -511,9 +450,7 @@ export default function SettingsSections({ activeSection }) {
                     <Icon size={17} aria-hidden="true" />
                     <strong>{t(label)}</strong>
 
-                    {isActive && (
-                      <Check size={17} aria-hidden="true" />
-                    )}
+                    {isActive && <Check size={17} aria-hidden="true" />}
                   </span>
                 </button>
               );
@@ -521,11 +458,7 @@ export default function SettingsSections({ activeSection }) {
           </div>
         </SettingsCard>
 
-        <WallpaperGallery
-          shell="desktop"
-          report={report}
-          announce={announce}
-        />
+        <WallpaperGallery shell="desktop" report={report} announce={announce} />
 
         <SettingsCard title={t('Personalização visual')}>
           <fieldset className="ws-settings__accent">
@@ -546,9 +479,7 @@ export default function SettingsSections({ activeSection }) {
                 <span aria-hidden="true" />
                 {t(label)}
 
-                {appearance.accent === id && (
-                  <Check size={16} aria-hidden="true" />
-                )}
+                {appearance.accent === id && <Check size={16} aria-hidden="true" />}
               </button>
             ))}
           </fieldset>
@@ -563,9 +494,7 @@ export default function SettingsSections({ activeSection }) {
                 ['normal', 'Normal'],
                 ['strong', 'Intenso'],
               ]}
-              onChange={(blur) =>
-                report(setAppearance({ blur }))
-              }
+              onChange={(blur) => report(setAppearance({ blur }))}
             />
 
             <SettingsSelect
@@ -576,9 +505,7 @@ export default function SettingsSections({ activeSection }) {
                 ['default', 'Padrão'],
                 ['high', 'Elevada'],
               ]}
-              onChange={(transparency) =>
-                report(setAppearance({ transparency }))
-              }
+              onChange={(transparency) => report(setAppearance({ transparency }))}
             />
 
             <SettingsSelect
@@ -589,9 +516,7 @@ export default function SettingsSections({ activeSection }) {
                 ['subtle', 'Suave'],
                 ['normal', 'Normal'],
               ]}
-              onChange={(motion) =>
-                report(setAppearance({ motion }))
-              }
+              onChange={(motion) => report(setAppearance({ motion }))}
             />
           </div>
 
@@ -649,9 +574,7 @@ export default function SettingsSections({ activeSection }) {
         </div>
 
         <p className="ws-settings__hint">
-          {t(
-            'As preferências de acessibilidade também respeitam as opções do sistema.',
-          )}
+          {t('As preferências de acessibilidade também respeitam as opções do sistema.')}
         </p>
       </SettingsCard>
     );
@@ -664,9 +587,7 @@ export default function SettingsSections({ activeSection }) {
         <SettingsToggle
           label={t('Ocultar automaticamente a barra de tarefas')}
           checked={autoHide}
-          onChange={(value) =>
-            report(setTaskbarAutoHide(value))
-          }
+          onChange={(value) => report(setTaskbarAutoHide(value))}
         />
 
         <p className="ws-settings__hint">
@@ -690,53 +611,32 @@ export default function SettingsSections({ activeSection }) {
         {widgets.widgets.map((widget) => {
           const definition = getWidgetDefinition(widget.widgetId);
 
-          const isReady = [
-            'clock',
-            'calendar',
-            'weather',
-            'dev-insights',
-          ].includes(widget.widgetId);
+          const isReady = ['clock', 'calendar', 'weather', 'dev-insights'].includes(
+            widget.widgetId,
+          );
 
-          const sizeOptions = (
-            definition?.allowedSizes ?? []
-          ).map((size) => [
+          const sizeOptions = (definition?.allowedSizes ?? []).map((size) => [
             size,
             size.replace('x', ' × '),
           ]);
 
           return (
-            <div
-              key={widget.instanceId}
-              className="ws-settings__options"
-            >
+            <div key={widget.instanceId} className="ws-settings__options">
               <div className="ws-settings__card-heading">
-                <h4>
-                  {t(definition?.name ?? widget.widgetId)}
-                </h4>
+                <h4>{t(definition?.name ?? widget.widgetId)}</h4>
 
-                <p>
-                  {t(definition?.description ?? '')}
-                </p>
+                <p>{t(definition?.description ?? '')}</p>
               </div>
 
               {!isReady && (
-                <p
-                  className="ws-settings__hint"
-                  role="status"
-                >
+                <p className="ws-settings__hint" role="status">
                   {t(
                     'Widget em preparação. Os controles serão habilitados após a integração com a grade do Desktop.',
                   )}
                 </p>
               )}
 
-              <div
-                style={
-                  !isReady
-                    ? { opacity: 0.55 }
-                    : undefined
-                }
-              >
+              <div style={!isReady ? { opacity: 0.55 } : undefined}>
                 <fieldset
                   disabled={!isReady}
                   style={{
@@ -761,9 +661,7 @@ export default function SettingsSections({ activeSection }) {
                     value={`${widget.size.columns}x${widget.size.rows}`}
                     options={sizeOptions}
                     onChange={(value) => {
-                      const [columns, rows] = value
-                        .split('x')
-                        .map(Number);
+                      const [columns, rows] = value.split('x').map(Number);
 
                       changeWidget(widget.instanceId, {
                         size: { columns, rows },
@@ -805,10 +703,7 @@ export default function SettingsSections({ activeSection }) {
                     <>
                       <SettingsSelect
                         label={t('Unidade de temperatura')}
-                        value={
-                          widget.settings?.temperatureUnit ??
-                          'celsius'
-                        }
+                        value={widget.settings?.temperatureUnit ?? 'celsius'}
                         options={[
                           ['celsius', 'Celsius (°C)'],
                           ['fahrenheit', 'Fahrenheit (°F)'],
@@ -825,9 +720,7 @@ export default function SettingsSections({ activeSection }) {
 
                       <SettingsSelect
                         label={t('Velocidade do vento')}
-                        value={
-                          widget.settings?.windUnit ?? 'kmh'
-                        }
+                        value={widget.settings?.windUnit ?? 'kmh'}
                         options={[
                           ['kmh', 'Quilômetros por hora (km/h)'],
                           ['mph', 'Milhas por hora (mph)'],
@@ -844,9 +737,7 @@ export default function SettingsSections({ activeSection }) {
 
                       <SettingsToggle
                         label={t('Mostrar sensação térmica')}
-                        checked={
-                          widget.settings?.showFeelsLike !== false
-                        }
+                        checked={widget.settings?.showFeelsLike !== false}
                         onChange={(showFeelsLike) =>
                           changeWidget(widget.instanceId, {
                             settings: {
@@ -859,9 +750,7 @@ export default function SettingsSections({ activeSection }) {
 
                       <SettingsToggle
                         label={t('Mostrar previsão dos próximos dias')}
-                        checked={
-                          widget.settings?.showForecast !== false
-                        }
+                        checked={widget.settings?.showForecast !== false}
                         onChange={(showForecast) =>
                           changeWidget(widget.instanceId, {
                             settings: {
@@ -913,17 +802,11 @@ export default function SettingsSections({ activeSection }) {
           />
 
           <p className="ws-settings__hint">
-            {t(
-              'Essa preferência altera somente a grade de aplicativos do Mobile.',
-            )}
+            {t('Essa preferência altera somente a grade de aplicativos do Mobile.')}
           </p>
         </SettingsCard>
 
-        <WallpaperGallery
-          shell="mobile"
-          report={report}
-          announce={announce}
-        />
+        <WallpaperGallery shell="mobile" report={report} announce={announce} />
       </>
     );
   }
@@ -966,18 +849,11 @@ export default function SettingsSections({ activeSection }) {
                 )}
               </p>
 
-              <button
-                ref={confirmRef}
-                type="button"
-                onClick={reset}
-              >
+              <button ref={confirmRef} type="button" onClick={reset}>
                 {t('Confirmar restauração')}
               </button>
 
-              <button
-                type="button"
-                onClick={closeReset}
-              >
+              <button type="button" onClick={closeReset}>
                 {t('Cancelar')}
               </button>
             </div>
@@ -988,10 +864,7 @@ export default function SettingsSections({ activeSection }) {
               className="ws-settings__reset-button"
               onClick={() => setConfirmReset(true)}
             >
-              <RotateCcw
-                size={17}
-                aria-hidden="true"
-              />
+              <RotateCcw size={17} aria-hidden="true" />
 
               {t('Restaurar padrões')}
             </button>
@@ -1010,11 +883,7 @@ export default function SettingsSections({ activeSection }) {
       <div
         role="status"
         aria-live="polite"
-        className={
-          message?.error
-            ? 'ws-settings__message is-error'
-            : 'ws-settings__message'
-        }
+        className={message?.error ? 'ws-settings__message is-error' : 'ws-settings__message'}
       >
         {message ? t(message.text) : ''}
       </div>

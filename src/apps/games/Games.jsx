@@ -31,14 +31,20 @@ export default function Games({ instance }) {
   return (
     <article className="desktop-window__content ws-app">
       <h2>{t('Jogos')}</h2>
-      <p>{t('Recordes locais são salvos neste navegador. Rankings públicos dependem de configuração e envio voluntário.')}</p>
+      <p>
+        {t(
+          'Recordes locais são salvos neste navegador. Rankings públicos dependem de configuração e envio voluntário.',
+        )}
+      </p>
       {Component ? (
         <>
           <button type="button" onClick={() => setSelected(null)}>
             {t('Voltar ao catálogo')}
           </button>
           <Component paused={paused} />
-          {['snake','flappy'].includes(selected)&&<GameRankings key={selected} game={selected}/>} 
+          {['snake', 'flappy'].includes(selected) && (
+            <GameRankings key={selected} game={selected} paused={paused} />
+          )}
         </>
       ) : (
         <>

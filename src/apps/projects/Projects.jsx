@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { openApp } from '../../core/appManager';
 import { useSystem } from '../../core/useSystem';
 import { portfolio, contentText } from '../../content/portfolioContent';
@@ -7,8 +7,9 @@ import useAppBack from '../../shared/hooks/useAppBack';
 import usePublicResource from '../../shared/hooks/usePublicResource';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { publicAssetUrl, safeExternalUrl } from '../../shared/utils/urls';
-import { filterProjects, mergeProjects } from './projectModel';
+import { createProjectShareUrl, filterProjects, mergeProjects } from './projectModel';
 import '../../styles/apps.css';
+import './Projects.css';
 
 export default function Projects({ instance }) {
   /* === Integrações e contexto === */
@@ -17,10 +18,7 @@ export default function Projects({ instance }) {
 
   /* === Catálogo de projetos === */
   /* ----- Carregamento remoto ----- */
-  const load = useCallback(
-    (options) => fetchGithubPortfolio(portfolio.githubUser, options),
-    [],
-  );
+  const load = useCallback((options) => fetchGithubPortfolio(portfolio.githubUser, options), []);
 
   const remote = usePublicResource(load, 'github', Boolean(portfolio.githubUser));
 
@@ -35,14 +33,7 @@ export default function Projects({ instance }) {
   const [technology, setTechnology] = useState('all');
   const [order, setOrder] = useState('updated');
 
-  const visible = filterProjects(
-    projects,
-    search,
-    technology,
-    order,
-    locale,
-    contentText,
-  );
+  const visible = filterProjects(projects, search, technology, order, locale, contentText);
 
   const technologies = useMemo(
     () => [...new Set(projects.flatMap((item) => item.technologies))].sort(),
@@ -59,9 +50,7 @@ export default function Projects({ instance }) {
   });
 
   const selectedId =
-    selection.request === navigation
-      ? selection.id
-      : (instance?.params?.projectId ?? null);
+    selection.request === navigation ? selection.id : (instance?.params?.projectId ?? null);
 
   /* ----- Seleção de projeto ----- */
   function setSelectedId(id) {
@@ -81,6 +70,32 @@ export default function Projects({ instance }) {
 
   /* ----- Projeto selecionado ----- */
   const selected = projects.find((item) => item.id === selectedId);
+
+  /* === Link público e cópia === */
+  const shareInputRef = useRef(null);
+  const [copyResult, setCopyResult] = useState({ id: null, message: '' });
+  const shareUrl = selected
+    ? createProjectShareUrl(
+        selected.id,
+        new URL(import.meta.env.BASE_URL, window.location.origin).href,
+      )
+    : null;
+  async function copyProjectLink() {
+    if (!shareUrl || !selected) return;
+    const id = selected.id;
+    try {
+      if (typeof navigator.clipboard?.writeText !== 'function')
+        throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(shareUrl);
+      setCopyResult({ id, message: 'Operação concluída.' });
+    } catch {
+      setCopyResult({ id, message: 'Não foi possível concluir a operação.' });
+      if (shareInputRef.current?.value === shareUrl) {
+        shareInputRef.current.focus();
+        shareInputRef.current.select();
+      }
+    }
+  }
 
   /* === Ações de projetos === */
   /* ----- Abertura de demonstrações ----- */
@@ -108,11 +123,7 @@ export default function Projects({ instance }) {
 
       {/* === Barra de ferramentas === */}
       <div className="ws-app__toolbar">
-        <button
-          type="button"
-          onClick={remote.refresh}
-          disabled={remote.status === 'loading'}
-        >
+        <button type="button" onClick={remote.refresh} disabled={remote.status === 'loading'}>
           {t('Atualizar dados')}
         </button>
 
@@ -124,9 +135,7 @@ export default function Projects({ instance }) {
       </div>
 
       {/* === Estado dos dados remotos === */}
-      {remote.status === 'loading' && (
-        <p role="status">{t('Carregando dados públicos…')}</p>
-      )}
+      {remote.status === 'loading' && <p role="status">{t('Carregando dados públicos…')}</p>}
 
       {remote.status === 'error' && (
         <p role="status">
@@ -137,10 +146,8 @@ export default function Projects({ instance }) {
       {remote.status === 'ready' && remote.data && (
         <p className="ws-app__muted">
           {t(remote.source === 'cache' ? 'Cache desta sessão' : 'Dados atualizados')}:{' '}
-          {new Date(remote.updatedAt).toLocaleString(locale)}.{' '}
-          {t(remote.warning ?? '')}
-          {!remote.data.complete &&
-            t('Catálogo limitado aos primeiros 1000 repositórios.')}
+          {new Date(remote.updatedAt).toLocaleString(locale)}. {t(remote.warning ?? '')}
+          {!remote.data.complete && t('Catálogo limitado aos primeiros 1000 repositórios.')}
         </p>
       )}
 
@@ -154,6 +161,7 @@ export default function Projects({ instance }) {
 
             {publicAssetUrl(selected.image) && (
               <img
+                key={selected.id}
                 className="ws-app__cover"
                 src={publicAssetUrl(selected.image)}
                 alt={contentText(selected.name, locale)}
@@ -165,6 +173,31 @@ export default function Projects({ instance }) {
 
             <p>{selected.technologies.join(' · ')}</p>
             <p>{t(selected.status ?? 'Público')}</p>
+
+            {/* ----- URL selecionável e cópia; não altera a navegação atual ----- */}
+            {shareUrl && (
+              <div className="ws-projects__share">
+                <label>
+                  {t('Projetos')} · URL
+                  <input
+                    ref={shareInputRef}
+                    type="url"
+                    readOnly
+                    value={shareUrl}
+                    aria-label={t('Projetos') + ' URL'}
+                    onFocus={(event) => event.target.select()}
+                  />
+                </label>
+                <button
+                  type="button"
+                  aria-label={'Ctrl+C: ' + t('Projetos')}
+                  onClick={copyProjectLink}
+                >
+                  Ctrl+C
+                </button>
+                {copyResult.id === selected.id && <p role="status">{t(copyResult.message)}</p>}
+              </div>
+            )}
 
             {/* ----- Links e demonstrações ----- */}
             <div className="ws-app__toolbar">
@@ -189,11 +222,7 @@ export default function Projects({ instance }) {
               )}
 
               {selected.demos.map((demo) => (
-                <button
-                  key={demo.id}
-                  type="button"
-                  onClick={() => openDemo(demo.id)}
-                >
+                <button key={demo.id} type="button" onClick={() => openDemo(demo.id)}>
                   {contentText(demo.title, locale) || t('Abrir demonstração')}
                 </button>
               ))}
@@ -219,10 +248,7 @@ export default function Projects({ instance }) {
 
             <label>
               {t('Tecnologia')}
-              <select
-                value={technology}
-                onChange={(event) => setTechnology(event.target.value)}
-              >
+              <select value={technology} onChange={(event) => setTechnology(event.target.value)}>
                 <option value="all">{t('Todas')}</option>
 
                 {technologies.map((item) => (
@@ -235,10 +261,7 @@ export default function Projects({ instance }) {
 
             <label>
               {t('Ordenar')}
-              <select
-                value={order}
-                onChange={(event) => setOrder(event.target.value)}
-              >
+              <select value={order} onChange={(event) => setOrder(event.target.value)}>
                 <option value="updated">{t('Atualização')}</option>
                 <option value="name">{t('Nome')}</option>
               </select>
@@ -255,10 +278,7 @@ export default function Projects({ instance }) {
             {visible.map((item) => (
               <section className="ws-app__card" key={item.id}>
                 <h3>{contentText(item.name, locale)}</h3>
-                <p>
-                  {contentText(item.description, locale) ||
-                    t('Sem descrição cadastrada.')}
-                </p>
+                <p>{contentText(item.description, locale) || t('Sem descrição cadastrada.')}</p>
 
                 <p className="ws-app__muted">
                   {item.technologies.join(' · ')} · {t(item.source)}
@@ -279,9 +299,7 @@ export default function Projects({ instance }) {
 
           {/* ----- Estado vazio ----- */}
           {visible.length === 0 && remote.status !== 'loading' && (
-            <p>
-              {t('Nenhum projeto encontrado. Ajuste os filtros ou cadastre projetos.')}
-            </p>
+            <p>{t('Nenhum projeto encontrado. Ajuste os filtros ou cadastre projetos.')}</p>
           )}
         </>
       )}
