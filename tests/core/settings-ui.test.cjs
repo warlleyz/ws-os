@@ -145,33 +145,90 @@ test('Galeria preserva mensagem correta quando upload falha e não anuncia após
   }
 });
 
-test('Boas-vindas fecha por Escape, contém Tab e devolve foco ao Mobile', async () => {
-  let focused = 0,
-    closed = 0;
+/* === Testes das boas-vindas === */
+/* ----- Proteção da apresentação e acessibilidade ----- */
+test('Boas-vindas bloqueia Escape, contém Tab e preserva a conclusão explícita', async () => {
+  let closed = 0;
+  let focused = 0;
   const button = { focus: () => focused++ };
   const mobile = { focus: () => focused++ };
-  const document = { activeElement: button, body: {}, querySelector: () => mobile };
+
+  const document = {
+    activeElement: button,
+    body: {},
+    querySelector: () => mobile,
+  };
+
   const ui = await renderApp(
     'src/features/welcome/WelcomeDialog.jsx',
     { onClose: () => closed++ },
     {
       document,
       HTMLElement: class {},
-      attachRef: () => ({ querySelector: () => button, querySelectorAll: () => [button] }),
+      useTheme: () => 'dark',
+      useAppearance: () => ({ accent: 'blue' }),
+      useWallpaper: () => 'dark-blue',
+      APPEARANCE_OPTIONS: {
+        accent: ['blue', 'violet', 'green'],
+      },
+      getOfficialWallpapersByTheme: () => [],
+      ArrowLeft: 'ArrowLeft',
+      ArrowRight: 'ArrowRight',
+      Check: 'Check',
+      Moon: 'Moon',
+      Sun: 'Sun',
+      attachRef: () => ({
+        focus: () => focused++,
+        scrollTo() {},
+        querySelectorAll: () => [button],
+      }),
     },
   );
+
   const dialog = ui.nodes().find((node) => node.props.role === 'dialog');
+
   let prevented = 0;
-  dialog.props.onKeyDown({ key: 'Tab', preventDefault: () => prevented++, stopPropagation() {} });
+
+  dialog.props.onKeyDown({
+    key: 'Tab',
+    preventDefault: () => prevented++,
+    stopPropagation() {},
+  });
+
   dialog.props.onKeyDown({
     key: 'Escape',
     preventDefault: () => prevented++,
     stopPropagation() {},
   });
+
   assert.equal(prevented, 2);
+  assert.equal(closed, 0);
+
+  /* ----- O título inicial também deve conter Shift+Tab ----- */
+  document.activeElement = {};
+  dialog.props.onKeyDown({
+    key: 'Tab',
+    shiftKey: true,
+    preventDefault: () => prevented++,
+    stopPropagation() {},
+  });
+  assert.equal(prevented, 3);
+  assert.equal(closed, 0);
+  ui.button('Próximo').props.onClick();
+  ui.render();
+  assert.ok(ui.button('Começar'));
+  assert.equal(ui.button('Próximo'), undefined);
+  ui.button('Voltar').props.onClick();
+  ui.render();
+  assert.ok(ui.button('Próximo'));
+  assert.equal(closed, 0);
+  ui.button('Próximo').props.onClick();
+  ui.render();
+  ui.button('Começar').props.onClick();
   assert.equal(closed, 1);
   ui.unmount();
-  assert.equal(focused, 3);
+
+  assert.ok(focused >= 4);
 });
 
 test('Sobre o Sistema utiliza versão versionada e links de licença seguros', async () => {

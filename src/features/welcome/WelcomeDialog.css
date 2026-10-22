@@ -1,64 +1,513 @@
-/* F4.23.1 — Boas-vindas */
-
+/* === Janela de boas-vindas === */
+/* ----- Sobreposição ----- */
 .ws-welcome-backdrop {
   position: fixed;
   inset: 0;
   z-index: 20000;
   display: grid;
   place-items: center;
-  padding: 20px;
-  background: rgb(0 0 0 / 65%);
+  padding: 18px;
+  overflow-y: auto;
+  background: rgb(0 0 0 / 60%);
+  backdrop-filter: blur(8px);
 }
 
+/* ----- Estrutura principal ----- */
 .ws-welcome {
-  display: flex;
-  width: min(420px, 100%);
-  flex-direction: column;
-  gap: 14px;
-  padding: 26px;
+  box-sizing: border-box;
+  width: min(900px, 100%);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
   border: 1px solid var(--border-default);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--surface-primary);
   color: var(--text-primary);
-  box-shadow: 0 20px 60px rgb(0 0 0 / 35%);
+  font-family: var(--font-interface);
+  box-shadow: var(--shadow-floating);
 }
 
-.ws-welcome__label {
+/* === Cabeçalho === */
+/* ----- Marca e indicador de progresso ----- */
+.ws-welcome__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 26px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.ws-welcome__brand {
+  font-size: 15px;
+  letter-spacing: 0.07em;
+}
+
+.ws-welcome__progress {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ws-welcome__progress>span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--border-default);
+}
+
+.ws-welcome__progress>span.is-active {
+  background: var(--accent-secondary);
+}
+
+.ws-welcome__progress small {
+  margin-left: 8px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.ws-welcome__eyebrow {
+  color: var(--accent-secondary);
+  font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 700;
 }
 
-.ws-welcome h1 {
-  margin: 0;
-  font-size: 22px;
+/* === Primeira etapa === */
+/* ----- Distribuição principal ----- */
+.ws-welcome__presentation {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  min-height: 440px;
 }
 
-.ws-welcome p {
+/* ----- Identidade do Wally ----- */
+.ws-welcome__mascot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 20px;
+  overflow: hidden;
+  border-right: 1px solid var(--border-default);
+  background: var(--surface-secondary);
+}
+
+.ws-welcome__mascot-image {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  max-height: 370px;
+  object-fit: contain;
+}
+
+.ws-welcome__mascot-name {
+  position: absolute;
+  right: 22px;
+  bottom: 20px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+/* ----- Apresentação textual ----- */
+.ws-welcome__presentation-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 30px;
+  gap: 16px;
+}
+
+.ws-welcome h1 {
   margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(23px, 3vw, 30px);
+  line-height: 1.25;
+}
+
+.ws-welcome h1:focus {
+  outline: none;
+}
+
+/* ----- Balões de conversa ----- */
+.ws-welcome__messages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ws-welcome__bubble {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 14px;
+  border: 1px solid var(--border-default);
+  border-radius: 5px 13px 13px 13px;
+  background: var(--surface-secondary);
+}
+
+.ws-welcome__message-number {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--surface-primary);
+  color: var(--accent-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.ws-welcome__bubble strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.ws-welcome__bubble p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+/* === Segunda etapa === */
+/* ----- Composição principal ----- */
+.ws-welcome__customization {
+  display: flex;
+  flex-direction: column;
+  padding: 27px 30px;
+  gap: 22px;
+}
+
+.ws-welcome__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ws-welcome__intro p {
+  margin: 0;
+  color: var(--text-secondary);
   font-size: 13px;
   line-height: 1.6;
 }
 
-.ws-welcome button {
-  align-self: flex-start;
-  padding: 9px 18px;
+/* ----- Área de preferências ----- */
+.ws-welcome__preferences {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+/* ----- Organização interna dos cards ----- */
+.ws-welcome__field {
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
   border: 0;
-  border-radius: 8px;
-  background: var(--action-background);
-  color: var(--action-text);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+}
+
+/* ----- Títulos internos dos cards ----- */
+.ws-welcome__field legend {
+  float: left;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 14px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--border-default);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ----- Organizar conteúdo após o título ----- */
+.ws-welcome__field legend+* {
+  clear: both;
+}
+
+/* ----- Opções de tema e idioma ----- */
+.ws-welcome__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ws-welcome .ws-welcome__option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 0;
+  min-height: 82px;
+  padding: 12px;
+  gap: 9px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-/* === Acesso em telas baixas e com ampliação === */
-.ws-welcome-backdrop {
-  overflow-y: auto;
+.ws-welcome .ws-welcome__option>span {
+  color: inherit;
 }
-.ws-welcome {
-  box-sizing: border-box;
-  max-height: calc(100dvh - 40px);
-  overflow-y: auto;
+
+.ws-welcome .ws-welcome__option[aria-pressed='true'] {
+  border-color: var(--accent-secondary);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--accent-secondary);
 }
-.ws-welcome button {
-  min-height: 44px;
+
+.ws-welcome .ws-welcome__option:hover {
+  border-color: var(--accent-secondary);
+}
+
+.ws-welcome__check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: var(--accent-secondary);
+}
+
+.ws-welcome__flag {
+  display: block;
+  width: 31px;
+  height: 22px;
+  line-height: 0;
+}
+
+.ws-welcome__flag svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* === Cores de destaque === */
+/* ----- Seletores de cor ----- */
+.ws-welcome__accent-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ws-welcome .ws-welcome__accent-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 9px;
+  gap: 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ws-welcome .ws-welcome__accent-option[aria-pressed='true'] {
+  border-color: var(--accent-secondary);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--accent-secondary);
+}
+
+.ws-welcome__color {
+  width: 17px;
+  height: 17px;
   flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border-default);
+}
+
+/* === Wallpapers === */
+/* ----- Galeria de imagens oficiais ----- */
+.ws-welcome__wallpapers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ws-welcome .ws-welcome__wallpaper-option {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 6px;
+  gap: 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.ws-welcome .ws-welcome__wallpaper-option[aria-pressed='true'] {
+  border-color: var(--accent-secondary);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--accent-secondary);
+}
+
+.ws-welcome__wallpaper-preview {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 7px;
+  box-sizing: border-box;
+  border-radius: var(--radius-sm);
+}
+
+.ws-welcome__wallpaper-preview svg {
+  box-sizing: content-box;
+  padding: 3px;
+  border-radius: 50%;
+  background: var(--surface-primary);
+  color: var(--accent-secondary);
+}
+
+/* === Navegação === */
+/* ----- Botões principais ----- */
+.ws-welcome__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 8px;
+  gap: 12px;
+}
+
+.ws-welcome__actions--split {
+  justify-content: space-between;
+}
+
+.ws-welcome .ws-welcome__primary,
+.ws-welcome .ws-welcome__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 11px 20px;
+  gap: 14px;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ws-welcome .ws-welcome__primary {
+  min-width: 160px;
+  border: 1px solid transparent;
+  background: var(--action-background);
+  color: var(--action-text);
+}
+
+.ws-welcome .ws-welcome__back {
+  border: 1px solid var(--border-default);
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+/* === Acessibilidade === */
+/* ----- Foco visível ----- */
+.ws-welcome button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 3px;
+}
+
+/* ----- Efeitos reduzidos ----- */
+@media (prefers-reduced-transparency: reduce) {
+  .ws-welcome-backdrop {
+    backdrop-filter: none;
+  }
+}
+
+:root[data-reduced-transparency='true'] .ws-welcome-backdrop,
+:root[data-low-effects='true'] .ws-welcome-backdrop {
+  backdrop-filter: none;
+}
+
+/* === Responsividade === */
+/* ----- Telas intermediárias ----- */
+@media (max-width: 760px) {
+  .ws-welcome__presentation {
+    grid-template-columns: 1fr;
+  }
+
+  .ws-welcome__mascot {
+    height: 190px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .ws-welcome__mascot-image {
+    max-height: 210px;
+  }
+
+  .ws-welcome__presentation-content {
+    padding: 23px;
+  }
+
+  .ws-welcome__preferences {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ----- Mobile ----- */
+@media (max-width: 480px) {
+  .ws-welcome-backdrop {
+    padding: 10px;
+  }
+
+  .ws-welcome {
+    max-height: calc(100dvh - 20px);
+  }
+
+  .ws-welcome__header {
+    padding: 15px 18px;
+  }
+
+  .ws-welcome__presentation-content,
+  .ws-welcome__customization {
+    padding: 19px;
+  }
+
+  .ws-welcome__accent-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ws-welcome__wallpapers {
+    gap: 7px;
+  }
+
+  .ws-welcome__actions--split {
+    flex-wrap: wrap;
+  }
+}
+
+/* ----- Telas pequenas ----- */
+@media (max-width: 350px) {
+  .ws-welcome__options {
+    grid-template-columns: 1fr;
+  }
 }

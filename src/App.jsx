@@ -12,6 +12,8 @@ import { CURSOR_VARIANTS, getCursorCssValue } from './core/cursorCatalog';
 import SystemProvider from './core/SystemProvider';
 import WallyConversationProvider from './features/wally/WallyConversationProvider';
 
+import { applyBrandingFavicon } from './core/branding';
+
 import BootScreen from './features/boot/BootScreen';
 import WelcomeDialog from './features/welcome/WelcomeDialog';
 
@@ -68,6 +70,11 @@ export default function App() {
   useEffect(() => {
     applyAppearance(appearance);
   }, [appearance]);
+
+  /* ----- Ícone oficial conforme tema e cor de destaque ----- */
+  useEffect(() => {
+    applyBrandingFavicon(theme, appearance.accent, import.meta.env.BASE_URL);
+  }, [theme, appearance.accent]);
 
   /* ----- Acessibilidade e efeitos ----- */
   useEffect(() => {

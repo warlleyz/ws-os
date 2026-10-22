@@ -278,6 +278,7 @@ test('App não pede descarte para o shell atual e revalida a mudança nos dois s
       CURSOR_VARIANTS: [],
       applyTheme() {},
       applyAppearance() {},
+      applyBrandingFavicon() {},
       applyAccessibility() {},
       BootScreen: 'Boot',
     },
