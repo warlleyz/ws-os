@@ -150,6 +150,10 @@ async function findOfficialFile(env, id, token) {
 
   const rows = await database(env, query, { token });
 
+  if (Array.isArray(rows) && rows.length === 0) {
+    throw Error('NOT_FOUND');
+  }
+
   return single(rows, id);
 }
 

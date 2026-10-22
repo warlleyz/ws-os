@@ -1,7 +1,11 @@
 
+/* === Configuração do limitador === */
+/* ----- Janela de tempo e quantidade de tentativas ----- */
 const WINDOW_SECONDS = 15 * 60;
 const MAX_ATTEMPTS = 5;
 
+/* === Identificação do visitante === */
+/* ----- Geração do identificador protegido ----- */
 async function hashIdentifier(value) {
     const bytes = new TextEncoder().encode(value);
     const digest = await crypto.subtle.digest('SHA-256', bytes);
@@ -11,20 +15,29 @@ async function hashIdentifier(value) {
         .join('');
 }
 
+/* === Limitação de tentativas administrativas === */
+/* ----- Verificação da configuração e identificação ----- */
 export async function checkAdminLoginRateLimit(request, env) {
     if (!env.WALLY_LIMITS_DB || !env.ADMIN_LOGIN_RATE_LIMIT_SALT) {
-        return { allowed: false, reason: 'LIMITER_NOT_CONFIGURED' };
+        return {
+            allowed: false,
+            reason: 'LIMITER_NOT_CONFIGURED',
+        };
     }
 
     const ip = request.headers.get('CF-Connecting-IP');
 
     if (!ip) {
-        return { allowed: false, reason: 'VISITOR_UNIDENTIFIED' };
+        return {
+            allowed: false,
+            reason: 'VISITOR_UNIDENTIFIED',
+        };
     }
 
+    /* ----- Identificação e janela de controle ----- */
     try {
         const identifier = await hashIdentifier(
-            `${env.ADMIN_LOGIN_RATE_LIMIT_SALT}:${ip}`
+            `${env.ADMIN_LOGIN_RATE_LIMIT_SALT}:${ip}`,
         );
 
         const now = Math.floor(Date.now() / 1000);
@@ -32,6 +45,7 @@ export async function checkAdminLoginRateLimit(request, env) {
         const expiresAt = (windowId + 1) * WINDOW_SECONDS;
         const key = `admin-login:${windowId}:${identifier}`;
 
+        /* ----- Registro atômico da tentativa no D1 ----- */
         const row = await env.WALLY_LIMITS_DB.prepare(`
       INSERT INTO admin_login_limits
         (rate_key, attempts, expires_at)
@@ -44,6 +58,7 @@ export async function checkAdminLoginRateLimit(request, env) {
             .bind(key, expiresAt, MAX_ATTEMPTS)
             .first();
 
+        /* ----- Bloqueio por excesso de tentativas ----- */
         if (!row) {
             return {
                 allowed: false,
@@ -52,8 +67,16 @@ export async function checkAdminLoginRateLimit(request, env) {
             };
         }
 
-        return { allowed: true, reason: null };
+        /* ----- Tentativa autorizada ----- */
+        return {
+            allowed: true,
+            reason: null,
+        };
     } catch {
-        return { allowed: false, reason: 'LIMITER_UNAVAILABLE' };
+        /* ----- Falha segura do limitador ----- */
+        return {
+            allowed: false,
+            reason: 'LIMITER_UNAVAILABLE',
+        };
     }
 }

@@ -29,5 +29,5 @@
 /* ----- Paleta azul padrão ----- */
 :root[data-theme='light'] {
   --accent-primary: #2876d0;
-  --accent-secondary: #147d96;
+  --accent-secondary: #126b81;
 }

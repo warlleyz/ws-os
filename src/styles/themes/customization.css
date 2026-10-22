@@ -13,7 +13,7 @@
 :root[data-theme='light'],
 :root[data-theme='light'][data-accent='blue'] {
   --accent-primary: #2876d0;
-  --accent-secondary: #147d96;
+  --accent-secondary: #126b81;
   --action-background: #1d5c96;
   --link-color: #185a9d;
 }

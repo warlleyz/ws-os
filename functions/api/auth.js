@@ -1,6 +1,12 @@
 
 import { checkAdminLoginRateLimit } from '../_lib/adminLoginRateLimit.js';
 
+/* === Constantes e configurações === */
+/* ----- Limites de autenticação ----- */
+const MAX_BODY_BYTES = 4096;
+const AUTH_TIMEOUT_MS = 10000;
+
+/* ----- Respostas JSON ----- */
 const json = (body, status = 200) =>
     Response.json(body, {
         status,
@@ -10,7 +16,9 @@ const json = (body, status = 200) =>
         },
     });
 
-async function readLimitedJson(request, maxBytes = 4096) {
+/* === Leitura e validação de requisições === */
+/* ----- Leitura limitada do corpo JSON ----- */
+async function readLimitedJson(request, maxBytes = MAX_BODY_BYTES) {
     if (!request.body) {
         throw new SyntaxError('EMPTY_BODY');
     }
@@ -47,10 +55,12 @@ async function readLimitedJson(request, maxBytes = 4096) {
     }
 
     return JSON.parse(
-        new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+        new TextDecoder('utf-8', { fatal: true }).decode(bytes),
     );
 }
 
+/* === Configuração do Supabase === */
+/* ----- Validação das variáveis de ambiente ----- */
 function getConfig(env) {
     if (
         !/^https:\/\/[a-z\d-]+\.supabase\.co$/i.test(env.SUPABASE_URL ?? '') ||
@@ -65,6 +75,7 @@ function getConfig(env) {
     };
 }
 
+/* ----- Requisições ao Supabase ----- */
 async function supabaseFetch(config, path, options = {}) {
     return fetch(new URL(path, config.url), {
         ...options,
@@ -72,10 +83,12 @@ async function supabaseFetch(config, path, options = {}) {
             apikey: config.key,
             ...options.headers,
         },
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(AUTH_TIMEOUT_MS),
     });
 }
 
+/* === Autorização administrativa === */
+/* ----- Verificação do usuário administrador ----- */
 async function verifyAdministrator(config, token) {
     const userResponse = await supabaseFetch(config, '/auth/v1/user', {
         headers: {
@@ -83,7 +96,9 @@ async function verifyAdministrator(config, token) {
         },
     });
 
-    if (!userResponse.ok) return false;
+    if (!userResponse.ok) {
+        return false;
+    }
 
     const user = await userResponse.json();
 
@@ -106,7 +121,7 @@ async function verifyAdministrator(config, token) {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
-        }
+        },
     );
 
     if (!adminResponse.ok) {
@@ -122,6 +137,7 @@ async function verifyAdministrator(config, token) {
     );
 }
 
+/* ----- Proteção das rotas administrativas ----- */
 export async function requireAdministrator(request, env) {
     const config = getConfig(env);
 
@@ -152,18 +168,23 @@ export async function requireAdministrator(request, env) {
             };
         }
 
-        return { authorized: true, response: null };
+        return {
+            authorized: true,
+            response: null,
+        };
     } catch {
         return {
             authorized: false,
             response: json(
                 { error: 'Não foi possível verificar a autorização.' },
-                502
+                502,
             ),
         };
     }
 }
 
+/* === Status administrativo === */
+/* ----- Consulta de autorização ----- */
 export async function onRequestAdminStatus({ request, env }) {
     const access = await requireAdministrator(request, env);
 
@@ -171,9 +192,14 @@ export async function onRequestAdminStatus({ request, env }) {
         return access.response;
     }
 
-    return json({ admin: true, status: 'authorized' });
+    return json({
+        admin: true,
+        status: 'authorized',
+    });
 }
 
+/* === Login administrativo === */
+/* ----- Autenticação e criação da sessão ----- */
 export async function onRequestLogin({ request, env }) {
     const config = getConfig(env);
 
@@ -181,6 +207,7 @@ export async function onRequestLogin({ request, env }) {
         return json({ error: 'Autenticação não configurada.' }, 503);
     }
 
+    /* ----- Limitação de tentativas ----- */
     const limit = await checkAdminLoginRateLimit(request, env);
 
     if (!limit.allowed) {
@@ -194,26 +221,28 @@ export async function onRequestLogin({ request, env }) {
                         'Retry-After': String(limit.retryAfter),
                         'X-Content-Type-Options': 'nosniff',
                     },
-                }
+                },
             );
         }
 
         return json(
             { error: 'Proteção de autenticação indisponível.' },
-            503
+            503,
         );
     }
 
+    /* ----- Verificação do tamanho da requisição ----- */
     const contentLength = request.headers.get('content-length');
 
     if (
         contentLength !== null &&
         Number.isFinite(Number(contentLength)) &&
-        Number(contentLength) > 4096
+        Number(contentLength) > MAX_BODY_BYTES
     ) {
         return json({ error: 'Requisição inválida.' }, 413);
     }
 
+    /* ----- Leitura das credenciais ----- */
     let credentials;
 
     try {
@@ -229,6 +258,7 @@ export async function onRequestLogin({ request, env }) {
         return json({ error: 'Dados inválidos.' }, 400);
     }
 
+    /* ----- Validação das credenciais ----- */
     const email = credentials?.email;
     const password = credentials?.password;
 
@@ -243,6 +273,7 @@ export async function onRequestLogin({ request, env }) {
         return json({ error: 'Credenciais inválidas.' }, 400);
     }
 
+    /* ----- Autenticação remota ----- */
     try {
         const response = await supabaseFetch(
             config,
@@ -256,16 +287,17 @@ export async function onRequestLogin({ request, env }) {
                     email: email.trim(),
                     password,
                 }),
-            }
+            },
         );
 
         if (!response.ok) {
             return json(
                 { error: 'Credenciais inválidas ou acesso negado.' },
-                401
+                401,
             );
         }
 
+        /* ----- Validação da resposta do Supabase ----- */
         const data = await response.json();
 
         if (
@@ -275,22 +307,24 @@ export async function onRequestLogin({ request, env }) {
         ) {
             return json(
                 { error: 'Resposta de autenticação inválida.' },
-                502
+                502,
             );
         }
 
+        /* ----- Confirmação de permissão administrativa ----- */
         const authorized = await verifyAdministrator(
             config,
-            data.access_token
+            data.access_token,
         );
 
         if (!authorized) {
             return json(
                 { error: 'Credenciais inválidas ou acesso negado.' },
-                403
+                403,
             );
         }
 
+        /* ----- Retorno da sessão autorizada ----- */
         return json({
             access_token: data.access_token,
             expires_in: data.expires_in,
@@ -298,11 +332,13 @@ export async function onRequestLogin({ request, env }) {
     } catch {
         return json(
             { error: 'Serviço de autenticação indisponível.' },
-            502
+            502,
         );
     }
 }
 
+/* === Consulta da sessão === */
+/* ----- Validação do administrador autenticado ----- */
 export async function onRequestMe({ request, env }) {
     const config = getConfig(env);
 
@@ -328,11 +364,13 @@ export async function onRequestMe({ request, env }) {
     } catch {
         return json(
             { error: 'Não foi possível verificar a sessão.' },
-            502
+            502,
         );
     }
 }
 
+/* === Encerramento da sessão === */
+/* ----- Logout remoto ----- */
 export async function onRequestLogout({ request, env }) {
     const config = getConfig(env);
 
@@ -356,13 +394,13 @@ export async function onRequestLogout({ request, env }) {
                 headers: {
                     Authorization: `Bearer ${match[1]}`,
                 },
-            }
+            },
         );
 
         if (!response.ok) {
             return json(
                 { error: 'Falha ao encerrar a sessão remota.' },
-                502
+                502,
             );
         }
 
@@ -370,7 +408,7 @@ export async function onRequestLogout({ request, env }) {
     } catch {
         return json(
             { error: 'Serviço de autenticação indisponível.' },
-            502
+            502,
         );
     }
 }

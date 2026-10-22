@@ -134,9 +134,17 @@ function ratio(a, b) {
 for (const theme of ['dark', 'light'])
   test(`contrastes representativos do tema ${theme} atendem aos limiares medidos`, () => {
     const foundation = read('src/styles/themes/foundation.css');
-    const sections = foundation.match(/:root[^\{]*\{[^}]+\}/g);
+    const customization = read('src/styles/themes/customization.css');
+
+    const sections = foundation.match(/:root[^{]*\{[^}]+\}/g);
+    const accentSections = customization.match(/:root[^{]*\{[^}]+\}/g);
+
+    assert.ok(sections?.length >= 2);
+    assert.ok(accentSections?.length >= 2);
+
     const tokens = {
       ...declarations(read(`src/styles/themes/${theme}.css`)),
+      ...declarations(accentSections[theme === 'light' ? 1 : 0]),
       ...declarations(sections[0]),
       ...(theme === 'light' ? declarations(sections[1]) : {}),
     };
