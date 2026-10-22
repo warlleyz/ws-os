@@ -1,40 +1,33 @@
 /* === Sistema de vidro === */
-/* ----- Saturação padrão ----- */
-:root {
-  --ws-glass-saturation: 135%;
-}
-
-/* ----- Vidro desativado ----- */
-:root[data-blur='off'],
-:root[data-transparency='solid'] {
-  --ws-glass-saturation: 100%;
-}
-
-/* === Janelas === */
-/* ----- Superfície principal ----- */
+/* ----- Superfície principal das janelas ----- */
 .desktop-window {
   border: 1px solid var(--panel-border);
-  background: var(--ws-glass);
+  background: var(--ws-window-background);
 
-  backdrop-filter:
-    blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
-
-  -webkit-backdrop-filter:
-    blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
+  /* ----- Desfoque da janela ----- */
+  -webkit-backdrop-filter: blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
+  backdrop-filter: blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
 }
 
-/* ----- Cabeçalho ----- */
+/* ----- Cabeçalho das janelas ----- */
 .desktop-window>.desktop-window__header {
   background:
-    color-mix(in srgb,
-      var(--surface-secondary) 45%,
-      transparent);
-
-  backdrop-filter: none;
+    color-mix(in srgb, var(--surface-secondary) 45%, transparent);
 }
 
-/* ----- Conteúdo interno ----- */
-.desktop-window>.desktop-window__content,
+/* ----- Conteúdo das janelas ----- */
+.desktop-window>.desktop-window__content {
+  background:
+    color-mix(in srgb, var(--surface-primary) 16%, transparent);
+}
+
+/* ----- Superfície dos aplicativos dentro das janelas ----- */
+.desktop-window>.desktop-window__content.ws-app {
+  background:
+    color-mix(in srgb, var(--surface-primary) 16%, transparent);
+}
+
+/* ----- Superfícies internas das Configurações ----- */
 .desktop-window>.ws-settings,
 .desktop-window .ws-settings__content,
 .desktop-window .ws-settings__header,
@@ -46,13 +39,11 @@
 .desktop-window .ws-settings__card,
 .desktop-window .ws-app__card {
   background:
-    color-mix(in srgb,
-      var(--surface-primary) 92%,
-      transparent);
+    color-mix(in srgb, var(--surface-primary) 68%, transparent);
 }
 
 /* === Painéis flutuantes === */
-/* ----- Efeito de vidro compartilhado ----- */
+/* ----- Vidro compartilhado ----- */
 .taskbar-launcher--redesign,
 .taskbar-notifications,
 .taskbar-quick-controls,
@@ -62,6 +53,8 @@
 .taskbar-preview,
 .taskbar-context,
 .ws-mobile__panel {
+  background: var(--panel-background);
+
   backdrop-filter:
     blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
 
@@ -69,7 +62,7 @@
     blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
 }
 
-/* ----- Evitar vidro duplicado no Mobile ----- */
+/* ----- Evitar camadas duplicadas no Mobile ----- */
 .ws-mobile__panel>.taskbar-quick-controls,
 .ws-mobile__panel>.taskbar-notifications,
 .ws-mobile__panel>.taskbar-quick-controls.ws-controls {
@@ -78,28 +71,22 @@
   -webkit-backdrop-filter: none;
 }
 
-/* === Interações de janelas === */
-/* ----- Prévia de encaixe ----- */
-.desktop-snap-preview {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-/* ----- Desativar blur durante movimento ou redimensionamento ----- */
+/* === Interação com janelas === */
+/* ----- Movimento e redimensionamento ----- */
 .desktop-window[data-interacting='true'] {
   background: var(--surface-primary);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* === Acessibilidade === */
-/* ----- Redução da saturação ----- */
-:root[data-reduced-transparency='true'],
-:root[data-low-effects='true'] {
-  --ws-glass-saturation: 100%;
+/* ----- Prévia de encaixe ----- */
+.desktop-snap-preview {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
-/* ----- Remoção dos efeitos de vidro ----- */
+/* === Acessibilidade === */
+/* ----- Desativar desfoque conforme preferências ----- */
 :root:is([data-blur='off'],
   [data-transparency='solid'],
   [data-reduced-transparency='true'],
@@ -123,9 +110,6 @@
 
 /* ----- Preferência do sistema operacional ----- */
 @media (prefers-reduced-transparency: reduce) {
-  :root {
-    --ws-glass-saturation: 100%;
-  }
 
   :is(.desktop-window,
     .desktop__widget,
@@ -146,20 +130,19 @@
   }
 }
 
-/* === Compatibilidade do navegador === */
-/* ----- Fallback sem suporte a backdrop-filter ----- */
+/* === Compatibilidade === */
+/* ----- Navegadores sem suporte a backdrop-filter ----- */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-
-  :root,
-  :root[data-theme] {
+  :root {
     --ws-glass: var(--surface-primary);
+    --ws-window-background: var(--surface-primary);
     --panel-background: var(--surface-primary);
     --taskbar-background: var(--surface-primary);
   }
 }
 
-/* === Legibilidade sobre wallpapers === */
-/* ----- Rótulos dos atalhos do Desktop ----- */
+/* === Legibilidade do Desktop === */
+/* ----- Rótulos dos atalhos ----- */
 .desktop__shortcut-label {
   padding: 0;
   border-radius: 0;
@@ -171,7 +154,7 @@
     0 2px 6px rgb(0 0 0 / 60%);
 }
 
-/* ----- Foco nos atalhos ----- */
+/* ----- Foco dos atalhos ----- */
 .desktop__shortcut:focus-visible {
   background: rgb(17 25 37 / 92%);
   outline-color: #ffffff;

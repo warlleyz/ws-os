@@ -3,33 +3,37 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
 
 /* === Design System === */
-/* ----- Tokens e temas ----- */
+/* ----- Tokens estruturais ----- */
 @import './themes/tokens.css';
+
+/* ----- Paletas dos temas ----- */
 @import './themes/dark.css';
 @import './themes/light.css';
+
+/* ----- Personalização e efeitos ----- */
+@import './themes/customization.css';
 @import './themes/effects.css';
 
-/* ----- Componentes e estrutura do sistema ----- */
+/* ----- Estrutura do sistema ----- */
 @import './system.css';
 
-/* ----- Fundamentos visuais ----- */
+/* ----- Fundamentos e superfícies ----- */
 @import './themes/foundation.css';
-@import './themes/customization.css';
 @import './themes/glass.css';
-
-/* ----- Cursores personalizados ----- */
-@import './themes/cursors.css';
 
 /* ----- Controles compartilhados ----- */
 @import './themes/controls.css';
 
-/* ----- Padrões responsivos compartilhados ----- */
+/* ----- Cursores personalizados ----- */
+@import './themes/cursors.css';
+
+/* ----- Padrões responsivos ----- */
 @import './themes/responsive.css';
 
 /* === Configuração global === */
 /* ----- Tipografia e aparência ----- */
 :root {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: var(--font-interface);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -55,6 +59,7 @@ body,
   margin: 0;
 }
 
+/* ----- Largura mínima suportada ----- */
 body {
   min-width: 320px;
 }
@@ -73,13 +78,6 @@ button {
 }
 
 /* === Acessibilidade === */
-/* ----- Foco visível ----- */
-button:focus-visible,
-a:focus-visible {
-  outline: 2px solid var(--accent-secondary);
-  outline-offset: 4px;
-}
-
 /* ----- Seleção de texto ----- */
 ::selection {
   background: var(--accent-primary);

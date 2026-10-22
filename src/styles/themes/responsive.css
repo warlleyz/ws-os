@@ -1,9 +1,9 @@
 /* === Fundamentos responsivos === */
 /* ----- Área adaptativa ----- */
 .ws-layout {
+    width: 100%;
     min-width: 0;
     min-height: 0;
-    width: 100%;
     container-type: inline-size;
 }
 
@@ -49,17 +49,18 @@
 
     display: grid;
     min-width: 0;
-    grid-template-columns: repeat(auto-fit,
-            minmax(min(100%, var(--ws-grid-minimum)), 1fr));
+    grid-template-columns:
+        repeat(auto-fit, minmax(min(100%, var(--ws-grid-minimum)), 1fr));
     gap: var(--space-4);
 }
 
-/* ----- Densidades ----- */
+/* ----- Grade compacta ----- */
 .ws-grid--compact {
     --ws-grid-minimum: 160px;
     gap: var(--space-3);
 }
 
+/* ----- Grade ampla ----- */
 .ws-grid--wide {
     --ws-grid-minimum: 300px;
 }
@@ -88,8 +89,7 @@
 .ws-form-grid {
     display: grid;
     min-width: 0;
-    grid-template-columns: repeat(2,
-            minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-4);
 }
 
@@ -110,13 +110,12 @@
 }
 
 /* === Layout com painel lateral === */
-/* ----- Estrutura master/detail ----- */
+/* ----- Estrutura principal ----- */
 .ws-master-detail {
     display: grid;
     min-width: 0;
     min-height: 0;
-    grid-template-columns:
-        minmax(180px, 280px) minmax(0, 1fr);
+    grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
     gap: var(--space-4);
 }
 
@@ -134,23 +133,20 @@
     max-width: 760px;
     min-width: 0;
     margin-inline: auto;
-
     line-height: 1.7;
     overflow-wrap: anywhere;
 }
 
-/* ----- Documentos e editores ----- */
+/* ----- Conteúdo fluido ----- */
 .ws-reading-area--fluid {
     max-width: none;
 }
 
-/* === Adaptação ao container === */
+/* === Adaptação ao contêiner === */
 /* ----- Área intermediária ----- */
 @container (max-width: 680px) {
-    .ws-layout .ws-master-detail {
-        grid-template-columns: minmax(0, 1fr);
-    }
 
+    .ws-layout .ws-master-detail,
     .ws-layout .ws-form-grid {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -177,6 +173,27 @@
     }
 }
 
+/* ----- Área extremamente estreita ----- */
+@container (max-width: 360px) {
+
+    .ws-layout .ws-toolbar__group,
+    .ws-layout .ws-toolbar__actions {
+        align-items: stretch;
+    }
+
+    .ws-layout .ws-toolbar__actions {
+        flex-direction: column;
+    }
+
+    .ws-layout .ws-toolbar__actions>* {
+        max-width: 100%;
+    }
+
+    .ws-layout .ws-reading-area {
+        max-width: 100%;
+    }
+}
+
 /* === Segurança de layout === */
 /* ----- Conteúdo longo ----- */
 .ws-toolbar,
@@ -187,16 +204,8 @@
     overflow-wrap: anywhere;
 }
 
-/* === Acessibilidade === */
-/* ----- Áreas de toque ----- */
-@media (pointer: coarse) {
-    .ws-toolbar__actions {
-        row-gap: var(--space-3);
-    }
-}
-
 /* === Regiões adaptativas === */
-/* ----- Containers flexíveis e grids ----- */
+/* ----- Containers compartilhados ----- */
 .ws-responsive-region {
     min-width: 0;
     min-height: 0;
@@ -215,13 +224,13 @@
     scrollbar-color: var(--border-control) transparent;
 }
 
-/* ----- Rolagem somente vertical ----- */
+/* ----- Rolagem vertical ----- */
 .ws-scroll-region--vertical {
     overflow-x: hidden;
     overflow-y: auto;
 }
 
-/* === Conteúdo e leitura === */
+/* === Conteúdo fluido === */
 /* ----- Elementos extensos ----- */
 .ws-content-fluid {
     width: 100%;
@@ -229,7 +238,7 @@
     max-width: 100%;
 }
 
-/* ----- Textos e conteúdos longos ----- */
+/* ----- Textos longos ----- */
 .ws-content-fluid :is(p,
     h1,
     h2,
@@ -243,11 +252,10 @@
 /* ----- Imagens e vídeos ----- */
 .ws-content-fluid :is(img, video) {
     max-width: 100%;
-    height: auto;
 }
 
 /* === Tabelas responsivas === */
-/* ----- Container com rolagem horizontal ----- */
+/* ----- Contêiner com rolagem horizontal ----- */
 .ws-table-scroll {
     width: 100%;
     min-width: 0;
@@ -263,7 +271,6 @@
 .ws-table {
     width: 100%;
     border-collapse: collapse;
-
     color: var(--text-primary);
     font-size: 13px;
     line-height: 1.5;
@@ -273,7 +280,6 @@
 .ws-table :is(th, td) {
     padding: var(--space-3);
     border-bottom: 1px solid var(--border-default);
-
     text-align: left;
     vertical-align: top;
 }
@@ -289,7 +295,7 @@
     color: var(--text-secondary);
 }
 
-/* ----- Tabela que preserva colunas ----- */
+/* ----- Tabela sem quebra de colunas ----- */
 .ws-table--nowrap {
     width: max-content;
     min-width: 100%;
@@ -316,46 +322,21 @@
     }
 }
 
-/* ----- Foco em elementos interativos ----- */
+/* ----- Foco dos elementos interativos ----- */
 .ws-table :is(button, a, input, select):focus-visible {
     outline: 2px solid var(--accent-secondary);
     outline-offset: 2px;
 }
 
-/* === Adaptação à largura disponível === */
-/* ----- Regiões extremamente estreitas ----- */
-@container (max-width: 360px) {
-
-    .ws-layout .ws-toolbar__group,
-    .ws-layout .ws-toolbar__actions {
-        align-items: stretch;
-    }
-
-    .ws-layout .ws-toolbar__actions {
-        flex-direction: column;
-    }
-
-    .ws-layout .ws-toolbar__actions>* {
-        max-width: 100%;
-    }
-
-    .ws-layout .ws-reading-area {
-        max-width: 100%;
-    }
-}
-
-/* === Compatibilidade touch === */
-/* ----- Rolagem por toque ----- */
+/* === Acessibilidade === */
+/* ----- Áreas de toque ----- */
 @media (pointer: coarse) {
-
-    .ws-scroll-region,
-    .ws-table-scroll {
-        touch-action: pan-x pan-y;
+    .ws-toolbar__actions {
+        row-gap: var(--space-3);
     }
 }
 
-/* === Contraste forçado === */
-/* ----- Delimitação das tabelas ----- */
+/* ----- Contraste forçado ----- */
 @media (forced-colors: active) {
     .ws-table :is(th, td) {
         border-bottom-color: CanvasText;

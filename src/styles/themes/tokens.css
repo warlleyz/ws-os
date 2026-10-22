@@ -40,14 +40,6 @@
   --transition-normal: 200ms;
 }
 
-/* === Compatibilidade === */
-/* ----- Tokens existentes ainda utilizados ----- */
-:root {
-  --blur-strength: 14px;
-  --surface-opacity: 0.94;
-  --shadow-floating: 0 16px 45px rgb(0 0 0 / 28%);
-}
-
 /* === Acessibilidade === */
 /* ----- Movimento reduzido ----- */
 @media (prefers-reduced-motion: reduce) {

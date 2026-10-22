@@ -1,8 +1,9 @@
 /* === Cursores personalizados === */
-/* ----- Apontadores compatíveis ----- */
+/* ----- Dispositivos com apontador preciso ----- */
 @media (hover: hover) and (pointer: fine) {
 
     /* === Cursor padrão === */
+    /* ----- Superfície do sistema ----- */
     html[data-cursor-mode='custom'],
     html[data-cursor-mode='custom'] body,
     html[data-cursor-mode='custom'] #root {
@@ -10,6 +11,7 @@
     }
 
     /* === Elementos interativos === */
+    /* ----- Botões, links e seletores ----- */
     html[data-cursor-mode='custom'] :is(button,
         a[href],
         select,
@@ -19,6 +21,7 @@
     }
 
     /* === Entrada de texto === */
+    /* ----- Campos editáveis ----- */
     html[data-cursor-mode='custom'] :is(textarea,
         input:not([type]),
         input[type='text'],
@@ -33,6 +36,7 @@
     }
 
     /* === Controles indisponíveis === */
+    /* ----- Elementos desabilitados ----- */
     html[data-cursor-mode='custom'] :is(button,
         input,
         textarea,
@@ -41,19 +45,18 @@
         cursor: var(--ws-cursor-not-allowed, not-allowed);
     }
 
-    /* === Áreas de arraste === */
+    /* === Interação com janelas === */
+    /* ----- Área de arraste ----- */
     html[data-cursor-mode='custom'] .desktop-window__drag-area {
         cursor: var(--ws-cursor-grab, grab);
     }
 
+    /* ----- Arraste ativo ----- */
     html[data-cursor-mode='custom'] .desktop-window__drag-area:active {
         cursor: var(--ws-cursor-grabbing, grabbing);
     }
-}
 
-/* === Estados especiais das janelas === */
-/* ----- Janela maximizada não pode ser arrastada ----- */
-@media (hover: hover) and (pointer: fine) {
+    /* ----- Janela maximizada ----- */
     html[data-cursor-mode='custom'] .desktop-window--maximized .desktop-window__drag-area {
         cursor: var(--ws-cursor-default, default);
     }

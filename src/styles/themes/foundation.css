@@ -1,69 +1,104 @@
+/* === Cores funcionais === */
+/* ----- Estados do tema Dark ----- */
 :root {
-  --link-color: #8dc2ff;
-  --action-background: #1d5c96;
   --action-text: #ffffff;
   --border-control: #71869b;
+
   --status-success: #83d5ae;
   --status-warning: #f0cb7a;
   --status-error: #ffabb2;
+
   --badge-background: #b42338;
 }
+
+/* ----- Estados do tema Light ----- */
 :root[data-theme='light'] {
-  --link-color: #185a9d;
   --border-control: #6b7a8b;
-  --accent-secondary: #0b657b;
+
   --status-success: #176b45;
   --status-warning: #795000;
   --status-error: #9a2536;
 }
+
+/* === Elementos de formulário === */
+/* ----- Campos compartilhados ----- */
 :where(input, select, textarea) {
   font: inherit;
   color: var(--text-primary);
   background: var(--surface-primary);
 }
+
+/* ----- Dimensões mínimas ----- */
+button,
+select {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* ----- Foco acessível ----- */
 :where(button, a, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 3px;
 }
-button,
-select {
-  min-height: 24px;
-  min-width: 24px;
+
+/* ----- Elementos desativados ----- */
+:where(button:disabled, input:disabled, select:disabled, textarea:disabled) {
+  cursor: not-allowed;
 }
+
+/* === Links === */
+/* ----- Cor de destaque ----- */
 a {
   color: var(--link-color);
 }
+
+/* === Navegação acessível === */
+/* ----- Atalho para conteúdo ----- */
 .ws-skip-link {
   position: fixed;
   z-index: 30000;
-  left: 8px;
   top: 8px;
-  transform: translateY(-200%);
+  left: 8px;
+
   padding: 10px;
   background: var(--surface-primary);
+
+  transform: translateY(-200%);
 }
+
+/* ----- Atalho em foco ----- */
 .ws-skip-link:focus {
   transform: none;
 }
+
+/* === Componentes de inicialização === */
+/* ----- Superfícies principais ----- */
 .ws-boot,
 .ws-welcome {
   background: var(--surface-primary);
   color: var(--text-primary);
 }
+
+/* ----- Janela de boas-vindas ----- */
 .ws-welcome {
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
   box-shadow: var(--shadow-floating);
 }
+
+/* ----- Botões das boas-vindas ----- */
 .ws-welcome button {
   background: var(--action-background);
   color: var(--action-text);
 }
+
+/* === WS Menu === */
+/* ----- Bordas compartilhadas ----- */
 .taskbar-launcher--redesign {
-  background: var(--panel-background);
   border-color: var(--border-default);
-  box-shadow: var(--panel-shadow);
 }
+
+/* ----- Ícones e elementos de identificação ----- */
 .ws-menu__avatar,
 .ws-menu__app-icon,
 .taskbar-preview__placeholder,
@@ -72,174 +107,196 @@ a {
   color: var(--accent-secondary);
   border-color: var(--border-default);
 }
+
+/* ----- Campo de pesquisa ----- */
 .ws-menu__search {
   background: var(--surface-primary);
   border-color: var(--border-control);
 }
+
+/* ----- Pesquisa em foco ----- */
 .ws-menu__search:focus-within {
   background: var(--surface-primary);
 }
+
+/* ----- Itens interativos ----- */
 .ws-menu__app-item:hover,
 .ws-menu__app-item:focus-within {
   background: var(--surface-secondary);
 }
+
+/* === Notificações === */
+/* ----- Superfície das mensagens ----- */
 .ws-toast {
   background: var(--surface-primary);
   color: var(--text-primary);
   border-color: var(--border-default);
   box-shadow: var(--shadow-floating);
 }
+
+/* ----- Textos secundários ----- */
 .ws-toast__source,
 .ws-toast__type,
 .ws-toast__message,
 .ws-toast__close {
   color: var(--text-secondary);
 }
+
+/* ----- Botão de fechar ----- */
 .ws-toast__close:hover {
   background: var(--surface-secondary);
   color: var(--text-primary);
 }
+
+/* ----- Ações das notificações ----- */
 .ws-toast__action {
   color: var(--link-color);
   border-color: var(--border-control);
   background: var(--surface-secondary);
 }
+
+/* ----- Foco das ações ----- */
 .ws-toast__action:focus-visible {
   outline-color: var(--accent-secondary);
 }
+
+/* ----- Indicadores por categoria ----- */
 .ws-toast--info {
   --toast-accent: var(--accent-secondary);
 }
+
 .ws-toast--success {
   --toast-accent: var(--status-success);
 }
+
 .ws-toast--warning {
   --toast-accent: var(--status-warning);
 }
+
 .ws-toast--error {
   --toast-accent: var(--status-error);
 }
+
+/* === Taskbar === */
+/* ----- Contador de notificações ----- */
 .taskbar-notifications__badge {
   background: var(--badge-background);
-  color: white;
+  color: #ffffff;
   border-color: var(--surface-primary);
 }
+
+/* ----- Conteúdo dos painéis ----- */
 .taskbar-notifications__item,
 .taskbar-quick-controls__section {
   background: var(--surface-primary);
   border-color: var(--border-default);
 }
+
+/* ----- Seções dos controles rápidos ----- */
 .taskbar-quick-controls__section {
   min-width: 0;
   margin: 0;
 }
+
+/* ----- Títulos das seções ----- */
 .taskbar-quick-controls__section legend {
   padding: 0;
   font-weight: 700;
 }
+
+/* ----- Controles de seleção ----- */
 .taskbar-quick-controls__theme select,
 .desktop__widget-size select {
   border-color: var(--border-control);
 }
+
+/* ----- Organização das opções de tema ----- */
+.taskbar-quick-controls__theme {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* === Controles de efeitos === */
+/* ----- Organização das opções ----- */
 .ws-effect-option {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-block: 8px;
 }
+
+/* ----- Campos de ativação ----- */
 .ws-effect-option input {
   width: 20px;
   height: 20px;
   accent-color: var(--action-background);
 }
+
+/* === Desktop === */
+/* ----- Indicação de posicionamento inválido ----- */
 .desktop__shortcut[data-drop-valid='false'],
 .desktop__widget[data-drop-valid='false'] {
   outline: 2px dashed var(--status-error);
   opacity: 0.7;
 }
-:root[data-reduced-transparency='true'],
-:root[data-low-effects='true'] {
-  --blur-light: 0px;
-  --blur-medium: 0px;
-  --blur-strong: 0px;
-  --taskbar-background: var(--surface-primary);
-  --panel-background: var(--surface-primary);
+
+/* === Rolagem === */
+/* ----- Áreas compartilhadas ----- */
+:where(.desktop-window__content,
+  .ws-app,
+  .ws-mobile__app,
+  .taskbar-floating-layer,
+  .ws-mobile__panel) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-control) transparent;
+  overscroll-behavior: contain;
 }
-:root[data-low-effects='true'] *,
-:root[data-low-effects='true'] *::before,
-:root[data-low-effects='true'] *::after {
-  box-shadow: none !important;
-  backdrop-filter: none !important;
+
+/* === Seleção de texto === */
+/* ----- Superfícies do sistema ----- */
+:where(.desktop-window,
+  .taskbar-floating-layer,
+  .ws-mobile__panel) ::selection {
+  background: var(--action-background);
+  color: var(--action-text);
 }
-:root[data-reduced-motion='true'] *,
-:root[data-low-effects='true'] * {
-  animation: none !important;
-  transition: none !important;
-  scroll-behavior: auto !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-}
-@media (prefers-reduced-transparency: reduce) {
-  :root {
-    --blur-light: 0px;
-    --blur-medium: 0px;
-    --blur-strong: 0px;
-    --taskbar-background: var(--surface-primary);
-    --panel-background: var(--surface-primary);
-  }
-}
+
+/* === Responsividade === */
+/* ----- Controles para dispositivos de toque ----- */
 @media (pointer: coarse) {
+
   button,
   select {
-    min-height: 44px;
     min-width: 44px;
+    min-height: 44px;
   }
+
   .desktop-window__header {
     min-height: 52px;
   }
-}
 
-.taskbar-quick-controls__theme {
-  gap: 8px;
-  flex-wrap: wrap;
-}
-@media (pointer: coarse) {
   .ws-effect-option {
     min-height: 44px;
   }
 }
 
-/* Rolagem e estados comuns, sem substituir a composição de cada aplicativo. */
-:where(
-  .desktop-window__content,
-  .ws-app,
-  .ws-mobile__app,
-  .taskbar-floating-layer,
-  .ws-mobile__panel
-) {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-control) transparent;
-  overscroll-behavior: contain;
+/* === Acessibilidade === */
+/* ----- Modo de baixo custo ----- */
+:root[data-low-effects='true'] *,
+:root[data-low-effects='true'] *::before,
+:root[data-low-effects='true'] *::after {
+  box-shadow: none !important;
 }
-:where(.desktop-window, .taskbar-floating-layer, .ws-mobile__panel) ::selection {
-  background: var(--action-background);
-  color: var(--action-text);
-}
-:where(button:disabled, input:disabled, select:disabled, textarea:disabled) {
-  cursor: not-allowed;
-}
+
+/* ----- Contraste forçado ----- */
 @media (forced-colors: active) {
   :where(button, input, select, textarea, a, [tabindex]):focus-visible {
     outline: 2px solid Highlight;
   }
-  :where(.desktop-window, .desktop__widget, .taskbar) {
+
+  :where(.desktop-window,
+    .desktop__widget,
+    .taskbar) {
     border-color: CanvasText;
   }
 }

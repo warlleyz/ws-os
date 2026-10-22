@@ -26,14 +26,8 @@
 }
 
 /* === Destaques === */
-/* ----- Paleta inicial azul ----- */
+/* ----- Paleta azul padrão ----- */
 :root[data-theme='light'] {
   --accent-primary: #2876d0;
   --accent-secondary: #147d96;
-}
-
-/* === Elevação === */
-/* ----- Compatibilidade com sombras existentes ----- */
-:root[data-theme='light'] {
-  --shadow-floating: 0 16px 45px rgb(25 45 70 / 16%);
 }

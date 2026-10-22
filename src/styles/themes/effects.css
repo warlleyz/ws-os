@@ -1,17 +1,83 @@
 /* === Transparência === */
-/* ----- Opacidades compartilhadas ----- */
+/* ----- Valores padrão ----- */
 :root {
   --opacity-solid: 1;
   --opacity-glass: 0.92;
+
+  --ws-glass-opacity: 0.88;
+  --ws-window-opacity: 68%;
+
+  --ws-glass-rgb: 24 34 48;
+  --ws-glass: rgb(var(--ws-glass-rgb) / var(--ws-glass-opacity));
+
+  --ws-window-background:
+    color-mix(in srgb, var(--surface-secondary) var(--ws-window-opacity), transparent);
+}
+
+/* ----- Superfícies do tema Light ----- */
+:root[data-theme='light'] {
+  --ws-glass-rgb: 255 255 255;
+}
+
+/* ----- Superfícies sólidas ----- */
+:root[data-transparency='solid'] {
+  --ws-glass-opacity: 1;
+  --ws-window-opacity: 100%;
+}
+
+/* ----- Transparência elevada ----- */
+:root[data-transparency='high'] {
+  --ws-glass-opacity: 0.72;
+  --ws-window-opacity: 48%;
 }
 
 /* === Desfoque === */
-/* ----- Intensidades de blur ----- */
+/* ----- Intensidades padrão ----- */
 :root {
   --blur-none: 0px;
-  --blur-light: 8px;
-  --blur-medium: 12px;
+  --blur-light: 6px;
+  --blur-medium: 14px;
   --blur-strong: 20px;
+
+  --blur-strength: var(--blur-medium);
+  --ws-glass-saturation: 135%;
+}
+
+/* ----- Desfoque desligado ----- */
+:root[data-blur='off'] {
+  --blur-light: 0px;
+  --blur-medium: 0px;
+  --blur-strong: 0px;
+  --ws-glass-saturation: 100%;
+}
+
+/* ----- Desfoque suave ----- */
+:root[data-blur='soft'] {
+  --blur-light: 4px;
+  --blur-medium: 8px;
+  --blur-strong: 12px;
+}
+
+/* ----- Desfoque normal ----- */
+:root[data-blur='normal'] {
+  --blur-light: 6px;
+  --blur-medium: 14px;
+  --blur-strong: 20px;
+}
+
+/* ----- Desfoque intenso ----- */
+:root[data-blur='strong'] {
+  --blur-light: 12px;
+  --blur-medium: 32px;
+  --blur-strong: 36px;
+}
+
+/* ----- Superfícies sólidas sem desfoque ----- */
+:root[data-transparency='solid'] {
+  --blur-light: 0px;
+  --blur-medium: 0px;
+  --blur-strong: 0px;
+  --ws-glass-saturation: 100%;
 }
 
 /* === Sombras === */
@@ -23,6 +89,7 @@
 
   --shadow-window: 0 18px 55px rgb(0 0 0 / 25%);
   --shadow-panel: 0 16px 45px rgb(0 0 0 / 28%);
+  --shadow-floating: 0 16px 45px rgb(0 0 0 / 28%);
 
   --window-shadow:
     0 18px 55px rgb(0 0 0 / 25%),
@@ -45,6 +112,7 @@
 
   --shadow-window: 0 18px 55px rgb(25 45 70 / 16%);
   --shadow-panel: 0 16px 45px rgb(25 45 70 / 14%);
+  --shadow-floating: 0 16px 45px rgb(25 45 70 / 16%);
 
   --window-shadow:
     0 18px 55px rgb(25 45 70 / 16%),
@@ -59,29 +127,100 @@
     inset 0 1px 0 rgb(255 255 255 / 65%);
 }
 
-/* === Superfícies translúcidas === */
+/* === Superfícies compartilhadas === */
 /* ----- Tema Dark ----- */
 :root {
-  --taskbar-background: rgb(24 34 48 / 92%);
+  --taskbar-background: var(--ws-glass);
   --taskbar-border: rgb(255 255 255 / 9%);
 
-  --panel-background:
-    linear-gradient(155deg,
-      rgb(28 43 61 / 98%),
-      rgb(21 33 49 / 98%));
-
+  --panel-background: var(--ws-glass);
   --panel-border: rgb(148 185 215 / 16%);
 }
 
 /* ----- Tema Light ----- */
 :root[data-theme='light'] {
-  --taskbar-background: rgb(255 255 255 / 92%);
+  --taskbar-background: var(--ws-glass);
   --taskbar-border: rgb(25 45 70 / 12%);
 
-  --panel-background:
-    linear-gradient(155deg,
-      rgb(255 255 255 / 98%),
-      rgb(241 245 249 / 98%));
-
+  --panel-background: var(--ws-glass);
   --panel-border: rgb(25 45 70 / 12%);
+}
+
+/* === Movimento === */
+/* ----- Intensidade padrão ----- */
+:root {
+  --motion-scale: 1;
+}
+
+/* ----- Animações suaves ----- */
+:root[data-motion-intensity='subtle'] {
+  --motion-scale: 0.5;
+  --transition-fast: 60ms;
+  --transition-normal: 100ms;
+}
+
+/* ----- Animações desativadas ----- */
+:root[data-motion-intensity='off'] *,
+:root[data-motion-intensity='off'] *::before,
+:root[data-motion-intensity='off'] *::after {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* === Acessibilidade === */
+/* ----- Transparência reduzida e efeitos mínimos ----- */
+:root[data-reduced-transparency='true'],
+:root[data-low-effects='true'] {
+  --ws-glass-opacity: 1;
+  --ws-window-opacity: 100%;
+  --ws-glass: var(--surface-primary);
+  --ws-window-background: var(--surface-primary);
+
+  --blur-light: 0px;
+  --blur-medium: 0px;
+  --blur-strong: 0px;
+  --ws-glass-saturation: 100%;
+
+  --taskbar-background: var(--surface-primary);
+  --panel-background: var(--surface-primary);
+}
+
+/* ----- Movimento reduzido ----- */
+:root[data-reduced-motion='true'] *,
+:root[data-reduced-motion='true'] *::before,
+:root[data-reduced-motion='true'] *::after,
+:root[data-low-effects='true'] *,
+:root[data-low-effects='true'] *::before,
+:root[data-low-effects='true'] *::after {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* ----- Preferência de transparência do sistema ----- */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --ws-glass-opacity: 1;
+    --ws-window-opacity: 100%;
+    --ws-glass: var(--surface-primary);
+    --ws-window-background: var(--surface-primary);
+
+    --blur-light: 0px;
+    --blur-medium: 0px;
+    --blur-strong: 0px;
+    --ws-glass-saturation: 100%;
+
+    --taskbar-background: var(--surface-primary);
+    --panel-background: var(--surface-primary);
+  }
+}
+
+/* ----- Preferência de movimento do sistema ----- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-scale: 0;
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+  }
 }

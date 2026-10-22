@@ -1,3 +1,5 @@
+/* === Estrutura do Desktop === */
+/* ----- Área principal ----- */
 .desktop {
   position: relative;
   display: flex;
@@ -10,25 +12,24 @@
   isolation: isolate;
 }
 
+/* ----- Wallpaper ----- */
 .desktop__wallpaper {
   position: absolute;
   z-index: -1;
   inset: 0;
   pointer-events: none;
+
   background:
-    radial-gradient(
-      ellipse at 75% 20%,
+    radial-gradient(ellipse at 75% 20%,
       color-mix(in srgb, var(--accent-primary) 15%, transparent),
-      transparent 45%
-    ),
-    radial-gradient(
-      ellipse at 20% 85%,
+      transparent 45%),
+    radial-gradient(ellipse at 20% 85%,
       color-mix(in srgb, var(--accent-secondary) 8%, transparent),
-      transparent 45%
-    ),
+      transparent 45%),
     var(--surface-canvas);
 }
 
+/* ----- Área de trabalho ----- */
 .desktop__workspace {
   position: relative;
   display: block;
@@ -39,6 +40,8 @@
   padding: 0;
 }
 
+/* === Grade do Desktop === */
+/* ----- Área compartilhada de atalhos e widgets ----- */
 .desktop__shortcuts {
   position: relative;
   width: calc(100% - 16px);
@@ -48,6 +51,14 @@
   margin: 22px 8px 16px;
 }
 
+/* ----- Interação com a grade ----- */
+.desktop__shortcut,
+.desktop__widget-drag {
+  touch-action: none;
+}
+
+/* === Atalhos do Desktop === */
+/* ----- Estrutura dos atalhos ----- */
 .desktop__shortcut {
   display: flex;
   width: 82px;
@@ -64,31 +75,47 @@
   color: var(--text-primary);
   cursor: default;
   user-select: none;
+
   transition:
     background-color calc(var(--motion-scale, 1) * 120ms) ease,
     border-color calc(var(--motion-scale, 1) * 120ms) ease,
     transform calc(var(--motion-scale, 1) * 120ms) ease;
 }
 
-.desktop__shortcut:hover {
-  border-color: rgb(255 255 255 / 10%);
-  background: rgb(255 255 255 / 7%);
+/* ----- Hover dos atalhos ----- */
+@media (hover: hover) {
+  .desktop__shortcut:hover {
+    border-color: color-mix(in srgb,
+        var(--border-default) 60%,
+        transparent);
+
+    background: color-mix(in srgb,
+        var(--surface-primary) 7%,
+        transparent);
+  }
 }
 
+/* ----- Atalho selecionado ----- */
 .desktop__shortcut--selected {
   border-color: var(--border-default);
-  background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
+  background: color-mix(in srgb,
+      var(--accent-secondary) 12%,
+      transparent);
 }
 
+/* ----- Atalho pressionado ----- */
 .desktop__shortcut:active {
   transform: scale(0.97);
 }
 
+/* ----- Foco por teclado ----- */
 .desktop__shortcut:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
 }
 
+/* === Ícones do Desktop === */
+/* ----- Superfície dos ícones ----- */
 .desktop__shortcut-icon {
   position: relative;
   display: grid;
@@ -99,14 +126,14 @@
 
   border: 1px solid var(--border-default);
   border-radius: 13px;
-
   background: var(--ws-glass);
   color: var(--text-primary);
-
   box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
 
-  backdrop-filter: blur(var(--blur-light)) saturate(120%);
-  -webkit-backdrop-filter: blur(var(--blur-light)) saturate(120%);
+  -webkit-backdrop-filter:
+    blur(var(--blur-light)) saturate(var(--ws-glass-saturation));
+  backdrop-filter:
+    blur(var(--blur-light)) saturate(var(--ws-glass-saturation));
 
   transition:
     background calc(var(--motion-scale, 1) * 120ms) ease,
@@ -115,37 +142,38 @@
     transform calc(var(--motion-scale, 1) * 120ms) ease;
 }
 
+/* ----- Hover dos ícones ----- */
+@media (hover: hover) {
+  .desktop__shortcut:hover .desktop__shortcut-icon {
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+  }
+}
+
+/* ----- Indicador de aplicativo aberto ----- */
 .desktop__shortcut-indicator {
   position: absolute;
   right: -2px;
   bottom: -2px;
-
   width: 8px;
   height: 8px;
-
   border: 2px solid var(--surface-primary);
   border-radius: 50%;
-
   background: var(--accent-secondary);
-
   pointer-events: none;
 }
 
-/* Aplicativo aberto, mas sem foco. */
+/* ----- Aplicativo aberto sem foco ----- */
 .desktop__shortcut-indicator[data-active='false'] {
   background: #8b929e;
 }
 
-/* Aplicativo atualmente em foco. */
+/* ----- Aplicativo em foco ----- */
 .desktop__shortcut-indicator[data-active='true'] {
   background: var(--accent-secondary);
 }
 
-.desktop__shortcut:hover .desktop__shortcut-icon {
-  border-color: var(--accent-primary);
-  transform: translateY(-1px);
-}
-
+/* ----- Nome do aplicativo ----- */
 .desktop__shortcut-label {
   display: flex;
   width: 100%;
@@ -155,50 +183,73 @@
   justify-content: center;
   overflow: hidden;
 
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--text-primary);
+  box-shadow: none;
   font-size: 11px;
   font-weight: 500;
   line-height: 13px;
   text-align: center;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 65%);
   white-space: normal;
   overflow-wrap: normal;
-
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  text-shadow: 0 1px 4px rgb(0 0 0 / 65%);
 }
 
+/* === Organização da grade === */
+/* ----- Área válida para soltura ----- */
+.desktop__shortcut[data-drop-valid] {
+  z-index: 2;
+}
+
+/* ----- Posição válida ----- */
+.desktop__shortcut[data-drop-valid='true'],
+.desktop__widget[data-drop-valid='true'] {
+  outline: 2px solid var(--accent-secondary);
+}
+
+/* ----- Posição inválida ----- */
+.desktop__shortcut[data-drop-valid='false'] {
+  outline: 2px solid var(--text-primary);
+  opacity: 0.5;
+}
+
+/* ----- Widget em posição inválida ----- */
+.desktop__widget[data-drop-valid='false'] {
+  opacity: 0.5;
+}
+
+/* ----- Seleção múltipla ----- */
+.desktop__selection-box {
+  position: absolute;
+  z-index: 3;
+  border: 1px solid var(--accent-secondary);
+  background: color-mix(in srgb,
+      var(--accent-secondary) 12%,
+      transparent);
+  pointer-events: none;
+}
+
+/* ----- Avisos de organização ----- */
+.desktop__layout-notice {
+  margin: 8px 20px 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* === Camada de janelas === */
+/* ----- Posicionamento e encaixe ----- */
 .desktop__window-layer {
   position: absolute;
-  inset: 0;
   z-index: 10;
-  pointer-events: none;
+  inset: 0;
   --window-gap: 8px;
+  pointer-events: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .desktop__shortcut,
-  .desktop__shortcut-icon {
-    transition: none;
-  }
-}
-
-@media (max-width: 720px) {
-  .desktop__shortcuts {
-    width: calc(100% - 28px);
-    margin: 22px 14px 16px;
-  }
-}
-
-@media (max-width: 480px) {
-  .desktop__shortcuts {
-    width: calc(100% - 20px);
-    margin-inline: 10px;
-  }
-}
-
+/* === Menu contextual === */
+/* ----- Estrutura básica ----- */
 .desktop__context {
   position: absolute;
   z-index: 20;
@@ -214,11 +265,13 @@
   box-shadow: 0 12px 30px rgb(0 0 0 / 25%);
 }
 
+/* ----- Títulos do menu ----- */
 .desktop__context strong {
   padding: 7px 9px;
   font-size: 12px;
 }
 
+/* ----- Ações básicas ----- */
 .desktop__context button {
   padding: 8px 9px;
   border: 0;
@@ -230,21 +283,27 @@
   cursor: pointer;
 }
 
-.desktop__context button:hover:not(:disabled) {
-  background: var(--surface-secondary);
+/* ----- Hover das ações ----- */
+@media (hover: hover) {
+  .desktop__context button:hover:not(:disabled) {
+    background: var(--surface-secondary);
+  }
 }
 
+/* ----- Ações desabilitadas ----- */
 .desktop__context button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
+/* ----- Divisores ----- */
 .desktop__context-divider {
   height: 1px;
   margin: 4px 0;
   background: var(--border-default);
 }
 
+/* ----- Informações contextuais ----- */
 .desktop__context-info {
   display: flex;
   flex-direction: column;
@@ -256,24 +315,27 @@
   line-height: 1.4;
 }
 
-/* Menu contextual moderno do Desktop */
-
+/* === Menu contextual moderno === */
+/* ----- Superfície principal ----- */
 .desktop__context--modern {
   width: 248px;
   max-width: calc(100% - 16px);
   max-height: calc(100% - 16px);
-  overflow-y: auto;
   gap: 3px;
   padding: 7px;
+  overflow-y: auto;
   border-radius: 13px;
   background: var(--ws-glass);
-  backdrop-filter: blur(var(--blur-medium));
+
   -webkit-backdrop-filter: blur(var(--blur-medium));
+  backdrop-filter: blur(var(--blur-medium));
+
   box-shadow:
     0 16px 40px rgb(0 0 0 / 24%),
     0 2px 8px rgb(0 0 0 / 12%);
 }
 
+/* ----- Cabeçalho do menu ----- */
 .desktop__context--modern .desktop__context-header {
   display: flex;
   align-items: center;
@@ -282,12 +344,14 @@
   color: var(--text-primary);
 }
 
+/* ----- Título do cabeçalho ----- */
 .desktop__context--modern .desktop__context-header strong {
   padding: 0;
   font-size: 12px;
   font-weight: 650;
 }
 
+/* ----- Ações modernas ----- */
 .desktop__context--modern button {
   display: flex;
   width: 100%;
@@ -302,71 +366,70 @@
   font-size: 12px;
   text-align: left;
   cursor: pointer;
+
   transition:
     background-color calc(var(--motion-scale, 1) * 120ms) ease,
     color calc(var(--motion-scale, 1) * 120ms) ease;
 }
 
-.desktop__context--modern button:hover {
-  background: var(--surface-secondary);
-  color: var(--accent-secondary);
+/* ----- Hover das ações modernas ----- */
+@media (hover: hover) {
+  .desktop__context--modern button:hover {
+    background: var(--surface-secondary);
+    color: var(--accent-secondary);
+  }
 }
 
+/* ----- Foco por teclado ----- */
 .desktop__context--modern button:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: -2px;
 }
 
+/* ----- Ações selecionadas ----- */
+.desktop__context--modern button[aria-pressed='true'] {
+  color: var(--accent-secondary);
+}
+
+/* ----- Indicador de ação selecionada ----- */
+.desktop__context--modern button[aria-pressed='true']>svg:last-child {
+  margin-left: auto;
+}
+
+/* ----- Conteúdo dos botões ----- */
+.desktop__context--modern button>span {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ----- Indicador de submenu ----- */
 .desktop__context--modern .desktop__context-arrow {
   margin-left: auto;
   color: var(--text-secondary);
 }
 
+/* ----- Ação de retorno ----- */
 .desktop__context--modern .desktop__context-back {
   font-weight: 600;
 }
 
+/* ----- Divisores modernos ----- */
 .desktop__context--modern .desktop__context-divider {
   margin: 5px 4px;
   opacity: 0.65;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .desktop__context--modern button {
-    transition: none;
-  }
+/* ----- Informações modernas ----- */
+.desktop__context--modern .desktop__context-info {
+  margin: 2px 4px 5px;
+  padding: 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-secondary);
 }
 
-/* R3: interação e acesso à grade completa, inclusive em áreas menores. */
-.desktop__shortcuts {
-  min-width: 90px;
-}
-.desktop__shortcut,
-.desktop__widget-drag {
-  touch-action: none;
-}
-.desktop__shortcut[data-drop-valid] {
-  z-index: 2;
-}
-.desktop__shortcut[data-drop-valid='true'] {
-  outline: 2px solid var(--accent-secondary);
-}
-.desktop__shortcut[data-drop-valid='false'] {
-  outline: 2px solid var(--text-primary);
-  opacity: 0.5;
-}
-.desktop__selection-box {
-  position: absolute;
-  z-index: 3;
-  pointer-events: none;
-  border: 1px solid var(--accent-secondary);
-  background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
-}
-.desktop__layout-notice {
-  margin: 8px 20px 0;
-  color: var(--text-secondary);
-  font-size: 12px;
-}
+/* === Acessibilidade === */
+/* ----- Conteúdo exclusivo para leitores de tela ----- */
 .desktop__visually-hidden {
   position: absolute;
   width: 1px;
@@ -376,32 +439,53 @@
   white-space: nowrap;
 }
 
-.desktop__widget[data-drop-valid='true'] {
-  outline: 2px solid var(--accent-secondary);
-}
-.desktop__widget[data-drop-valid='false'] {
-  opacity: 0.5;
-}
-
-/* Menu contextual: informações e indicadores */
-
-.desktop__context--modern .desktop__context-info {
-  margin: 2px 4px 5px;
-  padding: 10px;
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
-  background: var(--surface-secondary);
+/* ----- Transparência desabilitada ----- */
+:root:is([data-blur='off'],
+  [data-transparency='solid'],
+  [data-reduced-transparency='true'],
+  [data-low-effects='true']) .desktop__shortcut-icon,
+:root:is([data-blur='off'],
+  [data-transparency='solid'],
+  [data-reduced-transparency='true'],
+  [data-low-effects='true']) .desktop__context--modern {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
-.desktop__context--modern button[aria-pressed='true'] {
-  color: var(--accent-secondary);
+/* ----- Preferência do sistema por menos transparência ----- */
+@media (prefers-reduced-transparency: reduce) {
+
+  .desktop__shortcut-icon,
+  .desktop__context--modern {
+    background: var(--surface-primary);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
-.desktop__context--modern button[aria-pressed='true'] > svg:last-child {
-  margin-left: auto;
+/* ----- Preferência do sistema por menos movimento ----- */
+@media (prefers-reduced-motion: reduce) {
+
+  .desktop__shortcut,
+  .desktop__shortcut-icon,
+  .desktop__context--modern button {
+    transition: none;
+  }
 }
 
-.desktop__context--modern button > span {
-  flex: 1;
-  min-width: 0;
+/* === Responsividade === */
+/* ----- Área de atalhos em telas menores ----- */
+@media (max-width: 720px) {
+  .desktop__shortcuts {
+    width: calc(100% - 28px);
+    margin: 22px 14px 16px;
+  }
+}
+
+/* ----- Área de atalhos em telas estreitas ----- */
+@media (max-width: 480px) {
+  .desktop__shortcuts {
+    width: calc(100% - 20px);
+    margin-inline: 10px;
+  }
 }

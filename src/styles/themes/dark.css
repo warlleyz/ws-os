@@ -30,7 +30,7 @@
 }
 
 /* === Destaques === */
-/* ----- Paleta inicial azul ----- */
+/* ----- Paleta azul padrão ----- */
 :root,
 :root[data-theme='dark'] {
   --accent-primary: #378ce4;
