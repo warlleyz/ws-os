@@ -74,9 +74,14 @@
 /* === Interação com janelas === */
 /* ----- Movimento e redimensionamento ----- */
 .desktop-window[data-interacting='true'] {
-  background: var(--surface-primary);
+  background: var(--ws-window-background);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+}
+
+/* ----- Superfície grafite durante a interação no Dark ----- */
+:root:not([data-theme='light']) .desktop-window[data-interacting='true'] {
+  background: #252629;
 }
 
 /* ----- Prévia de encaixe ----- */

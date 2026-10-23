@@ -47,17 +47,17 @@
 
     /* === Interação com janelas === */
     /* ----- Área de arraste ----- */
-    html[data-cursor-mode='custom'] .desktop-window__drag-area {
+    html[data-cursor-mode='custom'] .desktop-window .desktop-window__drag-area[role='button'] {
         cursor: var(--ws-cursor-grab, grab);
     }
 
     /* ----- Arraste ativo ----- */
-    html[data-cursor-mode='custom'] .desktop-window__drag-area:active {
+    html[data-cursor-mode='custom'] .desktop-window[data-interacting='true'] .desktop-window__drag-area[role='button'] {
         cursor: var(--ws-cursor-grabbing, grabbing);
     }
 
     /* ----- Janela maximizada ----- */
-    html[data-cursor-mode='custom'] .desktop-window--maximized .desktop-window__drag-area {
-        cursor: var(--ws-cursor-default, default);
+    html[data-cursor-mode='custom'] .desktop-window--maximized:not([data-interacting='true']) .desktop-window__drag-area[role='button'] {
+        cursor: var(--ws-cursor-grab, grab);
     }
 }

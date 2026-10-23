@@ -182,13 +182,8 @@
 }
 
 /* ----- Arraste ativo ----- */
-.desktop-window__drag-area:active {
+.desktop-window[data-interacting='true'] .desktop-window__drag-area {
   cursor: grabbing;
-}
-
-/* ----- Janela maximizada ----- */
-.desktop-window--maximized .desktop-window__drag-area {
-  cursor: default;
 }
 
 /* === Controles da janela === */

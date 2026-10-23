@@ -14,6 +14,16 @@
     color-mix(in srgb, var(--surface-secondary) var(--ws-window-opacity), transparent);
 }
 
+/* ----- Superfície adaptativa das janelas Dark ----- */
+:root:not([data-theme='light']) {
+  --ws-window-background: color-mix(
+    in srgb,
+    color-mix(in srgb, #252628 96%, var(--accent-primary) 4%)
+      var(--ws-window-opacity),
+    transparent
+  );
+}
+
 /* ----- Superfícies do tema Light ----- */
 :root[data-theme='light'] {
   --ws-glass-rgb: 255 255 255;
