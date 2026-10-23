@@ -17,6 +17,16 @@
     ],
     "vars": {
         "WALLY_AI_ENABLED": "false",
-        "GEMINI_MODEL": "gemini-3.8-flash"
+        "GEMINI_MODEL": "gemini-3.8-flash",
+        "SUPABASE_URL": "https://nkzybphguyjvxglcwbik.supabase.co",
+        "REQUESTS_ENABLED": "true",
+        "MANAGED_FILES_ENABLED": "true",
+        "RANKINGS_ENABLED": "true",
+        "REQUEST_RETENTION_ENABLED": "true"
+    },
+    "triggers": {
+        "crons": [
+            "0 3 * * *"
+        ]
     }
 }
