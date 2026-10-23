@@ -107,14 +107,30 @@ export default function useWindowInteraction({ instance, app }) {
     if (!element) return;
     if (!geometryRef.current) {
       const defaults = app?.window;
-      geometryRef.current = defaults
-        ? { ...readGeometry(element), width: defaults.width, height: defaults.height }
-        : readGeometry(element);
+      const geometry = readGeometry(element);
+
+      if (defaults && instance.appId === 'about-me') {
+        const bounds = getBounds(element);
+        const width = Math.min(defaults.width, bounds.width - 16);
+        const height = Math.min(defaults.height, bounds.height - 16);
+
+        geometryRef.current = {
+          ...geometry,
+          x: Math.max(8, (bounds.width - width) / 2),
+          y: Math.max(8, (bounds.height - height) / 2),
+          width,
+          height,
+        };
+      } else {
+        geometryRef.current = defaults
+          ? { ...geometry, width: defaults.width, height: defaults.height }
+          : geometry;
+      }
     }
     if (mode === 'normal') {
       geometryRef.current = applyGeometry(element, geometryRef.current, getBounds(element), true);
     }
-  }, [mode, app]);
+  }, [mode, app, instance.appId]);
 
   /* ----- Observa somente alterações reais no tamanho do Desktop. ----- */
   useLayoutEffect(() => {

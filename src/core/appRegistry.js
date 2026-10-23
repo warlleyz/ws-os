@@ -22,6 +22,7 @@ import {
 /* === Registro de aplicativos === */
 /* === Dimensões iniciais por tarefa; geometria permanece somente na sessão === */
 const windowProfiles = {
+  'about-me': { width: 950, height: 860 },
   calculator: { width: 360, height: 520 },
   contact: { width: 680, height: 660 },
   settings: { width: 980, height: 680 },

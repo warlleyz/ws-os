@@ -91,8 +91,20 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
   );
   function nodes(node) {
     if (!arguments.length) node = tree;
-    if (Array.isArray(node)) return node.flatMap((item) => nodes(item));
-    return node && typeof node === 'object' ? [node, ...nodes(node.props.children)] : [];
+
+    if (Array.isArray(node)) {
+      return node.flatMap((item) => nodes(item));
+    }
+
+    if (!node || typeof node !== 'object') {
+      return [];
+    }
+
+    if (!('type' in node) || !('props' in node)) {
+      return [];
+    }
+
+    return [node, ...nodes(node.props?.children)];
   }
   function text(node) {
     if (!arguments.length) node = tree;

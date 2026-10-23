@@ -190,12 +190,25 @@ test('Projeto copia URL sem navegar e permite cópia manual se o navegador bloqu
   ui.unmount();
 });
 
-test('Sobre Mim mantém a instância de origem nos quatro destinos profissionais', async () => {
+/* ----- Contato preserva a instância de origem ----- */
+test('Sobre Mim abre Contato preservando a instância de origem', async () => {
   const calls = [];
+
   const ui = await renderApp(
     'src/apps/about-me/AboutMe.jsx',
     { instance: { id: 'profile-instance' } },
     {
+      Code2: 'Code2',
+      Database: 'Database',
+      Layers3: 'Layers3',
+      Wrench: 'Wrench',
+      BookOpen: 'BookOpen',
+      GitBranch: 'GitBranch',
+      GraduationCap: 'GraduationCap',
+      Mail: 'Mail',
+      MapPin: 'MapPin',
+      Rocket: 'Rocket',
+      SkillsGlobe: 'SkillsGlobe',
       portfolio: {
         profile: {
           name: 'Autor',
@@ -210,16 +223,21 @@ test('Sobre Mim mantém a instância de origem nos quatro destinos profissionais
       useSystem: () => ({ run: (...args) => calls.push(args) }),
     },
   );
-  for (const label of ['Projetos', 'Currículo', 'Certificados', 'Contato'])
-    ui.button(label).props.onClick();
-  assert.deepEqual(
-    calls.map((call) => call[1]),
-    ['projects', 'resume', 'certificates', 'contact'],
+
+  const contact = ui.nodes().find(
+    (node) =>
+      node.type === 'button' &&
+      node.props.className?.split(' ').includes('ws-about__link--contact'),
   );
-  assert.ok(
-    calls.every(
-      (call) => call[2].origin === 'about-me' && call[2].originInstanceId === 'profile-instance',
-    ),
-  );
+
+  assert.ok(contact, 'O aplicativo deve oferecer acesso ao Contato.');
+
+  contact.props.onClick();
+
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][1], 'contact');
+  assert.equal(calls[0][2].origin, 'about-me');
+  assert.equal(calls[0][2].originInstanceId, 'profile-instance');
+
   ui.unmount();
 });

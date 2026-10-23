@@ -1,0 +1,514 @@
+/* === Superfície do Sobre Mim === */
+/* ----- Estrutura do aplicativo ----- */
+.ws-about {
+  --about-line: color-mix(in srgb, var(--border-default) 72%, transparent);
+  --about-panel: color-mix(in srgb, var(--surface-secondary) 33%, transparent);
+  --about-accent-soft: color-mix(in srgb, var(--accent-primary) 11%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 18px !important;
+  overflow: auto;
+  background: transparent;
+  color: var(--text-primary);
+  container-type: inline-size;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-control) transparent;
+}
+
+/* ----- Dimensionamento dos elementos ----- */
+.ws-about *,
+.ws-about *::before,
+.ws-about *::after {
+  box-sizing: border-box;
+}
+
+/* === Perfil profissional === */
+/* ----- Cartão principal ----- */
+.ws-about__profile {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  padding: 20px;
+  border: 1px solid var(--about-line);
+  border-radius: 17px;
+  background: linear-gradient(115deg, var(--about-accent-soft), var(--about-panel) 58%, transparent);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 4%);
+}
+
+/* ----- Fotografia ----- */
+.ws-about__photo {
+  display: grid;
+  place-items: center;
+  width: 118px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 27%, var(--about-line));
+  border-radius: 19px;
+  background: var(--about-accent-soft);
+  color: var(--accent-secondary);
+  box-shadow: 0 10px 26px rgb(0 0 0 / 9%);
+}
+
+.ws-about__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 32%;
+}
+
+.ws-about__photo>span {
+  font-size: 33px;
+  font-weight: 750;
+  letter-spacing: -0.06em;
+}
+
+/* ----- Informações profissionais ----- */
+.ws-about__profile-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+}
+
+.ws-about__eyebrow {
+  color: var(--accent-secondary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.ws-about__profile h1 {
+  margin: 0;
+  font-size: clamp(24px, 4cqw, 34px);
+  font-weight: 720;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+
+.ws-about__profile-content>p {
+  max-width: 85ch;
+  margin: 2px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+/* ----- Formação e localização ----- */
+.ws-about__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 5px;
+}
+
+.ws-about__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid var(--about-line);
+  border-radius: 8px;
+  background: var(--about-panel);
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ws-about__meta svg {
+  color: var(--accent-secondary);
+}
+
+/* === Conteúdo principal === */
+/* ----- Texto à esquerda e globo à direita ----- */
+.ws-about__main {
+  display: grid;
+  grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.02fr);
+  align-items: stretch;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* ----- Cards com contraste sutil e integração ao vidro do sistema ----- */
+.ws-about__section {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--about-line);
+  border-radius: 16px;
+  background: linear-gradient(155deg,
+      color-mix(in srgb, var(--surface-secondary) 36%, transparent),
+      color-mix(in srgb, var(--surface-secondary) 17%, transparent));
+  box-shadow: 0 6px 20px rgb(0 0 0 / 3%);
+}
+
+/* ----- Realce discreto, sem competir com o conteúdo ----- */
+.ws-about__section:hover {
+  border-color: color-mix(in srgb, var(--accent-primary) 22%, var(--about-line));
+}
+
+.ws-about__narrative {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  gap: 14px;
+}
+
+/* ----- Objetivos acompanha a altura do card do globo ----- */
+.ws-about__goals {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ws-about__goals-grid {
+  flex: 1;
+  justify-content: space-evenly;
+}
+
+.ws-about__section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.ws-about__section-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--about-accent-soft);
+  color: var(--accent-secondary);
+}
+
+.ws-about__section-heading>div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ws-about__section-eyebrow {
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.ws-about__section-heading h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 680;
+  line-height: 1.25;
+}
+
+/* ----- Texto de apresentação ----- */
+.ws-about__text {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.ws-about__text p,
+.ws-about__description {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* ----- Espaço dedicado ao globo interativo ----- */
+.ws-about__learning {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.ws-about__description {
+  margin-bottom: 12px;
+}
+
+.ws-about__learning .ws-skills-globe__stage {
+  height: clamp(330px, 41cqw, 445px);
+}
+
+/* === Conhecimentos === */
+/* ----- Grade de categorias ----- */
+.ws-about__knowledge-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* ----- Card interno de conhecimento ----- */
+.ws-about__knowledge-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--about-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-secondary) 30%, transparent);
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.ws-about__knowledge-card:hover {
+  border-color: color-mix(in srgb, var(--accent-primary) 32%, var(--about-line));
+  background: color-mix(in srgb, var(--surface-secondary) 46%, transparent);
+}
+
+/* ----- Identificação da categoria ----- */
+.ws-about__knowledge-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 11px;
+}
+
+.ws-about__knowledge-header>span {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  border-radius: 8px;
+  background: var(--about-accent-soft);
+  color: var(--accent-secondary);
+}
+
+.ws-about__knowledge-header h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 680;
+}
+
+/* ----- Lista de habilidades ----- */
+.ws-about__knowledge-card ul {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.ws-about__knowledge-card li {
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.ws-about__knowledge-card li::marker {
+  color: var(--accent-secondary);
+}
+
+/* === Objetivos === */
+/* ----- Metas organizadas dentro do card ----- */
+.ws-about__goals-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ws-about__goals-grid p {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid color-mix(in srgb, var(--accent-primary) 48%, transparent);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+/* === Links profissionais === */
+/* ----- Faixa de canais de contato ----- */
+.ws-about__links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* ----- Cartões de links externos e acesso ao Contato ----- */
+.ws-about__links .ws-about__link {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 72px;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 1px solid var(--about-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-secondary) 36%, transparent);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.ws-about__links .ws-about__link:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent-primary) 50%, var(--about-line));
+  background: color-mix(in srgb, var(--accent-primary) 10%, var(--surface-secondary));
+}
+
+.ws-about__links .ws-about__link:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 3px;
+}
+
+.ws-about__link-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--about-accent-soft);
+  color: var(--accent-secondary);
+}
+
+.ws-about__link-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ws-about__link-info strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 680;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ws-about__link-info small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ws-about__link-action {
+  flex: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+}
+
+/* ----- Contato recebe realce de ação interna ----- */
+.ws-about__links .ws-about__link--contact {
+  border-color: color-mix(in srgb, var(--accent-primary) 32%, var(--about-line));
+  background: color-mix(in srgb, var(--accent-primary) 8%, var(--surface-secondary));
+}
+
+/* === Responsividade pela largura da janela === */
+/* ----- Largura intermediária ----- */
+@container (max-width: 850px) {
+  .ws-about__main {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .ws-about__narrative {
+    grid-template-rows: auto auto;
+  }
+
+  .ws-about__goals-grid {
+    justify-content: flex-start;
+  }
+
+  .ws-about__links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ws-about__learning {
+    padding: 20px;
+  }
+
+  .ws-about__knowledge-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ws-about__learning .ws-skills-globe__stage {
+    height: 360px;
+  }
+}
+
+/* ----- Janela compacta ----- */
+@container (max-width: 500px) {
+  .ws-about {
+    padding: 12px !important;
+    gap: 11px;
+  }
+
+  .ws-about__profile {
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 13px;
+    padding: 14px;
+  }
+
+  .ws-about__section {
+    padding: 15px;
+  }
+
+  .ws-about__learning {
+    padding: 15px;
+  }
+
+  .ws-about__photo {
+    width: 86px;
+    border-radius: 14px;
+  }
+
+  .ws-about__profile h1 {
+    font-size: 22px;
+  }
+
+  .ws-about__profile-content>p {
+    font-size: 12px;
+  }
+
+  .ws-about__knowledge-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ws-about__links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ws-about__learning .ws-skills-globe__stage {
+    height: 300px;
+  }
+}
+
+/* ----- Janela muito estreita ----- */
+@container (max-width: 340px) {
+  .ws-about__profile {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ws-about__photo {
+    width: 96px;
+  }
+
+  .ws-about__links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* === Acessibilidade === */
+/* ----- Preferência por menos movimento ----- */
+@media (prefers-reduced-motion: reduce) {
+
+  .ws-about__links .ws-about__link,
+  .ws-about__knowledge-card {
+    transition: none;
+  }
+
+  .ws-about__links .ws-about__link:hover {
+    transform: none;
+  }
+}

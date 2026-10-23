@@ -71,4 +71,15 @@
     html[data-cursor-mode='custom'] .desktop-window--maximized:not([data-interacting='true']) .desktop-window__drag-area[role='button'] {
         cursor: var(--ws-cursor-grab, grab);
     }
+
+    /* === Globo de tecnologias === */
+    /* ----- Cursor de interação ----- */
+    html[data-cursor-mode='custom'] .ws-skills-globe__stage {
+        cursor: var(--ws-cursor-grab, grab);
+    }
+    
+    /* ----- Cursor durante o arraste ----- */
+    html[data-cursor-mode='custom'] .ws-skills-globe__stage:active {
+        cursor: var(--ws-cursor-grabbing, grabbing);
+    }
 }
