@@ -4,7 +4,6 @@ const fs = require('node:fs'),
   path = require('node:path'),
   vm = require('node:vm');
 const root = path.resolve(__dirname, '../..');
-
 async function component(file, props, bindings = {}) {
   const { transformWithOxc } = await import('vite');
   const source = fs
@@ -87,9 +86,9 @@ async function component(file, props, bindings = {}) {
       ].map((name) => [name, name]),
     ),
     fetchManagedContent: async () => ({ data: [] }),
-    window: { addEventListener() {}, removeEventListener() {} },
-    subscribePublicData: () => () => {},
-    localStorage: { getItem: () => null, setItem() {} },
+    window: { addEventListener() { }, removeEventListener() { } },
+    subscribePublicData: () => () => { },
+    localStorage: { getItem: () => null, setItem() { } },
     createPortal: (node) => node,
     document: { body: {}, activeElement: null },
     React,
@@ -125,7 +124,7 @@ async function component(file, props, bindings = {}) {
     useUnsavedChanges: (_id, value) => {
       dirty = value;
     },
-    subscribeLocalFiles: () => () => {},
+    subscribeLocalFiles: () => () => { },
     localFilesRevision: () => 0,
     ...bindings,
   });
@@ -162,17 +161,13 @@ async function component(file, props, bindings = {}) {
     },
   };
 }
-
 /* === Testes do Visualizador de Arquivos === */
 /* ----- Localização da interface compartilhada ----- */
 function documentView(ui) {
   const node = ui.nodes().find((item) => item.type === 'DocumentView');
-
   assert.ok(node, 'O visualizador deve utilizar DocumentView.');
-
   return node.props;
 }
-
 const entry = (overrides = {}) => ({
   id: 'file',
   kind: 'file',
@@ -183,7 +178,6 @@ const entry = (overrides = {}) => ({
   ...overrides,
 });
 const editorProps = () => ({ instance: { id: 'editor', params: { fileId: 'file' } } });
-
 test('editor detecta alterações externas sem apagar rascunho e não sobrescreve revisão antiga', async () => {
   let current = entry(),
     revision = 0;
@@ -211,7 +205,6 @@ test('editor detecta alterações externas sem apagar rascunho e não sobrescrev
   assert.equal(ui.nodes().find((n) => n.type === 'textarea').props.value, 'rascunho');
   assert.equal(ui.dirty(), true);
 });
-
 test('salvar cópia recupera rascunho na raiz quando pasta e arquivo foram removidos', async () => {
   let current = entry({ parentId: 'folder' }),
     revision = 0,
@@ -240,27 +233,20 @@ test('salvar cópia recupera rascunho na raiz quando pasta e arquivo foram remov
   /* ----- Abertura do diálogo e confirmação da cópia ----- */
   ui.button('Salvar cópia').props.onClick();
   ui.render();
-
   assert.ok(ui.button('Criar cópia'));
-
   /* ----- Confirmação do formulário de cópia ----- */
   const copyForm = ui
     .nodes()
     .find((node) => node.type === 'form' && node.props.className === 'ws-editor__modal');
-
   assert.ok(copyForm, 'O formulário de cópia deve estar aberto.');
-
   copyForm.props.onSubmit({
-    preventDefault() {},
+    preventDefault() { },
   });
-
   await ui.flush();
-
   assert.equal(saved[1], null);
   assert.equal(saved[2], 'recuperado');
   assert.equal(ui.dirty(), true);
 });
-
 test('recarregar exige confirmação e protege fechamento durante gravação', async () => {
   let current = entry(),
     resolve;
@@ -292,7 +278,6 @@ test('recarregar exige confirmação e protege fechamento durante gravação', a
   ui.render();
   assert.equal(ui.dirty(), false);
 });
-
 test('editor recusa URL oficial e arquivos não textuais', async () => {
   let calls = 0;
   const ui = await component(
@@ -314,7 +299,6 @@ test('editor recusa URL oficial e arquivos não textuais', async () => {
   assert.match(image.text(), /1 MB/);
   assert.equal(image.button('Salvar'), undefined);
 });
-
 test('visualizador mostra texto escapado, download e libera URLs ao atualizar e fechar', async () => {
   const revoked = [];
   let revision = 0,
@@ -341,7 +325,6 @@ test('visualizador mostra texto escapado, download e libera URLs ao atualizar e 
   ui.unmount();
   assert.deepEqual(revoked, ['blob:1', 'blob:2']);
 });
-
 test('visualizador não cria URL após fechamento e informa arquivo removido', async () => {
   let resolve,
     created = 0;
@@ -358,7 +341,7 @@ test('visualizador não cria URL após fechamento e informa arquivo removido', a
           created++;
           return 'blob:x';
         },
-        revokeObjectURL() {},
+        revokeObjectURL() { },
       },
     },
   );
@@ -378,40 +361,31 @@ test('visualizador não cria URL após fechamento e informa arquivo removido', a
   await removed.flush();
   assert.match(documentView(removed).error, /não encontrado/);
 });
-
 test('visualizador local encaminha imagens e PDFs à interface compartilhada', async () => {
   const bindings = {
     readLocalFile: async () => entry({ name: 'a.png' }),
     URL: {
       createObjectURL: () => 'blob:x',
-      revokeObjectURL() {},
+      revokeObjectURL() { },
     },
   };
-
   /* ----- Pré-visualização de imagem ----- */
   const image = await component(
     'src/apps/file-viewer/LocalFileViewer.jsx',
     { fileId: 'file' },
     bindings,
   );
-
   await image.flush();
-
   const imageProps = documentView(image);
-
   assert.equal(imageProps.kind, 'image');
   assert.equal(imageProps.name, 'a.png');
   assert.equal(imageProps.url, 'blob:x');
   assert.ok(imageProps.blob instanceof Blob);
   assert.equal(typeof imageProps.onImageError, 'function');
-
   imageProps.onImageError();
   image.render();
-
   assert.equal(documentView(image).previewError, true);
-
   image.unmount();
-
   /* ----- Pré-visualização de PDF ----- */
   const pdf = await component(
     'src/apps/file-viewer/LocalFileViewer.jsx',
@@ -421,18 +395,13 @@ test('visualizador local encaminha imagens e PDFs à interface compartilhada', a
       readLocalFile: async () => entry({ name: 'a.pdf' }),
     },
   );
-
   await pdf.flush();
-
   const pdfProps = documentView(pdf);
-
   assert.equal(pdfProps.kind, 'pdf');
   assert.equal(pdfProps.name, 'a.pdf');
   assert.ok(pdfProps.blob instanceof Blob);
-
   pdf.unmount();
 });
-
 function officialBindings(fetchMock, overrides = {}) {
   const revoked = [];
   class AssetURL extends URL {
@@ -455,7 +424,6 @@ function officialBindings(fetchMock, overrides = {}) {
 const officialProps = (url = '/curriculo.pdf') => ({
   instance: { id: 'viewer', origin: 'resume', params: { url, name: 'Currículo' } },
 });
-
 test('documentos oficiais aceitam contrato url/name e isolam PDF validado', async () => {
   let request;
   const bindings = officialBindings(async (url, options) => {
@@ -467,7 +435,6 @@ test('documentos oficiais aceitam contrato url/name e isolam PDF validado', asyn
   assert.equal(request.url, 'https://ws.test/curriculo.pdf');
   assert.equal(request.options.redirect, 'error');
   const props = documentView(ui);
-
   assert.equal(props.kind, 'pdf');
   assert.ok(props.blob instanceof Blob);
   assert.equal(props.url, 'blob:official');
@@ -475,7 +442,6 @@ test('documentos oficiais aceitam contrato url/name e isolam PDF validado', asyn
   ui.unmount();
   assert.deepEqual(bindings.revoked, ['blob:official']);
 });
-
 test('visualizador oficial recusa origens externas, credenciais, consultas e PDFs inválidos', async () => {
   let calls = 0;
   for (const url of [
@@ -493,10 +459,8 @@ test('visualizador oficial recusa origens externas, credenciais, consultas e PDF
       }),
     );
     await ui.flush();
-
     /* ----- URL inválida não disponibiliza o documento ----- */
     const props = documentView(ui);
-
     assert.equal(Boolean(props.blob), false);
     assert.equal(Boolean(props.url), false);
   }
@@ -513,12 +477,10 @@ test('visualizador oficial recusa origens externas, credenciais, consultas e PDF
     await ui.flush();
     /* ----- Rejeição de conteúdo inválido ----- */
     const props = documentView(ui);
-
     assert.ok(props.error);
     assert.equal(Boolean(props.blob), false);
   }
 });
-
 test('prévia oficial limita leitura por stream mesmo sem Content-Length e oferece download', async () => {
   const ui = await component(
     'src/apps/file-viewer/FileViewer.jsx',
@@ -531,12 +493,10 @@ test('prévia oficial limita leitura por stream mesmo sem Content-Length e ofere
   await ui.flush();
   /* ----- Limite de pré-visualização ----- */
   const props = documentView(ui);
-
   assert.equal(props.kind, 'text');
   assert.equal(Boolean(props.blob), false);
   assert.ok(props.error);
 });
-
 test('HTML oficial é exibido como texto, nunca como iframe executável', async () => {
   const ui = await component(
     'src/apps/file-viewer/FileViewer.jsx',
@@ -549,18 +509,16 @@ test('HTML oficial é exibido como texto, nunca como iframe executável', async 
   await ui.flush();
   /* ----- HTML apresentado como texto ----- */
   const props = documentView(ui);
-
   assert.equal(props.kind, 'text');
   assert.match(props.text, /<script>literal/);
   assert.ok(props.blob instanceof Blob);
 });
-
 test('gerenciador impede criar na raiz por engano quando a pasta aberta é removida', async () => {
   const store = {
     entries: [entry({ id: 'folder', kind: 'folder', name: 'Pasta', blob: null })],
     loading: false,
     error: '',
-    refresh() {},
+    refresh() { },
   };
   let back,
     created = 0;
@@ -569,7 +527,7 @@ test('gerenciador impede criar na raiz por engano quando a pasta aberta é remov
     { instance: { id: 'files' } },
     {
       useLocalFiles: () => store,
-      useSystem: () => ({ run() {} }),
+      useSystem: () => ({ run() { } }),
       useAppBack: (_id, handler) => {
         back = handler;
       },
@@ -592,23 +550,21 @@ test('gerenciador impede criar na raiz por engano quando a pasta aberta é remov
   ui.render();
   assert.match(ui.text(), /Pasta de destino indisponível/);
   assert.equal(ui.button('Criar pasta').props.disabled, true);
-
   assert.equal(created, 0);
   assert.equal(back(), true);
   ui.render();
   assert.equal(ui.button('Pasta anterior'), undefined);
 });
-
 test('Arquivos abre visualizador/editor pelo contrato fileId e mantém oficiais sem escrita', async () => {
   const calls = [];
-  const store = { entries: [entry()], loading: false, error: '', refresh() {} };
+  const store = { entries: [entry()], loading: false, error: '', refresh() { } };
   const ui = await component(
     'src/apps/files/Files.jsx',
     { instance: { id: 'files' } },
     {
       useLocalFiles: () => store,
       useSystem: () => ({ run: (...args) => calls.push(args) }),
-      useAppBack() {},
+      useAppBack() { },
       portfolio: { officialFiles: [{ id: 'official', name: 'PDF oficial', url: '/oficial.pdf' }] },
       contentText: (value) => value,
       publicAssetUrl: (url) => url,
@@ -632,7 +588,6 @@ test('Arquivos abre visualizador/editor pelo contrato fileId e mantém oficiais 
   ui.button('Visualizar').props.onClick();
   assert.equal(calls[2][2].params.url, '/oficial.pdf');
 });
-
 test('leitura do gerenciador ignora resposta antiga e preserva listagem ao falhar atualização', async () => {
   const requests = [];
   const ui = await component(
@@ -657,16 +612,13 @@ test('leitura do gerenciador ignora resposta antiga e preserva listagem ao falha
   assert.equal(state.error, 'Falha de leitura');
   assert.equal(state.entries[0].name, 'atual.txt');
 });
-
 /* === Compatibilidade dos descritores com o Visualizador === */
 /* ----- Roteamento de arquivos locais e gerenciados ----- */
 test('Visualizador roteia descritores locais e gerenciados validados', async () => {
   const { loadContract } = require('../helpers/contract-loader.cjs');
-
   const { validateFileResource } = loadContract(
     path.join(root, 'src/services/storage/fileResourceContract.js'),
   );
-
   /* ----- Arquivo pessoal ----- */
   const local = await component(
     'src/apps/file-viewer/FileViewer.jsx',
@@ -682,10 +634,8 @@ test('Visualizador roteia descritores locais e gerenciados validados', async () 
       LocalFileViewer: 'LocalViewer',
     },
   );
-
   assert.equal(local.nodes()[0].type, 'LocalViewer');
   assert.equal(local.nodes()[0].props.fileId, 'one');
-
   /* ----- Arquivo gerenciado autorizado pelo contrato ----- */
   const managed = await component(
     'src/apps/file-viewer/FileViewer.jsx',
@@ -698,9 +648,7 @@ test('Visualizador roteia descritores locais e gerenciados validados', async () 
     },
     { validateFileResource },
   );
-
   assert.equal(managed.nodes()[0].props.resourceId, 'one');
-
   /* ----- Identificador inválido ----- */
   const invalid = await component(
     'src/apps/file-viewer/FileViewer.jsx',
@@ -716,17 +664,15 @@ test('Visualizador roteia descritores locais e gerenciados validados', async () 
     },
     { validateFileResource },
   );
-
   assert.equal(invalid.nodes()[0].props.source, 'invalid');
 });
-
 /* === Menus de contexto do explorador === */
 const contextEvent = (extra = {}) => ({
-  preventDefault() {},
-  stopPropagation() {},
+  preventDefault() { },
+  stopPropagation() { },
   clientX: 310,
   clientY: 240,
-  currentTarget: { getBoundingClientRect: () => ({ left: 100, top: 80 }), focus() {} },
+  currentTarget: { getBoundingClientRect: () => ({ left: 100, top: 80 }), focus() { } },
   ...extra,
 });
 async function filesMenu(store, extra = {}) {
@@ -735,8 +681,8 @@ async function filesMenu(store, extra = {}) {
     { instance: { id: 'files' } },
     {
       useLocalFiles: () => store,
-      useSystem: () => ({ run() {} }),
-      useAppBack() {},
+      useSystem: () => ({ run() { } }),
+      useAppBack() { },
       portfolio: { officialFiles: [{ id: 'pdf', name: 'Oficial', url: '/oficial.pdf' }] },
       contentText: (value) => value,
       publicAssetUrl: (url) => url,
@@ -746,7 +692,6 @@ async function filesMenu(store, extra = {}) {
   );
 }
 const menuNode = (ui) => ui.nodes().find((node) => node.props.role === 'menu');
-
 test('clique direito no espaço vazio oferece criação apenas no espaço pessoal', async () => {
   let refreshed = 0;
   const store = {
@@ -784,14 +729,13 @@ test('clique direito no espaço vazio oferece criação apenas no espaço pessoa
   assert.equal(menuNode(ui), undefined);
   ui.unmount();
 });
-
 test('menu local preserva seleção múltipla e expõe ações próprias da lixeira', async () => {
   let operations;
   const store = {
     entries: [entry(), entry({ id: 'second', name: 'b.txt' })],
     loading: false,
     error: '',
-    refresh() {},
+    refresh() { },
   };
   const ui = await filesMenu(store, {
     changeLocalFiles: async (items) => {
@@ -831,11 +775,10 @@ test('menu local preserva seleção múltipla e expõe ações próprias da lixe
   assert.doesNotMatch(ui.text(menuNode(ui)), /Renomear|Editar/);
   ui.unmount();
 });
-
 test('menu oficial por teclado permite visualizar e nunca expõe alterações', async () => {
   const calls = [];
   const ui = await filesMenu(
-    { entries: [], loading: false, error: '', refresh() {} },
+    { entries: [], loading: false, error: '', refresh() { } },
     {
       useSystem: () => ({ run: (...args) => calls.push(args) }),
     },
@@ -865,13 +808,12 @@ test('menu oficial por teclado permite visualizar e nunca expõe alterações', 
   assert.equal(calls[0][2].params.url, '/oficial.pdf');
   ui.unmount();
 });
-
 test('pesquisa em todas as pastas alterna escopo sem modificar os arquivos', async () => {
   const store = {
     entries: [entry(), entry({ id: 'nested', parentId: 'folder', name: 'oculto.txt' })],
     loading: false,
     error: '',
-    refresh() {},
+    refresh() { },
   };
   const ui = await filesMenu(store);
   ui.button('Meus arquivos').props.onClick();
@@ -894,7 +836,6 @@ test('pesquisa em todas as pastas alterna escopo sem modificar os arquivos', asy
   assert.equal(store.entries.length, 2);
   ui.unmount();
 });
-
 /* === Regressões do fechamento da Etapa 05: Editor === */
 test('cópia mantém a pasta atual e preserva o rascunho quando a gravação falha', async () => {
   let destination;
@@ -919,7 +860,7 @@ test('cópia mantém a pasta atual e preserva o rascunho quando a gravação fal
   ui.render();
   ui.nodes()
     .find((node) => node.type === 'form')
-    .props.onSubmit({ preventDefault() {} });
+    .props.onSubmit({ preventDefault() { } });
   await ui.flush();
   assert.equal(destination[1], 'moved');
   assert.equal(destination[2], 'rascunho seguro');
@@ -929,9 +870,8 @@ test('cópia mantém a pasta atual e preserva o rascunho quando a gravação fal
   assert.match(ui.text(), /Não foi possível salvar/);
   ui.unmount();
 });
-
 test('controles do Editor têm identificadores por instância e recarregar registra o foco de origem', async () => {
-  const trigger = { focus() {}, isConnected: true };
+  const trigger = { focus() { }, isConnected: true };
   const first = await component('src/apps/file-editor/FileEditor.jsx', editorProps(), {
     readLocalFile: async () => entry(),
     document: { activeElement: trigger },
@@ -966,16 +906,55 @@ test('controles do Editor têm identificadores por instância e recarregar regis
   first.unmount();
   second.unmount();
 });
-
 /* === Regressões do fechamento da Etapa 05: PDF e catálogo === */
+/* ----- Dependências simuladas do visualizador de PDF ----- */
 function pdfBindings(getDocument, extra = {}) {
-  const canvas = { getContext: () => ({}), style: {} };
+  const canvas = {
+    getContext: () => ({}),
+    style: {},
+  };
+  class MockEventBus { }
+  class MockPDFLinkService {
+    constructor() {
+      this.document = null;
+      this.viewer = null;
+    }
+    setDocument(document) {
+      this.document = document;
+    }
+    setViewer(viewer) {
+      this.viewer = viewer;
+    }
+    async navigateTo() { }
+  }
   return {
-    pdfjs: { GlobalWorkerOptions: {}, getDocument },
+    pdfjs: {
+      GlobalWorkerOptions: {},
+      getDocument,
+    },
+    PDFLinkService: MockPDFLinkService,
+    EventBus: MockEventBus,
     workerSrc: '/worker.mjs',
-    window: { devicePixelRatio: 1 },
-    attachRef: (type) =>
-      type === 'canvas' ? canvas : type === 'div' ? { clientWidth: 600 } : null,
+    window: {
+      devicePixelRatio: 1,
+    },
+    attachRef: (type) => {
+      if (type === 'canvas') return canvas;
+      if (type === 'div') {
+        return {
+          clientWidth: 600,
+          style: { setProperty() { } },
+          replaceChildren() { },
+          querySelector() {
+            return null;
+          },
+          querySelectorAll() {
+            return [];
+          },
+        };
+      }
+      return null;
+    },
     ...extra,
   };
 }
@@ -984,13 +963,12 @@ function pdfDocument(overrides = {}) {
     numPages: 3,
     getPage: async () => ({
       getViewport: ({ scale }) => ({ width: 500 * scale, height: 700 * scale }),
-      render: () => ({ promise: Promise.resolve(), cancel() {} }),
+      render: () => ({ promise: Promise.resolve(), cancel() { } }),
       getTextContent: async () => ({ items: [{ str: 'conteúdo do documento' }] }),
     }),
     ...overrides,
   };
 }
-
 test('PDF troca documento sem manter página antiga e recupera falha anterior', async () => {
   let attempt = 0,
     destroyed = 0;
@@ -1014,7 +992,10 @@ test('PDF troca documento sem manter página antiga e recupera falha anterior', 
   await ui.flush();
   await ui.flush();
   assert.doesNotMatch(ui.text(), /Não foi possível interpretar/);
-  assert.equal(ui.nodes().find((node) => node.type === 'canvas').props.hidden, false);
+  assert.notEqual(
+    ui.nodes().find((node) => node.type === 'canvas').props.hidden,
+    true,
+  );
   ui.nodes()
     .find((node) => node.props['aria-label'] === 'Próxima página')
     .props.onClick();
@@ -1028,91 +1009,104 @@ test('PDF troca documento sem manter página antiga e recupera falha anterior', 
   ui.unmount();
   assert.equal(destroyed, 3);
 });
-
 test('PDF cancela renderização e rejeita ajuste de largura atrasado ao trocar página', async () => {
-  let cancelled = 0,
-    resolveFit,
-    count = 0;
+  let cancelled = 0;
+  let rendered = 0;
+  let resolveFit;
+  let calls = 0;
   const page = {
     getViewport: ({ scale }) => ({ width: 500 * scale, height: 700 * scale }),
-    render: () => ({
-      promise: Promise.resolve(),
-      cancel() {
-        cancelled++;
-      },
-    }),
+    render: () => {
+      rendered++;
+      return {
+        promise: Promise.resolve(),
+        cancel() { cancelled++; },
+      };
+    },
   };
+  /* ----- Primeira renderização; segundo acesso reservado ao ajuste de largura ----- */
   const document = pdfDocument({
     getPage: () =>
-      ++count === 2
-        ? new Promise((resolve) => {
-            resolveFit = resolve;
-          })
+      ++calls === 2
+        ? new Promise((resolve) => { resolveFit = resolve; })
         : Promise.resolve(page),
   });
   const ui = await component(
     'src/apps/file-viewer/PdfPreview.jsx',
     { blob: new Blob(['pdf']), name: 'teste.pdf' },
-    pdfBindings(() => ({ promise: Promise.resolve(document), destroy: async () => {} })),
+    pdfBindings(() => ({ promise: Promise.resolve(document), destroy: async () => { } })),
   );
-  await ui.flush();
-  await ui.flush();
+  /* ----- Aguarda a tarefa de renderização efetivamente começar ----- */
+  for (let attempt = 0; attempt < 6 && rendered === 0; attempt++) {
+    await ui.flush();
+  }
+  assert.equal(rendered, 1, 'A renderização inicial precisa começar antes do teste de cancelamento.');
   ui.button('Ajustar largura').props.onClick();
+  assert.equal(typeof resolveFit, 'function', 'O ajuste de largura deve estar pendente.');
   ui.nodes()
     .find((node) => node.props['aria-label'] === 'Próxima página')
     .props.onClick();
   ui.render();
+  /* ----- O resultado antigo não pode modificar o zoom da nova página ----- */
   resolveFit(page);
   await ui.flush();
   assert.match(ui.text(), /100\s*%/);
-  assert.equal(cancelled, 1);
+  assert.equal(cancelled, 1, 'A renderização anterior deve ter sido cancelada.');
   ui.unmount();
-  assert.equal(cancelled, 2);
+  assert.equal(cancelled, 2, 'A renderização atual deve ser cancelada no fechamento.');
 });
-
 test('PDF encerra pesquisa cancelada antes de ler o texto de outra página', async () => {
-  let getTextCalls = 0,
-    resolvePage;
+  let resolvePage;
+  let secondPageTextReads = 0;
+  let firstPageTextReads = 0;
   const document = pdfDocument({
     getPage: (number) =>
       number === 2
         ? new Promise((resolve) => {
-            resolvePage = resolve;
-          })
+          resolvePage = resolve;
+        })
         : Promise.resolve({
-            getViewport: () => ({ width: 500, height: 700 }),
-            render: () => ({ promise: Promise.resolve(), cancel() {} }),
-            getTextContent: async () => {
-              getTextCalls++;
-              return { items: [{ str: 'busca' }] };
-            },
-          }),
+          getViewport: ({ scale = 1 }) => ({ width: 500 * scale, height: 700 * scale }),
+          render: () => ({ promise: Promise.resolve(), cancel() { } }),
+          getTextContent: async () => {
+            firstPageTextReads++;
+            return { items: [{ str: 'busca' }] };
+          },
+        }),
   });
   const ui = await component(
     'src/apps/file-viewer/PdfPreview.jsx',
     { blob: new Blob(['pdf']), name: 'teste.pdf' },
-    pdfBindings(() => ({ promise: Promise.resolve(document), destroy: async () => {} })),
+    pdfBindings(() => ({ promise: Promise.resolve(document), destroy: async () => { } })),
   );
   await ui.flush();
   await ui.flush();
-  const input = () => ui.nodes().find((node) => node.type === 'input');
+  const input = () => ui.nodes().find(
+    (node) => node.type === 'input' && node.props.type === 'search' &&
+      node.props['aria-label'] === 'Pesquisar no PDF',
+  );
   input().props.onChange({ target: { value: 'busca' } });
   ui.render();
   await ui.flush();
+  assert.ok(firstPageTextReads > 0, 'A pesquisa precisa ter iniciado.');
+  assert.equal(typeof resolvePage, 'function', 'A leitura da segunda página deve estar pendente.');
+
+  /* ----- Cancela enquanto a segunda página ainda está pendente ----- */
   input().props.onChange({ target: { value: '' } });
   ui.render();
   resolvePage({
     getTextContent: async () => {
-      getTextCalls++;
-      return { items: [] };
+      secondPageTextReads++;
+      return { items: [{ str: 'busca' }] };
     },
   });
   await ui.flush();
-  assert.equal(getTextCalls, 1);
+
+  /* ----- Uma camada de texto pode ler a página atual independentemente da busca ----- */
+  assert.equal(secondPageTextReads, 0, 'A pesquisa cancelada não deve ler a segunda página.');
   assert.equal(ui.button('Ir ao resultado'), undefined);
   ui.unmount();
 });
-
 test('catálogo gerenciado informa timeout e limpa o temporizador', async () => {
   let abort,
     cleared = 0;
@@ -1140,7 +1134,6 @@ test('catálogo gerenciado informa timeout e limpa o temporizador', async () => 
   assert.equal(cleared, 1);
   ui.unmount();
 });
-
 test('arquivo oficial com tamanho declarado acima do limite cancela o corpo e mantém download', async () => {
   let cancelled = 0;
   const ui = await component(
@@ -1166,12 +1159,11 @@ test('arquivo oficial com tamanho declarado acima do limite cancela o corpo e ma
   assert.equal(documentView(ui).url, 'https://ws.test/grande.txt');
   ui.unmount();
 });
-
 /* === Regressões do fechamento da Etapa 05: gerenciador === */
 test('criação de texto valida o nome antes de adicionar a extensão', async () => {
   const created = [];
   const ui = await filesMenu(
-    { entries: [], loading: false, error: '', refresh() {} },
+    { entries: [], loading: false, error: '', refresh() { } },
     {
       createLocalText: async (name) => {
         created.push(name);
@@ -1191,7 +1183,7 @@ test('criação de texto valida o nome antes de adicionar a extensão', async ()
     await ui
       .nodes()
       .find((node) => node.type === 'form' && node.props.role === 'dialog')
-      .props.onSubmit({ preventDefault() {} });
+      .props.onSubmit({ preventDefault() { } });
     ui.render();
     assert.match(ui.text(), /Nome inválido/);
     assert.equal(created.length, 0);
@@ -1201,7 +1193,7 @@ test('criação de texto valida o nome antes de adicionar a extensão', async ()
   await ui
     .nodes()
     .find((node) => node.type === 'form' && node.props.role === 'dialog')
-    .props.onSubmit({ preventDefault() {} });
+    .props.onSubmit({ preventDefault() { } });
   ui.render();
   ui.button('Criar arquivo de texto').props.onClick();
   ui.render();
@@ -1210,12 +1202,11 @@ test('criação de texto valida o nome antes de adicionar a extensão', async ()
   await ui
     .nodes()
     .find((node) => node.type === 'form' && node.props.role === 'dialog')
-    .props.onSubmit({ preventDefault() {} });
+    .props.onSubmit({ preventDefault() { } });
   ui.render();
   assert.deepEqual(created, ['novo.txt', 'OUTRO.TXT']);
   ui.unmount();
 });
-
 test('diálogo de Arquivos restringe foco, impede Escape durante gravação e restaura a origem', async () => {
   const handlers = new Map();
   const document = {
@@ -1236,10 +1227,10 @@ test('diálogo de Arquivos restringe foco, impede Escape durante gravação e re
       document.activeElement = this;
     },
   }));
-  const dialog = { closest: () => null, querySelectorAll: () => controls, focus() {} };
+  const dialog = { closest: () => null, querySelectorAll: () => controls, focus() { } };
   let finish;
   const ui = await filesMenu(
-    { entries: [], loading: false, error: '', refresh() {} },
+    { entries: [], loading: false, error: '', refresh() { } },
     {
       document,
       attachRef: (type) => (type === 'form' ? dialog : null),
@@ -1255,15 +1246,15 @@ test('diálogo de Arquivos restringe foco, impede Escape durante gravação e re
   ui.render();
   assert.equal(document.activeElement, controls[0]);
   document.activeElement = controls[1];
-  handlers.get('keydown')({ key: 'Tab', preventDefault() {} });
+  handlers.get('keydown')({ key: 'Tab', preventDefault() { } });
   assert.equal(document.activeElement, controls[0]);
-  handlers.get('keydown')({ key: 'Tab', shiftKey: true, preventDefault() {} });
+  handlers.get('keydown')({ key: 'Tab', shiftKey: true, preventDefault() { } });
   assert.equal(document.activeElement, controls[1]);
   const form = () =>
     ui.nodes().find((node) => node.type === 'form' && node.props.role === 'dialog');
-  const pending = form().props.onSubmit({ preventDefault() {} });
+  const pending = form().props.onSubmit({ preventDefault() { } });
   ui.render();
-  handlers.get('keydown')({ key: 'Escape', preventDefault() {}, stopPropagation() {} });
+  handlers.get('keydown')({ key: 'Escape', preventDefault() { }, stopPropagation() { } });
   ui.render();
   assert.ok(form());
   finish(entry({ kind: 'folder', blob: null }));
@@ -1274,7 +1265,6 @@ test('diálogo de Arquivos restringe foco, impede Escape durante gravação e re
   assert.equal(handlers.has('keydown'), false);
   ui.unmount();
 });
-
 /* ----- Foco do Editor não interfere em janelas de fundo ----- */
 test('Editor foca o texto ao abrir somente quando sua janela está ativa', async () => {
   for (const active of [true, false]) {

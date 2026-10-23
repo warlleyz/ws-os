@@ -1311,26 +1311,29 @@ export default function Files({ instance }) {
                     />
                   </div>
                 )}
+            
+                {/* ----- Ações contextuais da seleção ----- */}
+                {space !== 'official' && currentSelection.length > 0 && (
+                  <div className="ws-files__selection" role="group" aria-label={t('Ações')}>
+                    <label className="ws-files__check">
+                      <input
+                        type="checkbox"
+                        aria-label={t('Selecionar todos')}
+                        checked={
+                          visible.length > 0 && visible.every((item) => selected.includes(item.id))
+                        }
+                        onChange={(event) =>
+                          setSelected(event.target.checked ? visible.map((item) => item.id) : [])
+                        }
+                      />
+                      {currentSelection.length} {t('selecionados')}
+                    </label>
+                    {selectionTools()}
+                  </div>
+                )}
+
                 {/* ----- Fim da barra unificada ----- */}
               </div>
-              {space !== 'official' && currentSelection.length > 0 && (
-                <div className="ws-files__selection" role="group" aria-label={t('Ações')}>
-                  <label className="ws-files__check">
-                    <input
-                      type="checkbox"
-                      aria-label={t('Selecionar todos')}
-                      checked={
-                        visible.length > 0 && visible.every((item) => selected.includes(item.id))
-                      }
-                      onChange={(event) =>
-                        setSelected(event.target.checked ? visible.map((item) => item.id) : [])
-                      }
-                    />
-                    {currentSelection.length} {t('selecionados')}
-                  </label>
-                  {selectionTools()}
-                </div>
-              )}
               {store.loading && <p role="status">{t('Carregando')}</p>}
               {store.error && <p role="alert">{t(store.error)}</p>}
               {unavailableFolder && <p role="status">{t('Pasta de destino indisponível.')}</p>}

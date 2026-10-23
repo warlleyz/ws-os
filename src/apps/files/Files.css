@@ -1,14 +1,21 @@
 /* === Superfície do gerenciador === */
 .ws-files {
-  --files-line: color-mix(in srgb, var(--border-default) 65%, transparent);
-  --files-soft: color-mix(in srgb, var(--surface-secondary) 55%, transparent);
-  --files-accent: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  --files-line: color-mix(in srgb,
+    var(--border-default) 55%,
+    transparent);
+  --files-soft: color-mix(in srgb,
+    var(--ws-window-background) 75%,
+    var(--surface-secondary) 25%);
+  --files-accent: color-mix(in srgb,
+    var(--accent-primary) 10%,
+    transparent);
   position: relative;
   container-type: inline-size;
-  min-width: 0;
-  overflow: auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   padding: 0 !important;
-  background: var(--surface-primary);
+  background: transparent;
   color: var(--text-primary);
   scrollbar-width: thin;
   scrollbar-color: var(--border-control) transparent;
@@ -36,10 +43,14 @@
   cursor: not-allowed;
 }
 
+/* === Estrutura do gerenciador === */
+/* ----- Layout principal ----- */
 .ws-files__layout {
   display: grid;
   grid-template-columns: 205px minmax(0, 1fr);
-  min-height: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .ws-files__main {
@@ -56,6 +67,18 @@
   padding: 18px 12px;
   border-right: 1px solid var(--files-line);
   background: var(--files-soft);
+  align-self: start;
+  max-height: 100%;
+  min-height: 0;
+  align-self: start;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .ws-files__identity {
@@ -144,6 +167,10 @@
   border-top: 1px solid var(--files-line);
   font-size: 11px;
   color: var(--text-secondary);
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  margin-top: auto;
 }
 
 .ws-files__storage-heading {
@@ -175,6 +202,28 @@
   display: none;
 }
 
+/* ----- Dimensões do indicador de armazenamento ----- */
+.ws-files__storage {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  margin-top: auto;
+}
+
+/* ----- Barra de capacidade ----- */
+.ws-files__storage-track {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* ----- Informações de capacidade ----- */
+.ws-files__storage>span {
+  display: block;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* === Ferramentas, pesquisa e organização === */
 .ws-files__tools {
   display: flex;
@@ -186,6 +235,7 @@
   margin-bottom: 17px;
   padding: 8px 0;
   border-bottom: 1px solid var(--files-line);
+  position: relative
 }
 
 .ws-files__create {
@@ -458,18 +508,44 @@
   left: 8px;
 }
 
+/* ----- Botão de ações do arquivo ----- */
 .ws-files__more {
   position: absolute;
-  top: 5px;
-  right: 5px;
+  z-index: 2;
+  top: 6px;
+  right: 6px;
+
   display: grid;
   place-items: center;
-  min-height: 27px !important;
-  padding: 4px !important;
+
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px !important;
+
+  margin: 0;
+  padding: 0 !important;
+
   border: 0 !important;
-  border-radius: 6px;
+  border-radius: 7px;
   background: transparent !important;
+
   color: var(--text-secondary);
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ----- Centralização do ícone ----- */
+.ws-files__more svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+/* ----- Alinhamento no modo lista ----- */
+.ws-files__list--details .ws-files__more {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .ws-files__more:hover {
@@ -831,6 +907,10 @@
 
   .ws-files__main {
     padding: 18px;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .ws-files__workspace.has-details {
@@ -852,6 +932,12 @@
     padding: 10px 12px;
     border-right: 0;
     border-bottom: 1px solid var(--files-line);
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .ws-files__identity,
@@ -2063,18 +2149,28 @@
 }
 
 /* === Barra de seleção === */
-/* ----- Distribuição das ações ----- */
+/* ----- Ações sobrepostas à barra de ferramentas ----- */
 .ws-files .ws-files__selection {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
-  min-height: 54px;
-  padding: 10px 12px;
-  margin-bottom: 14px;
+
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 8px 10px;
+
+  overflow-x: auto;
+
   border: 1px solid var(--border-default);
   border-radius: 10px;
   background: var(--surface-secondary);
+  box-shadow: var(--shadow-panel);
 }
 
 .ws-files__selection .ws-files__check {

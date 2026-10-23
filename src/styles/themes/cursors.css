@@ -20,6 +20,17 @@
         cursor: var(--ws-cursor-pointer, pointer);
     }
 
+    /* === Arquivos === */
+    /* ----- Itens selecionáveis e navegáveis ----- */
+    html[data-cursor-mode='custom'] .ws-files .ws-files__entry {
+        cursor: var(--ws-cursor-pointer, pointer);
+    }
+
+    /* ----- Conteúdo interno dos itens ----- */
+    html[data-cursor-mode='custom'] .ws-files .ws-files__entry :is(span, strong, small, svg) {
+        cursor: inherit;
+    }
+
     /* === Entrada de texto === */
     /* ----- Campos editáveis ----- */
     html[data-cursor-mode='custom'] :is(textarea,
