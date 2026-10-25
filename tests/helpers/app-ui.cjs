@@ -84,7 +84,8 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
       publicAssetUrl: (value) => (value?.startsWith('/') ? 'https://ws.test' + value : null),
       fileKind: (value) => (value.endsWith('.pdf') ? 'pdf' : null),
       resolveStaticFile: () => ({ ok: true, resource: { url: '/curriculo.pdf' } }),
-      useSystem: () => ({ run() {} }),
+      useSystem: () => ({ run() { } }),
+      useAppBack: () => { },
       openApp: 'open',
       ...Object.fromEntries(
         [

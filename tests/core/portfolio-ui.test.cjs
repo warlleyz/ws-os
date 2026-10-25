@@ -18,33 +18,109 @@ const highlightsService = vm.runInNewContext(
   { validRepositoryIds },
 );
 
-test('certificados locais abrem o Visualizador com origem e mantêm download; externos ficam no navegador', async () => {
+test('certificados abrem detalhes, preservam origem, download e links externos', async () => {
   const calls = [];
+
   const ui = await renderApp(
     'src/apps/certificates/Certificates.jsx',
     { instance: { id: 'certs' } },
     {
       portfolio: {
         certificates: [
-          { id: 'local', title: 'Local', url: '/local.pdf' },
-          { id: 'external', title: 'Externo', url: 'https://issuer.test/cert' },
+          {
+            id: 'local',
+            title: 'Local',
+            category: 'course',
+            url: '/local.pdf',
+          },
+          {
+            id: 'external',
+            title: 'Externo',
+            category: 'event',
+            url: 'https://issuer.test/cert',
+          },
         ],
       },
-      useSystem: () => ({ run: (...args) => calls.push(args) }),
+      useSystem: () => ({
+        run: (...args) => calls.push(args),
+      }),
     },
   );
-  ui.button('Visualizar').props.onClick();
+
+  /* === Certificado local === */
+  /* ----- Abrir detalhes ----- */
+  const localCard = ui.nodes().find(
+    (node) =>
+      node.type === 'button' &&
+      node.props.className === 'ws-certificates__card-button' &&
+      node.props['aria-label']?.includes('Local'),
+  );
+
+  assert.ok(localCard, 'O card do certificado local deve existir.');
+
+  localCard.props.onClick();
+  ui.render();
+
+  /* ----- Visualizar documento ----- */
+  const viewButton = ui.nodes().find(
+    (node) =>
+      node.type === 'button' &&
+      node.props.className === 'ws-certificates__primary-action',
+  );
+
+  assert.ok(viewButton, 'O botão Visualizar deve existir nos detalhes.');
+
+  viewButton.props.onClick();
+
   assert.equal(calls[0][1], 'file-viewer');
+  assert.equal(calls[0][2].origin, 'certificates');
   assert.equal(calls[0][2].originInstanceId, 'certs');
   assert.equal(calls[0][2].params.url, 'https://ws.test/local.pdf');
-  assert.equal(
-    ui.nodes().find((node) => node.type === 'a' && node.props.download).props.href,
-    'https://ws.test/local.pdf',
+
+  /* ----- Download ----- */
+  const downloadLink = ui.nodes().find(
+    (node) => node.type === 'a' && node.props.download,
   );
-  assert.equal(
-    ui.nodes().find((node) => node.type === 'a' && node.props.target === '_blank').props.href,
-    'https://issuer.test/cert',
+
+  assert.ok(downloadLink, 'O link de download deve existir.');
+  assert.equal(downloadLink.props.href, 'https://ws.test/local.pdf');
+
+  /* === Certificado externo === */
+  /* ----- Retornar à listagem ----- */
+  const backButton = ui.nodes().find(
+    (node) =>
+      node.type === 'button' &&
+      node.props.className === 'ws-certificates__back',
   );
+
+  assert.ok(backButton, 'O botão Voltar deve existir.');
+
+  backButton.props.onClick();
+  ui.render();
+
+  /* ----- Abrir detalhes externos ----- */
+  const externalCard = ui.nodes().find(
+    (node) =>
+      node.type === 'button' &&
+      node.props.className === 'ws-certificates__card-button' &&
+      node.props['aria-label']?.includes('Externo'),
+  );
+
+  assert.ok(externalCard, 'O card externo deve existir.');
+
+  externalCard.props.onClick();
+  ui.render();
+
+  const externalLink = ui.nodes().find(
+    (node) =>
+      node.type === 'a' &&
+      node.props.href === 'https://issuer.test/cert',
+  );
+
+  assert.ok(externalLink, 'O link externo deve existir.');
+  assert.equal(externalLink.props.target, '_blank');
+  assert.match(externalLink.props.rel, /noopener/);
+
   ui.unmount();
 });
 

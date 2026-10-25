@@ -30,7 +30,8 @@ const windowProfiles = {
   resume: { width: 950, height: 760 },
   notes: { width: 900, height: 660 },
   projects: { width: 1100, height: 760 },
-  'dev-insights': { width: 1100, height: 760 },
+  'dev-insights': { width: 1100, height: 750 },
+  certificates: { width: 980, height: 740 },
 };
 const appDefinitions = [
   /* ----- Aplicativos Desktop ----- */
