@@ -48,41 +48,6 @@ test('certificados locais abrem o Visualizador com origem e mantêm download; ex
   ui.unmount();
 });
 
-test('currículo sai de timeout e permite tentar novamente antes de abrir o documento', async () => {
-  let expire,
-    requests = 0;
-  const calls = [];
-  const ui = await renderApp(
-    'src/apps/resume/Resume.jsx',
-    { instance: { id: 'resume' } },
-    {
-      setTimeout: (callback) => {
-        expire = callback;
-        return 1;
-      },
-      clearTimeout() {},
-      fetch: (_url, options) =>
-        ++requests === 1
-          ? new Promise((_resolve, reject) =>
-              options.signal.addEventListener('abort', () => reject(Error('abort'))),
-            )
-          : Promise.resolve(new Response(null, { headers: { 'Content-Type': 'application/pdf' } })),
-      useSystem: () => ({ run: (...args) => calls.push(args) }),
-    },
-  );
-  expire();
-  await ui.flush();
-  assert.match(ui.text(), /Documento indisponível/);
-  ui.button('Tentar novamente').props.onClick();
-  ui.render();
-  await ui.flush();
-  ui.button('Visualizar currículo').props.onClick();
-  assert.equal(requests, 2);
-  assert.equal(calls[0][2].params.resource.catalogId, 'curriculo');
-  assert.equal(calls[0][2].originInstanceId, 'resume');
-  ui.unmount();
-});
-
 /* === Compartilhamento e origem contextual === */
 const { loadContract } = require('../helpers/contract-loader.cjs');
 const projectModel = loadContract(

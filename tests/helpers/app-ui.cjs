@@ -87,7 +87,24 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
       useSystem: () => ({ run() {} }),
       openApp: 'open',
       ...Object.fromEntries(
-        ['Award', 'Download', 'ExternalLink', 'Search', 'Eye', 'FileText'].map((name) => [
+        [
+          'Award',
+          'Download',
+          'ExternalLink',
+          'Search',
+          'Eye',
+          'FileText',
+          'AlertCircle',
+          'ArrowUpRight',
+          'BookOpen',
+          'CheckCircle2',
+          'GraduationCap',
+          'Layers3',
+          'LoaderCircle',
+          'RefreshCw',
+          'UserRound',
+          'Wrench',
+        ].map((name) => [
           name,
           name,
         ]),

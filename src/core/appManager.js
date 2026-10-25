@@ -3,6 +3,7 @@ import { checkCapability } from './authorizationContract';
 import { getAppDefinition, getAppNavigationContract } from './appRegistry';
 import { isAdminAuthenticated } from '../services/authService';
 import { validateFileResource } from '../services/storage/fileResourceContract';
+import { resolveStaticFile } from '../services/storage/staticFileCatalog';
 
 /* === Estado inicial === */
 export const initialAppState = {
@@ -271,6 +272,36 @@ function updateInstanceNavigation(state, instanceId, appId, params) {
 /* ----- Abertura com resultado ----- */
 export function requestAppOpen(state, appId, options = {}) {
   const request = validateAppOpen(appId, options);
+
+  if (request.ok && appId === 'resume') {
+    const document = resolveStaticFile('curriculo');
+
+    if (!document.ok) {
+      return {
+        state,
+        result: {
+          ok: false,
+          error: {
+            code: 'STATIC_FILE_NOT_FOUND',
+            message: 'Documento do currículo não encontrado.',
+          },
+        },
+      };
+    }
+
+    return requestAppOpen(state, 'file-viewer', {
+      origin: 'resume',
+      ...(options.originInstanceId
+        ? { originInstanceId: options.originInstanceId }
+        : {}),
+      params: {
+        resource: {
+          source: 'static',
+          catalogId: 'curriculo',
+        },
+      },
+    });
+  }
 
   if (!request.ok) {
     return {
