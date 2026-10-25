@@ -29,7 +29,13 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
       if (props?.ref && bindings.attachRef) props.ref.current = bindings.attachRef(type, props);
       return { type, props: { ...props, children } };
     },
-    useMemo: (compute) => compute(),
+    useMemo(compute, deps) {
+      const index = cursor++;
+      if (!slots[index] || deps.some((value, n) => value !== slots[index].deps[n])) {
+        slots[index] = { deps, value: compute() };
+      }
+      return slots[index].value;
+    },
     useRef: (initial) => (slots[cursor++] ??= { current: initial }),
     useState(initial) {
       const index = cursor++;
@@ -51,7 +57,7 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
         });
       }
     },
-    useCallback: (callback) => callback,
+    useCallback: (callback, deps) => React.useMemo(() => callback, deps),
     useLayoutEffect: (effect, deps) => React.useEffect(effect, deps),
   };
   const App = vm.runInNewContext(
@@ -73,7 +79,7 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
       useLocale: () => 'pt-BR',
       t: (value) => value,
       contentText: (value) => value ?? '',
-      portfolio: { certificates: [], resume: { sections: [] }, projects: [], demoOrigins: [] },
+      portfolio: { certificates: [], resume: { sections: [] }, projects: [] },
       safeExternalUrl: (value) => (value?.startsWith('https://') ? value : null),
       publicAssetUrl: (value) => (value?.startsWith('/') ? 'https://ws.test' + value : null),
       fileKind: (value) => (value.endsWith('.pdf') ? 'pdf' : null),

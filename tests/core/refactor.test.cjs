@@ -47,13 +47,13 @@ function loadCore() {
   return { registry, manager };
 }
 
-test('catálogo preserva os 18 aplicativos e os 12 atalhos', () => {
+test('catálogo preserva os 17 aplicativos e os 12 atalhos', () => {
   const { registry } = loadCore();
   const apps = registry.getRegisteredApps();
-  assert.equal(apps.length, 18);
-  assert.equal(new Set(apps.map((app) => app.id)).size, 18);
+  assert.equal(apps.length, 17);
+  assert.equal(new Set(apps.map((app) => app.id)).size, 17);
   assert.equal(apps.filter((app) => app.desktopShortcut).length, 12);
-  assert.equal(apps.filter((app) => app.category === 'system').length, 6);
+  assert.equal(apps.filter((app) => app.category === 'system').length, 5);
   assert.equal(registry.getAppDefinition('administration').public, false);
 });
 
@@ -72,17 +72,43 @@ test('abrir app de instância única restaura a mesma instância', () => {
 
 test('múltiplas instâncias preservam foco e fecham individualmente', () => {
   const { manager: m } = loadCore();
-  let state = { instances: [], activeInstanceId: null, focusHistory: [] };
-  state = m.openApp(state, 'projects');
+
+  let state = {
+    instances: [],
+    activeInstanceId: null,
+    focusHistory: [],
+  };
+
+  /* === Abertura de múltiplas instâncias === */
+  /* ----- Editor de Arquivos permite múltiplas janelas ----- */
+  state = m.openApp(state, 'file-editor', {
+    params: { fileId: 'arquivo-01' },
+  });
+
   const first = state.activeInstanceId;
-  state = m.openApp(state, 'projects');
+
+  state = m.openApp(state, 'file-editor', {
+    params: { fileId: 'arquivo-02' },
+  });
+
   const second = state.activeInstanceId;
+
+  assert.ok(first);
+  assert.ok(second);
   assert.notEqual(first, second);
+
+  /* === Foco e minimização === */
   state = m.minimizeApp(state, second);
+
   assert.equal(state.activeInstanceId, first);
+
   state = m.restoreApp(state, second);
+
   assert.equal(state.activeInstanceId, second);
+
+  /* === Fechamento individual === */
   state = m.closeApp(state, second);
+
   assert.equal(state.instances.length, 1);
   assert.equal(state.activeInstanceId, first);
 });
@@ -132,6 +158,7 @@ test('resolução de painéis preserva exclusividade e alternância', () => {
   assert.equal(m.resolvePanel(false, 'calendar', 'weather'), 'calendar');
 });
 
+
 test('grupo da Taskbar respeita histórico de foco e minimização', () => {
   const { manager: m } = loadCore();
 
@@ -141,34 +168,40 @@ test('grupo da Taskbar respeita histórico de foco e minimização', () => {
     focusHistory: [],
   };
 
-  state = m.openApp(state, 'projects');
+  /* === Instâncias do Visualizador === */
+  /* ----- Aplicativo que permite múltiplas janelas ----- */
+  state = m.openApp(state, 'file-viewer');
   const first = state.activeInstanceId;
 
-  state = m.openApp(state, 'projects');
+  state = m.openApp(state, 'file-viewer');
   const second = state.activeInstanceId;
 
   state = m.openApp(state, 'about-me');
   const other = state.activeInstanceId;
 
-  assert.equal(m.getPreferredInstance(state, 'projects').id, second);
+  assert.notEqual(first, second);
+  assert.equal(m.getPreferredInstance(state, 'file-viewer').id, second);
 
+  /* === Minimização e foco === */
   state = m.minimizeApp(state, second);
-  assert.equal(m.getPreferredInstance(state, 'projects').id, second);
+  assert.equal(m.getPreferredInstance(state, 'file-viewer').id, second);
 
   state = m.minimizeApp(state, other);
   assert.equal(state.activeInstanceId, first);
-  assert.equal(m.getPreferredInstance(state, 'projects').id, first);
+  assert.equal(m.getPreferredInstance(state, 'file-viewer').id, first);
 
   state = m.minimizeApp(state, first);
   assert.equal(state.activeInstanceId, null);
-  assert.equal(m.getPreferredInstance(state, 'projects').id, first);
+  assert.equal(m.getPreferredInstance(state, 'file-viewer').id, first);
 
+  /* === Restauração e fechamento === */
   state = m.restoreApp(state, second);
-  assert.equal(m.getPreferredInstance(state, 'projects').id, second);
+  assert.equal(m.getPreferredInstance(state, 'file-viewer').id, second);
 
   state = m.closeApp(state, second);
-  assert.equal(m.getPreferredInstance(state, 'projects').id, first);
+  assert.equal(m.getPreferredInstance(state, 'file-viewer').id, first);
 });
+
 
 test('calendário e painéis preservam exclusividade', () => {
   const m = loadPureModule('src/core/panelManager.js');
@@ -191,7 +224,7 @@ test('calendário e painéis preservam exclusividade', () => {
 test('registry não declara aplicativos funcionais inexistentes', () => {
   const { registry } = loadCore();
   const apps = registry.getRegisteredApps();
-  assert.equal(apps.length, 18);
+  assert.equal(apps.length, 17);
   assert.equal(apps.filter((app) => app.desktopShortcut).length, 12);
   const source = fs.readFileSync(path.join(root, 'src/core/appRegistry.js'), 'utf8');
   const entries = [...source.matchAll(/import\('\.\.\/apps\/([^']+)'\)/g)];
@@ -225,7 +258,8 @@ test('Core bloqueia aplicativos restritos sem modificar a sessão', () => {
   assert.equal(state.instances[0].appId, 'projects');
 });
 
-test('abertura aceita origem e parâmetros por instância', () => {
+
+test('Projetos reutiliza a janela e atualiza a navegação contextual', () => {
   const { manager: m } = loadCore();
 
   let state = {
@@ -234,6 +268,7 @@ test('abertura aceita origem e parâmetros por instância', () => {
     focusHistory: [],
   };
 
+  /* === Primeira abertura === */
   state = m.openApp(state, 'projects', {
     origin: 'app',
     params: { projectId: 'project-01' },
@@ -243,20 +278,60 @@ test('abertura aceita origem e parâmetros por instância', () => {
 
   assert.equal(first.origin, 'app');
   assert.equal(first.params.projectId, 'project-01');
+  assert.equal(state.instances.length, 1);
 
+  /* === Segunda abertura === */
+  /* ----- A mesma janela recebe o novo projeto ----- */
   state = m.openApp(state, 'projects', {
     origin: 'menu',
     params: { projectId: 'project-02' },
   });
 
-  assert.equal(state.instances.length, 2);
-  assert.equal(state.instances[0].params.projectId, 'project-01');
-  assert.equal(state.instances[1].params.projectId, 'project-02');
+  assert.equal(state.instances.length, 1);
+  assert.equal(state.instances[0].id, first.id);
+  assert.equal(state.instances[0].params.projectId, 'project-02');
+  assert.equal(state.activeInstanceId, first.id);
+  assert.equal(state.instances[0].navigationRequestId, 1);
 
+  /* === Fechamento === */
   state = m.closeApp(state, first.id);
 
+  assert.equal(state.instances.length, 0);
+  assert.equal(state.activeInstanceId, null);
+});
+
+test('Projetos permite somente uma instância por sessão', () => {
+  const { manager: m } = loadCore();
+
+  let state = {
+    instances: [],
+    activeInstanceId: null,
+    focusHistory: [],
+  };
+
+  /* ----- Primeira abertura ----- */
+  state = m.openApp(state, 'projects');
+  const first = state.activeInstanceId;
+
+  /* ----- Reabertura reutiliza a instância ----- */
+  state = m.openApp(state, 'projects');
+
   assert.equal(state.instances.length, 1);
-  assert.equal(state.instances[0].params.projectId, 'project-02');
+  assert.equal(state.activeInstanceId, first);
+
+  /* ----- Reabrir após minimizar restaura a janela ----- */
+  state = m.minimizeApp(state, first);
+  state = m.openApp(state, 'projects');
+
+  assert.equal(state.instances.length, 1);
+  assert.equal(state.instances[0].minimized, false);
+
+  /* ----- Fechar e abrir cria uma nova sessão ----- */
+  state = m.closeApp(state, first);
+  state = m.openApp(state, 'projects');
+
+  assert.equal(state.instances.length, 1);
+  assert.notEqual(state.activeInstanceId, first);
 });
 
 test('abertura mantém compatibilidade com chamadas existentes', () => {

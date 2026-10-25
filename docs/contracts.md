@@ -1,4 +1,4 @@
-> **Referência vigente da revisão final:** [Etapa 15](finalizacao/ETAPA-15-ANDAMENTO.md), [plano](PLANO-FINALIZACAO-POR-ETAPAS.md) e checkpoints 03–14. Os trechos datados abaixo são históricos. Hoje há dois shells funcionais, 18 aplicativos registrados com carregamento sob demanda e autenticação administrativa; arquivos pessoais permanecem no IndexedDB, oficiais no Supabase Storage privado via Worker. Não interpretar descrições antigas de recursos reservados como estado atual, nem testes controlados como homologação externa.
+> **Referência vigente da revisão final:** [Etapa 15](finalizacao/ETAPA-15-ANDAMENTO.md), [plano](PLANO-FINALIZACAO-POR-ETAPAS.md) e checkpoints 03–14. Os trechos datados abaixo são históricos. Hoje há dois shells funcionais, 17 aplicativos registrados com carregamento sob demanda e autenticação administrativa; arquivos pessoais permanecem no IndexedDB, oficiais no Supabase Storage privado via Worker. Não interpretar descrições antigas de recursos reservados como estado atual, nem testes controlados como homologação externa.
 
 
 > **Atualização de 20/10/2026 — Etapas 03/04 e revisão do armazenamento:** os contratos/backend, formatos HTTP, migrações e limites estão na [entrega consolidada](finalizacao/ETAPAS-03-04-ENTREGA.md) e no [mapa de rotas](backend/WORKER.md). O armazenamento de arquivos oficiais foi alterado de Cloudflare R2 para Supabase Storage privado, conforme revisão posterior da DEC-FIN-003, DEC-FIN-011 e DEC-FIN-017. Solicitações, arquivos oficiais, vínculos e moderação possuem implementação local em revisão; homologação real continua pendente. O texto da Etapa 01 abaixo é uma referência histórica, não uma descrição integral do backend atual. Preferências incluem cursor e Não perturbe no reset/sincronização.
@@ -100,7 +100,7 @@ Fontes: privateRequestContract.js e publicContentContract.js.
 - Retenção: 180 dias após término; arquivar um pedido concluído não prorroga a retenção. Reabertura é explícita. Existe cálculo/validação; não há rotina automática de exclusão implantada.
 - Agendamento exige instante futuro e fuso, sem confirmar reunião ou publicar evento. Entrega EmailJS é independente de persistência; falha ou resultado desconhecido não vira confirmação.
 - Evento público separa data, horário, fuso e dia inteiro, estado, revisão e timestamps. Adaptador legado de dia inteiro não inventa revisão. Projeção rejeita campos privados.
-- Projeto valida destaque/ordem e demonstração embedded, external ou unavailable. Uma URL não concede capacidade de incorporação.
+- Projeto valida destaque/ordem, tecnologias e links HTTPS para repositórios e aplicações externas.
 - Publicação preserva ciclo editorial e anexos; projeção pública exclui rascunhos. Ranking aplica limites por jogo (Snake 222; Flappy 100000) e só projeta campos públicos, sem tokens ou hashes privados.
 - Estes contratos são a base dos domínios das etapas proprietárias. Não constituem novas telas administrativas, schemas de banco ou integração remota homologada.
 
@@ -364,8 +364,15 @@ As descrições antigas deste documento que dizem que cache ou APIs não têm co
 
 #### Etapa 01.4 — modelos vigentes
 
-Contratos puros: privateRequestContract (estados privados/revisão/retenção e resultado de envio), publicContentContract (eventos, projetos/demos, publicações/anexos e ranking), preferenceContract (versão lógica e formato legado). restoreSystemPreferences aceita categorias opcionais validadas; sem argumentos mantém o reset existente. Ver [conclusão 01.4](finalizacao/ETAPA-01-PARTE-01.4-CONCLUSAO.md). Rotinas de banco/R2 e interfaces completas continuam nas etapas proprietárias.
+Contratos puros: privateRequestContract (estados privados/revisão/retenção e resultado de envio), publicContentContract (eventos, projetos, publicações/anexos e ranking), preferenceContract (versão lógica e formato legado). restoreSystemPreferences aceita categorias opcionais validadas; sem argumentos mantém o reset existente. Ver [conclusão 01.4](finalizacao/ETAPA-01-PARTE-01.4-CONCLUSAO.md). Rotinas de banco/R2 e interfaces completas continuam nas etapas proprietárias.
 
 #### Etapa 01.5 — sessão e ações
 
 Catálogo e capacidades em core/actionContract e authorizationContract; adaptadores confiáveis em services/actionService. Busca e Wally consomem o catálogo para navegação. createAdminRequestScope cancela operações na mudança de versão da sessão e requer dispose; o token permanece em memória. Nenhuma pré-checagem local confere autorização ao Worker. Ver [conclusão 01.5](finalizacao/ETAPA-01-PARTE-01.5-CONCLUSAO.md).
+
+## Projetos em destaque — escopo vigente em 25/10/2026
+
+O catálogo possui 17 aplicativos. Projetos consulta o GitHub e aplica somente a seleção de
+identificadores persistida pela Administração. As APIs de destaques retornam e gravam
+apenas repositoryIds; colunas históricas não são lidas ou sobrescritas. Consultar
+[remoção e permissões](REMOCAO-DEMONSTRACOES.md) para o inventário, validações e migração 014.

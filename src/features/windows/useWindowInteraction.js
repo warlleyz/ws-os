@@ -109,7 +109,10 @@ export default function useWindowInteraction({ instance, app }) {
       const defaults = app?.window;
       const geometry = readGeometry(element);
 
-      if (defaults && instance.appId === 'about-me') {
+      if (
+        defaults &&
+        ['about-me', 'projects'].includes(instance.appId)
+      ) {
         const bounds = getBounds(element);
         const width = Math.min(defaults.width, bounds.width - 16);
         const height = Math.min(defaults.height, bounds.height - 16);

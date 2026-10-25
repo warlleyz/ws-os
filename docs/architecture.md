@@ -1,4 +1,4 @@
-> **Referência vigente da revisão final:** [Etapa 15](finalizacao/ETAPA-15-ANDAMENTO.md), [plano](PLANO-FINALIZACAO-POR-ETAPAS.md) e checkpoints 03–14. Os trechos datados abaixo são históricos. Hoje há dois shells funcionais, 18 aplicativos registrados com carregamento sob demanda e autenticação administrativa; arquivos pessoais permanecem no IndexedDB, oficiais no Supabase Storage privado via Worker. Não interpretar descrições antigas de recursos reservados como estado atual, nem testes controlados como homologação externa.
+> **Referência vigente da revisão final:** [Etapa 15](finalizacao/ETAPA-15-ANDAMENTO.md), [plano](PLANO-FINALIZACAO-POR-ETAPAS.md) e checkpoints 03–14. Os trechos datados abaixo são históricos. Hoje há dois shells funcionais, 17 aplicativos registrados com carregamento sob demanda e autenticação administrativa; arquivos pessoais permanecem no IndexedDB, oficiais no Supabase Storage privado via Worker. Não interpretar descrições antigas de recursos reservados como estado atual, nem testes controlados como homologação externa.
 
 > **Atualização de 15/10/2026:** consulte primeiro [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md) e [Estado atual](implementation-status.md). O texto abaixo preserva descrições/evidências de etapas anteriores; afirmações sobre apps reservados, Mobile ausente ou apenas um app implementado foram superadas pelos commits atuais.
 
@@ -15,7 +15,7 @@ Data: 14/10/2026. Referência: mestre v0.16.0, especialmente B04, B05 e B11. Est
 | shells/desktop | Compor área de trabalho, atalhos, menus e Taskbar             | Consumir Core; não realizar consultas HTTP         |
 | shells/mobile  | Destino da experiência Mobile própria                         | Reservado, sem implementação atual                 |
 | features       | Capacidades sistêmicas por responsabilidade                   | Não transformar funcionalidades em apps adicionais |
-| apps           | Módulo de cada um dos 18 apps                                 | Reservados e não importados                        |
+| apps           | Módulo de cada um dos 17 apps                                 | Reservados e não importados                        |
 | services       | Provedores e armazenamento                                    | Somente clima ativo                                |
 | shared         | Ícones comuns, destinos de i18n e isolamento de falha         | Reutilização comprovada                            |
 | styles         | Fundamentos, temas e ordem da cascata                         | Tokens sem duplicação                              |

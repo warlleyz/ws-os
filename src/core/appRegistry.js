@@ -6,8 +6,7 @@ import {
   FilePenLine,
   FileSearch,
   FileText,
-  FileVideo,
-  Folder,
+  FolderGit2,
   FolderOpen,
   Gamepad2,
   Info,
@@ -29,7 +28,7 @@ const windowProfiles = {
   'file-editor': { width: 1000, height: 700 },
   'file-viewer': { width: 900, height: 660 },
   notes: { width: 900, height: 660 },
-  projects: { width: 900, height: 660 },
+  projects: { width: 1100, height: 760 },
 };
 const appDefinitions = [
   /* ----- Aplicativos Desktop ----- */
@@ -50,13 +49,13 @@ const appDefinitions = [
   {
     id: 'projects',
     name: 'Projetos',
-    icon: Folder,
+    icon: FolderGit2,
     category: 'desktop',
     menuCategory: 'portfolio',
     desktopShortcut: true,
     implemented: true,
     loadComponent: () => import('../apps/projects/Projects.jsx'),
-    allowMultipleInstances: true,
+    allowMultipleInstances: false,
     pauseWhenMinimized: true,
     public: true,
     showInMenu: true,
@@ -246,20 +245,6 @@ const appDefinitions = [
     showInMenu: true,
   },
   {
-    id: 'demo-viewer',
-    name: 'Visualizador de Demos',
-    icon: FileVideo,
-    category: 'system',
-    menuCategory: 'development',
-    desktopShortcut: false,
-    implemented: true,
-    loadComponent: () => import('../apps/demo-viewer/DemoViewer.jsx'),
-    allowMultipleInstances: true,
-    pauseWhenMinimized: false,
-    public: true,
-    showInMenu: false,
-  },
-  {
     id: 'wally-extended',
     name: 'Wally Estendido',
     icon: Sparkles,
@@ -299,12 +284,13 @@ const appDefinitions = [
 
 /* === Contratos de navegação === */
 const navigationContracts = {
+  terminal: { params: {}, reusePolicy: 'existing' },
   /* ----- Aplicativos Desktop ----- */
   projects: {
     params: {
       projectId: 'string',
     },
-    reusePolicy: 'contextual',
+    reusePolicy: 'existing',
   },
   notes: {
     params: {
@@ -332,13 +318,6 @@ const navigationContracts = {
   'file-editor': {
     params: {
       fileId: 'string',
-    },
-    reusePolicy: 'multiple',
-  },
-  'demo-viewer': {
-    params: {
-      projectId: 'string',
-      demoId: 'string',
     },
     reusePolicy: 'multiple',
   },

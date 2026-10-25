@@ -5,6 +5,18 @@ const root = path.resolve(__dirname, '../..');
 
 /* === Componentes profissionais: contratos e recuperação de erros === */
 const { renderApp } = require('../helpers/app-ui.cjs');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const { validRepositoryIds } = require('../helpers/contract-loader.cjs').loadContract(
+  path.join(root, 'src/shared/utils/contractValidation.js'),
+);
+const highlightsService = vm.runInNewContext(
+  fs
+    .readFileSync(path.join(root, 'src/services/projectHighlightService.js'), 'utf8')
+    .replace(/^import[\s\S]*?;\s*$/gm, '')
+    .replace(/export /g, '') + ';({applyProjectHighlights})',
+  { validRepositoryIds },
+);
 
 test('certificados locais abrem o Visualizador com origem e mantêm download; externos ficam no navegador', async () => {
   const calls = [];
@@ -71,44 +83,6 @@ test('currículo sai de timeout e permite tentar novamente antes de abrir o docu
   ui.unmount();
 });
 
-test('demo incorporada tem timeout, sandbox e nova tentativa sem carregar URL não cadastrada', async () => {
-  let timeout,
-    clears = 0;
-  const props = { instance: { params: { projectId: 'p', demoId: 'd' } } };
-  const ui = await renderApp('src/apps/demo-viewer/DemoViewer.jsx', props, {
-    resolveDemo: (_projects, _origins, _project, id) =>
-      id === 'd'
-        ? { url: 'https://demo.test/', title: 'Demo', mode: 'embedded', canEmbed: true }
-        : null,
-    setTimeout: (callback) => {
-      timeout = callback;
-      return 1;
-    },
-    clearTimeout: () => {
-      clears++;
-    },
-  });
-  const iframe = () => ui.nodes().find((node) => node.type === 'iframe');
-  assert.equal(iframe().props.sandbox, 'allow-scripts allow-forms');
-  timeout();
-  ui.render();
-  assert.ok(ui.nodes().some((node) => node.props.role === 'alert'));
-  ui.button('Recarregar demonstração').props.onClick();
-  ui.render();
-  iframe().props.onLoad();
-  ui.render();
-  assert.equal(
-    ui.nodes().some((node) => node.props.role === 'alert'),
-    false,
-  );
-  props.instance.params.demoId = 'unknown';
-  ui.render();
-  assert.equal(iframe(), undefined);
-  assert.match(ui.text(), /Demonstração não cadastrada/);
-  assert.ok(clears > 0);
-  ui.unmount();
-});
-
 /* === Compartilhamento e origem contextual === */
 const { loadContract } = require('../helpers/contract-loader.cjs');
 const projectModel = loadContract(
@@ -136,57 +110,89 @@ test('link de projeto preserva subdiretório e resolve pela entrada pública exi
   assert.equal(projectModel.createProjectShareUrl('ok', 'https://user:secret@ws.test/'), null);
 });
 
-test('Projeto copia URL sem navegar e permite cópia manual se o navegador bloquear', async () => {
-  const copied = [],
-    selected = [];
-  const location = { origin: 'https://ws.test' };
-  let blocked = false;
-  const input = {
-    value: 'https://ws.test/portfolio/?project=one',
-    focus() {
-      selected.push('focus');
-    },
-    select() {
-      selected.push('select');
-    },
+test('Projeto apresenta detalhes sem compartilhamento', async () => {
+  const location = {
+    origin: 'https://ws.test',
   };
+
   const ui = await renderApp(
     'src/apps/projects/Projects.jsx',
-    { instance: { id: 'projects', params: { projectId: 'one' } } },
     {
-      ...projectModel,
-      window: { location },
-      navigator: {
-        clipboard: {
-          writeText: async (value) => {
-            if (blocked) throw Error('denied');
-            copied.push(value);
-          },
+      instance: {
+        id: 'projects',
+        params: {
+          projectId: 'one',
         },
       },
+    },
+    {
+      ...projectModel,
+      applyProjectHighlights: highlightsService.applyProjectHighlights,
+
+      // === Componentes simulados ===
+      // ----- Ícones utilizados pelo aplicativo -----
+      ArrowLeft: 'ArrowLeft',
+      ArrowUpRight: 'ArrowUpRight',
+      BookOpen: 'BookOpen',
+      FolderGit2: 'FolderGit2',
+      Search: 'Search',
+      Star: 'Star',
+
+      // === Ambiente e conteúdo ===
+      window: { location },
+
       portfolio: {
         githubUser: '',
-        projects: [{ id: 'one', name: 'Projeto real', technologies: [] }],
+        projects: [
+          {
+            id: 'one',
+            name: 'Projeto real',
+            description: 'Descrição do projeto.',
+            repository: 'https://github.com/warlleyz/projeto-real',
+            technologies: ['Java'],
+          },
+        ],
       },
+
       useAppBack() {},
-      usePublicResource: () => ({ status: 'idle', data: null, refresh() {} }),
-      attachRef: () => input,
+
+      usePublicResource: () => ({
+        status: 'idle',
+        data: null,
+        refresh() {},
+      }),
     },
   );
-  await ui.button('Ctrl+C').props.onClick();
-  ui.render();
-  assert.deepEqual(copied, ['https://ws.test/portfolio/?project=one']);
-  assert.match(ui.text(), /Operação concluída/);
-  assert.deepEqual(location, { origin: 'https://ws.test' });
-  blocked = true;
-  await ui.button('Ctrl+C').props.onClick();
-  ui.render();
-  assert.match(ui.text(), /Não foi possível concluir/);
-  assert.deepEqual(selected, ['focus', 'select']);
+
+  // === Validação dos detalhes ===
+  // ----- Informações do projeto -----
+  assert.match(ui.text(), /Projeto real/);
+  assert.match(ui.text(), /Descrição do projeto/);
+
+  // ----- Repositório externo -----
+  const repositoryLink = ui
+    .nodes()
+    .find(
+      (node) => node.type === 'a' && node.props.href === 'https://github.com/warlleyz/projeto-real',
+    );
+
+  assert.ok(repositoryLink, 'Os detalhes devem oferecer acesso ao repositório.');
+
+  assert.equal(repositoryLink.props.target, '_blank');
+  assert.match(repositoryLink.props.rel, /noopener/);
+
+  // ----- Compartilhamento removido -----
   assert.equal(
-    ui.nodes().find((node) => node.type === 'input' && node.props.readOnly).props.value,
-    input.value,
+    ui.button('Ctrl+C'),
+    undefined,
+    'O compartilhamento não deve aparecer nos detalhes.',
   );
+
+  // ----- A navegação não deve ser modificada -----
+  assert.deepEqual(location, {
+    origin: 'https://ws.test',
+  });
+
   ui.unmount();
 });
 
@@ -224,11 +230,13 @@ test('Sobre Mim abre Contato preservando a instância de origem', async () => {
     },
   );
 
-  const contact = ui.nodes().find(
-    (node) =>
-      node.type === 'button' &&
-      node.props.className?.split(' ').includes('ws-about__link--contact'),
-  );
+  const contact = ui
+    .nodes()
+    .find(
+      (node) =>
+        node.type === 'button' &&
+        node.props.className?.split(' ').includes('ws-about__link--contact'),
+    );
 
   assert.ok(contact, 'O aplicativo deve oferecer acesso ao Contato.');
 
@@ -240,4 +248,54 @@ test('Sobre Mim abre Contato preservando a instância de origem', async () => {
   assert.equal(calls[0][2].originInstanceId, 'profile-instance');
 
   ui.unmount();
+});
+
+/* === Falhas dos destaques não removem o catálogo principal === */
+test('Projetos preserva metadados e permite recuperar destaques quando a integração falha', async () => {
+  let refreshed = 0;
+  const bindings = {
+    ...projectModel,
+    applyProjectHighlights: highlightsService.applyProjectHighlights,
+    portfolio: { githubUser: 'owner', projects: [] },
+    usePublicResource: (_load, key) =>
+      key === 'github'
+        ? {
+            status: 'ready',
+            updatedAt: 1,
+            data: {
+              repositories: [
+                {
+                  id: 'github-1',
+                  name: 'Metadados preservados',
+                  description: 'Descrição original',
+                  technologies: [],
+                  stars: 7,
+                },
+              ],
+              complete: true,
+            },
+            refresh: () => refreshed++,
+          }
+        : { status: 'error', data: null, refresh: () => refreshed++ },
+    useAppBack() {},
+    ArrowLeft: 'ArrowLeft',
+    ArrowUpRight: 'ArrowUpRight',
+    BookOpen: 'BookOpen',
+    FolderGit2: 'FolderGit2',
+    Search: 'Search',
+    Star: 'Star',
+    Select: 'Select',
+    GitFork: 'GitFork',
+  };
+  const projects = await renderApp(
+    'src/apps/projects/Projects.jsx',
+    { instance: { id: 'projects', params: { projectId: 'github-1' } } },
+    bindings,
+  );
+  assert.match(projects.text(), /Metadados preservados/);
+  assert.match(projects.text(), /Descrição original/);
+  assert.match(projects.text(), /Não foi possível carregar os projetos em destaque/);
+  projects.button('Tentar novamente').props.onClick();
+  assert.equal(refreshed, 1);
+  projects.unmount();
 });

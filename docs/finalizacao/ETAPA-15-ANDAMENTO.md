@@ -1,5 +1,8 @@
 # Etapa 15 — Integração final e preparação de publicação
 
+> Atualização de escopo em 25/10/2026: o catálogo atual tem 17 aplicativos, sem execução de projetos.
+> As evidências e contagens abaixo são históricas. Consultar [remoção e validação atual](../REMOCAO-DEMONSTRACOES.md).
+
 ## Estado: preparação local validada; revisão e homologação pendentes
 
 Este é o ponto de entrada vigente para retomar o projeto. O mestre e o plano por etapas continuam normativos; os checkpoints anteriores preservam evidências e limitações. Não há certificação de 100%, aceite do proprietário ou publicação. Nenhuma alteração anterior foi descartada. Sem commit/push, migração, DNS, credenciais ou serviços externos nesta execução. Wally remoto permanece desativado.

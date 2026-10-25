@@ -89,14 +89,14 @@ test('eventos validam horário/fuso, proíbem dados privados e adaptam legado se
   assert.equal(legacy.data.allDay, true);
   assert.equal(legacy.data.revision, undefined);
 });
-test('projetos e demos não concedem embed por URL; publicações respeitam ciclo editorial e anexos', () => {
+test('projetos validam links HTTPS; publicações respeitam ciclo editorial e anexos', () => {
   const api = load('src/services/publicContentContract.js');
   assert.equal(
     api.validateProject({
       id: 'project',
       name: 'Project',
       technologies: ['JS'],
-      demos: [{ id: 'demo', mode: 'embedded', url: 'javascript:alert(1)' }],
+      homepage: 'javascript:alert(1)',
     }).ok,
     false,
   );

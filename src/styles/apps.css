@@ -142,16 +142,6 @@
   object-fit: contain;
 }
 
-/* ----- Demonstrações incorporadas ----- */
-.ws-app__demo {
-  width: 100%;
-  min-height: 300px;
-  height: 55dvh;
-  border: 1px solid var(--border-control);
-  border-radius: 8px;
-  background: #ffffff;
-}
-
 /* === Métricas === */
 /* ----- Grade de indicadores ----- */
 .ws-app__metrics {

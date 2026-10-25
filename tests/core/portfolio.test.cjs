@@ -88,26 +88,6 @@ test('catálogo local continua disponível sem API e substitui metadados do mesm
   );
   assert.equal(m.mergeProjects([{ id: 'a', name: 'Local' }], []).length, 1);
 });
-test('demos só aceitam descritores cadastrados e origens autorizadas para incorporação', () => {
-  const m = load('src/apps/demo-viewer/demoModel.js', { safeExternalUrl: urls().safeExternalUrl }, [
-    'resolveDemo',
-  ]);
-  const projects = [
-    { id: 'p', demos: [{ id: 'd', url: 'https://demo.test/app', mode: 'embedded' }] },
-  ];
-  assert.equal(m.resolveDemo(projects, [], 'p', 'd').canEmbed, false);
-  assert.equal(m.resolveDemo(projects, ['https://demo.test'], 'p', 'd').canEmbed, true);
-  assert.equal(m.resolveDemo(projects, [], 'p', 'unknown'), null);
-  assert.equal(
-    m.resolveDemo(
-      [{ id: 'p', demos: [{ id: 'd', url: 'javascript:x', mode: 'embedded' }] }],
-      [],
-      'p',
-      'd',
-    ),
-    null,
-  );
-});
 test('cancelar um consumidor não cancela a consulta compartilhada do outro', async () => {
   let complete,
     networkSignal,
@@ -199,9 +179,9 @@ test('retorno contextual identifica a instância exata de origem', () => {
     instances: [
       { id: 'projects-a', appId: 'projects' },
       { id: 'projects-b', appId: 'projects' },
-      { id: 'demo', appId: 'demo-viewer' },
+      { id: 'document', appId: 'file-viewer' },
     ],
-    focusHistory: ['projects-a', 'projects-b', 'demo'],
+    focusHistory: ['projects-a', 'projects-b', 'document'],
   };
 
   const getAppDefinition = (id) => ({

@@ -120,12 +120,12 @@ test('instância única retorna restored com o mesmo ID e conserva parâmetros',
 
 test('múltiplas instâncias retornam IDs distintos e close/reopen cria nova sessão', () => {
   const { manager: m } = core();
-  const first = m.requestAppOpen(initial(), 'projects');
-  const second = m.requestAppOpen(first.state, 'projects');
+  const first = m.requestAppOpen(initial(), 'file - viewer');
+  const second = m.requestAppOpen(first.state, 'file-viewer');
   assert.notEqual(first.result.instanceId, second.result.instanceId);
   const closed = m.closeApp(second.state, first.result.instanceId);
   assert.equal(closed.focusHistory.includes(first.result.instanceId), false);
-  const reopened = m.requestAppOpen(closed, 'projects');
+  const reopened = m.requestAppOpen(closed, 'file-viewer');
   assert.notEqual(reopened.result.instanceId, first.result.instanceId);
   assert.equal(reopened.state.instances.length, 2);
   const freshCore = core().manager;
@@ -190,4 +190,14 @@ test('política administrativa está declarada no Registry e não no appId do ge
     'administration.access',
   );
   assert.equal(registry.getAppNavigationContract('administration').requiresAuthentication, true);
+});
+
+/* === Contrato do catálogo após a remoção de aplicativos === */
+test('Terminal normal permanece único e aceita somente navegação sem parâmetros', () => {
+  const { manager: m } = core();
+  const first = m.requestAppOpen(initial(), 'terminal');
+  const again = m.requestAppOpen(first.state, 'terminal');
+  assert.equal(first.result.instanceId, again.result.instanceId);
+  assert.equal(again.state.instances.length, 1);
+  assert.equal(m.requestAppOpen(again.state, 'terminal', { params: { projectId: 'github-1' } }).result.ok, false);
 });

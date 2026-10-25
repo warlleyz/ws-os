@@ -238,13 +238,12 @@ export const portfolio = {
     },
   ],
 
-  // PROJETOS E DEMONSTRAÇÕES
+  // PROJETOS
 
   // Repositórios carregados automaticamente pela API do GitHub.
   // Este array permanece disponível para futuras personalizações.
   projects: [],
 
-  demoOrigins: [],
 
   // ARQUIVOS OFICIAIS
 

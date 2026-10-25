@@ -69,7 +69,6 @@ function validateNavigationParams(appId, params) {
   }
 
   const acceptedParams = contract.params;
-
   if (!isContractData(params)) return { ok: false, code: 'INVALID_NAVIGATION_PARAMS' };
   if (acceptedParams === null) return { ok: true };
 

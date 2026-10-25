@@ -11,7 +11,12 @@ const requests = new Map();
 const subscribers = new Set();
 const channelName = 'ws-os:public-data';
 const storageKey = 'ws-os:public-data-invalidated';
-const publicPrefixes = ['/api/posts', '/api/content', '/api/files'];
+const publicPrefixes = [
+  '/api/posts',
+  '/api/content',
+  '/api/files',
+  '/api/project-highlights',
+];
 let channel = null;
 let stopTransport = null;
 let sequence = 0;

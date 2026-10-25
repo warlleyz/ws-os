@@ -7,12 +7,14 @@ import AdminContent from './AdminContent';
 import AdminFiles from './AdminFiles';
 import AdminRequests from './AdminRequests';
 import AdminRankings from './AdminRankings';
+import AdminProjects from './AdminProjects';
 import '../../styles/apps.css';
 import './Administration.css';
 
 const sections = [
   ['overview', 'Visão geral'],
   ['posts', 'Publicações'],
+  ['projects', 'Projetos'],
   ['files', 'Arquivos oficiais'],
   ['documents', 'Catálogo de documentos'],
   ['rankings', 'Moderação de rankings'],
@@ -97,7 +99,9 @@ export default function Administration({ instance }) {
           className="ws-administration__content"
           aria-label={t(sections.find(([id]) => id === activeSection)[1])}
         >
-          {activeSection === 'posts' ? (
+          {activeSection === 'projects' ? (
+            <AdminProjects instanceId={instance.id} authorized={authorized} />
+          ) : activeSection === 'posts' ? (
             <AdminPosts instanceId={instance.id} authorized={authorized} />
           ) : activeSection === 'files' ? (
             <AdminFiles instanceId={instance.id} authorized={authorized} />

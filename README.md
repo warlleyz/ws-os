@@ -2,7 +2,7 @@
 
 Portfólio profissional de Warlley Silva, com experiências Desktop e Mobile em React, JavaScript e Vite.
 
-**Estado atual:** 18 aplicativos registrados (17 públicos e Administração protegida), entregas técnicas locais das etapas 01–14 e preparação da Etapa 15. O projeto está em revisão: testes locais não substituem aceite visual, conteúdo final e homologação de serviços. Wally remoto permanece desativado. Nenhuma publicação é executada pelo workflow de qualidade.
+**Estado atual:** 17 aplicativos registrados (16 públicos e Administração protegida), entregas técnicas locais das etapas 01–14 e preparação da Etapa 15. O projeto está em revisão: testes locais não substituem aceite visual, conteúdo final e homologação de serviços. Wally remoto permanece desativado. Nenhuma publicação é executada pelo workflow de qualidade.
 
 ## Executar e validar
 
@@ -26,7 +26,7 @@ Dev/preview servem o frontend, sem emular APIs. O backend vigente é o Cloudflar
 
 - [Auditoria e correções finais](docs/finalizacao/AUDITORIA-FINAL.md): requisitos, limpeza recuperável, tradução, dicas e atualização de segurança.
 
-- [Checkpoint final e roteiro de aceite](docs/finalizacao/ETAPA-15-ANDAMENTO.md): matriz dos 18 apps, evidências, bloqueios e publicação manual.
+- [Checkpoint final e roteiro de aceite](docs/finalizacao/ETAPA-15-ANDAMENTO.md): matriz histórica dos aplicativos, evidências, bloqueios e publicação manual.
 - [Plano por etapas](docs/PLANO-FINALIZACAO-POR-ETAPAS.md) e [mestre aprovado](docs/planning/WS-OS-V2-MESTRE-v0.16.0.md).
 - [Checkpoints de desenvolvimento](docs/finalizacao/): estado e pendências das entregas; preservar evidências históricas sem tratá-las como homologação atual.
 - [Arquitetura](docs/architecture.md), [contratos](docs/contracts.md), [rotas do Worker](docs/backend/WORKER.md) e [preferências](docs/settings.md).

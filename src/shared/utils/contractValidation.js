@@ -70,3 +70,13 @@ export function isContractData(value, depth = 0) {
 export function contractError(code) {
   return { ok: false, code };
 }
+
+/* ----- Seleção administrativa de repositórios públicos ----- */
+export function validRepositoryIds(ids) {
+  return (
+    Array.isArray(ids) &&
+    ids.length <= 1000 &&
+    ids.every((id) => typeof id === 'string' && /^github-[0-9]{1,20}$/.test(id)) &&
+    new Set(ids).size === ids.length
+  );
+}

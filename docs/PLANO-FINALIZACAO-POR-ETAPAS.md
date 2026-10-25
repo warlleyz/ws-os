@@ -1,5 +1,8 @@
 # WS OS V2 — plano de conclusão por partes encerráveis
 
+> Escopo vigente em 25/10/2026: catálogo com 17 aplicativos, sem demonstrações interativas de projetos.
+> Os registros datados abaixo são históricos; a decisão atual e a remoção estão em [registro de escopo](REMOCAO-DEMONSTRACOES.md).
+
 Referência de execução: **Execução em 20/10/2026:** implementação local consolidada, testes automatizados aprovados e homologação real dos arquivos oficiais concluída com Supabase Storage. Rankings públicos e D1 local validados. Permanecem pendências de homologação externa, segurança operacional e produção. Consultar [Entregas, migrações, testes e homologação](finalizacao/ETAPAS-03-04-ENTREGA.md).
 
 
@@ -87,7 +90,7 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 - [ ] Confirmar necessidades ainda condicionadas: upload oficial, anexos, ferramentas do Wally, ações da busca, indicação de eventos no widget e DOOM/licença.
 - [ ] Definir o fluxo de solicitações: recebimento, estados administrativos, retenção, exclusão e confirmação técnica. Não confirmar reuniões nem publicar pedidos privados automaticamente.
 - [ ] Separar requisitos obrigatórios, condicionados e melhorias opcionais. Não usar “opcional” para dispensar recurso aprovado.
-- [ ] Separar o conteúdo profissional que o autor precisa fornecer: destaques, descrições, demos e revisão dos documentos existentes.
+- [ ] Separar o conteúdo profissional que o autor precisa fornecer: destaques, descrições e revisão dos documentos existentes.
 - [ ] Escolher um ambiente de homologação autorizado e preparar acesso/configuração antes das etapas remotas.
 
 **Aceite:** não restam decisões de produto essenciais sendo empurradas para dentro da implementação de outro bloco. Dependência externa sem solução fica identificada com responsável/condição, não com uma data fictícia.
@@ -101,7 +104,7 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Trabalho:**
 
 - [ ] Documentar abertura de app, instância, origem, parâmetros, foco, retorno e reabertura contextual.
-- [ ] Definir `fileId` local, documento oficial, anexos e demos sem misturar permissões.
+- [ ] Definir `fileId` local, documento oficial, anexos sem misturar permissões.
 - [ ] Definir respostas de API, IDs, limites, revisão de concorrência, cancelamento, idempotência e códigos de erro.
 - [ ] Especificar atualização de dados públicos entre instâncias/abas, invalidação de cache e sinalização de dados antigos.
 - [ ] Definir modelos de eventos, solicitações, anexos, catálogo oficial e rankings; minimizar dados pessoais.
@@ -213,13 +216,12 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Execução em 21/10/2026:** implementação técnica local concluída e validada, 417 testes aprovados. Compartilhamento e integrações finalizados; conteúdo editorial/demos ainda não fornecidos, traduções finais e homologações reais permanecem explicitamente condicionados. [Entrega, limites e retomada na Etapa 07](finalizacao/ETAPA-06-ANDAMENTO.md).
 
-**Arquivos:** `src/apps/about-me/*`, `projects/*`, `dev-insights/*`, `resume/*`, `certificates/*`, `demo-viewer/*`; conteúdo/assets fornecidos; serviços GitHub/WakaTime apenas para defeitos de contrato identificados.
+**Arquivos:** `src/apps/about-me/*`, `projects/*`, `dev-insights/*`, `resume/*`, `certificates/*`; conteúdo/assets fornecidos; serviços GitHub/WakaTime apenas para defeitos de contrato identificados.
 
 **Trabalho por app, encerrando um antes de passar ao próximo:**
 
 - **Sobre Mim:** conteúdo aprovado, hierarquia, links, trajetória/habilidades e composição responsiva.
 - **Projetos:** seleção de destaques, filtros/ordenação, detalhes, múltiplas janelas, GitHub, dados locais/cache identificados e links de entrada.
-- **Demos:** catálogo aprovado, resolução do projeto/demo, origens permitidas, sandbox, falhas e abertura externa apropriada.
 - **Dev Insights:** períodos, indicadores/gráficos aprovados, origem dos dados, atualização e indisponibilidade sem métricas inventadas.
 - **Currículo:** documento existente, abertura via Visualizador, download e alternativa quando PDF não puder ser embutido.
 - **Certificados:** categorias/busca, metadados reais, documentos e abertura integrada.
@@ -230,7 +232,7 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Congelar:** pastas de cada app e formato público do conteúdo. Metadados incrementais podem ser atualizados depois sem reabrir a arquitetura.
 
-**Commits:** um por app ou conjunto pequeno inseparável, por exemplo `feat: finaliza projetos e demonstracoes`.
+**Commits:** um por app ou conjunto pequeno inseparável, por exemplo `feat: finaliza catálogo de projetos`.
 
 ## Etapa 07 — Encerrar Contato e solicitações
 
@@ -390,7 +392,7 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Arquivos:** documentação de estado/contratos/validação; scripts/configuração existentes; `index.html`; workflow em `.github/workflows/` a criar somente para CI, se adotado; testes de integração.
 
-- [ ] Conferir matriz dos 18 apps, contratos e requisitos DEC; nenhum aprovado pode ficar sem aceite ou condição explícita.
+- [ ] Conferir matriz dos 17 apps, contratos e requisitos DEC; nenhum aprovado pode ficar sem aceite ou condição explícita.
 - [ ] Validar integração completa nos dois shells/temas/idiomas, resoluções intermediárias e dispositivos reais.
 - [ ] Rodar segurança negativa, armazenamento falho, concorrência, navegação com rascunho e indisponibilidade de serviços.
 - [ ] Executar revisão de teclado/leitor de tela/contraste/zoom 200%/movimento reduzido, corrigindo regressões sem adiar a acessibilidade de todos os apps para cá.

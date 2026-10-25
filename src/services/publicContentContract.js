@@ -98,27 +98,7 @@ export function adaptLegacyPublicEvent(input) {
   };
 }
 
-/* === Projetos e demonstrações === */
-export function validateDemo(input) {
-  if (
-    !isRecord(input) ||
-    !validId(input.id) ||
-    !['embedded', 'external', 'unavailable'].includes(input.mode) ||
-    !validLocalizedText(input.title ?? '', 160)
-  )
-    return contractError('INVALID_DEMO');
-  if (input.mode !== 'unavailable' && !https(input.url)) return contractError('INVALID_DEMO_URL');
-  return {
-    ok: true,
-    data: {
-      id: input.id,
-      title: input.title ?? '',
-      mode: input.mode,
-      url: input.mode === 'unavailable' ? null : input.url,
-    },
-  };
-}
-
+/* === Projetos do catálogo === */
 export function validateProject(input) {
   if (
     !isRecord(input) ||
@@ -134,14 +114,6 @@ export function validateProject(input) {
     (input.order !== undefined && (!Number.isSafeInteger(input.order) || input.order < 0))
   )
     return contractError('INVALID_PROJECT');
-  const demos = input.demos ?? [];
-  if (
-    !Array.isArray(demos) ||
-    demos.length > 20 ||
-    demos.some((item) => !validateDemo(item).ok) ||
-    new Set(demos.map((item) => item.id)).size !== demos.length
-  )
-    return contractError('INVALID_PROJECT_DEMOS');
   return {
     ok: true,
     data: {
@@ -153,7 +125,6 @@ export function validateProject(input) {
       homepage: input.homepage ?? null,
       featured: input.featured ?? false,
       order: input.order ?? 0,
-      demos: demos.map((item) => validateDemo(item).data),
     },
   };
 }

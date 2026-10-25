@@ -22,6 +22,7 @@ import {
 } from '../../services/authService';
 import '../../styles/apps.css';
 import './Terminal.css';
+
 export default function Terminal({ instance }) {
   const locale = useLocale(),
     { run, appState } = useSystem();

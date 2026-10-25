@@ -6,6 +6,7 @@ import { onRequest as handleRankings } from '../functions/api/rankings.js';
 import { onRequest as handleContent } from '../functions/api/managedContent.js';
 import { onRequestPost as handleWally } from '../functions/api/wally.js';
 import { onRequestGet as handlePosts } from '../functions/api/posts.js';
+import { onRequest as handleProjectHighlights } from '../functions/api/projectHighlights.js';
 import {
   onRequestGet as handleGetPostLikes,
   onRequestPost as handlePostLike,
@@ -26,6 +27,7 @@ import {
   onRequestLogout,
   onRequestAdminStatus,
 } from '../functions/api/auth.js';
+
 
 const routes = {
   '/api/admin/rankings': { methods: ['GET', 'DELETE'], handler: handleRankings },
@@ -64,6 +66,14 @@ const routes = {
   '/api/admin/posts/delete': {
     method: 'DELETE',
     handler: handleDeleteNote,
+  },
+  '/api/project-highlights': {
+    method: 'GET',
+    handler: handleProjectHighlights,
+  },
+  '/api/admin/project-highlights': {
+    methods: ['GET', 'PUT'],
+    handler: handleProjectHighlights,
   },
 };
 function error(code, status, headers = {}) {

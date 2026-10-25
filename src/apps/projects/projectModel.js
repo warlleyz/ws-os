@@ -15,7 +15,6 @@ export function mergeProjects(curated, repositories) {
         technologies: Array.isArray(item.technologies)
           ? item.technologies
           : (remote?.technologies ?? []),
-        demos: Array.isArray(item.demos) ? item.demos : [],
         source: 'Portfólio',
       };
     });
