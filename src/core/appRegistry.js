@@ -22,16 +22,16 @@ import {
 /* === Dimensões iniciais por tarefa; geometria permanece somente na sessão === */
 const windowProfiles = {
   'about-me': { width: 950, height: 860 },
-  calculator: { width: 360, height: 520 },
+  projects: { width: 1100, height: 760 },
+  'dev-insights': { width: 1100, height: 750 },
+  resume: { width: 950, height: 760 },
+  certificates: { width: 980, height: 740 },
   contact: { width: 680, height: 660 },
+  calculator: { width: 360, height: 520 },
   settings: { width: 980, height: 680 },
   'file-editor': { width: 1000, height: 700 },
   'file-viewer': { width: 1000, height: 720 },
-  resume: { width: 950, height: 760 },
   notes: { width: 900, height: 660 },
-  projects: { width: 1100, height: 760 },
-  'dev-insights': { width: 1100, height: 750 },
-  certificates: { width: 980, height: 740 },
 };
 const appDefinitions = [
   /* ----- Aplicativos Desktop ----- */

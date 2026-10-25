@@ -26,8 +26,30 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
     tree;
   const React = {
     createElement: (type, props, ...children) => {
-      if (props?.ref && bindings.attachRef) props.ref.current = bindings.attachRef(type, props);
-      return { type, props: { ...props, children } };
+      const resolvedProps = { ...props, children };
+
+      /* ----- Renderizar componentes visuais sem hooks no ambiente de teste ----- */
+      const presentationalComponents = new Set([
+        'CertificateCard',
+        'CertificateDetails',
+        'CategoryIcon',
+        'CertificatesHeader',
+        'ContactChannels',
+        'ContactHeader',
+      ]);
+
+      if (
+        typeof type === 'function' &&
+        presentationalComponents.has(type.name)
+      ) {
+        return type(resolvedProps);
+      }
+
+      if (props?.ref && bindings.attachRef) {
+        props.ref.current = bindings.attachRef(type, props);
+      }
+
+      return { type, props: resolvedProps };
     },
     useMemo(compute, deps) {
       const index = cursor++;
@@ -105,6 +127,18 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
           'RefreshCw',
           'UserRound',
           'Wrench',
+          'ArrowLeft',
+          'CalendarDays',
+          'Clock3',
+          'Trophy',
+          'X',
+          'GitBranch',
+          'BriefcaseBusiness',
+          'Gamepad2',
+          'Mail',
+          'MessageCircle',
+          'Send',
+          'ShieldCheck',
         ].map((name) => [
           name,
           name,

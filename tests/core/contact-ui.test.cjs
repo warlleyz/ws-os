@@ -150,25 +150,57 @@ test('gravação impede envio duplo e fechamento da instância cancela a espera'
   await pending;
 });
 
-test('agendamento isolado protege saída e configuração ausente mantém canais disponíveis', async () => {
+test('contato sem configuração mantém canais e bloqueia envio', async () => {
   let dirty = false;
+
   const ui = await contact({
     isContactConfigured: () => false,
     useUnsavedChanges: (_id, value) => {
       dirty = value;
     },
   });
-  assert.ok(ui.nodes().some((node) => node.type === 'a' && node.props.href.startsWith('mailto:')));
-  assert.equal(
-    ui.nodes().find((node) => node.type === 'button' && node.props.type === 'submit').props
-      .disabled,
-    true,
+
+  /* === Canais disponíveis === */
+  const emailLink = ui.nodes().find(
+    (node) =>
+      node.type === 'a' &&
+      node.props.href?.startsWith('mailto:'),
   );
+
+  assert.ok(emailLink, 'O contato por e-mail deve permanecer disponível.');
+
+  /* === Envio desabilitado === */
+  const submitButton = ui.nodes().find(
+    (node) =>
+      node.type === 'button' &&
+      node.props.type === 'submit',
+  );
+
+  assert.ok(submitButton);
+  assert.equal(submitButton.props.disabled, true);
+
+  /* === Agendamento removido da interface === */
+  assert.equal(
+    ui.nodes().some((node) => node.type === 'select'),
+    false,
+  );
+
+  assert.equal(
+    ui.nodes().some((node) => node.props?.type === 'datetime-local'),
+    false,
+  );
+
+  /* === Proteção de rascunho === */
   ui.nodes()
-    .find((node) => node.type === 'select')
-    .props.onChange({ target: { value: 'schedule' } });
+    .find((node) =>
+      node.type === 'input' &&
+      node.props.autoComplete === 'name'
+    )
+    .props.onChange({ target: { value: 'Pessoa' } });
+
   ui.render();
+
   assert.equal(dirty, true);
-  assert.match(ui.text(), /não confirma reunião/);
+
   ui.unmount();
 });
