@@ -4,7 +4,14 @@ import './Select.css';
 
 /* === Seletor personalizado do sistema === */
 /* ----- Lista acessível controlada por botão ----- */
-export default function Select({ label, value, options, onChange, className = '' }) {
+export default function Select({
+  label,
+  value,
+  options,
+  onChange,
+  className = '',
+  variant = 'default',
+}) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef(null);
@@ -93,7 +100,12 @@ export default function Select({ label, value, options, onChange, className = ''
   return (
     <div
       ref={rootRef}
-      className={`ws-select ${open ? 'ws-select--open' : ''} ${className}`.trim()}
+      className={[
+        'ws-select',
+        `ws-select--${['default', 'compact', 'ghost'].includes(variant) ? variant : 'default'}`,
+        open ? 'ws-select--open' : '',
+        className,
+      ].filter(Boolean).join(' ')}
       onKeyDown={handleKeyDown}
     >
       <button

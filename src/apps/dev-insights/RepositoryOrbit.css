@@ -1,0 +1,404 @@
+/* === Universo de repositórios === */
+.ws-orbit {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    min-height: 350px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+    border-radius: 15px;
+    background: color-mix(in srgb, var(--text-primary) 2.5%, transparent);
+    container-type: inline-size;
+}
+
+/* === Cabeçalho === */
+.ws-orbit__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 22px 24px;
+    border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+}
+
+.ws-orbit__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 9px;
+    color: var(--accent-primary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+}
+
+.ws-orbit__header h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 19px;
+    font-weight: 750;
+    letter-spacing: -0.4px;
+}
+
+.ws-orbit__header p {
+    margin: 7px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.ws-orbit__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 11px;
+    border: 1px solid color-mix(in srgb, var(--text-primary) 12%, transparent);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+/* === Organização principal === */
+.ws-orbit__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 0.35fr);
+    min-width: 0;
+}
+
+.ws-orbit__stage {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    padding: 12px;
+}
+
+.ws-orbit__scene {
+    display: block;
+    width: 100%;
+    max-height: 440px;
+    overflow: visible;
+    margin: auto;
+}
+
+/* ----- Órbitas ----- */
+.ws-orbit__ring {
+    fill: none;
+    stroke: color-mix(in srgb, var(--accent-primary) 22%, transparent);
+    stroke-width: 1;
+    stroke-dasharray: 3 5;
+}
+
+.ws-orbit__core {
+    fill: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    stroke: color-mix(in srgb, var(--accent-primary) 65%, transparent);
+    stroke-width: 1.5;
+}
+
+.ws-orbit__core-inner {
+    fill: var(--accent-primary);
+    filter: drop-shadow(0 0 9px var(--accent-primary));
+}
+
+/* ----- Corpos orbitais interativos ----- */
+.ws-orbit__node {
+    cursor: var(--ws-cursor-pointer, pointer);
+    outline: none;
+}
+
+.ws-orbit__node-body {
+    fill: var(--orbit-color);
+    stroke: color-mix(in srgb, var(--orbit-color) 75%, white);
+    stroke-width: 1.5;
+    transition: stroke-width 160ms ease, filter 160ms ease;
+}
+
+.ws-orbit__node-halo {
+    fill: var(--orbit-color);
+    opacity: 0.09;
+    transition: opacity 160ms ease;
+}
+
+.ws-orbit__node-shine {
+    fill: white;
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.ws-orbit__node:hover .ws-orbit__node-body,
+.ws-orbit__node:focus-visible .ws-orbit__node-body,
+.ws-orbit__node.is-selected .ws-orbit__node-body {
+    stroke-width: 3;
+    filter: drop-shadow(0 0 6px var(--orbit-color));
+}
+
+.ws-orbit__node:hover .ws-orbit__node-halo,
+.ws-orbit__node:focus-visible .ws-orbit__node-halo,
+.ws-orbit__node.is-selected .ws-orbit__node-halo {
+    opacity: 0.3;
+}
+
+/* ----- Rodapé do palco ----- */
+.ws-orbit__stage-footer {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+/* === Painel de detalhes === */
+.ws-orbit__details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 330px;
+    padding: 22px;
+    border-left: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+    background:
+        radial-gradient(ellipse at 85% 10%,
+            color-mix(in srgb, var(--accent-primary) 5%, transparent),
+            transparent 70%),
+        color-mix(in srgb, var(--text-primary) 2%, transparent);
+}
+
+.ws-orbit__details-label {
+    color: var(--accent-primary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.ws-orbit__details h4 {
+    margin: 13px 0 9px;
+    color: var(--text-primary);
+    font-size: 20px;
+    overflow-wrap: anywhere;
+}
+
+.ws-orbit__description {
+    margin: 0 0 20px;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.ws-orbit__details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+/* ----- Cards de métricas do repositório ----- */
+.ws-orbit__details-grid>div {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+    min-height: 96px;
+    padding: 15px;
+    border: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.ws-orbit__details-grid svg {
+    color: var(--accent-primary);
+}
+
+/* ----- Valores dos indicadores ----- */
+.ws-orbit__details-grid strong {
+    color: var(--text-primary);
+    font-size: 22px;
+    font-weight: 750;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.ws-orbit__properties {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0 0 20px;
+}
+
+.ws-orbit__properties>div {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+}
+
+.ws-orbit__properties dt {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.ws-orbit__properties dd {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 650;
+    text-align: right;
+}
+
+/* ----- Acesso ao repositório ----- */
+.ws-orbit__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    margin-top: auto;
+    padding: 0 14px;
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 28%, transparent);
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--accent-primary) 9%, transparent);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 160ms ease, border-color 160ms ease;
+}
+
+.ws-orbit__link:hover {
+    background: color-mix(in srgb, var(--accent-primary) 19%, transparent);
+}
+
+.ws-orbit__placeholder {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.ws-orbit__placeholder svg {
+    color: var(--accent-primary);
+    opacity: 0.6;
+}
+
+.ws-orbit__placeholder strong {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.ws-orbit__placeholder p {
+    max-width: 170px;
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+/* === Legenda inferior === */
+.ws-orbit__footer {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 14px 22px;
+    border-top: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+}
+
+.ws-orbit__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px 15px;
+}
+
+.ws-orbit__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.ws-orbit__legend i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.ws-orbit__remaining {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.ws-orbit__empty {
+    display: grid;
+    place-items: center;
+    min-height: 230px;
+    padding: 20px;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* === Responsividade === */
+@container (max-width: 760px) {
+    .ws-orbit__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ws-orbit__details {
+        min-height: 190px;
+        border-left: 0;
+        border-top: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+    }
+}
+
+@container (max-width: 480px) {
+    .ws-orbit__header {
+        padding: 17px;
+    }
+
+    .ws-orbit__header h3 {
+        font-size: 17px;
+    }
+
+    .ws-orbit__stage {
+        padding: 5px;
+    }
+
+    .ws-orbit__details {
+        padding: 17px;
+    }
+
+    .ws-orbit__footer {
+        padding: 13px 17px;
+    }
+}
+
+/* === Acessibilidade === */
+.ws-orbit__node:focus-visible .ws-orbit__node-halo {
+    stroke: var(--accent-primary);
+    stroke-width: 3;
+}
+
+.ws-orbit__link:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ws-orbit__node-body,
+    .ws-orbit__node-halo {
+        transition: none;
+    }
+}

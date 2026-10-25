@@ -46,11 +46,19 @@
   height: min(700px, calc(100% - 96px));
 }
 
-/* ----- Projetos, indicadores e notas ----- */
+/* ----- Projetos e notas ----- */
 .desktop-window:is([data-app-id='projects'],
-  [data-app-id='dev-insights'],
   [data-app-id='notes']) {
   --initial-width: min(900px, calc(100% - 40px));
+}
+
+/* ----- Dev Insights ----- */
+.desktop-window[data-app-id='dev-insights'] {
+  --initial-width: min(1100px, calc(100% - 40px));
+  width: var(--initial-width);
+  height: min(760px, calc(100% - 64px));
+  top: max(16px, calc((100% - min(760px, calc(100% - 64px))) / 2));
+  left: max(16px, calc((100% - var(--initial-width)) / 2));
 }
 
 /* ----- Calculadora ----- */

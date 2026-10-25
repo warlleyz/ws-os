@@ -26,9 +26,15 @@
 }
 
 .ws-select__value {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ws-select__trigger>svg {
+  flex: 0 0 auto;
 }
 
 .ws-select__trigger>svg {
@@ -105,4 +111,38 @@
   .ws-select__trigger>svg {
     transition: none;
   }
+}
+
+/* === Variantes do seletor === */
+/* ----- Compacta ----- */
+.ws-select--compact .ws-select__trigger {
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+/* ----- Sem moldura ----- */
+.ws-select--ghost .ws-select__trigger {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ----- Interações da variante sem moldura ----- */
+.ws-select--ghost .ws-select__trigger:hover,
+.ws-select--ghost.ws-select--open .ws-select__trigger {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  box-shadow: none;
+}
+
+/* ----- Opções das variantes ----- */
+.ws-select--compact .ws-select__option,
+.ws-select--ghost .ws-select__option {
+  min-height: 32px;
+  font-size: 11px;
 }

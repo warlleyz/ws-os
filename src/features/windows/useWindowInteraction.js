@@ -111,7 +111,7 @@ export default function useWindowInteraction({ instance, app }) {
 
       if (
         defaults &&
-        ['about-me', 'projects'].includes(instance.appId)
+        ['about-me', 'projects', 'dev-insights'].includes(instance.appId)
       ) {
         const bounds = getBounds(element);
         const width = Math.min(defaults.width, bounds.width - 16);

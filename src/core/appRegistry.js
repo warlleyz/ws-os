@@ -29,6 +29,7 @@ const windowProfiles = {
   'file-viewer': { width: 900, height: 660 },
   notes: { width: 900, height: 660 },
   projects: { width: 1100, height: 760 },
+  'dev-insights': { width: 1100, height: 760 },
 };
 const appDefinitions = [
   /* ----- Aplicativos Desktop ----- */

@@ -1,0 +1,428 @@
+/* === Cidade 3D de contribuições === */
+.ws-city {
+    --city-highlight: color-mix(in srgb, var(--accent-primary) 65%, white);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 18%, transparent);
+    border-radius: 16px;
+    background:
+        radial-gradient(ellipse at 35% 35%,
+            color-mix(in srgb, var(--accent-primary) 7%, transparent),
+            transparent 65%),
+        color-mix(in srgb, var(--text-primary) 2%, transparent);
+    container-type: inline-size;
+}
+
+/* === Cabeçalho === */
+.ws-city__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 22px 24px;
+    border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+
+.ws-city__heading {
+    min-width: 0;
+}
+
+.ws-city__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 9px;
+    color: var(--accent-primary);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 1.4px;
+}
+
+.ws-city__live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    box-shadow: 0 0 10px var(--accent-primary);
+}
+
+.ws-city__heading h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+}
+
+.ws-city__heading p {
+    margin: 7px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* ----- Controles ----- */
+.ws-city__controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px;
+    border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--text-primary) 3%, transparent);
+}
+
+.ws-city__controls button,
+.ws-city__details-navigation button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease;
+}
+
+.ws-city__controls button:hover:not(:disabled),
+.ws-city__details-navigation button:hover:not(:disabled) {
+    color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+}
+
+.ws-city__controls button:disabled,
+.ws-city__details-navigation button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.ws-city__zoom-label {
+    min-width: 45px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 650;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.ws-city__control-divider {
+    width: 1px;
+    height: 19px;
+    margin: 0 3px;
+    background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+}
+
+/* === Área principal === */
+.ws-city__workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 0.27fr);
+    gap: 0;
+    min-width: 0;
+}
+
+.ws-city__visualization {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 50% 48%,
+            color-mix(in srgb, var(--accent-primary) 6%, transparent),
+            transparent 70%);
+}
+
+/* ----- Palco isométrico ----- */
+.ws-city__canvas {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+    min-height: 340px;
+    padding: 12px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.ws-city__viewport {
+    max-width: 100%;
+    max-height: 590px;
+    overflow: auto;
+    overscroll-behavior: auto;
+    scrollbar-width: thin;
+    scrollbar-color:
+        color-mix(in srgb, var(--accent-primary) 45%, transparent) transparent;
+}
+
+/* === Superfície gráfica da cidade === */
+/* ----- Cursor padrão ----- */
+.ws-city__drawing {
+    display: block;
+    max-width: none;
+    cursor: var(--ws-cursor-pointer, pointer);
+    outline: none;
+}
+
+/* ----- Cursor de interação ----- */
+.ws-city__drawing.is-hovering-building {
+    cursor: var(--ws-cursor-pointer, pointer);
+}
+
+.ws-city__drawing:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: -2px;
+}
+
+/* ----- Rodapé do palco ----- */
+.ws-city__canvas-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 18px;
+    color: var(--text-muted);
+    font-size: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+/* === Painel contextual === */
+.ws-city__details {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 21px;
+    border-left: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+    background: color-mix(in srgb, var(--text-primary) 2%, transparent);
+}
+
+.ws-city__details-heading {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--accent-primary);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.ws-city__selected-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 36px 0;
+}
+
+.ws-city__selected-date {
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ws-city__selected-number {
+    color: var(--text-primary);
+    font-size: clamp(36px, 4cqw, 54px);
+    font-weight: 750;
+    letter-spacing: -2px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.ws-city__selected-caption {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.ws-city__detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+    font-size: 11px;
+}
+
+.ws-city__detail-row span {
+    color: var(--text-muted);
+}
+
+.ws-city__detail-row strong {
+    color: var(--text-primary);
+    font-weight: 650;
+}
+
+.ws-city__details-empty {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 220px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.ws-city__details-empty svg {
+    color: var(--accent-primary);
+    opacity: 0.5;
+}
+
+.ws-city__details-empty p {
+    max-width: 150px;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.ws-city__details-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* === Resumo inferior === */
+.ws-city__summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    border-top: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+    background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+}
+
+/* ----- Indicadores do resumo ----- */
+.ws-city__summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 19px 22px;
+    background: color-mix(in srgb, var(--surface-primary) 18%, transparent);
+}
+
+.ws-city__summary-item span {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.ws-city__summary-item strong {
+    color: var(--text-primary);
+    font-size: 21px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+/* === Estados === */
+.ws-city__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    min-height: 320px;
+    padding: 30px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.ws-city__state svg {
+    color: var(--accent-primary);
+    opacity: 0.6;
+}
+
+.ws-city__state p {
+    margin: 0;
+    font-size: 12px;
+}
+
+.ws-city__state button {
+    padding: 9px 14px;
+    border: 1px solid var(--accent-primary);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+/* === Responsividade interna === */
+@container (max-width: 1050px) {
+    .ws-city__workspace {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ws-city__details {
+        border-left: 0;
+        border-top: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
+    }
+
+    .ws-city__details-empty {
+        min-height: 95px;
+    }
+
+    .ws-city__selected-content {
+        padding: 18px 0;
+    }
+}
+
+@container (max-width: 570px) {
+    .ws-city__header {
+        padding: 17px;
+    }
+
+    .ws-city__heading h3 {
+        font-size: 17px;
+    }
+
+    .ws-city__canvas {
+        min-height: 260px;
+        padding: 8px;
+    }
+
+    .ws-city__viewport {
+        max-height: 380px;
+    }
+
+    .ws-city__summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ws-city__summary-item {
+        padding: 15px;
+    }
+
+    .ws-city__summary-item strong {
+        font-size: 18px;
+    }
+
+    .ws-city__canvas-footer {
+        padding: 10px 12px;
+    }
+}
+
+/* === Acessibilidade === */
+.ws-city button:focus-visible,
+.ws-city__viewport:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ws-city__controls button,
+    .ws-city__details-navigation button {
+        transition: none;
+    }
+}
