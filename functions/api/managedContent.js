@@ -1,6 +1,7 @@
 import { validInstant, validTimezone } from '../../src/shared/utils/contractValidation.js';
 import { requireAdministrator } from './auth.js';
 
+/* === RESPOSTAS E VALIDAÇÃO DO CONTEÚDO === */
 const json = (body, status = 200) =>
   Response.json(body, {
     status,
@@ -57,7 +58,7 @@ export function validateManagedContent(kind, input) {
       throw Error('INVALID_URL');
     data.resourceId = input.resourceId;
   } else if (kind === 'files') {
-    /* ----- O catálogo publica somente artefatos estáticos versionados, nunca APIs ou arquivos privados. ----- */
+    /* ----- O CATÁLOGO PUBLICA SOMENTE ARTEFATOS ESTÁTICOS VERSIONADOS, NUNCA APIS OU ARQUIVOS PRIVADOS. ----- */
     if (
       !/^(?:documents|certificates)\/[a-z\d/_-]+\.(?:pdf|png|jpg|jpeg|webp|gif|txt|md|json|csv)$/i.test(
         url,
@@ -73,6 +74,7 @@ export function validateManagedContent(kind, input) {
   return data;
 }
 
+/* === ROTEAMENTO, REVISÕES E AUTORIZAÇÃO === */
 export async function onRequest({ request, env }) {
   const path = new URL(request.url).pathname;
   const publicRead = path === '/api/content';
@@ -169,19 +171,19 @@ export async function onRequest({ request, env }) {
       );
     const rows = await response.json();
     if (!Array.isArray(rows)) return json({ error: 'INVALID_RESPONSE' }, 502);
-    /* ----- Confirmar a identidade da operação administrativa ----- */
+    /* ----- CONFIRMAR A IDENTIDADE DA OPERAÇÃO ADMINISTRATIVA ----- */
     if (request.method !== 'GET') {
       if (rows.length !== 1 || rows[0]?.id !== expectedId) {
         return json({ error: 'CONTENT_CONFLICT' }, 409);
       }
     }
-    /* ----- Nunca devolver colunas extras, mesmo se a consulta upstream mudar. ----- */
+    /* ----- NUNCA DEVOLVER COLUNAS EXTRAS, MESMO SE A CONSULTA UPSTREAM MUDAR. ----- */
     return json({
       items: rows
         .filter((row) => !publicRead || row.status === 'published')
         .map((row) => ({
           id: row.id,
-          data: row.data,
+          data: publicRead ? validateManagedContent(kind, row.data) : row.data,
           status: row.status,
           updatedAt: row.updated_at,
         })),

@@ -2,7 +2,7 @@
 
 # Configuração do backend — Consulta operacional
 
-Revisado documentalmente na Etapa 01, em 26/10/2026. Seguir o [mestre vigente](../WS-OS-V2-MESTRE.md) e o [mapa de rotas](WORKER.md). Os registros de 20/10/2026 são evidências históricas, não homologação atual. Nenhuma instrução deste guia autoriza produção, SQL remoto ou uso de credenciais reais nesta etapa.
+Atualizado na Etapa 02, em 26/10/2026. Seguir o [mestre vigente](../WS-OS-V2-MESTRE.md) e o [mapa de rotas](WORKER.md). Os registros de 20/10/2026 são evidências históricas, não homologação atual. Nenhuma instrução deste guia autoriza produção, SQL remoto ou uso de credenciais reais nesta etapa.
 
 <!-- === AMBIENTE ISOLADO === -->
 
@@ -91,10 +91,24 @@ O editor reutilizado por Notas/Administração envia uma identidade estável na 
 
 ### Jogos — validação local da Etapa 10
 
-Cliente de rankings utiliza o transporte compartilhado, confirma accepted=true e conserva o payload de tentativa incerta para retry explícito com novo Turnstile. Atualização de lista não serve como recibo individual de escrita. Na base atual, API/contrato/SQL limitam Snake a 222, mas a interface permite 397; corrigir o contrato na Etapa 02 antes de homologar pontuações altas. Flappy permanece limitado a 100000. Nenhum limite, RPC ou migração foi alterado nesta revisão documental. O hash proporcional do backend e a pontuação originada no browser não garantem identidade global ou ausência de fraude. Homologação de envio/moderação depende do ambiente autorizado, flags de cliente/servidor e proteção pública configurada. Ver o checkpoint da Etapa 10 para pendências; nenhuma pontuação real foi enviada nesta tarefa.
+Cliente de rankings utiliza o transporte compartilhado, confirma accepted=true e conserva o payload de tentativa incerta para retry explícito com novo Turnstile. Atualização de lista não serve como recibo individual de escrita. O contrato compartilhado, a API e a interface agora utilizam Snake 397 e Flappy 100000. O banco inspecionado ainda limita Snake a 222. Aplicar/homologar database/migrations/20261026141305_etapa02_rankings_e_permissoes_legadas.sql antes de publicar esta mudança; a migração também isola a view pública legada das demos sem apagar dados. Executar database/tests/etapa02_rankings_permissions.sql em homologação autorizada. Nenhuma migração foi aplicada nesta entrega. O hash proporcional do backend e a pontuação originada no browser não garantem identidade global ou ausência de fraude. Homologação de envio/moderação depende do ambiente autorizado, flags de cliente/servidor e proteção pública configurada. Ver o checkpoint da Etapa 10 para pendências; nenhuma pontuação real foi enviada nesta tarefa.
 
 <!-- ----- ADMINISTRAÇÃO — INTEGRAÇÃO LOCAL DA ETAPA 11 ----- -->
 
 ### Administração — integração local da Etapa 11
 
 O painel consome as APIs existentes de solicitações privadas, arquivos oficiais e moderação, com paginação onde oferecida pelo backend. Publicações reutilizam NotesAdmin; catálogo de documentos e eventos conservam AdminContent. Exclusão de ranking inclui pontuação observada para recusar alteração concorrente; clientes anteriores continuam compatíveis. Não há migração nova nem serviço ativado. Homologar operações administrativas e permissões no ambiente autorizado antes do aceite real. Wally remoto permanece desativado; não foram feitas chamadas de IA ou alterações em segredos. Ver o checkpoint da Etapa 11 para validação e limitações.
+
+<!-- === HOMOLOGAÇÃO PENDENTE DA ETAPA 02 === -->
+
+## Homologação pendente da Etapa 02
+
+A inspeção somente de leitura confirmou histórico equivalente a 005–014, RLS nas dez tabelas públicas da aplicação e bucket privado com limite de 10 MiB. Não executou testes de identidade, escrita, retenção ou D1 remoto. Metadados/grants não certificam o fluxo completo.
+
+O proprietário ainda não confirmou rotação de credenciais e revogação das sessões citadas no histórico. Confirmar esses procedimentos pelo painel autorizado e atualizar os segredos dos consumidores somente mediante autorização; não enviar chaves ao chat. Logout não comprova por si só invalidação imediata de access tokens já emitidos: homologar o comportamento e o prazo do provedor.
+
+A view project_highlights_public permanece publicamente legível no banco até a aplicação autorizada da migração incremental. A aplicação ativa não a utiliza. Preservar a tabela de destaques, os IDs selecionados e a cadeia antiga de migrações.
+
+O roteiro transacional novo testa limites e permissões e termina com ROLLBACK. O roteiro etapa03_rls.sql continua exigindo ambiente descartável e administrador de teste. Ambos precisam ser executados por uma conexão autorizada, com interrupção em erro; não foram executados nesta etapa.
+
+O inventário de resultados, alertas intencionais e bloqueios está na seção 22 do [mestre](../WS-OS-V2-MESTRE.md). Não publicar o código antes de homologar a migração; rollback de código não reverte dados nem autoriza truncar pontuações.

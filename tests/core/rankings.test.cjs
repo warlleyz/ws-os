@@ -12,14 +12,14 @@ test('rankings permanecem desligados sem consumir serviços externos', async () 
 test('validação de rankings respeita jogos, limites e apelidos públicos', async () => {
   const { validateScore } = await import('../../functions/api/rankings.js');
   for (const input of [
-    { game: 'snake', score: 223, alias: 'Teste' },
+    { game: 'snake', score: 398, alias: 'Teste' },
     { game: 'flappy', score: Infinity, alias: 'Teste' },
     { game: 'mines', score: 1, alias: 'Teste' },
     { game: 'snake', score: 2, alias: '<script>' },
     { game: 'snake', score: 2, alias: 'email@example.com' },
   ])
     assert.throws(() => validateScore(input));
-  assert.equal(validateScore({ game: 'snake', score: 222, alias: 'Jogador' }).score, 222);
+  assert.equal(validateScore({ game: 'snake', score: 397, alias: 'Jogador' }).score, 397);
 });
 test('corpo público é limitado por stream e falha sem proteção configurada', async () => {
   const { readBoundedJson, protectPublicWrite } =
@@ -94,6 +94,7 @@ test('atualizar ranking após envio não cancela a própria operação nem mant�
     { game: 'snake' },
     {
       ...transport,
+      ...loadContract(path.resolve(__dirname, '../../src/services/publicContentContract.js')),
       __rankingsEnabled: 'true',
       useGameRecord: () => ({ record: 5 }),
       WallyTurnstile: 'Verification',

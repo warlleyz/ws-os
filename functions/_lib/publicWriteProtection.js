@@ -1,6 +1,8 @@
+/* === LEITURA LIMITADA DE JSON === */
+/* ----- VALIDAR MIME E LIBERAR O LEITOR EM SUCESSO OU FALHA ----- */
 export async function readBoundedJson(request, limit = 8192) {
-  if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json'))
-    throw Error('INVALID_CONTENT_TYPE');
+  const contentType = request.headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase();
+  if (contentType !== 'application/json') throw Error('INVALID_CONTENT_TYPE');
   const reader = request.body?.getReader();
   if (!reader) throw Error('INVALID_BODY');
   let size = 0;
@@ -31,6 +33,8 @@ export async function readBoundedJson(request, limit = 8192) {
     throw Error('INVALID_BODY');
   }
 }
+/* === PROTEÇÃO DAS ESCRITAS PÚBLICAS === */
+/* ----- IDENTIDADE PROTEGIDA, LIMITE ATÔMICO E DESAFIO VINCULADO À ORIGEM ----- */
 export async function protectPublicWrite(request, env, token, scope) {
   if (!env.WALLY_LIMITS_DB || !env.PUBLIC_WRITE_HASH_SALT || !env.TURNSTILE_SECRET_KEY)
     throw Error('PROTECTION_UNAVAILABLE');

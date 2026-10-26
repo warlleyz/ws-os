@@ -11,7 +11,7 @@ import {
 import { isValidRevision } from './revisionContract.js';
 import { validateNoteAttachments } from './storage/noteAttachmentContract.js';
 
-/* === Identidade e revisão editorial === */
+/* === IDENTIDADE E REVISÃO EDITORIAL === */
 const statusValid = (value) => ['draft', 'published'].includes(value);
 const https = (value) => {
   try {
@@ -22,7 +22,7 @@ const https = (value) => {
   }
 };
 
-/* === Eventos públicos: sem dados de solicitações privadas === */
+/* === EVENTOS PÚBLICOS: SEM DADOS DE SOLICITAÇÕES PRIVADAS === */
 export function validatePublicEvent(input) {
   if (
     !isRecord(input) ||
@@ -73,7 +73,7 @@ export function validatePublicEvent(input) {
   };
 }
 
-/* ----- Adaptação explícita do catálogo legado de dia inteiro ----- */
+/* ----- ADAPTAÇÃO EXPLÍCITA DO CATÁLOGO LEGADO DE DIA INTEIRO ----- */
 export function adaptLegacyPublicEvent(input) {
   if (
     !isRecord(input) ||
@@ -98,7 +98,7 @@ export function adaptLegacyPublicEvent(input) {
   };
 }
 
-/* === Projetos do catálogo === */
+/* === PROJETOS DO CATÁLOGO === */
 export function validateProject(input) {
   if (
     !isRecord(input) ||
@@ -129,7 +129,7 @@ export function validateProject(input) {
   };
 }
 
-/* === Publicações e seus anexos === */
+/* === PUBLICAÇÕES E SEUS ANEXOS === */
 export function validatePublication(input, { now = Date.now(), publicOnly = false } = {}) {
   if (
     !isRecord(input) ||
@@ -164,8 +164,8 @@ export function validatePublication(input, { now = Date.now(), publicOnly = fals
   };
 }
 
-/* === Pontuações elegíveis e projeção pública === */
-export const RANKING_GAME_LIMITS = Object.freeze({ snake: 222, flappy: 100000 });
+/* === PONTUAÇÕES ELEGÍVEIS E PROJEÇÃO PÚBLICA === */
+export const RANKING_GAME_LIMITS = Object.freeze({ snake: 397, flappy: 100000 });
 export function validateRankingSubmission(input) {
   if (
     !isRecord(input) ||

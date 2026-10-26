@@ -12,7 +12,7 @@ function load(
   rows = [
     {
       id: 'one',
-      data: { title: 'Evento' },
+      data: { title: 'Evento', date: '2026-10-18' },
       status: 'published',
       updated_at: '2026-10-18T00:00:00Z',
     },
@@ -102,7 +102,7 @@ test('edição exige revisão, limita corpo e retorna conflito sem sobrescrever'
   assert.equal((await send({ ...payload, data: { title: 'a'.repeat(9000) } })).status, 400);
 });
 
-/* === Confirmação de identidade nas mutações === */
+/* === CONFIRMAÇÃO DE IDENTIDADE NAS MUTAÇÕES === */
 test('POST, PATCH e DELETE confirmam o ID validado do corpo, nunca da query', async () => {
   for (const method of ['POST', 'PATCH', 'DELETE']) {
     for (const returnedId of ['one', 'other']) {

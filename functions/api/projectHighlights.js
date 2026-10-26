@@ -1,7 +1,8 @@
 import { requireAdministrator } from './auth.js';
+import { readBoundedJson } from '../_lib/publicWriteProtection.js';
 import { validRepositoryIds } from '../../src/shared/utils/contractValidation.js';
 
-/* === Destaques persistidos no Supabase === */
+/* === DESTAQUES PERSISTIDOS NO SUPABASE === */
 const MAX_BODY_BYTES = 16000;
 const json = (body, status = 200) =>
   Response.json(body, {
@@ -34,17 +35,16 @@ export async function onRequest({ request, env }) {
   };
   try {
     if (request.method === 'GET') {
-      /* ----- Consultar somente os identificadores, sem depender de outras colunas ----- */
+      /* ----- CONSULTAR SOMENTE OS IDENTIFICADORES, SEM DEPENDER DE OUTRAS COLUNAS ----- */
       url.searchParams.set('select', 'repository_ids');
       url.searchParams.set('id', 'eq.default');
       const response = await fetch(url, { headers, signal: AbortSignal.timeout(10000) });
       if (!response.ok) {
-        const details = await response.text();
         console.error('[ProjectHighlights] Falha na consulta ao Supabase', {
           status: response.status,
-          details,
           resource: 'project_highlights',
         });
+        await response.body?.cancel().catch(() => {});
         return json({ error: 'HIGHLIGHTS_UNAVAILABLE' }, 502);
       }
       const rows = await response.json();
@@ -55,31 +55,12 @@ export async function onRequest({ request, env }) {
         : json({ error: 'INVALID_RESPONSE' }, 502);
     }
 
-    /* ----- Limitar o corpo durante a leitura antes de interpretar JSON ----- */
-    const reader = request.body?.getReader();
-    const chunks = [];
-    let size = 0;
-    if (reader)
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        size += value.byteLength;
-        if (size > MAX_BODY_BYTES) {
-          await reader.cancel();
-          return json({ error: 'BODY_TOO_LARGE' }, 413);
-        }
-        chunks.push(value);
-      }
-    const bytes = new Uint8Array(size);
-    let offset = 0;
-    for (const chunk of chunks) {
-      bytes.set(chunk, offset);
-      offset += chunk.byteLength;
-    }
+    /* ----- LIMITAR E LIBERAR O STREAM ANTES DE VALIDAR OS IDENTIFICADORES ----- */
     let input;
     try {
-      input = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
-    } catch {
+      input = await readBoundedJson(request, MAX_BODY_BYTES);
+    } catch (error) {
+      if (error.message === 'BODY_TOO_LARGE') return json({ error: 'BODY_TOO_LARGE' }, 413);
       return json({ error: 'INVALID_HIGHLIGHTS' }, 400);
     }
     if (
@@ -93,7 +74,7 @@ export async function onRequest({ request, env }) {
     url.searchParams.set('select', 'id,repository_ids');
     headers['Content-Type'] = 'application/json';
     headers.Prefer = 'resolution=merge-duplicates,return=representation';
-    /* ----- Atualizar apenas a seleção; preservar quaisquer dados históricos no banco ----- */
+    /* ----- ATUALIZAR APENAS A SELEÇÃO; PRESERVAR QUAISQUER DADOS HISTÓRICOS NO BANCO ----- */
     const response = await fetch(url, {
       method: 'POST',
       headers,
@@ -113,7 +94,14 @@ export async function onRequest({ request, env }) {
       !validRepositoryIds(rows[0].repository_ids)
     )
       return json({ error: 'INVALID_RESPONSE' }, 502);
-    return json({ repositoryIds: rows[0].repository_ids });
+    /* ----- UMA GRAVAÇÃO SÓ É CONFIRMADA SE DEVOLVER A SELEÇÃO ENVIADA ----- */
+    const received = rows[0].repository_ids;
+    if (
+      received.length !== input.repositoryIds.length ||
+      received.some((id) => !input.repositoryIds.includes(id))
+    )
+      return json({ error: 'HIGHLIGHTS_CONFLICT' }, 409);
+    return json({ repositoryIds: received });
   } catch {
     return json({ error: 'HIGHLIGHTS_UNAVAILABLE' }, 502);
   }

@@ -1,14 +1,11 @@
 import { requireAdministrator } from './auth.js';
 import { database, domainFailure } from '../_lib/backend.js';
 import { readBoundedJson, protectPublicWrite } from '../_lib/publicWriteProtection.js';
+import { RANKING_GAME_LIMITS } from '../../src/services/publicContentContract.js';
 
-/* === Constantes e configurações === */
-const ALLOWED_GAMES = ['snake', 'flappy'];
-
-const MAX_SCORES = {
-  snake: 222,
-  flappy: 100000,
-};
+/* === CONSTANTES E CONFIGURAÇÕES === */
+const ALLOWED_GAMES = Object.keys(RANKING_GAME_LIMITS);
+const MAX_SCORES = RANKING_GAME_LIMITS;
 
 const PUBLIC_ERRORS = [
   'INVALID_SCORE',
@@ -22,7 +19,7 @@ const PUBLIC_ERRORS = [
   'RATE_LIMITED',
 ];
 
-/* === Utilitários === */
+/* === UTILITÁRIOS === */
 const json = (data, status = 200) =>
   Response.json(data, {
     status,
@@ -47,13 +44,15 @@ const publicFailure = (error) => {
   const code = error?.message ?? 'RANKINGS_UNAVAILABLE';
 
   const status =
-    code === 'RATE_LIMITED'
-      ? 429
-      : code.startsWith('INVALID') || code === 'BODY_TOO_LARGE'
-        ? 400
-        : code.startsWith('VERIFICATION')
-          ? 403
-          : 503;
+    code === 'BODY_TOO_LARGE'
+      ? 413
+      : code === 'RATE_LIMITED'
+        ? 429
+        : code.startsWith('INVALID')
+          ? 400
+          : code.startsWith('VERIFICATION')
+            ? 403
+            : 503;
 
   return json(
     {
@@ -63,7 +62,7 @@ const publicFailure = (error) => {
   );
 };
 
-/* === Validação das pontuações === */
+/* === VALIDAÇÃO DAS PONTUAÇÕES === */
 export function validateScore(input) {
   if (
     !input ||
@@ -88,9 +87,9 @@ export function validateScore(input) {
   };
 }
 
-/* === Operações administrativas === */
+/* === OPERAÇÕES ADMINISTRATIVAS === */
 
-/* ----- Listagem administrativa ----- */
+/* ----- LISTAGEM ADMINISTRATIVA ----- */
 async function listAdministrativeScores(env) {
   const rows = await database(
     env,
@@ -113,7 +112,7 @@ async function listAdministrativeScores(env) {
   });
 }
 
-/* ----- Exclusão administrativa ----- */
+/* ----- EXCLUSÃO ADMINISTRATIVA ----- */
 async function deleteAdministrativeScore(request, env) {
   const input = await readBoundedJson(request);
 
@@ -153,7 +152,7 @@ async function deleteAdministrativeScore(request, env) {
   return json({ deleted: true });
 }
 
-/* ----- Roteamento administrativo ----- */
+/* ----- ROTEAMENTO ADMINISTRATIVO ----- */
 async function handleAdministrativeRequest(request, env) {
   const access = await requireAdministrator(request, env);
 
@@ -176,9 +175,9 @@ async function handleAdministrativeRequest(request, env) {
   }
 }
 
-/* === Operações públicas === */
+/* === OPERAÇÕES PÚBLICAS === */
 
-/* ----- Consulta pública do ranking ----- */
+/* ----- CONSULTA PÚBLICA DO RANKING ----- */
 async function listPublicScores(request, env) {
   const game = new URL(request.url).searchParams.get('game');
 
@@ -220,7 +219,7 @@ async function listPublicScores(request, env) {
   });
 }
 
-/* ----- Envio público de pontuação ----- */
+/* ----- ENVIO PÚBLICO DE PONTUAÇÃO ----- */
 async function submitPublicScore(request, env) {
   const input = await readBoundedJson(request);
   const score = validateScore(input);
@@ -251,7 +250,7 @@ async function submitPublicScore(request, env) {
   return json({ accepted: true }, 201);
 }
 
-/* ----- Roteamento público ----- */
+/* ----- ROTEAMENTO PÚBLICO ----- */
 async function handlePublicRequest(request, env) {
   if (!['GET', 'POST'].includes(request.method)) {
     return json({ error: 'METHOD_NOT_ALLOWED' }, 405);
@@ -268,7 +267,7 @@ async function handlePublicRequest(request, env) {
   }
 }
 
-/* === Entrada principal da API === */
+/* === ENTRADA PRINCIPAL DA API === */
 export async function onRequest({ request, env }) {
   if (env.RANKINGS_ENABLED !== 'true') {
     return json({ error: 'RANKINGS_DISABLED' }, 503);

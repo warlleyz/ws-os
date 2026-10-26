@@ -10,7 +10,7 @@ Portfólio profissional de Warlley Silva, com experiências Desktop e Mobile em 
 
 17 entradas de aplicativos: 16 públicas e Administração protegida. Currículo encaminha o documento ao Visualizador. O sistema de demonstrações foi removido; destaques são selecionados por ID na Administração e a ordenação restante continua automática. Wally remoto permanece desativado.
 
-A revisão atual segue as 12 etapas do [documento mestre](docs/WS-OS-V2-MESTRE.md). A Etapa 01 consolidou escopo, referências e pendências; as demais etapas não foram iniciadas nesta revisão. Código existente e testes controlados não representam aceite visual ou homologação de produção.
+A revisão atual segue as 12 etapas do [documento mestre](docs/WS-OS-V2-MESTRE.md). A Etapa 01 consolidou escopo e referências. A Etapa 02 recebeu correções locais e inspeção remota de metadados; sua homologação integral permanece condicionada. A Etapa 03 não foi iniciada. Código existente e testes controlados não representam aceite visual ou homologação de produção.
 
 <!-- === EXECUTAR E VALIDAR === -->
 
@@ -34,11 +34,13 @@ npm run preview
 
 Dev/preview servem somente o frontend. O backend é o Cloudflare Worker em worker/index.js, com configuração em wrangler.jsonc, assets de dist e handlers em functions/api. Não usar bindings remotos ou segredos de produção em testes. Consultar a [configuração do backend](docs/backend/CONFIGURACAO.md).
 
-<!-- === BASE DA ETAPA 01 === -->
+<!-- === VALIDAÇÃO DA ETAPA 02 === -->
 
-## Base da Etapa 01
+## Validação da Etapa 02
 
-Referência de código: 3e6af7d, em 26/10/2026. Lint e build aprovados; 495 de 500 testes aprovados. As cinco falhas preexistentes estão atribuídas às etapas responsáveis no mestre. O build informa chunk FileViewer acima de 500 kB. Não houve homologação de produção nesta etapa documental.
+Executada sobre 0bf511d em 26/10/2026. Lint e build aprovados; 505 de 510 testes aprovados, com as mesmas cinco falhas preexistentes registradas no mestre. Há dez novas regressões aprovadas e aviso de chunk FileViewer acima de 500 kB.
+
+A migração incremental de rankings e permissões legadas está preparada, mas não aplicada. Homologá-la antes de publicar o limite Snake 397. Metadados remotos foram consultados somente para leitura; não houve escrita de dados, deploy ou rotação de credenciais. Consultar a seção 22 do mestre para resultados e bloqueios.
 
 <!-- === DOCUMENTAÇÃO === -->
 

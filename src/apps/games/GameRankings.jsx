@@ -3,9 +3,10 @@ import { executeJsonRequest } from '../../services/httpRequestContract';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import WallyTurnstile from '../../features/wally/WallyTurnstile';
 import { useGameRecord } from './gameRecords';
+import { RANKING_GAME_LIMITS } from '../../services/publicContentContract';
 
-/* === Validação da projeção pública, sem aceitar conteúdo administrativo === */
-const maximum = { snake: 397, flappy: 100000 };
+/* === VALIDAÇÃO DA PROJEÇÃO PÚBLICA, SEM ACEITAR CONTEÚDO ADMINISTRATIVO === */
+const maximum = RANKING_GAME_LIMITS;
 const validAlias = (value) =>
   typeof value === 'string' && /^[\p{L}\p{N} _-]{2,24}$/u.test(value.trim());
 const validScore = (game, score) =>
@@ -29,7 +30,7 @@ function publicRows(value, game) {
   return value.map(({ alias, score }) => ({ alias, score }));
 }
 
-/* === Leituras e envio voluntário com resultado confirmado === */
+/* === LEITURAS E ENVIO VOLUNTÁRIO COM RESULTADO CONFIRMADO === */
 export default function GameRankings({ game, paused = false }) {
   useLocale();
   const { record } = useGameRecord(game, 0, false);

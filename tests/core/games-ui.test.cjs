@@ -26,7 +26,7 @@ function timers() {
 }
 const recordBinding = () => ({ record: null, error: false });
 
-/* === Cada jogo exercitado pelos seus handlers === */
+/* === CADA JOGO EXERCITADO PELOS SEUS HANDLERS === */
 test('Snake consome curvas em passos distintos e cancela relógio ao pausar/desmontar', async () => {
   const clock = timers(),
     requested = [],
@@ -257,7 +257,7 @@ test('Paciência move para base, desfaz e bloqueia ações em pausa', async () =
   ui.unmount();
 });
 
-/* === Persistência e mesclagem entre instâncias/abas === */
+/* === PERSISTÊNCIA E MESCLAGEM ENTRE INSTÂNCIAS/ABAS === */
 function recordsTab(storage) {
   const events = new Map();
   let fail = false;
@@ -329,7 +329,7 @@ test('recordes mesclam jogos e melhores marcas, recuperam quota e respeitam limp
   assert.equal(b.events.size, 0);
 });
 
-/* === Ranking: confirmação, validação e retry explícito === */
+/* === RANKING: CONFIRMAÇÃO, VALIDAÇÃO E RETRY EXPLÍCITO === */
 async function ranking(fetchMock, enabled = 'true') {
   const transport = loadContract(path.join(root, 'src/services/httpRequestContract.js'), {
     fetch: fetchMock,
@@ -339,6 +339,7 @@ async function ranking(fetchMock, enabled = 'true') {
     { game: 'snake' },
     {
       ...transport,
+      ...loadContract(path.join(root, 'src/services/publicContentContract.js')),
       __rankingsEnabled: enabled,
       useGameRecord: () => ({ record: 5 }),
       WallyTurnstile: 'verification',

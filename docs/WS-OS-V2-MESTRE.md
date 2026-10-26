@@ -2,7 +2,7 @@
 
 # WS OS V2 — Documento mestre de revisão e conclusão
 
-- **Versão:** 1.1
+- **Versão:** 1.2
 - **Data:** 26/10/2026
 - **Projeto:** WS OS — Portfólio interativo
 - **Repositório:** https://github.com/warlleyz/ws-os
@@ -27,7 +27,7 @@ A revisão deve encerrar, em cada área:
 
 Não deixar traduções, Mobile, estados de erro ou acessibilidade de todos os aplicativos para a última etapa.
 
-Este documento consolida a direção de conclusão. A autorização vigente permite executar diretamente a Etapa 01 na main e realizar um único commit ao final, sem push. Não autoriza avançar para outras etapas, mudar de branch, publicar ou alterar infraestrutura.
+Este documento consolida a direção de conclusão. A autorização vigente permite executar diretamente a Etapa 02 na main e realizar um único commit ao final desta etapa, sem push. A Etapa 01 já recebeu seu commit. Não há autorização para avançar à Etapa 03, mudar de branch, aplicar migrações, publicar ou alterar infraestrutura remota.
 
 <!-- === 2. PRECEDÊNCIA E DECISÕES === -->
 
@@ -55,7 +55,7 @@ As autorizações antigas não constituem permissão permanente.
 - Supabase Storage privado substituiu Cloudflare R2 para arquivos oficiais.
 - A antiga restrição de adiar traduções não orienta esta revisão final: traduções devem ser encerradas na própria área revisada.
 - Referências históricas a 18 aplicativos, Administração inexistente ou Mobile reservado não descrevem a base atual.
-- Recomendações antigas de commits não concedem permissão permanente. Nesta execução, há autorização expressa para um único commit ao final da Etapa 01.
+- Recomendações antigas de commits não concedem permissão permanente. A autorização da Etapa 01 foi cumprida; o pedido posterior autoriza um único commit também ao final da Etapa 02.
 - Boot com processador e logos oficiais reservadas ao favicon, por confirmação do proprietário nesta etapa.
 - A Administração seleciona os projetos destacados por ID; a ordenação restante continua automática, com os filtros existentes. Não há ordenação editorial manual a implementar.
 - Animações das janelas permanecem obrigatórias, respeitando movimento reduzido. Comandos Reiniciar e Desligar ficam fora desta versão.
@@ -742,20 +742,20 @@ Não exigir toda combinação cartesiana em toda alteração. Cobrir riscos e di
 
 Manter neste documento, ou no local único combinado, uma tabela:
 
-| Etapa                            | Estado                     | Evidências                                                            | Pendências                       | Aceite                                                       |
-| -------------------------------- | -------------------------- | --------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------ |
-| 01 — Base e escopo               | Concluída tecnicamente     | Seções 18–21; Git, links, lint, build, testes e preservação do código | Revisão final do proprietário    | Decisões confirmadas; aceite da entrega ainda não registrado |
-| 02 — Backend e dados             | Não iniciada nesta revisão | Sem nova homologação remota                                           | P01, P04 e P12                   | Pendente                                                     |
-| 03 — Core e persistência         | Não iniciada nesta revisão | Diagnóstico registrado                                                | P02 e P03                        | Pendente                                                     |
-| 04 — Design System               | Não iniciada nesta revisão | Decisões preservadas                                                  | P05                              | Pendente                                                     |
-| 05 — Arquivos                    | Não iniciada nesta revisão | Contratos preservados                                                 | Revisão funcional e visual; P14  | Pendente                                                     |
-| 06 — Profissionais               | Não iniciada nesta revisão | Catálogo preservado                                                   | P07 e conteúdo                   | Pendente                                                     |
-| 07 — Contato/Notas/Administração | Não iniciada nesta revisão | APIs existentes                                                       | Homologação dos fluxos           | Pendente                                                     |
-| 08 — Calculadora/Jogos           | Não iniciada nesta revisão | Baseline registrada                                                   | P06, P08 e P11                   | Pendente                                                     |
-| 09 — Terminal/Wally/Busca        | Não iniciada nesta revisão | Catálogo existente                                                    | P09                              | Pendente                                                     |
-| 10 — Shells                      | Não iniciada nesta revisão | Integração existente                                                  | P10 e dispositivos               | Pendente                                                     |
-| 11 — Apresentação                | Não iniciada nesta revisão | Escopo fechado                                                        | Walkthrough e informações finais | Pendente                                                     |
-| 12 — Aceite integrado            | Não iniciada               | CI existente; execução remota não conferida                           | P13 e P15                        | Pendente                                                     |
+| Etapa                            | Estado                                               | Evidências                                               | Pendências                                                     | Aceite                                              |
+| -------------------------------- | ---------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------- |
+| 01 — Base e escopo               | Encerrada e aprovada                                 | Commit 0bf511d                                           | Nenhuma pendência de escopo                                    | Autorização do proprietário para avançar à Etapa 02 |
+| 02 — Backend e dados             | Bloqueada externamente; implementação local validada | Seção 22; 505/510 testes, mesmas cinco falhas anteriores | Aplicar/homologar migração, identidades reais, D1 remoto e P12 | Aceite integral pendente                            |
+| 03 — Core e persistência         | Não iniciada nesta revisão                           | Diagnóstico registrado                                   | P02 e P03                                                      | Pendente                                            |
+| 04 — Design System               | Não iniciada nesta revisão                           | Decisões preservadas                                     | P05                                                            | Pendente                                            |
+| 05 — Arquivos                    | Não iniciada nesta revisão                           | Contratos preservados                                    | Revisão funcional e visual; P14                                | Pendente                                            |
+| 06 — Profissionais               | Não iniciada nesta revisão                           | Catálogo preservado                                      | P07 e conteúdo                                                 | Pendente                                            |
+| 07 — Contato/Notas/Administração | Não iniciada nesta revisão                           | APIs existentes                                          | Homologação dos fluxos                                         | Pendente                                            |
+| 08 — Calculadora/Jogos           | Não iniciada nesta revisão                           | Baseline registrada                                      | P06, P08 e P11                                                 | Pendente                                            |
+| 09 — Terminal/Wally/Busca        | Não iniciada nesta revisão                           | Catálogo existente                                       | P09                                                            | Pendente                                            |
+| 10 — Shells                      | Não iniciada nesta revisão                           | Integração existente                                     | P10 e dispositivos                                             | Pendente                                            |
+| 11 — Apresentação                | Não iniciada nesta revisão                           | Escopo fechado                                           | Walkthrough e informações finais                               | Pendente                                            |
+| 12 — Aceite integrado            | Não iniciada                                         | CI existente; execução remota não conferida              | P13 e P15                                                      | Pendente                                            |
 
 Ao terminar uma etapa, registrar:
 
@@ -872,23 +872,23 @@ As cinco falhas são: duas por FaJava ausente no harness, duas pelo contrato ant
 
 Cada pendência possui responsável primário. Etapas posteriores apenas validam sua integração; não repetem a auditoria completa.
 
-| ID  | Pendência / evidência                                                            | Etapa responsável   | Critério de encerramento                                                                                      |
-| --- | -------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------- |
-| P01 | Snake: interface 397 versus contrato/API/SQL 222                                 | 02                  | Limite único, testes de fronteira e migração incremental preparada; aplicação remota autorizada separadamente |
-| P02 | Currículo redireciona para file-viewer, mas confirmação compara resume           | 03                  | onOpened confirma a instância efetiva e Mobile abre o documento; verificar novamente na 06                    |
-| P03 | beforeClose do DOOM não é consumido pelo Core                                    | 03                  | Preparação aguardada, erro/timeout tratados e cancelamento preservando sessão; verificar novamente na 08      |
-| P04 | RLS, grants, migrações PostgreSQL 001–014 e D1 001–004 dependem do ambiente real | 02                  | Conferência do histórico e testes positivos/negativos sem reaplicação indiscriminada                          |
-| P05 | Wallpapers emparelhados, destaque global e enquadramento fixo                    | 04                  | Quatro seleções independentes, auto/manual por tema e modos aprovados; walkthrough na 11                      |
-| P06 | Quatro testes Snake incompatíveis com a base recuperada                          | 08                  | Harness e fixtures atualizados preservando testes reais de regras, pausa e reinício                           |
-| P07 | Tradução “Carga horária” ausente                                                 | 06                  | Catálogos completos e interface bilíngue validada                                                             |
-| P08 | NOTICE anuncia validação de hash no build, inexistente no script                 | 08                  | Integridade automatizada e avisos compatíveis com o comportamento efetivo                                     |
-| P09 | Busca/Wally expõem principalmente abertura de apps                               | 09                  | Ações locais aprovadas alcançáveis com parâmetros, permissões e confirmação                                   |
-| P10 | Risco de rolagem global Mobile e ausência de aceite físico atual                 | 10                  | Reproduzir antes de alterar; navegação, altura dinâmica, orientação e teclado aprovados                       |
-| P11 | Licença SoundFont, commit/build do UZDoom e conjunto antigo de assets            | 08                  | Rastreabilidade e direitos verificados; limpeza apenas se autorizada e sem dependências                       |
-| P12 | Registro histórico de credenciais/sessões comprometidas                          | 02                  | Proprietário confirma rotação e revogação; não copiar credenciais como evidência                              |
-| P13 | Backup, restauração, rollback e limites operacionais                             | 12                  | Procedimentos ensaiados em ambiente autorizado e compatibilidade de schema registrada                         |
-| P14 | Chunk do Visualizador acima de 500 kB                                            | 05                  | Medir impacto e registrar solução ou justificativa; não elevar limite para esconder o aviso                   |
-| P15 | Conteúdo, acessibilidade, visual, CI e integrações externas                      | Por aplicativo e 12 | Evidências efetivas e aceite do proprietário, sem falsa certificação                                          |
+| ID  | Pendência / evidência                                                                   | Etapa responsável   | Critério de encerramento                                                                                 |
+| --- | --------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
+| P01 | Limite Snake 397 unificado no contrato, API e interface; migração incremental preparada | 02                  | Concluído localmente; aplicar e homologar a migração antes de publicar                                   |
+| P02 | Currículo redireciona para file-viewer, mas confirmação compara resume                  | 03                  | onOpened confirma a instância efetiva e Mobile abre o documento; verificar novamente na 06               |
+| P03 | beforeClose do DOOM não é consumido pelo Core                                           | 03                  | Preparação aguardada, erro/timeout tratados e cancelamento preservando sessão; verificar novamente na 08 |
+| P04 | Metadados de RLS/grants, bucket e histórico 005–014 conferidos no ws-os-dev             | 02                  | Ainda requer identidades reais, execução dos roteiros SQL, migração incremental e D1 remoto              |
+| P05 | Wallpapers emparelhados, destaque global e enquadramento fixo                           | 04                  | Quatro seleções independentes, auto/manual por tema e modos aprovados; walkthrough na 11                 |
+| P06 | Quatro testes Snake incompatíveis com a base recuperada                                 | 08                  | Harness e fixtures atualizados preservando testes reais de regras, pausa e reinício                      |
+| P07 | Tradução “Carga horária” ausente                                                        | 06                  | Catálogos completos e interface bilíngue validada                                                        |
+| P08 | NOTICE anuncia validação de hash no build, inexistente no script                        | 08                  | Integridade automatizada e avisos compatíveis com o comportamento efetivo                                |
+| P09 | Busca/Wally expõem principalmente abertura de apps                                      | 09                  | Ações locais aprovadas alcançáveis com parâmetros, permissões e confirmação                              |
+| P10 | Risco de rolagem global Mobile e ausência de aceite físico atual                        | 10                  | Reproduzir antes de alterar; navegação, altura dinâmica, orientação e teclado aprovados                  |
+| P11 | Licença SoundFont, commit/build do UZDoom e conjunto antigo de assets                   | 08                  | Rastreabilidade e direitos verificados; limpeza apenas se autorizada e sem dependências                  |
+| P12 | Proprietário informou em 26/10/2026 que ainda não confirmou rotação/revogação           | 02                  | Bloqueio externo: confirmar correção sem divulgar credenciais ou considerar logout suficiente            |
+| P13 | Backup, restauração, rollback e limites operacionais                                    | 12                  | Procedimentos ensaiados em ambiente autorizado e compatibilidade de schema registrada                    |
+| P14 | Chunk do Visualizador acima de 500 kB                                                   | 05                  | Medir impacto e registrar solução ou justificativa; não elevar limite para esconder o aviso              |
+| P15 | Conteúdo, acessibilidade, visual, CI e integrações externas                             | Por aplicativo e 12 | Evidências efetivas e aceite do proprietário, sem falsa certificação                                     |
 
 <!-- ----- ACESSOS E MATERIAIS A PREPARAR ----- -->
 
@@ -1002,4 +1002,111 @@ wrangler.jsonc já contém binding D1 e flags REQUESTS_ENABLED, MANAGED_FILES_EN
 
 ### Continuidade imediata
 
-O próximo incremento é a Etapa 02, começando pela leitura do histórico de migrações, contratos e permissões, com foco no limite Snake e nas dependências de homologação. Não repetir a organização documental nem corrigir interfaces de aplicativos antes da etapa responsável. Iniciar somente quando autorizado pelo proprietário.
+A Etapa 02 recebeu execução local e inspeção remota de metadados, conforme seção 22. A continuação é homologar os bloqueios externos quando autorizados. A Etapa 03 não foi iniciada; pode receber autorização própria sem repetir esta revisão, preservando os bloqueios de publicação ainda abertos.
+
+<!-- === 22. ETAPA 02 — BACKEND, SEGURANÇA E DADOS === -->
+
+## 22. Etapa 02 — Backend, segurança e dados
+
+<!-- ----- ESCOPO E AUTORIZAÇÃO ----- -->
+
+### Escopo e autorização
+
+Executada na main sobre o commit 0bf511d, por autorização para seguir o mesmo modelo da etapa anterior: edição direta, validação e um único commit final, sem push. Nenhuma migração, escrita de dados, configuração de provedor, publicação ou rotação de credencial foi executada remotamente.
+
+A implementação local foi validada. O aceite integral permanece bloqueado pelas homologações abaixo; não considerar segurança de produção ou conclusão do backend certificadas.
+
+<!-- ----- CORREÇÕES IMPLEMENTADAS ----- -->
+
+### Correções implementadas
+
+| Área             | Correção                                                                              | Preservação                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Ranking Snake    | Limite 397 no contrato compartilhado, importado pela API e interface                  | Flappy mantém 100000; nenhuma pontuação antiga apagada                        |
+| Erros de ranking | Corpo excessivo retorna HTTP 413                                                      | Não enviar ao banco ou verificador um payload já rejeitado                    |
+| Destaques        | Leitura limitada compartilhada, MIME JSON, cleanup e confirmação da seleção devolvida | Somente IDs, autorização administrativa e dados históricos preservados        |
+| Logs             | Removido corpo bruto de erros do Supabase em destaques                                | Registro mantém apenas status e identificação técnica do recurso              |
+| Conteúdo público | Projeção pelos campos permitidos de eventos/arquivos                                  | Campos internos não são copiados e dados privados/inválidos não são entregues |
+| Storage          | Downloads e reconciliação interrompem a leitura acima do tamanho esperado             | SHA-256, revisão, acesso mediado e ausência de sobrescrita preservados        |
+| Banco            | Migração incremental amplia a constraint Snake e isola a view legada das demos        | Não reescreve 001–014, não remove tabelas, views ou registros                 |
+
+O MIME JSON aceita parâmetros como charset, mas rejeita tipos que só compartilham o prefixo application/json. Resposta de gravação com outra seleção não produz confirmação falsa. Ordenação editorial manual e demos continuam fora do escopo.
+
+<!-- ----- REVISÃO DOS CONTRATOS EXISTENTES ----- -->
+
+### Revisão dos contratos existentes
+
+Auth mantém verificação do usuário no provedor e consulta de autorização administrativa; não usa user_metadata como papel administrativo. Sessão cliente permanece em memória. As verificações locais de visitante, usuário sem papel, falha de autorização e indisponibilidade continuam aprovadas. Não foi realizado login real ou revogação de sessão nesta etapa.
+
+Solicitações preservam validação/consentimento, Turnstile, limite D1, reserva idempotente, revisões e separação entre persistência e e-mail. Notas/anexos mantêm acesso conforme publicação, limite de vínculos e revisão. Storage mantém upload sem sobrescrita, verificação de conteúdo, reconciliação e exclusão confirmada. Curtidas preservam unicidade, leitura de agregados e bloqueio de acesso direto aos hashes. Manutenção continua condicionada às flags e ao ambiente autorizado.
+
+Esses fluxos foram examinados no código e cobertos pelos testes locais existentes; isso não equivale à homologação real de todas as operações.
+
+<!-- ----- INSPEÇÃO REMOTA SOMENTE DE LEITURA ----- -->
+
+### Inspeção remota somente de leitura
+
+Projeto identificado pelo conector Supabase: ws-os-dev. Foram consultados inventário de migrações, advisors e catálogos de estrutura/permissões. Não foram lidos documentos, solicitações, contas privadas, credenciais ou conteúdo de visitantes.
+
+- Histórico registra as migrações equivalentes a 005–014, incluindo índice de anexos e permissões de IDs de destaques. As estruturas anteriores não possuem histórico equivalente confirmado; não reaplicar automaticamente.
+- RLS habilitada nas dez tabelas públicas da aplicação.
+- Políticas administrativas conferidas nos metadados usam vínculo em admin_users, não apenas o papel authenticated.
+- Visitante possui SELECT de id/repository_ids em project_highlights, sem SELECT de demos na tabela.
+- Hash do ranking não possui leitura pública; RPCs de submissão, anexos, arquivos e retenção permanecem restritos ao serviço.
+- Bucket ws-os-official-files privado, limite 10485760 bytes e formatos PDF/TXT/PNG/JPEG/WebP.
+- Banco ainda limita Snake a 222. A migração nova não está aplicada.
+- A view project_highlights_public ainda permite leitura anon e usa privilégios do proprietário. A migração nova revoga esse acesso e define security_invoker, preservando o objeto.
+
+O advisor registra também: post_likes com RLS sem política, RPC agregado de contagem executável por papéis públicos e proteção contra senhas vazadas desativada. O primeiro é intencional: anon/authenticated não possuem SELECT/INSERT na tabela. O RPC retorna somente contagem de publicação pública passada e é utilizado pelo fluxo existente; não foi revogado para silenciar o alerta. A configuração de senhas deve ser avaliada pelo proprietário conforme o ambiente e recursos disponíveis.
+
+Metadados não substituem ensaio com identidades reais ou comprovam rotação de segredos. O proprietário informou que ainda não confirmou a correção das credenciais/sessões historicamente comprometidas; P12 permanece aberto.
+
+<!-- ----- MIGRAÇÃO E ORDEM DE HOMOLOGAÇÃO ----- -->
+
+### Migração e ordem de homologação
+
+Arquivo preparado: database/migrations/20261026141305_etapa02_rankings_e_permissoes_legadas.sql. Foi gerado pela CLI Supabase já disponível no cache offline e incorporado ao diretório de migrações existente. Nenhuma dependência do projeto foi instalada e nenhuma configuração Supabase de projeto local foi criada no repositório.
+
+Roteiro preparado: database/tests/etapa02_rankings_permissions.sql. Testa limites 397/398 e 100000/100001, preservação do melhor resultado e permissões mínimas; termina com ROLLBACK. Não foi executado no PostgreSQL nesta entrega e não deve ser descrito como teste SQL aprovado.
+
+Antes de publicar este código:
+
+1. Confirmar ambiente isolado, backup e histórico 001–014; não executar db push indiscriminadamente sobre o esquema existente.
+2. Obter autorização explícita e aplicar a migração incremental em homologação.
+3. Executar o novo roteiro transacional e o roteiro existente de RLS com identidades autorizadas, sem usar dados pessoais reais como fixtures.
+4. Homologar Worker/Turnstile/D1, escrita e moderação de pontuação acima de 222, anexos, upload/exclusão e solicitações.
+5. Confirmar que a view legada deixou de ser pública e revisar os advisors novamente.
+6. Confirmar rotação/revogação com o proprietário e só então tratar publicação como candidata ao aceite.
+
+Rollback de código não autoriza reduzir o limite do banco ou apagar pontuações. Após existirem resultados acima de 222, uma versão antiga que só aceita 222 não é candidata segura de rollback do ranking. Preservar uma versão compatível e o histórico dos dados.
+
+<!-- ----- VALIDAÇÃO EFETIVA ----- -->
+
+### Validação efetiva
+
+| Verificação                                               | Resultado                                                          |
+| --------------------------------------------------------- | ------------------------------------------------------------------ |
+| Testes diretamente relacionados                           | Aprovados                                                          |
+| Interface de ranking, filtro de testes por nome           | 3 aprovados                                                        |
+| Novas regressões de backend                               | 10 aprovadas na suíte                                              |
+| Lint                                                      | Aprovado                                                           |
+| Build                                                     | Aprovado; aviso FileViewer de aproximadamente 620,92 kB preservado |
+| Suíte completa                                            | 510 testes, 505 aprovados e as mesmas cinco falhas anteriores      |
+| SQL incremental e roteiros PostgreSQL                     | Preparados; não aplicados/executados                               |
+| Homologação com identidades reais, D1 remoto e publicação | Não realizada                                                      |
+
+Revisão final: formatação dos 16 arquivos aplicáveis aprovada, 100 links relativos válidos e git diff --check sem erros. O conjunto possui 18 arquivos; migrações antigas, dependências, configuração de runtime e assets permanecem inalterados. A conferência estática do SQL não é execução nem homologação PostgreSQL.
+
+As falhas restantes continuam sendo quatro testes Snake antigos e a tradução “Carga horária”, atribuídas às etapas 08 e 06. Nenhum teste foi desativado, removido ou relaxado para escondê-las.
+
+<!-- ----- ARQUIVOS E CONTINUIDADE ----- -->
+
+### Arquivos e continuidade
+
+Alterados: functions/_lib/publicWriteProtection.js; functions/api/rankings.js, projectHighlights.js, managedContent.js e managedFiles.js; src/services/publicContentContract.js; src/apps/games/GameRankings.jsx; testes relacionados; README, configuração do backend e este mestre. Criados: uma migração incremental, um roteiro SQL transacional e tests/core/backend-stage02.test.cjs.
+
+Comentários dos arquivos modificados seguem seções/subseções em PT-BR. Não foram alterados a configuração de produção, as flags, dependências, assets, demais aplicativos ou migrações antigas. doom-source/ permanece preservado e fora do commit.
+
+Não iniciar a Etapa 03 automaticamente. A próxima intervenção nesta etapa é homologar os itens externos mediante autorização, sem repetir as correções locais já verificadas.
+
+Referências de segurança consultadas: [RLS e privilégios](https://supabase.com/docs/guides/database/postgres/row-level-security), [avisos de views com privilégios do proprietário](https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view) e [segurança de senhas](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).

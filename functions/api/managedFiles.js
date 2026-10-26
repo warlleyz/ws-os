@@ -1,14 +1,6 @@
-
 import { requireAdministrator } from './auth.js';
 import { readBoundedJson } from '../_lib/publicWriteProtection.js';
-import {
-  configured,
-  database,
-  domainFailure,
-  json,
-  single,
-  pageOffset,
-} from '../_lib/backend.js';
+import { configured, database, domainFailure, json, single, pageOffset } from '../_lib/backend.js';
 import {
   isStorageConfigured,
   uploadOfficialFile,
@@ -19,14 +11,14 @@ import {
 import { validateNoteAttachment } from '../../src/services/storage/noteAttachmentContract.js';
 import { validId } from '../../src/shared/utils/contractValidation.js';
 
-/* === Configuração dos arquivos oficiais === */
+/* === CONFIGURAÇÃO DOS ARQUIVOS OFICIAIS === */
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const ADMIN_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 const PUBLIC_METHODS = ['GET'];
 
-/* === Projeção de metadados === */
-/* ----- Informações permitidas ao consumidor ----- */
+/* === PROJEÇÃO DE METADADOS === */
+/* ----- INFORMAÇÕES PERMITIDAS AO CONSUMIDOR ----- */
 function projectFile(row) {
   return {
     resourceId: row.id,
@@ -40,11 +32,10 @@ function projectFile(row) {
   };
 }
 
-/* === Validação de arquivos === */
-/* ----- Verificação da assinatura e do conteúdo ----- */
+/* === VALIDAÇÃO DE ARQUIVOS === */
+/* ----- VERIFICAÇÃO DA ASSINATURA E DO CONTEÚDO ----- */
 export function validateFileBytes(bytes, mime) {
-  const startsWith = (signature) =>
-    signature.every((value, index) => bytes[index] === value);
+  const startsWith = (signature) => signature.every((value, index) => bytes[index] === value);
 
   if (mime === 'application/pdf') {
     return startsWith([37, 80, 68, 70, 45]);
@@ -61,17 +52,13 @@ export function validateFileBytes(bytes, mime) {
   if (mime === 'image/webp') {
     return (
       startsWith([82, 73, 70, 70]) &&
-      [87, 69, 66, 80].every(
-        (value, index) => bytes[index + 8] === value,
-      )
+      [87, 69, 66, 80].every((value, index) => bytes[index + 8] === value)
     );
   }
 
   if (mime === 'text/plain') {
     try {
-      return !new TextDecoder('utf-8', { fatal: true })
-        .decode(bytes)
-        .includes('\0');
+      return !new TextDecoder('utf-8', { fatal: true }).decode(bytes).includes('\0');
     } catch {
       return false;
     }
@@ -80,7 +67,7 @@ export function validateFileBytes(bytes, mime) {
   return false;
 }
 
-/* ----- Leitura limitada do corpo binário ----- */
+/* ----- LEITURA LIMITADA DO CORPO BINÁRIO ----- */
 async function readFileBytes(request, expectedSize) {
   const reader = request.body?.getReader();
 
@@ -99,17 +86,14 @@ async function readFileBytes(request, expectedSize) {
 
       totalSize += value.byteLength;
 
-      if (
-        totalSize > expectedSize ||
-        totalSize > MAX_FILE_SIZE
-      ) {
+      if (totalSize > expectedSize || totalSize > MAX_FILE_SIZE) {
         throw Error('BODY_TOO_LARGE');
       }
 
       chunks.push(value);
     }
   } finally {
-    await reader.cancel().catch(() => { });
+    await reader.cancel().catch(() => {});
     reader.releaseLock();
   }
 
@@ -128,18 +112,17 @@ async function readFileBytes(request, expectedSize) {
   return bytes;
 }
 
-/* ----- Cálculo de integridade SHA-256 ----- */
+/* ----- CÁLCULO DE INTEGRIDADE SHA-256 ----- */
 async function calculateSha256(bytes) {
   const digest = await crypto.subtle.digest('SHA-256', bytes);
 
-  return Array.from(
-    new Uint8Array(digest),
-    (value) => value.toString(16).padStart(2, '0'),
-  ).join('');
+  return Array.from(new Uint8Array(digest), (value) => value.toString(16).padStart(2, '0')).join(
+    '',
+  );
 }
 
-/* === Comunicação com o banco de dados === */
-/* ----- Consulta de um recurso oficial ----- */
+/* === COMUNICAÇÃO COM O BANCO DE DADOS === */
+/* ----- CONSULTA DE UM RECURSO OFICIAL ----- */
 async function findOfficialFile(env, id, token) {
   const query =
     'official_files?' +
@@ -157,7 +140,7 @@ async function findOfficialFile(env, id, token) {
   return single(rows, id);
 }
 
-/* ----- Atualização condicional da revisão ----- */
+/* ----- ATUALIZAÇÃO CONDICIONAL DA REVISÃO ----- */
 async function updateOfficialFile(env, row, token, changes) {
   const query =
     'official_files?' +
@@ -180,17 +163,18 @@ async function updateOfficialFile(env, row, token, changes) {
   return updated;
 }
 
-/* === Leitura segura de arquivos === */
-/* ----- Download mediado pelo Worker ----- */
+/* === LEITURA SEGURA DE ARQUIVOS === */
+/* ----- DOWNLOAD MEDIADO PELO WORKER ----- */
 async function readOfficialFile(row, env) {
-  const response = await downloadOfficialFile(
-    env,
-    row.object_key,
-  );
+  const response = await downloadOfficialFile(env, row.object_key);
 
-  const bytes = new Uint8Array(
-    await response.arrayBuffer(),
-  );
+  /* ----- O PROVEDOR TAMBÉM É LIMITADO DURANTE A LEITURA, SEM CONFIAR EM CONTENT-LENGTH ----- */
+  let bytes;
+  try {
+    bytes = await readFileBytes(response, row.size);
+  } catch {
+    throw Error('SERVICE_UNAVAILABLE');
+  }
 
   if (bytes.byteLength !== row.size) {
     throw Error('SERVICE_UNAVAILABLE');
@@ -206,8 +190,7 @@ async function readOfficialFile(row, env) {
     headers: {
       'Content-Type': row.mime_type,
       'Content-Length': String(row.size),
-      'Content-Disposition':
-        `attachment; filename*=UTF-8''${encodeURIComponent(row.name)}`,
+      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(row.name)}`,
       'Cache-Control': 'no-store',
       'X-Content-Type-Options': 'nosniff',
       'Content-Security-Policy': "default-src 'none'; sandbox",
@@ -215,18 +198,14 @@ async function readOfficialFile(row, env) {
   });
 }
 
-/* === Consulta pública === */
-/* ----- Catálogo de recursos publicados ----- */
+/* === CONSULTA PÚBLICA === */
+/* ----- CATÁLOGO DE RECURSOS PUBLICADOS ----- */
 async function listPublicFiles(env) {
-  const rows = await database(
-    env,
-    'rpc/list_public_files',
-    {
-      method: 'POST',
-      service: true,
-      body: {},
-    },
-  );
+  const rows = await database(env, 'rpc/list_public_files', {
+    method: 'POST',
+    service: true,
+    body: {},
+  });
 
   if (!Array.isArray(rows)) {
     throw Error('SERVICE_UNAVAILABLE');
@@ -237,23 +216,19 @@ async function listPublicFiles(env) {
   });
 }
 
-/* ----- Leitura de recurso publicável ----- */
+/* ----- LEITURA DE RECURSO PUBLICÁVEL ----- */
 async function getPublicFile(env, id) {
   if (!validId(id)) {
     throw Error('INVALID_FILE_ID');
   }
 
-  const rows = await database(
-    env,
-    'rpc/read_public_file',
-    {
-      method: 'POST',
-      service: true,
-      body: {
-        target_id: id,
-      },
+  const rows = await database(env, 'rpc/read_public_file', {
+    method: 'POST',
+    service: true,
+    body: {
+      target_id: id,
     },
-  );
+  });
 
   if (!Array.isArray(rows) || rows.length !== 1) {
     throw Error('NOT_FOUND');
@@ -264,15 +239,14 @@ async function getPublicFile(env, id) {
   return readOfficialFile(row, env);
 }
 
-/* === Administração de arquivos === */
-/* ----- Listagem paginada ----- */
+/* === ADMINISTRAÇÃO DE ARQUIVOS === */
+/* ----- LISTAGEM PAGINADA ----- */
 async function listAdminFiles(request, env, token) {
   const offset = pageOffset(request);
 
   const rows = await database(
     env,
-    'official_files?order=updated_at.desc,id.asc&limit=100&offset=' +
-    offset,
+    'official_files?order=updated_at.desc,id.asc&limit=100&offset=' + offset,
     { token },
   );
 
@@ -286,7 +260,7 @@ async function listAdminFiles(request, env, token) {
   });
 }
 
-/* ----- Criação de metadados ----- */
+/* ----- CRIAÇÃO DE METADADOS ----- */
 async function createOfficialFile(request, env, token) {
   const input = await readBoundedJson(request);
 
@@ -329,12 +303,15 @@ async function createOfficialFile(request, env, token) {
     input.id,
   );
 
-  return json({
-    item: projectFile(created),
-  }, 201);
+  return json(
+    {
+      item: projectFile(created),
+    },
+    201,
+  );
 }
 
-/* ----- Conferência da revisão solicitada ----- */
+/* ----- CONFERÊNCIA DA REVISÃO SOLICITADA ----- */
 function validateRevision(request, row) {
   const rawRevision = request.headers.get('If-Match');
   const revision = Number(rawRevision);
@@ -352,33 +329,28 @@ function validateRevision(request, row) {
   return revision;
 }
 
-/* === Upload e reconciliação === */
-/* ----- Conferência do objeto armazenado ----- */
+/* === UPLOAD E RECONCILIAÇÃO === */
+/* ----- CONFERÊNCIA DO OBJETO ARMAZENADO ----- */
 async function verifyStoredFile(env, row, expectedSha256) {
-  const metadata = await inspectOfficialFile(
-    env,
-    row.object_key,
-  );
+  const metadata = await inspectOfficialFile(env, row.object_key);
 
   if (!metadata.exists) {
     return false;
   }
 
-  if (
-    metadata.size !== row.size ||
-    metadata.mimeType !== row.mime_type
-  ) {
+  if (metadata.size !== row.size || metadata.mimeType !== row.mime_type) {
     throw Error('CONFLICT');
   }
 
-  const response = await downloadOfficialFile(
-    env,
-    row.object_key,
-  );
+  const response = await downloadOfficialFile(env, row.object_key);
 
-  const bytes = new Uint8Array(
-    await response.arrayBuffer(),
-  );
+  /* ----- O PROVEDOR TAMBÉM É LIMITADO DURANTE A LEITURA, SEM CONFIAR EM CONTENT-LENGTH ----- */
+  let bytes;
+  try {
+    bytes = await readFileBytes(response, row.size);
+  } catch {
+    throw Error('SERVICE_UNAVAILABLE');
+  }
 
   if (bytes.byteLength !== row.size) {
     throw Error('CONFLICT');
@@ -393,7 +365,7 @@ async function verifyStoredFile(env, row, expectedSha256) {
   return true;
 }
 
-/* ----- Envio e confirmação no PostgreSQL ----- */
+/* ----- ENVIO E CONFIRMAÇÃO NO POSTGRESQL ----- */
 async function uploadFile(request, env, row, token) {
   if (!['pending', 'uploading'].includes(row.state)) {
     throw Error('CONFLICT');
@@ -426,48 +398,32 @@ async function uploadFile(request, env, row, token) {
       mimeType: row.mime_type,
     });
 
-    verified = await verifyStoredFile(
-      env,
-      row,
-      sha256,
-    );
+    verified = await verifyStoredFile(env, row, sha256);
   } catch (error) {
-    if (
-      error.message !== 'CONFLICT' &&
-      error.message !== 'STORAGE_RESULT_UNKNOWN'
-    ) {
+    if (error.message !== 'CONFLICT' && error.message !== 'STORAGE_RESULT_UNKNOWN') {
       throw error;
     }
 
-    verified = await verifyStoredFile(
-      env,
-      row,
-      sha256,
-    );
+    verified = await verifyStoredFile(env, row, sha256);
   }
 
   if (!verified) {
     throw Error('STORAGE_RESULT_UNKNOWN');
   }
 
-  const updated = await updateOfficialFile(
-    env,
-    row,
-    token,
-    {
-      state: 'available',
-      revision: row.revision + 1,
-      sha256,
-    },
-  );
+  const updated = await updateOfficialFile(env, row, token, {
+    state: 'available',
+    revision: row.revision + 1,
+    sha256,
+  });
 
   return json({
     item: projectFile(updated),
   });
 }
 
-/* === Visibilidade dos recursos === */
-/* ----- Publicação e privatização ----- */
+/* === VISIBILIDADE DOS RECURSOS === */
+/* ----- PUBLICAÇÃO E PRIVATIZAÇÃO ----- */
 async function updateFileVisibility(request, env, row, token) {
   if (row.state !== 'available') {
     throw Error('INVALID_FILE_VISIBILITY');
@@ -479,27 +435,20 @@ async function updateFileVisibility(request, env, row, token) {
     throw Error('INVALID_FILE_VISIBILITY');
   }
 
-  const updated = await updateOfficialFile(
-    env,
-    row,
-    token,
-    {
-      visibility: input.visibility,
-      revision: row.revision + 1,
-    },
-  );
+  const updated = await updateOfficialFile(env, row, token, {
+    visibility: input.visibility,
+    revision: row.revision + 1,
+  });
 
   return json({
     item: projectFile(updated),
   });
 }
 
-/* === Exclusão de arquivos === */
-/* ----- Remoção física e confirmação no banco ----- */
+/* === EXCLUSÃO DE ARQUIVOS === */
+/* ----- REMOÇÃO FÍSICA E CONFIRMAÇÃO NO BANCO ----- */
 async function removeOfficialFile(request, env, row, token) {
-  if (
-    request.headers.get('X-Confirm-Delete') !== 'true'
-  ) {
+  if (request.headers.get('X-Confirm-Delete') !== 'true') {
     throw Error('INVALID_CONFIRMATION');
   }
 
@@ -515,42 +464,31 @@ async function removeOfficialFile(request, env, row, token) {
   }
 
   try {
-    await deleteOfficialFile(
-      env,
-      row.object_key,
-    );
+    await deleteOfficialFile(env, row.object_key);
   } catch (error) {
     if (error.message !== 'STORAGE_RESULT_UNKNOWN') {
       throw error;
     }
   }
 
-  const metadata = await inspectOfficialFile(
-    env,
-    row.object_key,
-  );
+  const metadata = await inspectOfficialFile(env, row.object_key);
 
   if (metadata.exists) {
     throw Error('STORAGE_RESULT_UNKNOWN');
   }
 
-  const updated = await updateOfficialFile(
-    env,
-    row,
-    token,
-    {
-      state: 'deleted',
-      revision: row.revision + 1,
-    },
-  );
+  const updated = await updateOfficialFile(env, row, token, {
+    state: 'deleted',
+    revision: row.revision + 1,
+  });
 
   return json({
     item: projectFile(updated),
   });
 }
 
-/* === Roteamento das requisições === */
-/* ----- Operações administrativas ----- */
+/* === ROTEAMENTO DAS REQUISIÇÕES === */
+/* ----- OPERAÇÕES ADMINISTRATIVAS ----- */
 async function handleAdminRequest(request, env, url) {
   const token = request.headers.get('authorization');
   const id = url.searchParams.get('id');
@@ -596,7 +534,7 @@ async function handleAdminRequest(request, env, url) {
   return removeOfficialFile(request, env, row, token);
 }
 
-/* ----- Operações públicas ----- */
+/* ----- OPERAÇÕES PÚBLICAS ----- */
 async function handlePublicRequest(env, url) {
   const id = url.searchParams.get('id');
 
@@ -607,56 +545,46 @@ async function handlePublicRequest(env, url) {
   return getPublicFile(env, id);
 }
 
-/* === Entrada principal da API === */
-/* ----- Autorização, configuração e execução ----- */
+/* === ENTRADA PRINCIPAL DA API === */
+/* ----- AUTORIZAÇÃO, CONFIGURAÇÃO E EXECUÇÃO ----- */
 export async function onRequest({ request, env }) {
   const url = new URL(request.url);
   const admin = url.pathname === '/api/admin/files';
 
   if (admin) {
-    const access = await requireAdministrator(
-      request,
-      env,
-    );
+    const access = await requireAdministrator(request, env);
 
     if (!access.authorized) {
       return access.response;
     }
   }
 
-  if (
-    env.MANAGED_FILES_ENABLED !== 'true' ||
-    !configured(env, true) ||
-    !isStorageConfigured(env)
-  ) {
-    return json({
-      error: 'FILES_NOT_CONFIGURED',
-    }, 503);
+  if (env.MANAGED_FILES_ENABLED !== 'true' || !configured(env, true) || !isStorageConfigured(env)) {
+    return json(
+      {
+        error: 'FILES_NOT_CONFIGURED',
+      },
+      503,
+    );
   }
 
-  const allowedMethods = admin
-    ? ADMIN_METHODS
-    : PUBLIC_METHODS;
+  const allowedMethods = admin ? ADMIN_METHODS : PUBLIC_METHODS;
 
   if (!allowedMethods.includes(request.method)) {
-    return json({
-      error: 'METHOD_NOT_ALLOWED',
-    }, 405);
+    return json(
+      {
+        error: 'METHOD_NOT_ALLOWED',
+      },
+      405,
+    );
   }
 
   try {
     if (admin) {
-      return await handleAdminRequest(
-        request,
-        env,
-        url,
-      );
+      return await handleAdminRequest(request, env, url);
     }
 
-    return await handlePublicRequest(
-      env,
-      url,
-    );
+    return await handlePublicRequest(env, url);
   } catch (error) {
     return domainFailure(error);
   }

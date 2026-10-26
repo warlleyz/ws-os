@@ -5,7 +5,7 @@ const { loadContract } = require('../helpers/contract-loader.cjs');
 const load = (file) => loadContract(path.resolve(__dirname, '../../' + file));
 const date = '2026-10-01T12:00:00.000Z';
 
-/* === Solicitações e retenção === */
+/* === SOLICITAÇÕES E RETENÇÃO === */
 const request = () => ({
   id: 'request-1',
   type: 'message',
@@ -65,7 +65,7 @@ test('agendamento exige fuso e instante futuro e não confirma evento ou reuniã
   );
 });
 
-/* === Conteúdo público e adaptações === */
+/* === CONTEÚDO PÚBLICO E ADAPTAÇÕES === */
 test('eventos validam horário/fuso, proíbem dados privados e adaptam legado sem inventar revisão', () => {
   const api = load('src/services/publicContentContract.js');
   const event = {
@@ -130,13 +130,13 @@ test('ranking usa limites por jogo e só projeta campos públicos', () => {
     visitor_hash: 'private',
     turnstileToken: 'secret',
   };
-  assert.equal(api.validateRankingSubmission({ ...record, score: 223 }).ok, false);
+  assert.equal(api.validateRankingSubmission({ ...record, score: 398 }).ok, false);
   const result = api.projectPublicScore(record);
   assert.equal(result.ok, true);
   assert.doesNotMatch(JSON.stringify(result), /private|secret/);
 });
 
-/* === Preferências versionáveis e reset seguro === */
+/* === PREFERÊNCIAS VERSIONÁVEIS E RESET SEGURO === */
 test('preferências adaptam formatos legados sem escrita e codificam nas mesmas chaves', () => {
   const api = load('src/core/preferenceContract.js');
   for (const raw of ['list', '"list"']) {
@@ -165,7 +165,7 @@ test('reset seleciona somente ações da categoria e recusa alvos de dados pesso
   assert.equal(api.createPreferenceResetPlan().preserves.includes('session'), true);
 });
 
-/* === Datas reais e retenção não prorrogada por arquivamento === */
+/* === DATAS REAIS E RETENÇÃO NÃO PRORROGADA POR ARQUIVAMENTO === */
 test('datas impossíveis são rejeitadas e arquivar não amplia retenção de solicitação concluída', () => {
   const validation = load('src/shared/utils/contractValidation.js');
   assert.equal(validation.validInstant('2026-02-30T12:00:00Z'), false);
