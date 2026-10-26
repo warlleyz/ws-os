@@ -1,10 +1,9 @@
 import { memo } from 'react';
 import Window from './Window';
 import { getAppDefinition } from '../../core/appRegistry';
-import { activateApp } from '../../core/appManager';
-import { minimizeApp } from '../../core/appManager';
-import { closeApp } from '../../core/appManager';
+import { activateApp, minimizeApp, closeApp } from '../../core/appManager';
 
+/* === COMPOSIÇÃO DAS INSTÂNCIAS E ORDEM DE FOCO === */
 function WindowLayer({ appState, run }) {
   return (
     <div className="desktop__window-layer">

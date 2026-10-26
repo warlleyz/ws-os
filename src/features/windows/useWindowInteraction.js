@@ -8,7 +8,9 @@ import {
   getSnapMode,
 } from './windowGeometry';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+/* === INTERAÇÃO E GEOMETRIA POR INSTÂNCIA === */
 export default function useWindowInteraction({ instance, app }) {
+  /* ----- REFERÊNCIAS E ESTADO LOCAL ----- */
   const windowRef = useRef(null);
   const geometryRef = useRef(null);
   const interactionRef = useRef(null);
@@ -17,6 +19,7 @@ export default function useWindowInteraction({ instance, app }) {
   const modeRef = useRef('normal');
   const [mode, setMode] = useState('normal');
   const appName = app?.name ?? instance.appId;
+  /* ----- CANCELAR INTERAÇÃO COM ESCAPE ----- */
   useEffect(() => {
     function handleKeyDown(event) {
       if (event.key !== 'Escape') return;
@@ -49,7 +52,7 @@ export default function useWindowInteraction({ instance, app }) {
     };
   }, []);
   useEffect(() => {
-    if (!instance.minimized) return;
+    if (!instance.minimized && !instance.closing) return;
     windowRef.current?.removeAttribute('data-interacting');
     const interaction = interactionRef.current;
     cancelAnimationFrame(interactionFrameRef.current);
@@ -63,7 +66,8 @@ export default function useWindowInteraction({ instance, app }) {
     }
     previewRef.current?.remove();
     previewRef.current = null;
-  }, [instance.minimized]);
+  }, [instance.minimized, instance.closing]);
+  /* === PRÉVIA E MODOS DE ENCAIXE === */
   function removeSnapPreview() {
     previewRef.current?.remove();
     previewRef.current = null;
@@ -101,7 +105,7 @@ export default function useWindowInteraction({ instance, app }) {
     }
   }
 
-  /* ----- A geometria normal permanece preservada durante o snap. ----- */
+  /* ----- A GEOMETRIA NORMAL PERMANECE PRESERVADA DURANTE O SNAP. ----- */
   useLayoutEffect(() => {
     const element = windowRef.current;
     if (!element) return;
@@ -143,7 +147,7 @@ export default function useWindowInteraction({ instance, app }) {
     }
   }, [mode, app, instance.appId]);
 
-  /* ----- Observa somente alterações reais no tamanho do Desktop. ----- */
+  /* ----- OBSERVA SOMENTE ALTERAÇÕES REAIS NO TAMANHO DO DESKTOP. ----- */
   useLayoutEffect(() => {
     const element = windowRef.current;
     const parent = element?.offsetParent;
@@ -184,6 +188,7 @@ export default function useWindowInteraction({ instance, app }) {
       previewRef.current = null;
     };
   }, []);
+  /* === CICLO DO PONTEIRO === */
   function startInteraction(event, type, direction = '') {
     if (event.button !== 0 || interactionRef.current) return;
     if (type === 'drag' && event.target.closest('button')) {
@@ -311,6 +316,7 @@ export default function useWindowInteraction({ instance, app }) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
   }
+  /* === ALTERNATIVAS POR TECLADO === */
   function handleResizeKeyDown(event, direction) {
     const allowedKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
     if (!allowedKeys.includes(event.key)) return;

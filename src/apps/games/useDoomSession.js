@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { registerCloseGuard } from '../../core/appCloseGuards';
 
-/* === UZDoom: confirmação de persistência antes de desmontar o iframe === */
+/* === UZDOOM: CONFIRMAÇÃO DE PERSISTÊNCIA ANTES DE DESMONTAR O IFRAME === */
 export default function useDoomSession(instanceId, active) {
   const frameRef = useRef(null);
   const pendingRef = useRef(null);
@@ -20,7 +20,11 @@ export default function useDoomSession(instanceId, active) {
   const synchronize = useCallback(() => {
     if (pendingRef.current) return pendingRef.current.promise;
     const frame = frameRef.current?.contentWindow;
-    if (!frame) return Promise.resolve(false);
+    if (!frame) {
+      if (mountedRef.current)
+        setError('Não foi possível confirmar o salvamento. Tente novamente antes de sair.');
+      return Promise.resolve(false);
+    }
     setSaving(true);
     setError('');
     const requestId = crypto.randomUUID();
@@ -62,7 +66,7 @@ export default function useDoomSession(instanceId, active) {
 
   useLayoutEffect(() => {
     if (!active) return undefined;
-    /* ----- O Core aguarda o resultado; falhas mantêm a instância aberta. ----- */
+    /* ----- O CORE AGUARDA O RESULTADO; FALHAS MANTÊM A INSTÂNCIA ABERTA. ----- */
     return registerCloseGuard(instanceId, () => false, { beforeClose: synchronize });
   }, [instanceId, active, synchronize]);
 

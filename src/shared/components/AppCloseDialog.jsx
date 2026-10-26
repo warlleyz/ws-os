@@ -1,50 +1,53 @@
 import { useEffect, useRef } from 'react';
 
-import {
-  cancelCloseConfirmation,
-  confirmAppClose,
-} from '../../core/appCloseGuards';
+import { cancelCloseConfirmation, confirmAppClose } from '../../core/appCloseGuards';
 
 import { translate as t, useLocale } from '../i18n/i18n';
 
 import './AppCloseDialog.css';
 
-/* === Diálogo de alterações não salvas === */
+/* === DIÁLOGO DE ALTERAÇÕES NÃO SALVAS === */
 export default function AppCloseDialog({ request }) {
-  /* ----- Idioma e referências ----- */
+  /* ----- IDIOMA E REFERÊNCIAS ----- */
   useLocale();
 
   const panelRef = useRef(null);
 
-  /* === Configuração da confirmação === */
-  /* ----- Tipo de operação ----- */
+  /* === CONFIGURAÇÃO DA CONFIRMAÇÃO === */
+  /* ----- TIPO DE OPERAÇÃO ----- */
   const isNavigation = request?.action === 'navigate';
 
   const message = isNavigation
     ? 'Há alterações não salvas. Deseja descartá-las e continuar?'
     : 'Há alterações não salvas. Deseja descartá-las e fechar?';
 
-  const confirmLabel = isNavigation
-    ? 'Descartar e continuar'
-    : 'Descartar e fechar';
+  const confirmLabel = isNavigation ? 'Descartar e continuar' : 'Descartar e fechar';
 
-  /* === Acessibilidade === */
-  /* ----- Foco inicial e restauração ----- */
+  /* === ACESSIBILIDADE === */
+  /* ----- FOCO INICIAL E RESTAURAÇÃO ----- */
   useEffect(() => {
     if (!request) return undefined;
 
-    const previousFocus = document.activeElement;
+    const previousFocus = request.returnFocus ?? document.activeElement;
 
     panelRef.current?.querySelector('button')?.focus();
 
     return () => {
-      if (previousFocus?.isConnected) {
+      if (previousFocus?.isConnected && !previousFocus.closest?.('[inert]')) {
         previousFocus.focus();
+      } else {
+        const fallback =
+          document.querySelector(
+            '.desktop-window--active:not([inert]) .desktop-window__drag-area',
+          ) ??
+          document.querySelector('.taskbar__menu-button') ??
+          document.querySelector('#ws-mobile');
+        fallback?.focus();
       }
     };
   }, [request]);
 
-  /* ----- Navegação por teclado ----- */
+  /* ----- NAVEGAÇÃO POR TECLADO ----- */
   function handleKeyDown(event) {
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -56,9 +59,7 @@ export default function AppCloseDialog({ request }) {
 
     if (event.key !== 'Tab') return;
 
-    const controls = Array.from(
-      panelRef.current?.querySelectorAll('button:not(:disabled)') ?? [],
-    );
+    const controls = Array.from(panelRef.current?.querySelectorAll('button:not(:disabled)') ?? []);
 
     if (controls.length === 0) {
       event.preventDefault();
@@ -77,7 +78,7 @@ export default function AppCloseDialog({ request }) {
     }
   }
 
-  /* === Renderização === */
+  /* === RENDERIZAÇÃO === */
   if (!request) return null;
 
   return (
@@ -91,17 +92,13 @@ export default function AppCloseDialog({ request }) {
         aria-describedby="ws-close-message"
         onKeyDown={handleKeyDown}
       >
-        {/* ----- Cabeçalho ----- */}
-        <h2 id="ws-close-title">
-          {t('Alterações não salvas')}
-        </h2>
+        {/* ----- CABEÇALHO ----- */}
+        <h2 id="ws-close-title">{t('Alterações não salvas')}</h2>
 
-        {/* ----- Descrição ----- */}
-        <p id="ws-close-message">
-          {t(message)}
-        </p>
+        {/* ----- DESCRIÇÃO ----- */}
+        <p id="ws-close-message">{t(message)}</p>
 
-        {/* ----- Ações ----- */}
+        {/* ----- AÇÕES ----- */}
         <div className="ws-close-dialog__actions">
           <button
             type="button"
@@ -111,11 +108,7 @@ export default function AppCloseDialog({ request }) {
             {t('Continuar editando')}
           </button>
 
-          <button
-            type="button"
-            className="ws-button ws-button--danger"
-            onClick={confirmAppClose}
-          >
+          <button type="button" className="ws-button ws-button--danger" onClick={confirmAppClose}>
             {t(confirmLabel)}
           </button>
         </div>

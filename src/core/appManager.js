@@ -5,17 +5,19 @@ import { isAdminAuthenticated } from '../services/authService';
 import { validateFileResource } from '../services/storage/fileResourceContract';
 import { resolveStaticFile } from '../services/storage/staticFileCatalog';
 
-/* === Estado inicial === */
+/* === ESTADO INICIAL === */
 export const initialAppState = {
   instances: [],
   activeInstanceId: null,
   focusHistory: [],
 };
 
-/* === Consultas de instâncias === */
-/* ----- Instância preferencial ----- */
+/* === CONSULTAS DE INSTÂNCIAS === */
+/* ----- INSTÂNCIA PREFERENCIAL ----- */
 export function getPreferredInstance(state, appId) {
-  const instances = state.instances.filter((instance) => instance.appId === appId);
+  const instances = state.instances.filter(
+    (instance) => instance.appId === appId && !instance.closing,
+  );
 
   if (instances.length === 0) return null;
 
@@ -32,17 +34,21 @@ export function getPreferredInstance(state, appId) {
   return instances.find((instance) => !instance.minimized) ?? instances.at(-1);
 }
 
-/* ----- Última instância disponível ----- */
+/* ----- ÚLTIMA INSTÂNCIA DISPONÍVEL ----- */
 function getLastAvailableFocus(instances, history) {
   return (
     [...history]
       .reverse()
-      .find((id) => instances.some((instance) => instance.id === id && !instance.minimized)) ?? null
+      .find((id) =>
+        instances.some(
+          (instance) => instance.id === id && !instance.minimized && !instance.closing,
+        ),
+      ) ?? null
   );
 }
 
-/* === Validação de abertura === */
-/* ----- Objetos de parâmetros ----- */
+/* === VALIDAÇÃO DE ABERTURA === */
+/* ----- OBJETOS DE PARÂMETROS ----- */
 function isPlainRecord(value) {
   if (!value || typeof value !== 'object') return false;
 
@@ -51,7 +57,7 @@ function isPlainRecord(value) {
   return prototype === null || Object.getPrototypeOf(prototype) === null;
 }
 
-/* ----- Parâmetros declarados pelo aplicativo ----- */
+/* ----- PARÂMETROS DECLARADOS PELO APLICATIVO ----- */
 function validateNavigationParams(appId, params) {
   const contract = getAppNavigationContract(appId);
 
@@ -74,7 +80,7 @@ function validateNavigationParams(appId, params) {
   if (acceptedParams === null) return { ok: true };
 
   for (const [key, value] of Object.entries(params)) {
-    /* ----- Verificação dos campos declarados ----- */
+    /* ----- VERIFICAÇÃO DOS CAMPOS DECLARADOS ----- */
     if (!Object.hasOwn(acceptedParams, key)) {
       return {
         ok: false,
@@ -84,7 +90,7 @@ function validateNavigationParams(appId, params) {
 
     const expectedType = acceptedParams[key];
 
-    /* ----- Validação de descritores de arquivos ----- */
+    /* ----- VALIDAÇÃO DE DESCRITORES DE ARQUIVOS ----- */
     if (expectedType === 'file-resource') {
       if (!validateFileResource(value).ok) {
         return {
@@ -96,7 +102,7 @@ function validateNavigationParams(appId, params) {
       continue;
     }
 
-    /* ----- Validação dos parâmetros simples ----- */
+    /* ----- VALIDAÇÃO DOS PARÂMETROS SIMPLES ----- */
     if (expectedType !== 'string' || typeof value !== 'string' || !value.trim()) {
       return {
         ok: false,
@@ -108,7 +114,7 @@ function validateNavigationParams(appId, params) {
   return { ok: true };
 }
 
-/* ----- Solicitação de abertura ----- */
+/* ----- SOLICITAÇÃO DE ABERTURA ----- */
 export function validateAppOpen(appId, options = {}) {
   const app = getAppDefinition(appId);
 
@@ -177,12 +183,12 @@ export function validateAppOpen(appId, options = {}) {
   };
 }
 
-/* === Gerenciamento de foco === */
-/* ----- Ativação de instância ----- */
+/* === GERENCIAMENTO DE FOCO === */
+/* ----- ATIVAÇÃO DE INSTÂNCIA ----- */
 export function activateApp(state, instanceId) {
   const instance = state.instances.find((item) => item.id === instanceId);
 
-  if (!instance || instance.minimized) return state;
+  if (!instance || instance.minimized || instance.closing) return state;
 
   return {
     ...state,
@@ -191,13 +197,15 @@ export function activateApp(state, instanceId) {
   };
 }
 
-/* ----- Seleção de instância reutilizável ----- */
+/* ----- SELEÇÃO DE INSTÂNCIA REUTILIZÁVEL ----- */
 function findReusableInstance(state, appId, params) {
   const contract = getAppNavigationContract(appId);
 
   if (!contract) return null;
 
-  const instances = state.instances.filter((instance) => instance.appId === appId);
+  const instances = state.instances.filter(
+    (instance) => instance.appId === appId && !instance.closing,
+  );
 
   if (contract.reusePolicy === 'multiple') return null;
 
@@ -221,8 +229,8 @@ function findReusableInstance(state, appId, params) {
   return null;
 }
 
-/* === Abertura de aplicativos === */
-/* ----- Resolução da instância de origem ----- */
+/* === ABERTURA DE APLICATIVOS === */
+/* ----- RESOLUÇÃO DA INSTÂNCIA DE ORIGEM ----- */
 function resolveOpeningOrigin(state, options) {
   const instanceId = options.originInstanceId;
 
@@ -238,7 +246,7 @@ function resolveOpeningOrigin(state, options) {
   };
 }
 
-/* ----- Atualização de navegação contextual ----- */
+/* ----- ATUALIZAÇÃO DE NAVEGAÇÃO CONTEXTUAL ----- */
 function updateInstanceNavigation(state, instanceId, appId, params) {
   const contract = getAppNavigationContract(appId);
   const acceptedParams = contract?.params ?? {};
@@ -269,7 +277,7 @@ function updateInstanceNavigation(state, instanceId, appId, params) {
   };
 }
 
-/* ----- Abertura com resultado ----- */
+/* ----- ABERTURA COM RESULTADO ----- */
 export function requestAppOpen(state, appId, options = {}) {
   const request = validateAppOpen(appId, options);
 
@@ -291,9 +299,7 @@ export function requestAppOpen(state, appId, options = {}) {
 
     return requestAppOpen(state, 'file-viewer', {
       origin: 'resume',
-      ...(options.originInstanceId
-        ? { originInstanceId: options.originInstanceId }
-        : {}),
+      ...(options.originInstanceId ? { originInstanceId: options.originInstanceId } : {}),
       params: {
         resource: {
           source: 'static',
@@ -335,6 +341,7 @@ export function requestAppOpen(state, appId, options = {}) {
       result: {
         ok: true,
         instanceId: existing.id,
+        appId: existing.appId,
         status: nextState === state ? 'restored' : 'navigated',
       },
     };
@@ -361,22 +368,23 @@ export function requestAppOpen(state, appId, options = {}) {
     result: {
       ok: true,
       instanceId: instance.id,
+      appId: instance.appId,
       status: 'opened',
     },
   };
 }
 
-/* ----- Abertura compatível com reducers ----- */
+/* ----- ABERTURA COMPATÍVEL COM REDUCERS ----- */
 export function openApp(state, appId, options = {}) {
   return requestAppOpen(state, appId, options).state;
 }
 
-/* === Ciclo de vida das instâncias === */
-/* ----- Minimização ----- */
+/* === CICLO DE VIDA DAS INSTÂNCIAS === */
+/* ----- MINIMIZAÇÃO ----- */
 export function minimizeApp(state, instanceId) {
   const instance = state.instances.find((item) => item.id === instanceId);
 
-  if (!instance || instance.minimized) return state;
+  if (!instance || instance.minimized || instance.closing) return state;
 
   const app = getAppDefinition(instance.appId);
 
@@ -408,9 +416,9 @@ export function minimizeApp(state, instanceId) {
   };
 }
 
-/* ----- Restauração ----- */
+/* ----- RESTAURAÇÃO ----- */
 export function restoreApp(state, instanceId) {
-  if (!state.instances.some((item) => item.id === instanceId)) return state;
+  if (!state.instances.some((item) => item.id === instanceId && !item.closing)) return state;
 
   const instances = state.instances.map((item) =>
     item.id === instanceId
@@ -425,7 +433,24 @@ export function restoreApp(state, instanceId) {
   return activateApp({ ...state, instances }, instanceId);
 }
 
-/* ----- Fechamento ----- */
+/* ----- PREPARAÇÃO VISUAL APÓS SALVAR OU CONFIRMAR DESCARTE ----- */
+export function beginAppClose(state, instanceId) {
+  const instance = state.instances.find((item) => item.id === instanceId);
+  if (!instance || instance.closing) return state;
+  const instances = state.instances.map((item) =>
+    item.id === instanceId ? { ...item, closing: true, executionState: 'paused' } : item,
+  );
+  return {
+    ...state,
+    instances,
+    activeInstanceId:
+      state.activeInstanceId === instanceId
+        ? getLastAvailableFocus(instances, state.focusHistory)
+        : state.activeInstanceId,
+  };
+}
+
+/* ----- FECHAMENTO ----- */
 export function closeApp(state, instanceId) {
   if (!state.instances.some((item) => item.id === instanceId)) return state;
 

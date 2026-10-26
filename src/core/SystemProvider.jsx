@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   activateApp,
+  beginAppClose,
   closeApp,
   initialAppState,
   minimizeApp,
@@ -12,12 +13,11 @@ import {
 } from './appManager';
 import {
   requestGuardedAction,
+  releaseCloseGuard,
   useCloseConfirmation,
+  useClosePreparation,
 } from './appCloseGuards';
-import {
-  getAppDefinition,
-  getAppNavigationContract,
-} from './appRegistry';
+import { getAppDefinition, getAppNavigationContract } from './appRegistry';
 import {
   addNotification,
   clearNotifications,
@@ -32,22 +32,40 @@ import {
   subscribeNotificationPreferences,
 } from './notificationPreferences';
 import { SystemContext } from './systemContext';
+import { getWindowMotionDuration } from './windowLifecycle';
 
 import { resolveSharedEntry } from '../features/search/searchService';
 import AppCloseDialog from '../shared/components/AppCloseDialog';
 import { translate as t, useLocale } from '../shared/i18n/i18n';
 
+/* === RETORNO DE FOCO SEM INTERROMPER OUTRA INTERAÇÃO === */
+function restoreFocus(previous) {
+  if (document.activeElement !== document.body && document.activeElement !== previous) return;
+  if (previous?.isConnected && !previous.closest?.('[inert]')) {
+    previous.focus?.();
+    return;
+  }
+  const target =
+    document.querySelector?.('.desktop-window--active:not([inert]) .desktop-window__drag-area') ??
+    document.querySelector?.('.taskbar__menu-button') ??
+    document.querySelector?.('#ws-mobile');
+  target?.focus();
+}
+
 export default function SystemProvider({ children }) {
-  /* === Idioma e confirmações === */
+  /* === IDIOMA E CONFIRMAÇÕES === */
   useLocale();
 
   const closeRequest = useCloseConfirmation();
+  const preparation = useClosePreparation();
 
-  /* === Estado dos aplicativos === */
-  /* ----- Controle de abertura pendente ----- */
-  const pendingOpenRef = useRef(null);
+  /* === ESTADO DOS APLICATIVOS === */
+  /* ----- CONTROLE DE ABERTURA PENDENTE ----- */
+  const pendingOpenRef = useRef(new Map());
+  const pendingClosuresRef = useRef(new Map());
+  const closeTimersRef = useRef(new Map());
   const openRequestSequenceRef = useRef(0);
-  /* ----- Inicialização da sessão ----- */
+  /* ----- INICIALIZAÇÃO DA SESSÃO ----- */
   const [appState, setAppState] = useState(() => {
     const entry = resolveSharedEntry(window.location.search);
 
@@ -59,50 +77,83 @@ export default function SystemProvider({ children }) {
     });
   });
 
-  /* ----- Confirmação da abertura aplicada ----- */
+  /* ----- CONFIRMAR CADA ABERTURA APLICADA, INCLUSIVE DESTINOS DE ATALHOS ----- */
   useEffect(() => {
-    const pending = pendingOpenRef.current;
-    const outcome = appState.navigationOutcome;
-
-    if (!pending || !outcome) return;
-    if (pending.id !== outcome.id) return;
-
-    pendingOpenRef.current = null;
-
-    if (!outcome.ok) return;
-
-    const instance = appState.instances.find(
-      (item) => item.id === outcome.instanceId,
-    );
-
-    if (!instance || instance.appId !== pending.appId) return;
-
-    pending.onOpened?.({
-      instanceId: instance.id,
-      appId: instance.appId,
-      status: outcome.status,
-    });
+    const outcomes = appState.navigationOutcomes ?? [];
+    if (!outcomes.length) return;
+    for (const outcome of outcomes) {
+      const pending = pendingOpenRef.current.get(outcome.id);
+      pendingOpenRef.current.delete(outcome.id);
+      if (!pending || !outcome.ok) continue;
+      const instance = appState.instances.find(
+        (item) => item.id === outcome.instanceId && !item.closing,
+      );
+      if (!instance || instance.appId !== outcome.appId) continue;
+      pending.onOpened?.({
+        instanceId: instance.id,
+        appId: instance.appId,
+        requestedAppId: pending.appId,
+        status: outcome.status,
+      });
+    }
   }, [appState]);
 
-  /* ----- Limpeza dos links compartilhados ----- */
+  /* ----- DESMONTAR SOMENTE APÓS A PREPARAÇÃO E O CICLO VISUAL ----- */
+  useEffect(() => {
+    for (const [id, entry] of pendingClosuresRef.current) {
+      const instance = appState.instances.find((item) => item.id === id);
+      if (!instance) {
+        clearTimeout(closeTimersRef.current.get(id));
+        closeTimersRef.current.delete(id);
+        pendingClosuresRef.current.delete(id);
+        entry.onClosed?.();
+        restoreFocus(entry.returnFocus);
+        continue;
+      }
+      if (!instance.closing || closeTimersRef.current.has(id)) continue;
+      const duration = instance.minimized ? 0 : getWindowMotionDuration();
+      closeTimersRef.current.set(
+        id,
+        setTimeout(() => {
+          closeTimersRef.current.delete(id);
+          setAppState((current) => closeApp(current, id));
+        }, duration),
+      );
+    }
+  }, [appState]);
+
+  /* ----- ENCERRAR CALLBACKS E RELÓGIOS AO DESMONTAR O SISTEMA ----- */
+  useEffect(() => {
+    const timers = closeTimersRef.current;
+    const closures = pendingClosuresRef.current;
+    const openings = pendingOpenRef.current;
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
+      closures.clear();
+      openings.clear();
+    };
+  }, []);
+
+  /* ----- RECUPERAR FOCO APÓS SUCESSO OU FALHA DA PREPARAÇÃO ----- */
+  useEffect(() => {
+    if (!preparation) return undefined;
+    return () => restoreFocus(preparation.returnFocus);
+  }, [preparation]);
+
+  /* ----- LIMPEZA DOS LINKS COMPARTILHADOS ----- */
   useEffect(() => {
     if (!resolveSharedEntry(window.location.search)) return;
 
-    window.history.replaceState(
-      null,
-      '',
-      import.meta.env.BASE_URL,
-    );
+    window.history.replaceState(null, '', import.meta.env.BASE_URL);
   }, []);
 
-  /* === Estado das notificações === */
-  const [notificationState, setNotificationState] = useState(
-    initialNotificationState,
-  );
+  /* === ESTADO DAS NOTIFICAÇÕES === */
+  const [notificationState, setNotificationState] = useState(initialNotificationState);
 
   const [visibleToasts, setVisibleToasts] = useState([]);
 
-  /* ----- Preferências de notificações ----- */
+  /* ----- PREFERÊNCIAS DE NOTIFICAÇÕES ----- */
   useEffect(
     () =>
       subscribeNotificationPreferences(() => {
@@ -113,31 +164,25 @@ export default function SystemProvider({ children }) {
     [],
   );
 
-  /* ----- Criação de notificações ----- */
+  /* ----- CRIAÇÃO DE NOTIFICAÇÕES ----- */
   const notify = useCallback((details) => {
     const notification = createNotification(details);
 
     if (!notification) return;
 
-    setNotificationState((current) =>
-      addNotification(current, notification),
-    );
+    setNotificationState((current) => addNotification(current, notification));
 
-    const doNotDisturb =
-      getNotificationPreferences().doNotDisturb;
+    const doNotDisturb = getNotificationPreferences().doNotDisturb;
 
     const canShowToast =
-      details?.toast !== false &&
-      (!doNotDisturb || notification.type === 'error');
+      details?.toast !== false && (!doNotDisturb || notification.type === 'error');
 
     if (canShowToast) {
-      setVisibleToasts((current) =>
-        [...current, notification].slice(0, 20),
-      );
+      setVisibleToasts((current) => [...current, notification].slice(0, 20));
     }
   }, []);
 
-  /* ----- Notificações de desenvolvimento ----- */
+  /* ----- NOTIFICAÇÕES DE DESENVOLVIMENTO ----- */
   useEffect(() => {
     if (!import.meta.env.DEV) return;
 
@@ -155,39 +200,34 @@ export default function SystemProvider({ children }) {
     };
   }, [notify]);
 
-  /* === Navegação protegida === */
-  /* ----- Identificação de navegação contextual ----- */
+  /* === NAVEGAÇÃO PROTEGIDA === */
+  /* ----- IDENTIFICAÇÃO DE NAVEGAÇÃO CONTEXTUAL ----- */
   function getContextualTarget(appId, params = {}) {
     const contract = getAppNavigationContract(appId);
 
     if (!contract || contract.params === null) return null;
 
-    const keys = Object.keys(contract.params).filter(
-      (key) => Object.hasOwn(params, key),
-    );
+    const keys = Object.keys(contract.params).filter((key) => Object.hasOwn(params, key));
 
     if (keys.length === 0) return null;
 
     const instances = appState.instances.filter(
-      (instance) => instance.appId === appId,
+      (instance) => instance.appId === appId && !instance.closing,
     );
 
     if (contract.reusePolicy === 'multiple') return null;
 
     if (contract.reusePolicy === 'contextual') {
       return (
-        instances.find((instance) =>
-          keys.every(
-            (key) => instance.params?.[key] === params[key],
-          ),
-        ) ?? null
+        instances.find((instance) => keys.every((key) => instance.params?.[key] === params[key])) ??
+        null
       );
     }
 
     return instances[0] ?? null;
   }
 
-  /* ----- Detecção de substituição de contexto ----- */
+  /* ----- DETECÇÃO DE SUBSTITUIÇÃO DE CONTEXTO ----- */
   function getProtectedNavigationInstance(appId, params = {}) {
     const target = getContextualTarget(appId, params);
 
@@ -195,34 +235,44 @@ export default function SystemProvider({ children }) {
 
     const contract = getAppNavigationContract(appId);
 
-    const changesContext = Object.keys(
-      contract?.params ?? {},
-    ).some(
+    const changesContext = Object.keys(contract?.params ?? {}).some(
       (key) =>
         Object.hasOwn(params, key) &&
-        target.params?.[key] !== params[key],
+        JSON.stringify(target.params?.[key]) !== JSON.stringify(params[key]),
     );
 
     return changesContext ? target : null;
   }
 
-  /* === Execução de operações === */
-  /* ----- Fechamento protegido ----- */
+  /* === EXECUÇÃO DE OPERAÇÕES === */
+  /* ----- FECHAMENTO PROTEGIDO ----- */
   function runClose(instanceId, options) {
+    if (
+      !appState.instances.some((item) => item.id === instanceId) ||
+      pendingClosuresRef.current.has(instanceId)
+    )
+      return false;
     return requestGuardedAction(
       instanceId,
       () => {
-        setAppState((current) =>
-          closeApp(current, instanceId),
-        );
-
-        options?.onClosed?.();
+        pendingClosuresRef.current.set(instanceId, {
+          onClosed: options?.onClosed,
+          returnFocus: document.activeElement,
+        });
+        releaseCloseGuard(instanceId);
+        const animate = options?.animate !== false && getWindowMotionDuration() > 0;
+        setAppState((current) => {
+          const instance = current.instances.find((item) => item.id === instanceId);
+          return animate && instance && !instance.minimized
+            ? beginAppClose(current, instanceId)
+            : closeApp(current, instanceId);
+        });
       },
       'close',
     );
   }
 
-  /* ----- Abertura protegida ----- */
+  /* ----- ABERTURA PROTEGIDA ----- */
   function runOpen(appId, options) {
     const request = validateAppOpen(appId, options);
 
@@ -237,7 +287,7 @@ export default function SystemProvider({ children }) {
       return false;
     }
 
-    /* ----- Preservação dos parâmetros ----- */
+    /* ----- PRESERVAÇÃO DOS PARÂMETROS ----- */
     const openingOptions = {
       origin: request.origin,
       params: { ...request.params },
@@ -247,30 +297,21 @@ export default function SystemProvider({ children }) {
       openingOptions.originInstanceId = options.originInstanceId;
     }
 
-    /* ----- Identificação do contexto protegido ----- */
-    const target = getProtectedNavigationInstance(
-      appId,
-      openingOptions.params,
-    );
+    /* ----- IDENTIFICAÇÃO DO CONTEXTO PROTEGIDO ----- */
+    const target = getProtectedNavigationInstance(appId, openingOptions.params);
 
     const targetInstanceId = target?.id ?? null;
-    const previousParams = target
-      ? { ...target.params }
-      : null;
+    const previousParams = target ? { ...target.params } : null;
 
-    /* ----- Identificação da solicitação ----- */
+    /* ----- IDENTIFICAÇÃO DA SOLICITAÇÃO ----- */
     const requestId = ++openRequestSequenceRef.current;
 
-    /* ----- Execução da abertura ----- */
+    /* ----- EXECUÇÃO DA ABERTURA ----- */
     const proceed = () => {
-      pendingOpenRef.current = {
-        id: requestId,
-        appId,
-        onOpened: options?.onOpened,
-      };
+      pendingOpenRef.current.set(requestId, { appId, onOpened: options?.onOpened });
 
       setAppState((current) => {
-        /* ----- Verificação da instância protegida ----- */
+        /* ----- VERIFICAÇÃO DA INSTÂNCIA PROTEGIDA ----- */
         if (targetInstanceId) {
           const currentTarget = current.instances.find(
             (instance) => instance.id === targetInstanceId,
@@ -283,56 +324,61 @@ export default function SystemProvider({ children }) {
             currentTarget?.appId === appId &&
             keys.every(
               (key) =>
-                currentTarget.params?.[key] ===
-                previousParams?.[key],
+                JSON.stringify(currentTarget.params?.[key]) ===
+                JSON.stringify(previousParams?.[key]),
             );
 
           if (!contextUnchanged) {
             return {
               ...current,
-              navigationOutcome: {
-                id: requestId,
-                ok: false,
-                code: 'NAVIGATION_CONTEXT_CHANGED',
-              },
+              navigationOutcomes: [
+                ...(current.navigationOutcomes ?? []).filter((outcome) =>
+                  pendingOpenRef.current.has(outcome.id),
+                ),
+                {
+                  id: requestId,
+                  ok: false,
+                  code: 'NAVIGATION_CONTEXT_CHANGED',
+                },
+              ],
             };
           }
         }
 
-        /* ----- Revalidação e abertura ----- */
-        const response = requestAppOpen(
-          current,
-          appId,
-          openingOptions,
-        );
+        /* ----- REVALIDAÇÃO E ABERTURA ----- */
+        const response = requestAppOpen(current, appId, openingOptions);
 
+        const outcome = {
+          id: requestId,
+          ok: response.result.ok,
+          instanceId: response.result.instanceId ?? null,
+          appId: response.result.appId ?? null,
+          status: response.result.status ?? null,
+          code: response.result.error?.code ?? null,
+        };
         return {
           ...response.state,
-          navigationOutcome: {
-            id: requestId,
-            ok: response.result.ok,
-            instanceId: response.result.instanceId ?? null,
-            status: response.result.status ?? null,
-            code: response.result.error?.code ?? null,
-          },
+          navigationOutcome: outcome,
+          navigationOutcomes: [
+            ...(current.navigationOutcomes ?? []).filter((outcome) =>
+              pendingOpenRef.current.has(outcome.id),
+            ),
+            outcome,
+          ],
         };
       });
     };
 
-    /* ----- Proteção de alterações não salvas ----- */
+    /* ----- PROTEÇÃO DE ALTERAÇÕES NÃO SALVAS ----- */
     if (targetInstanceId) {
-      return requestGuardedAction(
-        targetInstanceId,
-        proceed,
-        'navigate',
-      );
+      return requestGuardedAction(targetInstanceId, proceed, 'navigate');
     }
 
     proceed();
     return true;
   }
 
-  /* ----- Despacho de operações ----- */
+  /* ----- DESPACHO DE OPERAÇÕES ----- */
   function run(operation, id, options) {
     if (operation === closeApp) {
       return runClose(id, options);
@@ -342,22 +388,18 @@ export default function SystemProvider({ children }) {
       return runOpen(id, options);
     }
 
-    setAppState((current) =>
-      operation(current, id, options),
-    );
+    setAppState((current) => operation(current, id, options));
 
     return true;
   }
 
-  /* === Gerenciamento de notificações === */
-  /* ----- Remoção de notificações visíveis ----- */
+  /* === GERENCIAMENTO DE NOTIFICAÇÕES === */
+  /* ----- REMOÇÃO DE NOTIFICAÇÕES VISÍVEIS ----- */
   function dismissToast(id) {
-    setVisibleToasts((current) =>
-      current.filter((notification) => notification.id !== id),
-    );
+    setVisibleToasts((current) => current.filter((notification) => notification.id !== id));
   }
 
-  /* ----- Ações da central de notificações ----- */
+  /* ----- AÇÕES DA CENTRAL DE NOTIFICAÇÕES ----- */
   function handleNotificationAction(action, id) {
     if (action === 'remove') {
       dismissToast(id);
@@ -387,7 +429,7 @@ export default function SystemProvider({ children }) {
     });
   }
 
-  /* ----- Abertura de aplicativos por notificações ----- */
+  /* ----- ABERTURA DE APLICATIVOS POR NOTIFICAÇÕES ----- */
   function handleNotificationOpen(notification) {
     const action = notification?.action;
 
@@ -397,41 +439,28 @@ export default function SystemProvider({ children }) {
 
     if (!app?.public) return;
 
-    const instance = [...appState.instances]
-      .reverse()
-      .find(
-        (item) => item.appId === action.appId,
-      );
+    const instance = [...appState.instances].reverse().find((item) => item.appId === action.appId);
 
     if (instance) {
-      run(
-        instance.minimized ? restoreApp : activateApp,
-        instance.id,
-      );
+      run(instance.minimized ? restoreApp : activateApp, instance.id);
     } else {
       if (!run(openApp, action.appId)) return;
     }
 
-    setNotificationState((current) =>
-      markNotificationAsRead(current, notification.id),
-    );
+    setNotificationState((current) => markNotificationAsRead(current, notification.id));
 
     dismissToast(notification.id);
   }
 
-  /* === Controles globais === */
-  /* ----- Minimização de todas as janelas ----- */
+  /* === CONTROLES GLOBAIS === */
+  /* ----- MINIMIZAÇÃO DE TODAS AS JANELAS ----- */
   function minimizeAllApps() {
     setAppState((current) =>
-      current.instances.reduce(
-        (state, instance) =>
-          minimizeApp(state, instance.id),
-        current,
-      ),
+      current.instances.reduce((state, instance) => minimizeApp(state, instance.id), current),
     );
   }
 
-  /* === Disponibilização do sistema === */
+  /* === DISPONIBILIZAÇÃO DO SISTEMA === */
   return (
     <SystemContext.Provider
       value={{
@@ -446,16 +475,20 @@ export default function SystemProvider({ children }) {
         handleNotificationOpen,
       }}
     >
-      {/* ----- Conteúdo do sistema ----- */}
-      <div
-        style={{ display: 'contents' }}
-        inert={Boolean(closeRequest)}
-      >
+      {/* ----- CONTEÚDO DO SISTEMA ----- */}
+      <div style={{ display: 'contents' }} inert={Boolean(closeRequest || preparation)}>
         {children}
       </div>
 
-      {/* ----- Confirmação de alterações não salvas ----- */}
+      {/* ----- CONFIRMAÇÃO DE ALTERAÇÕES NÃO SALVAS ----- */}
       <AppCloseDialog request={closeRequest} />
+      {preparation && (
+        <div className="ws-close-overlay">
+          <section className="ws-close-dialog" role="status" aria-live="polite">
+            <p>{t('Salvando...')}</p>
+          </section>
+        </div>
+      )}
     </SystemContext.Provider>
   );
 }

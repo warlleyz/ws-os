@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { renderApp } = require('../helpers/app-ui.cjs');
 
-/* === Shell Mobile com Core controlado === */
+/* === SHELL MOBILE COM CORE CONTROLADO === */
 async function setup(instances, authorized = false) {
   const state = {
     instances,
@@ -12,6 +12,8 @@ async function setup(instances, authorized = false) {
   let pending;
   const definitions = {
     notes: { name: 'Notas', public: true },
+    resume: { name: 'Currículo', public: true },
+    'file-viewer': { name: 'Visualizador de Arquivos', public: true },
     administration: { name: 'Administração', public: false },
     games: { name: 'Jogos', public: true, pauseWhenMinimized: true },
   };
@@ -106,4 +108,29 @@ test('Mobile recupera Home sem carregamento permanente quando a instância desap
     'home',
   );
   assert.equal(ui.text().includes('Carregando'), false);
+});
+
+/* === CONFIRMAÇÃO DO DESTINO EFETIVO DOS ATALHOS === */
+test('Mobile seleciona o Visualizador confirmado ao abrir Currículo e preserva a origem do retorno', async () => {
+  const { ui, state, pending } = await setup([]);
+  ui.nodes()
+    .find((node) => node.type === 'Home')
+    .props.onOpenApp('resume');
+  assert.equal(pending().id, 'resume');
+  state.instances = [{ id: 'viewer-1', appId: 'file-viewer', origin: 'resume' }];
+  // O callback informa a instância aplicada pelo Core, não o ID do atalho.
+  state.activeInstanceId = null;
+  pending().options.onOpened({ instanceId: 'viewer-1', appId: 'file-viewer' });
+  ui.render();
+  assert.equal(
+    ui.nodes().find((node) => node.props.id === 'ws-mobile').props['data-screen'],
+    'app',
+  );
+  assert.equal(ui.nodes().find((node) => node.type === 'AppHost').props.instance.id, 'viewer-1');
+  ui.nodes()
+    .find((node) => node.type === 'Navigation')
+    .props.onNavigate('home');
+  assert.equal(pending().id, 'viewer-1');
+  assert.equal(pending().options.animate, false);
+  ui.unmount();
 });

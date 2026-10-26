@@ -1,11 +1,10 @@
-
-/* === Registro de navegação interna === */
+/* === REGISTRO DE NAVEGAÇÃO INTERNA === */
 const backHandlers = new Map();
 
-/* ----- Registro de retorno ----- */
+/* ----- REGISTRO DE RETORNO ----- */
 export function registerAppBack(instanceId, handler) {
   if (typeof instanceId !== 'string' || !instanceId || typeof handler !== 'function') {
-    return () => { };
+    return () => {};
   }
 
   backHandlers.set(instanceId, handler);
@@ -17,20 +16,20 @@ export function registerAppBack(instanceId, handler) {
   };
 }
 
-/* ----- Execução de retorno interno ----- */
+/* ----- EXECUÇÃO DE RETORNO INTERNO ----- */
 export function handleAppBack(instanceId) {
   return backHandlers.get(instanceId)?.() === true;
 }
 
-/* === Navegação contextual === */
-/* ----- Validação de instâncias ----- */
+/* === NAVEGAÇÃO CONTEXTUAL === */
+/* ----- VALIDAÇÃO DE INSTÂNCIAS ----- */
 function findInstance(state, instanceId) {
   if (!state || !Array.isArray(state.instances)) return null;
 
   return state.instances.find((instance) => instance.id === instanceId) ?? null;
 }
 
-/* ----- Registro da origem ----- */
+/* ----- REGISTRO DA ORIGEM ----- */
 export function createNavigationOrigin(state, instanceId) {
   const instance = findInstance(state, instanceId);
 
@@ -42,7 +41,7 @@ export function createNavigationOrigin(state, instanceId) {
   };
 }
 
-/* ----- Resolução da origem ----- */
+/* ----- RESOLUÇÃO DA ORIGEM ----- */
 export function resolveNavigationOrigin(state, origin) {
   if (!origin || typeof origin !== 'object') return null;
 
@@ -53,17 +52,17 @@ export function resolveNavigationOrigin(state, origin) {
   return instance;
 }
 
-/* === Retorno contextual === */
-/* ----- Verificação de destino seguro ----- */
+/* === RETORNO CONTEXTUAL === */
+/* ----- VERIFICAÇÃO DE DESTINO SEGURO ----- */
 function isSafeReturnTarget(instance, getAppDefinition) {
-  if (!instance || typeof getAppDefinition !== 'function') return false;
+  if (!instance || instance.closing || typeof getAppDefinition !== 'function') return false;
 
   const app = getAppDefinition(instance.appId);
 
   return app?.public === true;
 }
 
-/* ----- Resolução do retorno ----- */
+/* ----- RESOLUÇÃO DO RETORNO ----- */
 export function resolveContextualBack(state, origin, getAppDefinition) {
   const source = resolveNavigationOrigin(state, origin);
 

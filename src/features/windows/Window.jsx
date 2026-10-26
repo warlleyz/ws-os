@@ -1,8 +1,12 @@
+import { useLayoutEffect, useRef } from 'react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import useWindowInteraction from './useWindowInteraction';
 import AppHost from './AppHost';
+import useWindowMotion from './useWindowMotion';
 import Tooltip from '../../shared/components/Tooltip';
+/* === CONFIGURAÇÃO DAS JANELAS === */
 const RESIZE_DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+/* === MOLDURA E CONTROLES DA INSTÂNCIA === */
 export default function Window({
   instance,
   app,
@@ -28,6 +32,20 @@ export default function Window({
     instance,
     app,
   });
+  /* ----- FOCAR A MOLDURA SOMENTE AO ABRIR OU RESTAURAR, SEM ROUBAR FOCO DE CAMPOS ----- */
+  const focusStateRef = useRef(null);
+  useLayoutEffect(() => {
+    const previous = focusStateRef.current;
+    focusStateRef.current = { minimized: instance.minimized };
+    if (active && !instance.minimized && !instance.closing && (!previous || previous.minimized)) {
+      windowRef.current
+        ?.querySelector('.desktop-window__drag-area')
+        ?.focus({ preventScroll: true });
+    }
+  }, [active, instance.minimized, instance.closing, windowRef]);
+
+  const motion = useWindowMotion(instance, mode);
+  const unavailable = instance.minimized || instance.closing;
   return (
     <section
       ref={windowRef}
@@ -35,6 +53,7 @@ export default function Window({
       data-window-min-width={app.window?.minWidth}
       data-window-min-height={app.window?.minHeight}
       data-instance-id={instance.id}
+      data-window-motion={motion.phase}
       className={[
         'desktop-window',
         active ? 'desktop-window--active' : '',
@@ -43,13 +62,14 @@ export default function Window({
         .filter(Boolean)
         .join(' ')}
       aria-label={t(`Janela de ${appName}`)}
-      aria-hidden={instance.minimized || undefined}
-      inert={instance.minimized}
+      aria-hidden={unavailable || undefined}
+      inert={unavailable}
       style={{
         zIndex,
         '--window-offset': offset,
-        visibility: instance.minimized ? 'hidden' : 'visible',
-        pointerEvents: instance.minimized ? 'none' : 'auto',
+        visibility: motion.visible ? 'visible' : 'hidden',
+        '--window-motion-duration': `${motion.duration}ms`,
+        pointerEvents: unavailable ? 'none' : 'auto',
       }}
       onPointerDown={(event) => {
         if (event.target.closest('.desktop-window__controls')) {
@@ -82,9 +102,8 @@ export default function Window({
           title={t('Arrastar para mover ou encaixar')}
         />
 
-
         <div className="desktop-window__controls">
-          {/* ----- Minimizar janela ----- */}
+          {/* ----- MINIMIZAR JANELA ----- */}
           <Tooltip content={t('Minimizar')}>
             <button
               className="desktop-window__control desktop-window__control--minimize"
@@ -98,10 +117,8 @@ export default function Window({
             </button>
           </Tooltip>
 
-          {/* ----- Maximizar ou restaurar janela ----- */}
-          <Tooltip
-            content={mode === 'normal' ? t('Maximizar') : t('Restaurar tamanho')}
-          >
+          {/* ----- MAXIMIZAR OU RESTAURAR JANELA ----- */}
+          <Tooltip content={mode === 'normal' ? t('Maximizar') : t('Restaurar tamanho')}>
             <button
               className="desktop-window__control desktop-window__control--maximize"
               type="button"
@@ -121,7 +138,7 @@ export default function Window({
             </button>
           </Tooltip>
 
-          {/* ----- Fechar janela ----- */}
+          {/* ----- FECHAR JANELA ----- */}
           <Tooltip content={t('Fechar')}>
             <button
               className="desktop-window__control desktop-window__control--close"
@@ -135,7 +152,6 @@ export default function Window({
             </button>
           </Tooltip>
         </div>
-
       </header>
 
       <AppHost key={instance.id} appName={t(appName)} instance={instance} />

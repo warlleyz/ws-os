@@ -6,7 +6,7 @@
 
 ## Referência e estado
 
-Consulta técnica alinhada ao [mestre vigente](WS-OS-V2-MESTRE.md), atualizada na Etapa 01 em 26/10/2026. Referência de código: 3e6af7d. A organização abaixo descreve responsabilidades existentes; não certifica todos os fluxos como concluídos.
+Consulta técnica alinhada ao [mestre vigente](WS-OS-V2-MESTRE.md), atualizada na Etapa 03 em 26/10/2026. Base desta entrega: 0b49058. A organização abaixo descreve responsabilidades existentes; não certifica todos os fluxos como concluídos.
 
 <!-- === CAMADAS E RESPONSABILIDADES === -->
 
@@ -36,9 +36,9 @@ Consulta técnica alinhada ao [mestre vigente](WS-OS-V2-MESTRE.md), atualizada n
 
 Há 17 entradas: 16 públicas e Administração restrita. Currículo encaminha ao Visualizador. Aplicativos utilizam o Core para abrir destinos; parâmetros, origem e retorno são dados validados, não permissões.
 
-Desktop e Mobile compartilham contratos, mas mantêm composição própria. Janelas minimizadas preservam estado; pausa depende do consumidor. Fechar desmonta recursos. Rascunhos são protegidos por instância e a troca de shell utiliza o guard central.
+Desktop e Mobile compartilham contratos, mas mantêm composição própria. Janelas minimizadas preservam estado; pausa depende do consumidor. Fechamento aguarda descarte ou preparação assíncrona e mantém a instância closing durante a animação; só depois remove e chama onClosed. Rascunhos são protegidos por instância e a troca de shell utiliza o guard central.
 
-Os defeitos conhecidos de confirmação do Currículo e preparação assíncrona do DOOM estão atribuídos à Etapa 03. Não interpretar o contrato desejado como comportamento já comprovado.
+Na Etapa 03, requestAppOpen passou a informar appId efetivo; o Provider confirma cada abertura aplicada e o Mobile seleciona o destino real do Currículo. onOpened também informa requestedAppId, preservando a identificação do atalho. Resultados pendentes possuem identidade própria, sem perder callbacks de aberturas no mesmo lote.
 
 <!-- === DADOS E AUTORIZAÇÃO === -->
 
@@ -64,12 +64,12 @@ Animações das janelas permanecem obrigatórias e respeitam movimento reduzido.
 
 Vite dev/preview não executam as APIs. O backend é o Worker com ASSETS e handlers reutilizados de functions/api. Não há segundo backend ativo por existir essa pasta. Consultar [rotas](backend/WORKER.md) e [configuração](backend/CONFIGURACAO.md).
 
-O Worker reúne seis partes de uzdoom.data e entrega o pacote por streaming. O isolamento COOP/COEP deve ser homologado junto às integrações externas. Hash do manifesto, licenças, rastreabilidade e integração de saves não são certificados pelo build atual.
+O Worker reúne seis partes de uzdoom.data e entrega o pacote por streaming. O isolamento COOP/COEP deve ser homologado junto às integrações externas. Hash do manifesto, licenças e rastreabilidade não são certificados pelo build atual. A integração de saves agora é aguardada pelo Core e testada com ACK/erro/timeout controlados; a persistência real do motor continua na Etapa 08.
 
 <!-- === VALIDAÇÃO E PRESERVAÇÃO === -->
 
 ## Validação e preservação
 
-Na Etapa 01, lint/build passaram e cinco testes preexistentes falharam. Não foram alterados fonte, testes, banco, configuração de runtime, dependências ou assets. Build atualizado em dist não é uma alteração rastreada da aplicação.
+Na Etapa 03, lint/build passaram e a suíte ficou em 523/528, com as mesmas cinco falhas anteriores. Foram alterados Core, consumidores e testes, sem mudança de banco, configuração de runtime, dependências ou assets. A nova duração compartilhada e o hook de apresentação mantêm animação e cleanup coerentes, sem interpolar geometria. Movimento reduzido desativa o atraso visual.
 
 O acompanhamento e os critérios de encerramento estão no mestre. [Contratos anteriores](contracts.md) e checkpoints preservam evidências datadas; não substituem a leitura do código e do estado atual.

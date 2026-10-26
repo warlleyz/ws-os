@@ -1,11 +1,6 @@
-
 import { useEffect, useRef, useState } from 'react';
 
-import {
-  translate as t,
-  useLocale,
-  setLocale,
-} from '../../shared/i18n/i18n';
+import { translate as t, useLocale, setLocale } from '../../shared/i18n/i18n';
 
 import { portfolio, contentText } from '../../content/portfolioContent';
 import { getRegisteredApps } from '../../core/appRegistry';
@@ -24,10 +19,7 @@ import {
   isPortfolioDirectory,
 } from './terminalPortfolio';
 
-import {
-  listLocalFiles,
-  readLocalFile,
-} from '../../services/storage/localFilesStorage';
+import { listLocalFiles, readLocalFile } from '../../services/storage/localFilesStorage';
 
 import {
   parseCommand,
@@ -51,13 +43,13 @@ import {
 import '../../styles/apps.css';
 import './Terminal.css';
 
-/* === Constantes === */
+/* === CONSTANTES === */
 
 const MAX_HISTORY = 100;
 const MAX_OUTPUT = 100;
 const MAX_TEXT_PREVIEW = 32000;
 
-/* === Utilitários de arquivos === */
+/* === UTILITÁRIOS DE ARQUIVOS === */
 
 function visibleEntries(entries) {
   return entries.filter((item) => !item.trashed);
@@ -65,9 +57,7 @@ function visibleEntries(entries) {
 
 function findChild(entries, parentId, name) {
   return entries.find(
-    (item) =>
-      item.parentId === parentId &&
-      item.name.toLowerCase() === name.toLowerCase(),
+    (item) => item.parentId === parentId && item.name.toLowerCase() === name.toLowerCase(),
   );
 }
 
@@ -83,9 +73,7 @@ function pathForFolder(entries, folderId) {
 
     visited.add(id);
 
-    const folder = entries.find(
-      (item) => item.id === id && item.kind === 'folder',
-    );
+    const folder = entries.find((item) => item.id === id && item.kind === 'folder');
 
     if (!folder) {
       throw new Error('Diretório não encontrado.');
@@ -163,13 +151,13 @@ function describeFile(item) {
   return `${item.kind === 'folder' ? '[DIR]' : '[FILE]'} ${item.name}`;
 }
 
-/* === Aplicativo Terminal === */
+/* === APLICATIVO TERMINAL === */
 
 export default function Terminal({ instance }) {
   const locale = useLocale();
   const { run, appState } = useSystem();
 
-  /* === Sessão de comandos === */
+  /* === SESSÃO DE COMANDOS === */
   const [input, setInput] = useState('');
   const [lines, setLines] = useState([]);
   const [history, setHistory] = useState([]);
@@ -179,15 +167,13 @@ export default function Terminal({ instance }) {
   const [currentFolderId, setCurrentFolderId] = useState(null);
   const [pathSuggestions, setPathSuggestions] = useState([]);
 
-  /* === Autenticação === */
+  /* === AUTENTICAÇÃO === */
   const [loginStep, setLoginStep] = useState(null);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-  const [authenticated, setAuthenticated] = useState(
-    () => isAdminAuthenticated(),
-  );
+  const [authenticated, setAuthenticated] = useState(() => isAdminAuthenticated());
 
-  /* === Referências === */
+  /* === REFERÊNCIAS === */
   const screenRef = useRef(null);
   const commandRef = useRef(null);
   const emailRef = useRef(null);
@@ -200,16 +186,16 @@ export default function Terminal({ instance }) {
   const apps = getRegisteredApps().filter((app) => app.public);
   const identity = authenticated ? 'admin' : 'visitor';
 
-  /* === Navegação virtual === */
+  /* === NAVEGAÇÃO VIRTUAL === */
   const [terminalPath, setTerminalPath] = useState('~');
   const [repositories, setRepositories] = useState([]);
   const [projectsLoaded, setProjectsLoaded] = useState(false);
 
-  /* === Animação Matrix === */
+  /* === ANIMAÇÃO MATRIX === */
   const [matrixActive, setMatrixActive] = useState(false);
   const [matrixFrame, setMatrixFrame] = useState([]);
 
-  /* === Inicialização e limpeza === */
+  /* === INICIALIZAÇÃO E LIMPEZA === */
   useEffect(() => {
     alive.current = true;
 
@@ -219,7 +205,7 @@ export default function Terminal({ instance }) {
     };
   }, []);
 
-  /* === Estado administrativo === */
+  /* === ESTADO ADMINISTRATIVO === */
   useEffect(
     () =>
       subscribeAdminSession(() => {
@@ -228,7 +214,7 @@ export default function Terminal({ instance }) {
     [],
   );
 
-  /* === Scroll automático === */
+  /* === SCROLL AUTOMÁTICO === */
   useEffect(() => {
     const screen = screenRef.current;
 
@@ -237,7 +223,7 @@ export default function Terminal({ instance }) {
     screen.scrollTop = screen.scrollHeight;
   }, [lines, loginStep, busy]);
 
-  /* === Foco do prompt === */
+  /* === FOCO DO PROMPT === */
   useEffect(() => {
     if (busy) return;
 
@@ -250,7 +236,7 @@ export default function Terminal({ instance }) {
     }
   }, [loginStep, busy]);
 
-  /* === Registro de saída === */
+  /* === REGISTRO DE SAÍDA === */
   function appendLine(command, output = [], type = 'normal', user = identity) {
     const messages = Array.isArray(output) ? output : [output];
 
@@ -274,7 +260,7 @@ export default function Terminal({ instance }) {
     setLoginPassword('');
   }
 
-  /* === Login por etapas === */
+  /* === LOGIN POR ETAPAS === */
   function cancelLogin() {
     if (busyRef.current) return;
 
@@ -305,22 +291,13 @@ export default function Terminal({ instance }) {
       resetLogin();
       setAuthenticated(true);
 
-      appendLine(
-        '',
-        ['Autenticação administrativa realizada.'],
-        'success',
-        'admin',
-      );
+      appendLine('', ['Autenticação administrativa realizada.'], 'success', 'admin');
     } catch (error) {
       if (!alive.current || controller.signal.aborted) return;
 
       setLoginPassword('');
 
-      appendLine(
-        '',
-        [error instanceof Error ? error.message : 'Falha na autenticação.'],
-        'error',
-      );
+      appendLine('', [error instanceof Error ? error.message : 'Falha na autenticação.'], 'error');
     } finally {
       if (loginRequest.current === controller) {
         loginRequest.current = null;
@@ -355,7 +332,7 @@ export default function Terminal({ instance }) {
     }
   }
 
-  /* === Entrada e histórico === */
+  /* === ENTRADA E HISTÓRICO === */
   function updateInput(value) {
     setInput(value);
     setHistoryIndex(null);
@@ -376,17 +353,11 @@ export default function Terminal({ instance }) {
         const slash = argument.lastIndexOf('/');
         const directory = slash >= 0 ? argument.slice(0, slash + 1) : '.';
 
-        const folderId = getDirectory(
-          entries,
-          currentFolderId,
-          directory,
-        );
+        const folderId = getDirectory(entries, currentFolderId, directory);
 
         paths = entries
           .filter(
-            (item) =>
-              item.parentId === folderId &&
-              (command !== 'cd' || item.kind === 'folder'),
+            (item) => item.parentId === folderId && (command !== 'cd' || item.kind === 'folder'),
           )
           .map((item) => item.name);
 
@@ -438,10 +409,7 @@ export default function Terminal({ instance }) {
         setDraft(input);
       }
 
-      const next = Math.max(
-        0,
-        (historyIndex ?? history.length) - 1,
-      );
+      const next = Math.max(0, (historyIndex ?? history.length) - 1);
 
       setHistoryIndex(next);
       setInput(history[next]);
@@ -465,20 +433,16 @@ export default function Terminal({ instance }) {
     }
   }
 
-  /* === Links profissionais === */
+  /* === LINKS PROFISSIONAIS === */
   function contactUrl(label) {
     return (
-      portfolio.contact.links.find(
-        (link) => link.label.toLowerCase() === label.toLowerCase(),
-      )?.url ?? null
+      portfolio.contact.links.find((link) => link.label.toLowerCase() === label.toLowerCase())
+        ?.url ?? null
     );
   }
 
   function openExternal(url) {
-    if (
-      typeof url !== 'string' ||
-      !/^https:\/\/[a-z0-9.-]+(?:[/:?#]|$)/i.test(url)
-    ) {
+    if (typeof url !== 'string' || !/^https:\/\/[a-z0-9.-]+(?:[/:?#]|$)/i.test(url)) {
       throw new Error('Endereço externo indisponível.');
     }
 
@@ -494,13 +458,11 @@ export default function Terminal({ instance }) {
   function openRegisteredApp(appId) {
     run(openApp, appId, {
       origin: 'terminal',
-      ...(instance?.id
-        ? { originInstanceId: instance.id }
-        : {}),
+      ...(instance?.id ? { originInstanceId: instance.id } : {}),
     });
   }
 
-  /* === Animação temporária, com limpeza automática === */
+  /* === ANIMAÇÃO TEMPORÁRIA, COM LIMPEZA AUTOMÁTICA === */
   useEffect(() => {
     if (!matrixActive) return undefined;
 
@@ -523,7 +485,7 @@ export default function Terminal({ instance }) {
     };
   }, [matrixActive]);
 
-  /* === Motor de comandos === */
+  /* === MOTOR DE COMANDOS === */
   async function execute(event) {
     event.preventDefault();
 
@@ -535,15 +497,10 @@ export default function Terminal({ instance }) {
     const safeCommand = safeTerminalCommand(command);
     const userAtExecution = identity;
 
-    /* === Estrutura virtual pública === */
-    const portfolioTree = createPortfolioTree(
-      portfolio,
-      repositories,
-      locale,
-      contentText,
-    );
+    /* === ESTRUTURA VIRTUAL PÚBLICA === */
+    const portfolioTree = createPortfolioTree(portfolio, repositories, locale, contentText);
 
-    /* === Consulta real ao GitHub === */
+    /* === CONSULTA REAL AO GITHUB === */
     async function loadTerminalProjects() {
       const result = await fetchGithubPortfolio(portfolio.githubUser);
 
@@ -562,9 +519,7 @@ export default function Terminal({ instance }) {
     setPathSuggestions([]);
 
     if (safeCommand !== 'login') {
-      setHistory((current) =>
-        [...current, command].slice(-MAX_HISTORY),
-      );
+      setHistory((current) => [...current, command].slice(-MAX_HISTORY));
     }
 
     busyRef.current = true;
@@ -577,43 +532,38 @@ export default function Terminal({ instance }) {
     try {
       const { name, args } = parseCommand(command);
 
-      /* ----- Impedir credenciais como argumentos ----- */
+      /* ----- IMPEDIR CREDENCIAIS COMO ARGUMENTOS ----- */
       if (name === 'login' && args.length) {
-        throw new Error(
-          'Use apenas login. As credenciais são informadas em etapas protegidas.',
-        );
+        throw new Error('Use apenas login. As credenciais são informadas em etapas protegidas.');
       }
 
       switch (name) {
-        /* === Ajuda === */
+        /* === AJUDA === */
         case 'help': {
           output = commandHelp(args[0]);
           break;
         }
 
-        /* === Catálogo de aplicativos === */
+        /* === CATÁLOGO DE APLICATIVOS === */
         case 'apps': {
           output = apps.map(
             (app) =>
-              `${app.id.padEnd(17)} ${t(app.name)}${app.implemented ? '' : ' [indisponível]'
-              }`,
+              `${app.id.padEnd(17)} ${t(app.name)}${app.implemented ? '' : ' [indisponível]'}`,
           );
           break;
         }
 
-        /* === Janelas === */
+        /* === JANELAS === */
         case 'windows': {
           output = appState.instances.map(
-            (item) =>
-              `${item.appId.padEnd(17)} ${item.id}${item.minimized ? ' [minimizada]' : ''
-              }`,
+            (item) => `${item.appId.padEnd(17)} ${item.id}${item.minimized ? ' [minimizada]' : ''}`,
           );
 
           if (!output.length) output = ['Nenhuma janela aberta.'];
           break;
         }
 
-        /* === Abrir aplicativo === */
+        /* === ABRIR APLICATIVO === */
         case 'open': {
           const requested = args.join(' ').toLowerCase();
 
@@ -621,19 +571,14 @@ export default function Terminal({ instance }) {
             throw new Error(`Uso: ${TERMINAL_USAGE.open}`);
           }
 
-          if (
-            requested === 'administration' ||
-            requested === 'administração'
-          ) {
+          if (requested === 'administration' || requested === 'administração') {
             const authorized = await verifyAdminSession();
 
             if (!alive.current) return;
 
             if (!authorized) {
               setAuthenticated(false);
-              throw new Error(
-                'Acesso administrativo negado. Utilize login.',
-              );
+              throw new Error('Acesso administrativo negado. Utilize login.');
             }
 
             setAuthenticated(true);
@@ -643,15 +588,11 @@ export default function Terminal({ instance }) {
           }
 
           const app = apps.find(
-            (item) =>
-              item.id === requested ||
-              t(item.name).toLowerCase() === requested,
+            (item) => item.id === requested || t(item.name).toLowerCase() === requested,
           );
 
           if (!app?.implemented) {
-            throw new Error(
-              'Aplicativo indisponível. Use apps para consultar o catálogo.',
-            );
+            throw new Error('Aplicativo indisponível. Use apps para consultar o catálogo.');
           }
 
           openRegisteredApp(app.id);
@@ -659,50 +600,40 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Fechar janela === */
+        /* === FECHAR JANELA === */
         case 'close': {
           if (!args[0]) {
             throw new Error(`Uso: ${TERMINAL_USAGE.close}`);
           }
 
           const matches = appState.instances.filter(
-            (item) =>
-              item.id === args[0] ||
-              item.appId === args[0] ||
-              item.id.startsWith(args[0]),
+            (item) => item.id === args[0] || item.appId === args[0] || item.id.startsWith(args[0]),
           );
 
           if (matches.length !== 1) {
-            throw new Error(
-              'Informe um ID único da instância. Consulte windows.',
-            );
+            throw new Error('Informe um ID único da instância. Consulte windows.');
           }
 
-          const result = run(closeApp, matches[0].id);
+          run(closeApp, matches[0].id);
 
-          output = [
-            result === false
-              ? 'Fechamento depende da confirmação de descarte.'
-              : 'Janela fechada.',
-          ];
+          // A preparação e a animação podem terminar depois do comando.
+          output = ['Fechamento solicitado.'];
           break;
         }
 
-        /* === Tema === */
+        /* === TEMA === */
         case 'theme': {
           if (!['dark', 'light'].includes(args[0])) {
             throw new Error(`Uso: ${TERMINAL_USAGE.theme}`);
           }
 
           output = [
-            setTheme(args[0])
-              ? 'Preferência aplicada.'
-              : 'Preferência ativa somente nesta sessão.',
+            setTheme(args[0]) ? 'Preferência aplicada.' : 'Preferência ativa somente nesta sessão.',
           ];
           break;
         }
 
-        /* === Idioma === */
+        /* === IDIOMA === */
         case 'lang': {
           if (!['pt-BR', 'en'].includes(args[0])) {
             throw new Error(`Uso: ${TERMINAL_USAGE.lang}`);
@@ -716,14 +647,12 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Diretório atual === */
+        /* === DIRETÓRIO ATUAL === */
         case 'pwd': {
           if (terminalPath.startsWith('~/personal')) {
             const entries = visibleEntries(await listLocalFiles());
 
-            output = [
-              `~${pathForFolder(entries, currentFolderId)}`,
-            ];
+            output = [`~${pathForFolder(entries, currentFolderId)}`];
           } else {
             output = [terminalPath];
           }
@@ -731,7 +660,7 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Listagem de arquivos === */
+        /* === LISTAGEM DE ARQUIVOS === */
         case 'ls': {
           const requested = args[0] ?? '.';
           const path = normalizePortfolioPath(terminalPath, requested);
@@ -739,13 +668,10 @@ export default function Terminal({ instance }) {
           if (path === '~/personal' || path.startsWith('~/personal/')) {
             const entries = visibleEntries(await listLocalFiles());
 
-            const folderId = path === '~/personal'
-              ? null
-              : getDirectory(
-                entries,
-                null,
-                path.replace(/^~\/personal\/?/, ''),
-              );
+            const folderId =
+              path === '~/personal'
+                ? null
+                : getDirectory(entries, null, path.replace(/^~\/personal\/?/, ''));
 
             output = entries
               .filter((item) => item.parentId === folderId)
@@ -759,8 +685,7 @@ export default function Terminal({ instance }) {
           let tree = portfolioTree;
 
           if (
-            (path === '~/portfolio/projects' ||
-              path.startsWith('~/portfolio/projects/')) &&
+            (path === '~/portfolio/projects' || path.startsWith('~/portfolio/projects/')) &&
             !projectsLoaded
           ) {
             const fresh = await loadTerminalProjects();
@@ -775,7 +700,7 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Navegação de arquivos === */
+        /* === NAVEGAÇÃO DE ARQUIVOS === */
         case 'cd': {
           const target = args[0] ?? '~';
           const next = normalizePortfolioPath(terminalPath, target);
@@ -794,10 +719,7 @@ export default function Terminal({ instance }) {
 
           let tree = portfolioTree;
 
-          if (
-            next.startsWith('~/portfolio/projects/') &&
-            !projectsLoaded
-          ) {
+          if (next.startsWith('~/portfolio/projects/') && !projectsLoaded) {
             const fresh = await loadTerminalProjects();
             if (!alive.current || !fresh) return;
 
@@ -813,7 +735,7 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Leitura de arquivos textuais === */
+        /* === LEITURA DE ARQUIVOS TEXTUAIS === */
         case 'cat': {
           if (!args[0]) {
             throw new Error('Uso: cat <arquivo>');
@@ -847,10 +769,7 @@ export default function Terminal({ instance }) {
 
           let tree = portfolioTree;
 
-          if (
-            path.startsWith('~/portfolio/projects/') &&
-            !projectsLoaded
-          ) {
+          if (path.startsWith('~/portfolio/projects/') && !projectsLoaded) {
             const fresh = await loadTerminalProjects();
             if (!alive.current || !fresh) return;
 
@@ -861,7 +780,7 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Perfil === */
+        /* === PERFIL === */
         case 'about': {
           output = [
             portfolio.profile.name,
@@ -872,15 +791,12 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Projetos === */
+        /* === PROJETOS === */
         case 'projects': {
           const projects = portfolio.projects ?? [];
 
           if (projects.length) {
-            output = projects.map(
-              (project) =>
-                `${project.name ?? project.title ?? project.id}`,
-            );
+            output = projects.map((project) => `${project.name ?? project.title ?? project.id}`);
           } else {
             output = [
               'Os projetos são carregados pela integração do GitHub.',
@@ -891,12 +807,11 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Certificados === */
+        /* === CERTIFICADOS === */
         case 'certificates': {
           output = (portfolio.certificates ?? []).map(
             (certificate) =>
-              `${contentText(certificate.title, locale)} — ${certificate.issuer ?? ''
-              }`,
+              `${contentText(certificate.title, locale)} — ${certificate.issuer ?? ''}`,
           );
 
           if (!output.length) {
@@ -906,54 +821,44 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Contatos === */
+        /* === CONTATOS === */
         case 'contact': {
           output = (portfolio.contact.links ?? []).map(
-            (link) =>
-              `${contentText(link.label, locale)}: ${link.url}`,
+            (link) => `${contentText(link.label, locale)}: ${link.url}`,
           );
           break;
         }
 
-        /* === Links externos === */
+        /* === LINKS EXTERNOS === */
         case 'github':
         case 'linkedin': {
           const url = contactUrl(name);
 
-          output = [
-            openExternal(url),
-            url,
-          ];
+          output = [openExternal(url), url];
           break;
         }
 
-        /* === Currículo === */
+        /* === CURRÍCULO === */
         case 'resume': {
           openRegisteredApp('resume');
           output = ['Currículo aberto.'];
           break;
         }
 
-        /* === Informações gerais === */
+        /* === INFORMAÇÕES GERAIS === */
         case 'date': {
           output = [new Date().toLocaleString(locale)];
           break;
         }
 
         case 'whoami': {
-          output = [
-            authenticated && isAdminAuthenticated()
-              ? 'Administrador'
-              : 'Visitante',
-          ];
+          output = [authenticated && isAdminAuthenticated() ? 'Administrador' : 'Visitante'];
           break;
         }
 
-        /* === Histórico === */
+        /* === HISTÓRICO === */
         case 'history': {
-          output = history.map(
-            (item, index) => `${index + 1} ${item}`,
-          );
+          output = history.map((item, index) => `${index + 1} ${item}`);
 
           if (!output.length) {
             output = ['Histórico vazio.'];
@@ -962,19 +867,19 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Limpar saída === */
+        /* === LIMPAR SAÍDA === */
         case 'clear': {
           clearRequested = true;
           break;
         }
 
-        /* === Echo === */
+        /* === ECHO === */
         case 'echo': {
           output = [args.join(' ')];
           break;
         }
 
-        /* === Login === */
+        /* === LOGIN === */
         case 'login': {
           if (isAdminAuthenticated()) {
             setAuthenticated(true);
@@ -985,31 +890,24 @@ export default function Terminal({ instance }) {
             setLoginPassword('');
             setLoginStep('email');
 
-            output = [
-              'WS OS Authentication',
-              'Informe as credenciais solicitadas pelo prompt.',
-            ];
+            output = ['WS OS Authentication', 'Informe as credenciais solicitadas pelo prompt.'];
           }
 
           break;
         }
 
-        /* === Logout === */
+        /* === LOGOUT === */
         case 'logout': {
-          const pendingChanges = appState.instances.some(
-            (item) => !canCloseApp(item.id),
-          );
+          const pendingChanges = appState.instances.some((item) => !canCloseApp(item.id));
 
           if (
             pendingChanges &&
             !window.confirm(
               'Existem alterações não salvas em aplicativos abertos.\n\n' +
-              'O acesso administrativo será encerrado. Deseja continuar?',
+                'O acesso administrativo será encerrado. Deseja continuar?',
             )
           ) {
-            output = [
-              'Logout cancelado. Alterações preservadas.',
-            ];
+            output = ['Logout cancelado. Alterações preservadas.'];
             break;
           }
 
@@ -1020,9 +918,7 @@ export default function Terminal({ instance }) {
           setAuthenticated(false);
           resetLogin();
 
-          const adminWindows = appState.instances.filter(
-            (item) => item.appId === 'administration',
-          );
+          const adminWindows = appState.instances.filter((item) => item.appId === 'administration');
 
           for (const item of adminWindows) {
             run(closeApp, item.id);
@@ -1037,7 +933,7 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Easter eggs === */
+        /* === EASTER EGGS === */
         case 'sudo':
         case 'coffee':
         case '42': {
@@ -1065,19 +961,13 @@ export default function Terminal({ instance }) {
           break;
         }
 
-        /* === Comando inválido === */
+        /* === COMANDO INVÁLIDO === */
         default: {
-          throw new Error(
-            `Comando não reconhecido: ${name}. Digite help.`,
-          );
+          throw new Error(`Comando não reconhecido: ${name}. Digite help.`);
         }
       }
     } catch (error) {
-      output = [
-        error instanceof Error
-          ? error.message
-          : 'Não foi possível executar o comando.',
-      ];
+      output = [error instanceof Error ? error.message : 'Não foi possível executar o comando.'];
       outputType = 'error';
     } finally {
       busyRef.current = false;
@@ -1096,7 +986,7 @@ export default function Terminal({ instance }) {
     }
   }
 
-  /* === Foco ao clicar na superfície === */
+  /* === FOCO AO CLICAR NA SUPERFÍCIE === */
   function focusCommand(event) {
     if (
       busy ||
@@ -1115,7 +1005,7 @@ export default function Terminal({ instance }) {
     }
   }
 
-  /* === Teclado durante autenticação === */
+  /* === TECLADO DURANTE AUTENTICAÇÃO === */
   function handleLoginKeyDown(event) {
     if (event.key === 'Escape' && !busy) {
       event.preventDefault();
@@ -1123,23 +1013,18 @@ export default function Terminal({ instance }) {
     }
   }
 
-  /* === Interface de terminal === */
+  /* === INTERFACE DE TERMINAL === */
   return (
-    <article
-      className="desktop-window__content ws-app ws-terminal"
-      aria-label={t('Terminal')}
-    >
-      <div
-        className="ws-terminal__screen"
-        ref={screenRef}
-        onClick={focusCommand}
-      >
-        {/* === Inicialização === */}
+    <article className="desktop-window__content ws-app ws-terminal" aria-label={t('Terminal')}>
+      <div className="ws-terminal__screen" ref={screenRef} onClick={focusCommand}>
+        {/* === INICIALIZAÇÃO === */}
         <div className="ws-terminal__welcome">
-          <p>Digite <strong>help</strong> para consultar os comandos disponíveis.</p>
+          <p>
+            Digite <strong>help</strong> para consultar os comandos disponíveis.
+          </p>
         </div>
 
-        {/* === Saídas e histórico === */}
+        {/* === SAÍDAS E HISTÓRICO === */}
         <div
           className="ws-terminal__log"
           role="log"
@@ -1148,32 +1033,22 @@ export default function Terminal({ instance }) {
           tabIndex={0}
         >
           {lines.map((entry) => (
-            <div
-              className="ws-terminal__entry"
-              key={entry.id}
-            >
+            <div className="ws-terminal__entry" key={entry.id}>
               {entry.command && (
                 <div className="ws-terminal__command-line">
-                  <span className="ws-terminal__user">
-                    {entry.identity}@ws-os
-                  </span>
+                  <span className="ws-terminal__user">{entry.identity}@ws-os</span>
 
-                  <span className="ws-terminal__path">
-                    :~$
-                  </span>
+                  <span className="ws-terminal__path">:~$</span>
 
-                  <span className="ws-terminal__command-text">
-                    {entry.command}
-                  </span>
+                  <span className="ws-terminal__command-text">{entry.command}</span>
                 </div>
               )}
 
               {entry.output.length > 0 && (
                 <div
-                  className={[
-                    'ws-terminal__output',
-                    `ws-terminal__output--${entry.type}`,
-                  ].join(' ')}
+                  className={['ws-terminal__output', `ws-terminal__output--${entry.type}`].join(
+                    ' ',
+                  )}
                 >
                   {entry.output.map((line, index) => (
                     <pre key={index}>{t(line)}</pre>
@@ -1184,7 +1059,7 @@ export default function Terminal({ instance }) {
           ))}
         </div>
 
-        {/* === Prompt de autenticação === */}
+        {/* === PROMPT DE AUTENTICAÇÃO === */}
         {loginStep !== null ? (
           <form
             className="ws-terminal__login"
@@ -1199,9 +1074,7 @@ export default function Terminal({ instance }) {
                   ref={emailRef}
                   type="email"
                   value={loginEmail}
-                  onChange={(event) =>
-                    setLoginEmail(event.target.value)
-                  }
+                  onChange={(event) => setLoginEmail(event.target.value)}
                   autoComplete="username"
                   autoCapitalize="none"
                   spellCheck={false}
@@ -1219,9 +1092,7 @@ export default function Terminal({ instance }) {
                   ref={passwordRef}
                   type="password"
                   value={loginPassword}
-                  onChange={(event) =>
-                    setLoginPassword(event.target.value)
-                  }
+                  onChange={(event) => setLoginPassword(event.target.value)}
                   autoComplete="current-password"
                   required
                   disabled={busy}
@@ -1236,26 +1107,14 @@ export default function Terminal({ instance }) {
                 : 'Enter: autenticar · Esc: cancelar'}
             </p>
 
-            <button
-              className="ws-terminal__sr-only"
-              type="submit"
-              disabled={busy}
-            >
-              {loginStep === 'email'
-                ? 'Continuar'
-                : t(busy ? 'Autenticando...' : 'Entrar')}
+            <button className="ws-terminal__sr-only" type="submit" disabled={busy}>
+              {loginStep === 'email' ? 'Continuar' : t(busy ? 'Autenticando...' : 'Entrar')}
             </button>
           </form>
         ) : (
-          /* === Prompt principal === */
-          <form
-            className="ws-terminal__input-line"
-            onSubmit={execute}
-          >
-            <span
-              className="ws-terminal__user"
-              aria-hidden="true"
-            >
+          /* === PROMPT PRINCIPAL === */
+          <form className="ws-terminal__input-line" onSubmit={execute}>
+            <span className="ws-terminal__user" aria-hidden="true">
               {identity}@ws-os
             </span>
 
@@ -1264,17 +1123,13 @@ export default function Terminal({ instance }) {
             </span>
 
             <label className="ws-terminal__input-wrap">
-              <span className="ws-terminal__sr-only">
-                {t('Comando')}
-              </span>
+              <span className="ws-terminal__sr-only">{t('Comando')}</span>
 
               <input
                 ref={commandRef}
                 type="text"
                 value={input}
-                onChange={(event) =>
-                  updateInput(event.target.value)
-                }
+                onChange={(event) => updateInput(event.target.value)}
                 onKeyDown={handleCommandKeyDown}
                 maxLength={512}
                 disabled={busy}
@@ -1285,38 +1140,23 @@ export default function Terminal({ instance }) {
               />
             </label>
 
-            <button
-              className="ws-terminal__sr-only"
-              type="submit"
-              disabled={busy}
-            >
+            <button className="ws-terminal__sr-only" type="submit" disabled={busy}>
               {t('Executar')}
             </button>
           </form>
         )}
 
-        {/* === Easter egg Matrix === */}
+        {/* === EASTER EGG MATRIX === */}
         {matrixActive && (
-          <div
-            className="ws-terminal__matrix"
-            aria-label="Animação Matrix"
-            aria-live="off"
-          >
-            <pre aria-hidden="true">
-              {matrixFrame.join('\n')}
-            </pre>
+          <div className="ws-terminal__matrix" aria-label="Animação Matrix" aria-live="off">
+            <pre aria-hidden="true">{matrixFrame.join('\n')}</pre>
           </div>
         )}
 
-        {/* === Operação em andamento === */}
+        {/* === OPERAÇÃO EM ANDAMENTO === */}
         {busy && (
-          <p
-            className="ws-terminal__processing"
-            role="status"
-          >
-            {loginStep !== null
-              ? t('Autenticando...')
-              : 'Processando...'}
+          <p className="ws-terminal__processing" role="status">
+            {loginStep !== null ? t('Autenticando...') : 'Processando...'}
           </p>
         )}
       </div>

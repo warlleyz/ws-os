@@ -2,7 +2,7 @@
 
 # WS OS V2 — Documento mestre de revisão e conclusão
 
-- **Versão:** 1.2
+- **Versão:** 1.3
 - **Data:** 26/10/2026
 - **Projeto:** WS OS — Portfólio interativo
 - **Repositório:** https://github.com/warlleyz/ws-os
@@ -27,7 +27,7 @@ A revisão deve encerrar, em cada área:
 
 Não deixar traduções, Mobile, estados de erro ou acessibilidade de todos os aplicativos para a última etapa.
 
-Este documento consolida a direção de conclusão. A autorização vigente permite executar diretamente a Etapa 02 na main e realizar um único commit ao final desta etapa, sem push. A Etapa 01 já recebeu seu commit. Não há autorização para avançar à Etapa 03, mudar de branch, aplicar migrações, publicar ou alterar infraestrutura remota.
+Este documento consolida a direção de conclusão. A autorização vigente permite executar diretamente a Etapa 03 na main e realizar um único commit ao final desta etapa, sem push. As Etapas 01 e 02 já receberam seus commits. Não há autorização para avançar à Etapa 04, mudar de branch, aplicar migrações, publicar ou alterar infraestrutura remota.
 
 <!-- === 2. PRECEDÊNCIA E DECISÕES === -->
 
@@ -55,7 +55,7 @@ As autorizações antigas não constituem permissão permanente.
 - Supabase Storage privado substituiu Cloudflare R2 para arquivos oficiais.
 - A antiga restrição de adiar traduções não orienta esta revisão final: traduções devem ser encerradas na própria área revisada.
 - Referências históricas a 18 aplicativos, Administração inexistente ou Mobile reservado não descrevem a base atual.
-- Recomendações antigas de commits não concedem permissão permanente. A autorização da Etapa 01 foi cumprida; o pedido posterior autoriza um único commit também ao final da Etapa 02.
+- Recomendações antigas de commits não concedem permissão permanente. As autorizações das Etapas 01 e 02 foram cumpridas com um commit cada. O pedido posterior autoriza o mesmo modelo na Etapa 03.
 - Boot com processador e logos oficiais reservadas ao favicon, por confirmação do proprietário nesta etapa.
 - A Administração seleciona os projetos destacados por ID; a ordenação restante continua automática, com os filtros existentes. Não há ordenação editorial manual a implementar.
 - Animações das janelas permanecem obrigatórias, respeitando movimento reduzido. Comandos Reiniciar e Desligar ficam fora desta versão.
@@ -742,20 +742,20 @@ Não exigir toda combinação cartesiana em toda alteração. Cobrir riscos e di
 
 Manter neste documento, ou no local único combinado, uma tabela:
 
-| Etapa                            | Estado                                               | Evidências                                               | Pendências                                                     | Aceite                                              |
-| -------------------------------- | ---------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------- |
-| 01 — Base e escopo               | Encerrada e aprovada                                 | Commit 0bf511d                                           | Nenhuma pendência de escopo                                    | Autorização do proprietário para avançar à Etapa 02 |
-| 02 — Backend e dados             | Bloqueada externamente; implementação local validada | Seção 22; 505/510 testes, mesmas cinco falhas anteriores | Aplicar/homologar migração, identidades reais, D1 remoto e P12 | Aceite integral pendente                            |
-| 03 — Core e persistência         | Não iniciada nesta revisão                           | Diagnóstico registrado                                   | P02 e P03                                                      | Pendente                                            |
-| 04 — Design System               | Não iniciada nesta revisão                           | Decisões preservadas                                     | P05                                                            | Pendente                                            |
-| 05 — Arquivos                    | Não iniciada nesta revisão                           | Contratos preservados                                    | Revisão funcional e visual; P14                                | Pendente                                            |
-| 06 — Profissionais               | Não iniciada nesta revisão                           | Catálogo preservado                                      | P07 e conteúdo                                                 | Pendente                                            |
-| 07 — Contato/Notas/Administração | Não iniciada nesta revisão                           | APIs existentes                                          | Homologação dos fluxos                                         | Pendente                                            |
-| 08 — Calculadora/Jogos           | Não iniciada nesta revisão                           | Baseline registrada                                      | P06, P08 e P11                                                 | Pendente                                            |
-| 09 — Terminal/Wally/Busca        | Não iniciada nesta revisão                           | Catálogo existente                                       | P09                                                            | Pendente                                            |
-| 10 — Shells                      | Não iniciada nesta revisão                           | Integração existente                                     | P10 e dispositivos                                             | Pendente                                            |
-| 11 — Apresentação                | Não iniciada nesta revisão                           | Escopo fechado                                           | Walkthrough e informações finais                               | Pendente                                            |
-| 12 — Aceite integrado            | Não iniciada                                         | CI existente; execução remota não conferida              | P13 e P15                                                      | Pendente                                            |
+| Etapa                            | Estado                                               | Evidências                                                                | Pendências                                                          | Aceite                                              |
+| -------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
+| 01 — Base e escopo               | Encerrada e aprovada                                 | Commit 0bf511d                                                            | Nenhuma pendência de escopo                                         | Autorização do proprietário para avançar à Etapa 02 |
+| 02 — Backend e dados             | Bloqueada externamente; implementação local validada | Seção 22; 505/510 testes, mesmas cinco falhas anteriores                  | Aplicar/homologar migração, identidades reais, D1 remoto e P12      | Aceite integral pendente                            |
+| 03 — Core e persistência         | Concluída tecnicamente, aguardando aceite            | Seção 23; 523/528 testes, mesmas cinco falhas anteriores; navegador local | Homologação do motor DOOM na 08 e aceite físico nas etapas próprias | Pendente                                            |
+| 04 — Design System               | Não iniciada nesta revisão                           | Decisões preservadas                                                      | P05                                                                 | Pendente                                            |
+| 05 — Arquivos                    | Não iniciada nesta revisão                           | Contratos preservados                                                     | Revisão funcional e visual; P14                                     | Pendente                                            |
+| 06 — Profissionais               | Não iniciada nesta revisão                           | Catálogo preservado                                                       | P07 e conteúdo                                                      | Pendente                                            |
+| 07 — Contato/Notas/Administração | Não iniciada nesta revisão                           | APIs existentes                                                           | Homologação dos fluxos                                              | Pendente                                            |
+| 08 — Calculadora/Jogos           | Não iniciada nesta revisão                           | Baseline registrada                                                       | P06, P08 e P11                                                      | Pendente                                            |
+| 09 — Terminal/Wally/Busca        | Não iniciada nesta revisão                           | Catálogo existente                                                        | P09                                                                 | Pendente                                            |
+| 10 — Shells                      | Não iniciada nesta revisão                           | Integração existente                                                      | P10 e dispositivos                                                  | Pendente                                            |
+| 11 — Apresentação                | Não iniciada nesta revisão                           | Escopo fechado                                                            | Walkthrough e informações finais                                    | Pendente                                            |
+| 12 — Aceite integrado            | Não iniciada                                         | CI existente; execução remota não conferida                               | P13 e P15                                                           | Pendente                                            |
 
 Ao terminar uma etapa, registrar:
 
@@ -875,8 +875,8 @@ Cada pendência possui responsável primário. Etapas posteriores apenas validam
 | ID  | Pendência / evidência                                                                   | Etapa responsável   | Critério de encerramento                                                                                 |
 | --- | --------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
 | P01 | Limite Snake 397 unificado no contrato, API e interface; migração incremental preparada | 02                  | Concluído localmente; aplicar e homologar a migração antes de publicar                                   |
-| P02 | Currículo redireciona para file-viewer, mas confirmação compara resume                  | 03                  | onOpened confirma a instância efetiva e Mobile abre o documento; verificar novamente na 06               |
-| P03 | beforeClose do DOOM não é consumido pelo Core                                           | 03                  | Preparação aguardada, erro/timeout tratados e cancelamento preservando sessão; verificar novamente na 08 |
+| P02 | Currículo confirma file-viewer e Mobile seleciona o destino efetivo                     | 03                  | Encerrado no Core; regressões e PDF real no navegador Desktop/Mobile aprovados; conteúdo permanece na 06 |
+| P03 | Preparação assíncrona consumida pelo Core, sem descarte ou desmontagem prematura        | 03                  | Encerrado no Core; ACK/erro/timeout e cleanup testados; persistência real do motor pertence à 08         |
 | P04 | Metadados de RLS/grants, bucket e histórico 005–014 conferidos no ws-os-dev             | 02                  | Ainda requer identidades reais, execução dos roteiros SQL, migração incremental e D1 remoto              |
 | P05 | Wallpapers emparelhados, destaque global e enquadramento fixo                           | 04                  | Quatro seleções independentes, auto/manual por tema e modos aprovados; walkthrough na 11                 |
 | P06 | Quatro testes Snake incompatíveis com a base recuperada                                 | 08                  | Harness e fixtures atualizados preservando testes reais de regras, pausa e reinício                      |
@@ -1002,7 +1002,7 @@ wrangler.jsonc já contém binding D1 e flags REQUESTS_ENABLED, MANAGED_FILES_EN
 
 ### Continuidade imediata
 
-A Etapa 02 recebeu execução local e inspeção remota de metadados, conforme seção 22. A continuação é homologar os bloqueios externos quando autorizados. A Etapa 03 não foi iniciada; pode receber autorização própria sem repetir esta revisão, preservando os bloqueios de publicação ainda abertos.
+As Etapas 02 e 03 receberam execução local, conforme seções 22 e 23. Os bloqueios externos da Etapa 02 continuam abertos. O próximo incremento de implementação é a Etapa 04, somente quando autorizado, sem repetir os contratos já encerrados.
 
 <!-- === 22. ETAPA 02 — BACKEND, SEGURANÇA E DADOS === -->
 
@@ -1107,6 +1107,100 @@ Alterados: functions/_lib/publicWriteProtection.js; functions/api/rankings.js, p
 
 Comentários dos arquivos modificados seguem seções/subseções em PT-BR. Não foram alterados a configuração de produção, as flags, dependências, assets, demais aplicativos ou migrações antigas. doom-source/ permanece preservado e fora do commit.
 
-Não iniciar a Etapa 03 automaticamente. A próxima intervenção nesta etapa é homologar os itens externos mediante autorização, sem repetir as correções locais já verificadas.
+A autorização posterior permitiu executar a Etapa 03, registrada abaixo. A próxima intervenção específica na Etapa 02 é homologar seus itens externos mediante autorização, sem repetir as correções locais já verificadas.
 
 Referências de segurança consultadas: [RLS e privilégios](https://supabase.com/docs/guides/database/postgres/row-level-security), [avisos de views com privilégios do proprietário](https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view) e [segurança de senhas](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+
+<!-- === 23. ETAPA 03 — CORE, PERSISTÊNCIA E CICLO DE VIDA === -->
+
+## 23. Etapa 03 — Core, persistência e ciclo de vida
+
+<!-- ----- ESCOPO E ESTADO ----- -->
+
+### Escopo e estado
+
+Executada na main sobre 0b49058, por autorização para seguir o mesmo modelo: edição direta e um único commit final, sem push. Estado inicial: nenhum arquivo rastreado modificado ou preparado; doom-source/ não rastreado, preservado.
+
+Entrega técnica local concluída, aguardando aceite. Não foram alterados backend, migrações, configuração de produção, dependências ou assets. Permanecem os bloqueios externos da Etapa 02. A Etapa 04 não foi iniciada.
+
+<!-- ----- NAVEGAÇÃO E CONFIRMAÇÃO APLICADA ----- -->
+
+### Navegação e confirmação aplicada
+
+- requestAppOpen informa appId efetivo nos resultados de sucesso, preservando instanceId e os estados opened/restored/navigated.
+- Currículo continua um atalho para o documento estático no Visualizador; não cria outro aplicativo ou catálogo.
+- SystemProvider confirma a instância realmente aplicada e entrega onOpened com instanceId, appId efetivo, requestedAppId e status.
+- Solicitações de abertura no mesmo lote mantêm callbacks próprios. Resultados consumidos são descartados na próxima abertura, sem um setState adicional apenas para limpar a fila em efeito.
+- Abertura cancelada, contexto perdido ou acesso revogado não recebe confirmação falsa de sucesso.
+- Mobile utiliza o destino confirmado e foca sua navegação. O PDF real abriu no shell de 390 × 844 emulado; não permaneceu na Home.
+
+<!-- ----- SAÍDA PROTEGIDA E PREPARAÇÃO ASSÍNCRONA ----- -->
+
+### Saída protegida e preparação assíncrona
+
+registerCloseGuard preserva o guard síncrono de descarte e passa a consumir a opção beforeClose para preparação assíncrona. Uma preparação precisa retornar true para permitir a ação. false, rejeição, registro substituído ou desmontagem mantêm a operação sem execução tardia.
+
+Durante o salvamento há exclusividade de saída, fundo inert e status localizado. Fechamento repetido não dispara salvamentos duplicados. As proteções aceitas são liberadas antes da animação para uma nova troca de shell não tentar salvar uma instância que já está encerrando.
+
+Troca de shell prepara todas as instâncias antes de desmontar qualquer uma; cancelar um rascunho interrompe a transição inteira. Um guard novo ou substituído exige nova solicitação. A mídia atual ainda é revalidada pelo App antes de aplicar o shell.
+
+O hook do DOOM mantém validação de origem, frame, tipo e requestId, uma solicitação de sincronização por vez e timeout de dez segundos. Falha ou ausência do frame deixa o jogo aberto e apresenta o erro existente. Desmontagem limpa listener, timeout e promise pendente. Fechar abruptamente o navegador continua sem garantia de conclusão assíncrona.
+
+Os testes do hook utilizam o código real com transporte controlado. Não houve partida DOOM nem homologação dos bytes gravados pelo motor/IndexedDB nesta etapa; isso permanece na Etapa 08.
+
+<!-- ----- ANIMAÇÕES, FOCO E LIMPEZA ----- -->
+
+### Animações, foco e limpeza
+
+O reducer closeApp permanece imediato e compatível. O Provider coordena antes a proteção e, quando pertinente, beginAppClose: a instância fica marcada closing, sem interação e pausada, até o encerramento visual. Só então é removida e onClosed é chamado após o estado aplicado.
+
+Abertura, minimização, restauração, mudança de modo e fechamento usam opacidade/transformação. Não foram adicionadas transições de largura, altura, top ou left, preservando a estratégia de geometria e desempenho.
+
+Duração compartilhada: 180 ms normal, 90 ms sutil e zero com movimento desligado/reduzido ou efeitos mínimos. Minimizar preserva montagem; restaurar reutiliza a instância. Fechamentos Mobile e de janelas já minimizadas não recebem espera visual artificial. Relógios, callbacks, captura de ponteiro e frames pendentes são liberados ao desmontar ou encerrar interação.
+
+Instâncias closing não podem ser ativadas, restauradas, minimizadas novamente ou reutilizadas como destino. O foco passa para outra janela disponível ou para o shell. Abertura/restauração foca a moldura; mera ativação não captura o foco de campos. Cancelar o diálogo devolve foco ao acionador registrado, sem focar áreas inert.
+
+Terminal informa “Fechamento solicitado.” em vez de prometer remoção imediata; as traduções PT-BR/EN foram incluídas. Não há comando novo de Terminal, reinício ou desligamento.
+
+<!-- ----- PERSISTÊNCIA E ISOLAMENTO PRESERVADOS ----- -->
+
+### Persistência e isolamento preservados
+
+Foram revistos os contratos de preferências/reset, escrita com recuperação, navegação contextual, AppHost e isolamento por ErrorBoundary. Os testes existentes de falha parcial, allowlist de reset, sincronização entre abas e recuperação continuam aprovados.
+
+Não houve alteração das chaves ou apagamento de arquivos pessoais, wallpapers, recordes ou posições. A revisão completa de IndexedDB/documentos pertence à Etapa 05; personalização avançada permanece na 04. Janelas e novos marcadores de animação são estado volátil, sem restauração automática após reload.
+
+<!-- ----- VALIDAÇÃO EFETIVA ----- -->
+
+### Validação efetiva
+
+| Verificação                                            | Resultado                                                                                                        |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Regressões adicionadas                                 | 18 aprovadas: 17 em lifecycle.test.cjs e uma integração Mobile                                                   |
+| Primeira bateria direcionada                           | 59 testes aprovados; a regressão adicional de foco foi incluída na suíte final                                   |
+| Lint                                                   | Aprovado, sem desativar regras                                                                                   |
+| Build                                                  | Aprovado; 2.138 módulos, aviso FileViewer de aproximadamente 620,92 kB preservado                                |
+| Suíte completa                                         | 528 testes: 523 aprovados e as mesmas cinco falhas anteriores                                                    |
+| Browser Desktop                                        | Currículo/PDF, minimizar/restaurar mesma instância, maximizar/restaurar e fechar com retorno de foco             |
+| Bundle compilado e Mobile emulado                      | Currículo abre em app; foco em Voltar; rascunho preservado ao cancelar troca e descartado somente após confirmar |
+| Erros da aplicação no percurso compilado observado     | Nenhum coletado no intervalo consultado                                                                          |
+| Dispositivos físicos, leitor de tela e motor DOOM real | Não homologados nesta etapa                                                                                      |
+
+Conferência final: 22 arquivos da etapa formatados, 100 links relativos válidos e git diff --check aprovado. A comparação do Terminal com a base confirmou somente a mensagem de fechamento, o comentário explicativo e a padronização de formatação, sem modificar os demais comandos.
+
+As cinco falhas continuam sendo quatro testes Snake desatualizados e a tradução “Carga horária”, atribuídos às etapas 08 e 06. Não foram removidas verificações para apresentar aprovação da suíte inteira.
+
+A prévia foi isolada em 127.0.0.1:5353. O formulário recebeu somente um rascunho de teste local; nenhum envio de contato ou desafio foi submetido. Dev/preview não executam o Worker; indisponibilidade de eventos e avisos Turnstile locais não foram considerados homologação de backend. A viewport temporária foi restaurada e a aba/serviços de prévia foram encerrados.
+
+<!-- ----- ARQUIVOS E CONTINUIDADE ----- -->
+
+### Arquivos e continuidade
+
+- Core: appCloseGuards.js, appManager.js, SystemProvider.jsx, navigationManager.js e novo windowLifecycle.js.
+- Janelas: Window.jsx, Window.css, WindowLayer.jsx, useWindowInteraction.js e novo useWindowMotion.js.
+- Consumidores: useDoomSession.js, Mobile.jsx, AppCloseDialog.jsx e mensagem de fechamento do Terminal.jsx.
+- Traduções: uma chave acrescentada em cada catálogo PT-BR/EN.
+- Testes: novo tests/core/lifecycle.test.cjs, integração em mobile-shell-ui.test.cjs e suporte de argumentos/ambiente no helper app-ui.cjs.
+- Documentação: mestre, README e arquitetura atualizados; nenhum documento histórico excluído ou reescrito.
+
+Reabrir estes contratos somente por defeito/regressão ou mudança autorizada. A Etapa 08 valida persistência real do DOOM sem reconstruir o Core; a Etapa 10 valida composição/fluidez nos shells e hardware real. Próxima implementação: Etapa 04, mediante autorização.

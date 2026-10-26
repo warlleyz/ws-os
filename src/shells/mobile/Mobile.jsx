@@ -30,25 +30,25 @@ import MobileNavigation from './MobileNavigation';
 import './Mobile.css';
 
 export default function Mobile({ theme, onThemeChange }) {
-  /* === Idioma e autenticação === */
+  /* === IDIOMA E AUTENTICAÇÃO === */
   useLocale();
 
   useSyncExternalStore(subscribeAdminSession, getAdminSessionVersion, getAdminSessionVersion);
 
   const authorized = isAdminAuthenticated();
 
-  /* === Preferências e aparência === */
+  /* === PREFERÊNCIAS E APARÊNCIA === */
   const mobilePreferences = useMobilePreferences();
   const wallpaper = useWallpaper('mobile');
 
   useWallpaperRevision();
 
-  /* === Integração com o sistema === */
+  /* === INTEGRAÇÃO COM O SISTEMA === */
   const { appState, run, notificationState, handleNotificationAction, handleNotificationOpen } =
     useSystem();
 
-  /* === Estado de navegação === */
-  /* ----- Tela inicial e compartilhamento ----- */
+  /* === ESTADO DE NAVEGAÇÃO === */
+  /* ----- TELA INICIAL E COMPARTILHAMENTO ----- */
   const [screen, setScreen] = useState(() =>
     appState.instances.some((item) => item.origin === 'shared-link') ? 'app' : 'home',
   );
@@ -59,26 +59,27 @@ export default function Mobile({ theme, onThemeChange }) {
     () => appState.instances.find((item) => item.origin === 'shared-link')?.appId ?? null,
   );
 
-  /* ----- Painéis sobrepostos ----- */
+  /* ----- PAINÉIS SOBREPOSTOS ----- */
   const [activePanel, setActivePanel] = useState(null);
 
   const panelRef = useRef(null);
+  const appHeaderRef = useRef(null);
   const panelTriggerRef = useRef(null);
   const appStateRef = useRef(appState);
 
-  /* === Dados do sistema === */
-  /* ----- Notificações ----- */
+  /* === DADOS DO SISTEMA === */
+  /* ----- NOTIFICAÇÕES ----- */
   const notifications = notificationState?.items ?? [];
   const unreadCount = notifications.filter((item) => !item.read).length;
 
-  /* ----- Catálogo de aplicativos ----- */
+  /* ----- CATÁLOGO DE APLICATIVOS ----- */
   const apps = getRegisteredApps().filter(
     (app) =>
       (app.public && (app.showInMenu !== false || app.id === 'wally-extended')) ||
       (authorized && app.id === 'administration'),
   );
 
-  /* ----- Instância ativa ----- */
+  /* ----- INSTÂNCIA ATIVA ----- */
   const accessibleInstances = appState.instances.filter((instance) => {
     const app = getAppDefinition(instance.appId);
     return app?.public || (authorized && instance.appId === 'administration');
@@ -98,14 +99,20 @@ export default function Mobile({ theme, onThemeChange }) {
 
   const visibleScreen = screen === 'app' && !selectedInstance ? 'home' : screen;
 
-  /* === Sincronização da navegação === */
-  /* ----- Atualização da referência da sessão ----- */
+  /* ----- FOCAR A NAVEGAÇÃO DO APLICATIVO APÓS CONFIRMAR SUA INSTÂNCIA ----- */
+  useEffect(() => {
+    if (visibleScreen === 'app')
+      appHeaderRef.current?.querySelector('button')?.focus({ preventScroll: true });
+  }, [visibleScreen, selectedInstance?.id]);
+
+  /* === SINCRONIZAÇÃO DA NAVEGAÇÃO === */
+  /* ----- ATUALIZAÇÃO DA REFERÊNCIA DA SESSÃO ----- */
   useEffect(() => {
     appStateRef.current = appState;
   }, [appState]);
 
-  /* === Acessibilidade dos painéis === */
-  /* ----- Gerenciamento de foco ----- */
+  /* === ACESSIBILIDADE DOS PAINÉIS === */
+  /* ----- GERENCIAMENTO DE FOCO ----- */
   useEffect(() => {
     if (!activePanel) return;
 
@@ -125,20 +132,20 @@ export default function Mobile({ theme, onThemeChange }) {
     };
   }, [activePanel]);
 
-  /* === Controle dos painéis === */
-  /* ----- Fechamento ----- */
+  /* === CONTROLE DOS PAINÉIS === */
+  /* ----- FECHAMENTO ----- */
   function closePanel() {
     setActivePanel(null);
   }
 
-  /* ----- Alternância ----- */
+  /* ----- ALTERNÂNCIA ----- */
   function togglePanel(name, event) {
     panelTriggerRef.current = event.currentTarget;
 
     setActivePanel((current) => (current === name ? null : name));
   }
 
-  /* ----- Navegação por teclado ----- */
+  /* ----- NAVEGAÇÃO POR TECLADO ----- */
   function handlePanelKeyDown(event) {
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -172,24 +179,24 @@ export default function Mobile({ theme, onThemeChange }) {
     }
   }
 
-  /* === Navegação entre telas === */
-  /* ----- Abertura de aplicativos ----- */
+  /* === NAVEGAÇÃO ENTRE TELAS === */
+  /* ----- ABERTURA DE APLICATIVOS ----- */
   function openMobileApp(appId, params = {}) {
     const origin = screen === 'catalog' || screen === 'search' ? screen : 'home';
 
     run(openApp, appId, {
       origin: 'mobile',
       params,
-      onOpened: () => {
+      onOpened: (opened) => {
         setAppOrigin(origin);
-        setSelectedAppId(appId);
+        setSelectedAppId(opened.appId);
         setScreen('app');
         closePanel();
       },
     });
   }
 
-  /* ----- Navegação principal ----- */
+  /* ----- NAVEGAÇÃO PRINCIPAL ----- */
   function navigateTo(nextScreen) {
     const finish = () => {
       closePanel();
@@ -200,14 +207,15 @@ export default function Mobile({ theme, onThemeChange }) {
     if (selectedInstance) {
       run(closeApp, selectedInstance.id, {
         onClosed: finish,
+        animate: false,
       });
     } else {
       finish();
     }
   }
 
-  /* === Retorno de aplicativos === */
-  /* ----- Retorno interno ----- */
+  /* === RETORNO DE APLICATIVOS === */
+  /* ----- RETORNO INTERNO ----- */
   function goBack() {
     closePanel();
 
@@ -216,7 +224,7 @@ export default function Mobile({ theme, onThemeChange }) {
     closeMobileApp();
   }
 
-  /* ----- Resolução de retorno contextual ----- */
+  /* ----- RESOLUÇÃO DE RETORNO CONTEXTUAL ----- */
   function getReturnDestination(current, state) {
     if (!current?.navigationOrigin) return null;
 
@@ -229,7 +237,7 @@ export default function Mobile({ theme, onThemeChange }) {
     return resolveContextualBack(remainingState, current.navigationOrigin, getAppDefinition);
   }
 
-  /* ----- Fechamento e retorno à origem ----- */
+  /* ----- FECHAMENTO E RETORNO À ORIGEM ----- */
   function closeMobileApp() {
     const current = selectedInstance;
 
@@ -238,7 +246,7 @@ export default function Mobile({ theme, onThemeChange }) {
 
       const destination = getReturnDestination(current, latestState);
 
-      /* ----- Retorno à instância de origem ----- */
+      /* ----- RETORNO À INSTÂNCIA DE ORIGEM ----- */
       if (destination?.type === 'instance') {
         const origin = latestState.instances.find(
           (instance) => instance.id === destination.instanceId && instance.id !== current?.id,
@@ -256,16 +264,17 @@ export default function Mobile({ theme, onThemeChange }) {
         }
       }
 
-      /* ----- Retorno à navegação principal ----- */
+      /* ----- RETORNO À NAVEGAÇÃO PRINCIPAL ----- */
       setSelectedAppId(null);
       setScreen(destination?.type === 'home' ? 'home' : appOrigin);
       closePanel();
     };
 
-    /* ----- Solicitação de fechamento protegido ----- */
+    /* ----- SOLICITAÇÃO DE FECHAMENTO PROTEGIDO ----- */
     if (current) {
       run(closeApp, current.id, {
         onClosed: finish,
+        animate: false,
       });
 
       return;
@@ -274,8 +283,8 @@ export default function Mobile({ theme, onThemeChange }) {
     finish();
   }
 
-  /* === Navegação por notificações === */
-  /* ----- Abertura do aplicativo associado ----- */
+  /* === NAVEGAÇÃO POR NOTIFICAÇÕES === */
+  /* ----- ABERTURA DO APLICATIVO ASSOCIADO ----- */
   function openNotificationApp(notification) {
     const appId = notification?.action?.appId;
     const app = getAppDefinition(appId);
@@ -290,7 +299,7 @@ export default function Mobile({ theme, onThemeChange }) {
     closePanel();
   }
 
-  /* === Renderização === */
+  /* === RENDERIZAÇÃO === */
   return (
     <main
       id="ws-mobile"
@@ -299,7 +308,7 @@ export default function Mobile({ theme, onThemeChange }) {
       data-screen={visibleScreen}
       tabIndex={-1}
     >
-      {/* === Papel de parede === */}
+      {/* === PAPEL DE PAREDE === */}
       <div
         className="ws-mobile__wallpaper"
         aria-hidden="true"
@@ -308,9 +317,9 @@ export default function Mobile({ theme, onThemeChange }) {
         }}
       />
 
-      {/* === Estrutura principal === */}
+      {/* === ESTRUTURA PRINCIPAL === */}
       <div className="ws-mobile__content-shell" inert={Boolean(activePanel)}>
-        {/* ----- Barra superior do sistema ----- */}
+        {/* ----- BARRA SUPERIOR DO SISTEMA ----- */}
         <div className="ws-mobile__system-bar">
           <strong>WS OS</strong>
 
@@ -341,9 +350,9 @@ export default function Mobile({ theme, onThemeChange }) {
           </div>
         </div>
 
-        {/* ----- Cabeçalho do aplicativo ----- */}
+        {/* ----- CABEÇALHO DO APLICATIVO ----- */}
         {visibleScreen === 'app' && (
-          <header className="ws-mobile__header">
+          <header ref={appHeaderRef} className="ws-mobile__header">
             <button type="button" onClick={goBack}>
               ← {t('Voltar')}
             </button>
@@ -362,8 +371,8 @@ export default function Mobile({ theme, onThemeChange }) {
           </header>
         )}
 
-        {/* === Telas de navegação === */}
-        {/* ----- Tela inicial ----- */}
+        {/* === TELAS DE NAVEGAÇÃO === */}
+        {/* ----- TELA INICIAL ----- */}
         {visibleScreen === 'home' && (
           <MobileHome
             apps={apps}
@@ -372,7 +381,7 @@ export default function Mobile({ theme, onThemeChange }) {
           />
         )}
 
-        {/* ----- Catálogo e pesquisa ----- */}
+        {/* ----- CATÁLOGO E PESQUISA ----- */}
         {(visibleScreen === 'catalog' || visibleScreen === 'search') && (
           <MobileCatalog
             key={screen}
@@ -382,7 +391,7 @@ export default function Mobile({ theme, onThemeChange }) {
           />
         )}
 
-        {/* === Aplicativos em execução === */}
+        {/* === APLICATIVOS EM EXECUÇÃO === */}
         <section
           className="ws-mobile__app-content"
           hidden={visibleScreen !== 'app'}
@@ -412,11 +421,11 @@ export default function Mobile({ theme, onThemeChange }) {
           })}
         </section>
 
-        {/* ----- Navegação inferior ----- */}
+        {/* ----- NAVEGAÇÃO INFERIOR ----- */}
         <MobileNavigation activeScreen={visibleScreen} onNavigate={navigateTo} />
       </div>
 
-      {/* === Painéis sobrepostos === */}
+      {/* === PAINÉIS SOBREPOSTOS === */}
       {activePanel && (
         <div
           className="ws-mobile__overlay"
@@ -434,7 +443,7 @@ export default function Mobile({ theme, onThemeChange }) {
             aria-label={t(activePanel === 'notifications' ? 'Notificações' : 'Controle Rápido')}
             onKeyDown={handlePanelKeyDown}
           >
-            {/* ----- Central de notificações ----- */}
+            {/* ----- CENTRAL DE NOTIFICAÇÕES ----- */}
             {activePanel === 'notifications' && (
               <NotificationCenter
                 unreadCount={unreadCount}
@@ -445,7 +454,7 @@ export default function Mobile({ theme, onThemeChange }) {
               />
             )}
 
-            {/* ----- Controles rápidos ----- */}
+            {/* ----- CONTROLES RÁPIDOS ----- */}
             {activePanel === 'controls' && (
               <QuickControls
                 setQuickControlsOpen={closePanel}

@@ -1071,5 +1071,6 @@
   "Projetos em destaque": "Featured projects",
   "Selecione os repositórios que terão destaque no portfólio. Os demais dados continuam vindo do GitHub.": "Select the repositories to feature in the portfolio. Other information continues to come from GitHub.",
   "Projeto": "Project",
-  "Não foi possível carregar os projetos em destaque.": "Could not load featured projects."
+  "Não foi possível carregar os projetos em destaque.": "Could not load featured projects.",
+  "Fechamento solicitado.": "Close requested."
 }

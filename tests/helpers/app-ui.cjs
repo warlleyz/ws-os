@@ -3,13 +3,19 @@ const path = require('node:path');
 const vm = require('node:vm');
 const root = path.resolve(__dirname, '../..');
 
-/* === Componentes com efeitos e transporte controlado === */
-async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
+/* === COMPONENTES COM EFEITOS E TRANSPORTE CONTROLADO === */
+async function renderApp(
+  file,
+  props,
+  bindings = {},
+  { entryPoint, getArguments = (value) => [value] } = {},
+) {
   const { transformWithOxc } = await import('vite');
   const { code } = await transformWithOxc(
     fs
       .readFileSync(path.join(root, file), 'utf8')
       .replaceAll('import.meta.env.BASE_URL', "'/portfolio/'")
+      .replaceAll('import.meta.env.DEV', 'false')
       .replaceAll('import.meta.env.VITE_RANKINGS_ENABLED', '__rankingsEnabled'),
     file,
     {
@@ -28,7 +34,7 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
     createElement: (type, props, ...children) => {
       const resolvedProps = { ...props, children };
 
-      /* ----- Renderizar componentes visuais sem hooks no ambiente de teste ----- */
+      /* ----- RENDERIZAR COMPONENTES VISUAIS SEM HOOKS NO AMBIENTE DE TESTE ----- */
       const presentationalComponents = new Set([
         'CertificateCard',
         'CertificateDetails',
@@ -38,10 +44,7 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
         'ContactHeader',
       ]);
 
-      if (
-        typeof type === 'function' &&
-        presentationalComponents.has(type.name)
-      ) {
+      if (typeof type === 'function' && presentationalComponents.has(type.name)) {
         return type(resolvedProps);
       }
 
@@ -106,8 +109,8 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
       publicAssetUrl: (value) => (value?.startsWith('/') ? 'https://ws.test' + value : null),
       fileKind: (value) => (value.endsWith('.pdf') ? 'pdf' : null),
       resolveStaticFile: () => ({ ok: true, resource: { url: '/curriculo.pdf' } }),
-      useSystem: () => ({ run() { } }),
-      useAppBack: () => { },
+      useSystem: () => ({ run() {} }),
+      useAppBack: () => {},
       openApp: 'open',
       ...Object.fromEntries(
         [
@@ -139,10 +142,7 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
           'MessageCircle',
           'Send',
           'ShieldCheck',
-        ].map((name) => [
-          name,
-          name,
-        ]),
+        ].map((name) => [name, name]),
       ),
       ...bindings,
     },
@@ -171,7 +171,7 @@ async function renderApp(file, props, bindings = {}, { entryPoint } = {}) {
   }
   const render = () => {
     cursor = 0;
-    tree = App(props);
+    tree = App(...getArguments(props));
     while (effects.length) effects.shift()();
     return tree;
   };
