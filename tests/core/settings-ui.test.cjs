@@ -8,6 +8,7 @@ async function settings(section, overrides = {}) {
   const calls = [];
   const ui = await renderApp('src/apps/settings/SettingsSections.jsx', props, {
     useTheme: () => 'dark',
+    useCursorMode: () => 'custom',
     useAppearance: () => ({
       accent: 'blue',
       blur: 'normal',
@@ -122,6 +123,8 @@ test('Galeria preserva mensagem correta quando upload falha e não anuncia após
       {
         useTheme: () => 'dark',
         useWallpaper: () => 'dark-blue',
+        getWallpaperFit: () => 'cover',
+        getWallpaperDefinition: () => ({ background: 'none' }),
         useWallpaperRevision() {},
         useWallpaperStatus: () => 'ready',
         usePersonalWallpapers: () => [],
@@ -246,4 +249,31 @@ test('Sobre o Sistema utiliza versão versionada e links de licença seguros', a
   );
   for (const link of ui.nodes().filter((node) => node.type === 'a'))
     assert.equal(link.props.rel, 'noopener noreferrer');
+});
+
+/* === PERSONALIZAÇÃO === */
+/* ----- Controles enviam preferências ao gerenciador real de contexto ----- */
+test('Configurações encaminha modo de cor, escolha manual e cursor sem alterar efeitos', async () => {
+  const changes = [];
+  const { ui } = await settings('appearance', {
+    setCursorMode: (value) => {
+      changes.push(['cursor', value]);
+      return true;
+    },
+    setAppearance: (value) => {
+      changes.push(['appearance', value]);
+      return true;
+    },
+  });
+  const select = (label) =>
+    ui.nodes().find((node) => node.type?.name === 'SettingsSelect' && node.props.label === label);
+  select('Cursor do sistema').props.onChange('native');
+  select('Modo da cor de destaque').props.onChange('auto');
+  ui.nodes()
+    .find((node) => node.type === 'button' && node.props['data-color'] === 'green')
+    .props.onClick();
+  assert.equal(changes[0][0], 'cursor');
+  assert.equal(changes[0][1], 'native');
+  assert.equal(changes[1][1].accentMode, 'auto');
+  assert.equal(changes[2][1].accent, 'green');
 });

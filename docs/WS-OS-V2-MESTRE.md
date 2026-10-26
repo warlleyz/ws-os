@@ -2,7 +2,7 @@
 
 # WS OS V2 — Documento mestre de revisão e conclusão
 
-- **Versão:** 1.3
+- **Versão:** 1.4
 - **Data:** 26/10/2026
 - **Projeto:** WS OS — Portfólio interativo
 - **Repositório:** https://github.com/warlleyz/ws-os
@@ -27,7 +27,7 @@ A revisão deve encerrar, em cada área:
 
 Não deixar traduções, Mobile, estados de erro ou acessibilidade de todos os aplicativos para a última etapa.
 
-Este documento consolida a direção de conclusão. A autorização vigente permite executar diretamente a Etapa 03 na main e realizar um único commit ao final desta etapa, sem push. As Etapas 01 e 02 já receberam seus commits. Não há autorização para avançar à Etapa 04, mudar de branch, aplicar migrações, publicar ou alterar infraestrutura remota.
+Este documento consolida a direção de conclusão. A autorização vigente permite executar diretamente a Etapa 04 na main e realizar um único commit ao final desta etapa, sem push. As Etapas 01, 02 e 03 já receberam seus commits. Não há autorização para avançar à Etapa 05, mudar de branch, aplicar migrações, publicar ou alterar infraestrutura remota.
 
 <!-- === 2. PRECEDÊNCIA E DECISÕES === -->
 
@@ -55,7 +55,7 @@ As autorizações antigas não constituem permissão permanente.
 - Supabase Storage privado substituiu Cloudflare R2 para arquivos oficiais.
 - A antiga restrição de adiar traduções não orienta esta revisão final: traduções devem ser encerradas na própria área revisada.
 - Referências históricas a 18 aplicativos, Administração inexistente ou Mobile reservado não descrevem a base atual.
-- Recomendações antigas de commits não concedem permissão permanente. As autorizações das Etapas 01 e 02 foram cumpridas com um commit cada. O pedido posterior autoriza o mesmo modelo na Etapa 03.
+- Recomendações antigas de commits não concedem permissão permanente. As autorizações das Etapas 01, 02 e 03 foram cumpridas com um commit cada. O pedido posterior autoriza o mesmo modelo na Etapa 04.
 - Boot com processador e logos oficiais reservadas ao favicon, por confirmação do proprietário nesta etapa.
 - A Administração seleciona os projetos destacados por ID; a ordenação restante continua automática, com os filtros existentes. Não há ordenação editorial manual a implementar.
 - Animações das janelas permanecem obrigatórias, respeitando movimento reduzido. Comandos Reiniciar e Desligar ficam fora desta versão.
@@ -742,20 +742,20 @@ Não exigir toda combinação cartesiana em toda alteração. Cobrir riscos e di
 
 Manter neste documento, ou no local único combinado, uma tabela:
 
-| Etapa                            | Estado                                               | Evidências                                                                | Pendências                                                          | Aceite                                              |
-| -------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
-| 01 — Base e escopo               | Encerrada e aprovada                                 | Commit 0bf511d                                                            | Nenhuma pendência de escopo                                         | Autorização do proprietário para avançar à Etapa 02 |
-| 02 — Backend e dados             | Bloqueada externamente; implementação local validada | Seção 22; 505/510 testes, mesmas cinco falhas anteriores                  | Aplicar/homologar migração, identidades reais, D1 remoto e P12      | Aceite integral pendente                            |
-| 03 — Core e persistência         | Concluída tecnicamente, aguardando aceite            | Seção 23; 523/528 testes, mesmas cinco falhas anteriores; navegador local | Homologação do motor DOOM na 08 e aceite físico nas etapas próprias | Pendente                                            |
-| 04 — Design System               | Não iniciada nesta revisão                           | Decisões preservadas                                                      | P05                                                                 | Pendente                                            |
-| 05 — Arquivos                    | Não iniciada nesta revisão                           | Contratos preservados                                                     | Revisão funcional e visual; P14                                     | Pendente                                            |
-| 06 — Profissionais               | Não iniciada nesta revisão                           | Catálogo preservado                                                       | P07 e conteúdo                                                      | Pendente                                            |
-| 07 — Contato/Notas/Administração | Não iniciada nesta revisão                           | APIs existentes                                                           | Homologação dos fluxos                                              | Pendente                                            |
-| 08 — Calculadora/Jogos           | Não iniciada nesta revisão                           | Baseline registrada                                                       | P06, P08 e P11                                                      | Pendente                                            |
-| 09 — Terminal/Wally/Busca        | Não iniciada nesta revisão                           | Catálogo existente                                                        | P09                                                                 | Pendente                                            |
-| 10 — Shells                      | Não iniciada nesta revisão                           | Integração existente                                                      | P10 e dispositivos                                                  | Pendente                                            |
-| 11 — Apresentação                | Não iniciada nesta revisão                           | Escopo fechado                                                            | Walkthrough e informações finais                                    | Pendente                                            |
-| 12 — Aceite integrado            | Não iniciada                                         | CI existente; execução remota não conferida                               | P13 e P15                                                           | Pendente                                            |
+| Etapa                            | Estado                                               | Evidências                                                                    | Pendências                                                          | Aceite                                                        |
+| -------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
+| 01 — Base e escopo               | Encerrada e aprovada                                 | Commit 0bf511d                                                                | Nenhuma pendência de escopo                                         | Autorização do proprietário para avançar à Etapa 02           |
+| 02 — Backend e dados             | Bloqueada externamente; implementação local validada | Seção 22; 505/510 testes, mesmas cinco falhas anteriores                      | Aplicar/homologar migração, identidades reais, D1 remoto e P12      | Aceite integral pendente                                      |
+| 03 — Core e persistência         | Concluída tecnicamente, aguardando aceite            | Seção 23; 523/528 testes, mesmas cinco falhas anteriores; navegador local     | Homologação do motor DOOM na 08 e aceite físico nas etapas próprias | Pendente                                                      |
+| 04 — Design System               | Entrega local concluída, aguardando aceite           | Quatro contextos, enquadramento, cores por tema, coleção e cursores; seção 24 | Walkthrough integral na 11 e dispositivos na 10                     | Lint/build aprovados; 539/544 testes, cinco falhas anteriores |
+| 05 — Arquivos                    | Não iniciada nesta revisão                           | Contratos preservados                                                         | Revisão funcional e visual; P14                                     | Pendente                                                      |
+| 06 — Profissionais               | Não iniciada nesta revisão                           | Catálogo preservado                                                           | P07 e conteúdo                                                      | Pendente                                                      |
+| 07 — Contato/Notas/Administração | Não iniciada nesta revisão                           | APIs existentes                                                               | Homologação dos fluxos                                              | Pendente                                                      |
+| 08 — Calculadora/Jogos           | Não iniciada nesta revisão                           | Baseline registrada                                                           | P06, P08 e P11                                                      | Pendente                                                      |
+| 09 — Terminal/Wally/Busca        | Não iniciada nesta revisão                           | Catálogo existente                                                            | P09                                                                 | Pendente                                                      |
+| 10 — Shells                      | Não iniciada nesta revisão                           | Integração existente                                                          | P10 e dispositivos                                                  | Pendente                                                      |
+| 11 — Apresentação                | Não iniciada nesta revisão                           | Escopo fechado                                                                | Walkthrough e informações finais                                    | Pendente                                                      |
+| 12 — Aceite integrado            | Não iniciada                                         | CI existente; execução remota não conferida                                   | P13 e P15                                                           | Pendente                                                      |
 
 Ao terminar uma etapa, registrar:
 
@@ -878,7 +878,7 @@ Cada pendência possui responsável primário. Etapas posteriores apenas validam
 | P02 | Currículo confirma file-viewer e Mobile seleciona o destino efetivo                     | 03                  | Encerrado no Core; regressões e PDF real no navegador Desktop/Mobile aprovados; conteúdo permanece na 06 |
 | P03 | Preparação assíncrona consumida pelo Core, sem descarte ou desmontagem prematura        | 03                  | Encerrado no Core; ACK/erro/timeout e cleanup testados; persistência real do motor pertence à 08         |
 | P04 | Metadados de RLS/grants, bucket e histórico 005–014 conferidos no ws-os-dev             | 02                  | Ainda requer identidades reais, execução dos roteiros SQL, migração incremental e D1 remoto              |
-| P05 | Wallpapers emparelhados, destaque global e enquadramento fixo                           | 04                  | Quatro seleções independentes, auto/manual por tema e modos aprovados; walkthrough na 11                 |
+| P05 | Contratos locais de personalização corrigidos na Etapa 04; seção 24                     | 04 / 11             | Implementação local verificada; resta walkthrough integral de Configurações na 11                        |
 | P06 | Quatro testes Snake incompatíveis com a base recuperada                                 | 08                  | Harness e fixtures atualizados preservando testes reais de regras, pausa e reinício                      |
 | P07 | Tradução “Carga horária” ausente                                                        | 06                  | Catálogos completos e interface bilíngue validada                                                        |
 | P08 | NOTICE anuncia validação de hash no build, inexistente no script                        | 08                  | Integridade automatizada e avisos compatíveis com o comportamento efetivo                                |
@@ -1002,7 +1002,7 @@ wrangler.jsonc já contém binding D1 e flags REQUESTS_ENABLED, MANAGED_FILES_EN
 
 ### Continuidade imediata
 
-As Etapas 02 e 03 receberam execução local, conforme seções 22 e 23. Os bloqueios externos da Etapa 02 continuam abertos. O próximo incremento de implementação é a Etapa 04, somente quando autorizado, sem repetir os contratos já encerrados.
+As Etapas 02, 03 e 04 receberam execução local, conforme seções 22 a 24. Os bloqueios externos da Etapa 02 continuam abertos. O próximo incremento de implementação é a Etapa 05, somente quando autorizado, sem repetir os contratos já encerrados.
 
 <!-- === 22. ETAPA 02 — BACKEND, SEGURANÇA E DADOS === -->
 
@@ -1204,3 +1204,84 @@ A prévia foi isolada em 127.0.0.1:5353. O formulário recebeu somente um rascun
 - Documentação: mestre, README e arquitetura atualizados; nenhum documento histórico excluído ou reescrito.
 
 Reabrir estes contratos somente por defeito/regressão ou mudança autorizada. A Etapa 08 valida persistência real do DOOM sem reconstruir o Core; a Etapa 10 valida composição/fluidez nos shells e hardware real. Próxima implementação: Etapa 04, mediante autorização.
+
+<!-- === 24. ETAPA 04 — DESIGN SYSTEM E PERSONALIZAÇÃO === -->
+
+## 24. Etapa 04 — Design System e personalização
+
+<!-- ----- ESCOPO E ESTADO ----- -->
+
+### Escopo e estado
+
+Execução local autorizada pelo proprietário no mesmo modelo das etapas anteriores: main, um commit ao final e sem push. Base ac808a5, em 26/10/2026. A pasta não rastreada doom-source/ permaneceu preservada e fora do commit. Nenhuma alteração remota, dependência instalada ou recurso da Etapa 05 iniciado.
+
+Entrega técnica local concluída, aguardando aceite. A suíte geral continua com cinco falhas preexistentes, detalhadas abaixo. Não declarar o projeto inteiro homologado ou 100% concluído.
+
+<!-- ----- PROBLEMAS CORRIGIDOS ----- -->
+
+### Problemas corrigidos
+
+- A carga e a seleção de wallpapers emparelhavam Dark/Light: agora cada uma das quatro combinações plataforma/tema é independente, sem regravar nem apagar preferências antigas.
+- Enquadramento fixo: Preencher, Ajustar e Centralizar possuem persistência própria por contexto e prévia em Configurações. A restauração de preferências também restaura os quatro enquadramentos.
+- Destaque global: automático/manual independente por tema. Manual é compartilhado entre shells, conservado ao trocar wallpaper e recuperado ao retornar ao modo manual. O valor legado é migrado para manual nos dois temas sem escrita durante a leitura.
+- Automático usa o wallpaper do shell efetivamente aprovado pelo Core. Alterar somente a galeria de outra plataforma não muda a cor da plataforma ativa; cancelar troca de shell também não muda esse contexto.
+- Wallpapers oficiais escolhem as paletas existentes. Imagens pessoais usam amostragem local de 32 × 32 pixels; transparência e tons neutros são descartados, com seleção determinística da família azul/verde/violeta mais próxima. Nenhuma cor arbitrária é aplicada aos tokens; contraste e fallback azul prevalecem. Não há upload para análise nem dependência externa. Extrações atrasadas não sobrepõem contexto novo nem escolha manual; cache limitado a 32 entradas.
+- Ocultar wallpaper é uma opção explícita, persistente e independente de efeitos. Modo de baixo custo mantém a imagem estática e reduz desfoque. Movimento reduzido do sistema também interrompe animações contínuas, preservando o contrato de fechamento da Etapa 03.
+- Coleção pessoal permanece múltipla e local. Uma imagem inválida não impede a recuperação das demais; seleção indisponível fica preservada com fallback e aviso. Migração legada continua utilizável pela cópia original mesmo se a cópia para a coleção falhar.
+- Exclusão verifica uso nas quatro seleções e preferências persistidas entre abas, revalidando após leitura assíncrona. Cópia legada continua protegida. Não há limpeza automática de dados.
+- O catálogo referenciava três SVGs ausentes: ocupado Dark/Light e ajuda Light foram completados no estilo existente. As 13 variantes têm recursos nos dois temas, hotspots e fallback nativo. Configurações permite cursor personalizado/nativo; as oito alças de resize consomem as variantes direcionais. Personalização de cursor continua restrita a mouse com apontador preciso.
+- Favicon continua usando exclusivamente as seis logos oficiais conforme tema e destaque resolvido. Boot permanece com processador; boas-vindas preserva as duas etapas.
+
+<!-- ----- PERSISTÊNCIA E LIMITES ----- -->
+
+### Persistência e limites
+
+- Imagem: PNG/JPEG/WebP, assinatura conferida, até 5 MiB, 32 megapixels e 8192 pixels por lado, com decodificação local.
+- Coleção: limite operacional de 100 MiB para os registros pessoais do IndexedDB; verificação e gravação na mesma transação readwrite, serializada entre abas. Limite comporta até 20 arquivos de tamanho máximo; imagens menores podem ser mais numerosas. Não é garantia de espaço disponível no navegador.
+- Arquivos existentes acima do limite não são removidos. Nova inclusão que excederia o limite é rejeitada; dados anteriores permanecem. A chave original legada é preservada e não entra no total dos registros pessoais.
+- Falhas de quota ou armazenamento não recebem falso sucesso. Preferências simples continuam aplicadas na sessão quando a gravação falha; a interface informa essa condição. O limite agregado é adicional à quota do navegador, que pode ser menor ou sujeita a eviction.
+- Novos campos da aparência são normalizados; a escolha manual anterior não se transforma silenciosamente em automática. Seleção e enquadramento não são vinculados ao conteúdo dos arquivos pessoais.
+
+<!-- ----- ARQUIVOS E RESPONSABILIDADES ----- -->
+
+### Arquivos e responsabilidades
+
+| Área          | Arquivos                                                                                              | Alteração                                                               |
+| ------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Aparência     | src/core/appearanceContract.js; src/core/appearanceManager.js; src/App.jsx                            | Normalização, migração, extração limitada, preferências e contexto real |
+| Wallpapers    | src/core/wallpaperManager.js; src/core/personalWallpaperCollection.js; src/core/preferencesManager.js | Seleções independentes, fit, recuperação, exclusão e reset              |
+| Armazenamento | src/services/storage/wallpaperStorage.js                                                              | Quota agregada transacional e propagação correta de falhas              |
+| Interface     | src/apps/settings/SettingsSections.jsx                                                                | Controles e prévia dentro da apresentação existente, rótulos acessíveis |
+| Estilos       | src/styles/themes/effects.css; src/styles/themes/cursors.css                                          | Movimento reduzido, visibilidade explícita e cursores nos consumidores  |
+| Cursores      | public/assets/cursors/dark-cursor-wait.svg; light-cursor-wait.svg; light-cursor-help.svg              | Recursos faltantes                                                      |
+| Idiomas       | src/shared/i18n/locales/en.json; pt-BR.json                                                           | Novos textos com paridade de chaves                                     |
+| Regressões    | tests/core/appearance.test.cjs; settings.test.cjs; settings-ui.test.cjs; windows-interaction.test.cjs | Comportamentos reais, recursos, armazenamento e contexto                |
+| Documentação  | README.md; docs/architecture.md; docs/WS-OS-V2-MESTRE.md                                              | Estado, contratos e evidências                                          |
+
+A cascata existente foi preservada: tokens estruturais → temas → personalização → efeitos → estrutura → fundamentos/superfícies → controles → cursores → responsividade. Os tokens de cor vêm das paletas; preferências de efeitos alteram seus próprios tokens e regras de acessibilidade possuem precedência explícita. Estilos de cursor usam contexto custom e especificidade superior às alças do componente, mantendo o modo nativo e o toque. Não houve redesenho geral ou reorganização indiscriminada de CSS.
+
+<!-- ----- VERIFICAÇÕES EFETIVAS ----- -->
+
+### Verificações efetivas
+
+| Verificação                   | Resultado                                                                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Testes pertinentes            | 53/53 aprovados: aparência, Settings, branding e integração de janelas                                                              |
+| npm run lint                  | Aprovado                                                                                                                            |
+| npm run build                 | Aprovado; permanece aviso conhecido de chunk do Visualizador acima de 500 kB                                                        |
+| npm run test                  | 544 testes: 539 aprovados e cinco falhas preexistentes; nenhuma regressão adicional                                                 |
+| Prévia compilada no navegador | Desktop e Mobile 390 × 844, temas, enquadramento, destaque automático/manual, persistência, imagem local, favicon, efeitos e cursor |
+
+As cinco falhas gerais continuam sendo duas de Snake/UI por FaJava ausente no harness, duas de fixtures antigas de Snake e a tradução Carga horária em Certificados. Permanecem nas Etapas 08 e 06; não foram alteradas fora do escopo para mascarar aprovação.
+
+Navegador: seleção Dark Green mudou o destaque e favicon para verde; escolha manual violeta permaneceu ao alternar temas. Light preservou wallpaper próprio. Reload recuperou cor e enquadramento. Uma cópia do wallpaper oficial dark-green.jpg foi adicionada como imagem pessoal somente na origem local de teste; imagem foi recuperada após reload, permaneceu protegida enquanto em uso e produziu paleta verde no automático. Mobile usou Dark Violet com Centralizar sem alterar o Desktop; ao mudar o shell, o automático passou a violeta. Modo de baixo custo manteve wallpaper com desfoque zero. Ocultar tornou a camada invisível sem apagar sua seleção; reexibir recuperou a mesma imagem. Cursor nativo mostrou ns-resize e personalizado mostrou SVG oficial com fallback na alça. Sem erros de console na consulta final. Viewport restaurado e aba/servidor temporários encerrados.
+
+O teste de quota usa IndexedDB controlado: valida recusa sem gravação, conservação de arquivo anterior e liberação da conexão. Não foi realizada carga real de 100 MiB nem medição em hardware físico. A validação numérica usa as cores efetivas do CSS para contraste de destaque secundário, links e ações nas superfícies testadas, mínimo 4,5:1; não equivale a auditoria completa de todas as telas sobre toda imagem/transparência.
+
+<!-- ----- PENDÊNCIAS E PRÓXIMO PASSO ----- -->
+
+### Pendências e próximo passo
+
+P05 recebeu a correção funcional desta etapa. Walkthrough integral de Configurações permanece na Etapa 11; composição, desempenho e dispositivos físicos na Etapa 10. Os bloqueios externos de segurança/homologação da Etapa 02 continuam registrados, inclusive rotação/revogação não confirmadas e migração ainda não aplicada.
+
+Próxima implementação: Etapa 05 — Arquivos, Editor e Visualizador, somente mediante autorização. Não reconstruir os gerenciadores de personalização encerrados aqui sem defeito demonstrado ou alteração de requisito.

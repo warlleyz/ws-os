@@ -255,6 +255,7 @@ test('App não pede descarte para o shell atual e revalida a mudança nos dois s
     },
   };
   const confirmations = [];
+  const appearanceContexts = [];
   const App = vm.runInNewContext(
     code.replace(/^import[\s\S]*?;\s*$/gm, '').replace('export default function', 'function') +
       ';App',
@@ -277,7 +278,10 @@ test('App não pede descarte para o shell atual e revalida a mudança nos dois s
       useCursorMode: () => 'default',
       CURSOR_VARIANTS: [],
       applyTheme() {},
-      applyAppearance() {},
+      updateAppearanceContext: (_theme, wallpaper) => appearanceContexts.push(wallpaper.shell),
+      getWallpaper: () => 'dark-blue',
+      getWallpaperDefinition: (id, shell) => ({ id, shell }),
+      subscribeWallpapers: () => () => {},
       applyBrandingFavicon() {},
       applyAccessibility() {},
       BootScreen: 'Boot',
@@ -308,6 +312,7 @@ test('App não pede descarte para o shell atual e revalida a mudança nos dois s
   media.matches = false;
   listener({ matches: false });
   assert.equal(confirmations.length, 3);
+  assert.deepEqual(appearanceContexts, ['desktop', 'mobile', 'desktop']);
   effects.forEach((effect) => effect?.cleanup?.());
 });
 

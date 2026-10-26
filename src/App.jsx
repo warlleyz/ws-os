@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { translate as t, useLocale } from './shared/i18n/i18n';
 
 import { applyTheme, useTheme, setTheme } from './core/themeManager';
-import { applyAppearance, useAppearance } from './core/appearanceManager';
+import { updateAppearanceContext, useAppearance } from './core/appearanceManager';
 import { applyAccessibility, useAccessibility } from './core/effectsManager';
+import { getWallpaper, getWallpaperDefinition, subscribeWallpapers } from './core/wallpaperManager';
 import { useCursorMode } from './core/cursorManager';
 import { CURSOR_VARIANTS, getCursorCssValue } from './core/cursorCatalog';
 
@@ -68,8 +69,16 @@ export default function App() {
 
   /* ----- Aparência ----- */
   useEffect(() => {
-    applyAppearance(appearance);
-  }, [appearance]);
+    function refreshAppearance() {
+      const shell = isMobile ? 'mobile' : 'desktop';
+      updateAppearanceContext(
+        theme,
+        getWallpaperDefinition(getWallpaper(shell, theme), shell, theme),
+      );
+    }
+    refreshAppearance();
+    return subscribeWallpapers(refreshAppearance);
+  }, [theme, isMobile]);
 
   /* ----- Ícone oficial conforme tema e cor de destaque ----- */
   useEffect(() => {

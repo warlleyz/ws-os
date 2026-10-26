@@ -1,4 +1,3 @@
-
 /* === Banco de wallpapers === */
 /* ----- Configuração ----- */
 const DATABASE = 'ws-os-wallpapers';
@@ -6,13 +5,13 @@ const STORE = 'images';
 const LEGACY_KEY = 'custom';
 const PERSONAL_PREFIX = 'personal:';
 
+// Limite operacional da coleção; dados existentes nunca são removidos automaticamente.
+export const MAX_WALLPAPER_COLLECTION_BYTES = 100 * 1024 * 1024;
+
 /* === Validação === */
 /* ----- Identificadores pessoais ----- */
 function personalKey(id) {
-  if (
-    typeof id !== 'string' ||
-    !/^[a-zA-Z0-9_-]{1,64}$/.test(id)
-  ) {
+  if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(id)) {
     throw new Error('Identificador de wallpaper inválido.');
   }
 
@@ -93,19 +92,19 @@ async function transact(mode, operation) {
       }
 
       transaction.oncomplete = () => {
-        resolve(result?.());
+        try {
+          resolve(result?.());
+        } catch (error) {
+          reject(error);
+        }
       };
 
       transaction.onerror = () => {
-        reject(
-          transaction.error ?? new Error('storage'),
-        );
+        reject(transaction.error ?? new Error('storage'));
       };
 
       transaction.onabort = () => {
-        reject(
-          transaction.error ?? new Error('storage'),
-        );
+        reject(transaction.error ?? new Error('storage'));
       };
     });
   } finally {
@@ -147,17 +146,35 @@ export function readPersonalWallpaperImage(id) {
 /* ----- Adicionar ou atualizar imagem ----- */
 export function writePersonalWallpaperImage(id, file) {
   const key = personalKey(id);
-
-  if (!file) {
-    return Promise.reject(
-      new Error('Arquivo de wallpaper inválido.'),
-    );
+  if (!file || !Number.isFinite(file.size) || file.size <= 0) {
+    return Promise.reject(new Error('Arquivo de wallpaper inválido.'));
   }
-
   return transact('readwrite', (store) => {
-    store.put(file, key);
-
-    return () => true;
+    const keysRequest = store.getAllKeys();
+    const filesRequest = store.getAll();
+    let exceeded = false;
+    filesRequest.onsuccess = () => {
+      const keys = keysRequest.result;
+      const total = filesRequest.result.reduce(
+        (sum, image, index) =>
+          typeof keys[index] === 'string' &&
+          keys[index].startsWith(PERSONAL_PREFIX) &&
+          keys[index] !== key
+            ? sum + (Number.isFinite(image?.size) ? image.size : 0)
+            : sum,
+        file.size,
+      );
+      exceeded = total > MAX_WALLPAPER_COLLECTION_BYTES;
+      // A verificação e a gravação compartilham a mesma transação entre abas.
+      if (!exceeded) store.put(file, key);
+    };
+    return () => {
+      if (exceeded)
+        throw new Error(
+          'A coleção de imagens atingiu o limite de 100 MB. Exclua imagens sem uso para adicionar outra.',
+        );
+      return true;
+    };
   });
 }
 
@@ -187,11 +204,7 @@ export function listPersonalWallpaperImages() {
           key,
           file: values[index],
         }))
-        .filter(
-          (entry) =>
-            typeof entry.key === 'string' &&
-            entry.key.startsWith(PERSONAL_PREFIX),
-        )
+        .filter((entry) => typeof entry.key === 'string' && entry.key.startsWith(PERSONAL_PREFIX))
         .map((entry) => ({
           id: entry.key.slice(PERSONAL_PREFIX.length),
           file: entry.file,

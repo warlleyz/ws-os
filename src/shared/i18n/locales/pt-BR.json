@@ -1072,5 +1072,21 @@
   "Selecione os repositórios que terão destaque no portfólio. Os demais dados continuam vindo do GitHub.": "Selecione os repositórios que terão destaque no portfólio. Os demais dados continuam vindo do GitHub.",
   "Projeto": "Projeto",
   "Não foi possível carregar os projetos em destaque.": "Não foi possível carregar os projetos em destaque.",
-  "Fechamento solicitado.": "Fechamento solicitado."
+  "Fechamento solicitado.": "Fechamento solicitado.",
+  "A seleção é independente para cada plataforma e tema. As imagens pessoais ficam somente neste navegador.": "A seleção é independente para cada plataforma e tema. As imagens pessoais ficam somente neste navegador.",
+  "Enquadramento da imagem": "Enquadramento da imagem",
+  "Preencher": "Preencher",
+  "Ajustar": "Ajustar",
+  "Centralizar": "Centralizar",
+  "Prévia do papel de parede": "Prévia do papel de parede",
+  "PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Novas imagens preservam a coleção anterior.": "PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Novas imagens preservam a coleção anterior.",
+  "Modo da cor de destaque": "Modo da cor de destaque",
+  "Automática pelo papel de parede": "Automática pelo papel de parede",
+  "Manual neste tema": "Manual neste tema",
+  "A cor manual é compartilhada pelas plataformas neste tema. O modo automático utiliza a paleta mais próxima da imagem ativa.": "A cor manual é compartilhada pelas plataformas neste tema. O modo automático utiliza a paleta mais próxima da imagem ativa.",
+  "Cursor do sistema": "Cursor do sistema",
+  "Nativo do dispositivo": "Nativo do dispositivo",
+  "Ocultar papel de parede": "Ocultar papel de parede",
+  "PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Coleção de até 100 MB, sem exclusão automática.": "PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Coleção de até 100 MB, sem exclusão automática.",
+  "A coleção de imagens atingiu o limite de 100 MB. Exclua imagens sem uso para adicionar outra.": "A coleção de imagens atingiu o limite de 100 MB. Exclua imagens sem uso para adicionar outra."
 }

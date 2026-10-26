@@ -1072,5 +1072,21 @@
   "Selecione os repositórios que terão destaque no portfólio. Os demais dados continuam vindo do GitHub.": "Select the repositories to feature in the portfolio. Other information continues to come from GitHub.",
   "Projeto": "Project",
   "Não foi possível carregar os projetos em destaque.": "Could not load featured projects.",
-  "Fechamento solicitado.": "Close requested."
+  "Fechamento solicitado.": "Close requested.",
+  "A seleção é independente para cada plataforma e tema. As imagens pessoais ficam somente neste navegador.": "Selection is independent for each platform and theme. Personal images stay in this browser only.",
+  "Enquadramento da imagem": "Image fit",
+  "Preencher": "Fill",
+  "Ajustar": "Fit",
+  "Centralizar": "Center",
+  "Prévia do papel de parede": "Wallpaper preview",
+  "PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Novas imagens preservam a coleção anterior.": "PNG, JPEG or WebP; up to 5 MB, 32 megapixels and 8192 pixels per side. New images preserve the existing collection.",
+  "Modo da cor de destaque": "Accent color mode",
+  "Automática pelo papel de parede": "Automatic from wallpaper",
+  "Manual neste tema": "Manual for this theme",
+  "A cor manual é compartilhada pelas plataformas neste tema. O modo automático utiliza a paleta mais próxima da imagem ativa.": "The manual color is shared across platforms for this theme. Automatic mode uses the closest palette to the active image.",
+  "Cursor do sistema": "System cursor",
+  "Nativo do dispositivo": "Device default",
+  "Ocultar papel de parede": "Hide wallpaper",
+  "PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Coleção de até 100 MB, sem exclusão automática.": "PNG, JPEG or WebP; up to 5 MB, 32 megapixels and 8192 pixels per side. Collection up to 100 MB, without automatic deletion.",
+  "A coleção de imagens atingiu o limite de 100 MB. Exclua imagens sem uso para adicionar outra.": "The image collection has reached its 100 MB limit. Delete unused images to add another."
 }

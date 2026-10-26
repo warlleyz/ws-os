@@ -11,12 +11,15 @@ import {
   deleteWallpaperFromCollection,
   isPersonalWallpaperInUse,
   getWallpaperDefinition,
+  getWallpaperFit,
+  setWallpaperFit,
 } from '../../core/wallpaperManager';
 
 import { getOfficialWallpapersByTheme } from '../../core/wallpaperCatalog';
 import { translate as t, useLocale, setLocale } from '../../shared/i18n/i18n';
 import { useTheme, setTheme } from '../../core/themeManager';
 import { useAppearance, setAppearance } from '../../core/appearanceManager';
+import { useCursorMode, setCursorMode } from '../../core/cursorManager';
 import { useAccessibility, setAccessibility } from '../../core/effectsManager';
 import { useTaskbarAutoHide, setTaskbarAutoHide } from '../../core/taskbarPreferences';
 import { useMobilePreferences, setMobilePreferences } from '../../core/mobilePreferences';
@@ -46,7 +49,7 @@ function SettingsSelect({ label, value, options, onChange }) {
     <label className="ws-settings__field">
       <span>{label}</span>
 
-      <select value={value} onChange={(event) => onChange(event.target.value)}>
+      <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>
         {options.map(([id, name]) => (
           <option key={id} value={id}>
             {t(name)}
@@ -175,9 +178,26 @@ function WallpaperGallery({ shell, report, announce }) {
     <SettingsCard
       title={t(shell === 'mobile' ? 'Papel de parede do Mobile' : 'Papel de parede do Desktop')}
       description={t(
-        'A seleção é independente para cada shell. A imagem pessoal fica somente neste navegador.',
+        'A seleção é independente para cada plataforma e tema. As imagens pessoais ficam somente neste navegador.',
       )}
     >
+      <SettingsSelect
+        label={t('Enquadramento da imagem')}
+        value={getWallpaperFit(shell, theme)}
+        options={[
+          ['cover', 'Preencher'],
+          ['contain', 'Ajustar'],
+          ['center', 'Centralizar'],
+        ]}
+        onChange={(fit) => report(setWallpaperFit(fit, shell, theme))}
+      />
+      <div
+        className="ws-settings__wallpaper-preview"
+        role="img"
+        aria-label={t('Prévia do papel de parede')}
+        style={{ background: getWallpaperDefinition(selected, shell, theme).background }}
+      />
+
       {/* === Wallpapers oficiais === */}
       {/* ----- Galeria do tema ativo ----- */}
       <div className="ws-settings__wallpaper-grid" data-shell={shell} aria-busy={busy}>
@@ -299,7 +319,7 @@ function WallpaperGallery({ shell, report, announce }) {
       {/* ----- Formatos e limites ----- */}
       <p className="ws-settings__hint">
         {t(
-          'PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Substituir atualiza a imagem compartilhada pelos shells que a utilizam.',
+          'PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Coleção de até 100 MB, sem exclusão automática.',
         )}
       </p>
 
@@ -325,6 +345,7 @@ export default function SettingsSections({ activeSection }) {
   const locale = useLocale();
   const theme = useTheme();
   const appearance = useAppearance();
+  const cursorMode = useCursorMode();
   const accessibility = useAccessibility();
   const autoHide = useTaskbarAutoHide();
   const mobile = useMobilePreferences();
@@ -461,6 +482,34 @@ export default function SettingsSections({ activeSection }) {
         <WallpaperGallery shell="desktop" report={report} announce={announce} />
 
         <SettingsCard title={t('Personalização visual')}>
+          <SettingsToggle
+            label={t('Ocultar papel de parede')}
+            checked={appearance.hideWallpaper === true}
+            onChange={(hideWallpaper) => report(setAppearance({ hideWallpaper }))}
+          />
+          <SettingsSelect
+            label={t('Cursor do sistema')}
+            value={cursorMode}
+            options={[
+              ['custom', 'Personalizado'],
+              ['native', 'Nativo do dispositivo'],
+            ]}
+            onChange={(mode) => report(setCursorMode(mode))}
+          />
+          <SettingsSelect
+            label={t('Modo da cor de destaque')}
+            value={appearance.accentMode ?? 'auto'}
+            options={[
+              ['auto', 'Automática pelo papel de parede'],
+              ['manual', 'Manual neste tema'],
+            ]}
+            onChange={(accentMode) => report(setAppearance({ accentMode }))}
+          />
+          <p className="ws-settings__hint">
+            {t(
+              'A cor manual é compartilhada pelas plataformas neste tema. O modo automático utiliza a paleta mais próxima da imagem ativa.',
+            )}
+          </p>
           <fieldset className="ws-settings__accent">
             <legend>{t('Cor de destaque')}</legend>
 
@@ -473,13 +522,15 @@ export default function SettingsSections({ activeSection }) {
                 key={id}
                 type="button"
                 data-color={id}
-                aria-pressed={appearance.accent === id}
+                aria-pressed={appearance.accentMode === 'manual' && appearance.accent === id}
                 onClick={() => report(setAppearance({ accent: id }))}
               >
                 <span aria-hidden="true" />
                 {t(label)}
 
-                {appearance.accent === id && <Check size={16} aria-hidden="true" />}
+                {appearance.accentMode === 'manual' && appearance.accent === id && (
+                  <Check size={16} aria-hidden="true" />
+                )}
               </button>
             ))}
           </fieldset>

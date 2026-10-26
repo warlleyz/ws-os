@@ -54,7 +54,7 @@ Projetos usa GitHub e IDs de destaques persistidos no Supabase. Não há sistema
 
 ## Aparência, ciclo de vida e apresentação
 
-Temas, efeitos, wallpapers e cursores possuem gerenciadores compartilhados. Requisitos ainda incompletos de personalização pertencem à Etapa 04. Configurações encerra o walkthrough dos consumidores na Etapa 11, sem reconstruir mecanismos já aprovados.
+Temas, efeitos, wallpapers e cursores possuem gerenciadores compartilhados. A Etapa 04 implementou seleções e enquadramentos independentes por plataforma/tema, destaque automático/manual por tema e opção independente de ocultar wallpaper. A preferência manual é compartilhada pelos shells; no automático, o shell aprovado pelo Core fornece a imagem para amostragem local e escolha de uma das três paletas. A coleção pessoal tem limite transacional de 100 MiB, sem eviction automática pela aplicação. Cursores possuem 13 variantes nos dois temas, fallback nativo e controle em Configurações. Configurações encerra o walkthrough dos consumidores na Etapa 11, sem reconstruir mecanismos já aprovados.
 
 Animações das janelas permanecem obrigatórias e respeitam movimento reduzido. Reiniciar/Desligar ficam fora desta versão. Boot mantém processador; favicon usa as seis logos conforme tema/destaque; boas-vindas mantém duas etapas e bloqueio de Escape.
 

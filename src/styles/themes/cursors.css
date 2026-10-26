@@ -1,85 +1,124 @@
 /* === Cursores personalizados === */
 /* ----- Dispositivos com apontador preciso ----- */
 @media (hover: hover) and (pointer: fine) {
+  /* === Cursor padrão === */
+  /* ----- Superfície do sistema ----- */
+  html[data-cursor-mode='custom'],
+  html[data-cursor-mode='custom'] body,
+  html[data-cursor-mode='custom'] #root {
+    cursor: var(--ws-cursor-default, default);
+  }
 
-    /* === Cursor padrão === */
-    /* ----- Superfície do sistema ----- */
-    html[data-cursor-mode='custom'],
-    html[data-cursor-mode='custom'] body,
-    html[data-cursor-mode='custom'] #root {
-        cursor: var(--ws-cursor-default, default);
-    }
+  /* === Elementos interativos === */
+  /* ----- Botões, links e seletores ----- */
+  html[data-cursor-mode='custom']
+    :is(button, a[href], select, summary, [role='button']):not(:disabled):not(
+      [aria-disabled='true']
+    ) {
+    cursor: var(--ws-cursor-pointer, pointer);
+  }
 
-    /* === Elementos interativos === */
-    /* ----- Botões, links e seletores ----- */
-    html[data-cursor-mode='custom'] :is(button,
-        a[href],
-        select,
-        summary,
-        [role='button']):not(:disabled):not([aria-disabled='true']) {
-        cursor: var(--ws-cursor-pointer, pointer);
-    }
+  /* === Arquivos === */
+  /* ----- Itens selecionáveis e navegáveis ----- */
+  html[data-cursor-mode='custom'] .ws-files .ws-files__entry {
+    cursor: var(--ws-cursor-pointer, pointer);
+  }
 
-    /* === Arquivos === */
-    /* ----- Itens selecionáveis e navegáveis ----- */
-    html[data-cursor-mode='custom'] .ws-files .ws-files__entry {
-        cursor: var(--ws-cursor-pointer, pointer);
-    }
+  /* ----- Conteúdo interno dos itens ----- */
+  html[data-cursor-mode='custom'] .ws-files .ws-files__entry :is(span, strong, small, svg) {
+    cursor: inherit;
+  }
 
-    /* ----- Conteúdo interno dos itens ----- */
-    html[data-cursor-mode='custom'] .ws-files .ws-files__entry :is(span, strong, small, svg) {
-        cursor: inherit;
-    }
+  /* === Entrada de texto === */
+  /* ----- Campos editáveis ----- */
+  html[data-cursor-mode='custom']
+    :is(
+      textarea,
+      input:not([type]),
+      input[type='text'],
+      input[type='search'],
+      input[type='email'],
+      input[type='password'],
+      input[type='url'],
+      input[type='tel'],
+      input[type='number'],
+      [contenteditable='true']
+    ):not(:disabled) {
+    cursor: var(--ws-cursor-text, text);
+  }
 
-    /* === Entrada de texto === */
-    /* ----- Campos editáveis ----- */
-    html[data-cursor-mode='custom'] :is(textarea,
-        input:not([type]),
-        input[type='text'],
-        input[type='search'],
-        input[type='email'],
-        input[type='password'],
-        input[type='url'],
-        input[type='tel'],
-        input[type='number'],
-        [contenteditable='true']):not(:disabled) {
-        cursor: var(--ws-cursor-text, text);
-    }
+  /* === Controles indisponíveis === */
+  /* ----- Elementos desabilitados ----- */
+  html[data-cursor-mode='custom'] :is(button, input, textarea, select):disabled,
+  html[data-cursor-mode='custom'] [aria-disabled='true'] {
+    cursor: var(--ws-cursor-not-allowed, not-allowed);
+  }
 
-    /* === Controles indisponíveis === */
-    /* ----- Elementos desabilitados ----- */
-    html[data-cursor-mode='custom'] :is(button,
-        input,
-        textarea,
-        select):disabled,
-    html[data-cursor-mode='custom'] [aria-disabled='true'] {
-        cursor: var(--ws-cursor-not-allowed, not-allowed);
-    }
+  /* === Interação com janelas === */
+  /* ----- Área de arraste ----- */
+  html[data-cursor-mode='custom'] .desktop-window .desktop-window__drag-area[role='button'] {
+    cursor: var(--ws-cursor-grab, grab);
+  }
 
-    /* === Interação com janelas === */
-    /* ----- Área de arraste ----- */
-    html[data-cursor-mode='custom'] .desktop-window .desktop-window__drag-area[role='button'] {
-        cursor: var(--ws-cursor-grab, grab);
-    }
+  /* ----- Arraste ativo ----- */
+  html[data-cursor-mode='custom']
+    .desktop-window[data-interacting='true']
+    .desktop-window__drag-area[role='button'] {
+    cursor: var(--ws-cursor-grabbing, grabbing);
+  }
 
-    /* ----- Arraste ativo ----- */
-    html[data-cursor-mode='custom'] .desktop-window[data-interacting='true'] .desktop-window__drag-area[role='button'] {
-        cursor: var(--ws-cursor-grabbing, grabbing);
-    }
+  /* ----- Janela maximizada ----- */
+  html[data-cursor-mode='custom']
+    .desktop-window--maximized:not([data-interacting='true'])
+    .desktop-window__drag-area[role='button'] {
+    cursor: var(--ws-cursor-grab, grab);
+  }
 
-    /* ----- Janela maximizada ----- */
-    html[data-cursor-mode='custom'] .desktop-window--maximized:not([data-interacting='true']) .desktop-window__drag-area[role='button'] {
-        cursor: var(--ws-cursor-grab, grab);
-    }
+  /* === Globo de tecnologias === */
+  /* ----- Cursor de interação ----- */
+  html[data-cursor-mode='custom'] .ws-skills-globe__stage {
+    cursor: var(--ws-cursor-grab, grab);
+  }
 
-    /* === Globo de tecnologias === */
-    /* ----- Cursor de interação ----- */
-    html[data-cursor-mode='custom'] .ws-skills-globe__stage {
-        cursor: var(--ws-cursor-grab, grab);
-    }
-    
-    /* ----- Cursor durante o arraste ----- */
-    html[data-cursor-mode='custom'] .ws-skills-globe__stage:active {
-        cursor: var(--ws-cursor-grabbing, grabbing);
-    }
+  /* ----- Cursor durante o arraste ----- */
+  html[data-cursor-mode='custom'] .ws-skills-globe__stage:active {
+    cursor: var(--ws-cursor-grabbing, grabbing);
+  }
+}
+/* === ESTADOS AUXILIARES === */
+/* ----- Variantes sem comprometer o comportamento nativo no toque ----- */
+@media (hover: hover) and (pointer: fine) {
+  html[data-cursor-mode='custom'] [aria-busy='true'] {
+    cursor: var(--ws-cursor-wait, wait);
+  }
+  html[data-cursor-mode='custom'] [data-cursor='help'] {
+    cursor: var(--ws-cursor-help, help);
+  }
+  html[data-cursor-mode='custom'] [data-cursor='move'] {
+    cursor: var(--ws-cursor-move, move);
+  }
+}
+
+/* === REDIMENSIONAMENTO E ARRASTE === */
+/* ----- Mesmos cursores nas oito alças, com fallback nativo ----- */
+@media (hover: hover) and (pointer: fine) {
+  html[data-cursor-mode='custom']
+    .desktop-window__resize:is(.desktop-window__resize--n, .desktop-window__resize--s) {
+    cursor: var(--ws-cursor-resize-vertical, ns-resize);
+  }
+  html[data-cursor-mode='custom']
+    .desktop-window__resize:is(.desktop-window__resize--e, .desktop-window__resize--w) {
+    cursor: var(--ws-cursor-resize-horizontal, ew-resize);
+  }
+  html[data-cursor-mode='custom']
+    .desktop-window__resize:is(.desktop-window__resize--nw, .desktop-window__resize--se) {
+    cursor: var(--ws-cursor-resize-diagonal-1, nwse-resize);
+  }
+  html[data-cursor-mode='custom']
+    .desktop-window__resize:is(.desktop-window__resize--ne, .desktop-window__resize--sw) {
+    cursor: var(--ws-cursor-resize-diagonal-2, nesw-resize);
+  }
+  html[data-cursor-mode='custom'] .ws-button[aria-busy='true'] {
+    cursor: var(--ws-cursor-wait, wait);
+  }
 }

@@ -8,7 +8,7 @@ import { resetAppearance } from './appearanceManager';
 import { setAccessibility } from './effectsManager';
 import { setTaskbarAutoHide } from './taskbarPreferences';
 import { resetMobilePreferences } from './mobilePreferences';
-import { setWallpaper } from './wallpaperManager';
+import { setWallpaper, setWallpaperFit } from './wallpaperManager';
 import { getDefaultWallpaper } from './wallpaperCatalog';
 import { resetWidgetPreferences } from './widgetPreferences';
 
@@ -19,7 +19,9 @@ function resetShellWallpapers(shell) {
 
   const light = setWallpaper(getDefaultWallpaper('light'), shell, 'light');
 
-  return dark && light;
+  const darkFit = setWallpaperFit('cover', shell, 'dark');
+  const lightFit = setWallpaperFit('cover', shell, 'light');
+  return dark && light && darkFit && lightFit;
 }
 
 /* === Restauração do sistema === */

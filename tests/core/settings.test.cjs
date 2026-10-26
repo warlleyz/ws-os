@@ -13,6 +13,17 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 /* === Carregamento isolado === */
 /* ----- Avaliação de módulos ----- */
 function load(file, bindings = {}, names = []) {
+  if (file === 'src/core/appearanceManager.js') {
+    bindings = {
+      ...load('src/core/appearanceContract.js', {}, [
+        'DEFAULT_APPEARANCE',
+        'APPEARANCE_OPTIONS',
+        'normalizeAppearance',
+        'extractWallpaperAccent',
+      ]),
+      ...bindings,
+    };
+  }
   if (file === 'src/core/preferencesManager.js') {
     bindings = {
       ...require('../helpers/contract-loader.cjs').loadContract(
@@ -24,6 +35,7 @@ function load(file, bindings = {}, names = []) {
 
   const source = read(file)
     .replace(/^import[^;]+;\s*/gm, '')
+    .replace(/^export \{[^;]+;\s*/gm, '')
     .replace(/\bexport\s+(?=(?:const|function|async)\b)/g, '');
 
   return vm.runInNewContext(`(() => { ${source}\nreturn {${names.join(',')}}; })()`, {
@@ -196,6 +208,8 @@ async function wallpaper(options = {}) {
     },
     [
       'WALLPAPERS',
+      'getWallpaperFit',
+      'setWallpaperFit',
       'getWallpaper',
       'setWallpaper',
       'getWallpaperDefinition',
@@ -253,7 +267,7 @@ test('catálogo contém apenas seis wallpapers oficiais', () => {
 
 /* === Preferências de wallpapers === */
 /* ----- Seleções independentes ----- */
-test('wallpapers sincronizam cores entre temas e separam plataformas', async () => {
+test('wallpapers preservam as quatro seleções independentes', async () => {
   const { m, storage } = await wallpaper();
 
   /* ----- Seleções iniciais ----- */
@@ -265,27 +279,27 @@ test('wallpapers sincronizam cores entre temas e separam plataformas', async () 
   /* ----- Desktop: selecionar violeta no Light ----- */
   assert.equal(m.setWallpaper('light-violeta', 'desktop', 'light'), true);
 
-  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-violeta');
+  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-blue');
   assert.equal(m.getWallpaper('desktop', 'light'), 'light-violeta');
 
   /* ----- Mobile: selecionar verde no Dark ----- */
   assert.equal(m.setWallpaper('dark-green', 'mobile', 'dark'), true);
 
   assert.equal(m.getWallpaper('mobile', 'dark'), 'dark-green');
-  assert.equal(m.getWallpaper('mobile', 'light'), 'light-green');
+  assert.equal(m.getWallpaper('mobile', 'light'), 'light-blue');
 
   /* ----- Desktop e Mobile permanecem independentes ----- */
-  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-violeta');
+  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-blue');
   assert.equal(m.getWallpaper('mobile', 'dark'), 'dark-green');
 
   /* ----- Persistência das quatro variantes ----- */
-  assert.equal(storage.getItem('ws-os:wallpaper:desktop:dark'), 'dark-violeta');
+  assert.equal(storage.getItem('ws-os:wallpaper:desktop:dark'), null);
 
   assert.equal(storage.getItem('ws-os:wallpaper:desktop:light'), 'light-violeta');
 
   assert.equal(storage.getItem('ws-os:wallpaper:mobile:dark'), 'dark-green');
 
-  assert.equal(storage.getItem('ws-os:wallpaper:mobile:light'), 'light-green');
+  assert.equal(storage.getItem('ws-os:wallpaper:mobile:light'), null);
 
   /* ----- Identificadores inválidos ----- */
   assert.equal(m.setWallpaper('original'), false);
@@ -319,7 +333,7 @@ test('preferências legadas são normalizadas sem apagar dados', async () => {
 });
 
 /* ----- Prioridade das preferências novas ----- */
-test('seleções novas prevalecem e harmonizam os dois temas', async () => {
+test('seleções salvas distintas são recuperadas sem harmonização', async () => {
   const storage = memory({
     'ws-os:wallpaper': 'original',
     'ws-os:wallpaper:desktop:dark': 'dark-green',
@@ -331,18 +345,18 @@ test('seleções novas prevalecem e harmonizam os dois temas', async () => {
     theme: 'dark',
   });
 
-  /* ----- Dark ativo determina a variante inicial ----- */
+  /* ----- Cada tema mantém sua seleção inicial ----- */
   assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-green');
 
-  assert.equal(m.getWallpaper('desktop', 'light'), 'light-green');
+  assert.equal(m.getWallpaper('desktop', 'light'), 'light-violeta');
 
   /* ----- Preferência legada permanece preservada ----- */
   assert.equal(storage.getItem('ws-os:wallpaper'), 'original');
 
-  /* ----- Nova seleção sincroniza os dois temas ----- */
+  /* ----- Nova seleção preserva o outro tema ----- */
   assert.equal(m.setWallpaper('light-violeta', 'desktop', 'light'), true);
 
-  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-violeta');
+  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-green');
 
   assert.equal(m.getWallpaper('desktop', 'light'), 'light-violeta');
 });
@@ -761,6 +775,7 @@ test('restauração aplica padrões dos quatro wallpapers e relata falhas', () =
       setTaskbarAutoHide: spy('taskbar'),
       resetMobilePreferences: spy('mobile'),
       setWallpaper: spy('wallpaper'),
+      setWallpaperFit: spy('fit'),
       resetWidgetPreferences: spy('widgets'),
     },
     ['restoreSystemPreferences'],
@@ -772,7 +787,16 @@ test('restauração aplica padrões dos quatro wallpapers e relata falhas', () =
 
   assert.deepEqual(Array.from(result.failed), ['locale']);
 
-  assert.equal(calls.length, 13);
+  assert.equal(calls.length, 17);
+  assert.deepEqual(
+    calls.filter(([name]) => name === 'fit').map(([, args]) => Array.from(args)),
+    [
+      ['cover', 'desktop', 'dark'],
+      ['cover', 'desktop', 'light'],
+      ['cover', 'mobile', 'dark'],
+      ['cover', 'mobile', 'light'],
+    ],
+  );
 
   assert.deepEqual(
     calls.filter(([name]) => name === 'wallpaper').map(([, args]) => Array.from(args)),
@@ -960,11 +984,21 @@ test('mensagens e opções de Configurações possuem tradução', () => {
 /* === Contraste visual === */
 /* ----- Destaques nos temas Dark e Light ----- */
 test('cores de destaque preservam contraste mínimo', () => {
-  const colors = {
-    blue: ['#65cde1', '#0b657b', '#1d5c96'],
-    violet: ['#c3abff', '#6439a9', '#6439a9'],
-    green: ['#7de1c4', '#08634f', '#08634f'],
-  };
+  const css = read('src/styles/themes/customization.css');
+  const colors = {};
+  for (const name of ['blue', 'violet', 'green']) {
+    colors[name] = {};
+    for (const theme of ['dark', 'light']) {
+      const marker = ":root[data-theme='" + theme + "'][data-accent='" + name + "'] {";
+      const block = css.slice(css.indexOf(marker) + marker.length).split('}')[0];
+      colors[name][theme] = Object.fromEntries(
+        Array.from(block.matchAll(/--([a-z-]+):\s*(#[0-9a-f]{6})/g), (match) => [
+          match[1],
+          match[2],
+        ]),
+      );
+    }
+  }
 
   const rgb = (hex) => [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16));
 
@@ -985,11 +1019,155 @@ test('cores de destaque preservam contraste mínimo', () => {
 
   const lightGlass = [255, 255, 255].map((value) => value * 0.88);
 
-  for (const [name, [dark, light, action]] of Object.entries(colors)) {
-    assert.ok(contrast(rgb(dark), darkGlass) >= 4.5, `${name} dark`);
-
-    assert.ok(contrast(rgb(light), lightGlass) >= 4.5, `${name} light`);
-
-    assert.ok(contrast(rgb(action), [255, 255, 255]) >= 4.5, `${name} action`);
+  for (const [name, themes] of Object.entries(colors)) {
+    for (const theme of ['dark', 'light']) {
+      const palette = themes[theme];
+      const glass = theme === 'dark' ? darkGlass : lightGlass;
+      assert.ok(
+        contrast(rgb(palette['accent-secondary']), glass) >= 4.5,
+        name + ' ' + theme + ' destaque',
+      );
+      assert.ok(contrast(rgb(palette['link-color']), glass) >= 4.5, name + ' ' + theme + ' link');
+      assert.ok(
+        contrast(rgb(palette['action-background']), [255, 255, 255]) >= 4.5,
+        name + ' ' + theme + ' ação',
+      );
+    }
   }
+});
+
+/* === ENQUADRAMENTO E PERSISTÊNCIA === */
+/* ----- Seleções, falhas e recuperação ----- */
+test('enquadramento mantém contexto, valida valores e recupera preferência', async () => {
+  const storage = memory();
+  const { m } = await wallpaper({ localStorage: storage });
+  assert.equal(m.setWallpaperFit('contain', 'mobile', 'light'), true);
+  assert.equal(m.getWallpaperFit('desktop', 'light'), 'cover');
+  assert.equal(m.getWallpaperFit('mobile', 'dark'), 'cover');
+  assert.equal(m.getWallpaperFit('mobile', 'light'), 'contain');
+  assert.equal(m.setWallpaperFit('invalid', 'mobile', 'light'), false);
+  assert.match(m.getWallpaperDefinition('light-green', 'mobile', 'light').background, /contain/);
+  const restored = await wallpaper({ localStorage: storage });
+  assert.equal(restored.m.getWallpaperFit('mobile', 'light'), 'contain');
+  assert.equal(m.setWallpaperFit('center', 'mobile', 'light'), true);
+  assert.match(
+    m.getWallpaperDefinition('light-green', 'mobile', 'light').background,
+    /center \/ auto/,
+  );
+});
+
+test('falha ao persistir seleção preserva outros contextos e imagens', async () => {
+  const storage = memory();
+  const { m } = await wallpaper({ localStorage: storage });
+  storage.setItem = () => {
+    throw Error('quota');
+  };
+  assert.equal(m.setWallpaper('dark-green', 'desktop', 'dark'), false);
+  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-green');
+  assert.equal(m.getWallpaper('desktop', 'light'), 'light-blue');
+  assert.equal(m.getWallpaper('mobile', 'dark'), 'dark-blue');
+  assert.equal(m.setWallpaperFit('contain', 'mobile', 'light'), false);
+  assert.equal(m.getWallpaperFit('mobile', 'light'), 'contain');
+});
+
+/* === COLEÇÃO PESSOAL === */
+/* ----- Falhas isoladas e seleção externa ----- */
+test('imagem inválida não bloqueia recuperação de outra imagem válida', async () => {
+  const storage = memory({ 'ws-os:wallpaper:desktop:dark': 'personal:broken' });
+  const invalid = new Blob(['invalid'], { type: 'image/png' });
+  const { m, files } = await wallpaper({
+    localStorage: storage,
+    personalFiles: [
+      ['broken', invalid],
+      ['good', png()],
+    ],
+  });
+  assert.equal(m.getPersonalWallpapers().length, 1);
+  assert.equal(m.getPersonalWallpapers()[0].id, 'personal:good');
+  assert.equal(m.getWallpaperStatus(), 'missing');
+  assert.equal(m.getWallpaper('desktop', 'dark'), 'personal:broken');
+  assert.match(m.getWallpaperDefinition('personal:broken').background, /dark-blue.jpg/);
+  assert.equal(files.has('broken'), true);
+});
+test('seleção persistida em outra aba impede exclusão da imagem', async () => {
+  const { m, storage, files } = await wallpaper();
+  const entry = await m.addWallpaperToCollection(png());
+  storage.setItem('ws-os:wallpaper:mobile:light', entry.id);
+  const result = await m.deleteWallpaperFromCollection(entry.id);
+  assert.equal(result.code, 'WALLPAPER_IN_USE');
+  assert.equal(files.has('test-1'), true);
+});
+test('quota agregada é verificada antes da gravação e preserva arquivos existentes', async () => {
+  const stored = new Map([
+    ['personal:old', { size: 99 * 1024 * 1024 }],
+    ['custom', { size: 3 }],
+  ]);
+  let closed = 0;
+  const indexedDB = {
+    open: () => {
+      const request = {};
+      setImmediate(() => {
+        request.result = {
+          close: () => closed++,
+          transaction: () => {
+            const transaction = {};
+            const store = {
+              getAllKeys: () => ({ result: [...stored.keys()] }),
+              getAll: () => {
+                const reading = { result: [...stored.values()] };
+                setImmediate(() => {
+                  reading.onsuccess();
+                  transaction.oncomplete();
+                });
+                return reading;
+              },
+              put: (file, key) => stored.set(key, file),
+            };
+            transaction.objectStore = () => store;
+            return transaction;
+          },
+        };
+        request.onsuccess();
+      });
+      return request;
+    },
+  };
+  const m = load('src/services/storage/wallpaperStorage.js', { indexedDB }, [
+    'writePersonalWallpaperImage',
+  ]);
+  await assert.rejects(m.writePersonalWallpaperImage('new', { size: 2 * 1024 * 1024 }), /100 MB/);
+  assert.equal(stored.has('personal:new'), false);
+  assert.equal(stored.get('personal:old').size, 99 * 1024 * 1024);
+  assert.equal(await m.writePersonalWallpaperImage('new', { size: 1024 }), true);
+  assert.equal(stored.has('personal:new'), true);
+  assert.equal(closed, 2);
+});
+
+/* ----- Migração compatível com quota esgotada ----- */
+test('falha ao copiar imagem legada preserva sua leitura e a coleção existente', async () => {
+  const legacy = png();
+  const good = png();
+  const m = load(
+    'src/core/personalWallpaperCollection.js',
+    {
+      readWallpaperImage: async () => legacy,
+      readPersonalWallpaperImage: async () => null,
+      listPersonalWallpaperImages: async () => [{ id: 'good', file: good }],
+      writePersonalWallpaperImage: async () => {
+        throw Error('quota');
+      },
+    },
+    ['loadPersonalWallpaperCollection', 'getPersonalWallpaperFile'],
+  );
+  const collection = await m.loadPersonalWallpaperCollection();
+  assert.equal(collection.length, 2);
+  assert.equal(
+    collection.some((entry) => entry.id === 'good'),
+    true,
+  );
+  assert.equal(
+    collection.some((entry) => entry.id === 'legacy'),
+    true,
+  );
+  assert.equal(await m.getPersonalWallpaperFile('legacy'), legacy);
 });
