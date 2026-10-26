@@ -117,6 +117,8 @@ export default function useWindowInteraction({ instance, app }) {
           'dev-insights',
           'file-viewer',
           'certificates',
+          'contact',
+          'terminal',
         ].includes(instance.appId)
       ) {
         const bounds = getBounds(element);

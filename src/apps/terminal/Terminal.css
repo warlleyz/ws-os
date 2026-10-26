@@ -1,30 +1,372 @@
+/* === Terminal WS OS === */
+
 .ws-terminal {
-  font-family: ui-monospace, monospace;
-}
-.ws-terminal__log {
-  min-height: 150px;
-  max-height: 45dvh;
-  overflow: auto;
-  padding: 12px;
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface-canvas) 85%, transparent);
-}
-.ws-terminal__log pre {
-  margin: 8px 0;
-  font: inherit;
-  font-size: 13px;
-}
-.ws-terminal form {
+  --terminal-text: var(--text-primary);
+  --terminal-muted: var(--text-secondary);
+  --terminal-accent: var(--accent-primary, #65bfe2);
+  --terminal-user: #7bcba4;
+  --terminal-error: #e58a85;
+
+  box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  gap: 12px;
-  margin-top: 16px;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--surface-canvas);
+  color: var(--terminal-text);
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.65;
 }
-.ws-terminal form label {
+
+/* === Superfície única === */
+
+.ws-terminal__screen {
+  box-sizing: border-box;
   flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 20px 22px 30px;
+  overflow: auto;
+  background: color-mix(in srgb,
+      var(--surface-canvas) 96%,
+      transparent);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+  user-select: text;
 }
-.ws-terminal code {
+
+.ws-terminal__screen::-webkit-scrollbar {
+  width: 7px;
+}
+
+.ws-terminal__screen::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ws-terminal__screen::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: var(--border-default);
+}
+
+/* === Mensagem inicial === */
+
+.ws-terminal__welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 20px;
+}
+
+.ws-terminal__welcome p {
+  margin: 0;
+  color: var(--terminal-muted);
+  font: inherit;
+}
+
+.ws-terminal__welcome .ws-terminal__welcome-title {
+  margin-bottom: 5px;
+  color: var(--terminal-accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* === Histórico e saída === */
+
+.ws-terminal__log {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  outline-offset: 3px;
+}
+
+.ws-terminal__entry {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ws-terminal__command-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 5px;
+  min-width: 0;
+}
+
+.ws-terminal__user {
+  flex: none;
+  color: var(--terminal-user);
+  font-weight: 650;
+}
+
+.ws-terminal__path {
+  flex: none;
+  color: var(--terminal-accent);
+  font-weight: 650;
+}
+
+.ws-terminal__command-text {
+  min-width: 0;
+  color: var(--terminal-text);
   overflow-wrap: anywhere;
+}
+
+.ws-terminal__output {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.ws-terminal__output pre {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--terminal-muted);
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ws-terminal__output--error pre {
+  color: var(--terminal-error);
+}
+
+.ws-terminal__output--success pre {
+  color: var(--terminal-user);
+}
+
+/* === Prompt principal === */
+
+.ws-terminal .ws-terminal__input-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  gap: 0 5px;
+  width: 100%;
+  min-width: 0;
+  margin: 16px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.ws-terminal__input-wrap {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.ws-terminal .ws-terminal__input-wrap input {
+  box-sizing: border-box;
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 23px;
+  min-height: 23px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+  color: var(--terminal-text);
+  caret-color: var(--terminal-accent);
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  appearance: none;
+}
+
+.ws-terminal .ws-terminal__input-wrap input:focus,
+.ws-terminal .ws-terminal__input-wrap input:hover,
+.ws-terminal .ws-terminal__input-wrap input:focus-visible {
+  padding: 0;
+  border: 0;
+  outline: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ws-terminal .ws-terminal__input-wrap input:disabled {
+  opacity: 0.6;
+}
+
+/* === Login por etapas === */
+
+.ws-terminal .ws-terminal__login {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  margin: 16px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.ws-terminal .ws-terminal__login-line {
+  display: flex;
+  align-items: baseline;
+  flex-direction: row;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ws-terminal__login-line>span {
+  flex: 0 0 65px;
+  color: var(--terminal-user);
+}
+
+.ws-terminal .ws-terminal__login-line input {
+  box-sizing: border-box;
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 23px;
+  min-height: 23px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+  color: var(--terminal-text);
+  caret-color: var(--terminal-accent);
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  appearance: none;
+}
+
+.ws-terminal .ws-terminal__login-line input:focus,
+.ws-terminal .ws-terminal__login-line input:hover,
+.ws-terminal .ws-terminal__login-line input:focus-visible {
+  border: 0;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ws-terminal__hint {
+  margin: 6px 0 0;
+  color: var(--terminal-muted);
+  font: inherit;
+  font-size: 10px;
+}
+
+/* === Processamento === */
+
+.ws-terminal__processing {
+  margin: 11px 0 0;
+  color: var(--terminal-accent);
+  font: inherit;
+  font-size: 11px;
+}
+
+/* === Acessibilidade === */
+
+.ws-terminal__sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.ws-terminal__log:focus-visible {
+  outline: 2px solid var(--terminal-accent);
+  outline-offset: 3px;
+}
+
+/* === Janelas menores === */
+
+@container (max-width: 540px) {
+  .ws-terminal__screen {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ws-terminal {
+    font-size: 11px;
+  }
+
+  .ws-terminal__screen {
+    padding: 13px;
+  }
+
+  .ws-terminal__login-line>span {
+    flex-basis: 55px;
+  }
+}
+
+/* === Movimento reduzido === */
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-terminal__screen {
+    scroll-behavior: auto;
+  }
+}
+
+/* === Easter egg Matrix === */
+
+.ws-terminal__matrix {
+  margin: 12px 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  color: #3be477;
+  pointer-events: none;
+}
+
+.ws-terminal__matrix pre {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.25;
+  white-space: pre;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-terminal__matrix {
+    display: none;
+  }
 }

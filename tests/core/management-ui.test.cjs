@@ -29,6 +29,17 @@ async function terminal(extra = {}) {
     { instance: { id: 'terminal-exact' } },
     {
       ...commands,
+
+      /* === Dependências da navegação virtual === */
+      createPortfolioTree: () => new Map(),
+      normalizePortfolioPath: (_current, target) => target,
+      listPortfolioPath: () => [],
+      readPortfolioPath: () => '',
+      isPortfolioDirectory: () => true,
+      fetchGithubPortfolio: async () => ({
+        data: { repositories: [] },
+      }),
+
       getRegisteredApps: () => [{ id: 'notes', name: 'Notas', public: true, implemented: true }],
       useSystem: () => ({ run() {}, appState: { instances: [] } }),
       canCloseApp: () => true,
