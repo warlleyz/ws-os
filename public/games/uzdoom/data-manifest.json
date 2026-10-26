@@ -1,0 +1,13 @@
+{
+  "file": "uzdoom.data",
+  "size": 57582824,
+  "sha256": "e31cf32a50137ca8d9843225276f7287b6af2b5743ea25b8fb6c59d975e0c653",
+  "parts": [
+    "uzdoom.data.part1",
+    "uzdoom.data.part2",
+    "uzdoom.data.part3",
+    "uzdoom.data.part4",
+    "uzdoom.data.part5",
+    "uzdoom.data.part6"
+  ]
+}

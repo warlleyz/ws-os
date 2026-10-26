@@ -33,7 +33,7 @@ export default function MemoryGame({ paused }) {
     setFlipped(next);
   }
   return (
-    <section>
+    <section className="ws-game ws-game--memory">
       <h3>{t('Memória')}</h3>
       <p role="status">
         {t('Tentativas')}: {moves} · {t('Melhor número de tentativas')}: {record ?? '—'}{' '}
@@ -46,6 +46,8 @@ export default function MemoryGame({ paused }) {
           return (
             <button
               key={index}
+              className={matched.includes(index) ? 'is-matched' : shown ? 'is-revealed' : ''}
+              aria-pressed={shown}
               type="button"
               disabled={paused || matched.includes(index) || flipped.length === 2}
               aria-label={shown ? `${t('Carta')} ${value}` : `${t('Carta fechada')} ${index + 1}`}

@@ -21,54 +21,6 @@ function foodFor(body, size, random) {
   const index = free[Math.min(free.length - 1, Math.floor(Math.max(0, random) * free.length))];
   return { x: index % size, y: Math.floor(index / size) };
 }
-export function newSnake(random = 0.5, size = 15) {
-  const y = Math.floor(size / 2),
-    x = Math.floor(size / 2);
-  const body = [
-    { x, y },
-    { x: x - 1, y },
-    { x: x - 2, y },
-  ];
-  return {
-    body,
-    size,
-    direction: 'right',
-    food: foodFor(body, size, random),
-    score: 0,
-    over: false,
-    won: false,
-  };
-}
-export function stepSnake(state, requested, random = 0.5) {
-  if (state.over) return state;
-  const old = directions[state.direction],
-    candidate = directions[requested] ?? old;
-  const vector = candidate[0] === -old[0] && candidate[1] === -old[1] ? old : candidate;
-  const direction = Object.keys(directions).find((key) => directions[key] === vector);
-  const head = { x: state.body[0].x + vector[0], y: state.body[0].y + vector[1] },
-    eating = head.x === state.food?.x && head.y === state.food?.y;
-  const occupied = eating ? state.body : state.body.slice(0, -1);
-  if (
-    head.x < 0 ||
-    head.y < 0 ||
-    head.x >= state.size ||
-    head.y >= state.size ||
-    occupied.some((cell) => cell.x === head.x && cell.y === head.y)
-  )
-    return { ...state, over: true };
-  const body = [head, ...state.body];
-  if (!eating) body.pop();
-  const food = eating ? foodFor(body, state.size, random) : state.food;
-  return {
-    ...state,
-    body,
-    direction,
-    food,
-    score: state.score + (eating ? 1 : 0),
-    over: food === null,
-    won: food === null,
-  };
-}
 export function mineNeighbors(index, size = 8) {
   const result = [];
   const x = index % size,
@@ -230,4 +182,160 @@ export function moveSolitaire(state, from, to) {
     source[source.length - 1] = { ...source.at(-1), faceUp: true };
   target.push(...cards);
   return next;
+}
+
+/* === Snake tecnológico: variante da V1 === */
+
+export const SNAKE_TECHNOLOGIES = [
+  'java',
+  'javascript',
+  'python',
+  'html',
+  'css',
+  'docker',
+  'git',
+  'spring',
+];
+
+const SNAKE_TECH_SIZE = 20;
+
+function snakeTechRandom(value) {
+  if (!Number.isFinite(value)) return 0.5;
+  return Math.min(0.999999999, Math.max(0, value));
+}
+
+function nextSnakeTechnology(random) {
+  const index = Math.floor(snakeTechRandom(random) * SNAKE_TECHNOLOGIES.length);
+
+  return SNAKE_TECHNOLOGIES[index];
+}
+
+function createSnakeTechFood(body, foods, size, positionRandom, technologyRandom) {
+  const occupied = [...body, ...foods];
+  const position = foodFor(occupied, size, snakeTechRandom(positionRandom));
+
+  if (!position) return null;
+
+  return {
+    ...position,
+    technology: nextSnakeTechnology(technologyRandom),
+  };
+}
+
+export function newTechSnake(random = Math.random()) {
+  const size = SNAKE_TECH_SIZE;
+
+  const body = [
+    { x: 10, y: 10 },
+    { x: 9, y: 10 },
+    { x: 8, y: 10 },
+  ];
+
+  return {
+    size,
+    body,
+    direction: 'right',
+    foods: [
+      { x: 14, y: 10, technology: nextSnakeTechnology(random) },
+      {
+        x: 5,
+        y: 5,
+        technology: nextSnakeTechnology((random + 0.37) % 1),
+      },
+    ],
+    score: 0,
+    over: false,
+    won: false,
+  };
+}
+
+export function stepTechSnake(
+  state,
+  requested,
+  positionRandom = Math.random(),
+  technologyRandom = Math.random(),
+) {
+  if (state.over) return state;
+
+  const previous = directions[state.direction];
+  const candidate = directions[requested] ?? previous;
+
+  const reversed = candidate[0] === -previous[0] && candidate[1] === -previous[1];
+
+  const vector = reversed ? previous : candidate;
+
+  const direction = Object.keys(directions).find(
+    (key) => directions[key][0] === vector[0] && directions[key][1] === vector[1],
+  );
+
+  const head = {
+    x: state.body[0].x + vector[0],
+    y: state.body[0].y + vector[1],
+  };
+
+  const eatenIndex = state.foods.findIndex((food) => food.x === head.x && food.y === head.y);
+
+  const eating = eatenIndex !== -1;
+
+  const collisionBody = eating ? state.body : state.body.slice(0, -1);
+
+  const collided =
+    head.x < 0 ||
+    head.y < 0 ||
+    head.x >= state.size ||
+    head.y >= state.size ||
+    collisionBody.some((segment) => segment.x === head.x && segment.y === head.y);
+
+  if (collided) {
+    return { ...state, over: true, won: false };
+  }
+
+  const body = [head, ...state.body];
+
+  if (!eating) body.pop();
+
+  let foods = state.foods;
+
+  if (eating) {
+    foods = foods.filter((_, index) => index !== eatenIndex);
+
+    const replacement = createSnakeTechFood(
+      body,
+      foods,
+      state.size,
+      positionRandom,
+      technologyRandom,
+    );
+
+    if (replacement) foods = [...foods, replacement];
+  }
+
+  const won = body.length === state.size * state.size;
+
+  return {
+    ...state,
+    body,
+    direction,
+    foods,
+    score: state.score + (eating ? 1 : 0),
+    over: won,
+    won,
+  };
+}
+
+/* === Compatibilidade com os testes da versão anterior === */
+
+export function newSnake(random = 0.5, size = 15) {
+  const state = newTechSnake(random);
+
+  return {
+    ...state,
+    size,
+    food: state.foods[0],
+  };
+}
+
+export function stepSnake(state, direction, random = 0.5) {
+  // Compatibilidade temporária: manter separada da mecânica nova.
+  return stepTechSnake(state, direction, random, random);
 }

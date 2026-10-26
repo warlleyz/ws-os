@@ -26,7 +26,7 @@ export default function FlappyGame({ paused }) {
     setState((current) => (current.over ? current : { ...current, velocity: -0.42 }));
   }
   return (
-    <section>
+    <section className="ws-game ws-game--flappy">
       <h3>Flappy Bird</h3>
       <p role="status">
         {t('Pontos')}: {state.score} · {t('Recorde local')}: {record ?? '—'}{' '}
@@ -34,7 +34,13 @@ export default function FlappyGame({ paused }) {
       </p>
       {error && <p>{t('Recorde disponível somente nesta sessão.')}</p>}
       <div
+        className="ws-flappy__control"
         tabIndex={0}
+        onPointerDown={(event) => {
+          if (event.button !== 0) return;
+          event.currentTarget.focus();
+          jump();
+        }}
         role="group"
         aria-label={t('Jogo de voo. Pressione Espaço para saltar.')}
         onKeyDown={(event) => {
@@ -63,7 +69,11 @@ export default function FlappyGame({ paused }) {
               />
             </g>
           ))}
-          <circle cx="64" cy={state.y * 400} r="10" fill="var(--status-warning)" />
+          <g transform={`translate(64, ${state.y * 400})`}>
+            <ellipse rx="12" ry="10" fill="var(--status-warning)" />
+            <circle cx="5" cy="-3" r="3" fill="var(--surface-primary)" />
+            <path d="M10 0L18 4L10 6" fill="var(--status-error)" />
+          </g>
         </svg>
       </div>
       <div className="ws-app__toolbar">

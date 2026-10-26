@@ -5,7 +5,7 @@ import WallyTurnstile from '../../features/wally/WallyTurnstile';
 import { useGameRecord } from './gameRecords';
 
 /* === Validação da projeção pública, sem aceitar conteúdo administrativo === */
-const maximum = { snake: 222, flappy: 100000 };
+const maximum = { snake: 397, flappy: 100000 };
 const validAlias = (value) =>
   typeof value === 'string' && /^[\p{L}\p{N} _-]{2,24}$/u.test(value.trim());
 const validScore = (game, score) =>

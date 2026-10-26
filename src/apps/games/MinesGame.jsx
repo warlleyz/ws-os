@@ -16,7 +16,7 @@ export default function MinesGame({ paused }) {
     });
   }
   return (
-    <section>
+    <section className="ws-game ws-game--mines">
       <h3>{t('Campo Minado')}</h3>
       <p role="status">
         {t('Bandeiras')}: {state?.flags.length ?? 0}/10 · {t('Melhor número de jogadas')}:{' '}
@@ -44,6 +44,8 @@ export default function MinesGame({ paused }) {
           return (
             <button
               key={index}
+              className={opened ? 'is-opened' : marked ? 'is-marked' : ''}
+              data-count={opened ? count : undefined}
               type="button"
               disabled={paused || state?.over || opened}
               aria-label={`${t('Casa')} ${index + 1}${marked ? ` · ${t('Bandeira')}` : ''}${opened ? ` · ${count}` : ''}`}

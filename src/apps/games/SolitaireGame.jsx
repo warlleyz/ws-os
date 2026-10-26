@@ -33,7 +33,7 @@ export default function SolitaireGame({ paused }) {
     setSelection(from);
   }
   return (
-    <section>
+    <section className="ws-game ws-game--solitaire">
       <h3>{t('Paciência')}</h3>
       <p role="status">
         {t('Jogadas')}: {state.moves} · {t('Melhor número de jogadas')}: {record ?? '—'}{' '}
@@ -51,6 +51,7 @@ export default function SolitaireGame({ paused }) {
         </button>
         <button
           type="button"
+          aria-pressed={selection?.kind === 'waste'}
           disabled={paused || won || !state.waste.length}
           onClick={() => pick({ kind: 'waste' })}
         >

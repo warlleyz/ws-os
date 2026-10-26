@@ -1,0 +1,25 @@
+WS OS — UZDoom / Freedoom — avisos de distribuição
+
+Motor: UZDoom WebAssembly, projeto abootnet/uzdoom-wasm.
+Fonte e instruções de compilação: https://github.com/abootnet/uzdoom-wasm
+Licença do motor: GNU GPL v3; consulte UZDOOM-LICENSE.txt e UZDOOM-CREDITS.md.
+O motor não foi substituído nesta finalização. Os artefatos existentes foram preservados.
+A adaptação WS OS do loader adiciona mensagens de sincronização de saves por origem.
+O loader adaptado acompanha o pacote em uzdoom-loader.js; o motor continua separado.
+
+Dados livres: Freedoom Project. Consulte FREEDOOM-COPYING.txt e FREEDOOM-CREDITS.txt.
+Não são distribuídos IWADs comerciais do Doom original.
+Os pacotes PK3 mantêm os créditos e avisos internos originais; os recursos de
+widescreen têm regras próprias em WIDESCREEN-LICENSE.md.
+A identidade UZDoom tem regras próprias em BRANDING-LICENSE.md.
+Bibliotecas do motor e SoundFont conservam suas respectivas licenças no código-fonte
+upstream (libraries/, docs/licenses/ e soundfont/).
+
+O pacote uzdoom.data é entregue sem modificação, em seis partes. O tamanho e o hash
+originais estão em data-manifest.json e são verificados pelo build da WS OS.
+Salvamentos e arquivos escolhidos pelo visitante ficam no IndexedDB deste navegador.
+O retorno ao catálogo, fechamento da janela e troca de shell aguardam a sincronização.
+Fechar a aba/navegador abruptamente não permite garantir uma operação assíncrona.
+
+Antes de distribuição pública: confirmar o commit/build correspondente aos binários
+recebidos e a licença específica do SoundFont. Este aviso não substitui essa rastreabilidade.
