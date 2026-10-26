@@ -1,6 +1,14 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === WS OS V2 — CONTINUIDADE APÓS A PAUSA DE 18/10/2026 === -->
+
 # WS OS V2 — continuidade após a pausa de 18/10/2026
 
 Este é o ponto de continuidade mais recente. O usuário pediu para parar ao concluir o próximo bloco. O bloco de correções de segurança/idioma do Wally foi o último implementado. **O projeto não está 100% concluído.** Não iniciar outro bloco automaticamente.
+
+<!-- === ESTADO ENTREGUE === -->
 
 ## Estado entregue
 
@@ -19,6 +27,8 @@ Este é o ponto de continuidade mais recente. O usuário pediu para parar ao con
 - Rankings opcionais preparados para Snake/Flappy: envio voluntário, apelido público, limites por jogo, Turnstile, limitação em D1 e melhor resultado por identificador derivado. Não ativados nem homologados externamente.
 - Wally: respostas locais PT/EN, instrução de login corrigida, idioma/contexto público selecionado no servidor, corpo limitado por stream, verificação de domínio/finalidade e timeout do Turnstile. Gemini continua desativado.
 
+<!-- === EVIDÊNCIAS E LIMITES DA VALIDAÇÃO === -->
+
 ## Evidências e limites da validação
 
 - `npm run lint`, `npm run build` e `npm run test`: aprovados no fechamento; 202 testes, nenhuma falha.
@@ -28,6 +38,8 @@ Este é o ponto de continuidade mais recente. O usuário pediu para parar ao con
 - Nenhuma exceção JavaScript de aplicativo foi retornada na última coleta do navegador. Isso não substitui testes prolongados, dispositivos reais e toda a matriz de fluxos.
 - O navegador temporário foi encerrado ao terminar a revisão. Arquivos de inspeção ficam fora do repositório, na pasta `work/` do chat.
 
+<!-- === BLOCO 1 — ADMINISTRAÇÃO E SOLICITAÇÕES PRIVADAS (PRIORIDADE ALTA) === -->
+
 ## Bloco 1 — Administração e solicitações privadas (prioridade alta)
 
 - [ ] Implementar persistência privada de solicitações/agendamentos, API protegida e gerenciamento de status na Administração. Atualmente o formulário entrega pelo EmailJS e a seção administrativa apenas explica esse fluxo; **não existe caixa de solicitações no banco**.
@@ -36,6 +48,8 @@ Este é o ponto de continuidade mais recente. O usuário pediu para parar ao con
 - [ ] Validar CRUD de eventos e catálogo oficial no runtime Worker e em Supabase de homologação; verificar RLS como anon, usuário autenticado comum e administrador.
 - [ ] Conferir que atualização pública entre janelas/abas não permanece obsoleta pelo cache. Os eventos atuais de atualização são locais à mesma janela; não houve homologação multiaba do conteúdo remoto.
 - [ ] Definir se o gerenciamento de arquivos estáticos versionados atende ao uso editorial. Upload de arquivos oficiais/anexos em armazenamento gerenciado ainda não foi implementado; não prometer upload no catálogo atual.
+
+<!-- === BLOCO 2 — NOTAS E CONTEÚDO PROFISSIONAL === -->
 
 ## Bloco 2 — Notas e conteúdo profissional
 
@@ -47,6 +61,8 @@ Este é o ponto de continuidade mais recente. O usuário pediu para parar ao con
 - [ ] Revisar conteúdo pessoal com o autor: currículo/certificados fornecidos já existem; destaques locais de projetos e demos não foram preenchidos com conteúdo inventado.
 - [ ] Homologar demos autorizadas e fallback externo; conferir restrições de origem, sandbox e CSP.
 
+<!-- === BLOCO 3 — ARQUIVOS, VISUALIZADOR E EDITOR === -->
+
 ## Bloco 3 — Arquivos, Visualizador e Editor
 
 - [ ] Revisão visual individual Desktop/Mobile de ferramentas, contexto, painel de detalhes e leitura de PDFs/imagens/textos longos.
@@ -54,6 +70,8 @@ Este é o ponto de continuidade mais recente. O usuário pediu para parar ao con
 - [ ] Verificar última pasta válida após exclusão externa/reabertura e decisões de restauração de itens com nomes duplicados.
 - [ ] Repetir fluxo real multiaba: edição concorrente, renomeação/movimentação, lixeira/restauração/exclusão, falha de quota e navegador com armazenamento bloqueado. Existem testes automatizados e evidência anterior de IndexedDB isolado; não confundir isso com toda a nova interface validada.
 - [ ] Conferir ajuste de imagens em proporções extremas e leitura PDF em navegadores Mobile sem visualizador embutido.
+
+<!-- === BLOCO 4 — DESKTOP, JANELAS, TASKBAR, PAINÉIS E WIDGETS === -->
 
 ## Bloco 4 — Desktop, janelas, Taskbar, painéis e widgets
 
@@ -64,6 +82,8 @@ Este é o ponto de continuidade mais recente. O usuário pediu para parar ao con
 - [ ] Verificar se o widget Calendário precisa indicar eventos públicos como o painel. A integração remota nova foi feita no painel, não no widget.
 - [ ] Completar ações contextuais aprovadas na busca. Hoje há apps, projetos, notas, certificados, perfil e seções de Configurações; não foi criado um catálogo geral de comandos/ações.
 
+<!-- === BLOCO 5 — MOBILE, PERSONALIZAÇÃO E ACESSIBILIDADE === -->
+
 ## Bloco 5 — Mobile, personalização e acessibilidade
 
 - [ ] Validar Home/catálogo/busca/apps/painéis em celular, tablet e transição de viewport; URL estável e retorno à origem com confirmação de rascunhos.
@@ -71,6 +91,8 @@ Este é o ponto de continuidade mais recente. O usuário pediu para parar ao con
 - [ ] Revisar os 18 apps visualmente em Dark/Light e PT/EN. A harmonização compartilhada não equivale a um redesign individual concluído.
 - [ ] Exercitar todas as configurações e persistência: tema, destaque, blur/transparência, animações, wallpapers, Desktop, Mobile, widgets e Taskbar; reset e armazenamento indisponível.
 - [ ] Revisão completa de teclado, leitor de tela, foco, contraste em todas as combinações, zoom 200%, toque e movimento reduzido. Testes de contraste representativos não comprovam WCAG integral.
+
+<!-- === BLOCO 6 — JOGOS, TERMINAL E WALLY === -->
 
 ## Bloco 6 — Jogos, Terminal e Wally
 
@@ -82,6 +104,8 @@ Este é o ponto de continuidade mais recente. O usuário pediu para parar ao con
 - [ ] Homologar Gemini com modelo realmente disponível, orçamento/limites, chave de teste e fallback; o modelo configurado não foi verificado externamente.
 - [ ] Implementar ferramentas permitidas do Wally conforme o mestre, com confirmação para ações sensíveis e autorização efetiva. O remoto continua retornando `actions: []`; o local sugere somente navegação pública.
 - [ ] Consolidar conhecimento público e eliminar módulos reservados somente quando houver consumidor justificado; `wallyKnowledge.js` ainda está reservado.
+
+<!-- === BLOCO 7 — CONFIGURAÇÃO E HOMOLOGAÇÃO EXTERNA === -->
 
 ## Bloco 7 — Configuração e homologação externa
 
@@ -96,6 +120,8 @@ Nenhum dos passos abaixo foi executado em produção.
 - [ ] Homologar GitHub/WakaTime/clima: fonte, períodos, cache, indisponibilidade, localização negada e limites. Não presumir validade de segredos só porque seus nomes existem.
 - [ ] Validar no Worker Cloudflare. O entrypoint atual é `worker/index.js`; documentos antigos que citam apenas roteamento automático de Pages estão desatualizados.
 
+<!-- === BLOCO 8 — PREPARAÇÃO DE PUBLICAÇÃO E ENCERRAMENTO === -->
+
 ## Bloco 8 — Preparação de publicação e encerramento
 
 - [ ] Completar auditoria rastreável do inventário e dos critérios DEC do mestre; não declarar que cada arquivo foi individualmente revisado nesta etapa.
@@ -106,9 +132,13 @@ Nenhum dos passos abaixo foi executado em produção.
 - [ ] Executar a matriz final de fluxos + lint/build/test e registrar evidências reais em Desktop/Mobile.
 - [ ] Revisão pessoal de design/UX/conteúdo e aceite final do usuário. Só então avaliar se o escopo aprovado está integralmente atendido.
 
+<!-- === PRÓXIMO PASSO RECOMENDADO === -->
+
 ## Próximo passo recomendado
 
 Começar pelo Bloco 1 (solicitações privadas e Administração), fechar os contratos de dados e antiabuso, preparar migrações e testar em ambiente isolado. Depois Notas/anexos e a revisão visual transversal. Não reiniciar o projeto nem descartar o que já foi implementado.
+
+<!-- === COMMITS LOCAIS DESTA EXECUÇÃO (ANTES DO FECHAMENTO DO WALLY) === -->
 
 ## Commits locais desta execução (antes do fechamento do Wally)
 
@@ -125,6 +155,8 @@ ced0827 fix: completa contato e propriedades dos documentos
 ```
 
 O commit de fechamento do Wally acompanha este documento; seu hash está em `git log` e no relatório da entrega.
+
+<!-- === ARQUIVOS ALTERADOS NA EXECUÇÃO === -->
 
 ## Arquivos alterados na execução
 

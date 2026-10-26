@@ -1,8 +1,16 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 05 — CHECKPOINT DE EXECUÇÃO === -->
+
 # Etapa 05 — checkpoint de execução
 
 Atualizado em 21/10/2026. Base desta execução: c79fc78.
 
 **Estado: fechamento técnico local concluído; continuidade para a Etapa 06 autorizada pelo proprietário em 21/10/2026.** Este registro permite retomar sem depender do histórico da conversa. As alterações estão salvas no checkout e ainda não foram commitadas.
+
+<!-- === REGRAS PRESERVADAS === -->
 
 ## Regras preservadas
 
@@ -10,6 +18,8 @@ Atualizado em 21/10/2026. Base desta execução: c79fc78.
 - Não alterar produção, executar migrações remotas, contratar/configurar provedores nem fazer commit/push sem autorização.
 - Não editar os JSONs de tradução. A tradução completa permanece reservada à fase final por instrução do proprietário; manter t() e registrar as mensagens restantes.
 - Não transformar documentos históricos em prova de implementação ou homologação atual.
+
+<!-- === BLOCO 1 — EDITOR: CONCLUÍDO LOCALMENTE === -->
 
 ## Bloco 1 — Editor: concluído localmente
 
@@ -21,6 +31,8 @@ Atualizado em 21/10/2026. Base desta execução: c79fc78.
 - Foco inicial na área de texto somente quando sua janela está ativa, sem tomar o foco de outra instância em segundo plano.
 - Testes de cópia após movimentação, falha sem perder rascunho, identificação por instância e foco. Contratos de revisão e proteção de alterações não salvas preservados.
 
+<!-- === BLOCO 2 — VISUALIZADOR/PDF: CONCLUÍDO LOCALMENTE === -->
+
 ## Bloco 2 — Visualizador/PDF: concluído localmente
 
 - Troca de blob deixa de reutilizar documento/página/erro antigos. PDF válido pode ser aberto após uma tentativa inválida.
@@ -31,6 +43,8 @@ Atualizado em 21/10/2026. Base desta execução: c79fc78.
 - Resposta com tamanho declarado acima do limite tem o corpo cancelado; alternativa de download preservada.
 - PDF.js e os contratos fileId, url/name e resource existentes foram preservados.
 
+<!-- === BLOCO 3 — GERENCIADOR E INTEGRAÇÃO: CONCLUÍDO LOCALMENTE === -->
+
 ## Bloco 3 — Gerenciador e integração: concluído localmente
 
 - Nome do novo texto validado antes de acrescentar .txt: espaços, ponto, dois pontos e comprimento inválido não geram arquivos artificiais. Extensão .TXT existente não é duplicada.
@@ -38,6 +52,8 @@ Atualizado em 21/10/2026. Base desta execução: c79fc78.
 - Retorno de foco não interfere com o Editor aberto pela criação do arquivo.
 - Rótulos acessíveis usam traduções existentes e título contextual do diálogo, eliminando as falhas de cobertura sem alterar testes de tradução ou os catálogos.
 - Regressões de integridade, lote, conflitos, lixeira, quota, importação, revisão e sincronização existentes continuam aprovadas. Não foi reescrita a camada de dados.
+
+<!-- === VALIDAÇÃO DESTA EXECUÇÃO === -->
 
 ## Validação desta execução
 
@@ -51,6 +67,8 @@ Atualizado em 21/10/2026. Base desta execução: c79fc78.
 - Oito cenários do serviço real com IndexedDB real e dois contextos: criação/leitura, BroadcastChannel, gravações concorrentes, duplicidade concorrente, renomear/mover/ciclos, importação PNG/PDF e rejeição inválida, lixeira/restauração/purga e persistência após reload. Todos aprovados. Dois contextos da mesma origem não substituem a matriz completa de dispositivos/abas reais.
 - Nenhum serviço remoto autenticado, dado pessoal do navegador habitual ou produção foi utilizado. As APIs remotas no servidor isolado respondem indisponível.
 
+<!-- === ARQUIVOS DESTA EXECUÇÃO === -->
+
 ## Arquivos desta execução
 
 - src/apps/file-editor/FileEditor.jsx
@@ -63,12 +81,16 @@ Atualizado em 21/10/2026. Base desta execução: c79fc78.
 
 Sem alteração nos JSONs, no provedor remoto, nas migrações, nas dependências ou em aplicativos de etapas posteriores. Formatação organizada nos componentes modificados. Scripts e capturas de teste permaneceram fora do repositório.
 
+<!-- === LIMITAÇÕES REGISTRADAS PARA REVISÃO FINAL === -->
+
 ## Limitações registradas para revisão final
 
 1. Revisão visual do proprietário: Desktop/Mobile/tablet, Dark/Light, toque físico, leitor de tela e zoom do navegador. Os ensaios desta execução não certificam essa matriz completa.
 2. Traduções finais: completar os textos de Files, DocumentView e PdfPreview, incluindo apresentação inicial, caminhos/erros de navegação, histórico/resultados, indicação .txt, rótulos/propriedades do documento e controles/status/erros do PDF. Há textos ainda literais; não chamar PT/EN de integralmente concluído por causa do teste de chamadas t(). Nenhuma chave nova foi adicionada neste bloco.
 3. Revalidar o catálogo oficial e download gerenciado no Worker/Supabase autorizado, com indisponibilidade e retirada de acesso. A homologação documentada anteriormente não foi repetida nesta execução. Não aplicar migrações nem ativar flags para contornar esse aceite.
 4. Integração de anexos publicados de Notas será exercitada no bloco proprietário (Etapa 08), conforme os contratos; não antecipar seu gerenciamento aqui.
+
+<!-- === RETOMADA EXATA === -->
 
 ## Retomada exata
 

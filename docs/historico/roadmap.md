@@ -1,3 +1,9 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === PRÓXIMAS ETAPAS — 15/10/2026 === -->
+
 # Próximas etapas — 15/10/2026
 
 Plano detalhado com critérios de aceite: [Entrega e continuidade, seção 11](ENTREGA-E-CONTINUIDADE-2026-10-15.md#11-plano-restante-em-ordem-de-execução).

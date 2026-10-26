@@ -1,12 +1,20 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
 > **Estado mais recente — 18/10/2026:** consulte [Pendências e continuidade](PENDENCIAS-FINALIZACAO.md). O texto abaixo é histórico; não descreve integralmente o estado atual de auth, Notas, Administração, Arquivos, rankings e testes.
 
 > **Atualização de 15/10/2026:** consulte primeiro [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md) e [Estado atual](implementation-status.md). O texto abaixo preserva descrições/evidências de etapas anteriores; afirmações sobre apps reservados, Mobile ausente ou apenas um app implementado foram superadas pelos commits atuais.
+
+<!-- === WS OS — DOCUMENTO DE CONTINUIDADE E RECUPERAÇÃO === -->
 
 # WS OS — Documento de continuidade e recuperação
 
 **Data:** 14/10/2026. **Planejamento de referência:** WS-OS-V2-MESTRE-REPLANEJAMENTO v0.16.0, consolidado em 13/10/2026. **Repositório:** https://github.com/warlleyz/ws-os. **Branch de trabalho:** main.
 
 Este documento permite continuar o projeto em outra conversa sem reiniciar, sem deduzir implementação a partir de arquivos vazios e sem repetir a auditoria inicial. É acompanhado por architecture, contracts, implementation-status, roadmap e file-inventory, todos em docs.
+
+<!-- === 1. RESULTADO DESTA ENTREGA === -->
 
 ## 1. Resultado desta entrega
 
@@ -16,11 +24,15 @@ O projeto continua sendo um protótipo Desktop. Tem gerenciamento básico de ins
 
 Foram preservadas as alterações locais ainda não commitadas pelo usuário. O ponto de partida remoto era 745ada6 (extração de CSS do boot/boas-vindas). A organização é entregue em um único commit; o SHA final é informado na resposta da entrega e pode ser conferido por git log. Não inserir um hash inventado ou exigir que o documento contenha seu próprio hash.
 
+<!-- === 2. AUTORIZAÇÕES E MÉTODO === -->
+
 ## 2. Autorizações e método
 
 O usuário inicialmente pediu edição manual com trechos exatos e arquivos completos. Depois autorizou edição direta exclusivamente para concluir a organização, sem novas funcionalidades e com um único commit. Essa exceção não constitui permissão permanente para toda implementação futura.
 
 No chat normal, confirmar o modo de trabalho do próximo incremento. Se manual: pequenas mudanças em Altere/Por/Depois de/Adicione/Remova; mudanças grandes com conteúdo completo. Ao concluir incremento funcional, apresentar verificações e commit segundo o padrão do repositório. Após confirmação de commit/push, conferir arquivos/diff antes de avançar. Não criar um novo projeto do zero.
+
+<!-- === 3. PLANEJAMENTO VIGENTE === -->
 
 ## 3. Planejamento vigente
 
@@ -41,7 +53,11 @@ Mestre com B01–B16 e DEC-001–609. Fonte canônica de produto em docs/plannin
 - Wally com base pública autorizada, fallback local e IA opcional protegida.
 - Navegação comum entre apps mantém URL visível; domínio planejado warlley.dev.
 
+<!-- === 4. MUDANÇAS DE ORGANIZAÇÃO === -->
+
 ## 4. Mudanças de organização
+
+<!-- ----- 4.1 CAMINHOS ANTIGOS RETIRADOS ----- -->
 
 ### 4.1 Caminhos antigos retirados
 
@@ -57,6 +73,8 @@ Mestre com B01–B16 e DEC-001–609. Fonte canônica de produto em docs/plannin
 
 As apresentações de boot/boas-vindas, já extraídas antes, permanecem nos módulos preparados. Não há cópias antigas ativas dos componentes.
 
+<!-- ----- 4.2 ESTADO E LÓGICA ----- -->
+
 ### 4.2 Estado e lógica
 
 SystemProvider passa a possuir sessão/instâncias/notificações/toasts; Desktop e Taskbar usam useSystem. O método de mostrar Desktop foi transferido como operação compartilhada, preservando a minimização existente. Não foram implementados desligamento/reinício ou auth.
@@ -65,11 +83,15 @@ Funções geométricas foram extraídas para windowGeometry; efeitos/interaçõe
 
 Taskbar recebeu subcomponentes para apps, prévias e menus; WS Menu/favoritos/pesquisa, painéis e atalhos globais foram separados. HTTP meteorológico foi retirado da apresentação e colocado em weatherService; estado/geolocalização em useWeather. Não foram adicionados retries, cache ou previsão.
 
+<!-- ----- 4.3 PRESERVAÇÃO ----- -->
+
 ### 4.3 Preservação
 
 IDs dos apps/instâncias, catálogo, textos, classes CSS, dados salvos, chaves de armazenamento, política de instâncias e interações observadas foram mantidos. Ajustes de imports, dependências de efeitos e identificação React de itens servem à extração, sem acrescentar funcionalidade.
 
 CSS foi distribuído em módulos com sequência de importação explícita. Comparação estática confirmou 299 combinações seletor/contexto com declarações preservadas. Isso não é prova de contraste, performance ou equivalência visual em todos os dispositivos.
+
+<!-- === 5. O QUE EXISTE E O QUE NÃO EXISTE === -->
 
 ## 5. O que existe e o que não existe
 
@@ -78,6 +100,8 @@ Consultar implementation-status para a matriz por funcionalidade e por app. Um a
 Nenhum dos 18 apps tem conteúdo funcional conectado ao AppHost. Não confundir registro, ícone, atalho ou placeholder com app entregue. Flags implemented de dois apps ainda são inconsistentes e foram mantidas para evitar misturar correção funcional na reorganização.
 
 Não há shell Mobile real, backend, Supabase/RLS, Gemini, EmailJS, métricas GitHub/WakaTime, arquivos pessoais em IndexedDB, jogos funcionais, CI ou deploy nesta entrega. As media queries existentes continuam adaptando Desktop, sem substituir F5.
+
+<!-- === 6. RISCOS E PENDÊNCIAS PRIORITÁRIAS === -->
 
 ## 6. Riscos e pendências prioritárias
 
@@ -94,6 +118,8 @@ Não há shell Mobile real, backend, Supabase/RLS, Gemini, EmailJS, métricas Gi
 
 Essas pendências não justificam restart. Priorizar os gates de estabilidade, contratos e acessibilidade antes de expandir funcionalidades.
 
+<!-- === 7. VERIFICAÇÃO DESTA ENTREGA === -->
+
 ## 7. Verificação desta entrega
 
 Ferramentas existentes reutilizadas de C:/Projetos/ws-os/node_modules. Nenhuma dependência instalada/atualizada. Node observado v24.19.0, npm 11.17.0; build reportou Vite 8.3.4. As versões do manifesto/lock não foram alteradas.
@@ -108,11 +134,15 @@ Ferramentas existentes reutilizadas de C:/Projetos/ws-os/node_modules. Nenhuma d
 
 Os cenários observados não significam que todas as interações planejadas passaram. A próxima etapa deve ampliar os testes justamente nos pontos de divergência.
 
+<!-- === 8. SEQUÊNCIA RECOMENDADA === -->
+
 ## 8. Sequência recomendada
 
 Ler roadmap para arquivos, dependências e aceite: R0 baseline → R1 Taskbar/painéis → R2 contratos/isolamento → R3 grade/persistência → R4 visual/acessibilidade → R5 gate de janelas/Desktop → F5 Mobile → A1–A8 apps → consolidação/publicação.
 
 Começar pelo menor incremento verificável: comportamento dos grupos e fechamento completo dos painéis. Não iniciar todos os apps ou toda a infraestrutura ao mesmo tempo. Não substituir a arquitetura por outra stack sem decisão.
+
+<!-- === 9. DADOS E DEPENDÊNCIAS A OBTER === -->
 
 ## 9. Dados e dependências a obter
 
@@ -128,6 +158,8 @@ Começar pelo menor incremento verificável: comportamento dos grupos e fechamen
 
 Não inventar dados reais, percentuais de competências, métricas, respostas de serviços ou aprovação de fornecedores.
 
+<!-- === 10. CHECKLIST PARA CONTINUAR NO CHAT NORMAL === -->
+
 ## 10. Checklist para continuar no chat normal
 
 - [ ] Anexar este documento completo e o mestre v0.16.0, ou fornecer acesso ao repo com docs.
@@ -140,6 +172,8 @@ Não inventar dados reais, percentuais de competências, métricas, respostas de
 - [ ] Atualizar implementation-status/contratos com o que realmente for entregue.
 
 Texto de contexto sugerido: “Continue o WS OS a partir do commit de reorganização, lendo docs/CONTINUIDADE.md e o mestre v0.16.0. Não reinicie o projeto. Os apps e Mobile ainda são reservas. Primeiro delimite a correção de grupos da Taskbar e fechamento dos painéis; preserve dados, contratos e o modo de edição que eu confirmar.”
+
+<!-- === 11. LIMITES DE ENTREGA === -->
 
 ## 11. Limites de entrega
 

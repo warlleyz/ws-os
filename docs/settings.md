@@ -1,8 +1,16 @@
-> **Temas atualizados em 15/10/2026:** [glass.css](../src/styles/themes/glass.css) agora aplica vidro à janela inteira e controla empilhamento de blur. As descrições/evidências abaixo sobre conteúdo opaco e blur antigo são da etapa anterior; detalhes atuais em [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md). Os contratos de dados/persistência abaixo permanecem válidos.
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+> **Temas atualizados em 15/10/2026:** [glass.css](../src/styles/themes/glass.css) agora aplica vidro à janela inteira e controla empilhamento de blur. As descrições/evidências abaixo sobre conteúdo opaco e blur antigo são da etapa anterior; detalhes atuais em [Entrega e continuidade](historico/ENTREGA-E-CONTINUIDADE-2026-10-15.md). Os contratos de dados/persistência abaixo permanecem válidos.
+
+<!-- === CONFIGURAÇÕES — ENTREGA DE 15/10/2026 === -->
 
 # Configurações — entrega de 15/10/2026
 
 Escopo: completar o app existente, preservando a arquitetura e as edições locais encontradas sobre `2b4bf86`. Não representa conclusão de todos os aplicativos ou de todo o roadmap.
+
+<!-- === IMPLEMENTAÇÃO === -->
 
 ## Implementação
 
@@ -23,6 +31,8 @@ Escopo: completar o app existente, preservando a arquitetura e as edições loca
 
 O relógio não possui outras preferências individuais implementadas: idioma e hora seguem a interface/dispositivo. Não foram adicionados widgets inexistentes nem controles sem efeito.
 
+<!-- === CONTRATOS DE DADOS === -->
+
 ## Contratos de dados
 
 - Mantida a chave legada `ws-os:wallpaper` para Desktop; `ws-os:mobile-wallpaper` para Mobile. Valores `original`, `aurora`, `minimal`, `custom`.
@@ -33,11 +43,15 @@ O relógio não possui outras preferências individuais implementadas: idioma e 
 - Chaves existentes de tema, acessibilidade, idioma, auto-ocultação, densidade Mobile e widgets mantidas. Posições dos atalhos não são migradas nem apagadas.
 - Desktop é o proprietário das restrições de capacidade durante sua montagem. No Mobile, mudanças de widgets são preferências para o próximo Desktop; ao voltar, a projeção da grade evita colisões e informa indisponibilidade temporária quando necessário.
 
+<!-- === PREFERÊNCIAS PARTICULARES DE APLICATIVOS === -->
+
 ## Preferências particulares de aplicativos
 
 Os aplicativos atuais não expõem schemas próprios editáveis nesta seção. Não se cria persistência arbitrária ou um painel vazio apenas para aparentar suporte.
 
 Para cada consumidor futuro, registrar appId, schemaVersion, defaults, normalização/validação, limites, método de leitura/escrita e quais campos são restauráveis. Usar chave `ws-os:app:<appId>:preferences` para pequenas preferências JSON; documentos e arquivos ficam no armazenamento próprio, nunca nessa chave. Um reset particular deve ser explícito e separado da restauração global; migração não pode apagar dados ao encontrar versão desconhecida. Dados privados/credenciais não são preferências públicas. Publicar somente controles consumidos efetivamente pelo app. O store deve fornecer snapshot estável/assinatura e informar falha de gravação sem inutilizar a sessão.
+
+<!-- === EVIDÊNCIAS DE VALIDAÇÃO === -->
 
 ## Evidências de validação
 
@@ -64,6 +78,8 @@ Navegador em origem isolada `127.0.0.1:5187`, sem limpar ou escrever a origem ha
 Preview de produção na mesma origem de teste: imagem personalizada recuperada após reload, seleções próprias mantidas, restauração concluída com imagem disponível, Configurações Mobile operável e grade confortável com duas colunas. Sem erros/warnings nesses fluxos. Sincronização real entre duas abas também verificada: idioma EN/PT atualizou a outra aba sem recarregar.
 
 Instrumentação e imagens de teste ficam fora do produto, na pasta de trabalho do agente.
+
+<!-- === LIMITES QUE EXIGEM VALIDAÇÃO HUMANA === -->
 
 ## Limites que exigem validação humana
 

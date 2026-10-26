@@ -1,6 +1,14 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 01 — PARTE 01.6: AUDITORIA, DOCUMENTAÇÃO E CONSOLIDAÇÃO === -->
+
 # Etapa 01 — Parte 01.6: auditoria, documentação e consolidação
 
 Data: 19/10/2026. **Estado: implementação e validação técnica da Etapa 01 concluídas.** Aceite final do proprietário (TEC-048) e homologações externas permanecem pendentes, sem impedir a entrega dos contratos de responsabilidade desta etapa. A Etapa 02 não foi iniciada.
+
+<!-- === RESULTADO POR PARTE === -->
 
 ## Resultado por parte
 
@@ -14,6 +22,8 @@ Data: 19/10/2026. **Estado: implementação e validação técnica da Etapa 01 c
 | 01.6 | Auditoria cruzada, correções de navegação/serialização, carregadores reais, regressões e documentação atual. Commit de consolidação é o que contém este documento; consultar git log, sem autorreferência de hash. |
 
 As conclusões específicas 01.1–01.5 permanecem como evidência dos incrementos. Ajustes da auditoria entram somente no commit 01.6; nenhum commit anterior foi refeito. O trabalho local encontrado no início foi preservado e integrado à Parte 01.3.
+
+<!-- === MATRIZ DE COBERTURA TÉCNICA === -->
 
 ## Matriz de cobertura técnica
 
@@ -56,6 +66,8 @@ Os intervalos abaixo cobrem todos os TEC-001 a TEC-048. O texto completo das dec
 | 046–047 | Contratos atuais separados do histórico, conclusões atualizadas e arquivos organizados. | docs/contracts.md; documentação por parte; comentários padronizados nos módulos alterados. |
 | 048 | Conclusão técnica documentada; aceite do proprietário permanece explícito. | Validações locais concluídas; revisão humana e homologações externas não foram inventadas. |
 
+<!-- === VALIDAÇÃO FINAL === -->
+
 ## Validação final
 
 - npm run lint: aprovado.
@@ -64,6 +76,8 @@ Os intervalos abaixo cobrem todos os TEC-001 a TEC-048. O texto completo das dec
 - Testes específicos de navegação/arquivos, API/adaptadores/cache/idempotência foram executados durante a auditoria antes da suíte completa. Incluem cenários negativos e compatibilidade; testes não foram afrouxados para esconder falhas.
 - O carregador comum percorre os imports reais de contratos puros. Harnesses com ambiente simulado continuam adequados aos testes de UI/Core, agora com os validadores reais em vez de símbolos omitidos.
 - Foram corrigidos na auditoria final: retorno sempre restored quando deveria ser navigated; comparação contextual de descritores; cópia rasa de parâmetros; política administrativa hardcoded; sucesso de API com dados que desapareceriam no JSON; entrada nula em pedido de idempotência; carregadores que removiam imports sem oferecer as novas dependências.
+
+<!-- === VERIFICAÇÕES MANUAIS E LIMITES === -->
 
 ## Verificações manuais e limites
 
@@ -76,6 +90,8 @@ Ambiente local isolado no Edge, bundle compilado, sem credenciais ou gravações
 - Em viewport Mobile de 390 × 844, Currículo abriu o Visualizador e o botão Voltar retornou ao Currículo; URL permaneceu em /. É emulação, não validação em aparelho físico.
 - A coleta não mostrou exceções espontâneas da aplicação. Uma tentativa inicial do próprio script de inspeção usou seletor incorreto e produziu Illegal invocation; o script foi corrigido e o fluxo de rascunho foi repetido com sucesso.
 - As verificações não homologam login remoto, EmailJS, R2, RLS, Gemini ou rankings globais. Testes de módulos/API usam transporte controlado e comprovam regras, não disponibilidade do fornecedor.
+
+<!-- === PENDÊNCIAS EXTERNAS E DAS ETAPAS PROPRIETÁRIAS === -->
 
 ## Pendências externas e das etapas proprietárias
 
@@ -91,6 +107,8 @@ Nenhuma migração ou operação de produção foi executada; nenhuma dependênc
 | WakaTime, Gemini e rankings globais | Homologação dos provedores e segurança nas respectivas etapas; não ativados por esta entrega. |
 | DOOM | Recursos licenciados/engine e integração jogável conforme escopo aprovado, etapa 10. Não foi reclassificado como opcional. |
 | Aceite | Proprietário deve revisar os commits e aprovar TEC-048; publicação/push continuam sob seu controle. |
+
+<!-- === TRADUÇÕES RESERVADAS À FASE FINAL === -->
 
 ## Traduções reservadas à fase final
 
@@ -128,6 +146,8 @@ Mensagens técnicas novas/adaptadas a mapear para apresentação traduzível na 
 - Resposta de autenticação inválida.
 
 Os modelos/capacidades retornam códigos técnicos, não textos de interface novos. Mapear mensagens de INVALID_PRIVATE_REQUEST, INVALID_REQUEST_SCHEDULE, INVALID_REQUEST_RETENTION, INVALID_REQUEST_TRANSITION, INVALID_PUBLIC_EVENT, INVALID_PROJECT, INVALID_PUBLICATION, INVALID_SCORE, INVALID_ACTION_REQUEST/PARAMS, ACTION_CONTEXT_DENIED, ACTION_ACCESS_DENIED, ACTION_UNAVAILABLE, LOCAL_CONTEXT_REQUIRED, HTTP_RESULT_UNKNOWN e demais códigos exportados quando suas telas de domínio forem implementadas. Códigos e IDs estáveis não devem ser traduzidos. A lista é backlog de apresentação, não autorização para editar os JSON nesta etapa.
+
+<!-- === ARQUIVOS CRIADOS, ALTERADOS OU ORGANIZADOS NESTA EXECUÇÃO === -->
 
 ## Arquivos criados, alterados ou organizados nesta execução
 
@@ -188,6 +208,8 @@ Inventário relativo à base 767636f (inclui o trabalho local inicial integrado)
 - tests/core/settings.test.cjs
 - tests/core/shared-models.test.cjs
 - tests/helpers/contract-loader.cjs
+
+<!-- === CONGELAMENTO TÉCNICO === -->
 
 ## Congelamento técnico
 

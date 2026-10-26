@@ -1,6 +1,14 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 01 — PARTE 01.5: SEGURANÇA, SESSÃO E AÇÕES === -->
+
 # Etapa 01 — Parte 01.5: segurança, sessão e ações
 
 Estado: contratos implementados, consumidores conectados e validação técnica concluída. Referências TEC-038–043.
+
+<!-- === ENTREGAS === -->
 
 ## Entregas
 
@@ -11,11 +19,15 @@ Estado: contratos implementados, consumidores conectados e validação técnica 
 - authService: token somente em memória, cancelamento de requisições de autenticação pendentes no logout, timeout/cancelamento do contrato HTTP e compatibilidade com envelopes legados/novos. Um observador com erro não impede expiração ou avisos a outros consumidores.
 - createAdminRequestScope vincula operação à versão da sessão e sinal externo; mudança de sessão cancela o escopo. AdminContent utiliza esse mecanismo e descarta respostas de sessão antiga. Rascunhos não são apagados pelo contrato.
 
+<!-- === VALIDAÇÃO === -->
+
 ## Validação
 
 Lint/build aprovados; 352 testes aprovados. Cobertura de parâmetros maliciosos, contexto negado, confirmação cancelada, argumentos alterados durante confirmação, revalidação de capacidade, projeção de permissões, expiração/logout/login pendente e acesso negativo às APIs existentes.
 
 Edge isolado: pergunta local ao Wally, acionamento da sugestão Projetos pelo catálogo, abertura confirmada e URL permanecendo /. Nenhuma exceção JavaScript na coleta. Não houve autenticação remota real, escrita em banco, ativação Gemini ou R2.
+
+<!-- === LIMITES DA ETAPA === -->
 
 ## Limites da etapa
 

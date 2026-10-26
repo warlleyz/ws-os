@@ -1,6 +1,14 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 01 — PARTE 01.4: MODELOS COMPARTILHADOS === -->
+
 # Etapa 01 — Parte 01.4: modelos compartilhados
 
 Estado: contratos implementados e validados tecnicamente. Referências TEC-029–037. Nenhuma persistência remota nova, tabela de solicitações ou backend R2 foi implementado nesta parte.
+
+<!-- === ENTREGAS === -->
 
 ## Entregas
 
@@ -12,9 +20,13 @@ Estado: contratos implementados e validados tecnicamente. Referências TEC-029�
 - contentService aplica o adaptador de eventos de dia inteiro antes de entregar dados ao Calendário, sem inventar revisão para os dados legados.
 - contractValidation reúne validações de fronteira reaproveitadas por modelos e futuros contratos de ação; datas impossíveis e dados executáveis não são aceitos.
 
+<!-- === VALIDAÇÃO === -->
+
 ## Validação
 
 Lint/build aprovados; 343 testes passaram. Testes específicos cobrem formatos, datas, fuso, conflitos, retenção, anexos, projeções públicas, preferências antigas e reset existente. Código de transição e de reset exercitado diretamente com dados/armazenamento isolados; não há uma nova interface de solicitações a testar nesta etapa.
+
+<!-- === RESPONSABILIDADES PRESERVADAS === -->
 
 ## Responsabilidades preservadas
 

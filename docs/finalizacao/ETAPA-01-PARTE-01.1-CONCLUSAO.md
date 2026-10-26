@@ -1,8 +1,16 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+
+<!-- === WS OS V2 — ETAPA 01 · PARTE 01.1 === -->
 
 # WS OS V2 — Etapa 01 · Parte 01.1
 
 **Status:** Concluída e validada  
 **Escopo:** Navegação e comunicação entre aplicativos
+
+<!-- === IMPLEMENTAÇÕES === -->
 
 ## Implementações
 
@@ -17,6 +25,8 @@
 - Resultados estruturados de abertura.
 - Organização dos arquivos modificados e padronização dos comentários.
 
+<!-- === VALIDAÇÕES === -->
+
 ## Validações
 
 - ESLint: aprovado.
@@ -24,10 +34,14 @@
 - Testes automatizados: aprovados.
 - Testes funcionais no navegador: aprovados pelo responsável.
 
+<!-- === PENDÊNCIAS GERAIS === -->
+
 ## Pendências gerais
 
 - Atualização consolidada dos catálogos de tradução PT-BR/EN na revisão final.
 - Continuação dos contratos compartilhados nas próximas partes da Etapa 01.
+
+<!-- === CONTINUIDADE === -->
 
 ## Continuidade
 
@@ -35,6 +49,8 @@ Próxima parte: **01.2 — Contratos de arquivos e recursos**.
 
 Não iniciar a Parte 01.2 antes da retomada do desenvolvimento.
 
+
+<!-- === AUDITORIA DE CONSOLIDAÇÃO — 19/10/2026 === -->
 
 ## Auditoria de consolidação — 19/10/2026
 

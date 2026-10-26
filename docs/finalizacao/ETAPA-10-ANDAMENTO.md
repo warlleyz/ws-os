@@ -1,8 +1,18 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 10 — JOGOS E RANKINGS === -->
+
 # Etapa 10 — Jogos e rankings
+
+<!-- === ESTADO: BLOCOS TÉCNICOS DOS CINCO JOGOS E INTEGRAÇÃO LOCAL VALIDADOS; ACEITE EXTERNO CONDICIONADO === -->
 
 ## Estado: blocos técnicos dos cinco jogos e integração local validados; aceite externo condicionado
 
 DEC-105/113, DEC-322, DEC-400/401, DEC-541 e DEC-FIN-008 preservadas. Nenhum commit/push, migração, ativação de serviço ou envio real de pontuação. Etapa 11 não iniciada. Alterações locais das etapas anteriores preservadas.
+
+<!-- === BLOCOS CONCLUÍDOS LOCALMENTE === -->
 
 ## Blocos concluídos localmente
 
@@ -16,6 +26,8 @@ DEC-105/113, DEC-322, DEC-400/401, DEC-541 e DEC-FIN-008 preservadas. Nenhum com
 | Paciência | Movimento para base, desfazer e reinício exercitados; ações bloqueadas em pausa; mensagens antigas são limpas em desfazer/reinício; destino inválido informa o erro; movimentos após vitória são impedidos, preservando desfazer. |
 | Rankings | Transporte compartilhado com timeout/cancelamento; projeção pública estrita, apelido Unicode e limites compatíveis com a API; clique duplo em envio bloqueado por referência da requisição; confirmação exige accepted=true; sucesso continua visível após atualizar a lista; tentativa incerta mantém apelido/pontuação originais e exige novo Turnstile para reenvio explícito; rejeição posterior não apaga uma incerteza anterior. |
 
+<!-- === CICLO DE VIDA E LIMITES === -->
+
 ## Ciclo de vida e limites
 
 O registro existente de Jogos usa pauseWhenMinimized=true e o Core transmite executionState=paused. useGamePaused também observa visibilidade do documento; timers/frames são limpos pelos efeitos dos jogos. Nenhum listener global de teclado foi introduzido. Modificadores do sistema não são consumidos pelos tabuleiros de Snake/voo.
@@ -23,6 +35,8 @@ O registro existente de Jogos usa pauseWhenMinimized=true e o Core transmite exe
 Recordes continuam em localStorage, com mesclagem e recuperação entre abas ativas, sem alegar transação distribuída ou sincronização remota. Melhores marcas por menor número de jogadas não aceitam zero como vitória válida.
 
 Rankings continuam restritos a Snake e Flappy e dependem da configuração existente. O banco usa chave por jogo/hash do visitante e só substitui por pontuação maior; reenvios não representam uma fila de eventos. A identidade proporcional baseada no backend não garante unicidade global ou ausência de fraude. O placar produzido pelo browser pode ser adulterado e não foi transformado em resultado confiável por esta tarefa. Moderação permanece no endpoint administrativo existente, com autenticação/seleção da pontuação; o painel correspondente pertence à Etapa 11.
+
+<!-- === VALIDAÇÃO REALIZADA === -->
 
 ## Validação realizada
 
@@ -33,6 +47,8 @@ Rankings continuam restritos a Snake e Flappy e dependem da configuração exist
 - Doze testes novos: handlers dos cinco jogos, dois cenários de Snake, mesclagem/quota/limpeza de recordes, recorde inválido, validação/retry/cancelamento do ranking e índices inválidos do Campo Minado.
 - Teste existente de atualização após envio migrou para o transporte real com apelido válido; preservou as verificações de duas requisições, sinal não cancelado e formulário liberado.
 - Testes locais usam efeitos/relógios/DOM/serviços controlados. Não constituem prova de toque físico, renderização em dispositivos reais ou homologação da escrita remota.
+
+<!-- === ARQUIVOS DA ETAPA === -->
 
 ## Arquivos da etapa
 
@@ -54,6 +70,8 @@ Rankings continuam restritos a Snake e Flappy e dependem da configuração exist
 - docs/backend/CONFIGURACAO.md
 - docs/finalizacao/ETAPA-10-ANDAMENTO.md
 
+<!-- === PENDÊNCIAS PARA ACEITE INTEGRAL === -->
+
 ## Pendências para aceite integral
 
 1. Homologar leitura/envio/reenvio de ranking com migração existente 006, RLS/RPC, D1, PUBLIC_WRITE_HASH_SALT, TURNSTILE_SECRET_KEY, hostname/action public-write, RANKINGS_ENABLED e VITE_RANKINGS_ENABLED. Nenhuma dessas configurações foi alterada. Não há migração nova.
@@ -62,10 +80,14 @@ Rankings continuam restritos a Snake e Flappy e dependem da configuração exist
 4. DOOM: DEC-FIN-008 determina integração jogável com motor/artefatos de licença compatível, carregamento sob demanda e desempenho validado. Recursos/licenças ainda não fornecidos/validados: DOOM permanece não incluído e a Etapa 10 não é declarada 100% concluída.
 5. Traduções abaixo ficam para a fase final. Os dois JSONs permaneceram intactos.
 
+<!-- === TRADUÇÕES ADIADAS === -->
+
 ## Traduções adiadas
 
 - PENDENTE_I18N src/apps/games/GameRankings.jsx :: Nenhuma pontuação publicada.
 - PENDENTE_I18N src/apps/games/GameRankings.jsx :: Resultado do envio não confirmado. Uma nova tentativa enviará o mesmo apelido e pontuação.
+
+<!-- === CONTINUIDADE === -->
 
 ## Continuidade
 

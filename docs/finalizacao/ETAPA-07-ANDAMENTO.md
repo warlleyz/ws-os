@@ -1,6 +1,14 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 07 — CONTATO E SOLICITAÇÕES === -->
+
 # Etapa 07 — Contato e solicitações
 
 Atualizado em 21/10/2026. **Estado: implementação técnica local concluída e validada; envio real e aceite integral dependem da configuração/homologação externa abaixo.** Não declara e-mail recebido, pedido real persistido ou produção aprovada nesta execução.
+
+<!-- === FLUXO ENTREGUE === -->
 
 ## Fluxo entregue
 
@@ -16,6 +24,8 @@ Atualizado em 21/10/2026. **Estado: implementação técnica local concluída e 
 - Rascunho, agendamento preenchido, operação em andamento e resultado incerto acionam o guard existente de fechamento/reload. Desmontagem cancela a espera sem prometer desfazer uma escrita já enviada.
 - Serviço mantém limite local entre novos pedidos, além das proteções reais no Worker. Validação/antispam do navegador não substituem Turnstile, limitação D1 e RLS.
 
+<!-- === COMPATIBILIDADE E ORGANIZAÇÃO === -->
+
 ## Compatibilidade e organização
 
 - Backend, modelos de solicitações e APIs administrativas anteriores preservados. A Administração da Etapa 11 reutilizará /api/admin/requests e backendDomainService; não foi criado um segundo CRUD nem uma tela fora do escopo.
@@ -24,6 +34,8 @@ Atualizado em 21/10/2026. **Estado: implementação técnica local concluída e 
 - CSS restrito ao Contato: organização de campos, legibilidade do recibo, redimensionamento do texto e controles responsivos.
 - Helper de componentes extraído para tests/helpers/app-ui.cjs para compartilhar a infraestrutura dos testes de Contato e aplicativos profissionais, sem duplicá-la.
 - Não foram alteradas credenciais, flags de solicitações, migrações, dependências, configuração remota ou o estado desligado do Wally.
+
+<!-- === VALIDAÇÃO === -->
 
 ## Validação
 
@@ -38,6 +50,8 @@ Atualizado em 21/10/2026. **Estado: implementação técnica local concluída e 
 
 Não foram enviados formulários/e-mails reais nem homologados Turnstile, entrega EmailJS, teclado virtual ou dispositivos físicos nesta execução. Testes controlados não comprovam esses aceites.
 
+<!-- === CONFIGURAÇÃO E HOMOLOGAÇÃO MANUAL === -->
+
 ## Configuração e homologação manual
 
 1. Frontend precisa de VITE_TURNSTILE_SITE_KEY público válido para o hostname autorizado. A presença da chave só habilita o desafio; não comprova que o Worker/banco estejam disponíveis.
@@ -49,6 +63,8 @@ Não foram enviados formulários/e-mails reais nem homologados Turnstile, entreg
 7. Sobre o Sistema ainda possui descrição histórica de solicitações entregues somente por EmailJS; atualizar essa apresentação na Etapa 14 junto da revisão de conteúdo/tradução. Não confundir esse texto com o transporte atual.
 
 Estas ações não foram executadas automaticamente. A etapa está pronta localmente, mas a habilitação/homologação real continua condição explícita para aceite integral.
+
+<!-- === ARQUIVOS DA ETAPA 07 === -->
 
 ## Arquivos da Etapa 07
 
@@ -64,6 +80,8 @@ Estas ações não foram executadas automaticamente. A etapa está pronta localm
 - docs/backend/CONFIGURACAO.md
 - docs/PLANO-FINALIZACAO-POR-ETAPAS.md
 - docs/finalizacao/ETAPA-07-ANDAMENTO.md
+
+<!-- === CONTINUIDADE === -->
 
 ## Continuidade
 

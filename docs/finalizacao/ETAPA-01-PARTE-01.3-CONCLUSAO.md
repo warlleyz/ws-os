@@ -1,6 +1,14 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 01 — PARTE 01.3: APIS, ERROS E ATUALIZAÇÃO DE DADOS === -->
+
 # Etapa 01 — Parte 01.3: APIs, erros e atualização de dados
 
 Estado: implementada e validada tecnicamente. Referências: TEC-022–028. Trabalho local anterior preservado e completado; nenhuma API remota foi ativada.
+
+<!-- === CONTRATOS E INTEGRAÇÃO === -->
 
 ## Contratos e integração
 
@@ -14,9 +22,13 @@ Estado: implementada e validada tecnicamente. Referências: TEC-022–028. Traba
 - Notas, catálogo de Arquivos, Calendário e busca contextual reconsultam as informações pertinentes; mutações administrativas sinalizam invalidação. GitHub/WakaTime utilizam as categorias apropriadas.
 - A superfície existente `{data,source,updatedAt,warning?}` foi preservada e recebe `cacheStatus`/`requiresRevalidation` sem quebrar consumidores.
 
+<!-- === CAUSA E CORREÇÃO DA REGRESSÃO CONHECIDA === -->
+
 ## Causa e correção da regressão conhecida
 
 O harness de `portfolio.test.cjs` removia imports ESM, deixando PUBLIC_CACHE_LIMITS e funções dependentes indefinidos. O loader de contratos agora resolve dependências reais em contextos isolados; não houve cópia de constantes para mascarar a falha de produção. Os dois cenários antes falhos passaram.
+
+<!-- === VALIDAÇÃO === -->
 
 ## Validação
 
@@ -24,6 +36,8 @@ O harness de `portfolio.test.cjs` removia imports ESM, deixando PUBLIC_CACHE_LIM
 - Regressão específica de cache, envelopes, revisões, idempotência, cancelamento e consumidores executada.
 - Edge isolado: dois contextos da mesma origem usando os módulos reais; consulta live, reutilização cache e nova consulta live após BroadcastChannel; um sinal recebido, dado reconsultado e nenhuma exceção JavaScript na coleta. Isto valida o transporte no navegador, não serviços externos.
 - APIs usadas nessa checagem eram locais e explicitamente simuladas. Nenhuma escrita de produção ou migração executada.
+
+<!-- === LIMITES E CONTINUIDADE === -->
 
 ## Limites e continuidade
 

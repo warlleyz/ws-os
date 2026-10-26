@@ -1,6 +1,14 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === BLOCO 6 / FASE A5 — BASE TÉCNICA DE ARQUIVOS === -->
+
 # Bloco 6 / Fase A5 — base técnica de Arquivos
 
 Referência: mestre v0.16.0, DEC-104, DEC-115/116, DEC-393–397, DEC-407 e DEC-539.
+
+<!-- === ESCOPO CONCLUÍDO === -->
 
 ## Escopo concluído
 
@@ -11,6 +19,8 @@ Referência: mestre v0.16.0, DEC-104, DEC-115/116, DEC-393–397, DEC-407 e DEC-
 - Editor: Ctrl+S, revisão transacional, aviso de alteração externa, rascunho preservado em conflitos/exclusão, confirmação para recarregar, proteção no fechamento/reload e durante operações. Salvar cópia usa o destino atual quando disponível; se a pasta não existe ou está na lixeira, usa a raiz pessoal. A cópia não limpa o rascunho original.
 - Visualizador pessoal: texto escapado, imagens com zoom, PDF isolado, download, erros de imagem e liberação de URLs em atualização/desmontagem.
 - Documentos oficiais: contrato url/name mantido, leitura de mesma origem sem credenciais na URL, query ou fragmento; redirects recusados. GET com timeout e leitura limitada por stream, MIME e assinatura PDF verificados, prévia isolada, download alternativo e zoom de imagens. Nenhuma API de escrita oficial foi adicionada.
+
+<!-- === ARQUIVOS DE IMPLEMENTAÇÃO E TESTES === -->
 
 ## Arquivos de implementação e testes
 
@@ -27,6 +37,8 @@ Referência: mestre v0.16.0, DEC-104, DEC-115/116, DEC-393–397, DEC-407 e DEC-
 
 Core, close guards, useLocalFiles, Currículo e Certificados foram inspecionados e preservados. Os contratos existentes continuam sendo fileId para pessoal e url/name para documento público. Certificados pode manter links de navegador como já implementado.
 
+<!-- === EVIDÊNCIAS === -->
+
 ## Evidências
 
 Testes automatizados exercitam modelo, handlers dos componentes e serviço com IndexedDB simulado: concorrência, rollback/quota, notificações, importação, limites, conflitos, recuperação, recursos e integrações.
@@ -34,6 +46,8 @@ Testes automatizados exercitam modelo, handlers dos componentes e serviço com I
 Ensaio adicional com Edge headless, perfil novo e origem localhost isolada, usando o serviço real e IndexedDB real: criação; leitura por segundo contexto; BroadcastChannel; gravações e nomes duplicados concorrentes; renomear/mover/ciclos; PNG produzido por canvas e decodificado; PDF/arquivo inválido; lixeira/restauração/purga; persistência ao recarregar contexto. Oito cenários aprovados. Nenhuma origem habitual ou produção foi acessada.
 
 A validação final usa npm run lint, npm run build e npm run test. Lint e build aprovados; 185 testes aprovados, zero falhas (24 testes adicionais neste bloco). Não houve instalação de dependências.
+
+<!-- === LIMITES E PRÓXIMA ETAPA === -->
 
 ## Limites e próxima etapa
 

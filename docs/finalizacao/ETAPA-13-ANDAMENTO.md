@@ -1,8 +1,18 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 13 — MOBILE E TABLETS === -->
+
 # Etapa 13 — Mobile e tablets
+
+<!-- === ESTADO: CORREÇÕES DE INTEGRAÇÃO VALIDADAS LOCALMENTE; ACEITE EM DISPOSITIVOS PENDENTE === -->
 
 ## Estado: correções de integração validadas localmente; aceite em dispositivos pendente
 
 Decisões DEC-077–088 e DEC-267–301 consultadas. Sem redesign, dependências novas, alterações de tradução, serviços externos, commit ou push. Alterações anteriores preservadas. Wally remoto permanece desativado. Etapa 14 não iniciada.
+
+<!-- === ENTREGA DESTE BLOCO === -->
 
 ## Entrega deste bloco
 
@@ -13,6 +23,8 @@ Decisões DEC-077–088 e DEC-267–301 consultadas. Sem redesign, dependências
 - Instâncias ocultas continuam montadas; jogos ocultos recebem estado pausado. Painéis continuam sobrepostos e exclusivos, sem fechar o aplicativo; Wally continua disponível como aplicativo no Mobile.
 - Preferências Mobile permanecem independentes e sincronizadas pelo mecanismo existente. Transição Desktop/Mobile continua usando requestGuardedTransition, sem mudança de URL ou novo mecanismo de persistência.
 
+<!-- === ARQUIVOS DESTE BLOCO === -->
+
 ## Arquivos deste bloco
 
 - src/shells/mobile/Mobile.jsx
@@ -20,6 +32,8 @@ Decisões DEC-077–088 e DEC-267–301 consultadas. Sem redesign, dependências
 - tests/core/mobile-shell-ui.test.cjs
 - docs/finalizacao/ETAPA-13-ANDAMENTO.md
 - docs/PLANO-FINALIZACAO-POR-ETAPAS.md (referência ao checkpoint)
+
+<!-- === VALIDAÇÃO === -->
 
 ## Validação
 
@@ -29,6 +43,8 @@ Decisões DEC-077–088 e DEC-267–301 consultadas. Sem redesign, dependências
 - Quatro regressões novas executam o componente real com hooks/Core controlados: instância administrativa inacessível, navegação aguardando confirmação, preservação/pausa das instâncias ocultas e remoção da instância sem carregamento permanente.
 - Testes de contratos e transição já existentes continuam passando. Esse ambiente controlado não comprova layout renderizado, toque, teclado virtual ou sessão expirada em serviço real.
 - Nenhum novo texto/chave de tradução introduzido.
+
+<!-- === ACEITE AINDA NECESSÁRIO === -->
 
 ## Aceite ainda necessário
 

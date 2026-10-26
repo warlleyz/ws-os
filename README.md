@@ -1,17 +1,29 @@
+<!-- === WS OS === -->
+
 # WS OS
 
 Portfólio profissional de Warlley Silva, com experiências Desktop e Mobile em React, JavaScript e Vite.
 
-**Estado atual:** 17 aplicativos registrados (16 públicos e Administração protegida), entregas técnicas locais das etapas 01–14 e preparação da Etapa 15. O projeto está em revisão: testes locais não substituem aceite visual, conteúdo final e homologação de serviços. Wally remoto permanece desativado. Nenhuma publicação é executada pelo workflow de qualidade.
+<!-- === ESTADO DO PROJETO === -->
+
+## Estado do projeto
+
+17 entradas de aplicativos: 16 públicas e Administração protegida. Currículo encaminha o documento ao Visualizador. O sistema de demonstrações foi removido; destaques são selecionados por ID na Administração e a ordenação restante continua automática. Wally remoto permanece desativado.
+
+A revisão atual segue as 12 etapas do [documento mestre](docs/WS-OS-V2-MESTRE.md). A Etapa 01 consolidou escopo, referências e pendências; as demais etapas não foram iniciadas nesta revisão. Código existente e testes controlados não representam aceite visual ou homologação de produção.
+
+<!-- === EXECUTAR E VALIDAR === -->
 
 ## Executar e validar
 
-Node.js 24 e npm com package-lock.json versionado. Em instalação nova:
+Node.js 24 e npm, com package-lock.json versionado. Em instalação nova e autorizada:
 
 ```bash
 npm ci
 npm run dev
 ```
+
+Verificações:
 
 ```bash
 npm run lint
@@ -20,19 +32,32 @@ npm run test
 npm run preview
 ```
 
-Dev/preview servem o frontend, sem emular APIs. O backend vigente é o Cloudflare Worker em worker/index.js com assets de dist e configuração em wrangler.jsonc; functions/api contém os handlers reutilizados. Configurar o runtime local e variáveis apenas conforme [documentação do backend](docs/backend/CONFIGURACAO.md). Não usar chaves de produção em testes.
+Dev/preview servem somente o frontend. O backend é o Cloudflare Worker em worker/index.js, com configuração em wrangler.jsonc, assets de dist e handlers em functions/api. Não usar bindings remotos ou segredos de produção em testes. Consultar a [configuração do backend](docs/backend/CONFIGURACAO.md).
 
-## Documentação vigente
+<!-- === BASE DA ETAPA 01 === -->
 
-- [Auditoria e correções finais](docs/finalizacao/AUDITORIA-FINAL.md): requisitos, limpeza recuperável, tradução, dicas e atualização de segurança.
+## Base da Etapa 01
 
-- [Checkpoint final e roteiro de aceite](docs/finalizacao/ETAPA-15-ANDAMENTO.md): matriz histórica dos aplicativos, evidências, bloqueios e publicação manual.
-- [Plano por etapas](docs/PLANO-FINALIZACAO-POR-ETAPAS.md) e [mestre aprovado](docs/planning/WS-OS-V2-MESTRE-v0.16.0.md).
-- [Checkpoints de desenvolvimento](docs/finalizacao/): estado e pendências das entregas; preservar evidências históricas sem tratá-las como homologação atual.
-- [Arquitetura](docs/architecture.md), [contratos](docs/contracts.md), [rotas do Worker](docs/backend/WORKER.md) e [preferências](docs/settings.md).
+Referência de código: 3e6af7d, em 26/10/2026. Lint e build aprovados; 495 de 500 testes aprovados. As cinco falhas preexistentes estão atribuídas às etapas responsáveis no mestre. O build informa chunk FileViewer acima de 500 kB. Não houve homologação de produção nesta etapa documental.
 
-Conteúdo público em src/content/portfolioContent.js. Arquivos pessoais permanecem no IndexedDB do visitante; arquivos oficiais usam Supabase Storage privado mediado pelo Worker. Nunca adicionar credenciais, rascunhos privados ou dados de visitantes ao conteúdo público, public/, testes ou documentação. .env.local e .dev.vars são ignorados pelo Git.
+<!-- === DOCUMENTAÇÃO === -->
 
-Catálogos PT-BR/EN atualizados na auditoria autorizada pelo autor; revisão visual e linguística em contexto ainda pendente. DOOM continua condicionado a motor/artefatos licenciados e aceitos. Serviços externos exigem homologação e autorização próprias; não há garantia de produção baseada apenas nos testes.
+## Documentação
 
-O workflow [Validação](.github/workflows/validacao.yml) instala pelo lockfile e executa lint, build e testes sem segredos nem deploy. Será executado pelo GitHub somente após envio pelo proprietário; sua execução remota ainda não foi validada.
+- [Mestre e acompanhamento único](docs/WS-OS-V2-MESTRE.md): escopo, regras, decisões, 12 etapas e critérios de conclusão.
+- [Arquitetura atual](docs/architecture.md): responsabilidades e limites verificados.
+- [Configuração do backend](docs/backend/CONFIGURACAO.md) e [mapa de rotas](docs/backend/WORKER.md): consulta operacional complementar.
+- [Contratos datados](docs/contracts.md): assinaturas e evolução; conferir os trechos históricos com o código atual.
+- [Remoção das demonstrações](docs/REMOCAO-DEMONSTRACOES.md): decisão e dependência da migração 014.
+
+O inventário completo e o destino de cada documento estão na seção 20 do mestre. Planning, planos antigos e checkpoints permanecem preservados como histórico, sem disputar a referência vigente. Nenhum documento foi excluído ou movido na Etapa 01.
+
+<!-- === DADOS, SEGURANÇA E PUBLICAÇÃO === -->
+
+## Dados, segurança e publicação
+
+Conteúdo público em src/content/portfolioContent.js. Documentos pessoais permanecem no IndexedDB do visitante; oficiais usam Supabase Storage privado mediado pelo Worker. Nunca adicionar credenciais, dados privados ou rascunhos ao conteúdo público, public/, testes ou documentação. Ambientes locais são ignorados pelo Git.
+
+Boot mantém o processador, favicon acompanha tema/destaque e animações das janelas permanecem no escopo. Reiniciar/Desligar ficam fora desta versão. Distribuição do UZDoom depende da rastreabilidade e licenças registradas no mestre.
+
+O workflow [Validação](.github/workflows/validacao.yml) executa lint, build e testes, sem deploy. Sua execução remota não foi conferida nesta etapa. Push, migrações e publicação exigem autorização específica; o commit documental da Etapa 01 não concede essas permissões.

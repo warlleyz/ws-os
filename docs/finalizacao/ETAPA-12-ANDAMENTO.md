@@ -1,8 +1,18 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 12 — DESKTOP, TASKBAR, MENU, PAINÉIS E WIDGETS === -->
+
 # Etapa 12 — Desktop, Taskbar, menu, painéis e widgets
+
+<!-- === ESTADO: BLOCOS TÉCNICOS VALIDADOS LOCALMENTE; ACEITE VISUAL E INTEGRAÇÕES REAIS PENDENTES === -->
 
 ## Estado: blocos técnicos validados localmente; aceite visual e integrações reais pendentes
 
 Planejamento preservado, incluindo DEC-054/057/236 (prévias e ações por instância), exclusividade dos painéis e DEC-FIN-007 (indicadores discretos de eventos no widget Calendário). Nenhum commit/push, migração ou alteração de credencial/configuração. Wally remoto continua desativado. Alterações anteriores preservadas. Etapa 13 não iniciada.
+
+<!-- === BLOCOS EXAMINADOS E CORRIGIDOS === -->
 
 ## Blocos examinados e corrigidos
 
@@ -16,6 +26,8 @@ Planejamento preservado, incluindo DEC-054/057/236 (prévias e ações por inst�
 | Calendário público | Evento com horário recebe data no fuso publicado, inclusive ao atravessar meia-noite em UTC. Projeção explícita conserva apenas campos públicos; fim anterior ao início é rejeitado. Falha dos eventos limpa indicadores não confirmados; fallback em cache informa obsolescência. |
 | Clima | Erro síncrono de geolocalização encerra carregamento com mensagem de permissão; cidade escolhida, cancelamento e cache existentes mantidos. |
 
+<!-- === QUATRO WIDGETS === -->
+
 ## Quatro widgets
 
 - Host passa a própria instância ao componente, mantendo fallback para chamadas antigas e as preferências existentes.
@@ -24,11 +36,15 @@ Planejamento preservado, incluindo DEC-054/057/236 (prévias e ações por inst�
 - Clima: usa unidades/opções da instância; data inválida de previsão não gera erro de renderização; mensagens e atualização existentes mantidas.
 - Dev Insights: contagem de linguagens usa Map; dados antigos de WakaTime não viram fonte principal quando a opção foi desabilitada; avisos de cache do WakaTime são mostrados quando habilitado. Dados continuam reais ou indisponíveis, sem números fictícios.
 
+<!-- === MINIATURAS E PRIVACIDADE === -->
+
 ## Miniaturas e privacidade
 
 TaskbarThumbnail é efêmero, sem persistência, upload, canvas de captura, dependência nova ou polling. Clona somente o conteúdo visível de Sobre Mim, Projetos, Dev Insights, Currículo, Certificados e Sobre o Sistema. Formulários, campos, conteúdo editável, imagens e recursos incorporados são removidos; identificadores e referências navegáveis/eventos são retirados; controles restantes viram texto estático; SVG fica inacessível/interativamente inerte e é removido ao fechar a prévia.
 
 Para Administração, Terminal, Notas, Contato, Arquivos/Editor/Visualizador, Wally, janelas minimizadas e conteúdo indisponível, mantém-se o ícone com título/estado/ações. Não há promessa de snapshot contínuo ou reprodução pixel a pixel; a conferência real de renderização/compatibilidade faz parte do aceite visual pendente. Não se introduziu captura de dados pessoais para miniaturas.
+
+<!-- === VALIDAÇÃO REALIZADA === -->
 
 ## Validação realizada
 
@@ -39,6 +55,8 @@ Para Administração, Terminal, Notas, Contato, Arquivos/Editor/Visualizador, Wa
 - Treze regressões novas: evento no fuso correto/projeção pública; indicador/navegação do calendário; fuso e timer do relógio; fuso salvo inválido; unidades/data inválida do clima; WakaTime desabilitado e nomes especiais; sincronização/quota de favoritos; erro síncrono de localização; Escape/composição; falha remota com resultado local; restauração/limpeza de foco; bloqueio de miniatura protegida e remoção de snapshot público.
 - Testes de grade/atalhos, multiwidget, Taskbar, serviços e contratos anteriores continuam passando. O helper de UI ganhou suporte às funções encapsuladas em memo e useLayoutEffect; o componente interno real é executado sem alterar a implementação para os testes.
 - DOM/hooks, recursos e rede controlados. Não houve acesso a provedores remotos, permissão real de localização ou inspeção visual em navegador/dispositivo físico nesta entrega.
+
+<!-- === ARQUIVOS DA ETAPA === -->
 
 ## Arquivos da etapa
 
@@ -65,6 +83,8 @@ Para Administração, Terminal, Notas, Contato, Arquivos/Editor/Visualizador, Wa
 - docs/PLANO-FINALIZACAO-POR-ETAPAS.md
 - docs/finalizacao/ETAPA-12-ANDAMENTO.md
 
+<!-- === PENDÊNCIAS DE ACEITE INTEGRAL === -->
+
 ## Pendências de aceite integral
 
 1. Conferência visual real do Desktop nos dois temas/idiomas, densidade, rolagem, menus contextuais, prévias SVG, overlays, foco e combinações de janelas/tamanhos. Teste controlado não foi apresentado como essa homologação.
@@ -73,9 +93,13 @@ Para Administração, Terminal, Notas, Contato, Arquivos/Editor/Visualizador, Wa
 4. Conferir GitHub/WakaTime reais quando configurados, fontes/cache e falhas de cota, sem inventar respostas.
 5. Revisão linguística final; JSONs pt-BR/en não foram editados. Etapa 12 não é declarada 100% aceita enquanto faltar esse aceite.
 
+<!-- === TRADUÇÕES ADIADAS === -->
+
 ## Traduções adiadas
 
 - PENDENTE_I18N src/features/search/GlobalSearchResults.jsx :: Não foi possível atualizar a busca remota. Resultados locais continuam disponíveis.
+
+<!-- === CONTINUIDADE === -->
 
 ## Continuidade
 

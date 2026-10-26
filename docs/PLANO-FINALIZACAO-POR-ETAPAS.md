@@ -1,3 +1,9 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === WS OS V2 — PLANO DE CONCLUSÃO POR PARTES ENCERRÁVEIS === -->
+
 # WS OS V2 — plano de conclusão por partes encerráveis
 
 > Escopo vigente em 25/10/2026: catálogo com 17 aplicativos, sem demonstrações interativas de projetos.
@@ -6,6 +12,8 @@
 Referência de execução: **Execução em 20/10/2026:** implementação local consolidada, testes automatizados aprovados e homologação real dos arquivos oficiais concluída com Supabase Storage. Rankings públicos e D1 local validados. Permanecem pendências de homologação externa, segurança operacional e produção. Consultar [Entregas, migrações, testes e homologação](finalizacao/ETAPAS-03-04-ENTREGA.md).
 
 
+<!-- === 1. OBJETIVO E REGRA DE EXECUÇÃO === -->
+
 ## 1. Objetivo e regra de execução
 
 Finalizar uma parte com funcionalidade, aparência, responsividade, idiomas, segurança, testes e organização dos seus arquivos no mesmo ciclo. Evitar etapas globais tardias de redesign, tradução ou refatoração que obriguem a reabrir todos os aplicativos.
@@ -13,6 +21,8 @@ Finalizar uma parte com funcionalidade, aparência, responsividade, idiomas, seg
 Este documento é planejamento, não uma declaração de implementação ou nova autorização para produção. Não modifica o escopo aprovado, não escolhe novos provedores sem necessidade e não transforma sugestões opcionais em requisitos obrigatórios.
 
 Não é possível garantir ausência absoluta de retornos: integrações podem revelar regressões. A meta é evitar retornos previsíveis por dependências incompletas. Ao final, a integração geral deve corrigir defeitos, não terminar funcionalidades deixadas para trás.
+
+<!-- ----- O QUE SIGNIFICA UMA PARTE ENCERRADA ----- -->
 
 ### O que significa uma parte encerrada
 
@@ -25,6 +35,8 @@ Não é possível garantir ausência absoluta de retornos: integrações podem r
 7. Testes pertinentes e verificações manuais executados com evidências. Lint, build e suite completa passam antes de concluir o bloco.
 8. Documentação de contratos/pendências atualizada e commit local descritivo em português, sem escopo.
 
+<!-- ----- ESTADOS PERMITIDOS NO ACOMPANHAMENTO ----- -->
+
 ### Estados permitidos no acompanhamento
 
 - **A fazer:** nenhum aceite concluído.
@@ -32,6 +44,8 @@ Não é possível garantir ausência absoluta de retornos: integrações podem r
 - **Implementado, bloqueado externamente:** código pronto, mas falta configuração, serviço ou homologação. Não chamar de 100%.
 - **Concluído:** implementação e critérios de aceite comprovados.
 - **Condicionado:** requisito depende de decisão, licença ou autorização documentada. Não ocultar como concluído nem implementar uma alternativa inventada.
+
+<!-- === 2. COMO EVITAR REORGANIZAÇÃO REPETIDA === -->
 
 ## 2. Como evitar reorganização repetida
 
@@ -47,6 +61,8 @@ Não é possível garantir ausência absoluta de retornos: integrações podem r
 - Arquivos legitimamente incrementais: catálogos de tradução, testes, documentação de andamento e registro de rotas. Alteração aditiva nesses arquivos não significa reabrir sua arquitetura.
 - Mudança de contrato compartilhado após seu aceite exige registrar consumidores afetados e executar a regressão deles. Não ajustar contrato implicitamente dentro de um app.
 
+<!-- ----- CHECKLIST DE ORGANIZAÇÃO USADO DENTRO DE CADA ETAPA ----- -->
+
 ### Checklist de organização usado dentro de cada etapa
 
 - [ ] Listar os arquivos realmente alterados e seus consumidores.
@@ -56,6 +72,8 @@ Não é possível garantir ausência absoluta de retornos: integrações podem r
 - [ ] Conferir CSS, nomes, imports, formatação e traduções antes do commit.
 - [ ] Não misturar arquivos temporários, configurações locais, segredos e assets sem uso.
 - [ ] Registrar teste executado, resultado e limite da evidência.
+
+<!-- === 3. ORDEM OBRIGATÓRIA POR DEPENDÊNCIAS === -->
 
 ## 3. Ordem obrigatória por dependências
 
@@ -80,6 +98,8 @@ Não é possível garantir ausência absoluta de retornos: integrações podem r
 
 A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes de cada app, sem esperar as etapas 12/13. Se um defeito compartilhado impedir o aceite de um app, corrigir a base antes de continuar; não acumular uma lista de apps falsamente concluídos.
 
+<!-- === ETAPA 00 — FECHAR DECISÕES, ESCOPO E INSUMOS === -->
+
 ## Etapa 00 — Fechar decisões, escopo e insumos
 
 **Arquivos:** `docs/planning/WS-OS-V2-MESTRE-v0.16.0.md` como referência; `docs/PENDENCIAS-FINALIZACAO.md`; `docs/contracts.md`; `src/content/portfolioContent.js`; assets públicos fornecidos.
@@ -96,6 +116,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Aceite:** não restam decisões de produto essenciais sendo empurradas para dentro da implementação de outro bloco. Dependência externa sem solução fica identificada com responsável/condição, não com uma data fictícia.
 
 **Commit sugerido:** `docs: consolida escopo e criterios de finalizacao`
+
+<!-- === ETAPA 01 — ESTABILIZAR CONTRATOS E MODELOS COMPARTILHADOS === -->
 
 ## Etapa 01 — Estabilizar contratos e modelos compartilhados
 
@@ -118,6 +140,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Commit sugerido:** `docs: estabiliza contratos entre aplicativos e servicos`
 
+<!-- === ETAPA 02 — ENCERRAR DESIGN SYSTEM E PRIMITIVAS COMPARTILHADAS === -->
+
 ## Etapa 02 — Encerrar Design System e primitivas compartilhadas
 
 **Arquivos:** `src/styles/global.css`, `system.css`, `apps.css`, `themes/*`; componentes realmente compartilhados em `src/shared/components/`; `tests/core/accessibility.test.cjs` e cobertura pertinente.
@@ -137,6 +161,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Congelar:** tokens, padrões e API dos componentes compartilhados. Ajustes visuais posteriores devem ser locais ao app sempre que possível.
 
 **Commit sugerido:** `style: finaliza fundamentos visuais e controles compartilhados`
+
+<!-- === ETAPA 03 — ENCERRAR BACKEND, POLÍTICAS E SERVIÇOS === -->
 
 ## Etapa 03 — Encerrar backend, políticas e serviços
 
@@ -166,6 +192,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Commits sugeridos por subbloco:** `fix: consolida autorizacao e contratos das apis`; `feat: implementa solicitacoes privadas e anexos`; `test: homologa servicos e politicas de acesso`. Usar somente os correspondentes ao trabalho efetivamente realizado.
 
+<!-- === ETAPA 04 — ENCERRAR CORE, JANELAS E MECANISMOS DE PREFERÊNCIAS === -->
+
 ## Etapa 04 — Encerrar Core, janelas e mecanismos de preferências
 
 **Execução em 20/10/2026:** correções e validação local concluídas para revisão; aceite físico/visual e limitações descritos na [entrega](finalizacao/ETAPAS-03-04-ENTREGA.md).
@@ -188,6 +216,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Congelar:** Core, geometria, contrato de fechamento e mecanismos das preferências. A interface de Configurações será fechada na etapa 14.
 
 **Commit sugerido:** `fix: estabiliza core janelas e persistencia de preferencias`
+
+<!-- === ETAPA 05 — ENCERRAR ARQUIVOS, VISUALIZADOR E EDITOR JUNTOS === -->
 
 ## Etapa 05 — Encerrar Arquivos, Visualizador e Editor juntos
 
@@ -212,6 +242,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Commit sugerido:** `feat: finaliza experiencia e integridade dos arquivos`
 
+<!-- === ETAPA 06 — ENCERRAR APLICATIVOS PROFISSIONAIS E DEMOS === -->
+
 ## Etapa 06 — Encerrar aplicativos profissionais e Demos
 
 **Execução em 21/10/2026:** implementação técnica local concluída e validada, 417 testes aprovados. Compartilhamento e integrações finalizados; conteúdo editorial/demos ainda não fornecidos, traduções finais e homologações reais permanecem explicitamente condicionados. [Entrega, limites e retomada na Etapa 07](finalizacao/ETAPA-06-ANDAMENTO.md).
@@ -234,6 +266,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Commits:** um por app ou conjunto pequeno inseparável, por exemplo `feat: finaliza catálogo de projetos`.
 
+<!-- === ETAPA 07 — ENCERRAR CONTATO E SOLICITAÇÕES === -->
+
 ## Etapa 07 — Encerrar Contato e solicitações
 
 **Execução em 21/10/2026:** implementação local concluída e validada, 422 testes aprovados. Persistência privada, Turnstile, idempotência e guard do formulário integrados; entrega real/ambiente externo ainda condicionado. [Entrega, configuração manual e retomada](finalizacao/ETAPA-07-ANDAMENTO.md).
@@ -252,6 +286,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Congelar:** formulário e fluxo. Administração consumirá a mesma API, sem exigir mudanças na captura dos dados.
 
 **Commit sugerido:** `feat: finaliza contato e solicitacoes de agendamento`
+
+<!-- === ETAPA 08 — ENCERRAR NOTAS E GERENCIAMENTO EDITORIAL === -->
 
 ## Etapa 08 — Encerrar Notas e gerenciamento editorial
 
@@ -273,6 +309,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Commit sugerido:** `feat: finaliza notas anexos e gerenciamento editorial`
 
+<!-- === ETAPA 09 — ENCERRAR CALCULADORA === -->
+
 ## Etapa 09 — Encerrar Calculadora
 
 **Checkpoint:** implementação técnica validada localmente; lint/build aprovados e 438 testes passando. Aceite visual/de toque nos dois shells permanece pendente. Detalhes em `docs/finalizacao/ETAPA-09-ANDAMENTO.md`. Etapa 10 não iniciada; nenhum commit/push realizado.
@@ -287,6 +325,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Aceite:** operações representativas e inválidas corretas e uso real em Desktop/Mobile.
 
 **Commit sugerido:** `fix: finaliza calculadora e controles responsivos`
+
+<!-- === ETAPA 10 — ENCERRAR JOGOS E RANKINGS === -->
 
 ## Etapa 10 — Encerrar Jogos e rankings
 
@@ -305,6 +345,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Aceite:** cinco jogos exercitados individualmente, recordes recuperáveis e ranking real homologado quando habilitado. Não confundir testes do modelo com todos os controles testados.
 
 **Commits:** por jogo quando houver trabalho relevante; um específico para integração final dos rankings.
+
+<!-- === ETAPA 11 — ENCERRAR TERMINAL, WALLY E ADMINISTRAÇÃO === -->
 
 ## Etapa 11 — Encerrar Terminal, Wally e Administração
 
@@ -330,6 +372,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Commits:** separar Terminal, Wally e Administração quando forem entregas independentes.
 
+<!-- === ETAPA 12 — ENCERRAR DESKTOP, TASKBAR, MENU, PAINÉIS E WIDGETS === -->
+
 ## Etapa 12 — Encerrar Desktop, Taskbar, menu, painéis e widgets
 
 **Checkpoint:** blocos técnicos locais validados, lint/build aprovados e 475 testes passando. Conferência visual real, provedores externos e traduções finais continuam pendentes; limites das miniaturas registrados em `docs/finalizacao/ETAPA-12-ANDAMENTO.md`. Etapa 13 não iniciada; nenhum commit/push ou operação remota.
@@ -350,6 +394,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Commits:** separar Desktop, Taskbar/menu e painéis/widgets em subblocos verificáveis.
 
+<!-- === ETAPA 13 — ENCERRAR SHELL MOBILE E TABLETS === -->
+
 ## Etapa 13 — Encerrar shell Mobile e tablets
 
 **Checkpoint local:** ver [ETAPA-13-ANDAMENTO.md](finalizacao/ETAPA-13-ANDAMENTO.md). Correções de integração validadas; aceite visual e em dispositivos reais pendente.
@@ -368,6 +414,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Commit sugerido:** `feat: finaliza navegacao mobile e experiencia em tablets`
 
+<!-- === ETAPA 14 — ENCERRAR CONFIGURAÇÕES E APRESENTAÇÃO DO SISTEMA === -->
+
 ## Etapa 14 — Encerrar Configurações e apresentação do sistema
 
 **Checkpoint local:** ver [ETAPA-14-ANDAMENTO.md](finalizacao/ETAPA-14-ANDAMENTO.md). Correções técnicas validadas; walkthrough visual e aceite editorial pendentes.
@@ -385,6 +433,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 **Aceite:** walkthrough de todos os controles, persistência após reload, consumidor reagindo e reset seguro. Não mudar a paleta global ou o schema de preferências nesta etapa por escolha estética tardia.
 
 **Commits:** um para Configurações; outro para apresentação/informações do sistema se houver mudanças relevantes independentes.
+
+<!-- === ETAPA 15 — INTEGRAÇÃO FINAL E PREPARAÇÃO DE PUBLICAÇÃO === -->
 
 ## Etapa 15 — Integração final e preparação de publicação
 
@@ -407,6 +457,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 
 **Commit sugerido:** `test: consolida validacao final e preparacao de publicacao`
 
+<!-- === 4. MATRIZ DE REVISÃO UTILIZADA EM CADA PARTE === -->
+
 ## 4. Matriz de revisão utilizada em cada parte
 
 | Eixo | Verificação mínima |
@@ -422,6 +474,8 @@ A ordem é de fechamento. Usar o Desktop e o Mobile existentes durante os testes
 | Evidência | Testes executados, captura/checagem visual e limitações registradas |
 
 Não é necessário testar toda combinação cartesiana em cada edição. Cobrir os fluxos de maior risco, as combinações visuais relevantes e os cenários que mudaram; repetir quando houver mudança ou regressão.
+
+<!-- === 5. MODELO DE REGISTRO AO ENCERRAR UMA ETAPA === -->
 
 ## 5. Modelo de registro ao encerrar uma etapa
 
@@ -442,6 +496,8 @@ Commit(s):
 Motivo previsto para reabrir: somente defeito/regressão ou mudança de escopo aprovada
 ```
 
+<!-- === 6. CRITÉRIO DE 100% DO PROJETO === -->
+
 ## 6. Critério de 100% do projeto
 
 Não usar percentual calculado por número de arquivos, componentes ou testes. Considerar conclusão integral somente quando as etapas obrigatórias tiverem aceite, o conteúdo necessário estiver fornecido, as integrações obrigatórias estiverem homologadas e não houver lacunas funcionais/visuais conhecidas no escopo aprovado.
@@ -450,6 +506,8 @@ Os 202 testes do estado de referência são uma base de regressão, não um cert
 
 **Primeira ação prática:** executar as etapas 00 e 01 antes de reorganizar mais arquivos. Depois fechar o Design System e os serviços compartilhados, e só então encerrar cada pasta de aplicativo na sequência definida.
 
+
+<!-- === AUDITORIA POSTERIOR AUTORIZADA === -->
 
 ## Auditoria posterior autorizada
 

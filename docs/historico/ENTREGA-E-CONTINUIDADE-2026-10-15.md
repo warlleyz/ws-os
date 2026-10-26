@@ -1,6 +1,14 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === WS OS — ENTREGA FUNCIONAL E CONTINUIDADE === -->
+
 # WS OS — entrega funcional e continuidade
 
 **Data:** 15/10/2026. **Repositório:** `warlleyz/ws-os`. **Cópia de trabalho:** `C:\Projetos\ws-os`, branch `main`.
+
+<!-- === 1. SITUAÇÃO REAL === -->
 
 ## 1. Situação real
 
@@ -12,6 +20,8 @@ Desktop, Taskbar, janelas, Mobile, preferências e seus dados anteriores foram p
 
 Nenhum push, deploy ou criação de recursos externos foi executado. Os commits estão na cópia local. Não foi usado crédito/restaurador de limite nem feita promessa sobre duração da cota.
 
+<!-- === 2. REFERÊNCIAS E PRECEDÊNCIA === -->
+
 ## 2. Referências e precedência
 
 1. Decisões de produto: `docs/planning/WS-OS-V2-MESTRE-v0.16.0.md`.
@@ -21,6 +31,8 @@ Nenhum push, deploy ou criação de recursos externos foi executado. Os commits 
 5. Contratos do Core: `docs/contracts.md`, com atualização de fechamento e catálogo.
 
 Documentos antigos com diagnóstico de 14/10 descrevem uma fotografia anterior; não repetir suas pendências como se nenhuma etapa posterior tivesse sido executada. O mestre é especificação, não prova de implementação. A autorização posterior do usuário permitiu as implementações e commits atuais.
+
+<!-- === 3. COMMITS DESTA EXECUÇÃO === -->
 
 ## 3. Commits desta execução
 
@@ -37,6 +49,8 @@ Base inicial: `7bb8a15` (`feat: concluir configuracoes wallpapers e preferencias
 | `5928533` | Notas e preparação de leitura pública WakaTime/Supabase             |               103 |
 
 O commit de fechamento contém também a documentação atualizada, retorno interno de Notas no Mobile e regras para ignorar segredos locais. Consultar `git log` para seu hash; não inserir o próprio hash dentro do arquivo que o gera.
+
+<!-- === 4. ARQUITETURA ATUAL === -->
 
 ## 4. Arquitetura atual
 
@@ -59,6 +73,8 @@ Apps abrem outros apps pelo Core. Não acessam DOM das janelas para comandar out
 
 O Core transmite `executionState`; apenas consumidores que o usam efetivamente param seus timers. Jogos agora consome pausa por minimização/ocultação, e o Mobile respeita a opção de pausa. Fechar desmonta o app e executa cleanups. Reload não restaura janelas ou rascunhos não salvos.
 
+<!-- ----- MÓDULOS AINDA RESERVADOS ----- -->
+
 ### Módulos ainda reservados
 
 - `src/apps/administration/Administration.jsx`: administração futura.
@@ -67,6 +83,8 @@ O Core transmite `executionState`; apenas consumidores que o usam efetivamente p
 - `src/features/wally/wallyKnowledge.js`: reserva histórica; o fallback ativo usa `src/services/wallyService.js`.
 
 Não importar arquivos reservados só para eliminar avisos ou preencher a árvore. Os dois últimos caminhos precisam de decisão de consolidação quando seu domínio for ampliado, sem duplicar implementações ativas.
+
+<!-- === 5. MATRIZ DOS APLICATIVOS E ADERÊNCIA FUNCIONAL === -->
 
 ## 5. Matriz dos aplicativos e aderência funcional
 
@@ -93,6 +111,8 @@ Não importar arquivos reservados só para eliminar avisos ou preencher a árvor
 
 Correspondência principal com o mestre: A2/DEC-383–387, A3/388–389, Notas/390–391, Calculadora/392, Arquivos/393–397, Configurações/398–399, Jogos/400–401, Terminal/402–403, Wally/404–405, Administração/406 e integração/estados/407–410. O restante do mestre continua exigindo critérios de qualidade e operação, não apenas componentes renderizados.
 
+<!-- === 6. SHELLS E DESIGN SYSTEM === -->
+
 ## 6. Shells e Design System
 
 - Desktop e Taskbar mantêm os avanços R1–R4: instâncias/foco, prévias, painéis exclusivos, organização e persistência. Não foi feita uma segunda reorganização estrutural.
@@ -106,6 +126,8 @@ Correspondência principal com o mestre: A2/DEC-383–387, A3/388–389, Notas/3
 - Rótulos do Desktop receberam fundo/contraste independente do wallpaper, incluindo tema claro sobre imagem escura.
 
 **Performance:** smokes de janelas e pausas não comprovam que o travamento antigo nas bordas físicas do monitor foi resolvido. Repetir resize nativo em dev/preview, DevTools fechado, com efeitos normais e baixo custo. Comparar novo trace com o arquivo original `C:\Users\warll\Downloads\Trace-20261014T195941.json.gz` se continuar disponível. Não atribuir a causa ao relógio/atalhos sem medir.
+
+<!-- === 7. COMO PREENCHER O CONTEÚDO SEM ALTERAR A ESTRUTURA === -->
 
 ## 7. Como preencher o conteúdo sem alterar a estrutura
 
@@ -134,6 +156,8 @@ Os itens locais de Projetos podem complementar repositórios: a URL de repositó
 
 Uma publicação local marcada como draft pode ser filtrada na interface, mas continua presente no bundle se cadastrada no código. **Rascunho privado pertence ao backend com autorização, nunca ao array local.**
 
+<!-- === 8. DADOS E PERSISTÊNCIA === -->
+
 ## 8. Dados e persistência
 
 | Dado                           | Armazenamento / política                                                                                    |
@@ -152,6 +176,8 @@ Uma publicação local marcada como draft pode ser filtrada na interface, mas co
 | Janelas/notificações/rascunhos | Sessão; não restaura após reload                                                                            |
 
 Configurações restaura apenas preferências previstas. Não apaga imagem pessoal, documentos, recordes, histórico da calculadora, favoritos ou posições dos atalhos. Pode restaurar visibilidade/tamanho dos widgets preservando posição. Limpeza de dados do navegador ou mudança de origem pode perder acesso a dados locais; backup/exportação integral ainda não existe.
+
+<!-- === 9. INTEGRAÇÕES, SEGURANÇA E LIMITES === -->
 
 ## 9. Integrações, segurança e limites
 
@@ -174,7 +200,11 @@ WakaTime usa Basic Auth apenas no servidor, timeout e whitelist de resposta sem 
 
 Demos têm sandbox sem `allow-same-origin`, sem popups e lista explícita de origens. Texto/HTML de arquivos e publicações é exibido como texto escapado, não executado. Administração futura não pode acessar arquivos pessoais do visitante.
 
+<!-- === 10. VALIDAÇÕES REALIZADAS E LIMITES === -->
+
 ## 10. Validações realizadas e limites
+
+<!-- ----- AUTOMATIZAÇÃO ----- -->
 
 ### Automatização
 
@@ -183,6 +213,8 @@ Demos têm sandbox sem `allow-same-origin`, sem popups e lista explícita de ori
 - Cobertura inclui contratos/modelos, cache/cancelamento, parser, envio simulado, guards, revisões/lixeira, regras dos jogos, Notas e respostas dos endpoints.
 - Sem dependências novas. Build não compila/executa Pages Functions; os testes exercitam seus handlers com Requests/Responses e fetch simulado.
 - Cada commit funcional foi verificado contra o conteúdo da cópia de trabalho, com exclusão explícita das três alterações locais protegidas.
+
+<!-- ----- NAVEGADOR ----- -->
 
 ### Navegador
 
@@ -199,7 +231,11 @@ Origem isolada `http://127.0.0.1:5189`, sem limpar dados da origem habitual do u
 
 Os smokes não substituem partidas completas, leitor de tela, toque físico, zoom nativo, todos os formatos de arquivos, quota realmente esgotada, envio real de e-mail, RLS em banco, autenticação ou benchmark de performance. Não declarar WCAG AA/Lighthouse-meta/resize resolvido sem suas evidências.
 
+<!-- === 11. PLANO RESTANTE, EM ORDEM DE EXECUÇÃO === -->
+
 ## 11. Plano restante, em ordem de execução
+
+<!-- ----- P0 — REVISÃO LOCAL E REGRESSÕES ANTES DE AMPLIAR ESCOPO ----- -->
 
 ### P0 — revisão local e regressões antes de ampliar escopo
 
@@ -207,6 +243,8 @@ Os smokes não substituem partidas completas, leitor de tela, toque físico, zoo
 2. Reproduzir o travamento de resize nas bordas físicas, comparar efeitos normais/baixo custo e novo trace; corrigir apenas com evidência.
 3. Exercitar dados pessoais reais com backup: textos, múltiplas abas, lixeira, upload válido/inválido, reset e reload. Não testar purga em arquivos importantes.
 4. Rodar lint/build/testes; conferir Desktop/Mobile em janelas pequenas e teclado virtual. Corrigir bugs observados antes de marcar aceite.
+
+<!-- ----- P1 — CONTEÚDO E SERVIÇOS DE LEITURA/ENVIO ----- -->
 
 ### P1 — conteúdo e serviços de leitura/envio
 
@@ -216,6 +254,8 @@ Os smokes não substituem partidas completas, leitor de tela, toque físico, zoo
 4. Configurar Pages Functions/WakaTime e medir resposta dos três períodos; revisar exposição pública dos agregados.
 5. Revisar/aplicar SQL de Notas no ambiente de teste, testar leitura anon positiva/negativa e depois ligar endpoint. Não usar dados privados no frontend.
 
+<!-- ----- P2 — AUTENTICAÇÃO E ADMINISTRAÇÃO ----- -->
+
 ### P2 — autenticação e Administração
 
 1. Definir provedor/configuração Supabase Auth e provisionamento de administrador; não criar cadastro público administrativo.
@@ -224,6 +264,8 @@ Os smokes não substituem partidas completas, leitor de tela, toque físico, zoo
 4. Adicionar testes negativos: visitante, usuário sem papel, sessão expirada, acesso por URL/chamada direta e tentativa de leitura/escrita indevida.
 5. Conectar login restrito do Terminal ao fluxo, sem interpretar comandos de sistema ou persistir senha/histórico sensível.
 
+<!-- ----- P3 — DADOS INTERATIVOS E ASSISTENTE REMOTO ----- -->
+
 ### P3 — dados interativos e assistente remoto
 
 1. Curtidas anônimas: idempotência no servidor, limite/antiabuso e política de privacidade; não confiar em contador local ou ID manipulável.
@@ -231,6 +273,8 @@ Os smokes não substituem partidas completas, leitor de tela, toque físico, zoo
 3. Gemini: segredo no backend, limite/cotas, contexto público curado, lista de ferramentas permitidas e validação de parâmetros; fallback local em falha.
 4. Administração e IA nunca recebem banco de arquivos pessoais do navegador. Não enviar conversas remotamente sem tornar o comportamento claro ao visitante.
 5. Decidir DOOM com artefatos/licença autorizados e fallback; não baixar/distribuir WAD comercial.
+
+<!-- ----- P4 — CRITÉRIOS RESTANTES DO MESTRE E LANÇAMENTO ----- -->
 
 ### P4 — critérios restantes do mestre e lançamento
 
@@ -241,6 +285,8 @@ Os smokes não substituem partidas completas, leitor de tela, toque físico, zoo
 5. Medir performance dev/preview com várias janelas e jogos pausados; acompanhar custo de fontes remotas e comportamento offline.
 6. Revisar segurança de produção, cabeçalhos/CSP compatíveis, limites, observabilidade sem dados privados, erros e custos; testar preview das Functions.
 7. Configurar pipeline/CI de lint/build/testes e revisão de deploy. Confirmar domínio/HTTPS/roteamento/rollback e conteúdo final. Só então publicar com autorização específica.
+
+<!-- === 12. GIT E PRESERVAÇÃO PARA O PRÓXIMO CHAT === -->
 
 ## 12. Git e preservação para o próximo chat
 
@@ -258,6 +304,8 @@ O ambiente testado contém essas três alterações; o checkout apenas dos commi
 
 Não executar reset/clean, apagar IndexedDB/localStorage, aplicar stash, trocar branch ou sobrescrever arquivos locais sem examinar o estado atual. Não há necessidade de reiniciar o projeto.
 
+<!-- === 13. COMANDOS DE CONTINUIDADE === -->
+
 ## 13. Comandos de continuidade
 
 Executar em `C:\Projetos\ws-os`:
@@ -274,9 +322,13 @@ npm run dev
 
 `npm run preview` testa o frontend produzido pelo build. Vite dev/preview não executa Pages Functions. Configuração e ensaio do backend seguem o guia separado. Dependências já estão instaladas; esta entrega não precisou de reinstalação.
 
+<!-- === 14. PROMPT PARA RETOMAR EM OUTRO CHAT === -->
+
 ## 14. Prompt para retomar em outro chat
 
 > Continue o WS OS em C:\Projetos\ws-os. Leia primeiro docs/ENTREGA-E-CONTINUIDADE-2026-10-15.md, docs/PROGRESSO-CONCLUSAO.md e docs/planning/WS-OS-V2-MESTRE-v0.16.0.md. Confira Git, commits e stash antes de editar. Preserve as três modificações locais documentadas e o stash R3.3; não aplique nem descarte automaticamente. Há 17 componentes de apps integrados, mas Administração/auth, Gemini, curtidas, rankings e configurações/aceites externos continuam pendentes. Não refaça o projeto, não invente conteúdo ou métricas e não confunda endpoint preparado com integração de produção. Use o plano P0–P4 deste documento, valide cada bloco com lint/build/testes e evidências pertinentes. Mantenha dados pessoais locais. Antes de começar, informe o próximo bloco concreto e as dependências que de fato exigem minha configuração. Não faça push/deploy sem autorização.
+
+<!-- === CONFERÊNCIA FINAL DO PREVIEW DE PRODUÇÃO === -->
 
 ## Conferência final do preview de produção
 

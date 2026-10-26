@@ -1,3 +1,9 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === WS OS V2 — ETAPA 02: DECISÕES TÉCNICAS E PLANEJAMENTO DE IMPLEMENTAÇÃO === -->
+
 # WS OS V2 — Etapa 02: Decisões técnicas e planejamento de implementação
 
 **Arquivo de destino no repositório:** `docs/finalizacao/ETAPA-02-DECISOES-TECNICAS.md`  
@@ -10,6 +16,8 @@
 > Este documento registra decisões aprovadas e critérios de execução. Sua entrega não constitui aceite final do planejamento nem autorização para iniciar implementação, fazer commits ou publicar alterações.
 
 ---
+
+<!-- === 1. OBJETIVO, ESCOPO E PRINCÍPIOS === -->
 
 ## 1. Objetivo, escopo e princípios
 
@@ -29,9 +37,13 @@ Princípios obrigatórios:
 
 ---
 
+<!-- === 2. REGISTRO INTEGRAL DAS DECISÕES APROVADAS === -->
+
 ## 2. Registro integral das decisões aprovadas
 
 As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64 C substitui a decisão anterior D02-64 B**; D02-65 B foi aprovada posteriormente.
+
+<!-- ----- 2.1. BLOCO 02-A — IDENTIDADE VISUAL E TEMAS ----- -->
 
 ### 2.1. Bloco 02-A — Identidade visual e temas
 
@@ -44,6 +56,8 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 | D02-05 | A | Três wallpapers oficiais por tema, com escolhas preservadas. |
 | D02-06 | B | Cursores personalizados por padrão, com opção de retornar aos nativos. |
 
+<!-- ----- 2.2. BLOCO 02-B — TIPOGRAFIA, ESPAÇAMENTO E CONTROLES ----- -->
+
 ### 2.2. Bloco 02-B — Tipografia, espaçamento e controles
 
 | ID | Alternativa | Deliberação |
@@ -54,6 +68,8 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 | D02-10 | B | Hierarquias de botão: primário, secundário, discreto e destrutivo. |
 | D02-11 | B | Scrollbars minimalistas, com destaque ao hover/interação. |
 | D02-12 | A | Ícones lineares consistentes em espessura e dimensões. |
+
+<!-- ----- 2.3. BLOCO 02-C — COMPONENTES COMPARTILHADOS ----- -->
 
 ### 2.3. Bloco 02-C — Componentes compartilhados
 
@@ -66,6 +82,8 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 | D02-17 | B | Cards e containers com hierarquia de superfícies, bordas, elevação e transparência moderada. |
 | D02-18 | B | Estados normal, hover, foco, pressionado, selecionado, desabilitado, carregando e erro, conforme aplicável. |
 | D02-19 | B | Menus consistentes com teclado, Escape, foco, agrupamento lógico e fechamento contextual. |
+
+<!-- ----- 2.4. BLOCO 02-D — RESPONSIVIDADE E LAYOUT ----- -->
 
 ### 2.4. Bloco 02-D — Responsividade e layout
 
@@ -80,6 +98,8 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 | D02-26 | B | Adaptação à área útil e rolagem nas regiões adequadas, evitando overflow horizontal indevido. |
 | D02-27 | B | Tabelas adaptativas por contexto: rolagem acessível, priorização de colunas ou apresentação por registro. |
 
+<!-- ----- 2.5. BLOCO 02-E — ACESSIBILIDADE, ANIMAÇÕES E DESEMPENHO ----- -->
+
 ### 2.5. Bloco 02-E — Acessibilidade, animações e desempenho
 
 | ID | Alternativa | Deliberação |
@@ -92,6 +112,8 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 | D02-33 | B | Skeletons, progresso ou carregamento contextual conforme operação, sem excesso de animações. |
 | D02-34 | B | Transições discretas de cor, borda, elevação e opacidade. |
 | D02-35 | B | Áreas de toque confortáveis e alternativas às interações dependentes de hover. |
+
+<!-- ----- 2.6. BLOCO 02-F — WALLPAPERS E CURSORES ----- -->
 
 ### 2.6. Bloco 02-F — Wallpapers e cursores
 
@@ -106,6 +128,8 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 | D02-42 | B | Variantes essenciais de interação por estilo e fallback nativo para estados especiais quando necessário. **Detalhada/ampliada pela D02-64 C.** |
 | D02-43 | B | Cursores personalizados somente quando houver apontador compatível; touch mantém comportamento nativo. |
 
+<!-- ----- 2.7. BLOCO 02-G — ARQUITETURA, TESTES E ENTREGA ----- -->
+
 ### 2.7. Bloco 02-G — Arquitetura, testes e entrega
 
 | ID | Alternativa | Deliberação |
@@ -119,6 +143,8 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 | D02-50 | B | Um commit por parte 02.1–02.5, em português, sem escopo entre parênteses. |
 | D02-51 | B | Documentar tokens, componentes, contratos, consumidores, validações e limitações; congelar base após aceite. |
 | D02-52 | B | Não editar JSON de traduções até a fase final; registrar novas chaves pendentes. |
+
+<!-- ----- 2.8. REVISÃO COMPLEMENTAR ----- -->
 
 ### 2.8. Revisão complementar
 
@@ -140,7 +166,11 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 
 ---
 
+<!-- === 3. INVENTÁRIO TÉCNICO DA BASE EXISTENTE === -->
+
 ## 3. Inventário técnico da base existente
+
+<!-- ----- 3.1. ESTILOS PRESENTES NO REPOSITÓRIO ----- -->
 
 ### 3.1. Estilos presentes no repositório
 
@@ -155,6 +185,8 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 - `src/styles/themes/glass.css`: superfícies translúcidas, backdrop-filter, exceções por interação e fallback.
 
 **Risco confirmado:** responsabilidade sobreposta entre `effects.css`, `foundation.css`, `customization.css` e `glass.css`. Há definições conflitantes ou repetidas de transparência, blur, fundo de componentes e efeitos reduzidos. A Parte 02.1 deverá mapear cascata e consumidores antes de reorganizar.
+
+<!-- ----- 3.2. SERVIÇOS E CONTRATOS EXISTENTES ----- -->
 
 ### 3.2. Serviços e contratos existentes
 
@@ -171,7 +203,11 @@ As descrições abaixo consolidam o sentido das alternativas aprovadas. **D02-64
 
 ---
 
+<!-- === 4. IDENTIDADE, TEMAS E TOKENS === -->
+
 ## 4. Identidade, temas e tokens
+
+<!-- ----- 4.1. DIREÇÃO VISUAL ----- -->
 
 ### 4.1. Direção visual
 
@@ -179,21 +215,29 @@ Estética profissional/tecnológica, não neon generalizado: hierarquia de super
 
 Fontes: **Nunito Sans** para UI; **JetBrains Mono** para Terminal/código e conteúdos técnicos. Escalas de tipografia, espaçamento e dimensões consistentes, com densidade equilibrada.
 
+<!-- ----- 4.2. CONTRATOS SEMÂNTICOS DE TOKENS ----- -->
+
 ### 4.2. Contratos semânticos de tokens
 
 Organizar responsabilidades de tokens de: canvas e superfícies, texto, acento, links e ações, estados sucesso/aviso/erro, borda, raio, elevação, opacidade, blur, tipografia, spacing, tamanho de controle, foco, scrollbar e duração de transição.
 
 Tokens devem ter significado estável nos dois temas. Nenhum componente deve depender da ordem incidental de duas definições conflitantes. Não alterar nomes públicos de tokens sem compatibilidade/migração comprovada.
 
+<!-- ----- 4.3. PRECEDÊNCIA DE APARÊNCIA ----- -->
+
 ### 4.3. Precedência de aparência
 
 Ordem conceitual: **base compartilhada → tema Dark/Light → paleta ou opção manual → personalização de efeito → requisitos de acessibilidade e fallback**. A aplicação técnica (cascade/layers/imports) deverá materializar essa ordem sem adicionar overrides arbitrários.
+
+<!-- ----- 4.4. NÍVEIS DE EFEITO ----- -->
 
 ### 4.4. Níveis de efeito
 
 Aprimorar opções já existentes (`blur`, `transparency`, `motion`, `accessibility`) em vez de criar mecanismos paralelos. Blur de múltiplas camadas e efeitos durante drag/resize devem ser evitados por custo. Modo de pouco efeito reduz blur/sombra/animação, **sem ocultar wallpaper estático** (D02-55). Preferência explícita de ocultar imagem, se disponibilizada, é independente.
 
 ---
+
+<!-- === 5. CORES DINÂMICAS, PRECEDÊNCIA E CONTRASTE === -->
 
 ## 5. Cores dinâmicas, precedência e contraste
 
@@ -207,7 +251,11 @@ Aprimorar opções já existentes (`blur`, `transparency`, `motion`, `accessibil
 
 ---
 
+<!-- === 6. WALLPAPERS OFICIAIS E COLEÇÃO PESSOAL === -->
+
 ## 6. Wallpapers oficiais e coleção pessoal
+
+<!-- ----- 6.1. ARQUIVOS OFICIAIS RECEBIDOS ----- -->
 
 ### 6.1. Arquivos oficiais recebidos
 
@@ -222,6 +270,8 @@ Aprimorar opções já existentes (`blur`, `transparency`, `motion`, `accessibil
 
 Esses arquivos foram fornecidos pelo proprietário na conversa. Não substituir por imagens de busca, não redesenhar nem alterar arte sem autorização. Os IDs são sugestão de catalogação a ser validada tecnicamente, não novas opções visuais aprovadas.
 
+<!-- ----- 6.2. QUATRO SELEÇÕES INDEPENDENTES ----- -->
+
 ### 6.2. Quatro seleções independentes
 
 - `desktop/dark`
@@ -230,6 +280,8 @@ Esses arquivos foram fornecidos pelo proprietário na conversa. Não substituir 
 - `mobile/light`
 
 A alternância do tema recupera a escolha daquela combinação sem sobrescrever as demais. `cover` (preencher), `contain` (ajustar) e centralizar, com prévia, são modos aprovados; assegurar fallback caso a imagem esteja ausente.
+
+<!-- ----- 6.3. COLEÇÃO PESSOAL ----- -->
 
 ### 6.3. Coleção pessoal
 
@@ -243,17 +295,25 @@ Coleção local de várias imagens, não um único slot compartilhado (D02-61). 
 - Migração não destrutiva da imagem pessoal única anterior e seleções por plataforma; definir o caso de ambas as plataformas compartilharem a mesma imagem.
 - Adoção em etapas: contratos/recursos e integração demonstrável na 02; persistência/sincronização avançada na 04; gestão completa e opções na 14. **Não declarar a coleção pessoal finalizada na Etapa 02 se a persistência avançada ainda estiver pendente.**
 
+<!-- ----- 6.4. FALLBACK E ACESSIBILIDADE ----- -->
+
 ### 6.4. Fallback e acessibilidade
 
 Efeitos reduzidos não devem apagar o wallpaper. Se a imagem não puder ser carregada ou renderizada, utilizar cor/superfície legível. Avaliar contraste dos rótulos de atalhos sobre imagens claras e escuras; garantir foco perceptível.
 
 ---
 
+<!-- === 7. CURSORES PERSONALIZADOS === -->
+
 ## 7. Cursores personalizados
+
+<!-- ----- 7.1. ESTÉTICA ----- -->
 
 ### 7.1. Estética
 
 Estilo geométrico moderno com detalhe tecnológico discreto. Versões **Dark** (alto contraste sobre superfícies escuras) e **Light** (alto contraste sobre superfícies claras). Cursores personalizados habilitados por padrão, com escolha de cursor nativo.
+
+<!-- ----- 7.2. ESTADOS APROVADOS — D02-64 C ----- -->
 
 ### 7.2. Estados aprovados — D02-64 C
 
@@ -270,6 +330,8 @@ Conjunto **completo**, incluindo:
 
 Oito categorias **não significam necessariamente oito arquivos por tema**: algumas categorias precisam de múltiplas direções/estados. Não reduzir o escopo a somente quatro variantes; a D02-64 **C prevalece** sobre a seleção anterior B.
 
+<!-- ----- 7.3. CONTRATO TÉCNICO ----- -->
+
 ### 7.3. Contrato técnico
 
 - Recursos SVG estáticos, com hotspot definido por variante; testar resolução e suporte real nos navegadores alvos.
@@ -282,15 +344,23 @@ Oito categorias **não significam necessariamente oito arquivos por tema**: algu
 
 ---
 
+<!-- === 8. COMPONENTES COMPARTILHADOS E ESTADOS === -->
+
 ## 8. Componentes compartilhados e estados
+
+<!-- ----- 8.1. COMPONENTIZAÇÃO ----- -->
 
 ### 8.1. Componentização
 
 Priorizar estilos semânticos compartilhados e componentes React apenas para comportamento reutilizável: não obrigar wrappers para todos os elementos HTML. Preservar `AppCloseDialog`, `AppErrorBoundary` e os mecanismos que já atendem aos contratos da Etapa 01.
 
+<!-- ----- 8.2. CONTROLES E HIERARQUIA ----- -->
+
 ### 8.2. Controles e hierarquia
 
 Botões primário/secundário/discreto/destrutivo, campos, select, checkbox, textarea, mensagens, cards, badges informativas e estados de carregamento. Estados possíveis: normal, hover, foco, ativo/pressionado, selecionado, desabilitado, carregando e erro; nem todo estado se aplica a todo controle.
+
+<!-- ----- 8.3. DIÁLOGOS, MENUS E TOOLTIPS ----- -->
 
 ### 8.3. Diálogos, menus e tooltips
 
@@ -300,11 +370,15 @@ Botões primário/secundário/discreto/destrutivo, campos, select, checkbox, tex
 - Feedback prioritariamente contextual; notificações discretas para resultados relevantes, sem duplicar ações.
 - Cards e superfícies com hierarquia controlada, não vidro intenso em todo elemento.
 
+<!-- ----- 8.4. MIGRAÇÃO ----- -->
+
 ### 8.4. Migração
 
 Identificar consumidores antes de mover CSS de `apps.css` ou extrair componentes. Manter classes antigas por transição quando necessário. Não converter todos os aplicativos durante esta etapa; acabamento interno dos apps continua nas respectivas etapas.
 
 ---
+
+<!-- === 9. PADRÕES RESPONSIVOS DE LAYOUT === -->
 
 ## 9. Padrões responsivos de layout
 
@@ -325,11 +399,17 @@ Validar viewport Mobile, tablets, janelas desktop estreitas, textos longos e zoo
 
 ---
 
+<!-- === 10. ACESSIBILIDADE, MOVIMENTO E DESEMPENHO === -->
+
 ## 10. Acessibilidade, movimento e desempenho
+
+<!-- ----- 10.1. ACESSIBILIDADE ----- -->
 
 ### 10.1. Acessibilidade
 
 Foco visível em todos os controles, teclado previsível, ordem lógica, contraste representativo, touch confortável, labels efetivas e erros comunicados claramente. Estados não devem depender apenas de cor, hover ou animação. Tooltips e menus devem ser acessíveis por teclado.
+
+<!-- ----- 10.2. MOVIMENTO E TRANSPARÊNCIA ----- -->
 
 ### 10.2. Movimento e transparência
 
@@ -339,13 +419,19 @@ Foco visível em todos os controles, teclado previsível, ordem lógica, contras
 - Evitar backdrop-filter redundante em superfícies aninhadas e durante drag/resize.
 - Loading contextual: skeleton, spinner/progresso ou texto de estado conforme operação, respeitando movimento reduzido.
 
+<!-- ----- 10.3. TESTES REPRESENTATIVOS ----- -->
+
 ### 10.3. Testes representativos
 
 Testar foco, teclado, modal, tooltip, formulário, estados vazios/carregando/erro, contraste em ambos os temas, rolagem e toque. Reaproveitar telas reais em vez de criar aplicativo de demonstração desnecessário.
 
 ---
 
+<!-- === 11. ARQUITETURA CSS E CONTRATOS TÉCNICOS === -->
+
 ## 11. Arquitetura CSS e contratos técnicos
+
+<!-- ----- 11.1. REORGANIZAÇÃO ESTRUTURADA — D02-63 B ----- -->
 
 ### 11.1. Reorganização estruturada — D02-63 B
 
@@ -364,6 +450,8 @@ Auditar os arquivos existentes e redistribuir, sem reconstrução total, as segu
 
 A tabela indica direção de organização, **não aprovação de alteração cega ou obrigação de manter exatamente os mesmos arquivos**. Examinar a cascata final e todos os consumidores antes de mover regras.
 
+<!-- ----- 11.2. CONTRATOS DE COMPATIBILIDADE ----- -->
+
 ### 11.2. Contratos de compatibilidade
 
 - Tokens públicos e classes existentes não serão renomeados sem mapeamento e regressão.
@@ -374,6 +462,8 @@ A tabela indica direção de organização, **não aprovação de alteração ce
 - Arquivos de tradução permanecem intocados; textos adicionados terão registro de chaves pendentes.
 
 ---
+
+<!-- === 12. FRONTEIRAS ENTRE ETAPAS === -->
 
 ## 12. Fronteiras entre etapas
 
@@ -391,7 +481,11 @@ A tabela indica direção de organização, **não aprovação de alteração ce
 
 ---
 
+<!-- === 13. PLANO DE IMPLEMENTAÇÃO: CINCO PARTES ENCERRÁVEIS === -->
+
 ## 13. Plano de implementação: cinco partes encerráveis
+
+<!-- ----- PARTE 02.1 — TEMAS, TOKENS, WALLPAPERS E CURSORES ----- -->
 
 ### Parte 02.1 — Temas, tokens, wallpapers e cursores
 
@@ -408,6 +502,8 @@ A tabela indica direção de organização, **não aprovação de alteração ce
 
 **Commit após aceite:** `feat: consolida temas wallpapers e cursores`
 
+<!-- ----- PARTE 02.2 — CONTROLES E COMPONENTES COMPARTILHADOS ----- -->
+
 ### Parte 02.2 — Controles e componentes compartilhados
 
 1. Auditar controles e componentes já existentes.
@@ -418,6 +514,8 @@ A tabela indica direção de organização, **não aprovação de alteração ce
 
 **Commit após aceite:** `feat: padroniza componentes compartilhados`
 
+<!-- ----- PARTE 02.3 — PADRÕES RESPONSIVOS ----- -->
+
 ### Parte 02.3 — Padrões responsivos
 
 1. Consolidar toolbar, grid/list, formulários, master/detail, leitura/edição e tabelas.
@@ -426,6 +524,8 @@ A tabela indica direção de organização, **não aprovação de alteração ce
 4. Não concluir visual de aplicativos reservado às etapas posteriores.
 
 **Commit após aceite:** `style: consolida layouts responsivos`
+
+<!-- ----- PARTE 02.4 — ACESSIBILIDADE E DESEMPENHO ----- -->
 
 ### Parte 02.4 — Acessibilidade e desempenho
 
@@ -436,6 +536,8 @@ A tabela indica direção de organização, **não aprovação de alteração ce
 5. Testar Desktop, Mobile e janelas pequenas, registrando limites.
 
 **Commit após aceite:** `fix: consolida acessibilidade e desempenho visual`
+
+<!-- ----- PARTE 02.5 — AUDITORIA E CONSOLIDAÇÃO ----- -->
 
 ### Parte 02.5 — Auditoria e consolidação
 
@@ -452,7 +554,11 @@ A tabela indica direção de organização, **não aprovação de alteração ce
 
 ---
 
+<!-- === 14. VERIFICAÇÃO, TESTES E CRITÉRIOS DE ACEITE === -->
+
 ## 14. Verificação, testes e critérios de aceite
+
+<!-- ----- 14.1. VALIDAÇÕES AUTOMATIZADAS ----- -->
 
 ### 14.1. Validações automatizadas
 
@@ -465,6 +571,8 @@ npm run test
 ```
 
 Adicionar testes unitários/de integração apenas para os contratos modificados e os comportamentos efetivamente introduzidos. Não alterar testes para mascarar incompatibilidades.
+
+<!-- ----- 14.2. MATRIZ VISUAL MÍNIMA ----- -->
 
 ### 14.2. Matriz visual mínima
 
@@ -480,6 +588,8 @@ Adicionar testes unitários/de integração apenas para os contratos modificados
 | Diálogo/painel | Foco inicial/retorno, Escape, teclado e sobreposição. |
 | Movimento/efeitos reduzidos | Sem animações supérfluas, sem blur custoso e **wallpaper preservado**. |
 | Armazenamento indisponível | Falha explícita, dados prévios preservados, fallback legível. |
+
+<!-- ----- 14.3. CRITÉRIOS PARA CADA PARTE ----- -->
 
 ### 14.3. Critérios para cada parte
 
@@ -498,7 +608,11 @@ Uma parte só poderá ser apresentada para aceite quando:
 
 ---
 
+<!-- === 15. REVISÃO DE CONFLITOS, LACUNAS E DECISÕES TÉCNICAS DERIVADAS === -->
+
 ## 15. Revisão de conflitos, lacunas e decisões técnicas derivadas
+
+<!-- ----- 15.1. CONSISTÊNCIA DAS DECISÕES ----- -->
 
 ### 15.1. Consistência das decisões
 
@@ -514,6 +628,8 @@ Uma parte só poderá ser apresentada para aceite quando:
 
 **Resultado:** nenhum conflito de produto bloqueante identificado nas 65 deliberações; detalhes técnicos devem ser validados sem modificar o escopo.
 
+<!-- ----- 15.2. PONTOS TÉCNICOS AINDA MENSURÁVEIS, SEM DECISÃO NOVA APROVADA ----- -->
+
 ### 15.2. Pontos técnicos ainda mensuráveis, sem decisão nova aprovada
 
 - Limiar numérico de contraste/acessibilidade e escala final de tokens: validar na execução contra telas e padrões relevantes, registrando critério adotado.
@@ -526,6 +642,8 @@ Uma parte só poderá ser apresentada para aceite quando:
 Qualquer alteração que transforme esses detalhes em **nova funcionalidade, limitação de escopo ou custo** exige autorização expressa.
 
 ---
+
+<!-- === 16. ESTADO DO DOCUMENTO E APROVAÇÃO === -->
 
 ## 16. Estado do documento e aprovação
 
@@ -546,7 +664,11 @@ Qualquer alteração que transforme esses detalhes em **nova funcionalidade, lim
 
 ---
 
+<!-- === 17. REGISTRO DE IMPLEMENTAÇÃO — ETAPA 02 === -->
+
 ## 17. Registro de implementação — Etapa 02
+
+<!-- ----- 17.1. ENTREGAS IMPLEMENTADAS ----- -->
 
 ### 17.1. Entregas implementadas
 
@@ -557,6 +679,8 @@ Qualquer alteração que transforme esses detalhes em **nova funcionalidade, lim
 | 02.3 | Padrões responsivos compartilhados | Implementada |
 | 02.4 | Acessibilidade e desempenho visual | Implementada |
 | 02.5 | Auditoria e consolidação | Em encerramento |
+
+<!-- ----- 17.2. ORGANIZAÇÃO TÉCNICA ----- -->
 
 ### 17.2. Organização técnica
 
@@ -569,6 +693,8 @@ Qualquer alteração que transforme esses detalhes em **nova funcionalidade, lim
 Os estilos responsivos compartilhados são opt-in.
 A integração visual definitiva permanece sob responsabilidade
 das etapas específicas dos aplicativos.
+
+<!-- ----- 17.3. VALIDAÇÕES REALIZADAS ----- -->
 
 ### 17.3. Validações realizadas
 
@@ -589,6 +715,8 @@ A matriz visual completa da seção 14.2 ainda requer
 conferência final dos cenários não comprovados
 individualmente.
 
+<!-- ----- 17.4. PERSISTÊNCIA E COMPATIBILIDADE ----- -->
+
 ### 17.4. Persistência e compatibilidade
 
 - Preferências de acessibilidade preservadas.
@@ -596,6 +724,8 @@ individualmente.
 - Wallpapers pessoais mantidos pelo mecanismo existente.
 - Contratos públicos dos componentes compartilhados preservados.
 - Sem alterações nos catálogos de tradução.
+
+<!-- ----- 17.5. PENDÊNCIAS DE OUTRAS ETAPAS ----- -->
 
 ### 17.5. Pendências de outras etapas
 
@@ -606,6 +736,8 @@ individualmente.
 - Etapa 15: regressão integrada e validação em dispositivos reais.
 - Fase final: atualização dos catálogos PT-BR e EN.
 
+<!-- ----- 17.6. COMMITS DE REFERÊNCIA ----- -->
+
 ### 17.6. Commits de referência
 
 - `b6a80cf` — temas, wallpapers e cursores.
@@ -615,6 +747,8 @@ individualmente.
 A limpeza final de `controls.css` e esta documentação
 ainda dependem de commit e push.
 
+
+<!-- ----- 17.7. ESTADO E APROVAÇÃO FINAL ----- -->
 
 ### 17.7. Estado e aprovação final
 

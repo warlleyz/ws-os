@@ -1,4 +1,10 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
 > **Estado mais recente — 18/10/2026:** consulte [Pendências e continuidade](PENDENCIAS-FINALIZACAO.md). O texto abaixo é histórico; não descreve integralmente o estado atual de auth, Notas, Administração, Arquivos, rankings e testes.
+
+<!-- === ESTADO DA IMPLEMENTAÇÃO — 15/10/2026 === -->
 
 # Estado da implementação — 15/10/2026
 

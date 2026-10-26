@@ -1,10 +1,20 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === AUDITORIA — REQUISITOS, ORGANIZAÇÃO, TRADUÇÕES E SEGURANÇA === -->
+
 # Auditoria — requisitos, organização, traduções e segurança
+
+<!-- === RESULTADO E LIMITES === -->
 
 ## Resultado e limites
 
 Auditoria local com correções e validação automatizada concluídas neste bloco. O projeto **não está certificado como 100% concluído**: permanecem requisitos de conteúdo, revisão visual, homologação real e operação. A autorização mais recente do proprietário libera a edição dos JSONs de tradução e a limpeza de arquivos desnecessários, substituindo a proibição anterior de traduzir nesta fase. Nenhum commit, push, deploy, migração ou alteração de credencial foi realizado.
 
 Esta auditoria confronta plano/checkpoints, registro dos 18 apps, textos de interface e resultados dos testes existentes. Não equivale a revisão humana linha a linha de todos os arquivos/decisões DEC, pentest, execução das políticas RLS em banco real ou aceite visual integral. Evidências anteriores permanecem históricas; não foram repetidas para aparentar uma homologação nova.
+
+<!-- === ACHADOS CORRIGIDOS === -->
 
 ## Achados corrigidos
 
@@ -20,6 +30,8 @@ Esta auditoria confronta plano/checkpoints, registro dos 18 apps, textos de inte
 | Organização | Arquivos modificados formatados; não houve redistribuição geral de pastas, dependências novas, alteração de arquitetura ou descarte de alterações existentes. |
 
 Referência primária do alerta: https://github.com/advisories/GHSA-hq66-cqwq-w95j. O alerta depende de configuração de scripting/origem; não foi demonstrada exploração neste portfólio. isEvalSupported=false já existente foi mantido, mas não foi tratado como justificativa para manter versão vulnerável.
+
+<!-- === REQUISITOS: ESTADO APÓS ESTA AUDITORIA === -->
 
 ## Requisitos: estado após esta auditoria
 
@@ -44,6 +56,8 @@ Referência primária do alerta: https://github.com/advisories/GHSA-hq66-cqwq-w9
 
 As condições acima não foram apagadas nem convertidas em requisitos atendidos pelo número de testes. Checkpoints por etapa continuam sendo a referência detalhada de cada fluxo.
 
+<!-- === TRADUÇÕES: ALCANCE VERIFICÁVEL === -->
+
 ## Traduções: alcance verificável
 
 - Catálogos com as mesmas 1.071 chaves e valores não vazios. Teste verifica tokens posicionais, com uma exceção gramatical documentada: o sufixo plural português de {0} não lida{1} não existe em inglês (unread).
@@ -51,6 +65,8 @@ As condições acima não foram apagadas nem convertidas em requisitos atendidos
 - Novo teste bloqueia reintrodução de texto JSX simples/multilinha nos três componentes de Arquivos/Visualizador/PDF, com exceção de marca/nome do produto e PDF.
 - Conteúdo profissional já usa versões localizadas; marcas, nomes próprios, extensões, atalhos de comandos e texto dos documentos/serviços externos não são traduzidos automaticamente.
 - Não afirmar revisão linguística visual completa só porque a cobertura passou: datas, textos longos, mensagens de fornecedor e layout EN precisam do walkthrough do autor.
+
+<!-- === VALIDAÇÃO FINAL DESTE BLOCO === -->
 
 ## Validação final deste bloco
 
@@ -62,6 +78,8 @@ As condições acima não foram apagadas nem convertidas em requisitos atendidos
 - Prévia HTTP: assets compilados acessíveis sem fallback HTML indevido no ensaio; processo encerrado. A prévia não emula o Worker.
 - git diff --check: conferir ao encerrar; nenhuma alteração anterior foi descartada. Segredos/ambientes locais permanecem ignorados; não houve leitura/divulgação de seus valores.
 
+<!-- === ARQUIVOS DESTE CICLO === -->
+
 ## Arquivos deste ciclo
 
 - Tradução: src/shared/i18n/locales/en.json e pt-BR.json.
@@ -71,6 +89,8 @@ As condições acima não foram apagadas nem convertidas em requisitos atendidos
 - Testes: tests/core/i18n-coverage.test.cjs e tests/core/tooltip-ui.test.cjs (novo).
 - Documentação: este relatório, README.md e referência no plano.
 - Removidos da raiz: qq e diagnostico-codex.patch. Backup local em C:/Users/warll/.codex/.chatgpt-projects/g-p-6ad22bd42de48191abdaa1311b2ff46f/work/auditoria-backup-artefatos/.
+
+<!-- === CONTINUIDADE === -->
 
 ## Continuidade
 

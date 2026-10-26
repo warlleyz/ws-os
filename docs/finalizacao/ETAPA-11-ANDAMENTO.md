@@ -1,8 +1,18 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 11 — TERMINAL, WALLY E ADMINISTRAÇÃO === -->
+
 # Etapa 11 — Terminal, Wally e Administração
+
+<!-- === ESTADO: IMPLEMENTAÇÃO TÉCNICA VALIDADA LOCALMENTE; HOMOLOGAÇÃO E ACABAMENTO FINAL CONDICIONADOS === -->
 
 ## Estado: implementação técnica validada localmente; homologação e acabamento final condicionados
 
 Nenhum commit/push, migração, envio real, login remoto ou alteração de credenciais/configuração. WALLY_AI_ENABLED=false preservado. Alterações das etapas anteriores mantidas. Etapa 12 não iniciada.
+
+<!-- === BLOCO TERMINAL === -->
 
 ## Bloco Terminal
 
@@ -11,6 +21,8 @@ Nenhum commit/push, migração, envio real, login remoto ou alteração de crede
 - Retorno de autorização não abre Administração se a instância já fechou. Aplicativos abertos pelo Terminal conservam originInstanceId exato.
 - Ajuda, catálogo, autocomplete, histórico de sessão, logout com aviso de alterações pendentes e expiração existentes preservados. Composição de texto não dispara atalhos de edição prematuramente.
 
+<!-- === BLOCO WALLY === -->
+
 ## Bloco Wally
 
 - Painel e aplicativo continuam consumindo a conversa compartilhada, respostas locais e ações públicas autorizadas pelo actionService. Nenhum prompt/flag libera acesso administrativo.
@@ -18,6 +30,8 @@ Nenhum commit/push, migração, envio real, login remoto ou alteração de crede
 - Abertura contextual pelo app completo conserva origem exata; composição de texto protegida.
 - Resposta remota maior que o limite de 4000 caracteres ou finalizada após abort não é apresentada como resposta válida. Cancelamento, limites e fallback locais existentes preservados.
 - IA remota não foi reativada nem homologada. Nenhuma chamada Gemini/Turnstile real foi produzida pelo agente.
+
+<!-- === BLOCO ADMINISTRAÇÃO === -->
 
 ## Bloco Administração
 
@@ -30,6 +44,8 @@ Nenhum commit/push, migração, envio real, login remoto ou alteração de crede
 - Hook administrativo compartilhado limita o ciclo de dados privados: paginação, operação única, confirmação de versão da sessão, cancelamento, mensagens e proteção de alterações pendentes. Serviços do domínio invalidam somente a sessão correspondente em 401/403.
 - Sistema continua informativo sobre os limites reais do painel; não foi criado gerenciamento de infraestrutura/produção.
 
+<!-- === VALIDAÇÃO REALIZADA === -->
+
 ## Validação realizada
 
 - npm run lint: aprovado, sem avisos.
@@ -38,6 +54,8 @@ Nenhum commit/push, migração, envio real, login remoto ou alteração de crede
 - git diff --check: aprovado.
 - Doze regressões novas: login sanitizado/log/histórico, origem do Terminal, login cancelado sem sessão tardia, cancelamento e limpeza de dados privados, revisão da solicitação, retomada de arquivo sem segundo upload, confirmação de moderação, rejeição backend de pontuação alterada, preservação de nova pergunta Wally, limite remoto e formulário editorial diante de identidade incorreta.
 - DOM/hooks, relógios, rede e serviços externos foram controlados pelos testes; não houve homologação de escrita remota ou aceite visual físico. Testes anteriores de autorização, ações, RLS preparada, notas e Wally continuam passando.
+
+<!-- === ARQUIVOS DA ETAPA === -->
 
 ## Arquivos da etapa
 
@@ -65,6 +83,8 @@ Nenhum commit/push, migração, envio real, login remoto ou alteração de crede
 - docs/backend/CONFIGURACAO.md
 - docs/finalizacao/ETAPA-11-ANDAMENTO.md
 
+<!-- === PENDÊNCIAS LEGÍTIMAS E APLICAÇÃO MANUAL === -->
+
 ## Pendências legítimas e aplicação manual
 
 - Sem migração nova. Homologar com migrações existentes 001–010, papéis/RLS e variáveis já descritas no guia backend: auth, conteúdo, solicitações privadas, Storage e rankings. Nenhuma configuração foi ativada nesta tarefa.
@@ -72,6 +92,8 @@ Nenhum commit/push, migração, envio real, login remoto ou alteração de crede
 - Wally permanece local com remoto desativado por instrução anterior. Homologação Gemini e orçamento real só se houver autorização para reativar/configurar, com os limites já existentes.
 - Conferir PT/EN final, foco, navegação e toque nos dois shells. Traduções não foram concluídas; os JSONs continuam intactos.
 - Não foram revistos/redesenhados os shells ou aplicativos fora das necessidades desta etapa. Etapa 12 permanece o próximo bloco de composição do Desktop.
+
+<!-- === TRADUÇÕES ADIADAS === -->
 
 ## Traduções adiadas
 
@@ -96,6 +118,8 @@ Nenhum commit/push, migração, envio real, login remoto ou alteração de crede
 - PENDENTE_I18N src/apps/administration/AdminRankings.jsx :: Pontuações do navegador não comprovam uma partida legítima.
 
 Também revisar na fase final os estados dinâmicos Nova/Em análise/Aguardando resposta/Respondida/Concluída/Arquivada, títulos das seções e mensagens de confirmação de exclusão/visibilidade/status. Os JSONs não foram editados.
+
+<!-- === CONTINUIDADE === -->
 
 ## Continuidade
 

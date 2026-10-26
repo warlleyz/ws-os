@@ -1,7 +1,15 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === WS OS V2 — ENTREGA DAS ETAPAS 03 E 04 === -->
+
 # WS OS V2 — entrega das Etapas 03 e 04
 
 Data: 20/10/2026. Base: `d7167db`. Alterações locais para revisão, sem commit ou push. Nenhuma migração, credencial, binding remoto, flag de produção ou serviço externo foi alterado.
 
+
+<!-- === ATUALIZAÇÃO POSTERIOR — MIGRAÇÃO PARA SUPABASE STORAGE === -->
 
 ## Atualização posterior — Migração para Supabase Storage
 
@@ -25,6 +33,8 @@ As referências a R2 nas seções históricas seguintes descrevem a implementaç
 
 **Situação da Etapa 03:** em execução; não homologada integralmente.
 
+<!-- === ESTADO VERDADEIRO === -->
+
 ## Estado verdadeiro
 
 | Etapa | Estado |
@@ -36,13 +46,19 @@ Não equivale a certificar produção nem a afirmar que todos os aplicativos est
 
 Referências: plano por etapas; mestre v0.16.0, especialmente DEC-065–070, 134–155, 302–354, 435–442, 453–458, 474, 481, 485 e 600; decisões DEC-FIN-001–022; contratos TEC-014–043.
 
+<!-- === ETAPA 03 — ENTREGAS === -->
+
 ## Etapa 03 — entregas
+
+<!-- ----- CORREÇÃO PENDENTE DE CONTEÚDO GERENCIADO ----- -->
 
 ### Correção pendente de conteúdo gerenciado
 
 `managedContent.js` preserva `expectedId` a partir do corpo validado e exige exatamente uma linha com esse ID em POST, PATCH e DELETE. A query não participa da confirmação. Resposta vazia, ID diferente ou múltiplas linhas resultam em conflito, sem falso sucesso. DELETE não tenta reconstruir o ID de um corpo upstream inexistente.
 
 Mantidos autorização por operação, revisão `updatedAt`, limite do corpo, leitura pública de publicados e projeção de colunas. Eventos agora preservam `allDay`, `startsAt`, `endsAt` e `timezone`, com validação de instantes/fuso e rejeição de campos privados. A data local continua disponível para o Calendário legado. Catálogo aceita referência `resourceId` mutuamente exclusiva com URL estática; a listagem legada continua filtrando os estáticos até a integração da Etapa 05.
+
+<!-- ----- SOLICITAÇÕES PRIVADAS E NOTIFICAÇÃO ----- -->
 
 ### Solicitações privadas e notificação
 
@@ -52,6 +68,8 @@ Mantidos autorização por operação, revisão `updatedAt`, limite do corpo, le
 - Seis estados e retenção terminal de 180 dias, sem prorrogar ao arquivar um pedido concluído. Histórico mínimo no banco registra revisão, ator, transição e instante; não duplica nome/e-mail/mensagem.
 - EmailJS opcional no servidor, com resultado independente da persistência. Reclamação única antes do envio evita duplicação no retry. Estados `sending`/`unknown` exigem reconciliação, sem reenvio automático. Erro/timeout não vira confirmação de e-mail ou de reunião.
 - Rotina `purge_expired_private_requests` preparada; ativação agendada é opt-in, não foi configurada. Exclusão remove também o histórico associado.
+
+<!-- ----- R2, CATÁLOGO E ANEXOS ----- -->
 
 ### R2, catálogo e anexos
 
@@ -65,6 +83,8 @@ Mantidos autorização por operação, revisão `updatedAt`, limite do corpo, le
 - `/api/admin/attachments`: POST/DELETE vinculam/desvinculam recurso disponível com revisão da publicação. RPC serializa por publicação e limita a cinco anexos; `/api/posts/attachments?postId=...` só projeta anexos publicáveis. Exclusão de publicação remove vínculos; exclusão de arquivo retira referências e atualiza as publicações afetadas.
 - Substituir documento oficial significa criar novo recurso e atualizar a referência na etapa do aplicativo; o objeto disponível é imutável. Reconciliação operacional e limpeza de resíduos após interrupções devem ser verificadas no R2 real antes da ativação.
 
+<!-- ----- RANKINGS, SERVIÇOS E INTEGRAÇÕES ----- -->
+
 ### Rankings, serviços e integrações
 
 - Mantidos melhores resultados atômicos por jogo/visitante, validação de apelidos e limites Snake/Flappy, proteção de escrita e projeção pública mínima. Resposta pública também valida os resultados recebidos.
@@ -74,6 +94,8 @@ Mantidos autorização por operação, revisão `updatedAt`, limite do corpo, le
 - Clima valida coordenadas antes da rede. Geocodificação agora usa timeout/cancelamento também durante a leitura do JSON. Cache de clima no consumidor existente foi preservado.
 - Gemini continua desligado na configuração existente; testes comprovam bloqueio antes de rede/cotas. Não houve chamada autenticada ou ativação de fornecedor.
 - Manutenção D1 remove somente registros vencidos das quatro tabelas conhecidas. Migração 004 prepara a tabela de limites Wally ausente do histórico. Hook `scheduled` preparado; não foi criado cron remoto.
+
+<!-- === MIGRAÇÕES E HOMOLOGAÇÃO OBRIGATÓRIA === -->
 
 ## Migrações e homologação obrigatória
 
@@ -90,6 +112,8 @@ Os testes locais executaram as migrações D1 em SQLite em memória e verificara
 
 Para homologação real: ambiente Supabase separado, R2 privado de teste, D1 isolado, runtime Worker e credenciais autorizadas dos provedores. Ver [configuração atual](../backend/CONFIGURACAO.md). Não marcar esta etapa como integralmente concluída antes dessas evidências.
 
+<!-- === ETAPA 04 — ENTREGAS E COMPATIBILIDADE === -->
+
 ## Etapa 04 — entregas e compatibilidade
 
 - Instâncias, abertura contextual, foco, retorno, permissões e URL estável preservados e cobertos pela regressão. Aberturas contextuais múltiplas continuam seguindo o Registry; não foi imposta instância única a Projetos.
@@ -102,11 +126,15 @@ Para homologação real: ambiente Supabase separado, R2 privado de teste, D1 iso
 - Cursor incluído no inventário e no reset de aparência. “Não perturbe” ganhou sincronização entre abas e reset específico. Reset continua por allowlist, preservando arquivos pessoais e dados fora do escopo.
 - Preferências legadas, falha/quota de armazenamento, defaults, IndexedDB de wallpapers, URLs temporárias, hidratação tardia e reset parcial foram cobertos pelos testes existentes, sem reimplementar os mecanismos que já funcionavam.
 
+<!-- ----- LIMITES DO ACEITE DO CORE ----- -->
+
 ### Limites do aceite do Core
 
 ErrorBoundary existente continua isolando falhas para que outros aplicativos e seus rascunhos não sejam derrubados. Não há promessa de recuperar automaticamente todo estado volátil interno de um componente que tenha sofrido exceção fatal; essa recuperação depende do domínio e deverá ser verificada ao fechar seus editores/formulários. Não foi criada persistência silenciosa de dados privados para simular essa garantia.
 
 Sessão expirada/logout e cancelamento de navegação têm regressões. Não foi feito login administrativo real nesta execução. Dispositivos físicos, múltiplos monitores e mudanças de escala do sistema operacional não foram homologados; os limites locais abaixo não certificam essa matriz.
+
+<!-- === EVIDÊNCIAS DE VALIDAÇÃO === -->
 
 ## Evidências de validação
 
@@ -118,11 +146,15 @@ Sessão expirada/logout e cancelamento de navegação têm regressões. Não foi
 - Coleta de tarefas longas na amostra de arraste/resize/maximização inicial: nenhuma acima de 50 ms. Não é benchmark em hardware/dispositivos variados. A prévia foi recarregada após builds para repetir os fluxos no bundle vigente.
 - Coleta de exceções espontâneas da aplicação nos fluxos finais: vazia. Falhas de seletor do script de inspeção foram corrigidas e não foram classificadas como defeitos do produto.
 
+<!-- === TRADUÇÕES, COMMITS E CONTINUIDADE === -->
+
 ## Traduções, commits e continuidade
 
 `pt-BR.json` e `en.json` permanecem byte a byte iguais à base. Reutilizado o rótulo traduzido da área de arraste; nenhuma chave de interface foi criada. Códigos dos novos serviços (por exemplo REQUESTS_NOT_CONFIGURED, FILES_NOT_CONFIGURED, INVALID_PRIVATE_REQUEST, INVALID_FILE_METADATA e CONFLICT) precisarão de apresentação por `t()` quando as interfaces proprietárias os consumirem; códigos técnicos não devem ser traduzidos no protocolo.
 
 Sem commit, push ou arquivos temporários no repositório. Mudanças estão disponíveis no working tree para revisão. A Etapa 05 pode iniciar sua implementação local sobre estes contratos; não deve habilitar os recursos remotos em produção enquanto a Etapa 03 estiver bloqueada por homologação. Aceite físico/visual do proprietário permanece necessário.
+
+<!-- === ARQUIVOS DA ENTREGA === -->
 
 ## Arquivos da entrega
 
@@ -170,11 +202,17 @@ Inventário do working tree relativo a `d7167db`, incluindo arquivos novos ainda
 - worker/index.js
 
 
+<!-- === ATUALIZAÇÃO DE HOMOLOGAÇÃO — 20/10/2026 === -->
+
 ## Atualização de homologação — 20/10/2026
+
+<!-- ----- ESTADO DA ETAPA 03 ----- -->
 
 ### Estado da Etapa 03
 
 **Implementação local concluída e testes principais aprovados. Homologação integral para produção ainda pendente.**
+
+<!-- ----- HOMOLOGAÇÕES APROVADAS ----- -->
 
 ### Homologações aprovadas
 
@@ -192,6 +230,8 @@ Inventário do working tree relativo a `d7167db`, incluindo arquivos novos ainda
 - Quatro tabelas de limitadores presentes no D1 local.
 - Migrações D1 003 e 004 aplicadas localmente.
 
+<!-- ----- AJUSTES REALIZADOS DURANTE A HOMOLOGAÇÃO ----- -->
+
 ### Ajustes realizados durante a homologação
 
 - Substituição do adaptador R2 pelo adaptador Supabase Storage.
@@ -199,6 +239,8 @@ Inventário do working tree relativo a `d7167db`, incluindo arquivos novos ainda
 - Tratamento de HTTP 400 com código `NoSuchKey` e status interno 404.
 - Correção da leitura pública de rankings para utilizar `service_role` exclusivamente no Worker.
 - Atualização dos testes de regressão relacionados ao Storage.
+
+<!-- ----- PENDÊNCIAS EXTERNAS E OPERACIONAIS ----- -->
 
 ### Pendências externas e operacionais
 
@@ -209,6 +251,8 @@ Inventário do working tree relativo a `d7167db`, incluindo arquivos novos ainda
 - Aplicação e validação da migração incremental 010 para o índice `post_attachments(resource_id)`.
 - Rotação de credenciais expostas e revogação das sessões administrativas comprometidas.
 - Revisão das configurações e autorização formal antes de qualquer publicação em produção.
+
+<!-- ----- CRITÉRIO DE CONTINUIDADE ----- -->
 
 ### Critério de continuidade
 

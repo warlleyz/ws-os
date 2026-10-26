@@ -1,3 +1,9 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === WS OS V2 — ETAPA 00: ESCOPO E DECISÕES === -->
+
 # WS OS V2 — Etapa 00: Escopo e decisões
 
 **Referência:** Documento mestre v0.16.0  
@@ -5,11 +11,15 @@
 **Situação:** decisões aprovadas; registro documental de encerramento  
 **Próxima etapa:** 01 — Contratos e modelos compartilhados
 
+<!-- === 1. OBJETIVO === -->
+
 ## 1. Objetivo
 
 Consolidar as decisões necessárias à finalização da WS OS V2, preservando o escopo do documento mestre e estabelecendo critérios de conclusão por partes.
 
 Cada etapa deverá ser finalizada funcionalmente, visualmente e tecnicamente, com organização, testes e aceite do proprietário antes do encerramento definitivo.
+
+<!-- === 2. DECISÕES APROVADAS === -->
 
 ## 2. Decisões aprovadas
 
@@ -38,6 +48,8 @@ Cada etapa deverá ser finalizada funcionalmente, visualmente e tecnicamente, co
 | DEC-FIN-021 | B | Revisão funcional e visual antes do aceite de cada etapa |
 | DEC-FIN-022 | B | Conteúdo profissional fornecido e aprovado por aplicativo |
 
+
+<!-- ----- REVISÃO POSTERIOR — SUPABASE STORAGE (20/10/2026) ----- -->
 
 ### Revisão posterior — Supabase Storage (20/10/2026)
 
@@ -74,6 +86,8 @@ Cada etapa deverá ser finalizada funcionalmente, visualmente e tecnicamente, co
 Esta revisão altera exclusivamente o provedor de armazenamento e suas integrações técnicas. Os demais requisitos aprovados permanecem válidos.
 
 
+<!-- === 3. MÉTODO DE DESENVOLVIMENTO === -->
+
 ## 3. Método de desenvolvimento
 
 - Desenvolvimento manual, orientado passo a passo, sem delegação de implementação ao Codex.
@@ -85,6 +99,8 @@ Esta revisão altera exclusivamente o provedor de armazenamento e suas integraç
 - Revisão obrigatória pelo proprietário.
 - Push realizado pelo proprietário.
 - Nenhuma migração remota, publicação ou alteração de produção sem autorização.
+
+<!-- === 4. REGRAS DE ENCERRAMENTO === -->
 
 ## 4. Regras de encerramento
 
@@ -100,6 +116,8 @@ Estados admitidos:
 
 Dependências externas não homologadas não serão consideradas concluídas.
 
+<!-- === 5. DEPENDÊNCIAS E INSUMOS === -->
+
 ## 5. Dependências e insumos
 
 - Supabase de homologação separado: provisionamento e validação pendentes.
@@ -110,6 +128,8 @@ Dependências externas não homologadas não serão consideradas concluídas.
 - Conteúdo profissional: fornecimento e aprovação na etapa de cada aplicativo.
 - DOOM: seleção e validação de motor e arquivos redistribuíveis, desempenho e integração jogável pendentes.
 - Retenção e privacidade: detalhamento técnico, rotinas de exclusão e tratamento das obrigações legais nas etapas correspondentes.
+
+<!-- === 6. RESPONSABILIDADE POR ETAPA === -->
 
 ## 6. Responsabilidade por etapa
 
@@ -133,6 +153,8 @@ Dependências externas não homologadas não serão consideradas concluídas.
 | 15 | Integração final e preparação de publicação |
 
 A ordem preserva as dependências do plano de conclusão por partes encerráveis.
+
+<!-- === 7. RESULTADO DA REVISÃO === -->
 
 ## 7. Resultado da revisão
 

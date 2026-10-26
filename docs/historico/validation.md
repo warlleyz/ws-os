@@ -1,4 +1,10 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
 > **Atualização de 15/10/2026:** consulte primeiro [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md) e [Estado atual](implementation-status.md). O texto abaixo preserva descrições/evidências de etapas anteriores; afirmações sobre apps reservados, Mobile ausente ou apenas um app implementado foram superadas pelos commits atuais.
+
+<!-- === VERIFICAÇÃO DA REORGANIZAÇÃO === -->
 
 # Verificação da reorganização
 
@@ -16,6 +22,8 @@ Data: 14/10/2026. Execução sobre a cópia organizada e repetição no destino 
 - Aviso de key introduzido na extração do widget corrigido; sem novos erros observados após correção/reload.
 
 Limites: sem benchmarks, WCAG completa, backend, dispositivos físicos, localização real, testes E2E automatizados ou validação integral do plano. Sete testes Node não equivalem a cobertura dos 18 apps ou dos hooks React. Nenhuma instalação/atualização de dependências, push ou deploy.
+
+<!-- === R1 — REVISÃO COMPLEMENTAR DE TASKBAR E PAINÉIS — 14/10/2026 === -->
 
 ## R1 — revisão complementar de Taskbar e painéis — 14/10/2026
 
@@ -56,6 +64,8 @@ Escopo do checkpoint: somente R1. As alterações de performance anteriores cont
 locais e fora deste commit; seu diagnóstico permanece parcial para o travamento nas
 bordas do monitor. O stash WIP R3.3 e o arquivo local diagnostico-codex.patch foram
 preservados. R2 só será revisada após autorização para avançar.
+
+<!-- === R2 — REVISÃO COMPLEMENTAR DE CONTRATOS E RECUPERAÇÃO — 14/10/2026 === -->
 
 ## R2 — revisão complementar de contratos e recuperação — 14/10/2026
 
@@ -103,6 +113,8 @@ não garante corrigir erro persistente de rede ou invalidar cache nativo de mód
 Nenhuma alteração em localStorage, CSS, dependências ou na R3.3. Correções locais
 anteriores de performance preservadas e excluídas deste commit. Sem push.
 
+<!-- === R3 — GRADE, ORGANIZAÇÃO E PERSISTÊNCIA — 14/10/2026 === -->
+
 ## R3 — grade, organização e persistência — 14/10/2026
 
 Entregue: aplicação de posições persistidas, drag individual/de grupo, seleção por
@@ -143,6 +155,8 @@ continuam na R5. Não declarar o problema original de performance resolvido nest
 Instrumentação ficou fora do produto. Alterações locais anteriores de performance
 foram preservadas e excluídas do commit R3. Não houve instalação, migração destrutiva,
 commit do stash original ou push. Próxima etapa, mediante autorização: R4.
+
+<!-- === R4 — FUNDAÇÃO VISUAL, ACESSIBILIDADE E IDIOMA — 14/10/2026 === -->
 
 ## R4 — fundação visual, acessibilidade e idioma — 14/10/2026
 
@@ -191,9 +205,13 @@ Nenhuma biblioteca instalada, nenhum dado existente apagado. Stash R3.3 preserva
 correções locais de performance mantidas fora do commit. Sem push. Próxima etapa,
 mediante autorização: R5, com gates manuais ainda pendentes conforme descrito acima.
 
+<!-- === R5.1 — REVISÃO DAS CORREÇÕES LOCAIS DE PERFORMANCE === -->
+
 ## R5.1 — Revisão das correções locais de performance
 
 Data: 2026-10-14
+
+<!-- ----- ESCOPO ----- -->
 
 ### Escopo
 
@@ -202,12 +220,16 @@ Data: 2026-10-14
 - Sem alterações nas chaves de localStorage ou dependências.
 - Sem reaplicação de patches ou do stash R3.3.
 
+<!-- ----- VALIDAÇÕES ----- -->
+
 ### Validações
 
 - git diff --check: aprovado.
 - npm.cmd run lint: aprovado.
 - npm.cmd run build: aprovado (Vite 8.3.4).
 - node --test tests/core/*.test.cjs: 53/53 aprovados.
+
+<!-- ----- LIMITAÇÕES ----- -->
 
 ### Limitações
 
@@ -216,18 +238,26 @@ Data: 2026-10-14
 - WCAG AA não comprovada.
 - Não há comprovação de ganho de performance em preview.
 
+<!-- ----- RESULTADO ----- -->
+
 ### Resultado
 
 Correções locais revisadas e aprovadas nos gates estáticos.
 Integração condicionada a commit isolado.
 
+<!-- ----- PRÓXIMO PASSO ----- -->
+
 ### Próximo passo
 
 R5.2 — Ciclo de vida de janelas, Desktop e recursos.
 
+<!-- === R5.2 — CICLO DE VIDA DE JANELAS E DESKTOP === -->
+
 ## R5.2 — Ciclo de vida de janelas e Desktop
 
 Data: 14/10/2026
+
+<!-- ----- ALTERAÇÕES ----- -->
 
 ### Alterações
 
@@ -235,6 +265,8 @@ Data: 14/10/2026
 - Preservados os listeners, observers e timers existentes.
 - Nenhuma alteração em geometria, contratos ou persistência.
 - Nenhuma reorganização de diretórios ou dependência nova.
+
+<!-- ----- VALIDAÇÕES ----- -->
 
 ### Validações
 
@@ -245,6 +277,8 @@ Data: 14/10/2026
 - Arraste e cancelamento com Escape: aprovados manualmente.
 - Dez ciclos de abertura e fechamento: aprovados manualmente, sem problemas relatados.
 
+<!-- ----- LIMITAÇÕES ----- -->
+
 ### Limitações
 
 - Testes manuais realizados pelo desenvolvedor.
@@ -252,14 +286,20 @@ Data: 14/10/2026
 - Resize nativo junto às bordas físicas ainda não validado.
 - WCAG AA não comprovada.
 
+<!-- ----- RESULTADO ----- -->
+
 ### Resultado
 
 Correção de cleanup integrada ao escopo da R5.2.
 Testes automatizados e manuais aprovados.
 
+<!-- ----- PRÓXIMO PASSO ----- -->
+
 ### Próximo passo
 
 R5.3 — Diagnóstico e validação do resize nativo.
+
+<!-- === CONFIGURAÇÕES — 15/10/2026 === -->
 
 ## Configurações — 15/10/2026
 

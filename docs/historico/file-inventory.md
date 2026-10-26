@@ -1,3 +1,9 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === INVENTÁRIO DE ARQUIVOS — 15/10/2026 === -->
+
 # Inventário de arquivos — 15/10/2026
 
 Arquivos versionados e novos desta entrega; dependências, dist e segredos ignorados não fazem parte do inventário. A árvore não indica completude funcional. Módulos reservados e responsabilidades estão em [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md#4-arquitetura-atual).

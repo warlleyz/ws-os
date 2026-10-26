@@ -1,3 +1,9 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === WS OS V2 — ETAPA 01: DECISÕES TÉCNICAS E CONTRATOS COMPARTILHADOS === -->
+
 # WS OS V2 — Etapa 01: Decisões técnicas e contratos compartilhados
 
 **Referência:** Documento mestre v0.16.0, Etapa 00 e DEC-FIN-001 a DEC-FIN-029  
@@ -9,7 +15,11 @@
 
 ---
 
+<!-- === 1. PRINCÍPIOS ARQUITETURAIS === -->
+
 ## 1. Princípios arquiteturais
+
+<!-- ----- TEC-001 — PRESERVAR A ARQUITETURA ATUAL ----- -->
 
 ### TEC-001 — Preservar a arquitetura atual
 
@@ -26,6 +36,8 @@ Manter a estrutura:
 
 Não reconstruir o projeto, migrar para TypeScript ou introduzir bibliotecas apenas por preferência arquitetural.
 
+<!-- ----- TEC-002 — CONTRATOS PÚBLICOS ESTÁVEIS ----- -->
+
 ### TEC-002 — Contratos públicos estáveis
 
 Todo contrato compartilhado terá:
@@ -39,6 +51,8 @@ Todo contrato compartilhado terá:
 - Testes de comportamento e compatibilidade.
 
 Alterações incompatíveis exigirão migração explícita.
+
+<!-- ----- TEC-003 — RESPONSABILIDADES SEPARADAS ----- -->
 
 ### TEC-003 — Responsabilidades separadas
 
@@ -54,7 +68,11 @@ Cada camada terá responsabilidade definida:
 
 ---
 
+<!-- === 2. PARTE 01.1 — NAVEGAÇÃO E COMUNICAÇÃO ENTRE APLICATIVOS === -->
+
 ## 2. Parte 01.1 — Navegação e comunicação entre aplicativos
+
+<!-- ----- TEC-004 — REGISTRO DECLARATIVO DE NAVEGAÇÃO ----- -->
 
 ### TEC-004 — Registro declarativo de navegação
 
@@ -70,6 +88,8 @@ Adicionar contratos declarativos para:
 - Política de retorno.
 
 Evitar condições específicas como `appId === 'projects'` dentro do gerenciador de instâncias.
+
+<!-- ----- TEC-005 — RESULTADO DE ABERTURA ----- -->
 
 ### TEC-005 — Resultado de abertura
 
@@ -89,6 +109,8 @@ Consolidar `requestAppOpen` como operação pura que produz:
 
 Não produzir notificações ou efeitos colaterais dentro de atualizadores de estado React.
 
+<!-- ----- TEC-006 — POLÍTICA DE INSTÂNCIAS ----- -->
+
 ### TEC-006 — Política de instâncias
 
 Conforme DEC-FIN-023 B:
@@ -97,6 +119,8 @@ Conforme DEC-FIN-023 B:
 - Aplicativos multi-instância respeitam a intenção da abertura contextual.
 - Uma abertura comum não força novas instâncias quando não necessário.
 - A identidade da instância permanece estável durante a navegação interna.
+
+<!-- ----- TEC-007 — VALIDAÇÃO DOS PARÂMETROS ----- -->
 
 ### TEC-007 — Validação dos parâmetros
 
@@ -107,6 +131,8 @@ Conforme DEC-FIN-027 B:
 - Worker valida permissões quando houver dados ou operações protegidas.
 - Parâmetros desconhecidos são rejeitados nos contratos de navegação contextual.
 - Não permitir objetos executáveis, funções ou valores arbitrários como parâmetros de navegação.
+
+<!-- ----- TEC-008 — CONTEXTO DE ORIGEM ----- -->
 
 ### TEC-008 — Contexto de origem
 
@@ -121,6 +147,8 @@ Origem não é autorização. O contexto não poderá ser usado para conceder pe
 
 Não implementar histórico ilimitado entre aplicativos.
 
+<!-- ----- TEC-009 — RETORNO À ORIGEM ----- -->
+
 ### TEC-009 — Retorno à origem
 
 Conforme DEC-FIN-024 A e DEC-FIN-026 B:
@@ -130,6 +158,8 @@ Conforme DEC-FIN-024 A e DEC-FIN-026 B:
 3. Não recriar sessões administrativas ou formulários com dados privados automaticamente.
 4. Quando o retorno não for seguro, oferecer navegação para uma área pública adequada.
 5. No Mobile, preservar o retorno contextual à tela de origem.
+
+<!-- ----- TEC-010 — NAVEGAÇÃO PROTEGIDA ----- -->
 
 ### TEC-010 — Navegação protegida
 
@@ -154,6 +184,8 @@ Fluxo:
 
 Não salvar automaticamente documentos cuja política aprovada exige salvamento manual.
 
+<!-- ----- TEC-011 — NAVEGAÇÃO INTERNA E RETORNO EXTERNO ----- -->
+
 ### TEC-011 — Navegação interna e retorno externo
 
 Manter responsabilidades distintas:
@@ -162,6 +194,8 @@ Manter responsabilidades distintas:
 - Retorno externo: responsabilidade da coordenação do Core.
 
 O retorno externo será utilizado quando a navegação interna não consumir a ação ou quando o usuário escolher explicitamente retornar à origem.
+
+<!-- ----- TEC-012 — TRATAMENTO DE ERROS ----- -->
 
 ### TEC-012 — Tratamento de erros
 
@@ -181,6 +215,8 @@ Mensagens devem ser traduzíveis.
 
 Falhas não devem destruir a instância atual nem apagar rascunhos.
 
+<!-- ----- TEC-013 — URL E COMPARTILHAMENTO ----- -->
+
 ### TEC-013 — URL e compartilhamento
 
 A navegação comum dentro do WS OS não modificará a URL do navegador.
@@ -191,7 +227,11 @@ Aplicativos internos não terão URLs independentes obrigatórias.
 
 ---
 
+<!-- === 3. PARTE 01.2 — ARQUIVOS, DOCUMENTOS E ANEXOS === -->
+
 ## 3. Parte 01.2 — Arquivos, documentos e anexos
+
+<!-- ----- TEC-014 — TRÊS ORIGENS INDEPENDENTES ----- -->
 
 ### TEC-014 — Três origens independentes
 
@@ -203,6 +243,8 @@ Definir três classes de recursos:
 
 Nenhuma dessas classes deverá ser identificada apenas por uma URL genérica.
 
+<!-- ----- TEC-015 — IDENTIFICADORES ----- -->
+
 ### TEC-015 — Identificadores
 
 - Arquivos locais mantêm `fileId`.
@@ -211,6 +253,8 @@ Nenhuma dessas classes deverá ser identificada apenas por uma URL genérica.
 - Chaves internas do R2 não serão usadas como autorização nem expostas como referência confiável ao cliente.
 
 A interface do Visualizador receberá um descritor validado conforme a origem.
+
+<!-- ----- TEC-016 — ARMAZENAMENTO PESSOAL ----- -->
 
 ### TEC-016 — Armazenamento pessoal
 
@@ -224,6 +268,8 @@ Preservar a implementação IndexedDB existente:
 - Persistência local e isolamento do usuário visitante.
 
 Os limites do R2 não alteram automaticamente os limites pessoais.
+
+<!-- ----- TEC-017 — UPLOAD ADMINISTRATIVO ----- -->
 
 ### TEC-017 — Upload administrativo
 
@@ -241,6 +287,8 @@ Uploads oficiais exigirão:
 
 Não confiar em MIME declarado pelo navegador como única verificação.
 
+<!-- ----- TEC-018 — ANEXOS DAS NOTAS ----- -->
+
 ### TEC-018 — Anexos das Notas
 
 Tipos inicialmente admitidos:
@@ -255,6 +303,8 @@ Até cinco anexos por publicação e 10 MB por arquivo.
 
 Os anexos serão relacionados à publicação por identificador, sem duplicar binários no banco.
 
+<!-- ----- TEC-019 — PUBLICAÇÃO E ACESSO ----- -->
+
 ### TEC-019 — Publicação e acesso
 
 - Rascunhos e anexos não publicados: acesso administrativo.
@@ -264,6 +314,8 @@ Os anexos serão relacionados à publicação por identificador, sem duplicar bi
 
 Não disponibilizar bucket R2 público para contornar autenticação.
 
+<!-- ----- TEC-020 — INTEGRIDADE DOS UPLOADS ----- -->
+
 ### TEC-020 — Integridade dos uploads
 
 Definir estados técnicos de upload e publicação para impedir referências a objetos inexistentes.
@@ -271,6 +323,8 @@ Definir estados técnicos de upload e publicação para impedir referências a o
 Falhas entre R2 e banco deverão ser detectáveis e recuperáveis.
 
 Objetos órfãos poderão ser removidos por rotina controlada e idempotente.
+
+<!-- ----- TEC-021 — VISUALIZADOR E EDITOR ----- -->
 
 ### TEC-021 — Visualizador e Editor
 
@@ -284,7 +338,11 @@ Não converter o Editor local em uma interface de edição remota sem autorizaç
 
 ---
 
+<!-- === 4. PARTE 01.3 — APIS, ERROS E ATUALIZAÇÃO DE DADOS === -->
+
 ## 4. Parte 01.3 — APIs, erros e atualização de dados
+
+<!-- ----- TEC-022 — PADRÃO DE RESPOSTAS ----- -->
 
 ### TEC-022 — Padrão de respostas
 
@@ -303,6 +361,8 @@ Padronizar respostas novas e evoluções compatíveis dos endpoints existentes.
 
 Não alterar imediatamente todos os endpoints legados apenas para uniformizar formato. Adaptadores compatíveis serão utilizados quando necessário.
 
+<!-- ----- TEC-023 — CÓDIGOS DE ERRO COMPARTILHADOS ----- -->
+
 ### TEC-023 — Códigos de erro compartilhados
 
 Categorias:
@@ -320,6 +380,8 @@ Categorias:
 
 Utilizar códigos estáveis para lógica e tradução; não depender de comparar textos de erro.
 
+<!-- ----- TEC-024 — CONCORRÊNCIA OTIMISTA ----- -->
+
 ### TEC-024 — Concorrência otimista
 
 Entidades administrativas editáveis utilizarão revisão ou mecanismo equivalente.
@@ -335,6 +397,8 @@ Se outra sessão tiver alterado o recurso:
 
 Evitar sobrescrita silenciosa.
 
+<!-- ----- TEC-025 — IDEMPOTÊNCIA ----- -->
+
 ### TEC-025 — Idempotência
 
 Operações com risco de duplicação aceitarão chave idempotente, especialmente:
@@ -348,6 +412,8 @@ A chave ficará vinculada à operação e ao resultado no servidor.
 
 O cliente não deverá criar um novo identificador para repetir a mesma tentativa incerta.
 
+<!-- ----- TEC-026 — CANCELAMENTO E TIMEOUT ----- -->
+
 ### TEC-026 — Cancelamento e timeout
 
 Serviços HTTP utilizarão `AbortController` quando aplicável.
@@ -357,6 +423,8 @@ Cada integração terá timeout adequado à sua operação.
 Cancelar uma requisição não implica desfazer uma escrita que já tenha sido concluída no servidor.
 
 Por isso, operações de escrita devem permitir consulta e reconciliação do resultado.
+
+<!-- ----- TEC-027 — CACHE PÚBLICO ----- -->
 
 ### TEC-027 — Cache público
 
@@ -368,6 +436,8 @@ Adotar mecanismo centralizado para recursos remotos públicos:
 - Revalidação após operações administrativas.
 - Estados explícitos para dados antigos.
 - Tratamento de indisponibilidade.
+
+<!-- ----- TEC-028 — SINCRONIZAÇÃO ENTRE JANELAS E ABAS ----- -->
 
 ### TEC-028 — Sincronização entre janelas e abas
 
@@ -381,7 +451,11 @@ Dados remotos serão reconsultados segundo o contrato de cache.
 
 ---
 
+<!-- === 5. PARTE 01.4 — MODELOS COMPARTILHADOS === -->
+
 ## 5. Parte 01.4 — Modelos compartilhados
+
+<!-- ----- TEC-029 — SOLICITAÇÕES PRIVADAS ----- -->
 
 ### TEC-029 — Solicitações privadas
 
@@ -415,6 +489,8 @@ Histórico mínimo de mudanças administrativas, sem registrar desnecessariament
 
 Reuniões confirmadas e eventos públicos serão entidades distintas.
 
+<!-- ----- TEC-030 — RETENÇÃO ----- -->
+
 ### TEC-030 — Retenção
 
 Retenção inicial de 180 dias para solicitações concluídas ou arquivadas.
@@ -426,6 +502,8 @@ Exclusão antecipada administrativa com confirmação.
 Rotina automática para vencimentos, com tratamento de erros e registro operacional mínimo.
 
 Requisitos legais poderão exigir tratamento específico, devidamente documentado.
+
+<!-- ----- TEC-031 — COMUNICAÇÃO EMAILJS ----- -->
 
 ### TEC-031 — Comunicação EmailJS
 
@@ -439,6 +517,8 @@ O fluxo deverá garantir:
 - Informar ao visitante o resultado técnico confirmado.
 
 Dados pessoais não devem entrar em logs públicos.
+
+<!-- ----- TEC-032 — EVENTOS PÚBLICOS ----- -->
 
 ### TEC-032 — Eventos públicos
 
@@ -457,6 +537,8 @@ Campos essenciais:
 
 Somente eventos publicados serão consumidos por painel e widget Calendário.
 
+<!-- ----- TEC-033 — PROJETOS E DEMONSTRAÇÕES ----- -->
+
 ### TEC-033 — Projetos e demonstrações
 
 Projeto terá identificador estável, informações públicas, tecnologias, links validados e atributos editoriais de destaque e ordenação.
@@ -469,6 +551,8 @@ Demo será um recurso relacionado ao projeto, com modo declarado:
 
 Nenhuma origem externa receberá permissões irrestritas automaticamente.
 
+<!-- ----- TEC-034 — PUBLICAÇÕES ----- -->
+
 ### TEC-034 — Publicações
 
 Preservar o modelo atual de Notas, acrescentando relacionamento de anexos sem reinventar o CRUD.
@@ -476,6 +560,8 @@ Preservar o modelo atual de Notas, acrescentando relacionamento de anexos sem re
 Rascunhos, publicações e anexos respeitarão o mesmo ciclo editorial.
 
 Curtidas e contagens públicas deverão tratar atualização concorrente e respostas obsoletas.
+
+<!-- ----- TEC-035 — RANKINGS ----- -->
 
 ### TEC-035 — Rankings
 
@@ -493,6 +579,8 @@ O servidor valida limites por jogo.
 Turnstile e rate limiting reduzem abuso, mas não tornam confiáveis pontuações calculadas pelo navegador.
 
 Identificadores privados e tokens antiabuso não serão divulgados.
+
+<!-- ----- TEC-036 — PREFERÊNCIAS ----- -->
 
 ### TEC-036 — Preferências
 
@@ -513,6 +601,8 @@ Valores legados deverão ser migrados ou adaptados de maneira explícita e não 
 
 Falhas de persistência não poderão apagar arquivos pessoais nem bloquear toda a interface.
 
+<!-- ----- TEC-037 — REDEFINIÇÃO DE PREFERÊNCIAS ----- -->
+
 ### TEC-037 — Redefinição de preferências
 
 Reset atuará apenas em chaves permitidas.
@@ -528,7 +618,11 @@ Mostrar confirmação quando houver consequência relevante.
 
 ---
 
+<!-- === 6. PARTE 01.5 — SEGURANÇA, SESSÃO E AÇÕES AUTORIZADAS === -->
+
 ## 6. Parte 01.5 — Segurança, sessão e ações autorizadas
+
+<!-- ----- TEC-038 — AUTORIZAÇÃO ----- -->
 
 ### TEC-038 — Autorização
 
@@ -537,6 +631,8 @@ Autorização administrativa será verificada pelo servidor em toda operação p
 O frontend poderá ocultar controles, mas nunca será fonte de autorização.
 
 RLS será defesa complementar nos dados armazenados em Supabase.
+
+<!-- ----- TEC-039 — SESSÃO ADMINISTRATIVA ----- -->
 
 ### TEC-039 — Sessão administrativa
 
@@ -550,6 +646,8 @@ Preservar a autenticação atual e reforçar:
 - Ausência de credenciais em logs ou histórico do Terminal.
 
 O token não será persistido indiscriminadamente em armazenamento acessível ao frontend.
+
+<!-- ----- TEC-040 — CATÁLOGO DE AÇÕES ----- -->
 
 ### TEC-040 — Catálogo de ações
 
@@ -567,6 +665,8 @@ Cada ação declarará:
 
 O catálogo descreve capacidades. Ele não concede permissões.
 
+<!-- ----- TEC-041 — BUSCA GLOBAL ----- -->
+
 ### TEC-041 — Busca global
 
 A busca poderá executar ações registradas, conforme DEC-FIN-006 C.
@@ -576,6 +676,8 @@ Ações de navegação serão diferenciadas de alterações de estado.
 As operações devem respeitar autenticação e confirmação quando aplicável.
 
 Resultados remotos não poderão produzir comandos executáveis arbitrários.
+
+<!-- ----- TEC-042 — WALLY ----- -->
 
 ### TEC-042 — Wally
 
@@ -591,6 +693,8 @@ Conforme DEC-FIN-005 B:
 Respostas da IA poderão sugerir ações, mas a decisão de executá-las depende do catálogo e da política local.
 
 Não conceder funções administrativas ao Wally por inferência.
+
+<!-- ----- TEC-043 — SEGURANÇA DE DADOS ----- -->
 
 ### TEC-043 — Segurança de dados
 
@@ -608,7 +712,11 @@ Evitar:
 
 ---
 
+<!-- === 7. PARTE 01.6 — TESTES, DOCUMENTAÇÃO E CONGELAMENTO === -->
+
 ## 7. Parte 01.6 — Testes, documentação e congelamento
+
+<!-- ----- TEC-044 — TESTES DE CONTRATO ----- -->
 
 ### TEC-044 — Testes de contrato
 
@@ -627,6 +735,8 @@ Cobrir principalmente:
 - Dados obsoletos entre abas.
 - Limites e permissões dos arquivos.
 
+<!-- ----- TEC-045 — COMPATIBILIDADE ----- -->
+
 ### TEC-045 — Compatibilidade
 
 Não modificar indiscriminadamente APIs que já possuem consumidores.
@@ -634,6 +744,8 @@ Não modificar indiscriminadamente APIs que já possuem consumidores.
 Sempre identificar os consumidores antes de alterar assinatura, formato ou semântica.
 
 Quando necessário, fornecer transição compatível e testes de regressão.
+
+<!-- ----- TEC-046 — DOCUMENTAÇÃO CENTRAL ----- -->
 
 ### TEC-046 — Documentação central
 
@@ -648,6 +760,8 @@ Após cada implementação:
 - Remover afirmações históricas incorretas da seção atual.
 - Preservar informações históricas claramente identificadas.
 
+<!-- ----- TEC-047 — ORGANIZAÇÃO ----- -->
+
 ### TEC-047 — Organização
 
 Priorizar módulos existentes.
@@ -655,6 +769,8 @@ Priorizar módulos existentes.
 Criar arquivos somente para responsabilidades concretas, como validação de navegação, catálogo de ações ou modelos compartilhados, quando isso reduzir acoplamento ou melhorar testes.
 
 Não criar dezenas de arquivos por convenção.
+
+<!-- ----- TEC-048 — ACEITE ----- -->
 
 ### TEC-048 — Aceite
 
@@ -671,6 +787,8 @@ Uma parte estará concluída somente quando:
 A Etapa 01 será encerrada depois de todas as partes concluídas e do commit de consolidação correspondente.
 
 ---
+
+<!-- === 8. MATRIZ DE RESPONSABILIDADES POR ETAPA === -->
 
 ## 8. Matriz de responsabilidades por etapa
 
@@ -693,6 +811,8 @@ Na Etapa 01, estabilizaremos os formatos, as responsabilidades e os contratos co
 
 ---
 
+<!-- === 9. DEPENDÊNCIAS EXTERNAS === -->
+
 ## 9. Dependências externas
 
 Continuam pendentes de homologação:
@@ -709,6 +829,8 @@ Continuam pendentes de homologação:
 Essas pendências não autorizam simular sucesso de operações reais nem declarar uma integração finalizada.
 
 ---
+
+<!-- === 10. ORDEM DE IMPLEMENTAÇÃO MANUAL DA ETAPA 01 === -->
 
 ## 10. Ordem de implementação manual da Etapa 01
 

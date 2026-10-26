@@ -1,12 +1,20 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
 > **Referência vigente da revisão final:** [Etapa 15](finalizacao/ETAPA-15-ANDAMENTO.md), [plano](PLANO-FINALIZACAO-POR-ETAPAS.md) e checkpoints 03–14. Os trechos datados abaixo são históricos. Hoje há dois shells funcionais, 17 aplicativos registrados com carregamento sob demanda e autenticação administrativa; arquivos pessoais permanecem no IndexedDB, oficiais no Supabase Storage privado via Worker. Não interpretar descrições antigas de recursos reservados como estado atual, nem testes controlados como homologação externa.
 
 
 > **Atualização de 20/10/2026 — Etapas 03/04 e revisão do armazenamento:** os contratos/backend, formatos HTTP, migrações e limites estão na [entrega consolidada](finalizacao/ETAPAS-03-04-ENTREGA.md) e no [mapa de rotas](backend/WORKER.md). O armazenamento de arquivos oficiais foi alterado de Cloudflare R2 para Supabase Storage privado, conforme revisão posterior da DEC-FIN-003, DEC-FIN-011 e DEC-FIN-017. Solicitações, arquivos oficiais, vínculos e moderação possuem implementação local em revisão; homologação real continua pendente. O texto da Etapa 01 abaixo é uma referência histórica, não uma descrição integral do backend atual. Preferências incluem cursor e Não perturbe no reset/sincronização.
 
+<!-- === CONTRATOS COMPARTILHADOS — ESTADO ATUAL DA ETAPA 01 === -->
+
 # Contratos compartilhados — estado atual da Etapa 01
 
 Atualizado em 19/10/2026. Fonte de decisões: [Etapa 01](finalizacao/ETAPA-01-DECISOES-TECNICAS.md). Evidências e limites: [conclusão técnica](finalizacao/ETAPA-01-PARTE-01.6-CONCLUSAO.md).
 
+
+<!-- === REVISÃO VIGENTE — ARMAZENAMENTO DE ARQUIVOS OFICIAIS === -->
 
 ## Revisão vigente — Armazenamento de arquivos oficiais
 
@@ -21,6 +29,8 @@ A implementação da Etapa 03 substitui Cloudflare R2 por Supabase Storage, pres
 - **Controle de acesso:** visitantes não recebem credenciais, URLs administrativas ou acesso direto ao bucket.
 - **Publicação:** somente recursos autorizados, disponíveis e efetivamente publicáveis podem ser entregues pela API.
 - **Integridade:** operações incertas não são consideradas concluídas sem reconciliação entre PostgreSQL e Storage.
+
+<!-- ----- CONTRATOS HTTP PRESERVADOS ----- -->
 
 ### Contratos HTTP preservados
 
@@ -43,11 +53,15 @@ A mudança de provedor não autoriza alterações nos modelos públicos, nos ide
 **Estado:** testes locais informados como aprovados; integração real com Supabase Storage ainda não homologada. As seções históricas abaixo permanecem preservadas para rastreabilidade.
 
 
+<!-- === RESPONSABILIDADES E COMPATIBILIDADE === -->
+
 ## Responsabilidades e compatibilidade
 
 Core coordena instâncias e navegação; aplicativos mantêm seus fluxos; serviços validam e adaptam dados; Workers autorizam operações remotas; banco garante persistência e integridade. Os contratos desta etapa não equivalem à implementação de todos os domínios futuros. Não há backend R2 novo, migração aplicada ou armazenamento remoto de arquivos pessoais nesta entrega.
 
 Os módulos de contrato exportam validadores e resultados estruturados. Consumidores devem verificar a propriedade ok ou o resultado específico do módulo, sem inferir sucesso de um status HTTP isolado. Falhas de validação não autorizam gravar valores corrigidos silenciosamente. Erros preservam códigos estáveis e mensagens seguras; dados brutos do servidor não são apresentados como mensagens confiáveis.
+
+<!-- === NAVEGAÇÃO, INSTÂNCIAS E PROTEÇÃO === -->
 
 ## Navegação, instâncias e proteção
 
@@ -60,6 +74,8 @@ Os módulos de contrato exportam validadores e resultados estruturados. Consumid
 - Alterações não salvas usam guard por instância e confirmação central. Cancelar preserva rascunho; confirmar executa uma vez; desmontagem libera o guard. Desktop e Mobile usam o mesmo Core. Navegação interna não modifica a URL; compartilhamento continua restrito aos recursos públicos aprovados.
 - Consumidores: shells, Busca, Wally, Currículo, Certificados, Projetos, Notas, Arquivos e visualizadores.
 
+<!-- === ARQUIVOS, DOCUMENTOS E ANEXOS === -->
+
 ## Arquivos, documentos e anexos
 
 Fontes: src/services/storage/fileResourceContract.js, managedFileContract.js, noteAttachmentContract.js, fileModel.js e localFilesStorage.js.
@@ -71,6 +87,8 @@ Fontes: src/services/storage/fileResourceContract.js, managedFileContract.js, no
 - Visualizador recebe descritor ou entradas legadas compatíveis (fileId/url permitida). Encaminha arquivos locais ao leitor local, estáticos ao fluxo público e managed ao estado seguro de indisponibilidade. Editor permanece restrito a texto local compatível, com revisão e proteção de alterações. URLs temporárias pertencem ao consumidor e precisam ser liberadas.
 - Erros de recurso inválido, inexistente, acesso negado, quota, conflito e leitura são distintos; falha não deve ser apresentada como salvamento bem-sucedido.
 
+<!-- === APIS, REVISÕES E IDEMPOTÊNCIA === -->
+
 ## APIs, revisões e idempotência
 
 Fontes: apiContract.js, apiResponseAdapter.js, revisionContract.js, idempotencyContract.js e httpRequestContract.js em src/services.
@@ -80,6 +98,8 @@ Fontes: apiContract.js, apiResponseAdapter.js, revisionContract.js, idempotencyC
 - Idempotência vincula chave, operação, escopo e fingerprint SHA-256 canônico do pedido. Registro concluído reutiliza o resultado; chave reaproveitada com outro pedido conflita; resultado incerto exige reconciliação. Ausência de registro exige reserva atômica no servidor, não autorização para repetir cegamente. O contrato não oferece armazenamento de registros nem transação de banco.
 - executeJsonRequest limita o tempo da requisição e leitura do JSON, propaga cancelamento e retorna {response,payload}. Leitura pode ser repetida conforme política; escrita enviada cuja resposta não chegou é HTTP_RESULT_UNKNOWN, sem reenvio automático. O serviço consumidor deve conferir status e adaptar a resposta.
 - Consumidores atuais: autenticação, conteúdo público, Notas e serviços de consulta. Aplicações futuras devem reutilizar os contratos, mantendo autorização real no Worker.
+
+<!-- === CACHE PÚBLICO E SINCRONIZAÇÃO === -->
 
 ## Cache público e sincronização
 
@@ -91,6 +111,8 @@ Fontes: publicCacheContract.js, publicDataService.js e usePublicResource.js.
 - invalidatePublicData invalida o cache e impede entrega/repopulação por tarefas antigas. Consumidores inscritos atualizam seletivamente os recursos afetados.
 - subscribePublicData usa BroadcastChannel, sinalização storage e revalidação por foco, com limpeza dos listeners e deduplicação limitada de sinais. Transporte entre abas aceita apenas sinais públicos conhecidos de /api/posts e /api/content; não transmite conteúdo, tokens, parâmetros privados ou localização. Outros recursos públicos têm a política temporal normal.
 - Resultado legado preservado: {data,updatedAt,source,warning?}; cacheStatus e requiresRevalidation acrescentam informação. Notas, conteúdo administrativo, Busca, Arquivos e Calendário participam da invalidação pertinente.
+
+<!-- === MODELOS DE DOMÍNIO === -->
 
 ## Modelos de domínio
 
@@ -104,11 +126,15 @@ Fontes: privateRequestContract.js e publicContentContract.js.
 - Publicação preserva ciclo editorial e anexos; projeção pública exclui rascunhos. Ranking aplica limites por jogo (Snake 222; Flappy 100000) e só projeta campos públicos, sem tokens ou hashes privados.
 - Estes contratos são a base dos domínios das etapas proprietárias. Não constituem novas telas administrativas, schemas de banco ou integração remota homologada.
 
+<!-- === PREFERÊNCIAS === -->
+
 ## Preferências
 
 Fontes: preferenceContract.js e preferencesManager.js.
 
 Versão lógica 1, inventário explícito das chaves existentes e adaptação dos formatos raw/json/boolean/json-or-raw. Leitura de formato inválido ou versão futura não regrava dados. Valores são estruturais; gerenciadores existentes conservam a normalização específica e as chaves legadas. Reset aceita somente ações/categorias da allowlist e tenta as operações existentes, relatando falhas parciais. Não apaga arquivos pessoais, conteúdo de apps, sessão, posições ou imagem persistida fora de seu escopo aprovado. Migrações físicas futuras pertencem às etapas 04/14.
+
+<!-- === PERMISSÕES, SESSÃO E CATÁLOGO DE AÇÕES === -->
 
 ## Permissões, sessão e catálogo de ações
 
@@ -120,6 +146,8 @@ Fontes: authorizationContract.js, actionContract.js, actionService.js e authServ
 - executeRegisteredAction rejeita parâmetros extras/código, copia argumentos aprovados e revalida autorização após confirmação. Executor vem de mapa local, nunca do pedido/IA. Sem adaptador disponível, retorna ACTION_UNAVAILABLE.
 - Busca e Wally usam o catálogo para abrir apps públicos. Adaptador legado do Wally aceita somente sugestão explícita open-app. Isso não habilita ferramentas privilegiadas ou novas interfaces de automação; integrações completas pertencem às etapas 11/12.
 
+<!-- === VALIDAÇÃO E EVOLUÇÃO === -->
+
 ## Validação e evolução
 
 Testes de contrato usam tests/helpers/contract-loader.cjs para resolver as dependências reais dos módulos puros; harnesses de Core/UI fornecem somente as dependências de ambiente necessárias. Testes de API simulam transporte para verificar regras negativas e não homologam provedores. A conclusão 01.6 registra os testes manuais, resultados e dependências externas.
@@ -128,9 +156,13 @@ Mudanças incompatíveis exigem versão/adaptador, identificação dos consumido
 
 ---
 
+<!-- === HISTÓRICO ANTERIOR À CONSOLIDAÇÃO DA ETAPA 01 === -->
+
 ## Histórico anterior à consolidação da Etapa 01
 
 O conteúdo abaixo é preservado para rastreabilidade. Descreve momentos anteriores do projeto; afirmações como ausência de autenticação, IndexedDB ou atualização contextual não representam o contrato atual. Em divergência, prevalecem as seções atuais acima e os validadores executáveis.
+
+<!-- ----- CONTRATOS ATUAIS E EVOLUÇÃO NECESSÁRIA ----- -->
 
 ### Contratos atuais e evolução necessária
 
@@ -369,6 +401,8 @@ Contratos puros: privateRequestContract (estados privados/revisão/retenção e 
 #### Etapa 01.5 — sessão e ações
 
 Catálogo e capacidades em core/actionContract e authorizationContract; adaptadores confiáveis em services/actionService. Busca e Wally consomem o catálogo para navegação. createAdminRequestScope cancela operações na mudança de versão da sessão e requer dispose; o token permanece em memória. Nenhuma pré-checagem local confere autorização ao Worker. Ver [conclusão 01.5](finalizacao/ETAPA-01-PARTE-01.5-CONCLUSAO.md).
+
+<!-- === PROJETOS EM DESTAQUE — ESCOPO VIGENTE EM 25/10/2026 === -->
 
 ## Projetos em destaque — escopo vigente em 25/10/2026
 

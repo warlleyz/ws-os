@@ -1,11 +1,21 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 15 — INTEGRAÇÃO FINAL E PREPARAÇÃO DE PUBLICAÇÃO === -->
+
 # Etapa 15 — Integração final e preparação de publicação
 
 > Atualização de escopo em 25/10/2026: o catálogo atual tem 17 aplicativos, sem execução de projetos.
 > As evidências e contagens abaixo são históricas. Consultar [remoção e validação atual](../REMOCAO-DEMONSTRACOES.md).
 
+<!-- === ESTADO: PREPARAÇÃO LOCAL VALIDADA; REVISÃO E HOMOLOGAÇÃO PENDENTES === -->
+
 ## Estado: preparação local validada; revisão e homologação pendentes
 
 Este é o ponto de entrada vigente para retomar o projeto. O mestre e o plano por etapas continuam normativos; os checkpoints anteriores preservam evidências e limitações. Não há certificação de 100%, aceite do proprietário ou publicação. Nenhuma alteração anterior foi descartada. Sem commit/push, migração, DNS, credenciais ou serviços externos nesta execução. Wally remoto permanece desativado.
+
+<!-- === ENTREGAS DESTE BLOCO === -->
 
 ## Entregas deste bloco
 
@@ -14,6 +24,8 @@ Este é o ponto de entrada vigente para retomar o projeto. O mestre e o plano po
 - index.html recebeu título profissional, descrição, tipo/título/descrição Open Graph e cartão summary. Não foi inventado domínio canônico, URL pública de preview ou imagem social; completar após confirmação do domínio e conteúdo.
 - Corrigido favicon referenciado mas ausente: public/favicon.svg reproduz os quatro quadrados do SystemIcon/menu existente. Conferência HTTP deixa de receber HTML da SPA no lugar do SVG.
 - Arquitetura e contratos recebem aviso de estado vigente; descrições datadas permanecem históricas. Inventário atual e roteiro de continuidade ficam centralizados neste documento para evitar mais documentos concorrentes.
+
+<!-- === EVIDÊNCIAS DESTA EXECUÇÃO === -->
 
 ## Evidências desta execução
 
@@ -27,6 +39,8 @@ Este é o ponto de entrada vigente para retomar o projeto. O mestre e o plano po
 | Segredos | Busca local limitada por padrões comuns de chave privada, GitHub e Google em 384 arquivos rastreados: nenhuma correspondência. .env.local, .dev.vars, .wrangler, dist e node_modules ignorados pelo Git |
 | Limite da busca | Não comprova ausência de segredos arbitrários, tokens históricos ou revogação de credenciais; não imprime valores, não acessa arquivos de ambiente nem altera histórico |
 | Visual / serviços | Nenhum teste físico, leitor de tela, captura visual, console de navegador real, RLS remota, escrita externa, DNS ou deploy foi executado nesta etapa |
+
+<!-- === MATRIZ DOS 18 APLICATIVOS === -->
 
 ## Matriz dos 18 aplicativos
 
@@ -53,6 +67,8 @@ Todos têm implementação registrada. “Local” significa evidência dos chec
 | Sobre o Sistema | Etapa 14: versão técnica/créditos; aprovar versão pública, editorial e licenças |
 | Visualizador de Demos | Etapa 06: descritor/origem/limites; catálogo/origens autorizadas ainda vazios, requer demo real fornecida |
 
+<!-- === ROTEIRO DE REVISÃO MANUAL, EM ORDEM === -->
+
 ## Roteiro de revisão manual, em ordem
 
 1. **Conteúdo e traduções:** aprovar currículo/certificados/perfil/projetos/demos. Traduções JSON permanecem intocadas conforme instrução do autor; consolidar PENDENTE_I18N dos checkpoints 08/10/11/12 e textos literais de Arquivos/PDF documentados na 05. Executar a fase de tradução separadamente quando autorizada; teste de chamadas t() não comprova PT/EN completos.
@@ -61,6 +77,8 @@ Todos têm implementação registrada. “Local” significa evidência dos chec
 4. **Core e shell:** arrastar/resize/snap/maximizar/restaurar e múltiplas instâncias; agrupamento/prévias, menu/busca, overlays/foco e quatro widgets; testar teclado virtual e áreas seguras. Medir fluidez e console no navegador, sem alegar desempenho com base apenas no build.
 5. **Backend em homologação autorizada:** login/logout/expiração e visitante/usuário comum/admin; publicações e anexos, pedidos privados, upload/download oficiais, idempotência/revisão, likes, ranking e moderação. Consultar WORKER.md, CONFIGURACAO.md e entrega 03/04; evidências anteriores de homologação não foram repetidas agora.
 6. **Produção, somente após aceite:** conferir migrações efetivamente aplicadas, restaurar backup em ambiente isolado, documentar flags/segredos/limites, publicar com autorização e executar smoke/rollback controlados.
+
+<!-- === PORTÕES EXTERNOS E OPERACIONAIS ANTES DE PUBLICAR === -->
 
 ## Portões externos e operacionais antes de publicar
 
@@ -73,6 +91,8 @@ Todos têm implementação registrada. “Local” significa evidência dos chec
 - **Domínio/SEO:** confirmar domínio final e HTTPS, redirects/SPA, canonical/og:url, imagem social e conteúdo público aprovado. Não assumir que o domínio planejado já está configurado.
 - **Operação:** definir responsável, alertas de erro, métricas sem conteúdo privado, orçamento/cotas e retenção; testar backup/exportação e restauração. Plano de rollback deve indicar versão de frontend/Worker conhecida, flags e compatibilidade com schema; rollback de código não reverte banco. DNS/segredos/banco exigem autorização separada.
 - **Git:** alterações acumuladas seguem modificadas/não rastreadas e precisam de revisão/staging explícito, sem incluir ambientes/temporários. Os arquivos rastreados qq e diagnostico-codex.patch já existiam; revisar pertinência antes do envio, sem remoção automática. Nenhum commit foi feito nesta execução.
+
+<!-- === INVENTÁRIO DESTE BLOCO E CONTINUIDADE === -->
 
 ## Inventário deste bloco e continuidade
 

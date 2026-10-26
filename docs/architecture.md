@@ -1,84 +1,75 @@
-> **Referência vigente da revisão final:** [Etapa 15](finalizacao/ETAPA-15-ANDAMENTO.md), [plano](PLANO-FINALIZACAO-POR-ETAPAS.md) e checkpoints 03–14. Os trechos datados abaixo são históricos. Hoje há dois shells funcionais, 17 aplicativos registrados com carregamento sob demanda e autenticação administrativa; arquivos pessoais permanecem no IndexedDB, oficiais no Supabase Storage privado via Worker. Não interpretar descrições antigas de recursos reservados como estado atual, nem testes controlados como homologação externa.
+<!-- === ARQUITETURA DA WS OS === -->
 
-> **Atualização de 15/10/2026:** consulte primeiro [Entrega e continuidade](ENTREGA-E-CONTINUIDADE-2026-10-15.md) e [Estado atual](implementation-status.md). O texto abaixo preserva descrições/evidências de etapas anteriores; afirmações sobre apps reservados, Mobile ausente ou apenas um app implementado foram superadas pelos commits atuais.
+# Arquitetura da WS OS
 
-# Arquitetura de implementação
+<!-- === REFERÊNCIA E ESTADO === -->
 
-Data: 14/10/2026. Referência: mestre v0.16.0, especialmente B04, B05 e B11. Este documento descreve a reorganização, sem substituir decisões de produto.
+## Referência e estado
 
-## Fronteiras
+Consulta técnica alinhada ao [mestre vigente](WS-OS-V2-MESTRE.md), atualizada na Etapa 01 em 26/10/2026. Referência de código: 3e6af7d. A organização abaixo descreve responsabilidades existentes; não certifica todos os fluxos como concluídos.
 
-| Camada         | Responsabilidade                                              | Limite                                             |
-| -------------- | ------------------------------------------------------------- | -------------------------------------------------- |
-| App            | Orquestrar boot, tema, apresentação e sessão                  | Não implementar conteúdo de apps ou geometria      |
-| core           | Registry, instâncias, notificações, widgets, temas e contexto | Não incorporar regras internas dos apps            |
-| shells/desktop | Compor área de trabalho, atalhos, menus e Taskbar             | Consumir Core; não realizar consultas HTTP         |
-| shells/mobile  | Destino da experiência Mobile própria                         | Reservado, sem implementação atual                 |
-| features       | Capacidades sistêmicas por responsabilidade                   | Não transformar funcionalidades em apps adicionais |
-| apps           | Módulo de cada um dos 17 apps                                 | Reservados e não importados                        |
-| services       | Provedores e armazenamento                                    | Somente clima ativo                                |
-| shared         | Ícones comuns, destinos de i18n e isolamento de falha         | Reutilização comprovada                            |
-| styles         | Fundamentos, temas e ordem da cascata                         | Tokens sem duplicação                              |
+<!-- === CAMADAS E RESPONSABILIDADES === -->
 
-## Inicialização e estado
+## Camadas e responsabilidades
 
-`main.jsx` importa `styles/global.css` e monta React em StrictMode. App lê tema e flag de boas-vindas. Boot dura aproximadamente 1,5 segundo: é uma apresentação temporizada, não prova de disponibilidade de serviços. Após boot, SystemProvider monta a sessão com Desktop; WelcomeDialog apresenta as boas-vindas.
+| Área                            | Responsabilidade                                                                     |
+| ------------------------------- | ------------------------------------------------------------------------------------ |
+| src/App.jsx                     | Inicialização, tema, acessibilidade, cursores, favicon e seleção protegida do shell  |
+| src/core                        | Registro, instâncias, navegação, permissões, guards e preferências                   |
+| src/shells/desktop e mobile     | Composição específica de cada experiência                                            |
+| src/features/windows            | AppHost lazy, ErrorBoundary por instância, moldura, interação e geometria            |
+| src/features                    | Menu, busca, painéis, notificações, widgets, calendário, clima, Wally e apresentação |
+| src/apps                        | Interface e regras dos 17 aplicativos/atalhos registrados                            |
+| src/services                    | Contratos, transporte, cache e integrações                                           |
+| src/services/storage            | Documentos pessoais locais e seus contratos                                          |
+| src/shared                      | Componentes, hooks, utilitários e i18n reutilizados                                  |
+| src/styles                      | Tokens, temas, efeitos e estilos compartilhados                                      |
+| src/content/portfolioContent.js | Conteúdo público versionado e referências de integrações                             |
+| worker/index.js                 | Roteamento HTTP, assets e manutenção agendada                                        |
+| functions/api e functions/_lib  | Handlers e dependências do Worker                                                    |
+| database                        | Migrações PostgreSQL/D1 e roteiro SQL de verificação                                 |
+| tests/core e tests/helpers      | Testes Node e ambientes controlados                                                  |
 
-SystemProvider contém appState, notificationState, visibleToasts e as operações antes declaradas dentro do Desktop. useSystem fornece a mesma sessão a Desktop e Taskbar. Ainda não há todos os contratos futuros, autenticação ou navegação Mobile.
+<!-- === CATÁLOGO E NAVEGAÇÃO === -->
 
-Seleção, menus contextuais, pesquisa, painel ativo, prévias e rolagem continuam locais. Tema permanece em App, transmitido aos controles. Widget possui hook próprio. Geometria, captura de ponteiro e snap permanecem locais a cada janela; movimentos não são enviados ao contexto global.
+## Catálogo e navegação
 
-## Desktop
+Há 17 entradas: 16 públicas e Administração restrita. Currículo encaminha ao Visualizador. Aplicativos utilizam o Core para abrir destinos; parâmetros, origem e retorno são dados validados, não permissões.
 
-- Desktop.jsx: composição, seleção e coordenação de menus existentes.
-- DesktopShortcuts.jsx: área de atalhos e widgets, com classes/eventos preservados.
-- DesktopContextMenu.jsx e ShortcutContextMenu.jsx: apresentações dos menus.
-- desktopLayout.js: cálculo puro da grade compartilhada e área reservada.
-- useDesktopLayout.js: ResizeObserver da área disponível.
-- useDesktopWidgets.js: persistência, tamanho e arraste do widget existente.
-- WidgetHost.jsx: moldura/controles; clock/ClockWidget.jsx: conteúdo do relógio.
+Desktop e Mobile compartilham contratos, mas mantêm composição própria. Janelas minimizadas preservam estado; pausa depende do consumidor. Fechar desmonta recursos. Rascunhos são protegidos por instância e a troca de shell utiliza o guard central.
 
-O algoritmo ainda pode ocultar atalhos em área insuficiente. A organização não conclui as regras da grade.
+Os defeitos conhecidos de confirmação do Currículo e preparação assíncrona do DOOM estão atribuídos à Etapa 03. Não interpretar o contrato desejado como comportamento já comprovado.
 
-## Taskbar e painéis
+<!-- === DADOS E AUTORIZAÇÃO === -->
 
-- Taskbar.jsx: composição, grupos, ações dos botões, painel ativo e coordenação.
-- TaskbarApps.jsx: apps abertos e navegação horizontal.
-- TaskbarPreview.jsx: prévias por instância, ainda com conteúdo visual provisório.
-- TaskbarContextMenu.jsx: menu das instâncias.
-- useTaskbarPreviews.js: temporizadores e destaque de janela.
-- useTaskbarScroll.js: observação e controle de overflow.
-- PanelLayer.jsx: container flutuante com filhos; não recebe os dados de todos os painéis.
-- WSMenu.jsx/useWSMenu.js: apresentação, busca atual e menus dos apps.
-- useMenuPreferences.js: favoritos no formato persistido existente.
-- searchService.js: normalização textual, sem pesquisa contextual completa.
-- Notificações, Controles, Wally, Clima e Calendário têm apresentações próprias.
-- useGlobalShortcuts.js: listener de teclado extraído da Taskbar.
+## Dados e autorização
 
-panelManager.js contém o resolvedor existente. Não é um gerenciador universal de overlays. As pendências de calendário e grupos foram preservadas.
+Preferências ficam no armazenamento local; arquivos pessoais no IndexedDB. Arquivos oficiais usam Supabase Storage privado com metadados/revisões PostgreSQL e transferência mediada pelo Worker. Administração não tem acesso aos documentos locais de visitantes.
 
-## Janelas
+Autenticação usa os serviços existentes e sessão em memória. Operações administrativas exigem verificação no servidor e políticas do banco. Segredos permanecem fora do frontend. Conteúdo público, cache e invalidadores não transportam credenciais ou payloads privados.
 
-WindowLayer.jsx apresenta instâncias com ID, foco e z-index. Window.jsx contém moldura, controles e handles. useWindowInteraction.js contém refs, efeitos, ponteiro, teclado, maximização, restauração e snap. windowGeometry.js contém cálculos puros.
+Projetos usa GitHub e IDs de destaques persistidos no Supabase. Não há sistema ativo de demonstrações, execução de repositórios ou ordenação editorial manual. Wally remoto permanece desativado.
 
-AppHost.jsx contém o placeholder anteriormente embutido em Window. Não faz lazy loading ou seleção de componentes reais. Isso exigirá entrada do registry, isolamento de erro e parâmetros de abertura.
+<!-- === APARÊNCIA, CICLO DE VIDA E APRESENTAÇÃO === -->
 
-executionState não pausa atividades sozinho. Apps futuros precisam consumir o lifecycle. Minimizar conserva o componente; fechar remove a instância imediatamente, sem transição de fechamento.
+## Aparência, ciclo de vida e apresentação
 
-## Serviços e dados
+Temas, efeitos, wallpapers e cursores possuem gerenciadores compartilhados. Requisitos ainda incompletos de personalização pertencem à Etapa 04. Configurações encerra o walkthrough dos consumidores na Etapa 11, sem reconstruir mecanismos já aprovados.
 
-useWeather administra estado/geolocalização; weatherService faz HTTP e valida temperatura. Preserva condições atuais, sem acrescentar cache, retries ou timeout HTTP.
+Animações das janelas permanecem obrigatórias e respeitam movimento reduzido. Reiniciar/Desligar ficam fora desta versão. Boot mantém processador; favicon usa as seis logos conforme tema/destaque; boas-vindas mantém duas etapas e bloqueio de Escape.
 
-As chaves de localStorage são preservadas. Armazenamento compartilhado, GitHub, WakaTime, Contato, calendário, auth e Wally têm serviços reservados. Não há Supabase/RLS/funções protegidas/credenciais configurados. Arquivos pessoais futuros permanecem locais.
+<!-- === RUNTIME E ASSETS === -->
 
-## CSS
+## Runtime e assets
 
-global.css importa fontes, tokens, temas, efeitos e system.css, depois os fundamentos globais. system.css declara explicitamente a sequência dos estilos dos módulos, evitando dependência da ordem incidental de importação dos componentes.
+Vite dev/preview não executam as APIs. O backend é o Worker com ASSETS e handlers reutilizados de functions/api. Não há segundo backend ativo por existir essa pasta. Consultar [rotas](backend/WORKER.md) e [configuração](backend/CONFIGURACAO.md).
 
-CSS de Desktop, janelas, Taskbar, prévias, menus, notificações e painéis fica próximo dos módulos. Boot e Welcome importam seus próprios estilos. Foram comparadas 299 combinações de seletor/contexto, com a mesma sequência de declarações por seletor. Isso não substitui auditoria visual de todos os breakpoints.
+O Worker reúne seis partes de uzdoom.data e entrega o pacote por streaming. O isolamento COOP/COEP deve ser homologado junto às integrações externas. Hash do manifesto, licenças, rastreabilidade e integração de saves não são certificados pelo build atual.
 
-O tema claro ainda contém superfícies escuras fixas em partes da interface. A duplicação de tokens foi retirada; App.css e index.css antigos foram removidos. Não houve redesenho da paleta.
+<!-- === VALIDAÇÃO E PRESERVAÇÃO === -->
 
-## Convenções
+## Validação e preservação
 
-JavaScript/React; componentes PascalCase; hooks com use; funções de domínio nomeadas por ação. Interfaces pequenas, sem barrel obrigatório. Submódulos de apps surgem conforme implementação. Arquivo reservado tem comentário e não é importado. JSON de idioma `{}` não significa tradução entregue. Sem bibliotecas novas por consequência desta organização.
+Na Etapa 01, lint/build passaram e cinco testes preexistentes falharam. Não foram alterados fonte, testes, banco, configuração de runtime, dependências ou assets. Build atualizado em dist não é uma alteração rastreada da aplicação.
+
+O acompanhamento e os critérios de encerramento estão no mestre. [Contratos anteriores](contracts.md) e checkpoints preservam evidências datadas; não substituem a leitura do código e do estado atual.

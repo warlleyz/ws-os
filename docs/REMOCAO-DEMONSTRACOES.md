@@ -1,4 +1,12 @@
+<!-- === REGISTRO DE ESCOPO PRESERVADO === -->
+
+> **Referência vigente:** [Mestre WS OS V2](WS-OS-V2-MESTRE.md). A remoção das demos permanece vigente. Os testes e a situação do Git abaixo pertencem à execução registrada; a migração 014 exige conferência no ambiente autorizado. Este registro não autoriza apagar estruturas do banco.
+
+<!-- === REMOÇÃO DO SISTEMA DE DEMONSTRAÇÕES — 25/10/2026 === -->
+
 # Remoção do sistema de demonstrações — 25/10/2026
+
+<!-- === ESCOPO VIGENTE === -->
 
 ## Escopo vigente
 
@@ -11,6 +19,8 @@ O fluxo é GitHub → Administração → IDs selecionados → Supabase → Proj
 Não há executores, análise para execução, receitas, iframes de projetos, prévias,
 aprovação/publicação de configurações executáveis ou sessões remotas no código ativo.
 As integrações do catálogo compartilhadas com WS Menu, busca, Taskbar e janelas foram mantidas.
+
+<!-- === ARQUIVOS EXCLUÍDOS === -->
 
 ## Arquivos excluídos
 
@@ -31,6 +41,8 @@ As integrações do catálogo compartilhadas com WS Menu, busca, Taskbar e janel
 
 Os diretórios exclusivos que ficaram vazios foram removidos. Nenhum arquivo fora desse
 escopo foi descartado. Não houve reset, commit, push ou deploy.
+
+<!-- === ARQUIVOS MODIFICADOS === -->
 
 ## Arquivos modificados
 
@@ -59,6 +71,8 @@ proteção de alterações não salvas, visualizadores de documentos e todos os 
 compartilhados com outros aplicativos foram preservados. Nenhuma dependência de pacote
 exclusiva havia sido adicionada; as dependências compartilhadas permanecem intactas.
 
+<!-- === PERSISTÊNCIA E BANCO DE DADOS === -->
+
 ## Persistência e banco de dados
 
 - APIs pública e administrativa consultam diretamente project_highlights, selecionando
@@ -83,6 +97,8 @@ conteúdo, não sua execução no Postgres. Homologar permissões/RLS em banco d
 de aplicar em produção. A autenticação administrativa e os IDs cadastrados devem ser
 conferidos nesse ambiente.
 
+<!-- === VALIDAÇÃO EFETIVAMENTE EXECUTADA === -->
+
 ## Validação efetivamente executada
 
 - Testes relacionados a destaques, catálogo, contratos, navegação e segurança: 68 aprovados.
@@ -97,6 +113,8 @@ conferidos nesse ambiente.
   do sistema removido. A suíte conserva cobertura de Menu, Taskbar, janelas e Terminal.
 - Traduções exclusivas foram removidas de ambos os idiomas. Mensagens compartilhadas
   e traduções de outras funcionalidades foram mantidas.
+
+<!-- === HOMOLOGAÇÃO RESTANTE === -->
 
 ## Homologação restante
 

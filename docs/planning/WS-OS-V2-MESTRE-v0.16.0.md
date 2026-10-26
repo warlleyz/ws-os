@@ -1,3 +1,9 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === WS OS V2 — DOCUMENTO MESTRE DE PLANEJAMENTO (REINÍCIO) === -->
+
 # WS OS V2 — Documento Mestre de Planejamento (reinício)
 
 > **Versão:** 0.16.0  
@@ -9,6 +15,8 @@
 > **Este documento:** reinício independente dos planejamentos anteriores encontrados na Biblioteca; nada de versões anteriores é automaticamente aprovado neste ciclo.
 
 ---
+
+<!-- === 1. FINALIDADE E PRINCÍPIOS DE INTERPRETAÇÃO === -->
 
 ## 1. Finalidade e princípios de interpretação
 
@@ -22,6 +30,8 @@ Este é o registro canônico **deste ciclo de replanejamento** da WS OS V2. Reú
 
 ---
 
+<!-- === 2. DIAGNÓSTICO DE REFERÊNCIA DA V1 === -->
+
 ## 2. Diagnóstico de referência da V1
 
 A V1 é um portfólio em React/JavaScript/Vite que simula um desktop no navegador. O repositório público documenta Desktop, Taskbar, WS Menu, janelas móveis/redimensionáveis, notificações, controles rápidos, terminal, projetos, currículo, certificados, estatísticas, Snake, temas e integrações (GitHub, WakaTime, Open-Meteo, Supabase). A inspeção estática dos arquivos `src/App.jsx`, `src/components/Desktop/Desktop.jsx`, `src/data/appsData.js`, `src/data/searchData.js`, `package.json` e README evidenciou concentração de diversas responsabilidades no Desktop. **Não houve auditoria de execução ou benchmarking; avaliações de performance são hipóteses a validar.**
@@ -30,11 +40,15 @@ A V1 é um portfólio em React/JavaScript/Vite que simula um desktop no navegado
 
 ---
 
+<!-- === 3. BLOCO 01 — VISÃO, IDENTIDADE E PRINCÍPIOS DO PRODUTO === -->
+
 ## 3. Bloco 01 — Visão, identidade e princípios do produto
 
 **Status:** CONCLUÍDO em 12/10/2026 após confirmação da DEC-018 e revisão de consistência.  
 **Escopo:** objetivo da V2, relação com V1, stack-base, posicionamento profissional, públicos, identidade geral, idiomas, primeira experiência em nível conceitual, exploração, princípios de qualidade, evolução e método de planejamento.  
 **Fora do escopo:** arquitetura detalhada, paleta, tipografia, Wally, telas, janelas, Catálogo de apps, persistência, localização de mensagens, métricas, limites de performance, estrutura do repositório e commits específicos.
+
+<!-- ----- 3.1 REGISTRO DE DECISÕES APROVADAS ----- -->
 
 ### 3.1 Registro de decisões aprovadas
 
@@ -59,9 +73,13 @@ A V1 é um portfólio em React/JavaScript/Vite que simula um desktop no navegado
 | DEC-017 | B | Versão inicial completa, com possibilidade de expansões futuras. | Critérios de completude, releases e roadmap pendentes. |
 | DEC-018 | B + observação | Equilíbrio entre qualidade técnica e riqueza visual, com requisitos mínimos obrigatórios; buscar uma mistura de estabilidade, acessibilidade, desempenho, fidelidade visual e experiência. | Nenhum requisito é dispensável automaticamente; limites mensuráveis e políticas de trade-off serão definidos mais tarde. |
 
+<!-- ----- 3.2 INTERPRETAÇÃO CONSOLIDADA ----- -->
+
 ### 3.2 Interpretação consolidada
 
 A WS OS V2 será um **portfólio profissional original**, com identidade tecnológica e navegação inspirada em sistema operacional. Demonstrará a capacidade técnica por meio da própria experiência, ao mesmo tempo em que facilitará o acesso ao conteúdo para públicos igualmente importantes: recrutadores, empresas e desenvolvedores. A experiência para celular será desenhada de forma distinta do desktop, com funcionalidades e identidade compartilhadas. Haverá boot breve e, na primeira visita, apresentação resumida não coercitiva feita pelo assistente Wally. O produto será bilíngue (pt-BR/inglês), combinando utilidade com interatividade. A primeira versão deverá ser completa em relação ao escopo que vier a ser aprovado, sem impedir expansões.
+
+<!-- ----- 3.3 REVISÃO DE CONSISTÊNCIA E RESOLUÇÃO DE AMBIGUIDADES ----- -->
 
 ### 3.3 Revisão de consistência e resolução de ambiguidades
 
@@ -75,6 +93,8 @@ A WS OS V2 será um **portfólio profissional original**, com identidade tecnol�
 - **DEC-012:** compromisso com dois idiomas, sem deduzir implementação de i18n específica.
 
 **Resultado da revisão:** zero contradições materiais nas 18 decisões; complementos do usuário incorporados em DEC-010, DEC-018 e metodologia da DEC-006. Nenhuma nova decisão proposta foi promovida a aprovada.
+
+<!-- ----- 3.4 CRITÉRIOS DE ENCERRAMENTO DO BLOCO 01 ----- -->
 
 ### 3.4 Critérios de encerramento do Bloco 01
 
@@ -90,11 +110,15 @@ A WS OS V2 será um **portfólio profissional original**, com identidade tecnol�
 
 ---
 
+<!-- === 3.5 BLOCO 02 — ESTRUTURA E EXPERIÊNCIA DO SISTEMA === -->
+
 ## 3.5 Bloco 02 — Estrutura e experiência do sistema
 
 **Estado:** CONCLUÍDO em 12/10/2026 após DEC-088, revisão das decisões e delegação explícita dos critérios técnicos de responsividade.
 **Escopo:** Desktop, atalhos, grade compartilhada, widgets, WS Menu, Taskbar, janelas, painéis, navegação e experiência Mobile.
 **Nota de governança:** diretrizes de comportamento aprovadas não substituem especificações futuras de Design System, Core, autenticação, catálogo de apps, Wally e implementação.
+
+<!-- ----- 3.5.1 REGISTRO INTEGRAL DAS DECISÕES ----- -->
 
 ### 3.5.1 Registro integral das decisões
 
@@ -171,6 +195,8 @@ A WS OS V2 será um **portfólio profissional original**, com identidade tecnol�
 | DEC-087 | B — Persistir preferências visuais, organização aplicável e dados autorizados de apps |
 | DEC-088 | B — Ao sair de app Mobile, retornar à origem (início ou catálogo) |
 
+<!-- ----- 3.5.2 REVISÃO DE CONSISTÊNCIA E PRECEDÊNCIA ----- -->
+
 ### 3.5.2 Revisão de consistência e precedência
 
 - **DEC-041/042/046:** menu sem categorias visuais, com lista principal alfabética e zonas complementares de recentes/favoritos. A classificação interna DEC-038 não impõe agrupamento no menu.
@@ -185,6 +211,8 @@ A WS OS V2 será um **portfólio profissional original**, com identidade tecnol�
 - **DEC-081/084/087:** preferências visuais entre dispositivos independentes; tela inicial Mobile fixa. “Persistir organização” aplica-se exclusivamente onde a organização for configurável, não cria permissão para rearranjar a tela inicial.
 - **DEC-083 e DEC-069/070:** ao cruzar tamanhos de interface, manter dados autorizados; transição não constitui restauração obrigatória de janelas Desktop nem exige preservar visualização Mobile.
 
+<!-- ----- 3.5.3 DIRETRIZES TÉCNICAS DE RESPONSIVIDADE DELEGADAS ----- -->
+
 ### 3.5.3 Diretrizes técnicas de responsividade delegadas
 
 O usuário delegou a seleção técnica de responsividade e adaptação Mobile, **não mudanças de escopo funcional**. Ficam estabelecidas para orientar a engenharia:
@@ -196,6 +224,8 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 5. Suportar ponteiro, toque e teclado conforme contexto, sem depender de hover para ações essenciais; respeitar zoom, foco visível, áreas de toque adequadas e preferência de movimento reduzido.
 6. Testar telas pequenas, intermediárias e grandes, orientação vertical/horizontal, teclado virtual, zoom e redimensionamento contínuo; transições não devem produzir travamentos perceptíveis.
 7. Regras exatas de transição de estado em mudança de modo, dimensionamento da grade, métricas e testes automatizados serão detalhadas nos blocos técnicos, sem reabrir decisões de produto.
+
+<!-- ----- 3.5.4 PENDÊNCIAS ENCAMINHADAS PARA BLOCOS ESPECÍFICOS ----- -->
 
 ### 3.5.4 Pendências encaminhadas para blocos específicos
 
@@ -210,11 +240,15 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 
 ---
 
+<!-- === 3.6 BLOCO 03 — CATÁLOGO E RESPONSABILIDADES === -->
+
 ## 3.6 Bloco 03 — Catálogo e responsabilidades
 
 **Estado:** CONCLUÍDO após DEC-127 e esclarecimento explícito da DEC-125.
 **Escopo:** inventário, classes exclusivas, finalidades, relações, permissões conceituais e dependências.
 **Limites:** decisões não especificam layouts, fornecedores definitivos, credenciais, esquemas de dados, contratos técnicos ou arquivos de implementação.
+
+<!-- ----- 3.6.1 CATÁLOGO CANÔNICO ----- -->
 
 ### 3.6.1 Catálogo canônico
 
@@ -225,6 +259,8 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 **Funcionalidades (inventário aberto):** gerenciador de janelas, Taskbar, WS Menu e busca global, central de notificações, painel de controle rápido, clima, inicialização e boas-vindas, sistema de widgets, temas, idiomas, atalhos de teclado, menus contextuais, persistência local, sons, autenticação/permissões, blur, transparência, animações e calendário da Taskbar. Não são necessariamente apps nem janelas independentes.
 
 **Critério de classificação:** exclusividade por função principal, não pela possibilidade de abrir janela. Um app Desktop pode oferecer operações que dependam de um app de Sistema; sua classificação não muda por isso. Um app de Sistema pode constar no WS Menu conforme política individual. Novos itens só entram no catálogo por decisão explícita.
+
+<!-- ----- 3.6.2 REGISTRO INTEGRAL DE DECISÕES ----- -->
 
 ### 3.6.2 Registro integral de decisões
 
@@ -270,6 +306,8 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 | DEC-126 | B — Novas inclusões mediante aprovação e atualização de dependências. |
 | DEC-127 | B — Falhas de serviços externos não devem paralisar funcionalidades independentes; apresentar alternativas quando possível. |
 
+<!-- ----- 3.6.3 DEPENDÊNCIAS CONCEITUAIS ----- -->
+
 ### 3.6.3 Dependências conceituais
 
 | Origem | Serviços e/ou aplicativos relacionados |
@@ -284,6 +322,8 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 | Terminal | registro de comandos, serviços, autorização para comandos privilegiados |
 | Wally | base pública sobre autor/WS OS, ferramentas de ações permitidas, API de IA opcional com fallback |
 | Administração | autenticação e autorização efetivas, serviços administrativos de conteúdo e sistema |
+
+<!-- ----- 3.6.4 REVISÃO DE CONSISTÊNCIA ----- -->
 
 ### 3.6.4 Revisão de consistência
 
@@ -302,6 +342,8 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 
 **Resultado:** nenhum conflito material remanescente dentro do escopo de B03. Especificações dependentes foram encaminhadas sem aprovação tácita.
 
+<!-- ----- 3.6.5 PENDÊNCIAS DIRECIONADAS A BLOCOS FUTUROS ----- -->
+
 ### 3.6.5 Pendências direcionadas a blocos futuros
 
 1. Selecionar serviços e arquitetura de armazenamento/publicação, rankings, contatos/agendamentos, eventos, anexos e curtidas; custos e políticas antiabuso.
@@ -317,10 +359,14 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 
 ---
 
+<!-- === 3.7 BLOCO 04 — ARQUITETURA E NÚCLEO DO SISTEMA === -->
+
 ## 3.7 Bloco 04 — Arquitetura e núcleo do sistema
 
 **Estado:** CONCLUÍDO — DEC-128 a DEC-155 aprovadas, incluindo revisão explícita da DEC-135.
 **Escopo:** Core, estado, registro de apps, serviços, ciclo de vida, persistência, autorização, desempenho, falhas e testabilidade.
+
+<!-- ----- 3.7.1 REGISTRO DE DECISÕES ----- -->
 
 ### 3.7.1 Registro de decisões
 
@@ -355,6 +401,8 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 | DEC-154 | B — Se houver falha de persistência, preservar operação viável e comunicar limitações. |
 | DEC-155 | B — Desligar/reiniciar sob controle do Core, liberar recursos e preservar apenas dados persistentes. |
 
+<!-- ----- 3.7.2 REVISÃO DE CONSISTÊNCIA E IMPLICAÇÕES ----- -->
+
 ### 3.7.2 Revisão de consistência e implicações
 
 - **Core modular sem fragmentação excessiva (DEC-128, 130, 138):** separar responsabilidades efetivas, não criar arquivos/camadas artificiais. Registro central declara capacidades e políticas dos aplicativos; regras de negócio continuam nos módulos correspondentes.
@@ -371,6 +419,8 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 
 **Conclusão da revisão:** nenhuma contradição material identificada com DEC-001 a DEC-127; DEC-135 corrigida formalmente. Nenhuma nova decisão foi inferida.
 
+<!-- ----- 3.7.3 PENDÊNCIAS PARA ESPECIFICAÇÕES TÉCNICAS POSTERIORES ----- -->
+
 ### 3.7.3 Pendências para especificações técnicas posteriores
 
 1. Escolher bibliotecas de gerenciamento de estado, testes e validação, sem contrariar a stack React/JavaScript/Vite.
@@ -384,10 +434,14 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 
 ---
 
+<!-- === 3.8 BLOCO 05 — ESTRUTURA TÉCNICA E ORGANIZAÇÃO DO PROJETO === -->
+
 ## 3.8 Bloco 05 — Estrutura técnica e organização do projeto
 
 **Estado:** CONCLUÍDO — DEC-156 a DEC-179 aprovadas explicitamente.
 **Escopo:** organização modular do código, Desktop/Mobile, componentes, estilos, recursos, convenções, documentação, dependências, configurações de ambiente e governança da estrutura.
+
+<!-- ----- 3.8.1 REGISTRO INTEGRAL DE DECISÕES ----- -->
 
 ### 3.8.1 Registro integral de decisões
 
@@ -418,6 +472,8 @@ O usuário delegou a seleção técnica de responsividade e adaptação Mobile, 
 | DEC-178 | B — Refatorações justificadas são permitidas, preservando contratos, testes e decisões aprovadas. |
 | DEC-179 | B — Avaliar necessidade, manutenção, licença, compatibilidade, peso e segurança das dependências. |
 
+<!-- ----- 3.8.2 ESTRUTURA-BASE APROVADA (NÃO É LISTA OBRIGATÓRIA DE PASTAS) ----- -->
+
 ### 3.8.2 Estrutura-base aprovada (não é lista obrigatória de pastas)
 
 ```text
@@ -437,6 +493,8 @@ ws-os/
 
 **Regra vinculante da DEC-174:** esta árvore é uma *base de referência*, não autorização ou exigência de criar antecipadamente todos os diretórios e arquivos. Novas pastas surgem quando a complexidade justificar. Cada app mantém estrutura proporcional ao seu escopo (DEC-157); não padronizar subpastas vazias. Nomes definitivos dos caminhos poderão ser refinados na preparação da implementação sem mudar limites arquiteturais aprovados.
 
+<!-- ----- 3.8.3 LIMITES E POLÍTICAS DE ORGANIZAÇÃO ----- -->
+
 ### 3.8.3 Limites e políticas de organização
 
 - **Core × shells × apps × features (DEC-156, 158, 175, 177):** Core define contratos, registro, ciclo de vida, regras e gerenciadores; shells entregam UX distinta para Desktop e Mobile; apps encapsulam implementação; features agregam capacidades sistêmicas específicas. A mesma lógica compartilhada não deve ser duplicada nas experiências.
@@ -448,6 +506,8 @@ ws-os/
 - **Ambientes (DEC-173):** separar desenvolvimento e produção e validar configurações. Variáveis incluídas no bundle Vite são públicas ao navegador; chaves privadas e autorização real exigem serviços protegidos. A decisão não cria infraestrutura backend por si só.
 - **Documentação (DEC-167):** manter contratos, decisões arquiteturais e fluxos importantes claros, sem duplicar explicações óbvias no código.
 - **Evolução (DEC-178):** reorganizar código apenas com justificativa e verificação de impacto; preservar contratos, testes e decisões anteriores.
+
+<!-- ----- 3.8.4 REVISÃO DE CONSISTÊNCIA E PENDÊNCIAS ----- -->
 
 ### 3.8.4 Revisão de consistência e pendências
 
@@ -468,10 +528,14 @@ ws-os/
 
 ---
 
+<!-- === 3.9 BLOCO 06 — DESIGN SYSTEM E IDENTIDADE VISUAL === -->
+
 ## 3.9 Bloco 06 — Design System e identidade visual
 
 **Estado:** CONCLUÍDO — DEC-180 a DEC-225 aprovadas explicitamente.
 **Escopo:** direção estética, tipografia, iconografia, temas e paleta, tokens, componentes, animações, adaptação de desempenho, acessibilidade e critérios de validação visual.
+
+<!-- ----- 3.9.1 REGISTRO DAS DECISÕES ----- -->
 
 ### 3.9.1 Registro das decisões
 
@@ -524,12 +588,16 @@ ws-os/
 | DEC-224 | B — Níveis semânticos de profundidade por superfícies, bordas, sombras e sobreposições. |
 | DEC-225 | B — Validar contraste, teclado, estados, responsividade, movimento reduzido e desempenho em componentes representativos. |
 
+<!-- ----- 3.9.2 IDENTIDADE VISUAL E TIPOGRAFIA ----- -->
+
 ### 3.9.2 Identidade visual e tipografia
 
 - **Princípio:** visual moderno, profissional e tecnológico equilibrado, com identidade própria; não copiar integralmente um SO existente.
 - **Tipografia:** Nunito Sans como família principal; JetBrains Mono para Terminal e conteúdo técnico. Peso Thin autorizado em ornamentação, mas comandos, saída e texto técnico legível utilizam pesos mais adequados. Estilos de fonte devem apoiar a hierarquia visual e responsividade.
 - **Iconografia:** linguagem consistente e funcional, permitindo identificação própria de aplicativos sem comprometer a coesão.
 - **Superfícies:** mistura ponderada de planos sólidos, translúcidos e blur. Cantos moderadamente arredondados. Hierarquia de camadas do Desktop, janelas, painéis, menus, diálogos e sobreposições articulada com o gerenciamento de janelas do Bloco 02.
+
+<!-- ----- 3.9.3 PALETA HEX INICIAL APROVADA — CANDIDATOS CONTROLADOS, NÃO VALORES FINAIS IMUTÁVEIS ----- -->
 
 ### 3.9.3 Paleta HEX inicial aprovada — candidatos controlados, não valores finais imutáveis
 
@@ -548,6 +616,8 @@ ws-os/
 
 **Cores semânticas ainda a especificar:** sucesso, alerta, erro, informação, variantes de superfície/estado e contraste de cada combinação — a decisão aprovou a política e a obrigação de validação, **não** HEX específicos desses estados.
 
+<!-- ----- 3.9.4 ESCALAS-BASE INICIAIS APROVADAS ----- -->
+
 ### 3.9.4 Escalas-base iniciais aprovadas
 
 | Sistema | Referências iniciais aprovadas | Natureza |
@@ -565,6 +635,8 @@ ws-os/
 
 Não inferir a aprovação de `line-height`, intervalos de sombra, durações de animações, valores de blur, paleta semântica ou dimensões de cada componente: esses parâmetros precisarão ser prototipados e validados.
 
+<!-- ----- 3.9.5 APLICAÇÃO, ACESSIBILIDADE E DESEMPENHO ----- -->
+
 ### 3.9.5 Aplicação, acessibilidade e desempenho
 
 - Componentes recorrentes são padronizados; componentes específicos de apps podem existir se respeitarem tokens, identidade e contratos. Evitar tanto UI monolítica quanto criação de um arquivo por detalhe.
@@ -574,6 +646,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 - Estados de hover, foco, pressionado, seleção, desabilitado e carregamento devem ser perceptíveis. Informação semântica não pode depender apenas de cor.
 - Critérios de validação: contraste efetivo, teclado, foco visível, estados, densidade/áreas de toque, leitura, responsividade, movimento reduzido e performance em componentes representativos nos **dois temas**.
 - Tema escuro padrão com versão clara; preferências de cor e intensidade controladas. Persistência e adaptações Desktop/Mobile seguem os Blocos 02 e 04.
+
+<!-- ----- 3.9.6 VERIFICAÇÃO DE CONSISTÊNCIA E LIMITES ----- -->
 
 ### 3.9.6 Verificação de consistência e limites
 
@@ -594,10 +668,14 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 
 ---
 
+<!-- === 3.10 BLOCO 07 — DESKTOP E COMPONENTES ESTRUTURAIS === -->
+
 ## 3.10 Bloco 07 — Desktop e componentes estruturais
 
 **Estado:** CONCLUÍDO — DEC-226 a DEC-266 aprovadas explicitamente, inclusive esclarecimento posterior da DEC-251.
 **Escopo:** identidade e composição visual do Desktop, Taskbar, WS Menu, janelas, painéis, menus contextuais, feedback, responsividade e acessibilidade, sem reabrir regras funcionais do Bloco 02.
+
+<!-- ----- 3.10.1 REGISTRO DAS DECISÕES ----- -->
 
 ### 3.10.1 Registro das decisões
 
@@ -645,6 +723,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 | DEC-265 | B — Padrões compartilhados para foco, seleção, arraste, transições e ações destrutivas. |
 | DEC-266 | B — Validar temas, dimensões de tela, múltiplas janelas, snap, painéis, seleção, teclado e performance. |
 
+<!-- ----- 3.10.2 REGRAS CONSOLIDADAS POR COMPONENTE ----- -->
+
 ### 3.10.2 Regras consolidadas por componente
 
 **Desktop, wallpaper, atalhos e widgets (DEC-226–231).** Equilíbrio visual entre wallpaper autoral azul/ciano, atalhos fixos e widgets. Atalhos têm ícones próprios, rótulos claros e feedback discreto. Widgets são cartões temáticos com transparência controlada. Uma **única grade compartilhada** acomoda atalhos e widgets; limites e áreas reservadas impedem sobreposição inadequada. Wallpapers alternativos e imagens personalizadas permanecem locais, sujeitos a validação de tipo e cotas de armazenamento. O conjunto fixo de 12 atalhos do Bloco 02 permanece inalterado.
@@ -658,6 +738,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 **Painéis (DEC-250–255, 262 e DEC-251 esclarecida).** Painéis flutuantes de dimensões adequadas ao conteúdo, mesma linguagem visual e transições rápidas. Notificações em cartões com origem/conteúdo/horário/ações; Painel de Controle com opções rápidas e acesso a Configurações; Wally oferece interação rápida e acesso ao app completo. **Posicionamento definitivo da DEC-251:** todos os painéis abrem **acima da Taskbar inferior e centralizados horizontalmente em relação à Taskbar**, independentemente do botão acionado. Ajustar dimensões/posição aos limites do espaço visível. Se a Taskbar usa auto-ocultação, ela permanece visível enquanto um painel estiver aberto (DEC-262). O gerenciador mantém um painel aberto por vez. Calendário da data/hora observa as mesmas regras visuais sem incorporar rotina pessoal.
 
 **Menus, feedback e interação (DEC-256–261, 263–266).** Menus contextuais flutuantes e posicionados próximos ao ponto de ativação, com ajuste de bordas. Hover, foco, seleção individual/múltipla, arraste, indisponibilidade e ações destrutivas possuem feedback consistente. Prévia de ocupação de grade não pode comunicar como viável posição bloqueada. Feedback contextual e notificação têm papéis distintos; evitar notificações excessivas. Oferecer operações equivalentes por teclado onde o arraste impediria uso acessível. Em espaços reduzidos, adaptar áreas úteis sem sacrificar legibilidade nem violar ocupação válida da grade.
+
+<!-- ----- 3.10.3 CONCILIAÇÃO E REVISÃO DE CONSISTÊNCIA ----- -->
 
 ### 3.10.3 Conciliação e revisão de consistência
 
@@ -680,10 +762,14 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 
 ---
 
+<!-- === 3.11 BLOCO 08 — EXPERIÊNCIA MOBILE === -->
+
 ## 3.11 Bloco 08 — Experiência Mobile
 
 **Estado:** CONCLUÍDO — DEC-267 a DEC-301 explicitamente aprovadas.
 **Escopo:** Home Mobile, catálogo e busca, barra inferior, navegação contextual, aplicativos em tela cheia, painéis, gestos, responsividade, persistência e critérios de validação. Mantém os contratos do Bloco 02 e o Design System do Bloco 06.
+
+<!-- ----- 3.11.1 REGISTRO INTEGRAL DE DECISÕES ----- -->
 
 ### 3.11.1 Registro integral de decisões
 
@@ -725,6 +811,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 | DEC-300 | B — Alvos de toque, foco, rótulos, alternativas a gestos e compatibilidade assistiva. |
 | DEC-301 | B — Validar larguras, orientações, teclado virtual, áreas seguras, temas, navegação, painéis e desempenho. |
 
+<!-- ----- 3.11.2 SÍNTESE E RESPONSABILIDADES ----- -->
+
 ### 3.11.2 Síntese e responsabilidades
 
 - **Home (DEC-267–272):** composição profissional híbrida, grade com apps principais e alguns cartões profissionais. Layout fixo com preferências visuais controladas; wallpapers em composições verticais derivadas da identidade WS OS. Catálogo contém os demais apps, conforme visibilidade aplicável.
@@ -733,6 +821,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 - **Painéis/gestos (DEC-285–290, 298):** painéis Mobile são folhas inferiores ou sobreposições de acordo com o conteúdo, geridos pelo shell com exclusividade de um painel principal. Controles rápidos disponíveis contextualmente, notificações temporárias e central consultável. Fechamento por controle, Voltar, Escape quando aplicável e fora do painel onde fizer sentido. Gestos personalizados não devem sobrepor funcionalidades nativas do navegador; sempre oferecer alternativas acessíveis. Wally é app no Mobile, não painel permanente de Taskbar.
 - **Adaptação (DEC-291–296, 300–301):** experiência fluida de acordo com espaço disponível e orientação, respeitando recortes, áreas seguras e barras do navegador. Teclado virtual não deve esconder campos ou ações indispensáveis. Carregamento seletivo, redução de efeitos e áreas de toque adequadas. Validar telas pequenas e maiores, temas, orientação vertical/horizontal, formulários, foco, tecnologias assistivas, interações e desempenho.
 - **Troca Desktop/Mobile (DEC-295):** mudança entre shells conserva dados persistentes e apenas estados de app compatíveis; geometria e instâncias de janelas Desktop não são restauradas automaticamente. Não misturar estado visual de janela com estado de conteúdo.
+
+<!-- ----- 3.11.3 AUDITORIA DE CONSISTÊNCIA ----- -->
 
 ### 3.11.3 Auditoria de consistência
 
@@ -755,11 +845,15 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 
 ---
 
+<!-- === 3.12 BLOCO 09 — SERVIÇOS, INTEGRAÇÕES E INFRAESTRUTURA DE DADOS === -->
+
 ## 3.12 Bloco 09 — Serviços, integrações e infraestrutura de dados
 
 **Estado:** CONCLUÍDO em 13/10/2026 após aprovação explícita da DEC-354 e revisão final.  
 **Escopo:** infraestrutura híbrida, provedores, Supabase, autenticação, banco e armazenamento, integrações (GitHub, WakaTime, Gemini/Wally, EmailJS), publicações, rankings, eventos, agendamentos, privacidade, custos, deploy, domínio e recuperação.  
 **Fora do escopo deste encerramento:** implementar serviços, selecionar quantitativos finais de cotas, migrar DNS, acessar o repositório do professor sem fornecimento, executar deploy ou decidir detalhes funcionais não aprovados.
+
+<!-- ----- 3.12.1 REGISTRO INTEGRAL DE DECISÕES APROVADAS ----- -->
 
 ### 3.12.1 Registro integral de decisões aprovadas
 
@@ -819,6 +913,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 | DEC-353 | B | Logs exclusivamente operacionais necessários com minimização, controle de acesso e retenção definida. |
 | DEC-354 | B | Alterações críticas com validação prévia, confirmação de ações destrutivas, migrações controladas e recuperação. |
 
+<!-- ----- 3.12.2 ARQUITETURA CONSOLIDADA E SEGURANÇA ----- -->
+
 ### 3.12.2 Arquitetura consolidada e segurança
 
 - **Frontend e hospedagem:** React/JavaScript/Vite estático; Cloudflare Pages é a primeira opção **condicional à validação** (DEC-302/309/338). A comparação prévia considerou Vercel e Netlify; nenhuma infraestrutura está efetivamente implantada. Deploy integrado ao Git, validações e rollback (DEC-339/343/349).
@@ -830,6 +926,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 - **Integrações:** GitHub com cache/paginação/limites (DEC-326); WakaTime público quando viável, protegido para dados que exigem segredo (DEC-327); Wally usa Gemini por serviço protegido com orçamento/fallback, base autorizada, ferramentas enumeradas e autorizações explícitas (DEC-328–330/335). Não guardar conversas permanentemente no Supabase por padrão, sem presumir ausência de processamento/retenção pelo fornecedor de IA (DEC-336).
 - **Operação e custo:** prioridade para planos gratuitos/baratos, orçamento e proteção contra esgotamento de cotas; degradar apenas recursos dependentes (DEC-304/307/340/341). Logs operacionais mínimos, erros, disponibilidade e agendamentos monitorados, exportação/recuperação testável e processos de produção recuperáveis (DEC-318/319/348/349/353/354).
 
+<!-- ----- 3.12.3 DOMÍNIO, URL E INTERPRETAÇÃO DAS OBSERVAÇÕES DO USUÁRIO ----- -->
+
 ### 3.12.3 Domínio, URL e interpretação das observações do usuário
 
 **Domínio oficial:** `warlley.dev`, com `www.warlley.dev` redirecionado para o principal (DEC-344); DNS Cloudflare e HTTPS após auditoria de registros existentes (DEC-345). Pré-visualizações usam origens separadas e proteção adequada (DEC-346). Controlar validade do benefício estudantil e custos de renovação (DEC-347).
@@ -837,6 +935,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 **Esclarecimento posterior explícito às DEC-350/351 (precedência da seção 1):** o requisito do usuário não é apenas conservar o domínio; **a URL exibida na barra do navegador não deve mudar quando qualquer aplicativo da WS OS é aberto, fechado, minimizado, maximizado ou alternado, no Desktop ou no Mobile.** Abrir Projetos, Sobre Mim, Terminal, Notas etc. não faz `pushState`/rotas por aplicativo; a navegação normal é estado interno do Core/shell e mantém o endereço canônico `https://warlley.dev/`. A mesma regra aplica-se à navegação interna de um app, salvo se o usuário aprovar exceção no futuro. Aplicativos não são sites ou subdomínios independentes.
 
 **Conciliação com links compartilháveis (DEC-351):** é permitido que *um URL de entrada explicitamente compartilhado* codifique um destino (por exemplo, projeto ou publicação), resolva/abra esse destino na WS OS e normalize o endereço exibido à URL canônica via histórico do navegador **sem navegação adicional** após processar a entrada. Dessa forma, interações usuais com apps não alteram a barra; apenas o link externo inicialmente acessado pode conter identificador/rota temporária para inicialização. **Não estabelecer neste bloco** a sintaxe (path/query/hash), indexação, SSR, previews ou regras exatas de normalização. Se houver exigência posterior de que nem o acesso por link compartilhado exiba URL diferente em momento algum, isso demandará nova decisão explícita para conciliar com DEC-351. Não introduzir rotas por aplicativo disfarçadamente.
+
+<!-- ----- 3.12.4 AUDITORIA FINAL DE COERÊNCIA COM BLOCOS 01–08 ----- -->
 
 ### 3.12.4 Auditoria final de coerência com Blocos 01–08
 
@@ -852,6 +952,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 
 **Resultado:** DEC-302 a DEC-354 verificadas; 53 decisões aprovadas; nenhum conflito impeditivo. A especificação de entrada por links foi conciliada com a correção explícita da URL estável, sem presumir novas decisões ou implementação.
 
+<!-- ----- 3.12.5 PENDÊNCIAS DE EXECUÇÃO E CRITÉRIOS DE VALIDAÇÃO ----- -->
+
 ### 3.12.5 Pendências de execução e critérios de validação
 
 - Receber, inspecionar e testar o repositório do professor antes de qualquer rotina agendada no Supabase; checar licença, quotas e restrições do provedor.
@@ -866,11 +968,15 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 
 ---
 
+<!-- === 3.13 BLOCO 10 — ESPECIFICAÇÃO FUNCIONAL DOS APLICATIVOS === -->
+
 ## 3.13 Bloco 10 — Especificação funcional dos aplicativos
 
 **Estado:** CONCLUÍDO em 13/10/2026, mediante aprovação explícita da especificação integral e formalização DEC-373–410.  
 **Escopo:** 18 aplicativos existentes, contratos e critérios de aceite funcionais; não se aprovaram novos aplicativos nem implementação.  
 **Premissa:** especificação de funcionalidade não congela design final; ajustes visuais podem ocorrer durante implementação sob a DEC-367/410.
+
+<!-- ----- 3.13.1 ESTRATÉGIA APROVADA — DEC-355 A DEC-360 ----- -->
 
 ### 3.13.1 Estratégia aprovada — DEC-355 a DEC-360
 
@@ -882,6 +988,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 | DEC-358 | APROVADA (B) | Reutilizar contratos, serviços e componentes somente com benefício concreto. |
 | DEC-359 | APROVADA (B) | Registrar decisões por aplicativo e dependências cruzadas com rastreabilidade no mestre. |
 | DEC-360 | APROVADA (B) | Concluir especificação após revisão de fluxos, estados, interfaces, acessibilidade, integrações, segurança e aceitação. |
+
+<!-- ----- 3.13.2 SOBRE MIM — DEC-361 A DEC-372 ----- -->
 
 ### 3.13.2 Sobre Mim — DEC-361 a DEC-372
 
@@ -901,6 +1009,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 | DEC-372 | APROVADA (B) | Validar conteúdo, navegação, legibilidade, teclado, leitor de tela, toque, responsividade, temas e Core. |
 
 **Resultado funcional:** apresentação, trajetória, competências, interesses e conexões com Projetos/Currículo/Certificados/Contato; conteúdo versionado; tratamento de indisponibilidade; navegação e acessibilidade validadas. Sobre Mim especificado, não implementado.
+
+<!-- ----- 3.13.3 FORMALIZAÇÃO DA ESPECIFICAÇÃO INTEGRAL — DEC-373 A DEC-410 ----- -->
 
 ### 3.13.3 Formalização da especificação integral — DEC-373 a DEC-410
 
@@ -947,6 +1057,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 | DEC-409 | Experiência e acessibilidade | Regras funcionais compartilhadas com interfaces próprias Desktop/Mobile; responsividade, teclado, toque, tecnologias assistivas, temas e performance. |
 | DEC-410 | Refinamento visual e encerramento funcional | Não congelar layout, animações, cartões ou medidas; refinamentos justificados preservam requisitos, Design System, arquitetura e critérios de aceitação. |
 
+<!-- ----- 3.13.4 INVENTÁRIO E CLASSES CANÔNICAS ----- -->
+
 ### 3.13.4 Inventário e classes canônicas
 
 **12 aplicativos Desktop:** Sobre Mim; Projetos; Dev Insights; Currículo; Certificados; Contato; Notas; Arquivos; Jogos; Terminal; Configurações; Sobre o Sistema. Todos seguem a disponibilidade Mobile aprovada, sem duplicar implementações desnecessariamente.
@@ -954,6 +1066,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 **6 aplicativos de Sistema:** Visualizador de Arquivos; Editor de Arquivos; Calculadora; Visualizador de Demos; Wally Estendido; Administração. Sua disponibilidade, descoberta e permissões são específicas; Administração continua protegida e oculta até login administrativo via Terminal.
 
 **Não são aplicativos adicionais:** WS Menu, Taskbar, Home Mobile, notificações, controles rápidos, calendário, Wally compacto, busca global, autenticação. Permanecem funcionalidades Core/shell, conforme B02–B04.
+
+<!-- ----- 3.13.5 CONTRATOS FUNCIONAIS E LIMITES ----- -->
 
 ### 3.13.5 Contratos funcionais e limites
 
@@ -968,6 +1082,8 @@ Não inferir a aprovação de `line-height`, intervalos de sombra, durações de
 - **Jogos → armazenamento local/serviço de ranking:** somente modos apropriados têm classificação global, com validação proporcional por jogo.
 - **Dev Insights → serviços GitHub/WakaTime:** não inventar métricas; diferenciar cache, carregamento, falha e dados atuais.
 - **Navegação geral:** abrir/trocar/fechar apps ordinários não altera a URL visível `https://warlley.dev/`; links profundos específicos são pontos de entrada, conforme a conciliação B09; preservar histórico contextual Mobile.
+
+<!-- ----- 3.13.6 ESTADOS, ACESSIBILIDADE E CRITÉRIOS DE ACEITAÇÃO ----- -->
 
 ### 3.13.6 Estados, acessibilidade e critérios de aceitação
 
@@ -984,6 +1100,8 @@ Critérios transversais obrigatórios quando aplicáveis:
 
 **Critério de encerramento do bloco:** as responsabilidades, comportamentos, estados e critérios gerais dos 18 aplicativos estão aprovados. A definição numérica fina (p.ex. cotas, tamanhos, validação antifraude), detalhes de tecnologia, conteúdo final e aceites executáveis ficam para especificações técnicas e planos de implementação posteriores; não constituem aprovação automática de código.
 
+<!-- ----- 3.13.7 REVISÃO DE CONSISTÊNCIA COM BLOCOS 01–09 ----- -->
+
 ### 3.13.7 Revisão de consistência com Blocos 01–09
 
 - **B02/B08/B09:** Desktop e Mobile mantêm experiência própria, histórico Mobile e URL estável no uso habitual; rotas de compartilhamento são pontos de entrada, não transformam apps em sites independentes.
@@ -994,6 +1112,8 @@ Critérios transversais obrigatórios quando aplicáveis:
 - **Licenças e viabilidade:** DOOM e modos de demos somente se direitos e viabilidade técnica forem validados. Antiabuso dos rankings não implica garantia de ausência de fraude.
 
 **Conclusão da auditoria:** nenhum conflito impeditivo; DEC-355–410 aprovadas, sem inclusão de funcionalidades externas à especificação aceita.
+
+<!-- ----- 3.13.8 PENDÊNCIAS ENCAMINHADAS ----- -->
 
 ### 3.13.8 Pendências encaminhadas
 
@@ -1007,12 +1127,16 @@ Critérios transversais obrigatórios quando aplicáveis:
 
 ---
 
+<!-- === 3.14 BLOCO 11 — CONTRATOS TÉCNICOS, DADOS E INTEGRAÇÕES === -->
+
 ## 3.14 Bloco 11 — Contratos técnicos, dados e integrações
 
 **Estado:** CONCLUÍDO em 13/10/2026 por delegação explícita do usuário para tomar todas as decisões do bloco.  
 **Escopo:** contratos do Core e dos shells, comunicação entre aplicativos, modelos e persistência de dados, fronteiras de serviços, segurança, falhas e validação.  
 **Limites:** define comportamento e responsabilidades, não classes ou arquivos definitivos, tabelas SQL finais, serviços pagos, implantação ou código.  
 **Decisões:** DEC-411 a DEC-449 — **APROVADAS por delegação**, mantendo os requisitos pré-existentes e sem reabrir blocos concluídos.
+
+<!-- ----- 3.14.1 REGISTRO DE DECISÕES DELEGADAS E CONSOLIDADAS ----- -->
 
 ### 3.14.1 Registro de decisões delegadas e consolidadas
 
@@ -1085,6 +1209,8 @@ Critérios transversais obrigatórios quando aplicáveis:
 | DEC-448 | **Compatibilidade Desktop/Mobile:** Mesmo serviço e modelo de domínio com apresentação específica; nenhum contrato técnico obriga um shell a reproduzir layout do outro. | DEC-357, B08 |
 | DEC-449 | **Escopo não autorizado:** Este bloco não aprova bibliotecas novas, tabelas SQL definitivas, código, credenciais, implantação, métricas numéricas, custo pago ou alteração dos 18 aplicativos. | B01, B05, B09, B10 |
 
+<!-- ----- 3.14.2 CONTRATOS DE REFERÊNCIA (SEM IMPOR IMPLEMENTAÇÃO) ----- -->
+
 ### 3.14.2 Contratos de referência (sem impor implementação)
 
 | Operação ou modelo | Entradas mínimas | Saída/efeito contratado | Falhas tratadas |
@@ -1099,6 +1225,8 @@ Critérios transversais obrigatórios quando aplicáveis:
 | Entidades de domínio | identidade estável, dados, origem, visibilidade | formato documentado e evolutivo | migração, campo ausente, permissões |
 
 Os nomes acima são **exemplos semânticos** do contrato e não determinam assinaturas JavaScript finais, bibliotecas de estado ou divisão de arquivos.
+
+<!-- ----- 3.14.3 MATRIZ PRELIMINAR DE CONFIANÇA E RESPONSABILIDADE ----- -->
 
 ### 3.14.3 Matriz preliminar de confiança e responsabilidade
 
@@ -1115,6 +1243,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | Conversas Wally | Contexto efêmero; sem histórico remoto por padrão | Sessão ativa | Solicitação do usuário e políticas do serviço |
 | Credenciais/segredos | Ambientes protegidos | Serviço autorizado | Operação segura fora do frontend |
 
+<!-- ----- 3.14.4 AUDITORIA DE COMPATIBILIDADE ----- -->
+
 ### 3.14.4 Auditoria de compatibilidade
 
 - **DEC-411–416 versus B04/B05:** registro e gerenciamento centralizados sem obrigatoriedade de uma classe/arquivo por recurso; múltiplas instâncias continuam por aplicativo.
@@ -1126,6 +1256,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 - **Visual:** nenhuma decisão deste bloco congela composição visual dos aplicativos nem altera o Design System aprovado.
 
 **Conclusão:** nenhuma contradição material ou mudança tácita de escopo identificada. Contratos e modelos ficam aprovados no nível necessário ao planejamento; detalhes executáveis, limites quantitativos, esquemas exatos e estratégia de implementação continuam pendentes.
+
+<!-- ----- 3.14.5 CRITÉRIOS DE CONCLUSÃO ----- -->
 
 ### 3.14.5 Critérios de conclusão
 
@@ -1142,12 +1274,16 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 
 ---
 
+<!-- === 3.15 BLOCO 12 — SEGURANÇA, ACESSIBILIDADE, DESEMPENHO E QUALIDADE === -->
+
 ## 3.15 Bloco 12 — Segurança, acessibilidade, desempenho e qualidade
 
 **Estado:** CONCLUÍDO por delegação explícita para definir integralmente o bloco em 13/10/2026.  
 **Decisões:** DEC-450 a DEC-487, aprovadas por delegação.  
 **Escopo:** critérios verificáveis de segurança, acessibilidade, performance, resiliência, testes e aceite de release.  
 **Limites:** não instalar ferramentas, implementar código, comprar planos, definir layouts imutáveis nem alterar o catálogo de 18 aplicativos.
+
+<!-- ----- CRITÉRIOS GERAIS DE QUALIDADE ----- -->
 
 ### Critérios gerais de qualidade
 
@@ -1159,6 +1295,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-453 | **Interações de janelas.** Movimentação, redimensionamento, maximização, restauração e snap evitam atualizações globais a cada evento; privilegiar atualizações localizadas, frame scheduling e medição de fluidez. |
 | DEC-454 | **Estratégia de testes.** Combinar testes unitários, contratos, integração e ponta a ponta por criticidade; não testar cada detalhe visual isoladamente por obrigação. |
 | DEC-455 | **Critério de pronto.** Funcionalidade só se considera pronta com comportamento, tratamento de erros, acessibilidade, integração e testes pertinentes validados. |
+
+<!-- ----- SEGURANÇA E PRIVACIDADE ----- -->
 
 ### Segurança e privacidade
 
@@ -1174,6 +1312,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-463 | **Privacidade e retenção.** Minimizar coleta, registrar finalidade e período de retenção de solicitações/logs, definir tratamento de exclusão; histórico remoto Wally desligado por padrão. |
 | DEC-464 | **Resposta a incidentes.** Prever revogação de credenciais, desativação seletiva de recursos, rollback, comunicação de falha e recuperação documentada. |
 
+<!-- ----- ACESSIBILIDADE E EXPERIÊNCIA ----- -->
+
 ### Acessibilidade e experiência
 
 | ID | Decisão aprovada por delegação |
@@ -1186,6 +1326,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-470 | **Movimento e mídia.** Respeitar prefers-reduced-motion; evitar efeitos que bloqueiem leitura ou prejudiquem operação e fornecer controle quando a interação o exigir. |
 | DEC-471 | **Internacionalização acessível.** Validar pt-BR e inglês com expansão de texto, rótulos, datas, mensagens de erro e anúncio coerente do idioma. |
 
+<!-- ----- DESEMPENHO E ESTABILIDADE ----- -->
+
 ### Desempenho e estabilidade
 
 | ID | Decisão aprovada por delegação |
@@ -1197,6 +1339,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-476 | **Memória e ciclo de vida.** Verificar limpeza de listeners, timers, observers, recursos de mídia e instâncias encerradas; pausas seletivas respeitam política de Core. |
 | DEC-477 | **Resiliência da rede.** Aplicar cancelamento, timeout, cache, tratamento de respostas obsoletas, retry apenas seguro e degradação por funcionalidade sem travar o sistema. |
 | DEC-478 | **Perfis de teste.** Medir navegador Desktop moderno e smartphone representativo, modo claro/escuro, diferentes tamanhos, conexão instável e condições de CPU reduzida quando possível. |
+
+<!-- ----- TESTES, OBSERVABILIDADE E ACEITE ----- -->
 
 ### Testes, observabilidade e aceite
 
@@ -1212,6 +1356,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-486 | **Critérios de bloqueio.** Bloquear entrega diante de falhas de autorização, vazamento de dados, perda indevida de dados locais, travamentos críticos ou navegação essencial inacessível. |
 | DEC-487 | **Revisão de fechamento.** Revisar rastreabilidade dos requisitos e evidências dos testes, documentar exceções e não iniciar implementação antes do roadmap e commits aprovados. |
 
+<!-- ----- MATRIZ DE QUALIDADE E EVIDÊNCIAS NECESSÁRIAS ----- -->
+
 ### Matriz de qualidade e evidências necessárias
 
 | Área | Cenários obrigatórios | Evidência esperada |
@@ -1224,6 +1370,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | Dependências externas | Supabase, GitHub, WakaTime, EmailJS, Gemini indisponíveis ou limitados | degradação seletiva e feedback honesto |
 | Release | lint, build, contratos, segurança, integração e smoke tests por shell | resultado verificável em CI e critérios de bloqueio atendidos |
 
+<!-- ----- METAS INICIAIS DE DESEMPENHO — SUJEITAS A AFERIÇÃO ----- -->
+
 ### Metas iniciais de desempenho — sujeitas a aferição
 
 1. **Interação contínua:** almejar 60 fps em equipamento de referência para arrastar/redimensionar janelas, sem declarar meta absoluta para todo equipamento; usar profiling para avaliar quedas e tarefas longas.
@@ -1231,6 +1379,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 3. **Carregamento:** medir inicialização e abertura dos aplicativos em condições representativas, estabelecer valores definitivos apenas após protótipo e hardware de teste definidos.
 4. **Memória:** não reter listeners, intervalos ou recursos de instâncias fechadas; testar várias sequências de abertura/fechamento e uso prolongado.
 5. **Qualidade de lançamento:** bugs que bloqueiem navegação, corrompam dados, exponham informações privadas ou travem fluxos essenciais impedem aceite.
+
+<!-- ----- REVISÃO DE CONSISTÊNCIA COM B01–B11 ----- -->
 
 ### Revisão de consistência com B01–B11
 
@@ -1246,12 +1396,16 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 
 ---
 
+<!-- === 3.16 BLOCO 13 — PUBLICAÇÃO E PREPARAÇÃO OPERACIONAL === -->
+
 ## 3.16 Bloco 13 — Publicação e preparação operacional
 
 **Estado:** CONCLUÍDO em 13/10/2026 por delegação explícita do usuário para decidir integralmente o bloco.  
 **Decisões:** DEC-488 a DEC-518 — aprovadas por delegação.  
 **Escopo:** branches, ambientes, CI, releases, domínio, DNS, SSL/TLS, disponibilidade, custo, rollback, monitoramento e documentação de operação.  
 **Limite:** decisões de planejamento; nenhuma mudança real de contas, DNS, serviços ou código foi executada.
+
+<!-- ----- FLUXO DE VERSIONAMENTO E IMPLANTAÇÃO ----- -->
 
 ### Fluxo de versionamento e implantação
 
@@ -1266,6 +1420,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | **DEC-494** | **Implantação Git:** Integrar Cloudflare Pages preferencialmente ao repositório GitHub; recursos específicos de deploy só serão ativados após validação técnica. |
 | **DEC-495** | **Condição de publicação:** Deploy aprovado depende de build, checks, comportamento Desktop/Mobile, regras de segurança e diagnóstico de regressões críticas. |
 
+<!-- ----- DOMÍNIO, ROTEAMENTO E AMBIENTES ----- -->
+
 ### Domínio, roteamento e ambientes
 
 | Decisão | Regra consolidada |
@@ -1277,6 +1433,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | **DEC-500** | **Prévia e indexação:** URLs de preview separadas de produção, sem indexação pública desejada e com controles de acesso quando necessário; jamais supor que URL obscura protege segredos. |
 | **DEC-501** | **Configuração por ambiente:** Variáveis Vite públicas são consideradas visíveis ao navegador; segredos permanecem exclusivamente em função/ambiente protegido. |
 | **DEC-502** | **Dependência dos provedores:** Cloudflare Pages é primeira opção; Supabase é plataforma principal condicionada a limites, compatibilidade e validação, com alternativas avaliadas apenas se necessário. |
+
+<!-- ----- CUSTOS, CONFIABILIDADE E CONTINUIDADE ----- -->
 
 ### Custos, confiabilidade e continuidade
 
@@ -1291,6 +1449,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | **DEC-509** | **Incidentes e rollback:** Plano para reverter frontend, revogar segredos, conter operações e restaurar dados quando necessário; rollback de frontend não implica reversão automática de schema. |
 | **DEC-510** | **Backups e restauração:** Definir exportação e restauração testável dos dados importantes de acordo com o plano contratado, especialmente antes de migrações. |
 
+<!-- ----- GOVERNANÇA, DOCUMENTAÇÃO E LANÇAMENTO ----- -->
+
 ### Governança, documentação e lançamento
 
 | Decisão | Regra consolidada |
@@ -1304,6 +1464,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | **DEC-517** | **Responsabilidades e revisões:** Antes de cada release, distinguir aprovação funcional, teste técnico, promoção de ambiente e publicação; commits não são automaticamente releases. |
 | **DEC-518** | **Critério de encerramento do bloco:** Este bloco aprova processo e critérios; não executa deploy, altera DNS, cria contas, contrata serviços ou escreve código. Roadmap, marcos e commits ainda serão definidos. |
 
+<!-- ----- FLUXO OPERACIONAL DE REFERÊNCIA ----- -->
+
 ### Fluxo operacional de referência
 
 1. **Branch de trabalho:** implementar pequena etapa de roadmap com validações locais e teste correspondente.
@@ -1312,6 +1474,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 4. **Promoção:** aprovar versão candidata com critérios de aceite; aplicar migrações compatíveis previamente planejadas, nunca implicitamente por todo commit.
 5. **Produção:** publicar no endereço canônico `https://warlley.dev/`, manter `www` como redirecionamento e realizar smoke tests.
 6. **Operação:** acompanhar erro crítico, cotas, vencimento do domínio, certificado, backup e incidentes; reverter ou desabilitar seletivamente quando necessário.
+
+<!-- ----- CHECKLIST DE LANÇAMENTO (MODELO A PREENCHER NA IMPLEMENTAÇÃO) ----- -->
 
 ### Checklist de lançamento (modelo a preencher na implementação)
 
@@ -1323,6 +1487,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 - [ ] Migração/backup quando aplicáveis, com plano de recuperação.
 - [ ] DNS e HTTPS corretos, domínio e renovação sob controle.
 - [ ] Informações da release registradas e smoke test pós-publicação executado.
+
+<!-- ----- AUDITORIA DE COERÊNCIA ----- -->
 
 ### Auditoria de coerência
 
@@ -1338,12 +1504,16 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 
 ---
 
+<!-- === 3.17 BLOCO 14 — ROADMAP E METODOLOGIA DE IMPLEMENTAÇÃO === -->
+
 ## 3.17 Bloco 14 — Roadmap e metodologia de implementação
 
 **Estado:** CONCLUÍDO em 13/10/2026 por delegação expressa do usuário para decidir integralmente o bloco.  
 **Decisões:** DEC-519 a DEC-559 (**APROVADAS por delegação**).  
 **Objeto:** ordem, dependências, entregas, verificações, checkpoints, commits e critérios de avanço.  
 **Limite:** nenhuma implementação, commit, push, instalação ou deploy é autorizada pela aprovação deste plano.
+
+<!-- ----- MÉTODO E CONTROLE DE ENTREGAS ----- -->
 
 ### Método e controle de entregas
 
@@ -1358,6 +1528,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-525 | **Aprovação de avanço.** Encerrar checkpoint não autoriza automaticamente próxima entrega, push, produção ou novas funcionalidades; solicitar aprovação explícita. |
 | DEC-526 | **Correções e refatorações.** Bugfix urgente ou refatoração pode gerar incremento próprio, com regressão e explicação; não misturar refatoração ampla com recurso novo sem necessidade. |
 
+<!-- ----- SEQUÊNCIA DE FUNDAÇÃO E SHELLS ----- -->
+
 ### Sequência de fundação e shells
 
 | ID | Decisão aprovada por delegação |
@@ -1370,6 +1542,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-532 | **Fase F4: Desktop completo.** Evoluir Taskbar, WS Menu alfabético, busca, widgets, notificações, controles rápidos, Wally compacto e calendário conforme blocos anteriores. |
 | DEC-533 | **Fase F5: Mobile.** Implementar shell Mobile próprio com Home, catálogo, busca, navegação de origem e painéis; compartilhar Core sem copiar componentes Desktop integralmente. |
 | DEC-534 | **Checkpoint de troca de shell.** Validar mudança de viewport/orientação e retorno sem perda de dados persistentes, preservando estado compatível e URL estável. |
+
+<!-- ----- SEQUÊNCIA DE APLICATIVOS ----- -->
 
 ### Sequência de aplicativos
 
@@ -1385,6 +1559,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-542 | **Fase A8: avançados.** Terminal, Wally Estendido, autenticação e Administração; infraestrutura de autorização pode anteceder UI avançada quando exigida por apps anteriores. |
 | DEC-543 | **Ordem dinâmica por dependência.** Sequência proposta pode reordenar subentregas por dependências reais e validação, mantendo os 18 apps e critérios aprovados. |
 
+<!-- ----- INFRAESTRUTURA INCREMENTAL E QUALIDADE ----- -->
+
 ### Infraestrutura incremental e qualidade
 
 | ID | Decisão aprovada por delegação |
@@ -1397,6 +1573,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-549 | **Performance como gate.** Qualquer travamento crítico ao arrastar, redimensionar, maximizar/restaurar bloqueia progressão da etapa do gerenciador de janelas. |
 | DEC-550 | **Critérios de segurança como gate.** Vazamento de segredo, acesso não autorizado, falha RLS e perda indevida de arquivos pessoais bloqueiam merge/publicação. |
 | DEC-551 | **Revisão visual flexível.** Ajustes em layout e estética são permitidos dentro dos requisitos funcionais e Design System, documentando alterações relevantes. |
+
+<!-- ----- GIT, CHECKPOINTS E LANÇAMENTO ----- -->
 
 ### Git, checkpoints e lançamento
 
@@ -1411,6 +1589,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-558 | **Fase R1: consolidação.** Após apps, executar teste cruzado completo dos 18 aplicativos, UX Desktop/Mobile, privacidade, acessibilidade e recuperação de falhas. |
 | DEC-559 | **Fase R2: produção.** Após aprovação expressa, realizar validação de DNS/HTTPS, prévia, segurança, cotas, rollback, backups, domínio warlley.dev e checklist de publicação. |
 
+
+<!-- ----- ROADMAP OPERACIONAL — ENTREGAS E DEPENDÊNCIAS ----- -->
 
 ### Roadmap operacional — entregas e dependências
 
@@ -1437,6 +1617,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 
 **Observação:** o roadmap é sequencial nas dependências, mas seus subincrementos podem ser intercalados quando isso reduzir retrabalho. A indicação de mensagem de commit é exemplo, não execução nem ordem irrevogável. Nenhum marco obriga um commit único: dividir entregas quando necessário.
 
+<!-- ----- PROTOCOLO DE CADA INCREMENTO ----- -->
+
 ### Protocolo de cada incremento
 
 1. Informar objetivo e decisões cobertas, dependências e arquivos candidatos.
@@ -1445,6 +1627,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 4. Executar/solicitar validações aplicáveis e apresentar evidências ou resultados, incluindo problemas conhecidos.
 5. Exigir revisão e aprovação para commit; sugerir mensagem e conteúdo exato do commit.
 6. Fazer push/deploy somente após autorização correspondente; nunca avançar automaticamente para próximo incremento.
+
+<!-- ----- AUDITORIA DE COMPATIBILIDADE E BLOQUEIOS ----- -->
 
 ### Auditoria de compatibilidade e bloqueios
 
@@ -1461,12 +1645,16 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 
 ---
 
+<!-- === 3.18 BLOCO 15 — GOVERNANÇA DE EXECUÇÃO E PRONTIDÃO DO PRIMEIRO INCREMENTO === -->
+
 ## 3.18 Bloco 15 — Governança de execução e prontidão do primeiro incremento
 
 **Estado:** CONCLUÍDO em 13/10/2026 por delegação expressa do usuário para decidir o próximo bloco.  
 **Decisões:** DEC-560 a DEC-584 — APROVADAS por delegação.  
 **Objetivo:** converter o roadmap B14 em um protocolo de início, revisão e controle de mudanças, sem iniciar código.  
 **Limites:** não autoriza implementação, ferramentas pagas, alterações no repositório, commits, push nem deploy.
+
+<!-- ----- GOVERNANÇA E AUTORIZAÇÃO ----- -->
 
 ### Governança e autorização
 
@@ -1478,6 +1666,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-563 | **Pontos de decisão:** Mudanças de escopo, novas dependências relevantes, alteração de contrato, custo ou segurança são submetidas à aprovação antes de execução. |
 | DEC-564 | **Limite da autonomia:** Permitir correções locais compatíveis com o incremento, mas não iniciar a etapa seguinte, criar serviço pago, implantar ou alterar produção automaticamente. |
 
+<!-- ----- PREPARAÇÃO DO REPOSITÓRIO E DA ETAPA F0 ----- -->
+
 ### Preparação do repositório e da etapa F0
 
 | ID | Definição aprovada por delegação |
@@ -1487,6 +1677,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-567 | **Baseline e ambiente:** Registrar ambiente de execução, versões de Node e gerenciador de pacotes disponíveis; selecionar versões e dependências só após checar compatibilidade real. |
 | DEC-568 | **Estrutura mínima:** Na fundação, iniciar com arquivos apenas necessários ao projeto React/JavaScript/Vite, Core mínimo e shells progressivos; novas pastas entram por demanda. |
 | DEC-569 | **Separação de configuração:** Documentar nomes e finalidades das variáveis de ambiente sem exibir segredos; não conectar produção desnecessariamente nos testes locais. |
+
+<!-- ----- FORMATO DE ENTREGA E REVISÃO ----- -->
 
 ### Formato de entrega e revisão
 
@@ -1498,6 +1690,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-573 | **Checkpoint verificável:** Em cada entrega, listar funcionalidade pronta, requisitos cobertos, testes rodados, pendências e próxima entrega proposta antes de solicitar commit. |
 | DEC-574 | **Commits e push distintos:** Sugerir mensagem clara e conteúdo do commit após validação; exigir autorização própria para commit e para push quando não abrangidos explicitamente. |
 
+<!-- ----- TESTES, QUALIDADE E CONTROLE DE MUDANÇAS ----- -->
+
 ### Testes, qualidade e controle de mudanças
 
 | ID | Definição aprovada por delegação |
@@ -1508,6 +1702,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-578 | **Experiência em dois shells:** Integração de cada app deve ser checada em Desktop e Mobile conforme maturidade de ambos, preservando URL estável e navegação de origem. |
 | DEC-579 | **Segurança e dados:** Não habilitar escrita remota pública ou operação administrativa antes de RLS, validação de autorização, proteção de credenciais e cenários negativos. |
 
+<!-- ----- CHECKPOINTS, RISCOS E ENCERRAMENTO ----- -->
+
 ### Checkpoints, riscos e encerramento
 
 | ID | Definição aprovada por delegação |
@@ -1517,6 +1713,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-582 | **Bloqueios externos:** Disponibilidade de warlley.dev, benefícios estudantis, código do professor e limites dos provedores são verificados no momento oportuno, sem presumir conclusão. |
 | DEC-583 | **Prontidão da fase F0:** Considerar o roadmap apto para iniciar F0 mediante autorização, sem afirmar que o repositório já foi inspecionado ou que dependências foram instaladas. |
 | DEC-584 | **Fechamento do bloco:** Encerrar o Bloco 15 após revisão de compatibilidade, manter implementação NÃO INICIADA e preparar Bloco 16 de checklist final de prontidão se ainda necessário. |
+
+<!-- ----- 3.18.1 CHECKLIST PARA AUTORIZAÇÃO FUTURA DO F0 ----- -->
 
 ### 3.18.1 Checklist para autorização futura do F0
 
@@ -1530,6 +1728,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 - [ ] Definição técnica final de ferramentas e versions de execução — **pendente da inspeção**.
 - [ ] Preparação de credenciais/serviços externos — **pendente e não autorizada**.
 
+<!-- ----- 3.18.2 MODELO OPERACIONAL DAS RESPOSTAS DURANTE A EXECUÇÃO ----- -->
+
 ### 3.18.2 Modelo operacional das respostas durante a execução
 
 1. **Incremento:** ID, objetivo, dependências e decisões atendidas.
@@ -1537,6 +1737,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 3. **Execução:** código completo dos arquivos reorganizados; mudanças localizadas para ajustes pontuais.
 4. **Verificação:** comandos efetivamente rodados, testes e resultados; não confundir teste sugerido com executado.
 5. **Checkpoint:** resultado, problemas pendentes, mensagem sugerida de commit e próxima ação, aguardando aprovação.
+
+<!-- ----- 3.18.3 REVISÃO DE CONSISTÊNCIA ----- -->
 
 ### 3.18.3 Revisão de consistência
 
@@ -1551,11 +1753,15 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 
 ---
 
+<!-- === 3.19 BLOCO 16 — CHECKLIST FINAL DE PRONTIDÃO === -->
+
 ## 3.19 Bloco 16 — Checklist final de prontidão
 
 **Estado:** CONCLUÍDO em 13/10/2026 por delegação explícita do usuário para decidir e finalizar o bloco.  
 **Decisões:** DEC-585 a DEC-609, aprovadas por delegação.  
 **Natureza:** revisão documental e preparação para autorização de execução; **nenhum código, instalação, análise do repositório, commit ou deploy foi executado**.
+
+<!-- ----- AUDITORIA DO ESCOPO E DA DOCUMENTAÇÃO ----- -->
 
 ### Auditoria do escopo e da documentação
 
@@ -1567,6 +1773,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-588 | **Design evolutivo:** Conservar Design System e UX estrutural aprovados, com liberdade para ajustes visuais coerentes na execução sem fixar layouts prematuramente. |
 | DEC-589 | **Critérios de pronto:** Cada incremento deve informar requisito, resultado, erros, acessibilidade, testes e checkpoint; implementação e publicação são aprovações distintas. |
 
+<!-- ----- PRONTIDÃO PARA F0 ----- -->
+
 ### Prontidão para F0
 
 | ID | Decisão aprovada por delegação |
@@ -1576,6 +1784,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-592 | **Baseline e trabalho existente:** Não presumir repositório vazio; identificar alterações locais ou remotas, preservar histórico e pedir direção se houver conflito com o planejamento. |
 | DEC-593 | **Relatório F0:** Ao concluir F0, apresentar inventário, riscos, compatibilidades, recursos existentes reaproveitáveis apenas quando aprovados e proposta exata para F1. |
 | DEC-594 | **Gate do F1:** F1 só inicia após aprovação dos resultados de F0, da estratégia de fundação e do incremento F1; esta delegação não concede tal permissão. |
+
+<!-- ----- DEPENDÊNCIAS EXTERNAS E SEGREDOS ----- -->
 
 ### Dependências externas e segredos
 
@@ -1587,6 +1797,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-598 | **Credenciais e ambiente:** Segredos não entram no cliente nem no mestre; preview e produção usam isolamento conforme risco; credenciais só serão configuradas na fase necessária e autorizada. |
 | DEC-599 | **Custos e indisponibilidade:** Não contratar plano pago sem autorização; cotas, rate limiting, orçamento e fallback seletivo precisam ser conferidos antes de habilitar serviços com consumo variável. |
 
+<!-- ----- QUALIDADE, SEGURANÇA E REGRESSÕES ----- -->
+
 ### Qualidade, segurança e regressões
 
 | ID | Decisão aprovada por delegação |
@@ -1597,6 +1809,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-603 | **Acessibilidade transversal:** Validar WCAG 2.2 AA como referência, teclado, foco, zoom, leitor de tela, toque e movimento reduzido ao longo do desenvolvimento. |
 | DEC-604 | **Testes e evidências:** Rodar lint, build, testes de contratos/integração e fluxos adequados à maturidade; distinguir teste planejado de teste efetivamente realizado. |
 
+<!-- ----- CONTROLE DE ENTREGA E LANÇAMENTO ----- -->
+
 ### Controle de entrega e lançamento
 
 | ID | Decisão aprovada por delegação |
@@ -1606,6 +1820,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | DEC-607 | **Publicação:** Deploy de produção exige gates de qualidade, segurança, DNS/HTTPS, custos, prévia, rollback e aprovação explícita; publicar não é consequência automática da validação técnica. |
 | DEC-608 | **Registro de desvios:** Manter changelog do mestre ou registros de decisão para mudanças relevantes na execução; bugs e pequenos ajustes visuais compatíveis não reabrem todos os blocos. |
 | DEC-609 | **Encerramento do planejamento:** Com B16 concluído, o desenho-base fica pronto para fase de execução controlada; nada foi testado no repositório nesta etapa e implementação continua NÃO INICIADA. |
+
+<!-- ----- 3.19.1 CHECKLIST DE PRONTIDÃO ----- -->
 
 ### 3.19.1 Checklist de prontidão
 
@@ -1622,6 +1838,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | Instalação, código e testes de execução | NÃO INICIADOS | Dependem dos incrementos autorizados |
 | Credenciais, DNS, Supabase e deploy | NÃO EXECUTADOS | Validar na fase pertinente |
 
+<!-- ----- 3.19.2 MATRIZ DE GATES DE EXECUÇÃO ----- -->
+
 ### 3.19.2 Matriz de gates de execução
 
 | Gate | Condição de entrada | Permitido após autorização | Não presumir |
@@ -1631,6 +1849,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 | G2 — Core/Desktop/Mobile | Contratos e base validados, autorização por incremento | Desenvolver/testar shells progressivamente | Avançar apesar de travamento crítico |
 | G3 — Dados e integrações | Segurança/credenciais/limites adequados e autorização | Implementar consumo de APIs, escrita e recursos protegidos | Exposição de segredos ou contorno de RLS |
 | G4 — Publicação | Checklists de segurança, acessibilidade, qualidade, custos e infraestrutura aprovados | Publicar versão específica autorizada | Push ou produção implícitos por commit |
+
+<!-- ----- 3.19.3 PENDÊNCIAS CLASSIFICADAS ----- -->
 
 ### 3.19.3 Pendências classificadas
 
@@ -1642,6 +1862,8 @@ Os nomes acima são **exemplos semânticos** do contrato e não determinam assin
 
 **Antes da publicação:** domínio warlley.dev, DNS, HTTPS, redirects, ambiente produtivo, custos/alertas, proteção de segredos, prévia, backup/recovery, regressões de janelas, acessibilidade e autorização expressa.
 
+<!-- ----- 3.19.4 CONCLUSÃO E COMPATIBILIDADE ----- -->
+
 ### 3.19.4 Conclusão e compatibilidade
 
 A revisão do B16 confirma consistência com o catálogo de 18 aplicativos, a URL estável, privacidade de pastas locais, autorização backend, experiências Desktop/Mobile distintas, contratos versionáveis, desempenho de janelas como gate, CI e rollbacks planejados. Não houve introdução de funcionalidades adicionais ou troca de fornecedores.
@@ -1649,6 +1871,8 @@ A revisão do B16 confirma consistência com o catálogo de 18 aplicativos, a UR
 **Conclusão:** encerrados os **16 blocos** e concluído o planejamento-base. DEC-001 a DEC-609 aprovadas neste ciclo. **Pronto para solicitar autorização de F0, mas F0 NÃO AUTORIZADO; implementação NÃO INICIADA.**
 
 ---
+
+<!-- === 4. MAPA PRELIMINAR DE BLOCOS — NÃO APROVADO === -->
 
 ## 4. Mapa preliminar de blocos — NÃO APROVADO
 
@@ -1677,6 +1901,8 @@ A organização abaixo é um índice de discussão, não uma estrutura imutável
 
 ---
 
+<!-- === 5. PENDÊNCIAS E PONTOS DE ATENÇÃO === -->
+
 ## 5. Pendências e pontos de atenção
 
 O planejamento-base dos Blocos 01–16 está concluído. Os itens abaixo são **dependências de execução e validação**, não novos blocos obrigatórios nem autorizações tácitas.
@@ -1693,6 +1919,8 @@ O planejamento-base dos Blocos 01–16 está concluído. Os itens abaixo são **
 **Proibido por padrão:** programar, alterar repositório, instalar dependências, provisionar serviço pago, fazer commit/push ou publicar antes da autorização pertinente.
 
 ---
+
+<!-- === 6. HISTÓRICO DO DOCUMENTO === -->
 
 ## 6. Histórico do documento
 
@@ -1714,6 +1942,8 @@ O planejamento-base dos Blocos 01–16 está concluído. Os itens abaixo são **
 | 13/10/2026 | 0.3.0 | Consolidação do Bloco 03 (DEC-089–127), esclarecimento de DEC-125 e revisão de dependências. |
 | 12/10/2026 | 0.2.0 | Consolidação do Bloco 02 (DEC-019–088) e diretrizes técnicas de responsividade. |
 | 12/10/2026 | 0.1.0 | Início do mestre independente deste ciclo; consolidação das DEC-001–018; verificação de consistência e encerramento do B01. |
+
+<!-- === 7. PRÓXIMA AÇÃO === -->
 
 ## 7. Próxima ação
 

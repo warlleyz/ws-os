@@ -1,8 +1,18 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 14 — CONFIGURAÇÕES E APRESENTAÇÃO DO SISTEMA === -->
+
 # Etapa 14 — Configurações e apresentação do sistema
+
+<!-- === ESTADO: ENTREGA TÉCNICA LOCAL VALIDADA; WALKTHROUGH VISUAL PENDENTE === -->
 
 ## Estado: entrega técnica local validada; walkthrough visual pendente
 
 Planejamento da Etapa 14 e decisões DEC-010/013/107/108/373–378 consultados. Arquitetura e mecanismos de preferências existentes preservados. Não houve commit, push, alteração de tradução, migração ou configuração de produção. Etapa 15 não iniciada.
+
+<!-- === BLOCO DE CONFIGURAÇÕES === -->
 
 ## Bloco de Configurações
 
@@ -13,6 +23,8 @@ Planejamento da Etapa 14 e decisões DEC-010/013/107/108/373–378 consultados. 
 - Reset permanece com confirmação e cancelamento/Escape, usa a allowlist do contrato e relata falha parcial. Não utiliza clear(), não apaga arquivos pessoais, sessão, conteúdo dos apps, favoritos ou imagens. Testes existentes verificam preservação de posições e falha de armazenamento.
 - A implementação de reset informa falhas por categoria; não se introduziu transação global entre preferências. Falha parcial não equivale a rollback de todas as categorias.
 
+<!-- === BLOCO DE APRESENTAÇÃO === -->
+
 ## Bloco de apresentação
 
 - Boas-vindas mantém primeiro acesso, botão Começar, Escape e contenção de Tab. Ao desmontar, restaura foco anterior conectado ou procura também o shell Mobile, evitando fallback exclusivo de Desktop.
@@ -21,6 +33,8 @@ Planejamento da Etapa 14 e decisões DEC-010/013/107/108/373–378 consultados. 
 - Sobre o Sistema conserva versão técnica derivada de package.json (atualmente 0.0.0) e texto de desenvolvimento; não foi inventada versão pública ou lançamento concluído.
 - Stack passa a citar React DOM e PDF.js. Créditos oferecem links externos identificados com seta para React/React DOM e Vite (MIT), Lucide (ISC), PDF.js (Apache-2.0); licenças conferidas nos pacotes instalados. Não foi alterada a licença do projeto.
 - Evolução/arquitetura e repositório existentes preservados, com organização da formatação do componente. Não se declarou conclusão geral do produto nem homologação das integrações.
+
+<!-- === ARQUIVOS DESTE BLOCO === -->
 
 ## Arquivos deste bloco
 
@@ -34,6 +48,8 @@ Planejamento da Etapa 14 e decisões DEC-010/013/107/108/373–378 consultados. 
 - docs/finalizacao/ETAPA-14-ANDAMENTO.md (novo)
 - docs/PLANO-FINALIZACAO-POR-ETAPAS.md (referência ao checkpoint)
 
+<!-- === VALIDAÇÃO EXECUTADA === -->
+
 ## Validação executada
 
 - Testes focados de Configurações: 26/26 aprovados, incluindo sete regressões novas.
@@ -42,6 +58,8 @@ Planejamento da Etapa 14 e decisões DEC-010/013/107/108/373–378 consultados. 
 - npm run test: 486/486 aprovados.
 - Novas regressões executam componentes reais com hooks/serviços/DOM controlados: confirmação/cancelamento do reset e falha parcial; tema com persistência rejeitada; encaminhamento de idioma/densidade; rejeição de gravação de widget; upload rejeitado e desmontagem; foco/Tab/Escape das boas-vindas; versão e links seguros de créditos.
 - JSON de tradução intactos; nenhuma nova mensagem traduzível introduzida. Foram reutilizadas mensagens existentes.
+
+<!-- === REVISÃO POSTERIOR PELO AUTOR === -->
 
 ## Revisão posterior pelo autor
 

@@ -1,4 +1,12 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === MISSÃO DE CONCLUSÃO — AUDITORIA E EXECUÇÃO === -->
+
 # Missão de conclusão — auditoria e execução
+
+<!-- === BASELINE E AUTORIZAÇÃO === -->
 
 ## Baseline e autorização
 
@@ -7,6 +15,8 @@ Auditoria iniciada em 15/10/2026 sobre `dc962b7` (main), Git limpo. Stash R3.3 p
 Inventário automatizado de 210 arquivos técnicos/documentais versionados, revisão do histórico posterior à entrega anterior e dos contratos/consumidores relevantes. V1 local de referência em `c2e51be`, sem executar seu código ou copiar credenciais. V2 evoluiu em 31 commits desde a entrega anterior: quatro widgets, grade adaptativa, refinamentos de painéis, Wally compartilhado e Worker/D1. Esses avanços são preservados; documentos anteriores que os chamam de ausentes estão desatualizados.
 
 Baseline executado: build aprovado; lint reprovado com 22 erros/2 warnings; testes 94 aprovados/9 falhas de 103. O total exato de diagnósticos deve ser conferido na saída final: vários são variáveis sem uso, efeitos com setState, refs em render e símbolo inexistente.
+
+<!-- === MATRIZ INICIAL DE REQUISITOS E RISCOS === -->
 
 ## Matriz inicial de requisitos e riscos
 
@@ -28,6 +38,8 @@ Baseline executado: build aprovado; lint reprovado com 22 erros/2 warnings; test
 | Wally, DEC-404–405/433                  | Conversa compartilhada/cancelável, Gemini/Turnstile/D1 preparados | Remoto deliberadamente desligado: manter `WALLY_AI_ENABLED=false`; testar negativa e fallback                                           | P0/P2 segurança, sem ativação remota                     |
 | Operação/qualidade, DEC-450–518         | Lint/build/testes existentes, Worker configurado                  | Sem CI/release completo; docs antigas contraditórias; gates físicos não comprovados                                                     | P0–P4, sem publicar                                      |
 
+<!-- === SEQUÊNCIA EXECUTÁVEL === -->
+
 ## Sequência executável
 
 1. **M0:** estabilizar lint, regressão de grade, compatibilidade de widgets e testes dos consumidores. Não reduzir funcionalidade para fazer testes passarem.
@@ -38,13 +50,19 @@ Baseline executado: build aprovado; lint reprovado com 22 erros/2 warnings; test
 
 Cada bloco terá diff revisado, lint/build/testes pertinentes, commit local e registro de evidências. Riscos críticos de segurança/perda de dados/resize impedem alegação de pronto para produção. Benchmark físico, leitor de tela/toque e contas reais serão distinguidos de testes simulados.
 
+<!-- === COMPARAÇÃO COM A V1 === -->
+
 ## Comparação com a V1
 
 A V1 oferece janela de vidro, painéis refinados, catálogo de projetos/demos, currículo/certificados, estatísticas e Snake com ranking Supabase. Sua organização concentra responsabilidades no Desktop e tem dependências distintas. A V2 mantém camadas Core/shells/features/apps, política de dados locais e autorização especificadas pelo mestre. Não portar acesso direto permissivo a rankings nem configuração cliente privilegiada. Transparência/blur são referências já adaptadas; evitar transições de geometria e blur duplicado que ampliem custo de resize.
 
+<!-- === EVIDÊNCIAS DE EXECUÇÃO === -->
+
 ## Evidências de execução
 
 Registro incrementado após cada entrega validada. Nenhum sucesso de integração externa será inferido de mocks ou ausência de chaves.
+
+<!-- ----- M0 — ESTABILIZAÇÃO ----- -->
 
 ### M0 — estabilização
 
@@ -54,11 +72,15 @@ Grade virtual separa reserva física da Taskbar das linhas roláveis. Testes ant
 
 Medição sintética do algoritmo multiwidget (Node/VM, 25 distribuições por dimensão, não benchmark do navegador): média 1,5 ms em 768×500, 1,5 ms em 1280×720, 3,0 ms em 1920×1080 e 18,6 ms em 3840×2160, p95 de 23,5 ms em 4K. O custo de layout em 4K merece otimização medida; não declarar resize físico corrigido com esse ensaio.
 
+<!-- ----- M0.1 — CUSTO DA GRADE ----- -->
+
 ### M0.1 — custo da grade
 
 Distribuicao sob demanda substitui enumeracao/ordenacao completas no caminho comum, preservando ordem de prioridade e desempate. Layout do hook memoizado por entradas reais para nao recalcular em atualizacoes sem relacao com a grade. Comparacao deterministica: 120 cenarios identicos antes/depois. Mesmo ensaio Node/VM: 4K media 0,95 ms/p95 1,63 ms (antes 18,6/23,5 ms); Full HD media 0,30 ms (antes 3,00 ms). Em 768x500, media 1,91 ms contra 1,51 ms: a melhora nao e uniforme em espacos congestionados. Nao equivale a medicao de FPS no navegador.
 
 Navegador: Desktop e tres widgets padrao renderizados, Taskbar funcional, Configuracoes abriu pelo teclado e listou os quatro widgets e tamanhos legados. Nenhum dado da origem habitual foi alterado. A consulta de localizacao retornou erro de permissao com feedback; nao foi concedida permissao de geolocalizacao.
+
+<!-- ----- M1 — TEMAS E EFEITOS ----- -->
 
 ### M1 — temas e efeitos
 
@@ -67,6 +89,8 @@ Medição no navegador encontrou Controles Rápidos sólido (rgb 27,39,54) com b
 Removido blur interno duplicado dos widgets e cabeçalho/compositor Wally; mantida uma camada externa. Blur desligado/superfície sólida/redução de transparência/baixo custo desativam o filtro nas superfícies suportadas; respeitar o SO. Intensidade suave escala durações fixas dos módulos, sem mudar o modo normal; movimento reduzido/desligado continua prioritário. Scrollbars/seleção/foco em alto contraste compartilham tokens. Nenhuma dependência ou serviço remoto ativado.
 
 Validação M1 no navegador: Controles Rápidos passou a rgba(24,34,48,.88)/blur 28 px no escuro e rgba(255,255,255,.88)/texto 23,35,52 no claro. Widget tem blur externo 24 px e interno none. Reduzir transparência tornou painel/janela/widget sólidos e filtro none. O teclado operou as opções; foi identificada/corrigida tradução dinâmica ausente em temas, controles, descrições de widgets e fallbacks Wally. Sugestões prontas acompanham o idioma; perguntas digitadas são preservadas. Os ensaios não representam certificação WCAG ou teste físico de leitor de tela.
+
+<!-- ----- M2.1 — ROTAS WORKER ----- -->
 
 ### M2.1 — rotas Worker
 

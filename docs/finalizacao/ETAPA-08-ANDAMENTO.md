@@ -1,8 +1,18 @@
+<!-- === REFERÊNCIA HISTÓRICA PRESERVADA === -->
+
+> **Referência vigente:** [Mestre WS OS V2](../WS-OS-V2-MESTRE.md). O conteúdo abaixo preserva decisões e evidências da sua data. A numeração antiga de etapas, autorizações, testes aprovados e descrições de implementação não representam a revisão atual. Decisões posteriores do proprietário prevalecem; não executar instruções antigas automaticamente.
+
+<!-- === ETAPA 08 — NOTAS E GERENCIAMENTO EDITORIAL === -->
+
 # Etapa 08 — Notas e gerenciamento editorial
+
+<!-- === ESTADO: IMPLEMENTADA E VALIDADA LOCALMENTE; ACEITE EXTERNO PENDENTE === -->
 
 ## Estado: implementada e validada localmente; aceite externo pendente
 
 Decisões preservadas: DEC-103/109/110 e DEC-390/391. Notas continua um blog público com edição administrativa autenticada; a Administração reutiliza NotesAdmin. Nenhuma operação externa, migração, credencial, commit ou push foi realizada. Etapa 09 não iniciada.
+
+<!-- === ENTREGAS TÉCNICAS === -->
 
 ## Entregas técnicas
 
@@ -19,6 +29,8 @@ Decisões preservadas: DEC-103/109/110 e DEC-390/391. Notas continua um blog pú
 - Guardas de fechamento contemplam texto, seleção de anexo e operações em andamento. Atualizar a lista preserva o gerenciador montado. Textos do editor permanecem em memória após expiração da sessão.
 - CSS editorial passa a ser carregado pelo módulo compartilhado, inclusive na Administração. Internacionalização preservada; traduções novas registradas abaixo para a fase final.
 
+<!-- === VALIDAÇÃO REALIZADA === -->
+
 ## Validação realizada
 
 - npm run lint: aprovado, sem avisos.
@@ -27,6 +39,8 @@ Decisões preservadas: DEC-103/109/110 e DEC-390/391. Notas continua um blog pú
 - git diff --check: aprovado.
 - Novas regressões: confirmação de edição de outra publicação (UI/backend); identidade estável após falha de rede; criação idempotente/conteúdo divergente; corpo Unicode dentro do limite; descritor de abertura e origem exata; rejeição de metadados privados; recuperação de upload sem duplicação; limite de cinco anexos; revalidação de curtidas.
 - O ciclo do Worker de login/criação/edição/publicação/curtida/despublicação/exclusão/logout passou com dependências externas controladas. Isso não equivale a homologação do banco real.
+
+<!-- === ARQUIVOS DA ETAPA === -->
 
 ## Arquivos da etapa
 
@@ -46,6 +60,8 @@ Decisões preservadas: DEC-103/109/110 e DEC-390/391. Notas continua um blog pú
 
 Notes.css foi formatado, sem alteração semântica. Demais alterações locais das etapas anteriores preservadas.
 
+<!-- === CONFIGURAÇÃO E ACEITE EXTERNO === -->
+
 ## Configuração e aceite externo
 
 Nenhuma migração nova necessária. Conferir no ambiente autorizado as migrações existentes 001–004 (auth/publicações/curtidas), 008–010 (arquivos/vínculos/integridade/índice), RLS, Storage privado, políticas e segredos previstos no guia backend. Anexos dependem de MANAGED_FILES_ENABLED=true e da configuração de Storage existente. Não foram ativados serviços nem aplicadas migrações nesta tarefa.
@@ -54,9 +70,13 @@ Permanecem pendentes: ciclo real em homologação, upload/download real de anexo
 
 Anexos enviados mas não vinculados após cancelamento/conflito continuam como arquivos privados identificáveis; não há exclusão automática que possa apagar dados. Gestão/limpeza geral desses recursos permanece na Administração, sem ampliar esta etapa.
 
+<!-- === CONTINUIDADE === -->
+
 ## Continuidade
 
 Próxima etapa: 09 — Calculadora, após autorização de avanço. Preservar alterações locais, não executar novamente scripts temporários de edição e não repetir validações sem mudança que justifique. Nenhum commit/push foi feito. Sugestão após revisão: feat: finaliza notas anexos e gerenciamento editorial
+
+<!-- === TRADUÇÕES ADIADAS POR INSTRUÇÃO DO USUÁRIO === -->
 
 ## Traduções adiadas por instrução do usuário
 
