@@ -1,5 +1,4 @@
 /* === Superfície do Sobre Mim === */
-/* ----- Estrutura do aplicativo ----- */
 .ws-about {
   --about-line: color-mix(in srgb, var(--border-default) 72%, transparent);
   --about-panel: color-mix(in srgb, var(--surface-secondary) 33%, transparent);
@@ -17,7 +16,6 @@
   scrollbar-color: var(--border-control) transparent;
 }
 
-/* ----- Dimensionamento dos elementos ----- */
 .ws-about *,
 .ws-about *::before,
 .ws-about *::after {
@@ -25,7 +23,6 @@
 }
 
 /* === Perfil profissional === */
-/* ----- Cartão principal ----- */
 .ws-about__profile {
   display: grid;
   grid-template-columns: 118px minmax(0, 1fr);
@@ -34,7 +31,10 @@
   padding: 20px;
   border: 1px solid var(--about-line);
   border-radius: 17px;
-  background: linear-gradient(115deg, var(--about-accent-soft), var(--about-panel) 58%, transparent);
+  background: linear-gradient(115deg,
+      var(--about-accent-soft),
+      var(--about-panel) 58%,
+      transparent);
   box-shadow: 0 8px 28px rgb(0 0 0 / 4%);
 }
 
@@ -97,7 +97,7 @@
   line-height: 1.65;
 }
 
-/* ----- Formação e localização ----- */
+/* ----- Formação e localização resumidas ----- */
 .ws-about__meta {
   display: flex;
   flex-wrap: wrap;
@@ -121,17 +121,7 @@
   color: var(--accent-secondary);
 }
 
-/* === Conteúdo principal === */
-/* ----- Texto à esquerda e globo à direita ----- */
-.ws-about__main {
-  display: grid;
-  grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.02fr);
-  align-items: stretch;
-  gap: 14px;
-  min-width: 0;
-}
-
-/* ----- Cards com contraste sutil e integração ao vidro do sistema ----- */
+/* === Estrutura das seções === */
 .ws-about__section {
   min-width: 0;
   padding: 20px;
@@ -143,30 +133,11 @@
   box-shadow: 0 6px 20px rgb(0 0 0 / 3%);
 }
 
-/* ----- Realce discreto, sem competir com o conteúdo ----- */
 .ws-about__section:hover {
   border-color: color-mix(in srgb, var(--accent-primary) 22%, var(--about-line));
 }
 
-.ws-about__narrative {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  min-width: 0;
-  gap: 14px;
-}
-
-/* ----- Objetivos acompanha a altura do card do globo ----- */
-.ws-about__goals {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.ws-about__goals-grid {
-  flex: 1;
-  justify-content: space-evenly;
-}
-
+/* ----- Cabeçalhos das seções ----- */
 .ws-about__section-heading {
   display: flex;
   align-items: center;
@@ -205,9 +176,81 @@
   font-size: 16px;
   font-weight: 680;
   line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
-/* ----- Texto de apresentação ----- */
+/* === Distribuição principal === */
+.ws-about__main {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  grid-template-areas:
+    "education learning"
+    "introduction learning";
+  grid-template-rows: auto auto;
+  align-items: start;
+  gap: 14px;
+  min-width: 0;
+}
+
+.ws-about__education {
+  grid-area: education;
+}
+
+.ws-about__introduction {
+  grid-area: introduction;
+}
+
+.ws-about__learning {
+  grid-area: learning;
+}
+
+/* === Formação acadêmica === */
+.ws-about__education {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ws-about__education-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ws-about__education-meta {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.ws-about__education-meta strong {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.ws-about__education-meta span {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border: 1px solid var(--about-line);
+  border-radius: 8px;
+  background: var(--about-accent-soft);
+  color: var(--accent-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ws-about__education-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+/* === Apresentação pessoal === */
 .ws-about__text {
   display: flex;
   flex-direction: column;
@@ -222,120 +265,82 @@
   line-height: 1.7;
 }
 
-/* ----- Espaço dedicado ao globo interativo ----- */
+/* === Globo de tecnologias === */
 .ws-about__learning {
-  min-width: 0;
   display: flex;
   flex-direction: column;
+  align-self: stretch;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 0;
   padding: 20px;
 }
 
 .ws-about__description {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .ws-about__learning .ws-skills-globe__stage {
-  height: clamp(330px, 41cqw, 445px);
+  height: clamp(350px, 43cqw, 460px);
 }
 
-/* === Conhecimentos === */
-/* ----- Grade de categorias ----- */
-.ws-about__knowledge-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+.ws-about__learning .ws-skills-globe {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
 }
 
-/* ----- Card interno de conhecimento ----- */
-.ws-about__knowledge-card {
+/* === Objetivos profissionais === */
+.ws-about__goals {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  padding: 14px;
-  border: 1px solid var(--about-line);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface-secondary) 30%, transparent);
-  transition: border-color 160ms ease, background-color 160ms ease;
 }
 
-.ws-about__knowledge-card:hover {
-  border-color: color-mix(in srgb, var(--accent-primary) 32%, var(--about-line));
-  background: color-mix(in srgb, var(--surface-secondary) 46%, transparent);
-}
-
-/* ----- Identificação da categoria ----- */
-.ws-about__knowledge-header {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 11px;
-}
-
-.ws-about__knowledge-header>span {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 31px;
-  height: 31px;
-  border-radius: 8px;
-  background: var(--about-accent-soft);
-  color: var(--accent-secondary);
-}
-
-.ws-about__knowledge-header h3 {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 680;
-}
-
-/* ----- Lista de habilidades ----- */
-.ws-about__knowledge-card ul {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  margin: 0;
-  padding-left: 18px;
-}
-
-.ws-about__knowledge-card li {
-  color: var(--text-secondary);
-  font-size: 11.5px;
-  line-height: 1.5;
-}
-
-.ws-about__knowledge-card li::marker {
-  color: var(--accent-secondary);
-}
-
-/* === Objetivos === */
-/* ----- Metas organizadas dentro do card ----- */
 .ws-about__goals-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
 }
 
-.ws-about__goals-grid p {
-  margin: 0;
+.ws-about__goal {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
   padding-left: 12px;
   border-left: 2px solid color-mix(in srgb, var(--accent-primary) 48%, transparent);
-  color: var(--text-secondary);
+}
+
+.ws-about__goal h3 {
+  margin: 0;
+  color: var(--text-primary);
   font-size: 12.5px;
+  font-weight: 680;
+  line-height: 1.4;
+}
+
+.ws-about__goal p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
   line-height: 1.65;
 }
 
 /* === Links profissionais === */
-/* ----- Faixa de canais de contato ----- */
 .ws-about__links {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
-/* ----- Cartões de links externos e acesso ao Contato ----- */
 .ws-about__links .ws-about__link {
   display: flex;
   align-items: center;
   min-width: 0;
-  min-height: 72px;
+  min-height: 88px;
   gap: 12px;
   padding: 13px 15px;
   border: 1px solid var(--about-line);
@@ -390,6 +395,8 @@
 .ws-about__link-info small {
   color: var(--text-secondary);
   font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .ws-about__link-action {
@@ -398,52 +405,82 @@
   font-size: 20px;
 }
 
-/* ----- Contato recebe realce de ação interna ----- */
 .ws-about__links .ws-about__link--contact {
   border-color: color-mix(in srgb, var(--accent-primary) 32%, var(--about-line));
   background: color-mix(in srgb, var(--accent-primary) 8%, var(--surface-secondary));
 }
 
-/* === Responsividade pela largura da janela === */
-/* ----- Largura intermediária ----- */
-@container (max-width: 850px) {
+/* === Navegação interna === */
+.ws-about__navigation {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ws-about__navigation-card {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 88px;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 1px solid var(--about-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-secondary) 36%, transparent);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.ws-about__navigation-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent-primary) 50%, var(--about-line));
+  background: color-mix(in srgb, var(--accent-primary) 10%, var(--surface-secondary));
+}
+
+.ws-about__navigation-card:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 3px;
+}
+
+.ws-about__navigation-card .ws-about__link-info strong {
+  white-space: normal;
+}
+
+.ws-about__navigation-card .ws-about__link-info small {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* === Responsividade === */
+@container (max-width: 700px) {
   .ws-about__main {
     grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
-
-  .ws-about__narrative {
-    grid-template-rows: auto auto;
+    grid-template-areas:
+      "education"
+      "introduction"
+      "learning";
+    grid-template-rows: auto;
   }
 
   .ws-about__goals-grid {
-    justify-content: flex-start;
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .ws-about__links {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .ws-about__learning {
-    padding: 20px;
-  }
-
-  .ws-about__knowledge-grid {
+  .ws-about__links,
+  .ws-about__navigation {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .ws-about__learning .ws-skills-globe__stage {
-    height: 360px;
+    height: 350px;
   }
 }
 
 /* ----- Janela compacta ----- */
 @container (max-width: 500px) {
-  .ws-about {
-    padding: 12px !important;
-    gap: 11px;
-  }
-
   .ws-about__profile {
     grid-template-columns: 86px minmax(0, 1fr);
     gap: 13px;
@@ -451,10 +488,6 @@
   }
 
   .ws-about__section {
-    padding: 15px;
-  }
-
-  .ws-about__learning {
     padding: 15px;
   }
 
@@ -471,11 +504,8 @@
     font-size: 12px;
   }
 
-  .ws-about__knowledge-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .ws-about__links {
+  .ws-about__links,
+  .ws-about__navigation {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -494,21 +524,29 @@
     width: 96px;
   }
 
-  .ws-about__links {
-    grid-template-columns: minmax(0, 1fr);
+  .ws-about__education-meta {
+    flex-direction: column;
+  }
+}
+
+/* === Ajustes pela largura da tela === */
+@media (max-width: 600px) {
+  .ws-about {
+    gap: 11px;
+    padding: 12px !important;
   }
 }
 
 /* === Acessibilidade === */
-/* ----- Preferência por menos movimento ----- */
 @media (prefers-reduced-motion: reduce) {
 
   .ws-about__links .ws-about__link,
-  .ws-about__knowledge-card {
+  .ws-about__navigation-card {
     transition: none;
   }
 
-  .ws-about__links .ws-about__link:hover {
+  .ws-about__links .ws-about__link:hover,
+  .ws-about__navigation-card:hover {
     transform: none;
   }
 }

@@ -21,7 +21,7 @@ import {
 /* === Registro de aplicativos === */
 /* === Dimensões iniciais por tarefa; geometria permanece somente na sessão === */
 const windowProfiles = {
-  'about-me': { width: 950, height: 860 },
+  'about-me': { width: 950, height: 890 },
   projects: { width: 1100, height: 760 },
   'dev-insights': { width: 1100, height: 750 },
   resume: { width: 950, height: 760 },

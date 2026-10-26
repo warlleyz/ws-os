@@ -20,9 +20,27 @@ export const portfolio = {
 
     summary: {
       'pt-BR':
-        'Sou estudante de Engenharia de Software na PUC Minas, com interesse em desenvolvimento de sistemas, automação, gerenciamento de dados e inteligência artificial. Busco evoluir tecnicamente por meio de projetos acadêmicos e pessoais, aplicando meus conhecimentos na construção de soluções funcionais.',
+        'Estudante de Engenharia de Software na PUC Minas, com foco em desenvolvimento de software, backend e integração de sistemas. Busco aplicar meus conhecimentos em projetos práticos e evoluir profissionalmente na área de tecnologia.',
       en:
-        'I am a Software Engineering student at PUC Minas, interested in software development, automation, data management, and artificial intelligence. I aim to improve my technical skills through academic and personal projects, applying my knowledge to build functional solutions.',
+        'Software Engineering student at PUC Minas, focused on software development, backend development, and systems integration. I aim to apply my knowledge through practical projects and grow professionally in the technology field.',
+    },
+
+    education: {
+      degree: {
+        'pt-BR': 'Bacharelado em Engenharia de Software',
+        en: "Bachelor's Degree in Software Engineering",
+      },
+      institution: 'Pontifícia Universidade Católica de Minas Gerais — PUC Minas',
+      status: {
+        'pt-BR': 'Graduação em andamento',
+        en: 'Undergraduate degree in progress',
+      },
+      description: {
+        'pt-BR':
+          'Formação voltada ao desenvolvimento de software, programação, arquitetura de aplicações, banco de dados e integração de sistemas, com aplicação prática dos conhecimentos em projetos acadêmicos.',
+        en:
+          'Education focused on software development, programming, application architecture, databases, and systems integration, with practical application of knowledge through academic projects.',
+      },
     },
 
     areas: [

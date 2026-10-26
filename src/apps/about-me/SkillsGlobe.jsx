@@ -1,7 +1,20 @@
 import { useEffect, useMemo, useRef } from 'react';
 import {
-  SiDocker, SiFigma, SiHtml5, SiJavascript,
-  SiOpenjdk, SiPhp, SiPython, SiSpringboot, SiSwagger,
+  SiDocker,
+  SiFigma,
+  SiGit,
+  SiGithub,
+  SiHtml5,
+  SiJavascript,
+  SiMongodb,
+  SiOpenjdk,
+  SiPostgresql,
+  SiPython,
+  SiReact,
+  SiSpringboot,
+  SiTailwindcss,
+  SiTypescript,
+  SiVite,
 } from 'react-icons/si';
 import { FaCss3Alt } from 'react-icons/fa';
 import './SkillsGlobe.css';
@@ -10,15 +23,21 @@ import './SkillsGlobe.css';
 /* ----- Ícones, nomes e cores reconhecíveis ----- */
 const TECHNOLOGIES = [
   { name: 'Java', icon: SiOpenjdk, color: '#e76f51' },
-  { name: 'Spring Boot', icon: SiSpringboot, color: '#6db33f' },
-  { name: 'APIs REST', icon: SiSwagger, color: '#85ea2d' },
-  { name: 'Docker', icon: SiDocker, color: '#2496ed' },
   { name: 'JavaScript', icon: SiJavascript, color: '#f7df1e' },
+  { name: 'React', icon: SiReact, color: '#61dafb' },
+  { name: 'TypeScript', icon: SiTypescript, color: '#3178c6' },
+  { name: 'Python', icon: SiPython, color: '#3776ab' },
+  { name: 'Spring Boot', icon: SiSpringboot, color: '#6db33f' },
   { name: 'HTML', icon: SiHtml5, color: '#e34f26' },
   { name: 'CSS', icon: FaCss3Alt, color: '#1572b6' },
-  { name: 'Python', icon: SiPython, color: '#3776ab' },
-  { name: 'PHP', icon: SiPhp, color: '#777bb4' },
+  { name: 'Docker', icon: SiDocker, color: '#2496ed' },
+  { name: 'Git', icon: SiGit, color: '#f05032' },
+  { name: 'MongoDB', icon: SiMongodb, color: '#47a248' },
+  { name: 'PostgreSQL', icon: SiPostgresql, color: '#4169e1' },
+  { name: 'Vite', icon: SiVite, color: '#a78bfa' },
+  { name: 'Tailwind CSS', icon: SiTailwindcss, color: '#06b6d4' },
   { name: 'Figma', icon: SiFigma, color: '#f24e1e' },
+  { name: 'GitHub', icon: SiGithub, color: '#a3a3a3' },
 ];
 
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
@@ -42,6 +61,7 @@ export default function SkillsGlobe({ locale = 'pt-BR', minimized = false }) {
   const rotationRef = useRef({ x: -0.22, y: 0.48 });
   const dragRef = useRef(null);
   const rafRef = useRef(0);
+  const projectRef = useRef(null);
   const points = useMemo(() => spherePoints(TECHNOLOGIES.length), []);
   const help = locale === 'en' ? 'Drag to rotate the technologies' : 'Arraste para girar as tecnologias';
 
@@ -90,12 +110,14 @@ export default function SkillsGlobe({ locale = 'pt-BR', minimized = false }) {
       }
     }
 
+    projectRef.current = project;
+
     function tick(timestamp) {
       const delta = Math.min(timestamp - (lastTime || timestamp), 50);
       lastTime = timestamp;
       if (!dragRef.current && !reducedMotion) rotationRef.current.y += delta * AUTO_ROTATION;
       project();
-      if (visible && !ancestorsHidden && !document.hidden && !minimized) {
+      if (visible && !ancestorsHidden && !document.hidden && !minimized && !reducedMotion) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
         rafRef.current = 0;
@@ -104,7 +126,7 @@ export default function SkillsGlobe({ locale = 'pt-BR', minimized = false }) {
 
     function start() {
       updateHidden();
-      if (visible && !ancestorsHidden && !document.hidden && !minimized && !rafRef.current) {
+      if (visible && !ancestorsHidden && !document.hidden && !minimized && !reducedMotion && !rafRef.current) {
         lastTime = 0;
         rafRef.current = requestAnimationFrame(tick);
       }
@@ -116,7 +138,15 @@ export default function SkillsGlobe({ locale = 'pt-BR', minimized = false }) {
     }
 
     function onVisibility() { if (document.hidden) stop(); else start(); }
-    function onMotion(event) { reducedMotion = event.matches; if (reducedMotion) project(); }
+    function onMotion(event) {
+      reducedMotion = event.matches;
+      if (reducedMotion) {
+        stop();
+        project();
+      } else {
+        start();
+      }
+    }
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       if (visible) start(); else stop();
@@ -145,6 +175,7 @@ export default function SkillsGlobe({ locale = 'pt-BR', minimized = false }) {
       mutations?.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
       media?.removeEventListener?.('change', onMotion);
+      projectRef.current = null;
     };
   }, [minimized, points]);
 
@@ -163,6 +194,7 @@ export default function SkillsGlobe({ locale = 'pt-BR', minimized = false }) {
     rotationRef.current.x = Math.max(-1.1, Math.min(1.1, rotationRef.current.x + dy * 0.007));
     drag.x = event.clientX;
     drag.y = event.clientY;
+    projectRef.current?.();
   }
 
   function onPointerEnd(event) {
