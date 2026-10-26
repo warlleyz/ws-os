@@ -91,6 +91,52 @@ test('exclusão permanente só após lixeira e inclui descendentes', () => {
   entries = m.applyFileOperation(entries, { type: 'trash', id: 'p' });
   assert.equal(m.applyFileOperation(entries, { type: 'purge', id: 'p' }).length, 0);
 });
+test('exclusão definitiva preserva arquivos removidos independentemente', () => {
+  const m = model();
+
+  let entries = m.applyFileOperation([], create('p', 'Pasta'));
+  entries = m.applyFileOperation(entries, create('a', 'a.txt', 'p', 'file', 'preservado'));
+  entries = m.applyFileOperation(entries, create('b', 'b.txt', 'p', 'file', 'removido'));
+
+  entries = m.applyFileOperation(entries, { type: 'trash', id: 'a' });
+  entries = m.applyFileOperation(entries, { type: 'trash', id: 'p' });
+  entries = m.applyFileOperation(entries, { type: 'purge', id: 'p' });
+
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].id, 'a');
+  assert.equal(entries[0].parentId, null);
+  assert.equal(entries[0].trashed, true);
+  assert.equal(entries[0].trashRootId, 'a');
+
+  entries = m.applyFileOperation(entries, { type: 'restore', id: 'a' });
+
+  assert.equal(entries[0].trashed, false);
+  assert.equal(entries[0].parentId, null);
+});
+
+test('restauração preserva exclusões independentes em pastas aninhadas', () => {
+  const m = model();
+
+  let entries = m.applyFileOperation([], create('p', 'Principal'));
+  entries = m.applyFileOperation(entries, create('s', 'Subpasta', 'p'));
+  entries = m.applyFileOperation(entries, create('a', 'a.txt', 's', 'file'));
+  entries = m.applyFileOperation(entries, create('b', 'b.txt', 's', 'file'));
+
+  entries = m.applyFileOperation(entries, { type: 'trash', id: 'a' });
+  entries = m.applyFileOperation(entries, { type: 'trash', id: 'p' });
+  entries = m.applyFileOperation(entries, { type: 'restore', id: 'p' });
+
+  assert.equal(entries.find((item) => item.id === 'p').trashed, false);
+  assert.equal(entries.find((item) => item.id === 's').trashed, false);
+  assert.equal(entries.find((item) => item.id === 'b').trashed, false);
+  assert.equal(entries.find((item) => item.id === 'a').trashed, true);
+
+  entries = m.applyFileOperation(entries, { type: 'restore', id: 'a' });
+
+  assert.equal(entries.find((item) => item.id === 'a').trashed, false);
+  assert.equal(entries.find((item) => item.id === 'a').parentId, 's');
+});
+
 test('limites de tamanho e integridade rejeitam operação sem alterar dados anteriores', () => {
   const m = model();
   const before = m.applyFileOperation([], create('a', 'a.txt', null, 'file'));

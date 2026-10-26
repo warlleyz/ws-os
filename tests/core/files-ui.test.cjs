@@ -80,6 +80,7 @@ async function component(file, props, bindings = {}) {
         'File',
         'DocumentView',
         'PdfPreview',
+        'Select',
         'ChevronLeft',
         'Minus',
         'RotateCw',
@@ -808,32 +809,37 @@ test('menu oficial por teclado permite visualizar e nunca expõe alterações', 
   assert.equal(calls[0][2].params.url, '/oficial.pdf');
   ui.unmount();
 });
-test('pesquisa em todas as pastas alterna escopo sem modificar os arquivos', async () => {
+test('pesquisa encontra arquivos em todas as pastas sem modificar os dados', async () => {
   const store = {
     entries: [entry(), entry({ id: 'nested', parentId: 'folder', name: 'oculto.txt' })],
     loading: false,
     error: '',
     refresh() { },
   };
+
   const ui = await filesMenu(store);
+
   ui.button('Meus arquivos').props.onClick();
   ui.render();
-  ui.nodes()
-    .find((node) => node.type === 'input' && node.props.type === 'search')
-    .props.onChange({ target: { value: 'oculto' } });
-  ui.render();
-  assert.equal(
-    ui.nodes().filter((node) => node.type === 'li' && node.props.onDoubleClick).length,
-    0,
-  );
-  ui.button('Todas as pastas').props.onClick();
-  ui.render();
-  assert.equal(ui.button('Todas as pastas').props['aria-pressed'], true);
+
   assert.equal(
     ui.nodes().filter((node) => node.type === 'li' && node.props.onDoubleClick).length,
     1,
   );
+
+  ui.nodes()
+    .find((node) => node.type === 'input' && node.props.type === 'search')
+    .props.onChange({ target: { value: 'oculto' } });
+
+  ui.render();
+
+  assert.equal(
+    ui.nodes().filter((node) => node.type === 'li' && node.props.onDoubleClick).length,
+    1,
+  );
+
   assert.equal(store.entries.length, 2);
+
   ui.unmount();
 });
 /* === Regressões do fechamento da Etapa 05: Editor === */

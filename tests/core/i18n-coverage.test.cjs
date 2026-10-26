@@ -5,6 +5,32 @@ const { test } = require('node:test'),
   vm = require('node:vm');
 const root = path.resolve(__dirname, '../..');
 const en = JSON.parse(fs.readFileSync(path.join(root, 'src/shared/i18n/locales/en.json'), 'utf8'));
+const pt = JSON.parse(
+  fs.readFileSync(path.join(root, 'src/shared/i18n/locales/pt-BR.json'), 'utf8'),
+);
+/* === NORMALIZAÇÃO DOS DICIONÁRIOS === */
+/* ----- EXTRAÇÃO DAS CHAVES E DOS TEXTOS ----- */
+function flattenTranslations(dictionary, prefix = '') {
+  const entries = [];
+
+  for (const [key, value] of Object.entries(dictionary)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+
+    if (typeof value === 'string') {
+      entries.push([path, value]);
+    } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+      entries.push(...flattenTranslations(value, path));
+    } else {
+      throw new Error(`Entrada de tradução inválida: ${path}`);
+    }
+  }
+
+  return entries;
+}
+
+const englishEntries = new Map(flattenTranslations(en));
+const portugueseEntries = new Map(flattenTranslations(pt));
+const translatedSources = new Set(portugueseEntries.values());
 test('interfaces possuem tradução sem dispensas temporárias', () => {
   function walk(dir) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -14,7 +40,10 @@ test('interfaces possuem tradução sem dispensas temporárias', () => {
         for (const match of fs
           .readFileSync(file, 'utf8')
           .matchAll(/\bt\(\s*(['"])((?:\\.|(?!\1)[^\\])*?)\1\s*[,)]/gs)) {
-          assert.ok(Object.hasOwn(en, match[2]), path.relative(root, file) + ': ' + match[2]);
+          assert.ok(
+            translatedSources.has(match[2]),
+            path.relative(root, file) + ': ' + match[2],
+          );
         }
     }
   }
@@ -27,20 +56,26 @@ test('nomes e descrições do catálogo de widgets são traduzíveis', () => {
   const widgets = vm.runInNewContext(`(()=>{${source};return getRegisteredWidgets()})()`);
   for (const widget of widgets)
     for (const value of [widget.name, widget.description])
-      assert.ok(Object.hasOwn(en, value), value);
+      assert.ok(translatedSources.has(value), value);
 });
 
 test('catálogos têm as mesmas chaves e preservam placeholders', () => {
-  const pt = JSON.parse(
-    fs.readFileSync(path.join(root, 'src/shared/i18n/locales/pt-BR.json'), 'utf8'),
+  assert.deepEqual(
+    [...englishEntries.keys()].sort(),
+    [...portugueseEntries.keys()].sort(),
   );
-  assert.deepEqual(Object.keys(en).sort(), Object.keys(pt).sort());
-  for (const [key, value] of Object.entries(en)) {
+
+  for (const [key, value] of englishEntries) {
+    const source = portugueseEntries.get(key);
+
+    assert.equal(typeof source, 'string', key);
     assert.equal(typeof value, 'string', key);
+    assert.ok(source.trim(), key);
     assert.ok(value.trim(), key);
+
     assert.deepEqual(
-      (key.match(/\{\d+\}/g) ?? [])
-        .filter((token) => key !== '{0} não lida{1}' || token !== '{1}')
+      (source.match(/\{\d+\}/g) ?? [])
+        .filter((token) => source !== '{0} não lida{1}' || token !== '{1}')
         .sort(),
       (value.match(/\{\d+\}/g) ?? []).sort(),
       key,
@@ -54,8 +89,9 @@ test('traduções finais respondem à troca de idioma e preservam parâmetros', 
     .replace(/^import.*$/gm, '')
     .replace(/\bexport /g, '');
   const i18n = vm.runInNewContext('(()=>{' + source + '; return {translate,setLocale};})()', {
+    portuguese: pt,
     english: en,
-    useSyncExternalStore() {},
+    useSyncExternalStore() { },
     localStorage: { getItem: () => 'en', setItem() {} },
     document: { documentElement: { lang: 'en' } },
   });

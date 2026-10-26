@@ -38,6 +38,7 @@ import {
 } from '../../services/storage/localFilesStorage';
 import useAppBack from '../../shared/hooks/useAppBack';
 import useLocalFiles from '../../shared/hooks/useLocalFiles';
+import Select from '../../shared/components/Select';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { validId } from '../../shared/utils/contractValidation';
 import { publicAssetUrl } from '../../shared/utils/urls';
@@ -125,7 +126,6 @@ export default function Files({ instance }) {
   const [homeQuery, setHomeQuery] = useState('');
   /* ----- Estados de pesquisa, seleção e interação ----- */
   const [query, setQuery] = useState(''),
-    [globalSearch, setGlobalSearch] = useState(false),
     [selected, setSelected] = useState([]);
   const [details, setDetails] = useState(false),
     [context, setContext] = useState(null),
@@ -334,7 +334,7 @@ export default function Files({ instance }) {
           ? item.trashed && !store.entries.find((parent) => parent.id === item.parentId)?.trashed
           : !unavailableFolder &&
             !item.trashed &&
-            (globalSearch && term ? true : item.parentId === parentId);
+          (space === 'personal' && term ? true : item.parentId === parentId);
       return inSpace && (!term || normalized(item.name).includes(term));
     })
     .sort((a, b) =>
@@ -1200,34 +1200,23 @@ export default function Files({ instance }) {
               {/* ----- Barra unificada de ferramentas ----- */}
               <div className="ws-files__tools">
                 <div className="ws-files__commandbar" role="toolbar" aria-label={t('Arquivos')}>
-                  {space === 'personal' && (
-                    <button
-                      type="button"
-                      className="ws-files__scope"
-                      aria-pressed={globalSearch}
-                      onClick={() => {
-                        setGlobalSearch((value) => !value);
-                        setSelected([]);
-                      }}
-                    >
-                      <FolderOpen size={15} aria-hidden="true" />
-                      {t('Todas as pastas')}
-                    </button>
-                  )}
-                  <label>
-                    {t('Ordenar')}
-                    <select
-                      value={sort}
-                      onChange={(event) => {
-                        setSort(event.target.value);
-                        persist('ws-os:files-sort', event.target.value);
-                      }}
-                    >
-                      <option value="name">{t('Nome')}</option>
-                      <option value="updated">{t('Atualização')}</option>
-                      <option value="size">{t('Tamanho')}</option>
-                    </select>
-                  </label>
+                    <div className="ws-files__sort">
+                      <span>{t('Ordenar')}</span>
+                      <Select
+                        label={t('Ordenar')}
+                        variant="compact"
+                        value={sort}
+                        onChange={(value) => {
+                          setSort(value);
+                          persist('ws-os:files-sort', value);
+                        }}
+                        options={[
+                          { value: 'name', label: t('Nome') },
+                          { value: 'updated', label: t('Atualização') },
+                          { value: 'size', label: t('Tamanho') },
+                        ]}
+                      />
+                    </div>
                   <div className="ws-files__view-controls">
                     <button
                       type="button"

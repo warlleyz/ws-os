@@ -6,13 +6,16 @@ const { test } = require('node:test');
 const root = path.resolve(__dirname, '../..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const english = JSON.parse(read('src/shared/i18n/locales/en.json'));
+const portuguese = JSON.parse(read('src/shared/i18n/locales/pt-BR.json'));
+
 function moduleAt(file, bindings = {}) {
   const source = read(file)
     .replace(/^import[^;]+;\s*/gm, '')
     .replace(/\bexport\s+(?=(?:const|function)\b)/g, '');
   const context = vm.createContext({
     english,
-    localStorage: { getItem: () => null, setItem() {} },
+    portuguese,
+    localStorage: { getItem: () => null, setItem() { } },
     document: { documentElement: { dataset: {}, lang: 'pt-BR' } },
     ...bindings,
   });
@@ -21,10 +24,45 @@ function moduleAt(file, bindings = {}) {
 }
 
 test('catálogos pt-BR/en possuem as mesmas chaves e valores de texto', () => {
-  const portuguese = JSON.parse(read('src/shared/i18n/locales/pt-BR.json'));
-  assert.deepEqual(Object.keys(english).sort(), Object.keys(portuguese).sort());
-  assert.ok(Object.values(english).every((value) => typeof value === 'string' && value.length > 0));
-  assert.ok(Object.keys(english).length > 180);
+  function flatten(dictionary, prefix = '') {
+    const entries = [];
+
+    for (const [key, value] of Object.entries(dictionary)) {
+      const path = prefix ? `${prefix}.${key}` : key;
+
+      if (typeof value === 'string') {
+        entries.push([path, value]);
+      } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+        entries.push(...flatten(value, path));
+      } else {
+        assert.fail(`Entrada de tradução inválida: ${path}`);
+      }
+    }
+
+    return new Map(entries);
+  }
+
+  const englishEntries = flatten(english);
+  const portugueseEntries = flatten(portuguese);
+
+  assert.deepEqual(
+    [...englishEntries.keys()].sort(),
+    [...portugueseEntries.keys()].sort(),
+  );
+
+  assert.ok(
+    [...englishEntries.values()].every(
+      (value) => typeof value === 'string' && value.length > 0,
+    ),
+  );
+
+  assert.ok(
+    [...portugueseEntries.values()].every(
+      (value) => typeof value === 'string' && value.length > 0,
+    ),
+  );
+
+  assert.ok(englishEntries.size > 180);
 });
 test('idioma é persistido, muda lang e notifica assinantes sem recarregar', () => {
   const saved = new Map();

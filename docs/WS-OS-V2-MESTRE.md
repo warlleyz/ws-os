@@ -569,17 +569,43 @@ A ordem abaixo substitui a sequência antiga de execução. Os problemas conheci
 
 **Aceite:** recursos funcionando na interface real, com persistência e testes pertinentes.
 
+
 <!-- ----- ETAPA 05 — ARQUIVOS, EDITOR E VISUALIZADOR ----- -->
 
 ### Etapa 05 — Arquivos, Editor e Visualizador
 
-- Revisar o ciclo completo dos três aplicativos.
-- Operações, quota, conflitos, lixeira e recuperação.
-- Texto, imagem, PDF e download.
-- Duas janelas/abas, arquivos oficiais e isolamento pessoal.
-- Desktop/Mobile, temas e idiomas.
+**Status:** Implementada — validação local concluída, com pendências de homologação.
 
-**Aceite:** documentos circulam entre os aplicativos sem perda ou exposição indevida.
+**Escopo realizado:**
+- Revisão do fluxo entre Arquivos, Editor e Visualizador.
+- Validação de operações, persistência, quota e conflitos de revisão.
+- Correção da lixeira e recuperação de exclusões independentes.
+- Validação de texto, imagem, PDF, pré-visualização e download.
+- Verificação de múltiplas abas e proteção contra sobrescrita.
+- Preservação do isolamento entre arquivos pessoais e oficiais.
+- Reorganização do mecanismo de internacionalização e dos catálogos PT-BR/EN.
+- Ajustes de tamanho e posição inicial das três janelas.
+- Ajustes visuais do aplicativo Arquivos: cards, barra lateral, pesquisa, ferramentas e select.
+- Revisão dos testes afetados pelas alterações legítimas de contrato.
+
+**Validação:**
+- ESLint: aprovado.
+- Build de produção: aprovado, com aviso de tamanho do bundle.
+- Testes de armazenamento e recuperação: aprovados.
+- Testes manuais de visualização, download e conflitos entre abas: aprovados.
+- Suíte completa: resultado esperado de 541/546 testes, pendente de confirmação do resumo final.
+- Falhas preexistentes: quatro relacionadas ao Snake (Etapa 08) e uma à tradução "Carga horária" em Certificados (Etapa 06).
+
+**Pendências de homologação:**
+- P14: avaliar o bundle do Visualizador, atualmente com aproximadamente 621 kB.
+- Validar a integração real dos arquivos oficiais gerenciados pelo backend.
+- Homologar em dispositivos físicos e com leitor de tela.
+- Confirmar comportamento no ambiente de produção.
+
+**Aceite:** fluxo local entre os três aplicativos validado, com proteção contra perda de documentos, conflitos de revisão e exposição indevida nos cenários verificados. Homologação remota e de produção permanece pendente.
+
+**Encerramento:** Etapa 05 concluída funcionalmente, sujeita à confirmação final dos testes e ao registro do commit na `main`, sem push.
+
 
 <!-- ----- ETAPA 06 — APLICATIVOS PROFISSIONAIS ----- -->
 

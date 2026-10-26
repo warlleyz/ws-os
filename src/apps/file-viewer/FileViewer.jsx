@@ -51,9 +51,23 @@ function resolveDocument(rawUrl, suppliedName = '') {
 /* ----- Tipo de conteúdo esperado pelo arquivo ----- */
 function validMime(document, contentType) {
   const mime = contentType.split(';')[0].trim().toLowerCase();
-  if (document.kind === 'pdf') return mime === 'application/pdf';
-  if (document.kind === 'image')
-    return ['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(mime);
+
+  if (document.kind === 'pdf') {
+    return mime === 'application/pdf';
+  }
+
+  if (document.kind === 'image') {
+    const expectedMime = {
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      webp: 'image/webp',
+      gif: 'image/gif',
+    };
+
+    return mime === expectedMime[document.extension];
+  }
+
   return (
     mime === 'application/json' ||
     mime === 'application/javascript' ||

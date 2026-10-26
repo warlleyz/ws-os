@@ -120,6 +120,8 @@ export default function useWindowInteraction({ instance, app }) {
           'projects',
           'dev-insights',
           'file-viewer',
+          'file-editor',
+          'files',
           'certificates',
           'contact',
           'terminal',

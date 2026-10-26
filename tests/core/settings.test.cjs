@@ -867,7 +867,8 @@ test('mudança externa atualiza sessão sem regravar', () => {
 
     const m = load(
       file,
-      {
+            {
+        portuguese: JSON.parse(read('src/shared/i18n/locales/pt-BR.json')),
         english: JSON.parse(read('src/shared/i18n/locales/en.json')),
 
         localStorage: storage,
@@ -938,7 +939,27 @@ test('IndexedDB indisponível ou bloqueado não mantém conexão aberta', async 
 /* === Cobertura de traduções === */
 /* ----- Textos de interface ----- */
 test('mensagens e opções de Configurações possuem tradução', () => {
-  const english = JSON.parse(read('src/shared/i18n/locales/en.json'));
+  const portuguese = JSON.parse(read('src/shared/i18n/locales/pt-BR.json'));
+
+  /* ----- TEXTOS DO DICIONÁRIO ----- */
+  function collectTranslations(dictionary) {
+    const values = new Set();
+
+    function collect(entries) {
+      for (const value of Object.values(entries)) {
+        if (typeof value === 'string') {
+          values.add(value);
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+          collect(value);
+        }
+      }
+    }
+
+    collect(dictionary);
+    return values;
+  }
+
+  const translatedSources = collectTranslations(portuguese);
 
   const files = [
     'src/apps/settings/Settings.jsx',
@@ -976,7 +997,7 @@ test('mensagens e opções de Configurações possuem tradução', () => {
         continue;
       }
 
-      assert.ok(Object.hasOwn(english, text), `${file}: ${text}`);
+      assert.ok(translatedSources.has(text), `${file}: ${text}`);
     }
   }
 });
