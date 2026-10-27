@@ -30,7 +30,11 @@ function AppPlaceholder({ appName, instance }) {
   );
 }
 
-export default function AppHost({ appName, instance }) {
+export default function AppHost({
+  appName,
+  instance,
+  onWindowResize,
+}) {
   useLocale();
   const app = getAppDefinition(instance.appId);
   const [retry, setRetry] = useState(() => ({
@@ -69,7 +73,12 @@ export default function AppHost({ appName, instance }) {
           </div>
         }
       >
-        <AppComponent instance={instance} />
+        <AppComponent
+          instance={instance}
+          {...(instance.appId === 'games' && onWindowResize
+            ? { onWindowResize }
+            : {})}
+        />
       </Suspense>
     </AppErrorBoundary>
   );

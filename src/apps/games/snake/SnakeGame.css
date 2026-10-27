@@ -77,20 +77,20 @@
 }
 
 .ws-snake__board-container:focus-visible {
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+    outline: 2px solid var(--accent-primary);
+    outline-offset: -2px;
 }
 
 /* === TABULEIRO === */
 .ws-snake__board {
     position: relative;
     width: 100%;
-    max-width: 560px;
+    max-width: 520px;
     aspect-ratio: 1;
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--accent-primary) 22%, transparent);
     border-radius: 10px;
-    background-color: color-mix(in srgb, var(--surface-primary) 88%, #09151a);
+    background-color: color-mix(in srgb, var(--surface-primary) 94%, var(--accent-primary));
     background-image:
         linear-gradient(to right,
             color-mix(in srgb, var(--text-primary) 5%, transparent) 1px,
@@ -113,21 +113,82 @@
     height: calc(100% / var(--snake-rows));
     left: calc(var(--snake-x) * 100% / var(--snake-columns));
     top: calc(var(--snake-y) * 100% / var(--snake-rows));
-    border: 1px solid color-mix(in srgb, #050a14 45%, transparent);
-    border-radius: 3px;
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 65%, #050a14);
+    border-radius: 5px;
     background: var(--accent-primary);
+    box-shadow: inset 0 1px 2px rgb(255 255 255 / 14%);
 }
 
 /* === CABEÇA === */
 .ws-snake__segment--head {
     z-index: 3;
-    background: color-mix(in srgb, var(--accent-primary) 68%, white);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--accent-primary) 78%, white);
+    box-shadow:
+        inset 0 1px 2px rgb(255 255 255 / 20%),
+        0 0 7px color-mix(in srgb, var(--accent-primary) 30%, transparent);
 }
 
-/* === ELEMENTOS DECORATIVOS DESATIVADOS === */
+/* === CAUDA === */
+.ws-snake__segment--tail {
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--accent-primary) 78%, var(--surface-primary));
+}
+
+/* === OLHOS DIRECIONAIS === */
 .ws-snake__eyes {
-    display: none;
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+}
+
+.ws-snake__eyes span {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--surface-primary);
+}
+
+.ws-snake__segment[data-direction='right'] .ws-snake__eyes span:first-child {
+    top: 22%;
+    right: 19%;
+}
+
+.ws-snake__segment[data-direction='right'] .ws-snake__eyes span:last-child {
+    right: 19%;
+    bottom: 22%;
+}
+
+.ws-snake__segment[data-direction='left'] .ws-snake__eyes span:first-child {
+    top: 22%;
+    left: 19%;
+}
+
+.ws-snake__segment[data-direction='left'] .ws-snake__eyes span:last-child {
+    bottom: 22%;
+    left: 19%;
+}
+
+.ws-snake__segment[data-direction='up'] .ws-snake__eyes span:first-child {
+    top: 19%;
+    left: 22%;
+}
+
+.ws-snake__segment[data-direction='up'] .ws-snake__eyes span:last-child {
+    top: 19%;
+    right: 22%;
+}
+
+.ws-snake__segment[data-direction='down'] .ws-snake__eyes span:first-child {
+    bottom: 19%;
+    left: 22%;
+}
+
+.ws-snake__segment[data-direction='down'] .ws-snake__eyes span:last-child {
+    right: 22%;
+    bottom: 19%;
 }
 
 /* === TECNOLOGIAS COLETÁVEIS === */

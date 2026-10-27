@@ -443,9 +443,7 @@ export default function GameRankings({
                   paused ||
                   submitting ||
                   !token ||
-                  !isValidRankingAlias(
-                    attemptRef.current?.alias ?? alias,
-                  )
+                  !isValidRankingAlias(alias)
                 }
               >
                 <Send size={15} aria-hidden="true" />

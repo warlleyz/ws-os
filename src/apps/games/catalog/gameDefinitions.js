@@ -1,7 +1,14 @@
-/* === Catálogo de jogos === */
+/* === DIMENSÕES DAS JANELAS === */
+export const GAMES_CATALOG_WINDOW = Object.freeze({
+    width: 1050,
+    height: 800,
+});
+
+/* === CATÁLOGO DE JOGOS === */
 export const GAMES_CATALOG = [
     {
         id: 'snake',
+        window: { width: 1000, height: 825 },
         name: 'Snake',
         category: 'ARCADE',
         description: 'Colete pontos, cresça e evite colisões.',

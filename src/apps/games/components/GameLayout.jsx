@@ -14,13 +14,7 @@ export default function GameLayout({
     doomFrameRef,
     doomSaving = false,
     doomSaveError = '',
-    headerStatus = '',
-    headerActions = null,
 }) {
-    if (!game || !Component) {
-        return null;
-    }
-
     /* === ESTADO DO CABEÇALHO === */
     const [gameHeader, setGameHeader] = useState({
         status: '',
@@ -39,6 +33,11 @@ export default function GameLayout({
             return next;
         });
     }, []);
+
+    /* ----- DISPONIBILIDADE DO JOGO ----- */
+    if (!game || !Component) {
+        return null;
+    }
 
     /* ----- DISPONIBILIDADE DO RANKING ----- */
     const hasPublicRanking = supportsPublicRanking(game.id);

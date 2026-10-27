@@ -453,9 +453,10 @@ export default function SnakeGame({
             }
 
             directionLockedRef.current = true;
-            updateGame(() => next);
+
+            gameRef.current = next;
         },
-        [paused, updateGame],
+        [paused],
     );
 
     /* === INICIAR OU CONTINUAR === */
@@ -465,7 +466,6 @@ export default function SnakeGame({
         }
 
         updateGame(startSnakeGame);
-        boardRef.current?.focus();
     }, [paused, updateGame]);
 
     /* === PAUSAR === */
@@ -485,7 +485,6 @@ export default function SnakeGame({
         gameRef.current = next;
 
         setGame(next);
-        boardRef.current?.focus();
     }, [paused]);
 
     /* === AÇÕES DO CABEÇALHO === */
@@ -523,40 +522,42 @@ export default function SnakeGame({
         }
 
         let active = true;
-        let lastTick = performance.now();
-        let frameId = null;
+        let timeoutId = null;
 
-        function tick(now) {
-            if (!active) {
+        /* ----- MOVIMENTAÇÃO DA COBRA ----- */
+        function tick() {
+            if (!active || gameRef.current.status !== 'playing') {
                 return;
             }
 
-            const current = gameRef.current;
+            updateGame(advanceSnakeGame);
 
-            if (current.status !== 'playing') {
-                return;
-            }
+            // Libera uma nova mudança de direção após o movimento.
+            directionLockedRef.current = false;
 
-            const speed = getSnakeSpeed(current.score);
-
-            if (now - lastTick >= speed) {
-                lastTick = now;
-
-                updateGame((state) => advanceSnakeGame(state));
-                directionLockedRef.current = false;
-            }
-
-            frameId = window.requestAnimationFrame(tick);
+            scheduleNextTick();
         }
 
-        frameId = window.requestAnimationFrame(tick);
-        timerRef.current = frameId;
+        /* ----- AGENDAMENTO DO PRÓXIMO MOVIMENTO ----- */
+        function scheduleNextTick() {
+            if (!active || gameRef.current.status !== 'playing') {
+                return;
+            }
 
+            const delay = getSnakeSpeed(gameRef.current.score);
+
+            timeoutId = window.setTimeout(tick, delay);
+            timerRef.current = timeoutId;
+        }
+
+        scheduleNextTick();
+
+        /* ----- ENCERRAMENTO E LIMPEZA ----- */
         return () => {
             active = false;
 
-            if (frameId !== null) {
-                window.cancelAnimationFrame(frameId);
+            if (timeoutId !== null) {
+                window.clearTimeout(timeoutId);
             }
 
             timerRef.current = null;
@@ -567,9 +568,12 @@ export default function SnakeGame({
     useEffect(() => {
         function handleKeyDown(event) {
             const target = event.target;
+            const desktopWindow = boardRef.current?.closest('.desktop-window');
 
+            /* ----- CONTROLES SOMENTE NA JANELA ATIVA ----- */
             if (
                 paused ||
+                (desktopWindow && !desktopWindow.classList.contains('desktop-window--active')) ||
                 (
                     target instanceof HTMLElement &&
                     (

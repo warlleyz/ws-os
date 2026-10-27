@@ -3,62 +3,13 @@ export default function GameArtwork({ game }) {
     switch (game) {
         case 'snake':
             return (
-                <svg viewBox="0 0 320 170" aria-hidden="true">
-                    <defs>
-                        <pattern
-                            id="games-snake-grid"
-                            width="23"
-                            height="23"
-                            patternUnits="userSpaceOnUse"
-                        >
-                            <path
-                                d="M23 0H0V23"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeOpacity=".11"
-                            />
-                        </pattern>
-                    </defs>
-
-                    <rect width="320" height="170" fill="url(#games-snake-grid)" />
-
-                    <path
-                        d="M46 119H92V96H138V73H184V50H230"
-                        fill="none"
-                        stroke="#2b8060"
-                        strokeWidth="22"
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                    />
-
-                    <path
-                        d="M46 119H92V96H138V73H184V50H230"
-                        fill="none"
-                        stroke="#83efb5"
-                        strokeWidth="15"
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                    />
-
-                    <rect
-                        x="229"
-                        y="39"
-                        width="24"
-                        height="23"
-                        rx="8"
-                        fill="#a8ffd0"
-                    />
-
-                    <circle cx="247" cy="46" r="3" fill="#123b30" />
-                    <circle cx="278" cy="49" r="10" fill="#ff746f" />
-
-                    <path
-                        d="M278 38l4-6"
-                        stroke="#8fdd9a"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                    />
-                </svg>
+                <img
+                    src="/assets/games/snake.jpg"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    draggable="false"
+                />
             );
 
         case 'memory':

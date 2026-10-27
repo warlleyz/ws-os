@@ -3,9 +3,13 @@ import { useState } from 'react';
 import { useLocale } from '../../shared/i18n/i18n';
 import useAppBack from '../../shared/hooks/useAppBack';
 
-import { GAMES_CATALOG } from './catalog/gameDefinitions';
+import {
+  GAMES_CATALOG,
+  GAMES_CATALOG_WINDOW,
+} from './catalog/gameDefinitions';
 import GamesCatalog from './catalog/GamesCatalog';
 import GameLayout from './components/GameLayout';
+import useGamePaused from './shared/useGamePaused';
 
 import SnakeGame from './snake/SnakeGame';
 
@@ -18,8 +22,11 @@ const GAME_COMPONENTS = {
 };  
 
 /* === APLICATIVO JOGOS === */
-export default function Games({ instance }) {
+export default function Games({ instance, onWindowResize }) {
   useLocale();
+
+  /* ----- ESTADO DE EXECUÇÃO ----- */
+  const paused = useGamePaused(instance);
 
   /* ----- NAVEGAÇÃO ----- */
   const [selected, setSelected] = useState(null);
@@ -33,9 +40,24 @@ export default function Games({ instance }) {
     ? GAME_COMPONENTS[current.id]
     : null;
 
+  /* === SELEÇÃO DO JOGO === */
+  function openGame(gameId) {
+    const game = GAMES_CATALOG.find(
+      (item) => item.id === gameId,
+    );
+
+    if (!game || !GAME_COMPONENTS[gameId]) {
+      return;
+    }
+
+    setSelected(gameId);
+    onWindowResize?.(game.window ?? GAMES_CATALOG_WINDOW);
+  }
+
   /* === RETORNO AO CATÁLOGO === */
   function leaveGame() {
     setSelected(null);
+    onWindowResize?.(GAMES_CATALOG_WINDOW);
   }
 
   /* === NAVEGAÇÃO DO SISTEMA === */
@@ -56,12 +78,13 @@ export default function Games({ instance }) {
         <GameLayout
           game={current}
           Component={Component}
+          paused={paused}
           onBack={leaveGame}
         />
       ) : (
         <GamesCatalog
           availableGames={Object.keys(GAME_COMPONENTS)}
-          onSelect={setSelected}
+          onSelect={openGame}
         />
       )}
     </article>

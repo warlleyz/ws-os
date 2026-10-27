@@ -22,6 +22,7 @@ export default function Window({
     windowRef,
     mode,
     appName,
+    resizeWindow,
     startInteraction,
     moveInteraction,
     endInteraction,
@@ -154,7 +155,12 @@ export default function Window({
         </div>
       </header>
 
-      <AppHost key={instance.id} appName={t(appName)} instance={instance} />
+      <AppHost
+        key={instance.id}
+        appName={t(appName)}
+        instance={instance}
+        onWindowResize={resizeWindow}
+      />
 
       {mode === 'normal' &&
         RESIZE_DIRECTIONS.map((direction) => (

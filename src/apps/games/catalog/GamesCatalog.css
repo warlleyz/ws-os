@@ -206,14 +206,27 @@
     content: '';
 }
 
-.ws-games__art svg {
+/* === MÍDIA DOS CARDS === */
+.ws-games__art svg,
+.ws-games__art img {
     display: block;
     width: 100%;
     height: 100%;
     transition: transform 250ms ease;
 }
 
-.ws-games .ws-games__card:not(:disabled):hover .ws-games__art svg {
+/* ----- IMAGENS DOS JOGOS ----- */
+.ws-games__art img {
+    position: absolute;
+    inset: 0;
+    object-fit: cover;
+    object-position: center;
+    user-select: none;
+}
+
+/* ----- INTERAÇÃO DOS CARDS ----- */
+.ws-games .ws-games__card:not(:disabled):hover .ws-games__art svg,
+.ws-games .ws-games__card:not(:disabled):hover .ws-games__art img {
     transform: scale(1.04);
 }
 

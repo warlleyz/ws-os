@@ -105,6 +105,53 @@ export default function useWindowInteraction({ instance, app }) {
     }
   }
 
+  /* === DIMENSÕES SOLICITADAS PELO APLICATIVO === */
+  function resizeWindow(size) {
+    const element = windowRef.current;
+
+    if (
+      !element ||
+      interactionRef.current ||
+      !Number.isFinite(size?.width) ||
+      !Number.isFinite(size?.height) ||
+      size.width <= 0 ||
+      size.height <= 0
+    ) {
+      return;
+    }
+
+    const bounds = getBounds(element);
+    const current = geometryRef.current ?? readGeometry(element);
+
+    /* ----- LIMITES DO DESKTOP ----- */
+    const width = Math.min(
+      size.width,
+      Math.max(0, bounds.width - 16),
+    );
+
+    const height = Math.min(
+      size.height,
+      Math.max(0, bounds.height - 16),
+    );
+
+    /* ----- CENTRALIZAÇÃO DA JANELA ----- */
+    const next = {
+      ...current,
+      x: Math.max(8, (bounds.width - width) / 2),
+      y: Math.max(8, (bounds.height - height) / 2),
+      width,
+      height,
+    };
+
+    // Preserva o modo atual de maximização ou encaixe.
+    if (modeRef.current !== 'normal') {
+      geometryRef.current = constrainGeometry(next, bounds);
+      return;
+    }
+
+    geometryRef.current = applyGeometry(element, next, bounds);
+  }
+
   /* ----- A GEOMETRIA NORMAL PERMANECE PRESERVADA DURANTE O SNAP. ----- */
   useLayoutEffect(() => {
     const element = windowRef.current;
@@ -125,6 +172,7 @@ export default function useWindowInteraction({ instance, app }) {
           'certificates',
           'contact',
           'terminal',
+          'games',
         ].includes(instance.appId)
       ) {
         const bounds = getBounds(element);
@@ -355,6 +403,7 @@ export default function useWindowInteraction({ instance, app }) {
     windowRef,
     mode,
     appName,
+    resizeWindow,
     startInteraction,
     moveInteraction,
     endInteraction,
