@@ -23,10 +23,10 @@ import {
 const windowProfiles = {
   'about-me': { width: 950, height: 890 },
   projects: { width: 1100, height: 760 },
-  'dev-insights': { width: 1100, height: 750 },
+  'dev-insights': { width: 1100, height: 715 },
   resume: { width: 950, height: 760 },
-  certificates: { width: 980, height: 740 },
-  contact: { width: 980, height: 760 },
+  certificates: { width: 980, height: 785 },
+  contact: { width: 980, height: 890 },
   calculator: { width: 360, height: 520 },
   settings: { width: 980, height: 680 },
   'file-editor': { width: 920, height: 680 },
