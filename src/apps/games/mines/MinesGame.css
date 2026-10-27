@@ -1,0 +1,331 @@
+/* === ESTRUTURA DO CAMPO MINADO === */
+.ws-mines-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    color: var(--text-primary);
+    container-type: inline-size;
+}
+
+/* === INDICADORES === */
+.ws-mines-game__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+}
+
+.ws-mines-game__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 12px 14px;
+    min-width: 0;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: color-mix(in srgb,
+            var(--surface-secondary) 28%,
+            transparent);
+}
+
+.ws-mines-game__stat>span {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.ws-mines-game__stat strong {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 22px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+.ws-mines-game__stat strong svg {
+    color: var(--accent-primary);
+}
+
+/* === FERRAMENTAS === */
+.ws-mines-game__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+}
+
+.ws-mines-game__mode {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px;
+    border: 1px solid var(--border-default);
+    border-radius: 9px;
+    background: var(--surface-secondary);
+}
+
+.ws-games .ws-mines-game__mode button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 7px 12px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.ws-games .ws-mines-game__mode button.is-active {
+    background: var(--accent-primary);
+    color: var(--text-on-accent, #fff);
+}
+
+.ws-mines-game__progress {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+}
+
+/* === CONTÊINER DO TABULEIRO === */
+.ws-mines-game__board-wrap {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 0;
+    padding: 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 13px;
+    background: color-mix(in srgb,
+            var(--surface-secondary) 22%,
+            transparent);
+}
+
+/* === TABULEIRO === */
+.ws-mines-game__board {
+    display: grid;
+    grid-template-columns: repeat(var(--mines-columns),
+            minmax(0, 1fr));
+    gap: 3px;
+    width: min(100%, 440px);
+    aspect-ratio: 1;
+    user-select: none;
+}
+
+/* === CÉLULAS === */
+.ws-games .ws-mines-game__cell {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 1px solid color-mix(in srgb,
+            var(--accent-primary) 16%,
+            var(--border-default));
+    border-radius: 5px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: clamp(12px, 2.5cqi, 19px);
+    font-weight: 800;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+        background-color 120ms ease,
+        border-color 120ms ease;
+}
+
+.ws-games .ws-mines-game__cell:not(:disabled):hover {
+    border-color: var(--accent-primary);
+    background: color-mix(in srgb,
+            var(--accent-primary) 12%,
+            var(--surface-secondary));
+}
+
+/* === CÉLULAS REVELADAS === */
+.ws-games .ws-mines-game__cell.is-revealed {
+    border-color: color-mix(in srgb,
+            var(--border-default) 50%,
+            transparent);
+    background: color-mix(in srgb,
+            var(--surface-primary) 85%,
+            var(--surface-secondary));
+    cursor: default;
+    opacity: 1;
+}
+
+/* === NÚMEROS DAS CÉLULAS === */
+.ws-mines-game__cell[data-count='1'] {
+    color: #5b9cff;
+}
+
+.ws-mines-game__cell[data-count='2'] {
+    color: #38b778;
+}
+
+.ws-mines-game__cell[data-count='3'] {
+    color: #fa6b62;
+}
+
+.ws-mines-game__cell[data-count='4'] {
+    color: #ab83ff;
+}
+
+.ws-mines-game__cell[data-count='5'] {
+    color: #e9a65a;
+}
+
+.ws-mines-game__cell[data-count='6'] {
+    color: #30b8c4;
+}
+
+.ws-mines-game__cell[data-count='7'],
+.ws-mines-game__cell[data-count='8'] {
+    color: var(--text-primary);
+}
+
+/* === BANDEIRAS E MINAS === */
+.ws-games .ws-mines-game__cell.is-flagged {
+    color: var(--status-warning);
+}
+
+.ws-games .ws-mines-game__cell.is-mine {
+    color: var(--status-error);
+    background: color-mix(in srgb,
+            var(--status-error) 15%,
+            var(--surface-secondary));
+}
+
+.ws-games .ws-mines-game__cell:disabled {
+    cursor: default;
+}
+
+/* === SOBREPOSIÇÃO DE ESTADO === */
+.ws-mines-game__overlay {
+    position: absolute;
+    z-index: 5;
+    inset: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 18px;
+    border-radius: 10px;
+    background: color-mix(in srgb,
+            var(--surface-primary) 88%,
+            transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    text-align: center;
+}
+
+.ws-mines-game__overlay strong {
+    font-size: 22px;
+    font-weight: 750;
+}
+
+.ws-mines-game__overlay p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.ws-games .ws-mines-game__overlay button {
+    min-height: 38px;
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent-primary);
+    color: var(--text-on-accent, #fff);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* === AÇÕES DO CABEÇALHO === */
+.ws-mines-game__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ws-games .ws-mines-game__actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.ws-games .ws-mines-game__actions button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* === INSTRUÇÕES E ERROS === */
+.ws-mines-game__hint {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-align: center;
+}
+
+.ws-mines-game__error {
+    margin: 0;
+    color: var(--status-error);
+    font-size: 12px;
+}
+
+/* === RESPONSIVIDADE === */
+@container (max-width: 460px) {
+    .ws-mines-game__stats {
+        gap: 6px;
+    }
+
+    .ws-mines-game__stat {
+        padding: 9px 8px;
+    }
+
+    .ws-mines-game__stat strong {
+        font-size: 16px;
+    }
+
+    .ws-mines-game__board {
+        gap: 2px;
+    }
+
+    .ws-mines-game__board-wrap {
+        padding: 8px;
+    }
+
+    .ws-mines-game__overlay {
+        inset: 8px;
+    }
+}
+
+/* === MOVIMENTO REDUZIDO === */
+@media (prefers-reduced-motion: reduce) {
+    .ws-games .ws-mines-game__cell {
+        transition: none;
+    }
+}

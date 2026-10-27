@@ -14,96 +14,24 @@ export default function GameArtwork({ game }) {
 
         case 'memory':
             return (
-                <svg viewBox="0 0 320 170" aria-hidden="true">
-                    <g transform="translate(51 24)">
-                        {[
-                            [0, 0],
-                            [61, 0],
-                            [122, 0],
-                            [183, 0],
-                            [0, 62],
-                            [61, 62],
-                            [122, 62],
-                            [183, 62],
-                        ].map(([x, y], index) => (
-                            <g key={index} transform={`translate(${x} ${y})`}>
-                                <rect
-                                    width="49"
-                                    height="53"
-                                    rx="9"
-                                    fill={index === 2 || index === 5 ? '#b8a1ff' : '#29284d'}
-                                    stroke={index === 2 || index === 5 ? '#e1d5ff' : '#5e578f'}
-                                />
-
-                                {index === 2 || index === 5 ? (
-                                    <path
-                                        d="M24.5 11L29 21l11 3-11 4-4.5 12-4.5-12-11-4 11-3z"
-                                        fill="#3a2b76"
-                                    />
-                                ) : (
-                                    <path
-                                        d="M17 15h15v23H17z"
-                                        fill="none"
-                                        stroke="#8d81cb"
-                                        strokeWidth="2"
-                                        strokeDasharray="3 3"
-                                    />
-                                )}
-                            </g>
-                        ))}
-                    </g>
-                </svg>
+                <img
+                    src="/assets/games/memory.png"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    draggable="false"
+                />
             );
 
         case 'mines':
             return (
-                <svg viewBox="0 0 320 170" aria-hidden="true">
-                    <g transform="translate(74 12)">
-                        {Array.from({ length: 35 }, (_, index) => {
-                            const x = (index % 7) * 25;
-                            const y = Math.floor(index / 7) * 25;
-                            const revealed = [8, 9, 10, 15, 16, 17, 23, 24].includes(index);
-
-                            return (
-                                <g key={index}>
-                                    <rect
-                                        x={x}
-                                        y={y}
-                                        width="23"
-                                        height="23"
-                                        rx="3"
-                                        fill={revealed ? '#2d4b59' : '#173442'}
-                                        stroke="#4e7889"
-                                        strokeOpacity=".65"
-                                    />
-
-                                    {revealed && (
-                                        <text
-                                            x={x + 11.5}
-                                            y={y + 16}
-                                            textAnchor="middle"
-                                            fontSize="14"
-                                            fontWeight="bold"
-                                            fill={index % 2 ? '#9aceff' : '#c7e9cb'}
-                                        >
-                                            {index % 3 === 0 ? '2' : '1'}
-                                        </text>
-                                    )}
-                                </g>
-                            );
-                        })}
-
-                        <path d="M136 17v41" stroke="#edf2fb" strokeWidth="3" />
-                        <path d="M138 19l25 8-25 9z" fill="#ff777f" />
-                        <circle cx="36" cy="88" r="10" fill="#eac679" />
-
-                        <path
-                            d="M36 73v30M21 88h30M25 77l22 22M47 77L25 99"
-                            stroke="#eac679"
-                            strokeWidth="3"
-                        />
-                    </g>
-                </svg>
+                <img
+                    src="/assets/games/mines.png"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    draggable="false"
+                />
             );
 
         case 'flappy':

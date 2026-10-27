@@ -24,6 +24,7 @@ export const GAMES_CATALOG = [
     },
     {
         id: 'mines',
+        window: { width: 850, height: 855 },
         name: 'Campo Minado',
         category: 'ESTRATÉGIA',
         description: 'Revele as casas e evite as minas ocultas.',
