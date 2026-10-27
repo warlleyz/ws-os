@@ -1,0 +1,435 @@
+/* === ESTRUTURA DO SNAKE === */
+.ws-snake {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    min-width: 0;
+    container-type: inline-size;
+    color: var(--text-primary);
+}
+
+/* === ESTATÍSTICAS DA PARTIDA === */
+.ws-snake__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    min-width: 0;
+}
+
+.ws-snake__stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 12px 15px;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--surface-secondary) 28%, transparent);
+}
+
+.ws-snake__stat>span {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+}
+
+.ws-snake__stat strong {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    font-size: 23px;
+    font-weight: 750;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.ws-snake__stat strong svg {
+    flex-shrink: 0;
+    color: var(--accent-primary);
+}
+
+/* === LAYOUT PRINCIPAL === */
+.ws-snake__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
+    align-items: start;
+    gap: 16px;
+    min-width: 0;
+}
+
+/* === CONTÊINER DO TABULEIRO === */
+.ws-snake__board-container {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+    border-radius: 13px;
+    outline: none;
+    background: color-mix(in srgb, var(--surface-secondary) 22%, transparent);
+}
+
+.ws-snake__board-container:focus-visible {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+}
+
+/* === TABULEIRO === */
+.ws-snake__board {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 22%, transparent);
+    border-radius: 10px;
+    background-color: color-mix(in srgb, var(--surface-primary) 88%, #09151a);
+    background-image:
+        linear-gradient(to right,
+            color-mix(in srgb, var(--text-primary) 5%, transparent) 1px,
+            transparent 1px),
+        linear-gradient(to bottom,
+            color-mix(in srgb, var(--text-primary) 5%, transparent) 1px,
+            transparent 1px);
+    background-size:
+        calc(100% / var(--snake-columns)) calc(100% / var(--snake-rows));
+    user-select: none;
+    contain: layout paint;
+}
+
+/* === COBRA === */
+.ws-snake__segment {
+    position: absolute;
+    z-index: 2;
+    box-sizing: border-box;
+    width: calc(100% / var(--snake-columns));
+    height: calc(100% / var(--snake-rows));
+    left: calc(var(--snake-x) * 100% / var(--snake-columns));
+    top: calc(var(--snake-y) * 100% / var(--snake-rows));
+    border: 1px solid color-mix(in srgb, #050a14 45%, transparent);
+    border-radius: 3px;
+    background: var(--accent-primary);
+}
+
+/* === CABEÇA === */
+.ws-snake__segment--head {
+    z-index: 3;
+    background: color-mix(in srgb, var(--accent-primary) 68%, white);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent);
+}
+
+/* === ELEMENTOS DECORATIVOS DESATIVADOS === */
+.ws-snake__eyes {
+    display: none;
+}
+
+/* === TECNOLOGIAS COLETÁVEIS === */
+.ws-snake__food {
+    position: absolute;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: calc(100% / var(--snake-columns));
+    height: calc(100% / var(--snake-rows));
+    left: calc(var(--snake-x) * 100% / var(--snake-columns));
+    top: calc(var(--snake-y) * 100% / var(--snake-rows));
+    padding: 1px;
+    pointer-events: none;
+}
+
+/* === ÍCONES DAS TECNOLOGIAS === */
+.ws-snake__food-icon {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border: 1px solid color-mix(in srgb, var(--snake-food-color) 45%, transparent);
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--snake-food-color) 12%, #101820);
+    color: var(--snake-food-color);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--snake-food-color) 20%, transparent);
+}
+
+.ws-snake__food-icon svg {
+    width: 72%;
+    height: 72%;
+}
+
+/* === SOBREPOSIÇÃO DOS ESTADOS === */
+.ws-snake__overlay {
+    position: absolute;
+    z-index: 10;
+    inset: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    padding: 20px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--surface-primary) 86%, transparent);
+    text-align: center;
+    -webkit-backdrop-filter: blur(9px);
+    backdrop-filter: blur(9px);
+}
+
+.ws-snake__overlay strong {
+    color: var(--text-primary);
+    font-size: clamp(20px, 3cqi, 27px);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+}
+
+.ws-snake__overlay>span {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* === AÇÃO PRINCIPAL DO TABULEIRO === */
+.ws-games .ws-snake__overlay button {
+    min-height: 38px;
+    margin-top: 5px;
+    padding: 9px 17px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent-primary);
+    color: var(--text-on-accent, #fff);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ws-games .ws-snake__overlay button:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+/* === AÇÕES DO CABEÇALHO === */
+.ws-snake__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ws-games .ws-snake__header-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--surface-secondary) 40%, transparent);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.ws-games .ws-snake__header-actions button:hover:not(:disabled) {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.ws-games .ws-snake__header-actions button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* === RANKING LATERAL === */
+.ws-snake__sidebar {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.ws-snake__sidebar .ws-ranking {
+    gap: 14px;
+    padding: 16px;
+}
+
+/* === RANKING INDISPONÍVEL === */
+.ws-snake__ranking-unavailable {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 260px;
+    padding: 20px;
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--surface-secondary) 28%, transparent);
+    text-align: center;
+}
+
+.ws-snake__ranking-unavailable svg {
+    color: var(--accent-primary);
+}
+
+.ws-snake__ranking-unavailable h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ws-snake__ranking-unavailable p {
+    max-width: 230px;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* === CONTROLES DIRECIONAIS === */
+.ws-snake__mobile-controls {
+    display: none;
+}
+
+.ws-snake__direction-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 42px);
+    grid-template-rows: repeat(2, 42px);
+    justify-content: center;
+    gap: 6px;
+}
+
+.ws-games .ws-snake__direction {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid var(--border-default);
+    border-radius: 9px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.ws-snake__direction--up {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.ws-snake__direction--left {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.ws-snake__direction--down {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.ws-snake__direction--right {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.ws-games .ws-snake__direction:hover:not(:disabled) {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.ws-games .ws-snake__direction:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* === ERROS DE PERSISTÊNCIA === */
+.ws-snake__error {
+    margin: 0;
+    padding: 11px 13px;
+    border: 1px solid color-mix(in srgb, #e36a6a 25%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, #e36a6a 8%, transparent);
+    color: var(--text-primary);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* === RESPONSIVIDADE DO SNAKE === */
+@container (max-width: 760px) {
+    .ws-snake__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ws-snake__board {
+        max-width: 540px;
+    }
+
+    .ws-snake__sidebar {
+        width: 100%;
+    }
+
+    .ws-snake__mobile-controls {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+@container (max-width: 480px) {
+    .ws-snake {
+        gap: 14px;
+    }
+
+    .ws-snake__stats {
+        gap: 7px;
+    }
+
+    .ws-snake__stat {
+        padding: 11px 10px;
+    }
+
+    .ws-snake__stat>span {
+        font-size: 9px;
+    }
+
+    .ws-snake__stat strong {
+        gap: 5px;
+        font-size: 19px;
+    }
+
+    .ws-snake__stat strong svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .ws-snake__board-container {
+        padding: 7px;
+    }
+
+    .ws-snake__overlay {
+        inset: 7px;
+    }
+
+    .ws-snake__header-actions {
+        gap: 5px;
+    }
+
+    .ws-games .ws-snake__header-actions button {
+        min-height: 33px;
+        padding: 7px 9px;
+        font-size: 11px;
+    }
+}
+
+/* === ACESSIBILIDADE === */
+@media (prefers-reduced-motion: reduce) {
+
+    .ws-games .ws-snake__header-actions button,
+    .ws-games .ws-snake__overlay button {
+        transition: none;
+    }
+}
