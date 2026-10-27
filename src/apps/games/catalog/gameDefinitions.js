@@ -16,6 +16,7 @@ export const GAMES_CATALOG = [
     },
     {
         id: 'memory',
+        window: { width: 900, height: 775 },
         name: 'Memória',
         category: 'RACIOCÍNIO',
         description: 'Encontre todos os pares com menos tentativas.',

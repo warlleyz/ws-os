@@ -12,6 +12,7 @@ import GameLayout from './components/GameLayout';
 import useGamePaused from './shared/useGamePaused';
 
 import SnakeGame from './snake/SnakeGame';
+import MemoryGame from './memory/MemoryGame';
 
 import '../../styles/apps.css';
 import './Games.css';
@@ -19,7 +20,8 @@ import './Games.css';
 /* === REGISTRO DOS JOGOS === */
 const GAME_COMPONENTS = {
   snake: SnakeGame,
-};  
+  memory: MemoryGame,
+};
 
 /* === APLICATIVO JOGOS === */
 export default function Games({ instance, onWindowResize }) {

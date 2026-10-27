@@ -1,0 +1,295 @@
+/* === ESTRUTURA DO JOGO MEMÓRIA === */
+.ws-memory-game {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    color: var(--text-primary);
+    container-type: inline-size;
+}
+
+/* === INDICADORES === */
+.ws-memory-game__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ws-memory-game__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 13px 15px;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: color-mix(in srgb,
+            var(--surface-secondary) 28%,
+            transparent);
+}
+
+.ws-memory-game__stat>span {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.ws-memory-game__stat strong {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 23px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+.ws-memory-game__stat strong svg {
+    color: var(--accent-primary);
+}
+
+/* === ÁREA DO TABULEIRO === */
+.ws-memory-game__board-wrap {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--border-default);
+    border-radius: 13px;
+    background: color-mix(in srgb,
+            var(--surface-secondary) 22%,
+            transparent);
+}
+
+/* === TABULEIRO DO MEMÓRIA === */
+.ws-memory-game__board {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    max-width: 620px;
+    margin-inline: auto;
+}
+
+/* === CARTAS === */
+.ws-games .ws-memory-game__card {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    aspect-ratio: 1.5;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb,
+            var(--accent-primary) 22%,
+            var(--border-default));
+    border-radius: 11px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition:
+        border-color 150ms ease,
+        background-color 150ms ease;
+}
+
+.ws-games .ws-memory-game__card:not(:disabled):hover {
+    border-color: var(--accent-primary);
+}
+
+.ws-games .ws-memory-game__card:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+.ws-memory-game__card-back,
+.ws-memory-game__card-front {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: absolute;
+    inset: 0;
+}
+
+/* ----- VERSO ----- */
+.ws-memory-game__card-back {
+    background:
+        radial-gradient(circle at 50% 35%,
+            color-mix(in srgb, var(--accent-primary) 17%, transparent),
+            transparent 70%),
+        var(--surface-secondary);
+}
+
+.ws-memory-game__card-symbol {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid color-mix(in srgb,
+            var(--accent-primary) 35%,
+            transparent);
+    border-radius: 10px;
+    color: var(--accent-primary);
+    font-size: 24px;
+    font-weight: 750;
+}
+
+/* ----- FRENTE ----- */
+.ws-memory-game__card-front {
+    padding: 8px;
+    opacity: 0;
+    background: color-mix(in srgb,
+            var(--surface-secondary) 75%,
+            var(--accent-primary));
+}
+
+.ws-memory-game__technology-icon {
+    width: clamp(24px, 5cqi, 45px);
+    height: clamp(24px, 5cqi, 45px);
+    flex: none;
+}
+
+.ws-memory-game__card-front>span {
+    color: var(--text-primary);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* === ESTADOS DAS CARTAS === */
+.ws-memory-game__card.is-visible .ws-memory-game__card-back {
+    opacity: 0;
+}
+
+.ws-memory-game__card.is-visible .ws-memory-game__card-front {
+    opacity: 1;
+}
+
+.ws-games .ws-memory-game__card.is-matched {
+    border-color: color-mix(in srgb,
+            var(--accent-primary) 55%,
+            transparent);
+}
+
+.ws-games .ws-memory-game__card:disabled {
+    cursor: default;
+}
+
+/* === SOBREPOSIÇÃO DE ESTADO === */
+.ws-memory-game__overlay {
+    position: absolute;
+    z-index: 5;
+    inset: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 10px;
+    background: color-mix(in srgb,
+            var(--surface-primary) 88%,
+            transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    text-align: center;
+}
+
+.ws-memory-game__overlay strong {
+    font-size: 22px;
+    font-weight: 750;
+}
+
+.ws-memory-game__overlay p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.ws-games .ws-memory-game__overlay button {
+    min-height: 38px;
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent-primary);
+    color: var(--text-on-accent, #fff);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* === AÇÕES DO CABEÇALHO === */
+.ws-memory-game__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ws-games .ws-memory-game__actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.ws-games .ws-memory-game__actions button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* === INSTRUÇÕES E ERROS === */
+.ws-memory-game__hint {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-align: center;
+}
+
+.ws-memory-game__error {
+    margin: 0;
+    color: var(--status-error);
+    font-size: 12px;
+}
+
+/* === RESPONSIVIDADE === */
+@container (max-width: 460px) {
+    .ws-memory-game__board {
+        gap: 6px;
+    }
+
+    .ws-memory-game__board-wrap {
+        padding: 8px;
+    }
+
+    .ws-memory-game__stat {
+        padding: 10px 8px;
+    }
+
+    .ws-memory-game__stat strong {
+        font-size: 17px;
+    }
+
+    .ws-memory-game__card-front>span {
+        font-size: 9px;
+    }
+
+    .ws-memory-game__overlay {
+        inset: 8px;
+    }
+}
+
+/* === ACESSIBILIDADE === */
+@media (prefers-reduced-motion: reduce) {
+    .ws-games .ws-memory-game__card {
+        transition: none;
+    }
+}
