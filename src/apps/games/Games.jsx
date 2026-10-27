@@ -14,6 +14,7 @@ import useGamePaused from './shared/useGamePaused';
 import SnakeGame from './snake/SnakeGame';
 import MemoryGame from './memory/MemoryGame';
 import MinesGame from './mines/MinesGame';
+import FlappyGame from './flappy/FlappyGame';
 
 import '../../styles/apps.css';
 import './Games.css';
@@ -23,6 +24,7 @@ const GAME_COMPONENTS = {
   snake: SnakeGame,
   memory: MemoryGame,
   mines: MinesGame,
+  flappy: FlappyGame,
 };
 
 /* === APLICATIVO JOGOS === */

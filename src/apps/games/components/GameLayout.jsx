@@ -42,9 +42,12 @@ export default function GameLayout({
     /* ----- DISPONIBILIDADE DO RANKING ----- */
     const hasPublicRanking = supportsPublicRanking(game.id);
 
-    /* ----- RANKING INTEGRADO AO SNAKE ----- */
+    /* ----- RANKING INTEGRADO AOS JOGOS ----- */
+    const hasIntegratedRanking =
+        game.id === 'snake' || game.id === 'flappy';
+
     const ranking =
-        game.id === 'snake' && hasPublicRanking ? (
+        hasIntegratedRanking && hasPublicRanking ? (
             <GameRankings
                 key={game.id}
                 game={game.id}
@@ -81,7 +84,7 @@ export default function GameLayout({
                 />
 
                 {/* === RANKING DOS DEMAIS JOGOS === */}
-                {game.id !== 'snake' && hasPublicRanking && (
+                {!hasIntegratedRanking && hasPublicRanking && (
                     <GameRankings
                         key={game.id}
                         game={game.id}

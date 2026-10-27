@@ -1,0 +1,284 @@
+/* === LAYOUT DO FLAPPY BIRD === */
+.ws-flappy-game__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
+    align-items: start;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+}
+
+/* === CLASSIFICAÇÃO GLOBAL === */
+.ws-flappy-game__ranking {
+    min-width: 0;
+    max-height: 690px;
+    overflow-y: auto;
+}
+
+.ws-flappy-game__ranking>.ws-ranking {
+    width: 100%;
+}
+
+/* === RESPONSIVIDADE DO LAYOUT === */
+@media (max-width: 760px) {
+    .ws-flappy-game__layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ws-flappy-game__ranking {
+        max-height: none;
+        overflow: visible;
+    }
+}
+
+/* === ESTRUTURA DO FLAPPY BIRD === */
+.ws-flappy-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    color: var(--text-primary);
+    container-type: inline-size;
+}
+
+/* === INDICADORES === */
+.ws-flappy-game__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: min(100%, 420px);
+}
+
+.ws-flappy-game__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    padding: 11px 14px;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: color-mix(in srgb,
+            var(--surface-secondary) 28%,
+            transparent);
+}
+
+.ws-flappy-game__stat>span {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.ws-flappy-game__stat strong {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 23px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+.ws-flappy-game__stat strong svg {
+    color: var(--accent-primary);
+}
+
+/* === CENÁRIO === */
+.ws-flappy-game__stage {
+    position: relative;
+    width: min(100%, 350px);
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+    border-radius: 13px;
+    background: var(--surface-secondary);
+    contain: layout paint;
+}
+
+.ws-games .ws-flappy-game__play-surface {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.ws-flappy-game__play-surface svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* === CÉU E PAISAGEM === */
+.ws-flappy-game__sky {
+    fill: color-mix(in srgb,
+            var(--accent-primary) 12%,
+            var(--surface-primary));
+}
+
+.ws-flappy-game__sun {
+    fill: color-mix(in srgb,
+            var(--accent-primary) 25%,
+            transparent);
+}
+
+.ws-flappy-game__clouds {
+    fill: color-mix(in srgb,
+            var(--text-primary) 9%,
+            transparent);
+}
+
+.ws-flappy-game__ground {
+    fill: color-mix(in srgb,
+            var(--accent-primary) 28%,
+            var(--surface-secondary));
+}
+
+/* === OBSTÁCULOS === */
+.ws-flappy-game__pipe rect {
+    fill: color-mix(in srgb,
+            var(--accent-primary) 75%,
+            var(--surface-secondary));
+    stroke: color-mix(in srgb,
+            var(--accent-primary) 60%,
+            var(--text-primary));
+    stroke-width: 2;
+}
+
+.ws-flappy-game__pipe-cap {
+    fill: var(--accent-primary) !important;
+}
+
+/* === PÁSSARO === */
+.ws-flappy-game__bird-body {
+    fill: var(--accent-primary);
+    stroke: color-mix(in srgb,
+            var(--accent-primary) 55%,
+            var(--text-primary));
+    stroke-width: 2;
+}
+
+.ws-flappy-game__bird-wing {
+    fill: color-mix(in srgb,
+            var(--accent-primary) 55%,
+            white);
+}
+
+.ws-flappy-game__bird-beak {
+    fill: #f6ad42;
+}
+
+/* === SOBREPOSIÇÃO DE ESTADO === */
+.ws-flappy-game__overlay {
+    position: absolute;
+    z-index: 5;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    background: color-mix(in srgb,
+            var(--surface-primary) 80%,
+            transparent);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    text-align: center;
+}
+
+.ws-flappy-game__overlay strong {
+    color: var(--text-primary);
+    font-size: 23px;
+    font-weight: 750;
+}
+
+.ws-flappy-game__overlay p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.ws-games .ws-flappy-game__overlay button {
+    min-height: 38px;
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent-primary);
+    color: var(--text-on-accent, #fff);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* === AÇÕES DO CABEÇALHO === */
+.ws-flappy-game__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ws-games .ws-flappy-game__actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.ws-games .ws-flappy-game__actions button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* === INSTRUÇÕES E ERROS === */
+.ws-flappy-game__hint {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-align: center;
+}
+
+.ws-flappy-game__error {
+    margin: 0;
+    color: var(--status-error);
+    font-size: 12px;
+}
+
+/* === RESPONSIVIDADE === */
+@container (max-width: 440px) {
+    .ws-flappy-game__stats {
+        gap: 6px;
+    }
+
+    .ws-flappy-game__stat {
+        padding: 9px 10px;
+    }
+
+    .ws-flappy-game__stat strong {
+        font-size: 18px;
+    }
+
+    .ws-flappy-game__stage {
+        width: min(100%, 300px);
+    }
+}
+
+/* === ACESSIBILIDADE === */
+@media (prefers-reduced-motion: reduce) {
+    .ws-games .ws-flappy-game__actions button {
+        transition: none;
+    }
+}

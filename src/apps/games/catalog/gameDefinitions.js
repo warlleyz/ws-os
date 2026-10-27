@@ -32,6 +32,7 @@ export const GAMES_CATALOG = [
     },
     {
         id: 'flappy',
+        window: { width: 900, height: 850 },
         name: 'Flappy Bird',
         category: 'ARCADE',
         description: 'Atravesse obstáculos e bata seu recorde.',
