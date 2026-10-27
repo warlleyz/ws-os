@@ -27,6 +27,7 @@ const windowProfiles = {
   resume: { width: 950, height: 760 },
   certificates: { width: 980, height: 785 },
   contact: { width: 980, height: 890 },
+  terminal: { width: 1000, height: 525 },
   calculator: { width: 360, height: 520 },
   settings: { width: 980, height: 680 },
   'file-editor': { width: 920, height: 680 },

@@ -184,7 +184,7 @@ export default function Terminal({ instance }) {
   const serialRef = useRef(0);
 
   const apps = getRegisteredApps().filter((app) => app.public);
-  const identity = authenticated ? 'admin' : 'visitor';
+  const identity = authenticated ? 'warlley' : 'visitor';
 
   /* === NAVEGAÇÃO VIRTUAL === */
   const [terminalPath, setTerminalPath] = useState('~');
@@ -291,7 +291,7 @@ export default function Terminal({ instance }) {
       resetLogin();
       setAuthenticated(true);
 
-      appendLine('', ['Autenticação administrativa realizada.'], 'success', 'admin');
+      appendLine('', ['Autenticação administrativa realizada.'], 'success', 'warlley');
     } catch (error) {
       if (!alive.current || controller.signal.aborted) return;
 
@@ -943,7 +943,7 @@ export default function Terminal({ instance }) {
 
         case 'neofetch': {
           output = getNeofetchLines({
-            username: isAdminAuthenticated() ? 'admin' : 'visitor',
+            username: isAdminAuthenticated() ? 'warlley' : 'visitor',
             locale,
             theme: 'Tema atual da WS OS',
             appCount: apps.length,
