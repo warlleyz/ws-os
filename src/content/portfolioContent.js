@@ -207,6 +207,34 @@ export const portfolio = {
       category: 'course',
       date: '2026-09-21',
 
+      workload: {
+        'pt-BR': '25 horas',
+        en: '25 hours',
+      },
+
+      subjects: [
+        {
+          'pt-BR': 'Obtenção e transformação de dados',
+          en: 'Data acquisition and transformation',
+        },
+        {
+          'pt-BR': 'Modelagem de dados',
+          en: 'Data modeling',
+        },
+        {
+          'pt-BR': 'Cálculos e medidas no Power BI',
+          en: 'Calculations and measures in Power BI',
+        },
+        {
+          'pt-BR': 'Visualização de dados e relatórios',
+          en: 'Data visualization and reports',
+        },
+        {
+          'pt-BR': 'Publicação de relatórios',
+          en: 'Report publishing',
+        },
+      ],
+
       description: {
         'pt-BR':
           'Curso de 25 horas sobre obtenção e transformação de dados, modelagem, cálculos, visualização e publicação de relatórios com Power BI.',

@@ -1,8 +1,7 @@
-
 import { useMemo, useState } from 'react';
 import {
   ArrowLeft,
-  ArrowUpRight,
+  ArrowRight,
   Award,
   BookOpen,
   CalendarDays,
@@ -15,6 +14,7 @@ import {
   Search,
   Trophy,
   X,
+  Check,
 } from 'lucide-react';
 
 import { portfolio, contentText } from '../../content/portfolioContent';
@@ -57,7 +57,6 @@ function getCategory(item) {
     return item.category;
   }
 
-  /* ----- Compatibilidade com cadastros antigos ----- */
   if (item.category === 'achievement' && item.url?.includes('/events/')) {
     return 'event';
   }
@@ -131,7 +130,7 @@ function getCertificateResource(item) {
   }
 }
 
-/* === Ícones de categorias === */
+/* === Ícones das categorias === */
 function CategoryIcon({ category, size = 20 }) {
   switch (category) {
     case 'course':
@@ -147,7 +146,7 @@ function CategoryIcon({ category, size = 20 }) {
   }
 }
 
-/* === Cabeçalho V2 === */
+/* === Cabeçalho principal === */
 function CertificatesHeader() {
   return (
     <header className="ws-certificates__hero">
@@ -170,13 +169,65 @@ function CertificatesHeader() {
   );
 }
 
+/* === Filtros e pesquisa === */
+function CertificatesToolbar({
+  search,
+  onSearchChange,
+  category,
+  onCategoryChange,
+}) {
+  return (
+    <div className="ws-certificates__toolbar">
+      <div
+        className="ws-certificates__categories"
+        role="group"
+        aria-label={t('Categoria')}
+      >
+        {CATEGORIES.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={category === item.id ? 'is-active' : ''}
+            aria-pressed={category === item.id}
+            onClick={() => onCategoryChange(item.id)}
+          >
+            {t(item.label)}
+          </button>
+        ))}
+      </div>
+
+      <div className="ws-certificates__search">
+        <Search size={17} aria-hidden="true" />
+
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={t('Pesquisar certificados')}
+          aria-label={t('Pesquisar certificados')}
+        />
+
+        {search && (
+          <button
+            type="button"
+            onClick={() => onSearchChange('')}
+            aria-label={t('Limpar')}
+          >
+            <X size={15} aria-hidden="true" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* === Card de certificado === */
 function CertificateCard({ item, locale, onSelect }) {
   const title = readText(item.title, locale);
   const issuer = readText(item.issuer, locale);
   const category = getCategory(item);
-  const tags = getTags(item, locale);
   const date = formatCertificateDate(item.date, locale);
+  const workload = readText(item.workload, locale);
 
   return (
     <article className="ws-certificates__card">
@@ -184,18 +235,20 @@ function CertificateCard({ item, locale, onSelect }) {
         type="button"
         className="ws-certificates__card-button"
         onClick={() => onSelect(item.id)}
-        aria-label={`${t('Certificados')}: ${title}`}
+        aria-label={`${t('Ver detalhes')}: ${title}`}
       >
+        {/* === Identificação === */}
         <div className="ws-certificates__card-top">
-          <span className="ws-certificates__card-icon">
-            <CategoryIcon category={category} />
-          </span>
-
           <span className="ws-certificates__card-category">
             {t(getCategoryLabel(category))}
           </span>
+
+          <span className="ws-certificates__card-symbol">
+            <CategoryIcon category={category} size={19} />
+          </span>
         </div>
 
+        {/* === Conteúdo === */}
         <div className="ws-certificates__card-information">
           <h3>{title}</h3>
 
@@ -206,38 +259,44 @@ function CertificateCard({ item, locale, onSelect }) {
           )}
         </div>
 
-        {(date || item.workload) && (
+        {/* === Informações e navegação === */}
+        <div className="ws-certificates__card-bottom">
           <div className="ws-certificates__card-meta">
-            {date && (
-              <span>
-                <CalendarDays size={14} aria-hidden="true" />
-                {date}
-              </span>
-            )}
+            {date && <span>{date}</span>}
 
-            {item.workload && (
-              <span>
-                <Clock3 size={14} aria-hidden="true" />
-                {readText(item.workload, locale)}
-              </span>
+            {workload && (
+              <span>{workload}</span>
             )}
           </div>
-        )}
 
-        {tags.length > 0 && (
-          <div className="ws-certificates__tags">
-            {tags.slice(0, 3).map((tag, index) => (
-              <span key={`${index}-${tag}`}>{tag}</span>
-            ))}
-          </div>
-        )}
-
-        <span className="ws-certificates__card-footer">
-          <span>{t('Ver detalhes')}</span>
-          <ArrowUpRight size={15} aria-hidden="true" />
-        </span>
+          <span className="ws-certificates__card-action">
+            {t('Ver detalhes')}
+            <ArrowRight size={16} aria-hidden="true" />
+          </span>
+        </div>
       </button>
     </article>
+  );
+}
+
+/* === Navegação da tela de detalhes === */
+function DetailsNavigation({ onBack }) {
+  return (
+    <nav
+      className="ws-certificates__details-navigation"
+      aria-label={t('Certificados')}
+    >
+      <button
+        type="button"
+        className="ws-certificates__back"
+        onClick={onBack}
+      >
+        <ArrowLeft size={17} aria-hidden="true" />
+        {t('Voltar')}
+      </button>
+
+      <span>{t('Certificados')}</span>
+    </nav>
   );
 }
 
@@ -249,26 +308,28 @@ function CertificateDetails({ item, locale, onBack, onOpen }) {
   const workload = readText(item.workload, locale);
   const category = getCategory(item);
   const tags = getTags(item, locale);
+
+  const subjects =
+    getCategory(item) === 'course' && Array.isArray(item.subjects)
+      ? item.subjects.map((subject) => readText(subject, locale)).filter(Boolean)
+      : [];
+
   const resource = getCertificateResource(item);
   const date = formatCertificateDate(item.date, locale, true);
 
   const facts = [
-    date
-      ? {
-        id: 'date',
-        label: t('Data'),
-        value: date,
-        icon: CalendarDays,
-      }
-      : null,
-    workload
-      ? {
-        id: 'workload',
-        label: t('Carga horária'),
-        value: workload,
-        icon: Clock3,
-      }
-      : null,
+    date && {
+      id: 'date',
+      label: t('Data'),
+      value: date,
+      icon: CalendarDays,
+    },
+    workload && {
+      id: 'workload',
+      label: t('Carga horária'),
+      value: workload,
+      icon: Clock3,
+    },
     {
       id: 'category',
       label: t('Categoria'),
@@ -280,24 +341,13 @@ function CertificateDetails({ item, locale, onBack, onOpen }) {
   return (
     <div className="ws-certificates__details">
       {/* === Navegação === */}
-      <div className="ws-certificates__details-navigation">
-        <button
-          type="button"
-          className="ws-certificates__back"
-          onClick={onBack}
-        >
-          <ArrowLeft size={17} aria-hidden="true" />
-          {t('Voltar')}
-        </button>
+      <DetailsNavigation onBack={onBack} />
 
-        <span>{t('Certificados')}</span>
-      </div>
-
-      {/* === Identificação === */}
+      {/* === Identificação do certificado === */}
       <header className="ws-certificates__details-header">
-        <div className="ws-certificates__details-icon">
-          <CategoryIcon category={category} size={27} />
-        </div>
+        <span className="ws-certificates__details-icon">
+          <CategoryIcon category={category} size={29} />
+        </span>
 
         <div className="ws-certificates__details-title">
           <span className="ws-certificates__details-category">
@@ -311,24 +361,71 @@ function CertificateDetails({ item, locale, onBack, onOpen }) {
       </header>
 
       {/* === Metadados === */}
-      <section className="ws-certificates__details-facts">
-        {facts.map((fact) => (
-          <div className="ws-certificates__fact" key={fact.id}>
-            <span>{fact.label}</span>
-            <strong>{fact.value}</strong>
-          </div>
-        ))}
+      <section
+        className="ws-certificates__details-facts"
+        aria-label={t('Detalhes')}
+      >
+        {facts.map((fact) => {
+          const Icon = fact.icon;
+
+          return (
+            <div className="ws-certificates__fact" key={fact.id}>
+              <span className="ws-certificates__fact-icon">
+                <Icon size={17} aria-hidden="true" />
+              </span>
+
+              <div>
+                <span>{fact.label}</span>
+                <strong>{fact.value}</strong>
+              </div>
+            </div>
+          );
+        })}
       </section>
 
-      {/* === Sobre === */}
-      {description && (
-        <section className="ws-certificates__details-about">
-          <div className="ws-certificates__section-heading">
-            <BookOpen size={18} aria-hidden="true" />
-            <h3>{t('Sobre')}</h3>
-          </div>
+      {/* === Conteúdo do certificado === */}
+      {(description || subjects.length > 0) && (
+        <section className="ws-certificates__details-content">
+          {/* === Apresentação === */}
+          {description && (
+            <div className="ws-certificates__details-about">
+              <div className="ws-certificates__section-heading">
+                <BookOpen size={18} aria-hidden="true" />
+                <h3>
+                  {locale === 'en'
+                    ? 'About'
+                    : category === 'course'
+                      ? 'Sobre o curso'
+                      : 'Sobre'}
+                </h3>
+              </div>
 
-          <p>{description}</p>
+              <p>{description}</p>
+            </div>
+          )}
+
+          {/* === Conteúdo estudado === */}
+          {subjects.length > 0 && (
+            <div className="ws-certificates__subjects">
+              <div className="ws-certificates__section-heading">
+                <BookOpen size={18} aria-hidden="true" />
+                <h3>
+                  {locale === 'en'
+                    ? 'Topics covered'
+                    : 'Conteúdo estudado'}
+                </h3>
+              </div>
+
+              <ul className="ws-certificates__subjects-list">
+                {subjects.map((subject) => (
+                  <li key={subject}>
+                    <Check size={15} aria-hidden="true" />
+                    <span>{subject}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
       )}
 
@@ -341,21 +438,32 @@ function CertificateDetails({ item, locale, onBack, onOpen }) {
         </div>
       )}
 
-      {/* === Documento oficial === */}
+      {/* === Documento comprobatório === */}
       {resource && (
         <section className="ws-certificates__document">
           <div className="ws-certificates__document-heading">
             <span className="ws-certificates__document-icon">
-              <FileText size={21} aria-hidden="true" />
+              <FileText size={22} aria-hidden="true" />
             </span>
 
             <div className="ws-certificates__document-description">
-              <h3>{t('Certificados')}</h3>
-              <p>{title}</p>
+              <h3>
+                {locale === 'en'
+                  ? 'Certificate document'
+                  : 'Documento do certificado'}
+              </h3>
+
+              <p>
+                {locale === 'en'
+                  ? 'View or download the official document.'
+                  : 'Visualize ou baixe o documento oficial.'}
+              </p>
             </div>
 
             {resource.type === 'local' && (
-              <span className="ws-certificates__document-type">PDF</span>
+              <span className="ws-certificates__document-type">
+                PDF
+              </span>
             )}
           </div>
 
@@ -372,9 +480,9 @@ function CertificateDetails({ item, locale, onBack, onOpen }) {
                 </button>
 
                 <a
+                  className="ws-certificates__secondary-action"
                   href={resource.url}
                   download
-                  className="ws-certificates__secondary-action"
                 >
                   <Download size={17} aria-hidden="true" />
                   {t('Baixar')}
@@ -403,7 +511,6 @@ export default function Certificates({ instance }) {
   const locale = useLocale();
   const { run } = useSystem();
 
-  /* ----- Estado da navegação ----- */
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
@@ -411,7 +518,7 @@ export default function Certificates({ instance }) {
   const selected =
     CERTIFICATES.find((item) => item.id === selectedId) ?? null;
 
-  /* ----- Integração com o botão Voltar do WS OS ----- */
+  /* === Navegação do sistema === */
   useAppBack(instance?.id, () => {
     if (!selectedId) return false;
 
@@ -419,7 +526,7 @@ export default function Certificates({ instance }) {
     return true;
   });
 
-  /* ----- Abertura no Visualizador de Arquivos ----- */
+  /* === Abertura do documento === */
   function openCertificate(item, url) {
     run(openApp, 'file-viewer', {
       origin: 'certificates',
@@ -433,7 +540,7 @@ export default function Certificates({ instance }) {
     });
   }
 
-  /* === Busca e filtros === */
+  /* === Pesquisa e filtros === */
   const visible = useMemo(() => {
     const query = normalize(search);
 
@@ -457,7 +564,7 @@ export default function Certificates({ instance }) {
       );
   }, [search, category, locale]);
 
-  /* ----- Agrupamento por ano ----- */
+  /* === Agrupamento por ano === */
   const grouped = useMemo(() => {
     const groups = new Map();
 
@@ -488,56 +595,22 @@ export default function Certificates({ instance }) {
         <>
           <CertificatesHeader />
 
-          <div className="ws-certificates__toolbar">
-            <div
-              className="ws-certificates__categories"
-              role="group"
-              aria-label={t('Categoria')}
-            >
-              {CATEGORIES.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={category === item.id ? 'is-active' : ''}
-                  aria-pressed={category === item.id}
-                  onClick={() => setCategory(item.id)}
-                >
-                  {t(item.label)}
-                </button>
-              ))}
-            </div>
-
-            <div className="ws-certificates__search">
-              <Search size={17} aria-hidden="true" />
-
-              <input
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={t('Pesquisar certificados')}
-                aria-label={t('Pesquisar certificados')}
-              />
-
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch('')}
-                  aria-label={t('Limpar')}
-                >
-                  <X size={15} aria-hidden="true" />
-                </button>
-              )}
-            </div>
-          </div>
+          <CertificatesToolbar
+            search={search}
+            onSearchChange={setSearch}
+            category={category}
+            onCategoryChange={setCategory}
+          />
 
           <div className="ws-certificates__content">
-            <p className="ws-certificates__results" role="status">
-              {t('Resultados')}: <strong>{visible.length}</strong>
-            </p>
 
             {visible.length === 0 ? (
               <div className="ws-certificates__empty">
-                <Award size={38} strokeWidth={1.5} aria-hidden="true" />
+                <Award
+                  size={38}
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
 
                 <h3>{t('Nenhum certificado encontrado')}</h3>
 
@@ -556,7 +629,16 @@ export default function Certificates({ instance }) {
                   <div className="ws-certificates__year-heading">
                     <span>{year}</span>
                     <div aria-hidden="true" />
-                    <small>{items.length}</small>
+                    <small>
+                      {items.length}{' '}
+                      {locale === 'en'
+                        ? items.length === 1
+                          ? 'certificate'
+                          : 'certificates'
+                        : items.length === 1
+                          ? 'certificado'
+                          : 'certificados'}
+                    </small>
                   </div>
 
                   <div className="ws-certificates__grid">
