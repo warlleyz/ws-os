@@ -1,0 +1,452 @@
+/* === ESTRUTURA DA PACIÊNCIA === */
+.ws-solitaire-game {
+    --solitaire-card-width: 86px;
+    --solitaire-card-height: 116px;
+    --solitaire-stack-gap: 26px;
+    --solitaire-tableau-height: 300px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    color: var(--text-primary);
+    container-type: inline-size;
+}
+
+/* === INDICADORES === */
+.ws-solitaire-game__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ws-solitaire-game__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    padding: 11px 14px;
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    background: color-mix(in srgb,
+            var(--surface-secondary) 28%,
+            transparent);
+}
+
+.ws-solitaire-game__stat>span {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.ws-solitaire-game__stat strong {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 21px;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+.ws-solitaire-game__stat strong svg {
+    color: var(--accent-primary);
+}
+
+/* === MESA DE JOGO === */
+.ws-solitaire-game__table {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    min-width: 0;
+    min-height: 465px;
+    padding: 18px;
+    border: 1px solid var(--border-default);
+    border-radius: 13px;
+    background:
+        radial-gradient(circle at 50% 25%,
+            color-mix(in srgb, var(--accent-primary) 9%, transparent),
+            transparent 65%),
+        color-mix(in srgb, var(--surface-secondary) 35%, transparent);
+}
+
+/* === FILEIRA SUPERIOR === */
+.ws-solitaire-game__top-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.ws-solitaire-game__pile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    flex: 0 0 var(--solitaire-card-width);
+    min-width: 0;
+}
+
+.ws-solitaire-game__pile small {
+    color: var(--text-muted);
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.ws-solitaire-game__slot {
+    position: relative;
+    width: var(--solitaire-card-width);
+    height: var(--solitaire-card-height);
+    border: 1px dashed var(--border-default);
+    border-radius: 9px;
+}
+
+.ws-solitaire-game__foundation-group {
+    display: flex;
+    gap: 12px;
+    margin-left: auto;
+}
+
+/* === CARTAS === */
+.ws-games .ws-solitaire-game__card {
+    position: absolute;
+    inset: 0 auto auto 0;
+    display: flex;
+    flex-direction: column;
+    width: var(--solitaire-card-width);
+    height: var(--solitaire-card-height);
+    padding: 8px;
+    overflow: hidden;
+    border: 1px solid #cbd1dd;
+    border-radius: 9px;
+    background: #f7f8fc;
+    color: #202532;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgb(0 0 0 / 14%);
+}
+
+.ws-solitaire-game__card.is-red {
+    color: #d34651;
+}
+
+.ws-solitaire-game__card.is-black {
+    color: #202532;
+}
+
+.ws-games .ws-solitaire-game__card.is-selected {
+    outline: 3px solid var(--accent-primary);
+    outline-offset: -2px;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 30%, transparent);
+}
+
+.ws-solitaire-game__card-corner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: flex-start;
+    gap: 0;
+    line-height: 1;
+}
+
+.ws-solitaire-game__card-corner strong {
+    font-size: 17px;
+}
+
+.ws-solitaire-game__card-corner span {
+    font-size: 17px;
+}
+
+.ws-solitaire-game__card-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 37px;
+    transform: translate(-50%, -50%);
+}
+
+/* === VERSO DAS CARTAS === */
+.ws-games .ws-solitaire-game__card.is-face-down {
+    display: grid;
+    place-items: center;
+    padding: 6px;
+    border-color: color-mix(in srgb,
+            var(--accent-primary) 35%,
+            var(--border-default));
+    background:
+        repeating-linear-gradient(45deg,
+            transparent 0 7px,
+            rgb(255 255 255 / 10%) 7px 9px),
+        var(--accent-primary);
+    color: #fff;
+}
+
+.ws-solitaire-game__card-pattern {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgb(255 255 255 / 50%);
+    border-radius: 5px;
+    font-size: 29px;
+}
+
+/* === ESTOQUE E ESPAÇOS VAZIOS === */
+.ws-games .ws-solitaire-game__stock,
+.ws-games .ws-solitaire-game__empty {
+    display: grid;
+    place-items: center;
+    width: var(--solitaire-card-width);
+    height: var(--solitaire-card-height);
+    padding: 0;
+    border: 1px dashed var(--border-default);
+    border-radius: 9px;
+    background: color-mix(in srgb,
+            var(--surface-primary) 40%,
+            transparent);
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.ws-games .ws-solitaire-game__stock.has-cards {
+    border: 1px solid var(--accent-primary);
+    background: var(--accent-primary);
+    color: #fff;
+    font-size: 30px;
+}
+
+.ws-games .ws-solitaire-game__stock:disabled,
+.ws-games .ws-solitaire-game__empty:disabled {
+    cursor: default;
+}
+
+.ws-games .ws-solitaire-game__empty {
+    color: var(--text-muted);
+    font-size: 25px;
+    font-weight: 750;
+}
+
+/* === SETE COLUNAS === */
+.ws-solitaire-game__tableau {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 12px;
+    height: var(--solitaire-tableau-height);
+    min-height: 0;
+}
+
+.ws-solitaire-game__column {
+    position: relative;
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+}
+
+.ws-games .ws-solitaire-game__column-target {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: var(--solitaire-card-width);
+    height: var(--solitaire-card-height);
+    padding: 0;
+    border: 1px dashed var(--border-default);
+    border-radius: 9px;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* === ESTADO DA PARTIDA === */
+.ws-solitaire-game__overlay {
+    position: absolute;
+    z-index: 40;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 12px;
+    background: color-mix(in srgb,
+            var(--surface-primary) 88%,
+            transparent);
+    backdrop-filter: blur(7px);
+    text-align: center;
+}
+
+.ws-solitaire-game__overlay strong {
+    font-size: 24px;
+}
+
+.ws-solitaire-game__overlay p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.ws-games .ws-solitaire-game__overlay button {
+    min-height: 38px;
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent-primary);
+    color: var(--text-on-accent, #fff);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* === AÇÕES DO CABEÇALHO === */
+.ws-solitaire-game__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ws-games .ws-solitaire-game__actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.ws-games .ws-solitaire-game__actions button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* === INSTRUÇÕES E ERROS === */
+.ws-solitaire-game__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.ws-solitaire-game__footer>span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.ws-games .ws-solitaire-game__footer button {
+    border: 0;
+    background: transparent;
+    color: var(--accent-primary);
+    cursor: pointer;
+}
+
+.ws-solitaire-game__error {
+    margin: 0;
+    color: var(--status-error);
+    font-size: 12px;
+}
+
+/* === RESPONSIVIDADE === */
+@container (max-width: 900px) {
+    .ws-solitaire-game {
+        --solitaire-card-width: clamp(45px, 8cqi, 76px);
+        --solitaire-card-height: clamp(65px, 11cqi, 104px);
+        --solitaire-stack-gap: 23px;
+    }
+
+    .ws-solitaire-game__table {
+        padding: 12px;
+    }
+
+    .ws-solitaire-game__top-row,
+    .ws-solitaire-game__foundation-group,
+    .ws-solitaire-game__tableau {
+        gap: 8px;
+    }
+
+    .ws-solitaire-game__card-center {
+        font-size: 27px;
+    }
+}
+
+@container (max-width: 560px) {
+    .ws-solitaire-game {
+        --solitaire-card-width: clamp(35px, 11cqi, 58px);
+        --solitaire-card-height: clamp(53px, 15cqi, 80px);
+        --solitaire-stack-gap: 19px;
+    }
+
+    .ws-solitaire-game__stats {
+        gap: 5px;
+    }
+
+    .ws-solitaire-game__stat {
+        padding: 9px 7px;
+    }
+
+    .ws-solitaire-game__stat strong {
+        font-size: 16px;
+    }
+
+    .ws-solitaire-game__top-row,
+    .ws-solitaire-game__foundation-group,
+    .ws-solitaire-game__tableau {
+        gap: 4px;
+    }
+
+    .ws-solitaire-game__table {
+        padding: 7px;
+    }
+
+    .ws-games .ws-solitaire-game__card {
+        padding: 4px;
+    }
+
+    .ws-solitaire-game__card-corner strong,
+    .ws-solitaire-game__card-corner span {
+        font-size: 12px;
+    }
+
+    .ws-solitaire-game__card-center {
+        font-size: 19px;
+    }
+
+    .ws-solitaire-game__pile small {
+        font-size: 8px;
+    }
+}
+
+/* === ESPAÇAMENTO ADAPTATIVO DAS PILHAS === */
+.ws-solitaire-game__column>.ws-solitaire-game__card {
+    top: calc(var(--card-index) * min(var(--solitaire-stack-gap),
+                max(8px,
+                    (var(--solitaire-tableau-height) - var(--solitaire-card-height)) / max(1, var(--stack-count) - 1)))) !important;
+}
+
+/* === APROVEITAMENTO DA ALTURA === */
+.ws-solitaire-game__table {
+    min-height: 0;
+    gap: 18px;
+    padding: 12px;
+}
+
+.ws-solitaire-game__tableau {
+    --solitaire-tableau-height: 300px;
+}
+
+@container (max-width: 900px) {
+    .ws-solitaire-game__tableau {
+        --solitaire-tableau-height: 270px;
+    }
+}
+
+@container (max-width: 560px) {
+    .ws-solitaire-game__tableau {
+        --solitaire-tableau-height: 240px;
+    }
+}

@@ -15,6 +15,7 @@ import SnakeGame from './snake/SnakeGame';
 import MemoryGame from './memory/MemoryGame';
 import MinesGame from './mines/MinesGame';
 import FlappyGame from './flappy/FlappyGame';
+import SolitaireGame from './solitaire/SolitaireGame';
 
 import '../../styles/apps.css';
 import './Games.css';
@@ -25,6 +26,7 @@ const GAME_COMPONENTS = {
   memory: MemoryGame,
   mines: MinesGame,
   flappy: FlappyGame,
+  solitaire: SolitaireGame,
 };
 
 /* === APLICATIVO JOGOS === */

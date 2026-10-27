@@ -40,6 +40,7 @@ export const GAMES_CATALOG = [
     },
     {
         id: 'solitaire',
+        window: { width: 1150, height: 800 },
         name: 'Paciência',
         category: 'CARTAS',
         description: 'Organize as cartas e complete as quatro bases.',
