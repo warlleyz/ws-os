@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { translate as t } from '../../../shared/i18n/i18n';
 
 import GameHeader from './GameHeader';
 import GameRankings from '../rankings/GameRankings';
@@ -11,9 +10,6 @@ export default function GameLayout({
     Component,
     paused = false,
     onBack,
-    doomFrameRef,
-    doomSaving = false,
-    doomSaveError = '',
 }) {
     /* === ESTADO DO CABEÇALHO === */
     const [gameHeader, setGameHeader] = useState({
@@ -64,21 +60,12 @@ export default function GameLayout({
                 status={gameHeader.status}
                 actions={gameHeader.actions}
                 onBack={onBack}
-                saving={doomSaving}
             />
-
-            {/* === ERROS DE SINCRONIZAÇÃO === */}
-            {game.id === 'doom' && doomSaveError && (
-                <p className="ws-games__doom-save-error" role="alert">
-                    {t(doomSaveError)}
-                </p>
-            )}
 
             {/* === CONTEÚDO ROLÁVEL === */}
             <section className="ws-games__play-content">
                 <Component
                     paused={paused}
-                    iframeRef={doomFrameRef}
                     ranking={ranking}
                     onHeaderChange={handleHeaderChange}
                 />

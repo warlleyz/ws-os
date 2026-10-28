@@ -46,11 +46,4 @@ export const GAMES_CATALOG = [
         description: 'Organize as cartas e complete as quatro bases.',
         controls: 'MOUSE / TOQUE',
     },
-    {
-        id: 'doom',
-        name: 'DOOM',
-        category: 'RETRO FPS',
-        description: 'Um FPS clássico executado diretamente no WS OS.',
-        controls: 'TECLADO / MOUSE',
-    },
 ];

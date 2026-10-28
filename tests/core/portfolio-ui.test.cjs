@@ -261,6 +261,12 @@ test('Sobre Mim abre Contato preservando a instância de origem', async () => {
           name: 'Autor',
           headline: 'Perfil',
           summary: 'Resumo',
+          education: {
+            degree: 'Engenharia de Software',
+            institution: 'PUC Minas',
+            status: 'Em andamento',
+            description: 'Graduação em Engenharia de Software',
+          },
           areas: [],
           timeline: [],
           interests: [],

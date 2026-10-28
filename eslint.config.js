@@ -8,9 +8,6 @@ export default defineConfig([
   globalIgnores([
     'dist',
     '.wrangler/**',
-    'doom-source/**',
-    'public/games/doom/**',
-    'public/games/uzdoom/**',
   ]),
   {
     files: ['**/*.{js,jsx}'],

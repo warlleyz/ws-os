@@ -56,17 +56,6 @@ export const RANKING_CONFIG = Object.freeze({
         minimum: 1,
         maximum: null,
     },
-
-    doom: {
-        id: 'doom',
-        name: 'DOOM',
-        enabled: false,
-        public: false,
-        order: null,
-        unit: null,
-        minimum: null,
-        maximum: null,
-    },
 });
 
 /* === CONSULTA DAS CONFIGURAÇÕES === */

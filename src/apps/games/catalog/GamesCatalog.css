@@ -250,10 +250,6 @@
     background: radial-gradient(ellipse at 50% 45%, #2b6557, #12362f 80%);
 }
 
-.ws-games__card--doom .ws-games__art {
-    background: #2d2129;
-}
-
 .ws-games__art-number {
     position: absolute;
     z-index: 1;

@@ -14,11 +14,6 @@ import {
 import { onRequestGet as handleWakatime } from '../functions/api/wakatime.js';
 
 import {
-  isDoomDataRequest,
-  serveDoomData,
-} from './doomAssets.js';
-
-import {
   onRequestGet as handleAdminPosts,
   onRequestCreate as handleCreateNote,
   onRequestUpdate as handleUpdateNote,
@@ -101,11 +96,6 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    /* === Pacote de dados do UZDoom === */
-    if (isDoomDataRequest(url.pathname)) {
-      return serveDoomData(request, env);
-    }
-
     const route = routes[url.pathname];
     if (route) {
       const methods = route.methods ?? [route.method];
@@ -123,36 +113,6 @@ export default {
     }
 
     const assetResponse = await env.ASSETS.fetch(request);
-
-    /* === Isolamento para UZDoom WebAssembly === */
-    if (
-      request.method === 'GET' &&
-      assetResponse.ok &&
-      !url.pathname.startsWith('/api/') &&
-      (
-        url.pathname === '/' ||
-        url.pathname.startsWith('/games/uzdoom/')
-      )
-    ) {
-      const response = new Response(assetResponse.body, assetResponse);
-
-      response.headers.set(
-        'Cross-Origin-Opener-Policy',
-        'same-origin'
-      );
-
-      response.headers.set(
-        'Cross-Origin-Embedder-Policy',
-        'require-corp'
-      );
-
-      response.headers.set(
-        'Cross-Origin-Resource-Policy',
-        'same-origin'
-      );
-
-      return response;
-    }
 
     return assetResponse;
 

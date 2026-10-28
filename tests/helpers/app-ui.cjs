@@ -38,6 +38,7 @@ async function renderApp(
       const presentationalComponents = new Set([
         'CertificateCard',
         'CertificateDetails',
+        'DetailsNavigation',
         'CategoryIcon',
         'CertificatesHeader',
         'ContactChannels',
@@ -131,6 +132,9 @@ async function renderApp(
           'UserRound',
           'Wrench',
           'ArrowLeft',
+          'ArrowRight',
+          'FolderGit2',
+          'Orbit',
           'CalendarDays',
           'Clock3',
           'Trophy',

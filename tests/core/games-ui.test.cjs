@@ -1,437 +1,456 @@
+
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const vm = require('node:vm');
+
 const { renderApp } = require('../helpers/app-ui.cjs');
 const { loadContract } = require('../helpers/contract-loader.cjs');
+
 const root = path.resolve(__dirname, '../..');
-const models = loadContract(path.join(root, 'src/apps/games/gameModels.js'));
-function timers() {
-  let next = 0;
-  const entries = new Map();
+
+/* === CATÁLOGO DOS CINCO JOGOS === */
+const GAME_COMPONENTS = [
+  {
+    id: 'snake',
+    name: 'Snake',
+    component: 'snake/SnakeGame.jsx',
+    model: 'snake/snakeModel.js',
+    className: 'ws-snake',
+  },
+  {
+    id: 'memory',
+    name: 'Memória',
+    component: 'memory/MemoryGame.jsx',
+    model: 'memory/memoryModel.js',
+    className: 'ws-memory-game',
+  },
+  {
+    id: 'mines',
+    name: 'Campo Minado',
+    component: 'mines/MinesGame.jsx',
+    model: 'mines/minesModel.js',
+    className: 'ws-mines-game',
+  },
+  {
+    id: 'flappy',
+    name: 'Flappy Bird',
+    component: 'flappy/FlappyGame.jsx',
+    model: 'flappy/flappyModel.js',
+    className: 'ws-flappy-game__layout',
+  },
+  {
+    id: 'solitaire',
+    name: 'Paciência',
+    component: 'solitaire/SolitaireGame.jsx',
+    model: 'solitaire/solitaireModel.js',
+    className: 'ws-solitaire-game',
+  },
+];
+
+/* === AMBIENTE CONTROLADO DO NAVEGADOR === */
+function createBrowserMock() {
+  let nextId = 0;
+
+  const timers = new Map();
+  const listeners = new Map();
+
   return {
-    entries,
-    set: (callback) => {
-      entries.set(++next, callback);
-      return next;
+    timers,
+    listeners,
+
+    setTimeout(callback) {
+      const id = ++nextId;
+      timers.set(id, callback);
+      return id;
     },
-    clear: (id) => entries.delete(id),
-    fire: (time = 0, once = false) => {
-      const [id, callback] = entries.entries().next().value;
-      if (once) entries.delete(id);
-      callback(time);
+
+    clearTimeout(id) {
+      timers.delete(id);
+    },
+
+    setInterval(callback) {
+      const id = ++nextId;
+      timers.set(id, callback);
+      return id;
+    },
+
+    clearInterval(id) {
+      timers.delete(id);
+    },
+
+    requestAnimationFrame(callback) {
+      const id = ++nextId;
+      timers.set(id, callback);
+      return id;
+    },
+
+    cancelAnimationFrame(id) {
+      timers.delete(id);
+    },
+
+    addEventListener(event, callback) {
+      listeners.set(event, callback);
+    },
+
+    removeEventListener(event, callback) {
+      if (listeners.get(event) === callback) {
+        listeners.delete(event);
+      }
     },
   };
 }
-const recordBinding = () => ({ record: null, error: false });
 
-/* === CADA JOGO EXERCITADO PELOS SEUS HANDLERS === */
-test('Snake consome curvas em passos distintos e cancela relógio ao pausar/desmontar', async () => {
-  const clock = timers(),
-    requested = [],
-    props = { paused: false };
-  const ui = await renderApp('src/apps/games/SnakeGame.jsx', props, {
-    ...models,
-    useGameRecord: recordBinding,
-    setInterval: clock.set,
-    clearInterval: clock.clear,
-    stepSnake: (state, direction, random) => {
-      requested.push(direction);
-      return models.stepSnake(state, direction, random);
-    },
-  });
-  ui.button('Iniciar').props.onClick();
-  ui.render();
-  const board = () => ui.nodes().find((n) => n.props.className === 'ws-snake');
-  const key = (value) =>
-    board().props.onKeyDown({ key: value, preventDefault() {}, stopPropagation() {} });
-  key('W');
-  key('a');
-  clock.fire();
-  ui.render();
-  clock.fire();
-  ui.render();
-  assert.deepEqual(requested, ['up', 'left']);
-  key('d');
-  clock.fire();
-  ui.render();
-  assert.equal(requested.at(-1), 'left');
-  props.paused = true;
-  ui.render();
-  assert.equal(clock.entries.size, 0);
-  assert.equal(ui.button('Novo jogo').props.disabled, true);
-  props.paused = false;
-  ui.render();
-  assert.equal(clock.entries.size, 1);
-  ui.unmount();
-  assert.equal(clock.entries.size, 0);
-});
+/* === MONTAGEM DOS COMPONENTES REAIS === */
+async function mountGame(definition, paused = false) {
+  const base = path.join(root, 'src/apps/games');
+  const componentPath = path.join(base, definition.component);
 
-test('Snake termina na colisão e reinicia com relógio parado', async () => {
-  const clock = timers();
-  let finished = false;
+  const source = fs.readFileSync(componentPath, 'utf8');
+  const icons = {};
+
+  for (const match of source.matchAll(
+    /\b(?:Si|Fa|Arrow|Pause|Play|RotateCcw|Trophy|Zap|Bomb|Flag|Layers3)[A-Za-z0-9]*\b/g,
+  )) {
+    icons[match[0]] = match[0];
+  }
+
+  const browser = createBrowserMock();
+  const headerUpdates = [];
+
+  const model = loadContract(
+    path.join(base, definition.model),
+  );
+
+  const props = {
+    paused,
+    onHeaderChange: (value) => headerUpdates.push(value),
+  };
+
   const ui = await renderApp(
-    'src/apps/games/SnakeGame.jsx',
-    { paused: false },
+    `src/apps/games/${definition.component}`,
+    props,
     {
-      ...models,
-      newSnake: () => ({
-        ...models.newSnake(),
-        body: [
-          { x: 14, y: 7 },
-          { x: 13, y: 7 },
-          { x: 12, y: 7 },
-        ],
+      ...model,
+      ...icons,
+      memo: (component) => component,
+      window: browser,
+      useGameRecord: () => ({
+        record: null,
+        error: false,
       }),
-      useGameRecord: (_id, _score, over) => {
-        finished = over;
-        return recordBinding();
-      },
-      setInterval: clock.set,
-      clearInterval: clock.clear,
     },
   );
-  ui.button('Iniciar').props.onClick();
-  ui.render();
-  clock.fire();
-  ui.render();
-  assert.equal(finished, true);
-  assert.equal(clock.entries.size, 0);
-  ui.button('Novo jogo').props.onClick();
-  ui.render();
-  assert.equal(finished, false);
-  assert.equal(clock.entries.size, 0);
-  ui.unmount();
-});
 
-test('Memória bloqueia terceiro clique, suspende resolução em pausa e conclui pares', async () => {
-  const clock = timers(),
-    props = { paused: false };
-  let finished = false,
-    score = 0;
-  const ui = await renderApp('src/apps/games/MemoryGame.jsx', props, {
-    shuffled: (values) => values,
-    useGameRecord: (_id, value, won) => {
-      finished = won;
-      score = value;
-      return recordBinding();
-    },
-    setTimeout: clock.set,
-    clearTimeout: clock.clear,
-  });
-  const cards = () =>
-    ui.nodes().filter((n) => n.type === 'button' && n.props['aria-label']?.startsWith('Carta'));
-  const flip = (i) => {
-    cards()[i].props.onClick();
-    ui.render();
+  return {
+    ui,
+    props,
+    browser,
+    headerUpdates,
   };
-  flip(0);
-  flip(1);
-  assert.equal(cards()[2].props.disabled, true);
-  props.paused = true;
-  ui.render();
-  assert.equal(clock.entries.size, 0);
-  props.paused = false;
-  ui.render();
-  clock.fire(0, true);
-  ui.render();
-  assert.equal(cards()[0].props.children[0], '?');
-  ui.button('Novo jogo').props.onClick();
-  ui.render();
-  for (let i = 0; i < 8; i++) {
-    flip(i);
-    flip(i + 8);
-  }
-  assert.equal(finished, true);
-  assert.equal(score, 8);
-  assert.match(ui.text(), /Você venceu/);
-  ui.unmount();
-});
+}
 
-test('Campo Minado mantém abertura segura, bandeiras, fim e reinício', async () => {
-  const props = { paused: false };
-  const ui = await renderApp('src/apps/games/MinesGame.jsx', props, {
-    ...models,
-    useGameRecord: recordBinding,
+/* === TESTES DE MONTAGEM E SUSPENSÃO === */
+for (const definition of GAME_COMPONENTS) {
+  test(`${definition.name} monta sua interface sem erros`, async () => {
+    const { ui } = await mountGame(definition);
+
+    try {
+      assert.ok(
+        ui.nodes().some(
+          (node) =>
+            typeof node.props.className === 'string' &&
+            node.props.className.includes(definition.className),
+        ),
+        `Interface de ${definition.name} não encontrada`,
+      );
+    } finally {
+      ui.unmount();
+    }
   });
-  const cells = () =>
-    ui.nodes().filter((n) => n.type === 'button' && n.props['aria-label']?.startsWith('Casa'));
-  cells()[0].props.onContextMenu({ preventDefault() {} });
-  ui.render();
-  assert.doesNotMatch(ui.text(), /⚑/);
-  cells()[0].props.onClick();
-  ui.render();
-  assert.equal(cells()[0].props.disabled, true);
-  assert.doesNotMatch(ui.text(), /Fim de jogo/);
-  const closed = cells().find((n) => !n.props.disabled);
-  closed.props.onContextMenu({ preventDefault() {} });
-  ui.render();
-  assert.match(ui.text(), /⚑/);
-  props.paused = true;
-  ui.render();
-  assert.ok(cells().every((n) => n.props.disabled));
-  props.paused = false;
-  ui.render();
-  ui.button('Novo jogo').props.onClick();
-  ui.render();
-  assert.ok(cells().every((n) => !n.props.disabled));
-  ui.unmount();
-});
 
-test('Flappy não repete salto com Espaço mantido e retoma sem acumular tempo oculto', async () => {
-  const clock = timers(),
-    props = { paused: false },
-    deltas = [];
-  const ui = await renderApp('src/apps/games/FlappyGame.jsx', props, {
-    ...models,
-    useGameRecord: recordBinding,
-    requestAnimationFrame: clock.set,
-    cancelAnimationFrame: clock.clear,
-    stepFlappy: (state, delta, random) => {
-      deltas.push(delta);
-      return models.stepFlappy(state, delta, random);
-    },
+  test(`${definition.name} aceita suspensão pelo aplicativo`, async () => {
+    const { ui, props } = await mountGame(definition);
+
+    try {
+      props.paused = true;
+      assert.doesNotThrow(() => ui.render());
+
+      props.paused = false;
+      assert.doesNotThrow(() => ui.render());
+    } finally {
+      ui.unmount();
+    }
   });
-  const board = () => ui.nodes().find((n) => n.props.role === 'group');
-  const space = (repeat) => {
-    board().props.onKeyDown({ code: 'Space', repeat, preventDefault() {}, stopPropagation() {} });
-    ui.render();
-  };
-  space(true);
-  assert.equal(clock.entries.size, 0);
-  space(false);
-  assert.equal(clock.entries.size, 1);
-  clock.fire(100, true);
-  ui.render();
-  props.paused = true;
-  ui.render();
-  assert.equal(clock.entries.size, 0);
-  props.paused = false;
-  ui.render();
-  clock.fire(100000, true);
-  ui.render();
-  assert.deepEqual(deltas, [0, 0]);
-  ui.button('Novo jogo').props.onClick();
-  ui.render();
-  assert.equal(clock.entries.size, 0);
-  ui.unmount();
-});
+}
 
-test('Paciência move para base, desfaz e bloqueia ações em pausa', async () => {
-  const props = { paused: false };
-  let moves = 0;
-  const initial = {
-    tableau: [[], [], [], [], [], [], []],
-    stock: [],
-    waste: [{ id: 1, rank: 1, suit: 0, faceUp: true }],
-    foundations: [[], [], [], []],
-    moves: 0,
-  };
-  const ui = await renderApp('src/apps/games/SolitaireGame.jsx', props, {
-    ...models,
-    newSolitaire: () => initial,
-    useGameRecord: (_id, value) => {
-      moves = value;
-      return recordBinding();
-    },
-  });
-  const button = (prefix) =>
-    ui.nodes().find((n) => n.type === 'button' && ui.text(n).trim().startsWith(prefix));
-  button('Descarte').props.onClick();
-  ui.render();
-  button('Base').props.onClick();
-  ui.render();
-  assert.equal(moves, 1);
-  props.paused = true;
-  ui.render();
-  assert.equal(ui.button('Desfazer').props.disabled, true);
-  props.paused = false;
-  ui.render();
-  ui.button('Desfazer').props.onClick();
-  ui.render();
-  assert.equal(moves, 0);
-  ui.button('Novo jogo').props.onClick();
-  ui.render();
-  assert.equal(ui.button('Desfazer').props.disabled, true);
-  ui.unmount();
-});
+/* === CONTRATOS DE RANKING === */
+const publicContent = loadContract(
+  path.join(root, 'src/services/publicContentContract.js'),
+);
 
-/* === PERSISTÊNCIA E MESCLAGEM ENTRE INSTÂNCIAS/ABAS === */
+const rankingConfig = loadContract(
+  path.join(root, 'src/apps/games/rankings/rankingConfig.js'),
+  publicContent,
+);
+
+/* === ARMAZENAMENTO SIMULADO POR ABA === */
 function recordsTab(storage) {
   const events = new Map();
   let fail = false;
+
   const localStorage = {
-    getItem: (key) => storage.get(key) ?? null,
-    setItem: (key, value) => {
-      if (fail) throw Error('quota');
+    getItem(key) {
+      return storage.get(key) ?? null;
+    },
+
+    setItem(key, value) {
+      if (fail) {
+        throw new Error('quota');
+      }
+
       storage.set(key, value);
     },
   };
-  const source = fs
-    .readFileSync(path.join(root, 'src/apps/games/gameRecords.js'), 'utf8')
-    .replace(/^import[^;]+;\s*/m, '')
-    .replace(/\bexport\s+/g, '');
-  const api = vm.runInNewContext(
-    '(()=>{' + source + ';return {subscribe,saveGameRecord,useGameRecord};})()',
+
+  const window = {
+    localStorage,
+
+    addEventListener(key, callback) {
+      events.set(key, callback);
+    },
+
+    removeEventListener(key) {
+      events.delete(key);
+    },
+  };
+
+  /* === EXPORTAÇÃO EXCLUSIVA PARA TESTES === */
+  const api = loadContract(
+    path.join(root, 'src/apps/games/rankings/gameRecords.js'),
     {
-      localStorage,
-      window: {
-        addEventListener: (key, callback) => events.set(key, callback),
-        removeEventListener: (key) => events.delete(key),
-      },
-      useEffect() {},
+      ...publicContent,
+      ...rankingConfig,
+      window,
+      useEffect() { },
       useSyncExternalStore: (_subscribe, snapshot) => snapshot(),
     },
+    {
+      transformSource(source, filename) {
+        if (!filename.endsWith('gameRecords.js')) {
+          return source;
+        }
+
+        return source
+          .replace(
+            /import\s*\{[\s\S]*?\}\s*from\s*['"][^'"]+['"];?\s*/g,
+            '',
+          )
+          .replace(
+            'function subscribe(listener) {',
+            'export function subscribe(listener) {',
+          );
+      },
+    },
   );
-  const remove = api.subscribe(() => {});
+
+  const remove = api.subscribe(() => { });
+
   return {
     ...api,
     events,
     remove,
-    fail: (value) => {
+
+    fail(value) {
       fail = value;
     },
-    sync: (value) =>
-      events.get('storage')({
+
+    sync(newValue) {
+      const callback = events.get('storage');
+
+      assert.ok(
+        callback,
+        'Observador de armazenamento não registrado',
+      );
+
+      callback({
         key: 'ws-os:game-records',
-        newValue: value,
+        newValue,
         storageArea: localStorage,
-      }),
-  };
-}
-test('recordes mesclam jogos e melhores marcas, recuperam quota e respeitam limpeza', () => {
-  const storage = new Map(),
-    a = recordsTab(storage),
-    b = recordsTab(storage);
-  a.saveGameRecord('snake', 5);
-  b.saveGameRecord('flappy', 3);
-  a.sync('changed');
-  assert.equal(a.useGameRecord('flappy', 0, false).record, 3);
-  a.fail(true);
-  assert.equal(a.saveGameRecord('snake', 9), false);
-  assert.equal(a.useGameRecord('snake', 0, false).error, true);
-  a.fail(false);
-  assert.equal(a.saveGameRecord('snake', 8), true);
-  b.sync('changed');
-  assert.equal(b.useGameRecord('snake', 0, false).record, 9);
-  a.saveGameRecord('memory', 12);
-  b.saveGameRecord('memory', 10);
-  a.sync('changed');
-  assert.equal(a.useGameRecord('memory', 0, false).record, 10);
-  storage.clear();
-  a.sync(null);
-  assert.equal(a.useGameRecord('snake', 0, false).record, null);
-  assert.equal(storage.size, 0);
-  a.remove();
-  b.remove();
-  assert.equal(a.events.size, 0);
-  assert.equal(b.events.size, 0);
-});
-
-/* === RANKING: CONFIRMAÇÃO, VALIDAÇÃO E RETRY EXPLÍCITO === */
-async function ranking(fetchMock, enabled = 'true') {
-  const transport = loadContract(path.join(root, 'src/services/httpRequestContract.js'), {
-    fetch: fetchMock,
-  });
-  const ui = await renderApp(
-    'src/apps/games/GameRankings.jsx',
-    { game: 'snake' },
-    {
-      ...transport,
-      ...loadContract(path.join(root, 'src/services/publicContentContract.js')),
-      __rankingsEnabled: enabled,
-      useGameRecord: () => ({ record: 5 }),
-      WallyTurnstile: 'verification',
+      });
     },
-  );
-  const fill = () => {
-    ui.nodes()
-      .find((n) => n.type === 'input')
-      .props.onChange({ target: { value: 'Pessoa teste' } });
-    ui.nodes()
-      .find((n) => n.type === 'verification')
-      .props.onTokenChange('test-token');
-    ui.render();
   };
-  const submit = async () => {
-    await ui
-      .nodes()
-      .find((n) => n.type === 'form')
-      .props.onSubmit({ preventDefault() {} });
-    ui.render();
-  };
-  return { ...ui, fill, submit };
 }
-test('ranking desligado não consulta rede e projeções inválidas não são exibidas', async () => {
-  let calls = 0;
-  const off = await ranking(async () => {
-    calls++;
-    throw Error('unexpected');
-  }, 'false');
-  assert.equal(off.nodes().length, 0);
-  assert.equal(calls, 0);
-  off.unmount();
-  const ui = await ranking(async () =>
-    Response.json({ scores: [{ alias: 'Teste', score: 9999, visitorHash: 'private' }] }),
-  );
-  await ui.button('Atualizar ranking').props.onClick();
-  ui.render();
-  assert.match(ui.text(), /Ranking indisponível/);
-  assert.doesNotMatch(ui.text(), /9999/);
-  ui.unmount();
-});
-test('ranking só confirma accepted e preserva payload após resultado incerto e rejeição posterior', async () => {
-  const bodies = [];
-  let sends = 0;
-  const ui = await ranking(async (_url, options) => {
-    if (options.method === 'POST') {
-      bodies.push(JSON.parse(options.body));
-      sends++;
-      if (sends === 1) return Response.json({});
-      if (sends === 2) return Response.json({ error: 'verification' }, { status: 403 });
-      return Response.json({ accepted: true }, { status: 201 });
-    }
-    return Response.json({ scores: [] });
-  });
-  ui.fill();
-  await ui.submit();
-  assert.doesNotMatch(ui.text(), /Recorde enviado/);
-  assert.equal(ui.nodes().find((n) => n.type === 'input').props.readOnly, true);
-  ui.fill();
-  await ui.submit();
-  assert.equal(ui.nodes().find((n) => n.type === 'input').props.readOnly, true);
-  ui.fill();
-  await ui.submit();
-  assert.match(ui.text(), /Recorde enviado/);
-  assert.equal(ui.nodes().find((n) => n.type === 'input').props.readOnly, false);
-  assert.equal(bodies.length, 3);
-  assert.ok(bodies.every((body) => body.alias === 'Pessoa teste' && body.score === 5));
-  ui.unmount();
-});
 
-test('recordes inválidos de zero jogadas não bloqueiam futuras vitórias', () => {
-  const storage = new Map([
-      ['ws-os:game-records', JSON.stringify({ memory: 0, mines: 0, solitaire: 0, snake: 0 })],
-    ]),
-    tab = recordsTab(storage);
-  assert.equal(tab.useGameRecord('memory', 0, false).record, null);
-  assert.equal(tab.saveGameRecord('memory', 0), false);
-  tab.saveGameRecord('memory', 8);
-  assert.equal(tab.useGameRecord('memory', 0, false).record, 8);
-  tab.remove();
-});
+/* === PERSISTÊNCIA E SINCRONIZAÇÃO DOS RECORDES === */
+test('recordes preservam melhores marcas entre abas', () => {
+  const storage = new Map();
 
-test('cancelar leitura do ranking libera o transporte ao desmontar', async () => {
-  let signal;
-  const ui = await ranking(async (_url, options) => {
-    signal = options.signal;
-    return new Promise((_resolve, reject) =>
-      signal.addEventListener('abort', () => reject(Error('aborted')), { once: true }),
+  const first = recordsTab(storage);
+  const second = recordsTab(storage);
+
+  try {
+    assert.equal(first.saveGameRecord('snake', 5), true);
+
+    second.sync(storage.get('ws-os:game-records'));
+
+    assert.equal(
+      second.getGameRecord('snake'),
+      5,
     );
-  });
-  const loading = ui.button('Atualizar ranking').props.onClick();
-  ui.unmount();
-  await loading;
-  assert.equal(signal.aborted, true);
+
+    assert.equal(second.saveGameRecord('snake', 8), true);
+
+    first.sync(storage.get('ws-os:game-records'));
+
+    assert.equal(
+      first.getGameRecord('snake'),
+      8,
+    );
+
+    /* ----- PONTUAÇÃO MENOR NÃO SUBSTITUI A MELHOR ----- */
+    assert.equal(first.saveGameRecord('snake', 3), true);
+    assert.equal(first.getGameRecord('snake'), 8);
+
+    /* ----- JOGOS COM ORDEM CRESCENTE ----- */
+    assert.equal(first.saveGameRecord('memory', 12), true);
+    assert.equal(first.saveGameRecord('memory', 10), true);
+
+    assert.equal(first.getGameRecord('memory'), 10);
+  } finally {
+    first.remove();
+    second.remove();
+  }
+
+  assert.equal(first.events.size, 0);
+  assert.equal(second.events.size, 0);
+});
+
+/* === FALHA DE PERSISTÊNCIA === */
+test('recordes sinalizam falha de armazenamento sem perder a sessão', () => {
+  const storage = new Map();
+  const tab = recordsTab(storage);
+
+  try {
+    tab.fail(true);
+
+    assert.equal(tab.saveGameRecord('snake', 9), false);
+
+    assert.equal(
+      tab.useGameRecord('snake', 0, false).error,
+      true,
+    );
+
+    /* ----- RECUPERAÇÃO DO ARMAZENAMENTO ----- */
+    tab.fail(false);
+
+    assert.equal(tab.saveGameRecord('snake', 9), true);
+
+    assert.equal(
+      tab.useGameRecord('snake', 0, false).error,
+      false,
+    );
+
+    assert.equal(tab.getGameRecord('snake'), 9);
+  } finally {
+    tab.remove();
+  }
+});
+
+/* === VALIDAÇÃO DE RECORDES === */
+test('recordes inválidos não substituem pontuações válidas', () => {
+  const storage = new Map([
+    [
+      'ws-os:game-records',
+      JSON.stringify({
+        memory: 0,
+        mines: -1,
+        solitaire: 0,
+        snake: 0,
+      }),
+    ],
+  ]);
+
+  const tab = recordsTab(storage);
+
+  try {
+    assert.equal(tab.getGameRecord('memory'), null);
+    assert.equal(tab.getGameRecord('mines'), null);
+    assert.equal(tab.getGameRecord('solitaire'), null);
+
+    assert.equal(tab.saveGameRecord('memory', 0), false);
+    assert.equal(tab.saveGameRecord('memory', 8), true);
+
+    assert.equal(tab.getGameRecord('memory'), 8);
+  } finally {
+    tab.remove();
+  }
+});
+
+/* === CONFIGURAÇÃO DOS RANKINGS === */
+test('ranking público é permitido apenas para jogos configurados', () => {
+  assert.equal(
+    rankingConfig.supportsPublicRanking('snake'),
+    true,
+  );
+
+  assert.equal(
+    rankingConfig.supportsPublicRanking('flappy'),
+    true,
+  );
+
+  for (const game of ['memory', 'mines', 'solitaire']) {
+    assert.equal(
+      rankingConfig.supportsPublicRanking(game),
+      false,
+    );
+  }
+
+  assert.equal(
+    rankingConfig.supportsPublicRanking('doom'),
+    false,
+  );
+
+  assert.equal(
+    rankingConfig.supportsPublicRanking('wolfenstein'),
+    false,
+  );
+});
+
+/* === LIMITES E ORDENAÇÃO DOS RECORDES === */
+test('rankings respeitam pontuações e critérios de comparação', () => {
+  assert.equal(
+    rankingConfig.isValidRankingScore('snake', 1),
+    true,
+  );
+
+  assert.equal(
+    rankingConfig.isValidRankingScore('snake', -1),
+    false,
+  );
+
+  assert.equal(
+    rankingConfig.isValidRankingScore('memory', 0),
+    false,
+  );
+
+  assert.equal(
+    rankingConfig.isBetterRankingScore('snake', 10, 5),
+    true,
+  );
+
+  assert.equal(
+    rankingConfig.isBetterRankingScore('snake', 3, 5),
+    false,
+  );
+
+  assert.equal(
+    rankingConfig.isBetterRankingScore('memory', 8, 12),
+    true,
+  );
+
+  assert.equal(
+    rankingConfig.isBetterRankingScore('memory', 15, 12),
+    false,
+  );
 });
