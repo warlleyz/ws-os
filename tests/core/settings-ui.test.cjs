@@ -8,12 +8,21 @@ async function settings(section, overrides = {}) {
   const calls = [];
   const ui = await renderApp('src/apps/settings/SettingsSections.jsx', props, {
     useTheme: () => 'dark',
+    getWallpaper: () => 'dark-green',
+    getDefaultWallpaper: (theme) => `${theme}-blue`,
+    setWallpaper: () => true,
+    setAppearance: () => true,
     useCursorMode: () => 'custom',
     useAppearance: () => ({
-      accent: 'blue',
+      accent: 'green',
+      accentMode: 'manual',
       blur: 'normal',
       transparency: 'default',
       motion: 'normal',
+      accents: {
+        dark: { mode: 'manual', manual: 'green' },
+        light: { mode: 'auto', manual: 'blue' },
+      },
     }),
     useAccessibility: () => ({ motion: false, transparency: false, lowEffects: false }),
     useTaskbarAutoHide: () => false,

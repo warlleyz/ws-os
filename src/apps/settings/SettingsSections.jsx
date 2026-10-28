@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Moon, RotateCcw, Sun } from 'lucide-react';
+import Select from '../../shared/components/Select';
 
 import {
   useWallpaper,
@@ -7,6 +8,7 @@ import {
   useWallpaperStatus,
   usePersonalWallpapers,
   setWallpaper,
+  getWallpaper,
   uploadCustomWallpaper,
   deleteWallpaperFromCollection,
   isPersonalWallpaperInUse,
@@ -14,8 +16,7 @@ import {
   getWallpaperFit,
   setWallpaperFit,
 } from '../../core/wallpaperManager';
-
-import { getOfficialWallpapersByTheme } from '../../core/wallpaperCatalog';
+import { getOfficialWallpapersByTheme, getDefaultWallpaper } from '../../core/wallpaperCatalog';
 import { translate as t, useLocale, setLocale } from '../../shared/i18n/i18n';
 import { useTheme, setTheme } from '../../core/themeManager';
 import { useAppearance, setAppearance } from '../../core/appearanceManager';
@@ -28,8 +29,10 @@ import { getWidgetDefinition } from '../../core/widgetManager';
 import { restoreSystemPreferences } from '../../core/preferencesManager';
 import { useSystem } from '../../core/useSystem';
 
-/* === Componentes compartilhados === */
-/* ----- Card de configurações ----- */
+import './SettingsSections.css';
+
+/* === ELEMENTOS COMPARTILHADOS === */
+/* ----- Grupo de preferências ----- */
 function SettingsCard({ title, description, children }) {
   return (
     <section className="ws-settings__card">
@@ -37,310 +40,238 @@ function SettingsCard({ title, description, children }) {
         <h4>{title}</h4>
         {description && <p>{description}</p>}
       </div>
-
       {children}
     </section>
   );
 }
 
-/* ----- Campo de seleção ----- */
-function SettingsSelect({ label, value, options, onChange }) {
+/* ----- Seleção de preferência ----- */
+function SettingsSelect({ label, value, options, onChange, description }) {
   return (
-    <label className="ws-settings__field">
-      <span>{label}</span>
+    <div className="ws-settings__field">
+      <span className="ws-settings__field-label">{label}</span>
+      {description && (
+        <small className="ws-settings__field-description">{description}</small>
+      )}
 
-      <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>
-        {options.map(([id, name]) => (
-          <option key={id} value={id}>
-            {t(name)}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-/* ----- Controle de ativação ----- */
-function SettingsToggle({ label, checked, onChange }) {
-  return (
-    <label className="ws-settings__toggle">
-      <span className="ws-settings__toggle-copy">
-        <strong>{label}</strong>
-      </span>
-
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
+      <Select
+        label={label}
+        value={value}
+        options={options.map(([id, name]) => ({
+          value: id,
+          label: t(name),
+        }))}
+        onChange={onChange}
       />
+    </div>
+  );
+}
+
+/* ----- Alternância de preferência ----- */
+function SettingsToggle({ label, checked, onChange, description }) {
+  return (
+    <label className="ws-settings__preference-row">
+      <span className="ws-settings__preference-copy">
+        <strong>{label}</strong>
+        {description && <small>{description}</small>}
+      </span>
+      <span className="ws-settings__switch">
+        <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} aria-label={label} />
+        <span aria-hidden="true" />
+      </span>
     </label>
   );
 }
 
-/* === Galeria de wallpapers === */
-/* ----- Seleção por plataforma e tema ----- */
+/* === CONTROLE DE INTENSIDADE VISUAL === */
+/* ----- Opções discretas compatíveis com as preferências do Core ----- */
+function SettingsIntensity({ label, description, value, options, onChange }) {
+  return (
+    <div className="ws-settings__intensity">
+      <div className="ws-settings__intensity-heading">
+        <strong>{label}</strong>
+        <p>{description}</p>
+      </div>
+
+      <div className="ws-settings__intensity-options" role="group" aria-label={label}>
+        {options.map(([id, name]) => (
+          <button
+            key={id}
+            type="button"
+            className={value === id ? 'is-active' : ''}
+            aria-pressed={value === id}
+            onClick={() => onChange(id)}
+          >
+            {t(name)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* === GALERIA DE PAPÉIS DE PAREDE === */
+/* ----- Seleção, upload e exclusão de imagens ----- */
 function WallpaperGallery({ shell, report, announce }) {
   const theme = useTheme();
   const selected = useWallpaper(shell);
-
   useWallpaperRevision();
-
   const status = useWallpaperStatus();
   const personalWallpapers = usePersonalWallpapers();
-
   const [busy, setBusy] = useState(false);
-
   const inputRef = useRef(null);
   const mounted = useRef(false);
 
-  /* === Ciclo de vida === */
-  /* ----- Evitar atualização após desmontagem ----- */
   useEffect(() => {
     mounted.current = true;
-
-    return () => {
-      mounted.current = false;
-    };
+    return () => { mounted.current = false; };
   }, []);
 
-  /* === Catálogos === */
-  /* ----- Wallpapers correspondentes ao tema ----- */
   const officialChoices = getOfficialWallpapersByTheme(theme);
 
-  /* === Seleção === */
-  /* ----- Aplicar wallpaper à plataforma ----- */
-  function selectWallpaper(id) {
-    report(setWallpaper(id, shell, theme));
-  }
-
-  /* === Upload === */
-  /* ----- Adicionar imagem pessoal à coleção ----- */
   async function upload(event) {
     const input = event.currentTarget;
     const file = input.files?.[0];
-
     input.value = '';
-
-    if (!file || busy) {
-      return;
-    }
-
+    if (!file || busy) return;
     setBusy(true);
-
     try {
       const saved = await uploadCustomWallpaper(file, shell);
-
       if (!mounted.current) return;
-      if (saved) {
-        announce('Imagem salva e aplicada.');
-      } else {
-        announce('Não foi possível salvar a imagem. A imagem anterior foi preservada.', true);
-      }
+      announce(
+        saved ? 'Imagem salva e aplicada.' : 'Não foi possível salvar a imagem. A imagem anterior foi preservada.',
+        !saved,
+      );
     } catch (error) {
-      if (mounted.current)
-        announce(error?.message || 'Não foi possível concluir a operação.', true);
+      if (mounted.current) announce(error?.message || 'Não foi possível concluir a operação.', true);
     } finally {
-      if (mounted.current) {
-        setBusy(false);
-      }
+      if (mounted.current) setBusy(false);
     }
   }
 
-  /* === Exclusão === */
-  /* ----- Remover imagem que não está em uso ----- */
+  /* === EXCLUSÃO DE IMAGEM PESSOAL === */
+  /* ----- Libera o uso da imagem antes de removê-la da coleção ----- */
   async function removeWallpaper(id) {
-    if (busy || id === 'personal:legacy' || isPersonalWallpaperInUse(id)) {
-      return;
-    }
+    if (busy || id === 'personal:legacy') return;
 
     setBusy(true);
 
     try {
-      const result = await deleteWallpaperFromCollection(id);
+      /* ----- Substituir a imagem em todas as plataformas e temas ----- */
+      for (const targetShell of ['desktop', 'mobile']) {
+        for (const targetTheme of ['dark', 'light']) {
+          if (getWallpaper(targetShell, targetTheme) !== id) continue;
 
+          const saved = setWallpaper(
+            getDefaultWallpaper(targetTheme),
+            targetShell,
+            targetTheme,
+          );
+
+          if (!saved) {
+            announce('Não foi possível liberar a imagem em uso. A exclusão foi cancelada.', true);
+            return;
+          }
+        }
+      }
+
+      const result = await deleteWallpaperFromCollection(id);
       if (!mounted.current) return;
+
       if (result.ok) {
-        report(true);
+        announce('Imagem pessoal excluída.');
       } else {
-        announce('Não foi possível concluir a operação.', true);
+        announce('Não foi possível excluir a imagem pessoal.', true);
       }
     } catch {
       if (mounted.current) announce('Não foi possível concluir a operação.', true);
     } finally {
-      if (mounted.current) {
-        setBusy(false);
-      }
+      if (mounted.current) setBusy(false);
     }
   }
 
-  /* === Renderização === */
   return (
     <SettingsCard
       title={t(shell === 'mobile' ? 'Papel de parede do Mobile' : 'Papel de parede do Desktop')}
-      description={t(
-        'A seleção é independente para cada plataforma e tema. As imagens pessoais ficam somente neste navegador.',
-      )}
+      description={t('Escolha uma imagem oficial ou adicione a sua. Ao trocar de tema, a família de cor é preservada.')}
     >
       <SettingsSelect
         label={t('Enquadramento da imagem')}
         value={getWallpaperFit(shell, theme)}
-        options={[
-          ['cover', 'Preencher'],
-          ['contain', 'Ajustar'],
-          ['center', 'Centralizar'],
-        ]}
+        options={[["cover", 'Preencher'], ["contain", 'Ajustar'], ["center", 'Centralizar']]}
         onChange={(fit) => report(setWallpaperFit(fit, shell, theme))}
       />
-      <div
-        className="ws-settings__wallpaper-preview"
-        role="img"
+      <div className="ws-settings__wallpaper-preview ws-settings__wallpaper-current" role="img"
         aria-label={t('Prévia do papel de parede')}
-        style={{ background: getWallpaperDefinition(selected, shell, theme).background }}
-      />
-
-      {/* === Wallpapers oficiais === */}
-      {/* ----- Galeria do tema ativo ----- */}
+        style={{ background: getWallpaperDefinition(selected, shell, theme).background }} />
       <div className="ws-settings__wallpaper-grid" data-shell={shell} aria-busy={busy}>
         {officialChoices.map((item) => {
-          const isActive = selected === item.id;
-
+          const active = selected === item.id;
           return (
-            <button
-              key={item.id}
-              type="button"
-              className={`ws-settings__wallpaper-option${isActive ? ' is-active' : ''}`}
-              aria-pressed={isActive}
-              disabled={busy}
-              onClick={() => selectWallpaper(item.id)}
-            >
-              <span
-                className="ws-settings__wallpaper-preview"
-                style={{
-                  background: getWallpaperDefinition(item.id, shell, theme).background,
-                }}
-                aria-hidden="true"
-              >
-                {isActive && (
-                  <span className="ws-settings__wallpaper-check">
-                    <Check size={16} aria-hidden="true" />
-                  </span>
-                )}
+            <button key={item.id} type="button" className={`ws-settings__wallpaper-option${active ? ' is-active' : ''}`}
+              aria-pressed={active} disabled={busy} onClick={() => report(setWallpaper(item.id, shell, theme))}>
+              <span className="ws-settings__wallpaper-preview" aria-hidden="true"
+                style={{ background: getWallpaperDefinition(item.id, shell, theme).background }}>
+                {active && <span className="ws-settings__wallpaper-check"><Check size={16} aria-hidden="true" /></span>}
               </span>
-
-              <span className="ws-settings__wallpaper-info">
-                <strong>{t(item.name)}</strong>
-                <small>{t(isActive ? 'Em uso' : 'Selecionar')}</small>
-              </span>
+              <span className="ws-settings__wallpaper-info"><strong>{t(item.name)}</strong><small>{t(active ? 'Em uso' : 'Selecionar')}</small></span>
             </button>
           );
         })}
       </div>
-
-      {/* === Coleção pessoal === */}
-      {/* ----- Imagens cadastradas no navegador ----- */}
       {personalWallpapers.length > 0 && (
-        <div className="ws-settings__wallpaper-grid" data-shell={shell} aria-busy={busy}>
-          {personalWallpapers.map((item) => {
-            const isActive =
-              selected === item.id || (selected === 'custom' && item.id === 'personal:legacy');
-
-            const protectedImage = item.id === 'personal:legacy';
-
-            const inUse = isPersonalWallpaperInUse(item.id);
-
-            const cannotRemove = busy || protectedImage || inUse;
-
-            return (
-              <div key={item.id} className="ws-settings__personal-wallpaper">
-                {/* ----- Selecionar imagem ----- */}
-                <button
-                  type="button"
-                  className={`ws-settings__wallpaper-option${isActive ? ' is-active' : ''}`}
-                  aria-pressed={isActive}
-                  disabled={busy}
-                  onClick={() => selectWallpaper(item.id)}
-                >
-                  <span
-                    className="ws-settings__wallpaper-preview"
-                    style={{
-                      background: getWallpaperDefinition(item.id, shell, theme).background,
-                    }}
-                    aria-hidden="true"
-                  >
-                    {isActive && (
-                      <span className="ws-settings__wallpaper-check">
-                        <Check size={16} aria-hidden="true" />
-                      </span>
-                    )}
-                  </span>
-
-                  <span className="ws-settings__wallpaper-info">
-                    <strong title={item.name}>{item.name}</strong>
-
-                    <small>{t(isActive ? 'Em uso' : 'Selecionar')}</small>
-                  </span>
-                </button>
-
-                {/* ----- Exclusão segura ----- */}
-                <button
-                  type="button"
-                  className="ws-settings__personal-wallpaper-delete"
-                  disabled={cannotRemove}
-                  onClick={() => removeWallpaper(item.id)}
-                  title={t(inUse ? 'Em uso' : 'Excluir')}
-                  aria-label={`${t('Excluir')}: ${item.name}`}
-                >
-                  {t('Excluir')}
-                </button>
-              </div>
-            );
-          })}
+        <div className="ws-settings__personal-section">
+          <p className="ws-settings__subheading">{t('Minhas imagens')}</p>
+          <div className="ws-settings__wallpaper-grid" data-shell={shell} aria-busy={busy}>
+            {personalWallpapers.map((item) => {
+              const active = selected === item.id || (selected === 'custom' && item.id === 'personal:legacy');
+              const inUse = isPersonalWallpaperInUse(item.id);
+              return (
+                <div key={item.id} className="ws-settings__personal-wallpaper">
+                  <button type="button" className={`ws-settings__wallpaper-option${active ? ' is-active' : ''}`}
+                    aria-pressed={active} disabled={busy} onClick={() => report(setWallpaper(item.id, shell, theme))}>
+                    <span className="ws-settings__wallpaper-preview" aria-hidden="true"
+                      style={{ background: getWallpaperDefinition(item.id, shell, theme).background }}>
+                      {active && <span className="ws-settings__wallpaper-check"><Check size={16} aria-hidden="true" /></span>}
+                    </span>
+                    <span className="ws-settings__wallpaper-info"><strong title={item.name}>{item.name}</strong><small>{t(active ? 'Em uso' : 'Selecionar')}</small></span>
+                  </button>
+                  <button type="button" className="ws-settings__personal-wallpaper-delete"
+                    disabled={busy || item.id === 'personal:legacy'}
+                    title={t(inUse ? 'Excluir e substituir o wallpaper em uso' : 'Excluir')}
+                    aria-label={`${t('Excluir')}: ${item.name}`} onClick={() => removeWallpaper(item.id)}>
+                    {t('Excluir')}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
-
-      {/* === Inclusão de imagens === */}
-      {/* ----- Seleção de arquivo local ----- */}
       <div className="ws-settings__upload">
         <input
           ref={inputRef}
+          className="ws-settings__file-input"
           type="file"
           accept="image/png,image/jpeg,image/webp"
           onChange={upload}
           disabled={busy}
+          tabIndex={-1}
           aria-label={t('Escolher imagem personalizada')}
         />
-
         <button type="button" disabled={busy} onClick={() => inputRef.current?.click()}>
           {t(busy ? 'Salvando imagem…' : 'Adicionar imagem pessoal')}
         </button>
       </div>
-
-      {/* === Orientações da coleção pessoal === */}
-      {/* ----- Formatos e limites ----- */}
-      <p className="ws-settings__hint">
-        {t(
-          'PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Coleção de até 100 MB, sem exclusão automática.',
-        )}
-      </p>
-
-      {/* === Recuperação === */}
-      {/* ----- Estado de carregamento ----- */}
+      <p className="ws-settings__hint">{t('PNG, JPEG ou WebP; até 5 MB, 32 megapixels e 8192 pixels por lado. Coleção de até 100 MB, sem exclusão automática.')}</p>
       {status === 'loading' && <p role="status">{t('Recuperando imagem pessoal…')}</p>}
-
-      {/* ----- Falha de recuperação ----- */}
-      {['missing', 'error'].includes(status) && (
-        <p role="status">
-          {t(
-            'A imagem pessoal não está disponível. O fundo padrão é exibido sem apagar sua seleção ou dados.',
-          )}
-        </p>
-      )}
+      {['missing', 'error'].includes(status) && <p role="status">{t('A imagem pessoal não está disponível. O fundo padrão é exibido sem apagar sua seleção ou dados.')}</p>}
     </SettingsCard>
   );
 }
 
-/* === Aplicativo Configurações === */
-/* ----- Estado e serviços ----- */
+/* === SEÇÕES DE CONFIGURAÇÕES === */
+/* ----- Estado e integrações das preferências ----- */
 export default function SettingsSections({ activeSection }) {
   const locale = useLocale();
   const theme = useTheme();
@@ -350,574 +281,340 @@ export default function SettingsSections({ activeSection }) {
   const autoHide = useTaskbarAutoHide();
   const mobile = useMobilePreferences();
   const widgets = useWidgetPreferences();
-
   const { notify } = useSystem();
-
   const [message, setMessage] = useState(null);
   const [confirmReset, setConfirmReset] = useState(false);
-
   const confirmRef = useRef(null);
   const resetButtonRef = useRef(null);
 
-  /* ----- Gerenciamento de foco ----- */
   useEffect(() => {
-    if (confirmReset) {
-      confirmRef.current?.focus();
-    }
+    if (confirmReset) confirmRef.current?.focus();
   }, [confirmReset]);
 
-  /* === Feedback de operações === */
-  /* ----- Mensagens e notificações ----- */
   function announce(text, error = false) {
     setMessage({ text, error });
-
-    if (error) {
-      notify({
-        title: t('Configurações'),
-        message: t(text),
-        type: 'warning',
-        source: t('Sistema'),
-      });
-    }
+    if (error) notify({ title: t('Configurações'), message: t(text), type: 'warning', source: t('Sistema') });
   }
 
-  /* ----- Resultado de persistência ----- */
   function report(saved) {
-    if (!saved) {
-      announce('Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.', true);
-    } else {
-      setMessage(null);
-    }
+    if (!saved) announce('Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.', true);
+    else setMessage(null);
   }
 
-  /* === Operações dos widgets === */
-  /* ----- Atualização de configurações ----- */
   function changeWidget(id, patch) {
     const result = configureWidget(id, patch);
-
     if (!result.ok) {
-      announce(
-        result.reason === 'capacity'
-          ? 'Sem espaço para o relógio. Escolha outro tamanho ou libere espaço na grade.'
-          : 'Preferência inválida.',
-        true,
-      );
-    } else {
-      if (result.saved) report(true);
-      else announce('Não foi possível concluir a operação.', true);
-    }
+      announce(result.reason === 'capacity'
+        ? 'Sem espaço na grade do Desktop. Escolha outro tamanho ou libere espaço.'
+        : 'Preferência inválida.', true);
+    } else if (result.saved) report(true);
+    else announce('Não foi possível concluir a operação.', true);
   }
 
-  /* === Restauração de preferências === */
-  /* ----- Fechar confirmação ----- */
   function closeReset() {
     setConfirmReset(false);
-
-    queueMicrotask(() => {
-      resetButtonRef.current?.focus();
-    });
+    queueMicrotask(() => resetButtonRef.current?.focus());
   }
 
-  /* ----- Executar restauração ----- */
   function reset() {
     const result = restoreSystemPreferences();
-
     closeReset();
-
-    announce(
-      result.ok
-        ? 'As preferências padrão foram aplicadas.'
-        : 'As preferências foram aplicadas nesta sessão, mas algumas não puderam ser salvas.',
-      !result.ok,
-    );
+    announce(result.ok
+      ? 'As preferências padrão foram aplicadas.'
+      : 'As preferências foram aplicadas nesta sessão, mas algumas não puderam ser salvas.', !result.ok);
   }
 
-  /* === Conteúdo das seções === */
-  let content;
+  /* === SINCRONIZAÇÃO VISUAL ENTRE TEMAS === */
+  /* ----- Mantém a família do wallpaper e a preferência de destaque ----- */
+  function changeTheme(nextTheme) {
+    if (nextTheme === theme) return;
 
-  /* ----- Aparência ----- */
+    /* ----- Parear wallpapers Desktop e Mobile pela família de cor ----- */
+    for (const shell of ['desktop', 'mobile']) {
+      const sourceWallpaper = getWallpaper(shell, theme);
+      const sourceIsPersonal = sourceWallpaper.startsWith('personal:') || sourceWallpaper === 'custom';
+      const family = sourceWallpaper.match(/^(dark|light)-(blue|green|violeta)$/)?.[2];
+      const targetWallpaper = sourceIsPersonal
+        ? sourceWallpaper
+        : family
+          ? `${nextTheme}-${family}`
+          : getDefaultWallpaper(nextTheme);
+
+      if (!setWallpaper(targetWallpaper, shell, nextTheme)) {
+        report(false);
+        return;
+      }
+    }
+
+    /* ----- Preservar também a escolha manual ou automática de cor ----- */
+    const accents = {
+      ...appearance.accents,
+      [nextTheme]: {
+        ...(appearance.accents?.[theme] ?? {
+          mode: appearance.accentMode ?? 'auto',
+          manual: appearance.accent ?? 'blue',
+        }),
+      },
+    };
+    const accentSaved = setAppearance({ accents });
+    const themeSaved = setTheme(nextTheme);
+    report(accentSaved && themeSaved);
+  }
+
+  let content = null;
+
+  /* === APARÊNCIA === */
   if (activeSection === 'appearance') {
     content = (
       <>
-        <SettingsCard
-          title={t('Tema do sistema')}
-          description={t('Escolha o tema visual do sistema.')}
-        >
+        <SettingsCard title={t('Tema do sistema')} description={t('Escolha o visual geral da interface. A alteração é aplicada imediatamente.')}>
           <div className="ws-settings__theme-grid">
-            {[
-              { id: 'dark', label: 'Escuro', Icon: Moon },
-              { id: 'light', label: 'Claro', Icon: Sun },
-            ].map(({ id, label, Icon }) => {
-              const isActive = theme === id;
-
+            {[{ id: 'dark', label: 'Escuro', Icon: Moon }, { id: 'light', label: 'Claro', Icon: Sun }].map(({ id, label, Icon }) => {
+              const active = theme === id;
               return (
-                <button
-                  key={id}
-                  type="button"
-                  className={`ws-settings__theme-option ws-settings__theme-option--${id}${isActive ? ' is-active' : ''}`}
-                  aria-pressed={isActive}
-                  onClick={() => report(setTheme(id))}
-                >
+                <button key={id} type="button" className={`ws-settings__theme-option ws-settings__theme-option--${id}${active ? ' is-active' : ''}`}
+                  aria-pressed={active} onClick={() => changeTheme(id)}>
                   <span className="ws-settings__theme-preview" aria-hidden="true">
                     <span className="ws-settings__theme-preview-sidebar" />
-
-                    <span className="ws-settings__theme-preview-panel">
-                      <span />
-                      <span />
-                    </span>
+                    <span className="ws-settings__theme-preview-panel"><span /><span /></span>
                   </span>
-
-                  <span className="ws-settings__theme-label">
-                    <Icon size={17} aria-hidden="true" />
-                    <strong>{t(label)}</strong>
-
-                    {isActive && <Check size={17} aria-hidden="true" />}
-                  </span>
+                  <span className="ws-settings__theme-label"><Icon size={17} aria-hidden="true" /><strong>{t(label)}</strong>{active && <Check size={17} aria-hidden="true" />}</span>
                 </button>
               );
             })}
           </div>
         </SettingsCard>
-
         <WallpaperGallery shell="desktop" report={report} announce={announce} />
-
-        <SettingsCard title={t('Personalização visual')}>
-          <SettingsToggle
-            label={t('Ocultar papel de parede')}
-            checked={appearance.hideWallpaper === true}
-            onChange={(hideWallpaper) => report(setAppearance({ hideWallpaper }))}
-          />
-          <SettingsSelect
-            label={t('Cursor do sistema')}
-            value={cursorMode}
-            options={[
-              ['custom', 'Personalizado'],
-              ['native', 'Nativo do dispositivo'],
-            ]}
-            onChange={(mode) => report(setCursorMode(mode))}
-          />
-          <SettingsSelect
-            label={t('Modo da cor de destaque')}
-            value={appearance.accentMode ?? 'auto'}
-            options={[
-              ['auto', 'Automática pelo papel de parede'],
-              ['manual', 'Manual neste tema'],
-            ]}
-            onChange={(accentMode) => report(setAppearance({ accentMode }))}
-          />
-          <p className="ws-settings__hint">
-            {t(
-              'A cor manual é compartilhada pelas plataformas neste tema. O modo automático utiliza a paleta mais próxima da imagem ativa.',
-            )}
-          </p>
+        <SettingsCard title={t('Cores e cursor')} description={t('Ajuste a cor de destaque e como o ponteiro aparece no WS OS.')}>
+          <SettingsToggle label={t('Ocultar papel de parede')}
+            description={t('Exibe uma superfície uniforme no lugar da imagem de fundo.')}
+            checked={appearance.hideWallpaper === true} onChange={(hideWallpaper) => report(setAppearance({ hideWallpaper }))} />
+          <div className="ws-settings__field-grid">
+            <SettingsSelect label={t('Cursor do sistema')} value={cursorMode}
+              options={[["custom", 'Personalizado'], ["native", 'Nativo do dispositivo']]}
+              onChange={(mode) => report(setCursorMode(mode))} />
+            <SettingsSelect label={t('Modo da cor de destaque')} value={appearance.accentMode ?? 'auto'}
+              options={[["auto", 'Automática pelo papel de parede'], ["manual", 'Manual neste tema']]}
+              onChange={(accentMode) => report(setAppearance({ accentMode }))} />
+          </div>
           <fieldset className="ws-settings__accent">
             <legend>{t('Cor de destaque')}</legend>
-
-            {[
-              ['blue', 'Azul'],
-              ['violet', 'Violeta'],
-              ['green', 'Verde'],
-            ].map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                data-color={id}
+            {[["blue", 'Azul'], ["violet", 'Violeta'], ["green", 'Verde']].map(([id, label]) => (
+              <button key={id} type="button" data-color={id}
                 aria-pressed={appearance.accentMode === 'manual' && appearance.accent === id}
-                onClick={() => report(setAppearance({ accent: id }))}
-              >
-                <span aria-hidden="true" />
-                {t(label)}
-
-                {appearance.accentMode === 'manual' && appearance.accent === id && (
-                  <Check size={16} aria-hidden="true" />
-                )}
+                onClick={() => report(setAppearance({ accent: id }))}>
+                <span aria-hidden="true" />{t(label)}
+                {appearance.accentMode === 'manual' && appearance.accent === id && <Check size={16} aria-hidden="true" />}
               </button>
             ))}
           </fieldset>
+          <p className="ws-settings__hint">{t('A cor automática é calculada a partir do papel de parede. A preferência de cor acompanha a troca entre os temas claro e escuro.')}</p>
+        </SettingsCard>
+        <SettingsCard title={t('Superfícies e animações')} description={t('Controle os efeitos visuais sem comprometer a leitura dos aplicativos.')}>
+          {/* ----- Desfoque das superfícies ----- */}
+          <SettingsIntensity
+            label={t('Intensidade do desfoque')}
+            description={t('Suaviza o conteúdo visível atrás das superfícies do sistema.')}
+            value={appearance.blur}
+            options={[
+              ['off', 'Desligado'],
+              ['soft', 'Suave'],
+              ['normal', 'Normal'],
+              ['strong', 'Intenso'],
+            ]}
+            onChange={(blur) => report(setAppearance({ blur }))}
+          />
 
-          <div className="ws-settings__field-grid">
-            <SettingsSelect
-              label={t('Intensidade do desfoque')}
-              value={appearance.blur}
-              options={[
-                ['off', 'Desligado'],
-                ['soft', 'Suave'],
-                ['normal', 'Normal'],
-                ['strong', 'Intenso'],
-              ]}
-              onChange={(blur) => report(setAppearance({ blur }))}
-            />
+          {/* ----- Transparência das superfícies ----- */}
+          <SettingsIntensity
+            label={t('Transparência')}
+            description={t('Define quanto do papel de parede aparece através das superfícies.')}
+            value={appearance.transparency}
+            options={[
+              ['solid', 'Sólida'],
+              ['default', 'Padrão'],
+              ['high', 'Elevada'],
+            ]}
+            onChange={(transparency) => report(setAppearance({ transparency }))}
+          />
 
-            <SettingsSelect
-              label={t('Transparência')}
-              value={appearance.transparency}
-              options={[
-                ['solid', 'Sólida'],
-                ['default', 'Padrão'],
-                ['high', 'Elevada'],
-              ]}
-              onChange={(transparency) => report(setAppearance({ transparency }))}
-            />
-
-            <SettingsSelect
-              label={t('Intensidade das animações')}
-              value={appearance.motion}
-              options={[
-                ['off', 'Desligado'],
-                ['subtle', 'Suave'],
-                ['normal', 'Normal'],
-              ]}
-              onChange={(motion) => report(setAppearance({ motion }))}
-            />
-          </div>
-
-          <p className="ws-settings__hint">
-            {t(
-              'Efeitos são aplicados às superfícies do sistema. Conteúdo dos aplicativos permanece legível. Acessibilidade e preferências do sistema têm prioridade.',
-            )}
-          </p>
+          {/* ----- Intensidade das animações ----- */}
+          <SettingsSelect
+            label={t('Intensidade das animações')}
+            value={appearance.motion}
+            options={[
+              ['off', 'Desligado'],
+              ['subtle', 'Suave'],
+              ['normal', 'Normal'],
+            ]}
+            onChange={(motion) => report(setAppearance({ motion }))}
+          />
+          <p className="ws-settings__hint">{t('As preferências de Acessibilidade e as configurações do dispositivo têm prioridade sobre os efeitos decorativos.')}</p>
         </SettingsCard>
       </>
     );
   }
 
-  /* ----- Idioma ----- */
+  /* === IDIOMA === */
   if (activeSection === 'language') {
     content = (
-      <SettingsCard title={t('Idioma do sistema')}>
-        <SettingsSelect
-          label={t('Idioma')}
-          value={locale}
-          options={[
-            ['pt-BR', 'Português (Brasil)'],
-            ['en', 'English'],
-          ]}
+      <SettingsCard title={t('Idioma da interface')} description={t('Defina como menus, aplicativos e mensagens do WS OS são apresentados.')}>
+        <div className="ws-settings__language-preview">
+          <div className="ws-settings__language-symbol" aria-hidden="true">{locale === 'en' ? 'EN' : 'PT'}</div>
+          <div><strong>{locale === 'en' ? 'English' : 'Português (Brasil)'}</strong><small>{t('Idioma atual do sistema')}</small></div>
+        </div>
+        <SettingsSelect label={t('Idioma')} value={locale}
+          options={[["pt-BR", 'Português (Brasil)'], ["en", 'English']]}
           onChange={(value) => report(setLocale(value))}
-        />
+          description={t('A mudança é aplicada imediatamente à interface.')} />
+        <p className="ws-settings__hint">{t('Nomes próprios, tecnologias e conteúdos externos podem permanecer em seu idioma original.')}</p>
       </SettingsCard>
     );
   }
 
-  /* ----- Acessibilidade ----- */
+  /* === ACESSIBILIDADE === */
   if (activeSection === 'accessibility') {
     content = (
-      <SettingsCard title={t('Acessibilidade')}>
-        <div className="ws-settings__options">
+      <SettingsCard title={t('Conforto visual e desempenho')} description={t('Reduza efeitos que podem atrapalhar a navegação ou exigir mais do dispositivo.')}>
+        <div className="ws-settings__preference-list">
           {[
-            ['motion', 'Reduzir movimento'],
-            ['transparency', 'Reduzir transparência'],
-            ['lowEffects', 'Modo de baixo custo'],
-          ].map(([key, label]) => (
-            <SettingsToggle
-              key={key}
-              label={t(label)}
-              checked={accessibility[key]}
-              onChange={(value) =>
-                report(
-                  setAccessibility({
-                    ...accessibility,
-                    [key]: value,
-                  }),
-                )
-              }
-            />
+            ['motion', 'Reduzir movimento', 'Diminui animações e transições da interface.'],
+            ['transparency', 'Reduzir transparência', 'Prioriza superfícies mais opacas para melhorar a legibilidade.'],
+            ['lowEffects', 'Modo de baixo custo', 'Reduz efeitos visuais exigentes para poupar processamento gráfico.'],
+          ].map(([key, label, description]) => (
+            <SettingsToggle key={key} label={t(label)} description={t(description)} checked={accessibility[key]}
+              onChange={(value) => report(setAccessibility({ ...accessibility, [key]: value }))} />
           ))}
         </div>
-
-        <p className="ws-settings__hint">
-          {t('As preferências de acessibilidade também respeitam as opções do sistema.')}
-        </p>
+        <p className="ws-settings__hint">{t('Essas opções têm prioridade sobre os ajustes decorativos de Aparência.')}</p>
       </SettingsCard>
     );
   }
 
-  /* ----- Área de Trabalho ----- */
+  /* === ÁREA DE TRABALHO === */
   if (activeSection === 'desktop') {
     content = (
-      <SettingsCard title={t('Área de Trabalho')}>
-        <SettingsToggle
-          label={t('Ocultar automaticamente a barra de tarefas')}
-          checked={autoHide}
-          onChange={(value) => report(setTaskbarAutoHide(value))}
-        />
-
-        <p className="ws-settings__hint">
-          {t(
-            'A organização dos atalhos é feita no Desktop por arraste, teclado ou menu de contexto. Alterar aparência não muda suas posições.',
-          )}
-        </p>
-      </SettingsCard>
+      <>
+        <SettingsCard title={t('Barra de tarefas')} description={t('Defina como a Taskbar se comporta durante o uso do Desktop.')}>
+          <SettingsToggle label={t('Ocultar automaticamente a barra de tarefas')}
+            description={t('Recolhe a barra quando não está em uso, ampliando a área disponível para as janelas.')}
+            checked={autoHide} onChange={(value) => report(setTaskbarAutoHide(value))} />
+        </SettingsCard>
+        <SettingsCard title={t('Organização do Desktop')} description={t('Os itens podem ser organizados diretamente na Área de Trabalho.')}>
+          <div className="ws-settings__information-list">
+            <div><strong>{t('Atalhos')}</strong><p>{t('Mova e organize aplicativos por arraste, teclado ou menu de contexto.')}</p></div>
+            <div><strong>{t('Widgets')}</strong><p>{t('Configure visibilidade e dimensões na seção Widgets.')}</p></div>
+            <div><strong>{t('Posições preservadas')}</strong><p>{t('A alteração de tema ou aparência não reorganiza os atalhos existentes.')}</p></div>
+          </div>
+        </SettingsCard>
+      </>
     );
   }
 
-  /* ----- Widgets ----- */
+  /* === WIDGETS === */
   if (activeSection === 'widgets') {
     content = (
-      <SettingsCard
-        title={t('Widgets do Desktop')}
-        description={t(
-          'Gerencie os widgets disponíveis. Posição e tamanho são compartilhados com o Desktop.',
-        )}
-      >
-        {widgets.widgets.map((widget) => {
-          const definition = getWidgetDefinition(widget.widgetId);
-
-          const isReady = ['clock', 'calendar', 'weather', 'dev-insights'].includes(
-            widget.widgetId,
-          );
-
-          const sizeOptions = (definition?.allowedSizes ?? []).map((size) => [
-            size,
-            size.replace('x', ' × '),
-          ]);
-
-          return (
-            <div key={widget.instanceId} className="ws-settings__options">
-              <div className="ws-settings__card-heading">
-                <h4>{t(definition?.name ?? widget.widgetId)}</h4>
-
-                <p>{t(definition?.description ?? '')}</p>
-              </div>
-
-              {!isReady && (
-                <p className="ws-settings__hint" role="status">
-                  {t(
-                    'Widget em preparação. Os controles serão habilitados após a integração com a grade do Desktop.',
-                  )}
-                </p>
-              )}
-
-              <div style={!isReady ? { opacity: 0.55 } : undefined}>
-                <fieldset
-                  disabled={!isReady}
-                  style={{
-                    border: 0,
-                    padding: 0,
-                    margin: 0,
-                    minWidth: 0,
-                  }}
-                >
-                  <SettingsToggle
-                    label={t('Exibir no Desktop')}
-                    checked={widget.visible}
-                    onChange={(visible) =>
-                      changeWidget(widget.instanceId, {
-                        visible,
-                      })
-                    }
-                  />
-
-                  <SettingsSelect
-                    label={t('Tamanho')}
-                    value={`${widget.size.columns}x${widget.size.rows}`}
-                    options={sizeOptions}
-                    onChange={(value) => {
+      <SettingsCard title={t('Widgets do Desktop')} description={t('Altere a visibilidade, o tamanho e as preferências de cada widget. A posição continua sendo gerenciada no Desktop.')}>
+        <div className="ws-settings__widget-list">
+          {widgets.widgets.map((widget) => {
+            const definition = getWidgetDefinition(widget.widgetId);
+            const ready = ['clock', 'calendar', 'weather', 'dev-insights'].includes(widget.widgetId);
+            const sizes = (definition?.allowedSizes ?? []).map((size) => [size, size.replace('x', ' × ')]);
+            return (
+              <section className="ws-settings__widget-item" key={widget.instanceId}>
+                <div className="ws-settings__widget-heading">
+                  <div><h5>{t(definition?.name ?? widget.widgetId)}</h5><p>{t(definition?.description ?? '')}</p></div>
+                  <span className="ws-settings__widget-size">{widget.size.columns} × {widget.size.rows}</span>
+                </div>
+                {!ready && <p className="ws-settings__hint" role="status">{t('Widget em preparação. Os controles serão habilitados após a integração com a grade do Desktop.')}</p>}
+                <fieldset disabled={!ready} className="ws-settings__widget-controls">
+                  <SettingsToggle label={t('Exibir no Desktop')} checked={widget.visible}
+                    onChange={(visible) => changeWidget(widget.instanceId, { visible })} />
+                  <SettingsSelect label={t('Tamanho')} value={`${widget.size.columns}x${widget.size.rows}`}
+                    options={sizes} onChange={(value) => {
                       const [columns, rows] = value.split('x').map(Number);
-
-                      changeWidget(widget.instanceId, {
-                        size: { columns, rows },
-                      });
-                    }}
-                  />
-
-                  {/* ----- Configurações do relógio ----- */}
+                      changeWidget(widget.instanceId, { size: { columns, rows } });
+                    }} />
                   {widget.widgetId === 'clock' && (
-                    <SettingsSelect
-                      label={t('Fuso horário do relógio')}
-                      value={widget.settings?.timeZone ?? ''}
+                    <SettingsSelect label={t('Fuso horário do relógio')} value={widget.settings?.timeZone ?? ''}
                       options={[
-                        ['', 'Automático (dispositivo)'],
-                        ['America/Sao_Paulo', 'Brasília'],
-                        ['America/Manaus', 'Manaus'],
-                        ['America/Rio_Branco', 'Rio Branco'],
-                        ['America/Noronha', 'Fernando de Noronha'],
-                        ['America/New_York', 'Nova York'],
-                        ['America/Los_Angeles', 'Los Angeles'],
-                        ['Europe/London', 'Londres'],
-                        ['Europe/Paris', 'Paris'],
-                        ['Asia/Tokyo', 'Tóquio'],
-                        ['UTC', 'UTC'],
+                        ['', 'Automático (dispositivo)'], ['America/Sao_Paulo', 'Brasília'],
+                        ['America/Manaus', 'Manaus'], ['America/Rio_Branco', 'Rio Branco'],
+                        ['America/Noronha', 'Fernando de Noronha'], ['America/New_York', 'Nova York'],
+                        ['America/Los_Angeles', 'Los Angeles'], ['Europe/London', 'Londres'],
+                        ['Europe/Paris', 'Paris'], ['Asia/Tokyo', 'Tóquio'], ['UTC', 'UTC'],
                       ]}
-                      onChange={(timeZone) =>
-                        changeWidget(widget.instanceId, {
-                          settings: {
-                            ...widget.settings,
-                            timeZone,
-                          },
-                        })
-                      }
-                    />
+                      onChange={(timeZone) => changeWidget(widget.instanceId, { settings: { ...widget.settings, timeZone } })} />
                   )}
-
-                  {/* ----- Configurações do clima ----- */}
                   {widget.widgetId === 'weather' && (
                     <>
-                      <SettingsSelect
-                        label={t('Unidade de temperatura')}
-                        value={widget.settings?.temperatureUnit ?? 'celsius'}
-                        options={[
-                          ['celsius', 'Celsius (°C)'],
-                          ['fahrenheit', 'Fahrenheit (°F)'],
-                        ]}
-                        onChange={(temperatureUnit) =>
-                          changeWidget(widget.instanceId, {
-                            settings: {
-                              ...widget.settings,
-                              temperatureUnit,
-                            },
-                          })
-                        }
-                      />
-
-                      <SettingsSelect
-                        label={t('Velocidade do vento')}
-                        value={widget.settings?.windUnit ?? 'kmh'}
-                        options={[
-                          ['kmh', 'Quilômetros por hora (km/h)'],
-                          ['mph', 'Milhas por hora (mph)'],
-                        ]}
-                        onChange={(windUnit) =>
-                          changeWidget(widget.instanceId, {
-                            settings: {
-                              ...widget.settings,
-                              windUnit,
-                            },
-                          })
-                        }
-                      />
-
-                      <SettingsToggle
-                        label={t('Mostrar sensação térmica')}
-                        checked={widget.settings?.showFeelsLike !== false}
-                        onChange={(showFeelsLike) =>
-                          changeWidget(widget.instanceId, {
-                            settings: {
-                              ...widget.settings,
-                              showFeelsLike,
-                            },
-                          })
-                        }
-                      />
-
-                      <SettingsToggle
-                        label={t('Mostrar previsão dos próximos dias')}
-                        checked={widget.settings?.showForecast !== false}
-                        onChange={(showForecast) =>
-                          changeWidget(widget.instanceId, {
-                            settings: {
-                              ...widget.settings,
-                              showForecast,
-                            },
-                          })
-                        }
-                      />
+                      <div className="ws-settings__field-grid">
+                        <SettingsSelect label={t('Unidade de temperatura')} value={widget.settings?.temperatureUnit ?? 'celsius'}
+                          options={[["celsius", 'Celsius (°C)'], ["fahrenheit", 'Fahrenheit (°F)']]}
+                          onChange={(temperatureUnit) => changeWidget(widget.instanceId, { settings: { ...widget.settings, temperatureUnit } })} />
+                        <SettingsSelect label={t('Velocidade do vento')} value={widget.settings?.windUnit ?? 'kmh'}
+                          options={[["kmh", 'Quilômetros por hora (km/h)'], ["mph", 'Milhas por hora (mph)']]}
+                          onChange={(windUnit) => changeWidget(widget.instanceId, { settings: { ...widget.settings, windUnit } })} />
+                      </div>
+                      <SettingsToggle label={t('Mostrar sensação térmica')} checked={widget.settings?.showFeelsLike !== false}
+                        onChange={(showFeelsLike) => changeWidget(widget.instanceId, { settings: { ...widget.settings, showFeelsLike } })} />
+                      <SettingsToggle label={t('Mostrar previsão dos próximos dias')} checked={widget.settings?.showForecast !== false}
+                        onChange={(showForecast) => changeWidget(widget.instanceId, { settings: { ...widget.settings, showForecast } })} />
                     </>
                   )}
                 </fieldset>
-              </div>
-
-              {/* ----- Informações complementares ----- */}
-              {widget.widgetId === 'clock' && (
-                <p className="ws-settings__hint">
-                  {t(
-                    'O relógio utiliza o fuso horário selecionado. Na opção Automático, acompanha o dispositivo. O idioma segue as configurações do WS OS.',
-                  )}
-                </p>
-              )}
-            </div>
-          );
-        })}
+              </section>
+            );
+          })}
+        </div>
       </SettingsCard>
     );
   }
 
-  /* ----- Mobile ----- */
+  /* === MOBILE === */
   if (activeSection === 'mobile') {
     content = (
       <>
-        <SettingsCard title={t('Mobile')}>
-          <SettingsSelect
-            label={t('Espaçamento dos aplicativos')}
-            value={mobile.gridDensity}
-            options={[
-              ['default', 'Padrão'],
-              ['comfortable', 'Confortável'],
-            ]}
-            onChange={(gridDensity) =>
-              report(
-                setMobilePreferences({
-                  gridDensity,
-                }),
-              )
-            }
-          />
-
-          <p className="ws-settings__hint">
-            {t('Essa preferência altera somente a grade de aplicativos do Mobile.')}
-          </p>
+        <SettingsCard title={t('Organização dos aplicativos')} description={t('Personalize o espaçamento da tela inicial no Mobile.')}>
+          <div className="ws-settings__density-preview" aria-hidden="true">
+            <div className="ws-settings__density-device">
+              <div className={`ws-settings__density-icons${mobile.gridDensity === 'comfortable' ? ' is-comfortable' : ''}`}>
+                {Array.from({ length: 12 }, (_, index) => <span key={index} />)}
+              </div>
+            </div>
+          </div>
+          <SettingsSelect label={t('Espaçamento dos aplicativos')} value={mobile.gridDensity}
+            options={[["default", 'Padrão'], ["comfortable", 'Confortável']]}
+            onChange={(gridDensity) => report(setMobilePreferences({ gridDensity }))}
+            description={t('O modo Confortável aumenta a distância entre os aplicativos.')} />
+          <p className="ws-settings__hint">{t('Essa configuração altera somente a grade de aplicativos do Mobile.')}</p>
         </SettingsCard>
-
         <WallpaperGallery shell="mobile" report={report} announce={announce} />
       </>
     );
   }
 
-  /* ----- Restauração ----- */
+  /* === RESTAURAÇÃO === */
   if (activeSection === 'reset') {
     content = (
-      <SettingsCard title={t('Preferências padrão')}>
+      <SettingsCard title={t('Restaurar preferências')} description={t('Retorne as configurações visuais aos valores originais sem apagar os dados dos aplicativos.')}>
         <div className="ws-settings__reset">
-          <p>
-            {t(
-              'Restaura tema, idioma, cores, efeitos, acessibilidade, Taskbar, densidade Mobile, seleção de wallpapers e tamanho/visibilidade dos widgets.',
-            )}
-          </p>
-
-          <p>
-            <strong>
-              {t(
-                'Arquivos, dados dos aplicativos, favoritos, imagem pessoal e posições dos atalhos e widgets são preservados.',
-              )}
-            </strong>
-          </p>
-
+          <div className="ws-settings__restore-summary">
+            <div><strong>{t('O que será restaurado')}</strong><p>{t('Tema, idioma, cores, efeitos, acessibilidade, barra de tarefas, densidade Mobile, seleção de wallpapers e tamanho/visibilidade dos widgets.')}</p></div>
+            <div><strong>{t('O que será preservado')}</strong><p>{t('Arquivos, dados dos aplicativos, favoritos, imagens pessoais e posições de atalhos e widgets.')}</p></div>
+          </div>
           {confirmReset ? (
-            <div
-              className="ws-settings__confirm"
+            <div className="ws-settings__confirm" role="group" aria-label={t('Confirmar restauração')}
               onKeyDown={(event) => {
-                if (event.key === 'Escape') {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  closeReset();
-                }
-              }}
-              role="group"
-              aria-label={t('Confirmar restauração')}
-            >
-              <p>
-                {t(
-                  'Deseja restaurar as preferências padrão? Os dados dos aplicativos não serão apagados.',
-                )}
-              </p>
-
-              <button ref={confirmRef} type="button" onClick={reset}>
-                {t('Confirmar restauração')}
-              </button>
-
-              <button type="button" onClick={closeReset}>
-                {t('Cancelar')}
-              </button>
+                if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closeReset(); }
+              }}>
+              <p>{t('Deseja restaurar as preferências padrão? Os dados dos aplicativos não serão apagados.')}</p>
+              <button ref={confirmRef} type="button" onClick={reset}>{t('Confirmar restauração')}</button>
+              <button type="button" onClick={closeReset}>{t('Cancelar')}</button>
             </div>
           ) : (
-            <button
-              ref={resetButtonRef}
-              type="button"
-              className="ws-settings__reset-button"
-              onClick={() => setConfirmReset(true)}
-            >
-              <RotateCcw size={17} aria-hidden="true" />
-
-              {t('Restaurar padrões')}
+            <button ref={resetButtonRef} type="button" className="ws-settings__reset-button" onClick={() => setConfirmReset(true)}>
+              <RotateCcw size={17} aria-hidden="true" />{t('Restaurar padrões')}
             </button>
           )}
         </div>
@@ -925,17 +622,11 @@ export default function SettingsSections({ activeSection }) {
     );
   }
 
-  /* === Renderização final === */
-  /* ----- Seção ativa e feedback ----- */
   return (
     <div className="ws-settings__stack">
       {content}
-
-      <div
-        role="status"
-        aria-live="polite"
-        className={message?.error ? 'ws-settings__message is-error' : 'ws-settings__message'}
-      >
+      <div role="status" aria-live="polite"
+        className={message?.error ? 'ws-settings__message is-error' : 'ws-settings__message'}>
         {message ? t(message.text) : ''}
       </div>
     </div>

@@ -594,6 +594,58 @@ export async function deleteWallpaperFromCollection(id) {
   };
 }
 
+/* === EXCLUSÃO COM SUBSTITUIÇÃO === */
+/* ----- Liberar os contextos antes de remover uma imagem pessoal ----- */
+export async function deleteWallpaperAndReplaceSelections(id) {
+  const selectionId = isPersonalWallpaperId(id)
+    ? id
+    : createPersonalWallpaperSelectionId(id);
+
+  if (!selectionId || selectionId === LEGACY_ID) {
+    return {
+      ok: false,
+      code: 'WALLPAPER_LEGACY_PROTECTED',
+    };
+  }
+
+  if (!personalUrls.has(selectionId)) {
+    return {
+      ok: false,
+      code: 'WALLPAPER_NOT_FOUND',
+    };
+  }
+
+  /* ----- Substituir a imagem onde estiver selecionada ----- */
+  for (const shell of WALLPAPER_SHELLS) {
+    for (const theme of WALLPAPER_THEMES) {
+      if (getWallpaper(shell, theme) !== selectionId) {
+        continue;
+      }
+
+      const fallback = getDefaultWallpaper(theme);
+      const saved = setWallpaper(fallback, shell, theme);
+
+      if (!saved) {
+        return {
+          ok: false,
+          code: 'WALLPAPER_REPLACEMENT_FAILED',
+        };
+      }
+    }
+  }
+
+  /* ----- Verificar referências restantes, inclusive persistidas ----- */
+  if (isPersonalWallpaperInUse(selectionId)) {
+    return {
+      ok: false,
+      code: 'WALLPAPER_STILL_IN_USE',
+    };
+  }
+
+  /* ----- Remover somente depois de liberar a imagem ----- */
+  return deleteWallpaperFromCollection(selectionId);
+}
+
 /* === Sincronização === */
 /* ----- Notificar outras abas ----- */
 function signalImageChange() {
