@@ -173,6 +173,7 @@ export default function useWindowInteraction({ instance, app }) {
           'contact',
           'terminal',
           'games',
+          'notes',
         ].includes(instance.appId)
       ) {
         const bounds = getBounds(element);
