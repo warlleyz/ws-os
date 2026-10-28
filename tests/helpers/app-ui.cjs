@@ -43,6 +43,9 @@ async function renderApp(
         'CertificatesHeader',
         'ContactChannels',
         'ContactHeader',
+        'SystemHeader',
+        'SystemIdentity',
+        'SectionHeading',
       ]);
 
       if (typeof type === 'function' && presentationalComponents.has(type.name)) {
@@ -115,6 +118,23 @@ async function renderApp(
       openApp: 'open',
       ...Object.fromEntries(
         [
+          'AppWindow',
+          'Blocks',
+          'Check',
+          'ChevronRight',
+          'Code2',
+          'FaGithub',
+          'FileCode2',
+          'Globe2',
+          'LayoutGrid',
+          'Monitor',
+          'MonitorCog',
+          'Palette',
+          'Scale',
+          'Settings2',
+          'Smartphone',
+          'Sparkles',
+          'Workflow',
           'Award',
           'Download',
           'ExternalLink',

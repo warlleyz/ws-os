@@ -234,21 +234,36 @@ test('Boas-vindas bloqueia Escape, contém Tab e preserva a conclusão explícit
   assert.ok(focused >= 4);
 });
 
-test('Sobre o Sistema utiliza versão versionada e links de licença seguros', async () => {
+test('Sobre o Sistema apresenta versão técnica e licenças seguras', async () => {
   const ui = await renderApp(
     'src/apps/about-system/AboutSystem.jsx',
     {},
-    { packageInfo: { version: '0.0.0' } },
+    { packageInfo: { version: '0.2.0' } },
   );
-  assert.match(ui.text(), /WS OS V2 ·/);
-  assert.match(ui.text(), /0.0.0/);
-  assert.match(ui.text(), /Apache-2.0/);
-  assert.equal(
-    ui.nodes().filter((node) => node.type === 'a' && node.props.href.includes('LICENSE')).length,
-    4,
+
+  const content = ui.text();
+
+  assert.match(content, /WS OS/);
+  assert.match(content, /V2/);
+  assert.match(content, /0\.2\.0/);
+  assert.match(content, /Apache-2\.0/);
+
+  const links = ui.nodes().filter(
+    (node) => node.type === 'a',
   );
-  for (const link of ui.nodes().filter((node) => node.type === 'a'))
+
+  const licenseLinks = links.filter(
+    (node) => node.props.href.includes('LICENSE'),
+  );
+
+  assert.equal(licenseLinks.length, 4);
+
+  for (const link of links) {
     assert.equal(link.props.rel, 'noopener noreferrer');
+    assert.equal(link.props.target, '_blank');
+  }
+
+  ui.unmount();
 });
 
 /* === PERSONALIZAÇÃO === */

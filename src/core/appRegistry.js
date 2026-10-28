@@ -30,6 +30,7 @@ const windowProfiles = {
   terminal: { width: 1000, height: 525 },
   games: { width: 1050, height: 800 },
   notes: { width: 980, height: 760 },
+  'about-system': { width: 920, height: 820 },
   calculator: { width: 360, height: 520 },
   settings: { width: 980, height: 680 },
   'file-editor': { width: 920, height: 680 },

@@ -1,0 +1,688 @@
+/* === APLICATIVO SOBRE O SISTEMA === */
+.ws-system {
+    --system-accent: var(--accent-primary);
+    --system-line: color-mix(in srgb,
+            var(--border-default) 78%,
+            transparent);
+    --system-panel: color-mix(in srgb,
+            var(--surface-secondary) 44%,
+            transparent);
+    --system-soft: color-mix(in srgb,
+            var(--system-accent) 9%,
+            transparent);
+
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    width: 100%;
+    min-width: 0;
+    padding: clamp(18px, 3cqw, 32px);
+    background: transparent;
+    color: var(--text-primary);
+    container-type: inline-size;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-control) transparent;
+}
+
+.ws-system *,
+.ws-system *::before,
+.ws-system *::after {
+    box-sizing: border-box;
+}
+
+/* === CABEÇALHO PADRÃO V2 === */
+.ws-system__hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-width: 0;
+    padding: 7px 0 25px 19px;
+    border-bottom: 1px solid var(--system-line);
+}
+
+.ws-system__hero::before {
+    position: absolute;
+    top: 10px;
+    bottom: 27px;
+    left: 0;
+    width: 3px;
+    border-radius: 9px;
+    background: var(--system-accent);
+    box-shadow: 0 0 19px color-mix(in srgb,
+            var(--system-accent) 46%,
+            transparent);
+    content: '';
+}
+
+.ws-system__hero-copy {
+    min-width: 0;
+}
+
+.ws-system__eyebrow {
+    color: var(--system-accent);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.ws-system__hero h2 {
+    margin: 6px 0 7px;
+    font-size: clamp(30px, 4.2cqw, 46px);
+    font-weight: 750;
+    line-height: 1.08;
+    letter-spacing: -0.055em;
+}
+
+.ws-system__hero p {
+    max-width: 620px;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.ws-system__hero-icon {
+    box-sizing: content-box;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    padding: 16px;
+    border-radius: 18px;
+    background: color-mix(in srgb,
+            var(--system-accent) 12%,
+            var(--surface-secondary));
+    color: var(--system-accent);
+}
+
+/* === IDENTIDADE DO SISTEMA === */
+.ws-system__identity {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    min-width: 0;
+    padding: 27px;
+    border: 1px solid var(--system-line);
+    border-radius: 18px;
+    background: linear-gradient(115deg,
+            var(--system-soft),
+            var(--system-panel) 58%,
+            transparent);
+}
+
+/* ----- MARCA VISUAL ----- */
+.ws-system__identity-mark {
+    display: grid;
+    place-items: center;
+    flex: 0 0 98px;
+    width: 98px;
+    height: 98px;
+    border: 1px solid color-mix(in srgb,
+            var(--system-accent) 32%,
+            var(--system-line));
+    border-radius: 24px;
+    background: color-mix(in srgb,
+            var(--system-accent) 13%,
+            var(--surface-secondary));
+    color: var(--system-accent);
+    box-shadow: 0 10px 26px rgb(0 0 0 / 7%);
+}
+
+.ws-system__identity-mark span {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.09em;
+}
+
+/* ----- APRESENTAÇÃO ----- */
+.ws-system__identity-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+}
+
+.ws-system__identity-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.ws-system__identity-title h3 {
+    margin: 0;
+    font-size: clamp(27px, 3.5cqw, 38px);
+    font-weight: 780;
+    line-height: 1;
+    letter-spacing: -0.055em;
+}
+
+.ws-system__version-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 26px;
+    padding: 4px 9px;
+    border: 1px solid color-mix(in srgb,
+            var(--system-accent) 27%,
+            transparent);
+    border-radius: 7px;
+    background: var(--system-soft);
+    color: var(--system-accent);
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.ws-system__identity-content>p {
+    max-width: 630px;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* ----- CARACTERÍSTICAS RESUMIDAS ----- */
+.ws-system__identity-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px 18px;
+    margin-top: 2px;
+}
+
+.ws-system__identity-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.ws-system__identity-meta svg {
+    color: var(--system-accent);
+}
+
+/* === SEÇÕES === */
+.ws-system__section {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+}
+
+/* === CABEÇALHO DAS SEÇÕES === */
+.ws-system__section-heading {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+}
+
+.ws-system__section-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--system-soft);
+    color: var(--system-accent);
+}
+
+.ws-system__section-heading>div {
+    min-width: 0;
+}
+
+.ws-system__section-heading h3 {
+    margin: 0 0 5px;
+    font-size: 19px;
+    font-weight: 750;
+    letter-spacing: -0.035em;
+}
+
+.ws-system__section-heading p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+/* === INFORMAÇÕES DO SISTEMA === */
+.ws-system__info-panel {
+    display: grid;
+    gap: 0;
+    padding: 3px 19px;
+    border: 1px solid var(--system-line);
+    border-radius: 14px;
+    background: var(--system-panel);
+}
+
+.ws-system__info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 49px;
+    padding: 12px 2px;
+    border-bottom: 1px solid var(--system-line);
+}
+
+.ws-system__info-row:last-child {
+    border-bottom: none;
+}
+
+.ws-system__info-row>span {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.ws-system__info-row strong {
+    font-size: 12px;
+    font-weight: 650;
+    text-align: right;
+}
+
+.ws-system__info-row code {
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: var(--system-soft);
+    color: var(--system-accent);
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 11px;
+}
+
+/* === TECNOLOGIAS === */
+.ws-system__technology-grid {
+    display: grid;
+    grid-template-columns: repeat(3,
+            minmax(0, 1fr));
+    gap: 11px;
+}
+
+.ws-system__technology {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+    min-height: 82px;
+    padding: 15px;
+    border: 1px solid var(--system-line);
+    border-radius: 12px;
+    background: var(--system-panel);
+    transition:
+        border-color 160ms ease,
+        background 160ms ease;
+}
+
+.ws-system__technology:hover {
+    border-color: color-mix(in srgb,
+            var(--system-accent) 32%,
+            var(--system-line));
+    background: color-mix(in srgb,
+            var(--system-accent) 6%,
+            var(--system-panel));
+}
+
+.ws-system__technology-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 39px;
+    width: 39px;
+    height: 39px;
+    border-radius: 11px;
+    background: var(--system-soft);
+    color: var(--system-accent);
+}
+
+.ws-system__technology>div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.ws-system__technology strong {
+    font-size: 12px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.ws-system__technology small {
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+/* === ARQUITETURA === */
+.ws-system__architecture {
+    display: grid;
+    grid-template-columns: repeat(2,
+            minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ws-system__architecture-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    min-width: 0;
+    padding: 16px 17px;
+    border: 1px solid var(--system-line);
+    border-radius: 11px;
+    background: var(--system-panel);
+}
+
+.ws-system__architecture-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+}
+
+.ws-system__architecture-mark {
+    display: grid;
+    place-items: center;
+    flex: 0 0 23px;
+    width: 23px;
+    height: 23px;
+    border-radius: 7px;
+    background: var(--system-soft);
+    color: var(--system-accent);
+}
+
+.ws-system__architecture-item>div {
+    min-width: 0;
+}
+
+.ws-system__architecture-item strong {
+    display: block;
+    margin: 1px 0 5px;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.ws-system__architecture-item p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* === RECURSOS DO SISTEMA === */
+.ws-system__features {
+    display: grid;
+    grid-template-columns: repeat(2,
+            minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ws-system__feature {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    padding: 13px 15px;
+    border: 1px solid var(--system-line);
+    border-radius: 10px;
+    background: var(--system-panel);
+}
+
+.ws-system__feature svg {
+    flex: none;
+    color: var(--system-accent);
+}
+
+.ws-system__feature span {
+    font-size: 12px;
+    font-weight: 550;
+    overflow-wrap: anywhere;
+}
+
+/* === CRÉDITOS E LICENÇAS === */
+.ws-system__credits {
+    display: grid;
+    grid-template-columns: repeat(2,
+            minmax(0, 1fr));
+    gap: 10px;
+}
+
+.ws-system__credit {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    min-height: 66px;
+    padding: 13px 15px;
+    border: 1px solid var(--system-line);
+    border-radius: 11px;
+    background: var(--system-panel);
+    color: var(--text-primary);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        border-color 160ms ease,
+        background 160ms ease;
+}
+
+.ws-system__credit:hover {
+    border-color: var(--system-accent);
+    background: var(--system-soft);
+}
+
+.ws-system__credit>div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.ws-system__credit strong {
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.ws-system__credit small {
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.ws-system__credit>svg {
+    flex: none;
+    color: var(--text-secondary);
+}
+
+.ws-system__credit:hover>svg {
+    color: var(--system-accent);
+}
+
+/* === REPOSITÓRIO === */
+.ws-system__repository {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-width: 0;
+    padding: 21px;
+    border: 1px solid color-mix(in srgb,
+            var(--system-accent) 24%,
+            var(--system-line));
+    border-radius: 14px;
+    background: linear-gradient(110deg,
+            var(--system-soft),
+            var(--system-panel));
+}
+
+.ws-system__repository-copy {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.ws-system__repository-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--system-soft);
+    color: var(--system-accent);
+}
+
+.ws-system__repository-copy>div {
+    min-width: 0;
+}
+
+.ws-system__repository h3 {
+    margin: 0 0 5px;
+    font-size: 15px;
+    font-weight: 750;
+}
+
+.ws-system__repository p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.ws-system__repository-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    gap: 9px;
+    min-height: 40px;
+    padding: 9px 14px;
+    border: 1px solid var(--system-line);
+    border-radius: 9px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+    transition:
+        border-color 160ms ease,
+        color 160ms ease;
+}
+
+.ws-system__repository-link:hover {
+    border-color: var(--system-accent);
+    color: var(--system-accent);
+}
+
+/* === RODAPÉ === */
+.ws-system__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 4px 0;
+    border-top: 1px solid var(--system-line);
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.ws-system__footer span {
+    padding-top: 13px;
+}
+
+/* === RESPONSIVIDADE POR LARGURA DA JANELA === */
+@container (max-width: 720px) {
+    .ws-system__technology-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ws-system__identity {
+        padding: 22px;
+    }
+}
+
+@container (max-width: 520px) {
+    .ws-system__identity {
+        gap: 17px;
+        padding: 18px;
+    }
+
+    .ws-system__identity-mark {
+        flex-basis: 68px;
+        width: 68px;
+        height: 68px;
+        border-radius: 17px;
+    }
+
+    .ws-system__identity-mark span {
+        font-size: 26px;
+    }
+
+    .ws-system__identity-title h3 {
+        font-size: 27px;
+    }
+
+    .ws-system__technology-grid,
+    .ws-system__architecture,
+    .ws-system__features,
+    .ws-system__credits {
+        grid-template-columns: 1fr;
+    }
+
+    .ws-system__architecture-item:last-child:nth-child(odd) {
+        grid-column: auto;
+    }
+
+    .ws-system__repository {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .ws-system__repository-link {
+        align-self: flex-start;
+    }
+}
+
+@container (max-width: 360px) {
+    .ws-system__identity {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .ws-system__identity-mark {
+        flex-basis: auto;
+    }
+
+    .ws-system__hero-icon {
+        display: none;
+    }
+
+    .ws-system__info-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .ws-system__info-row strong {
+        text-align: left;
+    }
+}
+
+/* === ACESSIBILIDADE === */
+.ws-system a:focus-visible {
+    outline: 2px solid var(--system-accent);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ws-system__technology,
+    .ws-system__credit,
+    .ws-system__repository-link {
+        transition: none;
+    }
+}
