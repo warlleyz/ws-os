@@ -22,7 +22,7 @@ import { createElement } from 'react';
 /* ----- Utilizar o rosto oficial do assistente ----- */
 function WallyAppIcon({ size = 20 }) {
   return createElement('img', {
-    src: `${import.meta.env.BASE_URL}assets/wally/wally-rosto.svg`,
+    src: '/assets/wally/wally-rosto.svg',
     alt: '',
     'aria-hidden': true,
     width: size,

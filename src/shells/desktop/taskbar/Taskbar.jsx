@@ -440,12 +440,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     month: 'long',
     year: 'numeric',
   });
-  const firstWeekday = calendarMonth.getDay();
-  const daysInMonth = new Date(
-    calendarMonth.getFullYear(),
-    calendarMonth.getMonth() + 1,
-    0,
-  ).getDate();
+  
   function toggleCalendar() {
     clearWindowHighlight();
     closePreview();
@@ -456,14 +451,21 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     shortcutTriggerRef.current = null;
     setCalendarOpen((current) => !current);
   }
-  // Ativar/restaurar um app também fecha painéis sem depender de um clique externo.
-  const [panelFocusHistory, setPanelFocusHistory] = useState(appState.focusHistory);
-  if (panelFocusHistory !== appState.focusHistory) {
-    setPanelFocusHistory(appState.focusHistory);
+  /* === SINCRONIZAÇÃO DO FOCO === */
+  /* ----- Fechar painéis quando o foco das janelas mudar ----- */
+  const previousFocusHistoryRef = useRef(appState.focusHistory);
+
+  useLayoutEffect(() => {
+    if (previousFocusHistoryRef.current === appState.focusHistory) {
+      return;
+    }
+
+    previousFocusHistoryRef.current = appState.focusHistory;
+
     setActivePanel(null);
     setContextGroup(null);
     setShortcutContext(null);
-  }
+  }, [appState.focusHistory, setShortcutContext]);
   // Camada flutuante + barra inferior (sem containers extras).
   useGlobalShortcuts({
     clearWindowHighlight,
@@ -559,8 +561,6 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
               setCalendarMonth={setCalendarMonth}
               currentTime={currentTime}
               setCalendarOpen={setCalendarOpen}
-              firstWeekday={firstWeekday}
-              daysInMonth={daysInMonth}
               calendarMonth={calendarMonth}
             />
           )}
