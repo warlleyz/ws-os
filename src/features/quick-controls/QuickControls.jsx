@@ -2,8 +2,6 @@ import {
   BellOff,
   BellRing,
   Check,
-  ChevronDown,
-  ChevronUp,
   ExternalLink,
   Gauge,
   Languages,
@@ -15,32 +13,35 @@ import {
   Waves,
   X,
 } from 'lucide-react';
-
-import { useState } from 'react';
 import { translate as t, useLocale, setLocale } from '../../shared/i18n/i18n';
 import { useAccessibility, setAccessibility } from '../../core/effectsManager';
 import { setTheme } from '../../core/themeManager';
-import { useNotificationPreferences, setDoNotDisturb } from '../../core/notificationPreferences';
+import {
+  useNotificationPreferences,
+  setDoNotDisturb,
+} from '../../core/notificationPreferences';
 import { useSystem } from '../../core/useSystem';
 import { openApp } from '../../core/appManager';
 import Tooltip from '../../shared/components/Tooltip';
-
 import './QuickControls.css';
 
-function ControlTile({ icon: Icon, label, description, active, onClick, disabled = false }) {
+/* === CONTROLES DE ACESSO RÁPIDO === */
+/* ----- Botão de preferência ----- */
+function ControlTile({ icon: Icon, label, description, active, onClick }) {
   return (
     <Tooltip content={`${label} — ${t(active ? 'Ativado' : 'Desativado')}`} delay={450}>
       <button
         type="button"
         className={`ws-control-tile${active ? ' ws-control-tile--active' : ''}`}
         aria-pressed={active}
-        disabled={disabled}
         onClick={onClick}
       >
-        <span className="ws-control-tile__icon">
-          <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
+        <span className="ws-control-tile__top">
+          <span className="ws-control-tile__icon">
+            <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
+          </span>
+          {active && <Check size={15} className="ws-control-tile__check" aria-hidden="true" />}
         </span>
-
         <span className="ws-control-tile__text">
           <strong>{label}</strong>
           <small>{description}</small>
@@ -50,23 +51,7 @@ function ControlTile({ icon: Icon, label, description, active, onClick, disabled
   );
 }
 
-function EffectToggle({ label, description, checked, onChange }) {
-  return (
-    <label className="ws-controls__effect">
-      <span>
-        <strong>{t(label)}</strong>
-        <small>{t(description)}</small>
-      </span>
-
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-      />
-    </label>
-  );
-}
-
+/* === CENTRAL DE CONTROLE === */
 export default function QuickControls({
   setQuickControlsOpen,
   theme,
@@ -78,11 +63,9 @@ export default function QuickControls({
   const accessibility = useAccessibility();
   const { doNotDisturb } = useNotificationPreferences();
   const { notify, run } = useSystem();
-
-  const [detailsOpen, setDetailsOpen] = useState(false);
-
   const isDark = theme === 'dark';
 
+  /* ----- Informar falhas de persistência ----- */
   function report(saved) {
     if (saved === false) {
       notify({
@@ -94,39 +77,36 @@ export default function QuickControls({
     }
   }
 
+  /* ----- Alterar preferências de acessibilidade ----- */
   function changeEffect(key, enabled) {
-    report(
-      setAccessibility({
-        ...accessibility,
-        [key]: enabled,
-      }),
-    );
+    report(setAccessibility({
+      ...accessibility,
+      [key]: enabled,
+    }));
   }
 
+  /* ----- Abrir o aplicativo Configurações ----- */
   function openSettings() {
     const opened = run(openApp, 'settings');
-
-    if (opened) {
-      setQuickControlsOpen(false);
-    }
+    if (opened) setQuickControlsOpen(false);
   }
 
+  /* === RENDERIZAÇÃO DO PAINEL === */
   return (
     <section
       className="taskbar-quick-controls ws-controls"
       role="region"
       aria-label={t('Painel de Controle Rápido')}
     >
+      {/* ----- Cabeçalho ----- */}
       <header className="ws-controls__header">
         <span className="ws-controls__heading-icon">
           <SlidersHorizontal size={19} aria-hidden="true" />
         </span>
-
         <div className="ws-controls__heading">
           <strong>{t('Central de Controle')}</strong>
           <small>{t('Preferências rápidas do sistema')}</small>
         </div>
-
         <Tooltip content={t('Fechar Controle Rápido')}>
           <button
             type="button"
@@ -139,12 +119,11 @@ export default function QuickControls({
         </Tooltip>
       </header>
 
+      {/* ----- Preferências rápidas ----- */}
       <div className="ws-controls__content">
         <div className="ws-controls__section-header">
           <strong>{t('Ações rápidas')}</strong>
-          <span>{t('Personalize sua experiência')}</span>
         </div>
-
         <div className="ws-controls__tiles">
           <ControlTile
             icon={isDark ? Moon : Sun}
@@ -153,7 +132,6 @@ export default function QuickControls({
             active={isDark}
             onClick={() => report(setTheme(isDark ? 'light' : 'dark'))}
           />
-
           <ControlTile
             icon={doNotDisturb ? BellOff : BellRing}
             label={t('Não Perturbe')}
@@ -161,7 +139,6 @@ export default function QuickControls({
             active={doNotDisturb}
             onClick={() => report(setDoNotDisturb(!doNotDisturb))}
           />
-
           <ControlTile
             icon={Gauge}
             label={t('Baixo custo')}
@@ -169,7 +146,6 @@ export default function QuickControls({
             active={Boolean(accessibility.lowEffects)}
             onClick={() => changeEffect('lowEffects', !accessibility.lowEffects)}
           />
-
           {showAutoHideTaskbar ? (
             <ControlTile
               icon={PanelBottom}
@@ -189,20 +165,17 @@ export default function QuickControls({
           )}
         </div>
 
-        <div className="ws-controls__section-header ws-controls__section-header--compact">
+        {/* ----- Idioma do sistema ----- */}
+        <div className="ws-controls__section-header">
           <strong>{t('Sistema')}</strong>
         </div>
-
         <label className="ws-controls__locale">
           <span className="ws-controls__locale-icon">
             <Languages size={17} aria-hidden="true" />
           </span>
-
           <span className="ws-controls__locale-label">
             <strong>{t('Idioma')}</strong>
-            <small>{t('Idioma do sistema')}</small>
           </span>
-
           <select
             value={locale}
             aria-label={t('Idioma')}
@@ -212,61 +185,17 @@ export default function QuickControls({
             <option value="en">English</option>
           </select>
         </label>
-
-        <div className="ws-controls__advanced">
-          <button
-            type="button"
-            className="ws-controls__advanced-trigger"
-            aria-expanded={detailsOpen}
-            onClick={() => setDetailsOpen((current) => !current)}
-          >
-            <span className="ws-controls__advanced-heading">
-              <Settings2 size={16} aria-hidden="true" />
-              {t('Acessibilidade e desempenho')}
-            </span>
-
-            {detailsOpen ? (
-              <ChevronUp size={16} aria-hidden="true" />
-            ) : (
-              <ChevronDown size={16} aria-hidden="true" />
-            )}
-          </button>
-
-          {detailsOpen && (
-            <div className="ws-controls__advanced-body">
-              <EffectToggle
-                label="Reduzir movimento"
-                description="Minimizar animações"
-                checked={Boolean(accessibility.motion)}
-                onChange={(enabled) => changeEffect('motion', enabled)}
-              />
-
-              <EffectToggle
-                label="Reduzir transparência"
-                description="Aumentar a opacidade dos painéis"
-                checked={Boolean(accessibility.transparency)}
-                onChange={(enabled) => changeEffect('transparency', enabled)}
-              />
-
-              <EffectToggle
-                label="Modo de baixo custo"
-                description="Reduzir efeitos visuais"
-                checked={Boolean(accessibility.lowEffects)}
-                onChange={(enabled) => changeEffect('lowEffects', enabled)}
-              />
-            </div>
-          )}
-        </div>
       </div>
 
+      {/* ----- Acesso às configurações avançadas ----- */}
       <footer className="ws-controls__footer">
-        <span>
-          <Check size={13} aria-hidden="true" />
-          {t('Preferências do WS OS')}
-        </span>
-
+        <span>{t('Preferências avançadas')}</span>
         <Tooltip content={t('Abrir Configurações')}>
-          <button type="button" onClick={openSettings} aria-label={t('Abrir Configurações')}>
+          <button
+            type="button"
+            onClick={openSettings}
+            aria-label={t('Abrir Configurações')}
+          >
             <Settings2 size={15} aria-hidden="true" />
             {t('Configurações')}
             <ExternalLink size={13} aria-hidden="true" />

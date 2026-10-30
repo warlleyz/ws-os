@@ -1,46 +1,41 @@
-/* ==========================================================
-   WS OS — Central de Controle Rápido
-   ========================================================== */
-
+/* === CENTRAL DE CONTROLE === */
+/* ----- Estrutura e vidro do painel ----- */
 .taskbar-quick-controls.ws-controls {
   display: flex;
   flex-direction: column;
-
   width: min(405px, calc(100vw - 24px));
-  max-height: min(515px, calc(100dvh - 100px));
+  height: auto;
+  max-height: calc(100dvh - 90px);
   min-height: 0;
   overflow: hidden;
-
   border: 1px solid var(--panel-border, var(--border-default));
   border-radius: 17px;
-  background: var(--panel-background);
+  background: var(--ws-window-background);
   color: var(--text-primary);
   box-shadow: var(--shadow-floating);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
+  backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
 }
 
-/* Cabeçalho */
-
+/* ----- Cabeçalho ----- */
 .ws-controls__header {
   display: flex;
   align-items: center;
   gap: 11px;
   flex: 0 0 auto;
-
-  padding: 17px;
+  padding: 15px 16px;
   border-bottom: 1px solid var(--border-default);
 }
 
 .ws-controls__heading-icon {
   display: grid;
   place-items: center;
-  flex: 0 0 40px;
-
-  width: 40px;
-  height: 40px;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
   border: 1px solid var(--border-default);
   border-radius: 11px;
-
-  background: var(--surface-secondary);
+  background: color-mix(in srgb, var(--surface-secondary) 55%, transparent);
   color: var(--accent-secondary);
 }
 
@@ -66,60 +61,42 @@
   display: grid;
   place-items: center;
   flex: 0 0 30px;
-
   width: 30px;
   height: 30px;
+  padding: 0;
   border: 0;
   border-radius: 8px;
-
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
 }
 
 .ws-controls__icon-button:hover {
-  color: var(--text-primary);
   background: var(--surface-secondary);
+  color: var(--text-primary);
 }
 
-/* Conteúdo */
-
+/* === CONTEÚDO DO PAINEL === */
+/* ----- Organização sem rolagem ----- */
 .ws-controls__content {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-
-  padding: 16px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-default) transparent;
-}
-
-.ws-controls__section-header {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  padding: 14px;
+  overflow: visible;
 }
 
 .ws-controls__section-header strong {
-  font-size: 12px;
-  font-weight: 750;
-}
-
-.ws-controls__section-header span {
   color: var(--text-secondary);
   font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
-.ws-controls__section-header--compact {
-  margin-top: 5px;
-}
-
-/* Grade de controles */
-
+/* ----- Grade de ações rápidas ----- */
 .ws-controls__tiles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -129,23 +106,19 @@
 .ws-control-tile {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 11px;
-
-  min-width: 0;
-  min-height: 105px;
-  padding: 12px;
-
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 88px;
+  min-height: 92px;
+  padding: 10px;
   border: 1px solid var(--border-default);
   border-radius: 12px;
-
-  background: var(--surface-secondary);
+  background: color-mix(in srgb, var(--surface-secondary) 65%, transparent);
   color: var(--text-primary);
   text-align: left;
   cursor: pointer;
-
-  transition:
-    border-color calc(var(--motion-scale, 1) * 150ms) ease,
+  transition: border-color calc(var(--motion-scale, 1) * 150ms) ease,
     background-color calc(var(--motion-scale, 1) * 150ms) ease,
     transform calc(var(--motion-scale, 1) * 150ms) ease;
 }
@@ -157,25 +130,29 @@
 
 .ws-control-tile--active {
   border-color: color-mix(in srgb, var(--accent-secondary) 65%, var(--border-default));
+  background: color-mix(in srgb, var(--accent-secondary) 12%, var(--surface-secondary));
+}
 
-  background: color-mix(in srgb, var(--accent-secondary) 12%, var(--surface-primary));
+.ws-control-tile__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .ws-control-tile__icon {
   display: grid;
   place-items: center;
-
-  width: 33px;
-  height: 33px;
+  width: 31px;
+  height: 31px;
   border: 1px solid var(--border-default);
-  border-radius: 10px;
-
-  background: var(--surface-primary);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface-primary) 65%, transparent);
   color: var(--accent-secondary);
 }
 
-.ws-control-tile--active .ws-control-tile__icon {
-  border-color: var(--accent-secondary);
+.ws-control-tile__check {
+  color: var(--accent-secondary);
 }
 
 .ws-control-tile__text {
@@ -188,7 +165,8 @@
 .ws-control-tile__text strong {
   font-size: 11px;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .ws-control-tile__text small {
@@ -196,31 +174,27 @@
   font-size: 10px;
 }
 
-/* Idioma */
-
+/* === IDIOMA === */
+/* ----- Linha de seleção ----- */
 .ws-controls__locale {
   display: flex;
   align-items: center;
-  gap: 11px;
-
-  min-height: 58px;
+  gap: 10px;
+  min-height: 55px;
   padding: 9px 11px;
-
   border: 1px solid var(--border-default);
   border-radius: 11px;
-  background: var(--surface-secondary);
+  background: color-mix(in srgb, var(--surface-secondary) 65%, transparent);
 }
 
 .ws-controls__locale-icon {
   display: grid;
   place-items: center;
   flex: 0 0 32px;
-
   width: 32px;
   height: 32px;
   border-radius: 9px;
-
-  background: var(--surface-primary);
+  background: color-mix(in srgb, var(--surface-primary) 65%, transparent);
   color: var(--accent-secondary);
 }
 
@@ -228,196 +202,72 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 4px;
   min-width: 0;
 }
 
 .ws-controls__locale-label strong {
   font-size: 11px;
-}
-
-.ws-controls__locale-label small {
-  color: var(--text-secondary);
-  font-size: 10px;
+  font-weight: 650;
 }
 
 .ws-controls__locale select {
-  max-width: 120px;
+  width: 116px;
+  max-width: 45%;
   min-width: 0;
   padding: 7px;
-
   border: 1px solid var(--border-default);
   border-radius: 8px;
-
   background: var(--surface-primary);
   color: var(--text-primary);
   font-size: 11px;
   cursor: pointer;
 }
 
-/* Opções avançadas */
-
-.ws-controls__advanced {
-  border: 1px solid var(--border-default);
-  border-radius: 11px;
-  overflow: hidden;
-  background: var(--surface-secondary);
-}
-
-.ws-controls__advanced-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-
-  width: 100%;
-  min-height: 44px;
-  padding: 11px 12px;
-
-  border: 0;
-  background: transparent;
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-.ws-controls__advanced-trigger:hover {
-  background: color-mix(in srgb, var(--accent-secondary) 7%, transparent);
-}
-
-.ws-controls__advanced-heading {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.ws-controls__advanced-heading svg {
-  color: var(--accent-secondary);
-}
-
-.ws-controls__advanced-body {
-  display: flex;
-  flex-direction: column;
-  padding: 4px 12px 12px;
-  border-top: 1px solid var(--border-default);
-}
-
-.ws-controls__effect {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 11px 0;
-}
-
-.ws-controls__effect + .ws-controls__effect {
-  border-top: 1px solid var(--border-default);
-}
-
-.ws-controls__effect > span {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.ws-controls__effect strong {
-  font-size: 11px;
-  font-weight: 650;
-}
-
-.ws-controls__effect small {
-  color: var(--text-secondary);
-  font-size: 10px;
-}
-
-.ws-controls__effect input {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 auto;
-  accent-color: var(--accent-secondary);
-  cursor: pointer;
-}
-
-/* Rodapé */
-
+/* === RODAPÉ === */
+/* ----- Acesso às Configurações ----- */
 .ws-controls__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   flex: 0 0 auto;
-
   padding: 12px 16px;
   border-top: 1px solid var(--border-default);
-
-  background: color-mix(in srgb, var(--surface-secondary) 50%, var(--surface-primary));
+  background: transparent;
 }
 
-.ws-controls__footer > span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.ws-controls__footer>span {
   color: var(--text-secondary);
   font-size: 10px;
 }
 
-.ws-controls__footer > button {
+.ws-controls__footer>button {
   display: flex;
   align-items: center;
   gap: 7px;
-
   padding: 8px 10px;
   border: 1px solid var(--border-default);
   border-radius: 8px;
-
-  background: var(--surface-primary);
+  background: var(--surface-secondary);
   color: var(--text-primary);
   font-size: 11px;
   font-weight: 650;
   cursor: pointer;
 }
 
-.ws-controls__footer > button:hover {
+.ws-controls__footer>button:hover {
   border-color: var(--accent-secondary);
   color: var(--accent-secondary);
 }
 
 .ws-controls button:focus-visible,
-.ws-controls select:focus-visible,
-.ws-controls input:focus-visible {
+.ws-controls select:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
 }
 
-/* Responsividade */
-
-@media (max-height: 650px) {
-  .taskbar-quick-controls.ws-controls {
-    max-height: calc(100dvh - 85px);
-  }
-}
-
-@media (max-width: 360px) {
-  .ws-controls__content {
-    padding: 11px;
-  }
-
-  .ws-control-tile {
-    padding: 9px;
-  }
-
-  .ws-controls__footer > span {
-    display: none;
-  }
-}
-
-/* Mantém o comportamento já existente da Taskbar */
-
-/* === Taskbar com ocultação automática === */
-/* ----- Manter o mesmo posicionamento da barra visível ----- */
+/* === TASKBAR COM OCULTAÇÃO AUTOMÁTICA === */
+/* ----- Preservar posicionamento existente ----- */
 .taskbar-container--auto-hide {
   bottom: 16px;
   transform: translate(-50%, calc(100% + 8px));
@@ -429,9 +279,33 @@
   transform: translate(-50%, 0);
 }
 
+/* === RESPONSIVIDADE E ACESSIBILIDADE === */
+/* ----- Alturas reduzidas ----- */
+@media (max-height: 650px) {
+  .taskbar-quick-controls.ws-controls {
+    max-height: calc(100dvh - 85px);
+  }
+}
+
+/* ----- Larguras reduzidas ----- */
+@media (max-width: 360px) {
+  .ws-controls__content {
+    padding: 11px;
+  }
+
+  .ws-control-tile {
+    padding: 9px;
+  }
+
+  .ws-controls__footer>span {
+    display: none;
+  }
+}
+
+/* ----- Preferência de movimento reduzido ----- */
 @media (prefers-reduced-motion: reduce) {
+
   .ws-control-tile,
-  .ws-controls__search,
   .taskbar-container--auto-hide {
     transition: none;
   }
