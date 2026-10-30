@@ -32,6 +32,8 @@ export async function fetchWeatherData(latitude, longitude, signal) {
       'apparent_temperature',
       'weather_code',
       'wind_speed_10m',
+      'uv_index',
+      'precipitation_probability',
     ].join(','),
     daily: ['weather_code', 'temperature_2m_max', 'temperature_2m_min'].join(','),
     forecast_days: '5',
