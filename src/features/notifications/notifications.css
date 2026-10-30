@@ -1,33 +1,26 @@
-/* =====================================================
-   WS OS — Central de notificações
-   ===================================================== */
-
+/* === CENTRAL DE NOTIFICAÇÕES === */
+/* ----- Estrutura do painel ----- */
 .taskbar-notifications {
   display: flex;
   flex-direction: column;
-
   width: min(410px, calc(100vw - 24px));
   height: min(480px, calc(100dvh - 100px));
   min-height: 0;
-
   overflow: hidden;
-
   border: 1px solid var(--panel-border, var(--border-default));
   border-radius: 17px;
-  background: var(--panel-background);
+  background: var(--ws-window-background);
   color: var(--text-primary);
   box-shadow: var(--shadow-floating);
 }
 
-/* Cabeçalho */
-
+/* ----- Cabeçalho ----- */
 .taskbar-notifications__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   flex: 0 0 auto;
-
   padding: 17px 18px;
   border-bottom: 1px solid var(--border-default);
 }
@@ -42,21 +35,20 @@
 .taskbar-notifications__heading-icon {
   display: grid;
   place-items: center;
-
   width: 40px;
   height: 40px;
   flex: 0 0 40px;
-
   border: 1px solid var(--border-default);
   border-radius: 11px;
   background: var(--surface-secondary);
   color: var(--accent-secondary);
 }
 
-.taskbar-notifications__heading > div {
+.taskbar-notifications__heading>div {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .taskbar-notifications__heading strong {
@@ -69,17 +61,16 @@
   font-size: 11px;
 }
 
+/* ----- Botões da Central ----- */
 .taskbar-notifications__icon-button,
 .taskbar-notifications__toolbar button,
 .taskbar-notifications__item-actions button {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-
   width: 30px;
   height: 30px;
   padding: 0;
-
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
@@ -104,8 +95,8 @@
   cursor: default;
 }
 
-/* Não Perturbe */
-
+/* === NÃO PERTURBE === */
+/* ----- Área de configuração ----- */
 .taskbar-notifications__controls {
   flex: 0 0 auto;
   padding: 14px 16px;
@@ -117,7 +108,6 @@
   align-items: center;
   gap: 11px;
   padding: 12px;
-
   border: 1px solid var(--border-default);
   border-radius: 12px;
   background: var(--surface-secondary);
@@ -129,7 +119,6 @@
   flex: 0 0 33px;
   width: 33px;
   height: 33px;
-
   border-radius: 9px;
   background: var(--surface-primary);
   color: var(--accent-secondary);
@@ -153,13 +142,13 @@
   font-size: 10px;
 }
 
+/* ----- Interruptor ----- */
 .taskbar-notifications__switch {
   position: relative;
   width: 39px;
   height: 23px;
   flex: 0 0 39px;
   padding: 0;
-
   border: 1px solid var(--border-default);
   border-radius: 999px;
   background: var(--surface-primary);
@@ -171,10 +160,8 @@
   position: absolute;
   top: 3px;
   left: 3px;
-
   width: 15px;
   height: 15px;
-
   border-radius: 50%;
   background: var(--text-secondary);
   transition:
@@ -192,8 +179,8 @@
   transform: translateX(16px);
 }
 
-/* Lista */
-
+/* === LISTA DE NOTIFICAÇÕES === */
+/* ----- Seção e cabeçalho ----- */
 .taskbar-notifications__section {
   display: flex;
   flex: 1;
@@ -207,11 +194,10 @@
   justify-content: space-between;
   gap: 10px;
   flex: 0 0 auto;
-
   padding: 11px 16px 8px;
 }
 
-.taskbar-notifications__section-title > div:first-child {
+.taskbar-notifications__section-title>div:first-child {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -228,11 +214,9 @@
   min-width: 22px;
   height: 22px;
   padding: 0 5px;
-
   border-radius: 7px;
   background: var(--surface-secondary);
   color: var(--text-secondary);
-
   font-size: 10px;
 }
 
@@ -242,15 +226,14 @@
   gap: 4px;
 }
 
+/* ----- Rolagem da lista ----- */
 .taskbar-notifications__list {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 8px;
   min-height: 0;
-
   padding: 4px 13px 14px 16px;
-
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -258,23 +241,20 @@
   scrollbar-color: var(--border-default) transparent;
 }
 
-/* Notificação individual */
-
+/* === CARTÕES DE NOTIFICAÇÃO === */
+/* ----- Estrutura e estados ----- */
 .taskbar-notifications__item {
   --notification-accent: var(--accent-secondary);
-
   display: flex;
   align-items: flex-start;
   gap: 10px;
   flex: 0 0 auto;
   min-width: 0;
-
+  max-width: 100%;
   padding: 12px 9px 12px 11px;
-
   border: 1px solid var(--border-default);
   border-radius: 11px;
   background: var(--surface-secondary);
-
   animation: ws-notification-enter calc(var(--motion-scale, 1) * 180ms) ease-out both;
 }
 
@@ -302,11 +282,9 @@
   display: grid;
   place-items: center;
   flex: 0 0 31px;
-
   width: 31px;
   height: 31px;
   border-radius: 9px;
-
   background: var(--surface-primary);
   color: var(--notification-accent);
 }
@@ -317,16 +295,23 @@
   flex-direction: column;
   gap: 5px;
   min-width: 0;
+  overflow: hidden;
 }
 
+/* ----- Origem e horário ----- */
 .taskbar-notifications__item-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  min-width: 0;
 }
 
 .taskbar-notifications__source {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--notification-accent);
   font-size: 10px;
   font-weight: 700;
@@ -334,26 +319,41 @@
 
 .taskbar-notifications__item-top time {
   flex-shrink: 0;
+  white-space: nowrap;
   color: var(--text-secondary);
   font-size: 10px;
 }
 
+/* ----- Título e mensagem com limite visual ----- */
 .taskbar-notifications__item-title {
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   color: var(--text-primary);
   font-size: 12px;
   line-height: 1.35;
 }
 
 .taskbar-notifications__item-message {
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
   margin: 0;
   color: var(--text-secondary);
   font-size: 11px;
   line-height: 1.5;
-  overflow-wrap: anywhere;
 }
 
+/* ----- Ações do cartão ----- */
 .taskbar-notifications__item-actions {
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: center;
   gap: 2px;
@@ -369,20 +369,21 @@
   align-items: center;
   align-self: flex-start;
   gap: 5px;
+  max-width: 100%;
+  min-width: 0;
   margin-top: 5px;
   padding: 6px 8px;
-
   border: 1px solid var(--border-default);
   border-radius: 7px;
-
   background: var(--surface-primary);
   color: var(--accent-secondary);
   font-size: 10px;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 
-/* Estado vazio */
-
+/* === ESTADO VAZIO === */
+/* ----- Apresentação sem notificações ----- */
 .taskbar-notifications__empty {
   display: flex;
   align-items: center;
@@ -394,12 +395,11 @@
   text-align: center;
 }
 
-.taskbar-notifications__empty > div {
+.taskbar-notifications__empty>div {
   display: grid;
   place-items: center;
   width: 64px;
   height: 64px;
-
   border: 1px solid var(--border-default);
   border-radius: 20px;
   background: var(--surface-secondary);
@@ -418,8 +418,8 @@
   line-height: 1.5;
 }
 
-/* Animação dos itens */
-
+/* === ANIMAÇÃO E RESPONSIVIDADE DA CENTRAL === */
+/* ----- Entrada dos cartões ----- */
 @keyframes ws-notification-enter {
   from {
     opacity: 0;
@@ -432,12 +432,14 @@
   }
 }
 
+/* ----- Altura reduzida ----- */
 @media (max-height: 620px) {
   .taskbar-notifications {
     height: min(390px, calc(100dvh - 85px));
   }
 }
 
+/* ----- Preferência por movimento reduzido ----- */
 @media (prefers-reduced-motion: reduce) {
   .taskbar-notifications__item {
     animation: none;
@@ -454,20 +456,16 @@
   animation: none;
 }
 
-/* ==========================================================
-   WS OS — Fila horizontal de notificações
-   ========================================================== */
-
+/* === FILA DE NOTIFICAÇÕES TEMPORÁRIAS === */
+/* ----- Posicionamento geral ----- */
 .ws-toast-container {
   position: fixed;
   right: 16px;
   bottom: 16px;
   z-index: 9998;
-
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
-
   max-width: calc(100vw - 32px);
   pointer-events: none;
 }
@@ -477,38 +475,32 @@
   align-items: flex-end;
   justify-content: flex-end;
   gap: 7px;
-
   max-width: 100%;
   min-width: 0;
 }
 
-/* Notificação principal */
-
+/* === NOTIFICAÇÃO TEMPORÁRIA PRINCIPAL === */
+/* ----- Estrutura e aparência ----- */
 .ws-toast {
   --toast-accent: var(--accent-secondary);
   --toast-expanded-width: min(330px, calc(100vw - 90px));
-
+  --toast-expanded-height: 112px;
   position: relative;
   display: flex;
   align-items: center;
-
   width: 52px;
   min-width: 52px;
   max-width: 100%;
   min-height: 52px;
   height: auto;
   flex: 0 0 auto;
-
   overflow: hidden;
   box-sizing: border-box;
-
   border: 1px solid var(--border-default);
   border-radius: 13px;
-
   background: var(--surface-primary);
   color: var(--text-primary);
   box-shadow: var(--shadow-floating);
-
   pointer-events: auto;
 }
 
@@ -527,23 +519,27 @@
   --toast-accent: #d96470;
 }
 
-/* O ícone permanece na extremidade direita */
+/* ----- Altura conforme conteúdo ----- */
+.ws-toast--size-medium {
+  --toast-expanded-height: 132px;
+}
 
+.ws-toast--size-large {
+  --toast-expanded-height: 164px;
+}
+
+/* ----- Ícone fixo à direita ----- */
 .ws-toast__icon {
   position: absolute;
   right: 8px;
   bottom: 8px;
   top: auto;
-
   display: grid;
   place-items: center;
-
   width: 34px;
   height: 34px;
   padding: 0;
-
   transform: none;
-
   color: var(--toast-accent);
   pointer-events: none;
 }
@@ -554,20 +550,17 @@
   height: 21px;
 }
 
-/* Conteúdo cresce para a esquerda */
-
+/* ----- Conteúdo expandido à esquerda ----- */
 .ws-toast__body {
   display: flex;
   align-items: flex-start;
   gap: 5px;
-  padding-right: 50px;
-
   order: 1;
   flex: 1 1 0;
   min-width: 0;
-  padding: 12px 0 12px 13px;
+  min-height: 0;
+  padding: 12px 44px 12px 13px;
   box-sizing: border-box;
-
   overflow: hidden;
   opacity: 0;
 }
@@ -578,6 +571,7 @@
   flex-direction: column;
   gap: 5px;
   min-width: 0;
+  min-height: 0;
 }
 
 .ws-toast__header {
@@ -585,42 +579,80 @@
   justify-content: space-between;
   gap: 8px;
   align-items: center;
+  min-width: 0;
 }
 
 .ws-toast__source {
   color: var(--toast-accent);
   font-size: 10px;
   font-weight: 750;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ws-toast__type {
   color: var(--text-secondary);
   font-size: 9px;
+  flex-shrink: 0;
 }
 
 .ws-toast__title {
   color: var(--text-primary);
   font-size: 12px;
   line-height: 1.4;
-}
-
-.ws-toast__message {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 11px;
-  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
   overflow-wrap: anywhere;
 }
 
+.ws-toast__message {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  margin: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ----- Conteúdo com altura adaptável ----- */
+.ws-toast__body {
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+/* ----- Distribuição interna ----- */
+.ws-toast__content {
+  overflow: visible;
+  min-width: 0;
+}
+
+/* ----- Mensagem sem truncamento de linhas ----- */
+.ws-toast__message {
+  display: block;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+/* ----- Botão de fechar ----- */
 .ws-toast__close {
   display: grid;
   place-items: center;
-
   width: 23px;
   height: 23px;
   flex: 0 0 23px;
   padding: 0;
-
   border: 0;
   border-radius: 7px;
   background: transparent;
@@ -633,21 +665,22 @@
   color: var(--text-primary);
 }
 
+/* ----- Botão de ação ----- */
 .ws-toast__action {
   display: flex;
   align-items: center;
   gap: 5px;
   align-self: flex-start;
-
   margin-top: 4px;
   padding: 6px 9px;
   border: 1px solid var(--border-default);
   border-radius: 7px;
-
   background: var(--surface-secondary);
   color: var(--accent-secondary);
   font-size: 10px;
   cursor: pointer;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .ws-toast__close:focus-visible,
@@ -656,49 +689,47 @@
   outline-offset: -2px;
 }
 
-/* ==========================================================
-   Estados e transições
-   ========================================================== */
-
+/* === ESTADOS E TRANSIÇÕES DOS AVISOS === */
+/* ----- Estado compacto ----- */
 .ws-toast--compact {
   width: 52px;
   height: 52px;
   animation: ws-notify-icon-enter calc(var(--motion-scale, 1) * 220ms) ease-out both;
 }
 
+/* ----- Expansão ----- */
 .ws-toast--expanding {
   width: 52px;
   height: 52px;
   min-height: 52px;
-
-  animation: ws-notify-expand calc(var(--motion-scale, 1) * 300ms) cubic-bezier(0.22, 1, 0.36, 1)
-    both;
+  animation: ws-notify-expand calc(var(--motion-scale, 1) * 300ms) cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ----- Notificação expandida com altura dinâmica ----- */
 .ws-toast--expanded {
   width: var(--toast-expanded-width);
-  height: 84px;
+  height: auto;
   min-height: 84px;
+  max-height: min(320px, calc(100dvh - 100px));
+  align-items: stretch;
 }
 
+/* ----- Recolhimento e saída ----- */
 .ws-toast--collapsing {
   width: var(--toast-expanded-width);
-  height: 84px;
+  height: var(--toast-expanded-height);
   min-height: 52px;
-
   animation: ws-notify-collapse calc(var(--motion-scale, 1) * 200ms) ease-in both;
 }
 
 .ws-toast--leaving {
   width: 52px;
   height: 52px;
-
   animation: ws-notify-descend calc(var(--motion-scale, 1) * 260ms) ease-in both;
   pointer-events: none;
 }
 
-/* Conteúdo */
-
+/* ----- Visibilidade do conteúdo ----- */
 .ws-toast--expanding .ws-toast__body {
   animation: ws-notify-content-in calc(var(--motion-scale, 1) * 300ms) ease-out both;
 }
@@ -716,10 +747,8 @@
   visibility: hidden;
 }
 
-/* ==========================================================
-   Próximas notificações: fila de ícones
-   ========================================================== */
-
+/* === FILA DE ÍCONES PENDENTES === */
+/* ----- Distribuição ----- */
 .ws-toast-queue__pending {
   display: flex;
   align-items: center;
@@ -732,18 +761,14 @@
 .ws-toast-queue__more {
   display: grid;
   place-items: center;
-
   width: 44px;
   height: 44px;
   flex: 0 0 44px;
-
   border: 1px solid var(--border-default);
   border-radius: 12px;
-
   background: var(--surface-primary);
   color: var(--toast-accent, var(--accent-secondary));
   box-shadow: var(--shadow-floating);
-
   animation: ws-notify-pending-enter calc(var(--motion-scale, 1) * 250ms) ease-out both;
   animation-delay: calc(var(--queue-index, 0) * calc(var(--motion-scale, 1) * 80ms));
 }
@@ -754,10 +779,8 @@
   font-weight: 700;
 }
 
-/* ==========================================================
-   Keyframes
-   ========================================================== */
-
+/* === ANIMAÇÕES DOS AVISOS === */
+/* ----- Entrada do ícone ----- */
 @keyframes ws-notify-icon-enter {
   from {
     opacity: 0;
@@ -770,27 +793,26 @@
   }
 }
 
+/* ----- Expansão horizontal preservando altura dinâmica ----- */
 @keyframes ws-notify-expand {
   0% {
     width: 52px;
-    height: 52px;
   }
 
   35% {
     width: 52px;
-    height: 52px;
   }
 
   100% {
     width: var(--toast-expanded-width);
-    height: 84px;
   }
 }
 
+/* ----- Recolhimento horizontal ----- */
 @keyframes ws-notify-collapse {
   from {
     width: var(--toast-expanded-width);
-    height: 84px;
+    height: var(--toast-expanded-height);
   }
 
   to {
@@ -799,6 +821,7 @@
   }
 }
 
+/* ----- Saída vertical ----- */
 @keyframes ws-notify-descend {
   from {
     opacity: 1;
@@ -811,7 +834,9 @@
   }
 }
 
+/* ----- Entrada do conteúdo ----- */
 @keyframes ws-notify-content-in {
+
   0%,
   35% {
     opacity: 0;
@@ -822,6 +847,7 @@
   }
 }
 
+/* ----- Saída do conteúdo ----- */
 @keyframes ws-notify-content-out {
   from {
     opacity: 1;
@@ -832,6 +858,7 @@
   }
 }
 
+/* ----- Entrada dos ícones pendentes ----- */
 @keyframes ws-notify-pending-enter {
   from {
     opacity: 0;
@@ -844,16 +871,15 @@
   }
 }
 
-/* ==========================================================
-   Espaço e acessibilidade
-   ========================================================== */
-
+/* === RESPONSIVIDADE E ACESSIBILIDADE DOS AVISOS === */
+/* ----- Fila simplificada em telas menores ----- */
 @media (max-width: 1000px) {
   .ws-toast-queue__pending {
     display: none;
   }
 }
 
+/* ----- Posicionamento para dispositivos móveis ----- */
 @media (max-width: 600px) {
   .ws-toast-container {
     right: 12px;
@@ -861,7 +887,9 @@
   }
 }
 
+/* ----- Movimento reduzido pelo navegador ----- */
 @media (prefers-reduced-motion: reduce) {
+
   .ws-toast--compact,
   .ws-toast--expanding,
   .ws-toast--collapsing,
@@ -879,6 +907,7 @@
   }
 }
 
+/* ----- Movimento reduzido pelas Configurações ----- */
 :root[data-reduced-motion='true'] .ws-toast,
 :root[data-low-effects='true'] .ws-toast,
 :root[data-reduced-motion='true'] .ws-toast__body,
@@ -888,27 +917,9 @@
   animation: none !important;
 }
 
+/* ----- Posicionamento intermediário ----- */
 @media (min-width: 601px) and (max-width: 1100px) {
   .ws-toast-container {
     bottom: 84px;
   }
-}
-
-.ws-toast__body {
-  min-height: 0;
-  max-height: 100%;
-  box-sizing: border-box;
-}
-
-.ws-toast__content {
-  min-height: 0;
-  overflow: hidden;
-}
-
-.ws-toast__message {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
 }

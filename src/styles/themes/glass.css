@@ -42,7 +42,7 @@
     color-mix(in srgb, var(--surface-primary) 68%, transparent);
 }
 
-/* === Painéis flutuantes === */
+/* === PAINÉIS FLUTUANTES === */
 /* ----- Vidro compartilhado ----- */
 .taskbar-launcher--redesign,
 .taskbar-notifications,
@@ -53,13 +53,9 @@
 .taskbar-preview,
 .taskbar-context,
 .ws-mobile__panel {
-  background: var(--panel-background);
-
-  backdrop-filter:
-    blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
-
-  -webkit-backdrop-filter:
-    blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
+  background: var(--ws-window-background);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
+  backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
 }
 
 /* ----- Evitar camadas duplicadas no Mobile ----- */

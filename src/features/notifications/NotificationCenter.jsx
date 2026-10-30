@@ -6,14 +6,13 @@ import {
   CheckCheck,
   CircleAlert,
   CircleCheck,
+  ExternalLink,
   Info,
   Moon,
   Trash2,
   TriangleAlert,
   X,
-  ExternalLink,
 } from 'lucide-react';
-
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import Tooltip from '../../shared/components/Tooltip';
 import {
@@ -21,6 +20,8 @@ import {
   setDoNotDisturb,
 } from '../../core/notificationPreferences';
 
+/* === CONFIGURAÇÕES DAS NOTIFICAÇÕES === */
+/* ----- Ícones por tipo ----- */
 const ICONS = {
   info: Info,
   success: CircleCheck,
@@ -28,6 +29,7 @@ const ICONS = {
   error: CircleAlert,
 };
 
+/* === ITEM DA CENTRAL DE NOTIFICAÇÕES === */
 function NotificationItem({
   notification,
   locale,
@@ -39,6 +41,7 @@ function NotificationItem({
   const date = new Date(notification.createdAt);
   const validDate = !Number.isNaN(date.getTime());
 
+  /* === RENDERIZAÇÃO DO ITEM === */
   return (
     <article
       className={[
@@ -49,16 +52,17 @@ function NotificationItem({
           : 'taskbar-notifications__item--unread',
       ].join(' ')}
     >
+      {/* ----- Ícone da notificação ----- */}
       <span className="taskbar-notifications__item-icon">
         <Icon size={17} aria-hidden="true" />
       </span>
 
+      {/* ----- Conteúdo da notificação ----- */}
       <div className="taskbar-notifications__item-content">
         <div className="taskbar-notifications__item-top">
           <span className="taskbar-notifications__source">
             {t(notification.source)}
           </span>
-
           {validDate && (
             <time dateTime={date.toISOString()}>
               {date.toLocaleTimeString(locale, {
@@ -69,16 +73,17 @@ function NotificationItem({
           )}
         </div>
 
+        {/* ----- Título e mensagem ----- */}
         <strong className="taskbar-notifications__item-title">
           {t(notification.title)}
         </strong>
-
         {notification.message && (
           <p className="taskbar-notifications__item-message">
             {t(notification.message)}
           </p>
         )}
 
+        {/* ----- Ação da notificação ----- */}
         {notification.action?.type === 'open-app' && (
           <button
             type="button"
@@ -94,28 +99,24 @@ function NotificationItem({
         )}
       </div>
 
+      {/* ----- Ações individuais ----- */}
       <div className="taskbar-notifications__item-actions">
         {!notification.read && (
           <Tooltip content={t('Marcar como lida')}>
             <button
               type="button"
               aria-label={t('Marcar como lida')}
-              onClick={() =>
-                onNotificationAction('read', notification.id)
-              }
+              onClick={() => onNotificationAction('read', notification.id)}
             >
               <Check size={15} aria-hidden="true" />
             </button>
           </Tooltip>
         )}
-
         <Tooltip content={t('Excluir')}>
           <button
             type="button"
             aria-label={t('Excluir')}
-            onClick={() =>
-              onNotificationAction('remove', notification.id)
-            }
+            onClick={() => onNotificationAction('remove', notification.id)}
           >
             <X size={15} aria-hidden="true" />
           </button>
@@ -125,6 +126,7 @@ function NotificationItem({
   );
 }
 
+/* === CENTRAL DE NOTIFICAÇÕES === */
 export default function NotificationCenter({
   unreadCount,
   setNotificationOpen,
@@ -135,18 +137,19 @@ export default function NotificationCenter({
   const locale = useLocale();
   const { doNotDisturb } = useNotificationPreferences();
 
+  /* === RENDERIZAÇÃO DO PAINEL === */
   return (
     <section
       className="taskbar-notifications"
       role="region"
       aria-label={t('Central de notificações')}
     >
+      {/* ----- Cabeçalho ----- */}
       <header className="taskbar-notifications__header">
         <div className="taskbar-notifications__heading">
           <span className="taskbar-notifications__heading-icon">
             <Bell size={19} aria-hidden="true" />
           </span>
-
           <div>
             <strong>{t('Notificações')}</strong>
             <small>
@@ -156,7 +159,6 @@ export default function NotificationCenter({
             </small>
           </div>
         </div>
-
         <Tooltip content={t('Fechar notificações')}>
           <button
             type="button"
@@ -169,6 +171,7 @@ export default function NotificationCenter({
         </Tooltip>
       </header>
 
+      {/* ----- Controle Não Perturbe ----- */}
       <div className="taskbar-notifications__controls">
         <div className="taskbar-notifications__dnd">
           <span className="taskbar-notifications__dnd-icon">
@@ -178,7 +181,6 @@ export default function NotificationCenter({
               <Moon size={17} aria-hidden="true" />
             )}
           </span>
-
           <span className="taskbar-notifications__dnd-label">
             <strong>{t('Não Perturbe')}</strong>
             <small>
@@ -187,7 +189,6 @@ export default function NotificationCenter({
                 : t('Avisos temporários ativados')}
             </small>
           </span>
-
           <Tooltip
             content={t(
               doNotDisturb
@@ -198,8 +199,7 @@ export default function NotificationCenter({
             <button
               type="button"
               role="switch"
-              className={`taskbar-notifications__switch${doNotDisturb ? ' is-active' : ''
-                }`}
+              className={`taskbar-notifications__switch${doNotDisturb ? ' is-active' : ''}`}
               aria-checked={doNotDisturb}
               aria-label={t('Não Perturbe')}
               onClick={() => setDoNotDisturb(!doNotDisturb)}
@@ -210,13 +210,13 @@ export default function NotificationCenter({
         </div>
       </div>
 
+      {/* ----- Lista e ações gerais ----- */}
       <div className="taskbar-notifications__section">
         <div className="taskbar-notifications__section-title">
           <div>
             <strong>{t('Recentes')}</strong>
             <span>{notifications.length}</span>
           </div>
-
           <div className="taskbar-notifications__toolbar">
             <Tooltip content={t('Marcar todas como lidas')}>
               <button
@@ -228,7 +228,6 @@ export default function NotificationCenter({
                 <CheckCheck size={17} aria-hidden="true" />
               </button>
             </Tooltip>
-
             <Tooltip content={t('Limpar tudo')}>
               <button
                 type="button"
@@ -242,6 +241,7 @@ export default function NotificationCenter({
           </div>
         </div>
 
+        {/* ----- Notificações disponíveis ----- */}
         {notifications.length > 0 ? (
           <div className="taskbar-notifications__list">
             {notifications.map((notification) => (
@@ -256,15 +256,14 @@ export default function NotificationCenter({
             ))}
           </div>
         ) : (
+          /* ----- Estado vazio ----- */
           <div className="taskbar-notifications__empty">
             <div>
               <Bell size={26} aria-hidden="true" />
             </div>
             <strong>{t('Nenhuma notificação')}</strong>
             <p>
-              {t(
-                'Os avisos importantes do sistema aparecerão aqui.',
-              )}
+              {t('Os avisos importantes do sistema aparecerão aqui.')}
             </p>
           </div>
         )}
