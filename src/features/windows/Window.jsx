@@ -4,8 +4,10 @@ import useWindowInteraction from './useWindowInteraction';
 import AppHost from './AppHost';
 import useWindowMotion from './useWindowMotion';
 import Tooltip from '../../shared/components/Tooltip';
+
 /* === CONFIGURAÇÃO DAS JANELAS === */
 const RESIZE_DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+
 /* === MOLDURA E CONTROLES DA INSTÂNCIA === */
 export default function Window({
   instance,
@@ -30,11 +32,9 @@ export default function Window({
     toggleMaximize,
     handleResizeKeyDown,
     handleMoveKeyDown,
-  } = useWindowInteraction({
-    instance,
-    app,
-  });
-  /* ----- FOCAR A MOLDURA SOMENTE AO ABRIR OU RESTAURAR, SEM ROUBAR FOCO DE CAMPOS ----- */
+  } = useWindowInteraction({ instance, app });
+
+  /* ----- GERENCIAMENTO DO FOCO ----- */
   const focusStateRef = useRef(null);
   useLayoutEffect(() => {
     const previous = focusStateRef.current;
@@ -45,7 +45,21 @@ export default function Window({
         ?.focus({ preventScroll: true });
     }
   }, [active, instance.minimized, instance.closing, windowRef]);
-
+  function moveFocusOutsideWindow() {
+    const focused = document.activeElement;
+    if (!windowRef.current?.contains(focused)) return;
+    const destination = document.querySelector('.taskbar__menu-button')
+      ?? document.querySelector('.desktop__workspace');
+    destination?.focus({ preventScroll: true });
+  }
+  function handleMinimize() {
+    moveFocusOutsideWindow();
+    onMinimize();
+  }
+  function handleClose() {
+    moveFocusOutsideWindow();
+    onClose();
+  }
   const motion = useWindowMotion(instance, mode);
   const unavailable = instance.minimized || instance.closing;
   return (
@@ -60,9 +74,7 @@ export default function Window({
         'desktop-window',
         active ? 'desktop-window--active' : '',
         mode !== 'normal' ? `desktop-window--${mode}` : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      ].filter(Boolean).join(' ')}
       aria-label={t(`Janela de ${appName}`)}
       aria-hidden={unavailable || undefined}
       inert={unavailable}
@@ -75,16 +87,11 @@ export default function Window({
       }}
       onFocusCapture={recoverWindow}
       onPointerDown={(event) => {
-        if (event.target.closest('.desktop-window__controls')) {
-          return;
-        }
-
+        if (event.target.closest('.desktop-window__controls')) return;
         onActivate();
 
-        /* ----- Recuperar janela parcialmente fora do Desktop ----- */
-        if (!event.target.closest('.desktop-window__drag-area')) {
-          recoverWindow();
-        }
+        /* ----- RECUPERAÇÃO DA JANELA NO DESKTOP ----- */
+        if (!event.target.closest('.desktop-window__drag-area')) recoverWindow();
       }}
     >
       <header className="desktop-window__header">
@@ -93,9 +100,7 @@ export default function Window({
           data-active={active}
           title={active ? t('Janela ativa') : t('Janela inativa')}
         />
-
         <strong className="desktop-window__title">{t(appName)}</strong>
-
         <div
           tabIndex={0}
           role="button"
@@ -110,7 +115,6 @@ export default function Window({
           onDoubleClick={toggleMaximize}
           title={t('Arrastar para mover ou encaixar')}
         />
-
         <div className="desktop-window__controls">
           {/* ----- MINIMIZAR JANELA ----- */}
           <Tooltip content={t('Minimizar')}>
@@ -118,14 +122,13 @@ export default function Window({
               className="desktop-window__control desktop-window__control--minimize"
               type="button"
               aria-label={t('Minimizar')}
-              onClick={onMinimize}
+              onClick={handleMinimize}
             >
               <svg viewBox="0 0 12 12" aria-hidden="true">
                 <path d="M2.5 6h7" />
               </svg>
             </button>
           </Tooltip>
-
           {/* ----- MAXIMIZAR OU RESTAURAR JANELA ----- */}
           <Tooltip content={mode === 'normal' ? t('Maximizar') : t('Restaurar tamanho')}>
             <button
@@ -146,14 +149,13 @@ export default function Window({
               </svg>
             </button>
           </Tooltip>
-
           {/* ----- FECHAR JANELA ----- */}
           <Tooltip content={t('Fechar')}>
             <button
               className="desktop-window__control desktop-window__control--close"
               type="button"
               aria-label={t('Fechar')}
-              onClick={onClose}
+              onClick={handleClose}
             >
               <svg viewBox="0 0 12 12" aria-hidden="true">
                 <path d="M3 3l6 6M9 3L3 9" />
@@ -162,14 +164,12 @@ export default function Window({
           </Tooltip>
         </div>
       </header>
-
       <AppHost
         key={instance.id}
         appName={t(appName)}
         instance={instance}
         onWindowResize={resizeWindow}
       />
-
       {mode === 'normal' &&
         RESIZE_DIRECTIONS.map((direction) => (
           <div

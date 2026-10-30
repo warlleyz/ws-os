@@ -1,23 +1,26 @@
-import { executeSystemAction } from '../../services/actionService';
-import { subscribePublicData } from '../../services/publicDataService';
 import { useEffect, useState } from 'react';
-import { Search, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Search } from 'lucide-react';
 import { portfolio, contentText } from '../../content/portfolioContent';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
+import { executeSystemAction } from '../../services/actionService';
+import { subscribePublicData } from '../../services/publicDataService';
 import { fetchGithubPortfolio } from '../../services/githubService';
 import { fetchNotes, normalizeNotes } from '../../services/notesService';
 import { searchContent } from './searchService';
 
+/* === RESULTADOS DA BUSCA GLOBAL === */
 export default function GlobalSearchResults({ query, onOpen }) {
-  const locale = useLocale(),
-    [remote, setRemote] = useState({
-      query: '',
-      projects: [],
-      posts: [],
-      failed: false,
-      warnings: [],
-    });
+  const locale = useLocale();
+  const [remote, setRemote] = useState({
+    query: '',
+    projects: [],
+    posts: [],
+    failed: false,
+    warnings: [],
+  });
   const term = query.trim();
+
+  /* ----- CONSULTA DAS FONTES REMOTAS ----- */
   useEffect(() => {
     if (term.length < 2) return;
     const controller = new AbortController();
@@ -54,6 +57,8 @@ export default function GlobalSearchResults({ query, onOpen }) {
       controller.abort();
     };
   }, [term]);
+
+  /* ----- CONSOLIDAÇÃO DOS RESULTADOS ----- */
   const results = searchContent(term, {
     portfolio,
     projects: remote.query === term ? remote.projects : [],
@@ -63,6 +68,8 @@ export default function GlobalSearchResults({ query, onOpen }) {
     translate: t,
   });
   if (term.length < 2) return null;
+
+  /* === INTERFACE DOS RESULTADOS === */
   return (
     <section className="ws-global-search" aria-label={t('Conteúdo e configurações')}>
       <h3>

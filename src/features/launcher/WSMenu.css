@@ -1,16 +1,10 @@
-/* ==========================================================================
-   WS OS — WS MENU
-   Launcher integrado ao sistema de aparência V2
-   ========================================================================== */
-
-/* === 01. SUPERFÍCIE === */
+/* === SUPERFÍCIE === */
 .taskbar-launcher {
   position: relative;
   z-index: 1;
 }
 
 .taskbar-launcher--redesign.ws-menu {
-  --ws-menu-surface: var(--panel-background, var(--surface-primary));
   display: flex;
   flex-direction: column;
   isolation: isolate;
@@ -22,34 +16,14 @@
   overflow: visible;
   border: 1px solid var(--panel-border, var(--border-default));
   border-radius: 17px;
-  background: var(--ws-menu-surface);
+  background: var(--ws-window-background);
   color: var(--text-primary);
   box-shadow: var(--shadow-floating);
-  backdrop-filter: blur(var(--blur-medium));
-  -webkit-backdrop-filter: blur(var(--blur-medium));
+  backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
 }
 
-/* ----- Respeitar opções oficiais de transparência e blur ----- */
-:root[data-transparency='solid'] .taskbar-launcher--redesign.ws-menu {
-  --ws-menu-surface: var(--surface-primary);
-}
-
-:root[data-transparency='high'] .taskbar-launcher--redesign.ws-menu {
-  --ws-menu-surface: color-mix(in srgb, var(--panel-background, var(--surface-primary)) 77%, transparent);
-}
-
-:root[data-blur='off'] .taskbar-launcher--redesign.ws-menu,
-:root[data-low-effects='true'] .taskbar-launcher--redesign.ws-menu {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-:root[data-transparency='solid'] .ws-menu__sidebar,
-:root[data-transparency='solid'] .ws-menu__footer {
-  background: var(--surface-secondary);
-}
-
-/* === 02. CABEÇALHO E BUSCA === */
+/* === CABEÇALHO E BUSCA === */
 .ws-menu__top {
   display: flex;
   align-items: center;
@@ -72,8 +46,7 @@
   border-radius: 10px;
   background: var(--surface-primary);
   color: var(--text-secondary);
-  transition: border-color calc(var(--motion-scale, 1) * 140ms) ease,
-    box-shadow calc(var(--motion-scale, 1) * 140ms) ease;
+  transition: border-color calc(var(--motion-scale, 1) * 140ms) ease, box-shadow calc(var(--motion-scale, 1) * 140ms) ease;
 }
 
 .ws-menu__search:focus-within {
@@ -133,7 +106,7 @@
   letter-spacing: .1em;
 }
 
-/* === 03. NAVEGAÇÃO LATERAL === */
+/* === NAVEGAÇÃO LATERAL === */
 .ws-menu__workspace {
   display: grid;
   grid-template-columns: 133px minmax(0, 1fr);
@@ -149,7 +122,7 @@
   padding: 19px 9px 15px;
   border-right: 1px solid var(--border-default);
   border-radius: 0 0 0 8px;
-  background: color-mix(in srgb, var(--surface-secondary) 55%, transparent);
+  background: transparent;
 }
 
 .ws-menu__sidebar-label,
@@ -231,7 +204,7 @@
   color: var(--accent-secondary);
 }
 
-/* === 04. CONTEÚDO E ROLAGEM === */
+/* === CONTEÚDO E ROLAGEM === */
 .ws-menu__content {
   display: flex;
   flex-direction: column;
@@ -342,8 +315,7 @@
   color: var(--text-primary);
   text-align: left;
   cursor: pointer;
-  transition: background-color calc(var(--motion-scale, 1) * 140ms) ease,
-    border-color calc(var(--motion-scale, 1) * 140ms) ease;
+  transition: background-color calc(var(--motion-scale, 1) * 140ms) ease, border-color calc(var(--motion-scale, 1) * 140ms) ease;
 }
 
 .ws-menu__app:hover,
@@ -436,7 +408,7 @@
   outline-offset: -2px;
 }
 
-/* === 05. RODAPÉ === */
+/* === RODAPÉ === */
 .ws-menu__footer {
   display: flex;
   align-items: center;
@@ -447,7 +419,7 @@
   padding: 10px 17px;
   border-top: 1px solid var(--border-default);
   border-radius: 0 0 17px 17px;
-  background: color-mix(in srgb, var(--surface-secondary) 60%, transparent);
+  background: transparent;
 }
 
 .ws-menu__user {
@@ -495,7 +467,7 @@
   letter-spacing: .08em;
 }
 
-/* === 06. MENU DE CONTEXTO === */
+/* === MENU DE CONTEXTO === */
 .ws-menu__context {
   position: absolute;
   z-index: 100;
@@ -509,11 +481,11 @@
   padding: 7px;
   border: 1px solid var(--panel-border, var(--border-default));
   border-radius: 12px;
-  background: var(--panel-background, var(--surface-primary));
+  background: var(--panel-background);
   color: var(--text-primary);
   box-shadow: var(--shadow-floating);
-  backdrop-filter: blur(var(--blur-medium));
-  -webkit-backdrop-filter: blur(var(--blur-medium));
+  backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
   scrollbar-width: thin;
   scrollbar-color: var(--border-default) transparent;
 }
@@ -620,12 +592,12 @@
   line-height: 1.5;
 }
 
-:root[data-blur='off'] .ws-menu__context {
+:root:is([data-blur='off'], [data-transparency='solid'], [data-reduced-transparency='true'], [data-low-effects='true']) .ws-menu__context {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* === 07. RESPONSIVIDADE === */
+/* === RESPONSIVIDADE === */
 @media (max-height: 600px) {
   .taskbar-launcher--redesign.ws-menu {
     height: min(390px, calc(100dvh - 85px));

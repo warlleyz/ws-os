@@ -51,6 +51,7 @@ function isMobileViewport() {
 
 /* === Aplicativo principal === */
 export default function App() {
+
   /* ----- Preferências globais ----- */
   const locale = useLocale();
   const theme = useTheme();
@@ -118,6 +119,19 @@ export default function App() {
       }
     };
   }, [cursorMode, theme]);
+
+  /* === MENU CONTEXTUAL DO SISTEMA === */
+  // Impede o menu nativo sem interferir nos menus personalizados.
+  useEffect(() => {
+    if (typeof document.addEventListener !== 'function') return;
+    function preventNativeContextMenu(event) {
+      event.preventDefault();
+    }
+    document.addEventListener('contextmenu', preventNativeContextMenu);
+    return () => {
+      document.removeEventListener('contextmenu', preventNativeContextMenu);
+    };
+  }, []);
 
   /* === Responsividade === */
   /* ----- Alternância entre Desktop e Mobile ----- */

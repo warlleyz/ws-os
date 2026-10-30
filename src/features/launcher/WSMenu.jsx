@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from 'react';
 import { Clock3, Grid2X2, Search, Star, UserRound, X } from 'lucide-react';
-
 import GlobalSearchResults from '../search/GlobalSearchResults';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { openApp } from '../../core/appManager';
@@ -12,7 +11,6 @@ import {
   isAdminAuthenticated,
   subscribeAdminSession,
 } from '../../services/authService';
-
 import './WSMenu.css';
 import '../search/GlobalSearchResults.css';
 
@@ -44,7 +42,8 @@ export default function WSMenu({
 }) {
   useLocale();
 
-  /* ----- A identidade acompanha login, logout e expiração ----- */
+  /* ----- IDENTIDADE E ESTADO DA NAVEGAÇÃO ----- */
+  // A identidade acompanha login, logout e expiração da sessão.
   useSyncExternalStore(subscribeAdminSession, getAdminSessionVersion, () => 0);
   const authenticated = isAdminAuthenticated();
   const searching = Boolean(searchTerm);
@@ -61,7 +60,6 @@ export default function WSMenu({
     onAppAction(openApp, appId, { origin: 'search', params });
     closePanels();
   }
-
   function handleContextKeyboard(event, app) {
     if (!((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu')) return;
     event.preventDefault();
@@ -76,7 +74,6 @@ export default function WSMenu({
       app,
     );
   }
-
   return (
     <section
       className="taskbar-launcher taskbar-launcher--redesign ws-menu"
@@ -155,7 +152,6 @@ export default function WSMenu({
             </span>
           </div>
         </nav>
-
         <div className="ws-menu__content">
           <div className="ws-menu__content-heading">
             <div className="ws-menu__content-title">
@@ -170,7 +166,7 @@ export default function WSMenu({
             </span>
           </div>
 
-          {/* ----- Um único corpo rolável para busca e aplicativos ----- */}
+          {/* ----- RESULTADOS EM UM ÚNICO CORPO ROLÁVEL ----- */}
           <div className="ws-menu__results-scroll">
             <div className="ws-menu__apps" aria-label={t('Aplicativos')}>
               {visibleMenuApps.length === 0 ? (
@@ -242,14 +238,13 @@ export default function WSMenu({
         <span className="ws-menu__footer-brand">WS OS</span>
       </footer>
 
-      {/* === MENU DE CONTEXTO EXISTENTE === */}
+      {/* === MENU DE CONTEXTO === */}
       {shortcutContext &&
         (() => {
           const app = getAppDefinition(shortcutContext.appId);
           if (!app) return null;
           const isFavorite = favoriteIds.includes(shortcutContext.appId);
           const canFavorite = isFavorite || favoriteIds.length < MAX_FAVORITES;
-
           return (
             <div
               ref={shortcutContextRef}
