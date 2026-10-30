@@ -2,7 +2,7 @@
 
 # WS OS V2 — Documento mestre de revisão e conclusão
 
-- **Versão:** 1.6
+- **Versão:** 1.7
 - **Data:** 30/10/2026
 - **Projeto:** WS OS — Portfólio interativo
 - **Repositório:** https://github.com/warlleyz/ws-os
@@ -27,7 +27,7 @@ A revisão deve encerrar, em cada área:
 
 Não deixar traduções, Mobile, estados de erro ou acessibilidade de todos os aplicativos para a última etapa.
 
-Este documento consolida a direção de conclusão. Em 30/10/2026, o proprietário autorizou revisar R01–R09 e R10 até o WS Menu e corrigir erros e pendências locais, preservando suas alterações. Autorizações anteriores de etapas e commits são históricas. Não há autorização para commit, push, troca de branch/worktree, migrações, publicação ou escrita remota.
+Este documento consolida a direção de conclusão. A instrução mais recente de 30/10/2026 autoriza revisar e corrigir o projeto sequencialmente de R01 a R14, uma revisão por vez, seguindo as regras de edição e formatação do proprietário. Uma revisão somente pode ser encerrada com seus critérios verificados e as ações do proprietário resolvidas. Ao depender de algo que o assistente não possa executar, registrar a ação exata, informar o proprietário e aguardar antes de avançar. Não há autorização para commit, push, troca de branch/worktree, instalação de dependências, migração, publicação ou escrita remota indiscriminada.
 
 <!-- === 2. PRECEDÊNCIA E DECISÕES === -->
 
@@ -53,6 +53,7 @@ As autorizações antigas não constituem permissão permanente.
 
 - O sistema de demonstrações de projetos foi removido. DOOM, UZDoom e seus recursos também foram removidos; engine, SoundFont, saves e distribuição não são bloqueadores desta versão.
 - Supabase Storage privado substituiu Cloudflare R2 para arquivos oficiais.
+- Contato oferece somente mensagem profissional, por decisão do proprietário em 30/10/2026 na R11. Solicitação de horário não integra o formulário ou o aceite desta versão. Contratos e registros legados de agendamento são preservados; não implementar remoção de dados ou migração por essa decisão.
 - A antiga restrição de adiar traduções não orienta esta revisão final: traduções devem ser encerradas na própria área revisada.
 - Referências históricas a 18 aplicativos, Administração inexistente ou Mobile reservado não descrevem a base atual.
 - Recomendações e autorizações antigas de commits são históricas e não concedem permissão para commits futuros.
@@ -102,6 +103,8 @@ A WS OS apresenta um portfólio profissional por meio de uma interface inspirada
 
 Currículo funciona como atalho para o Visualizador, preservando confirmação de abertura e navegação.
 
+São 17 entradas registradas: 16 públicas e Administração protegida. No Desktop, Todos apresenta 13 entradas públicas conforme showInMenu; Editor, Visualizador e Wally Estendido usam acessos contextuais. O Mobile também oferece o Wally Estendido no catálogo.
+
 Administração é restrita. A visibilidade no catálogo não substitui autorização.
 
 <!-- ----- FORA DO ESCOPO ----- -->
@@ -109,6 +112,7 @@ Administração é restrita. A visibilidade no catálogo não substitui autoriza
 ### Fora do escopo
 
 - Retorno do sistema de demonstrações.
+- Retorno de DOOM, UZDoom ou recursos associados.
 - Execução automática de repositórios.
 - Builds de projetos de terceiros.
 - Novos runtimes ou infraestrutura remota.
@@ -125,7 +129,7 @@ Administração é restrita. A visibilidade no catálogo não substitui autoriza
 
 ### Padrão de trabalho
 
-O padrão é **desenvolvimento conjunto, manual e orientado**: o assistente examina os arquivos e entrega alterações precisas para o proprietário aplicar.
+O modo vigente é **edição direta dos incrementos locais autorizados**, com inspeção prévia do arquivo completo, preservação das funcionalidades e validação. Quando uma ação depender do proprietário, o assistente entrega instruções exatas e aguarda sua execução antes de avançar.
 
 Se o proprietário autorizar edição direta, executar apenas o incremento autorizado. Não pedir novamente autorização para ações já claramente incluídas nele.
 
@@ -136,9 +140,11 @@ Sem autorização explícita, não:
 - Fazer commits, push ou deploy além da autorização específica concedida.
 - Instalar ou atualizar dependências.
 - Aplicar migrações ou alterar recursos remotos.
-- Apagar documentos, arquivos ou dados.
+- Apagar dados pessoais, segredos, migrações ou materiais com finalidade ainda não esclarecida.
 - Aplicar ou descartar stashes.
 - Executar operações que descartem alterações.
+
+A limpeza foi autorizada expressamente pelo proprietário: arquivos comprovadamente desnecessários podem ser removidos na revisão da área responsável, após ler seu conteúdo, conferir referências e registrar a justificativa. A ausência de import, sozinha, não prova que um documento histórico, licença ou script operacional seja dispensável. A autorização não abrange sources/ do projeto ChatGPT, arquivos pessoais ou segredos locais.
 
 Leituras e verificações compatíveis com a autorização podem prosseguir. Informar quando uma verificação produzir arquivos ou alterar dados.
 
@@ -199,7 +205,7 @@ Em edição direta autorizada, esses modelos orientam o tamanho da mudança; o r
 
 ## 6. Organização, comentários e CSS
 
-Preservar arquitetura modular e responsabilidades claras.
+Preservar arquitetura modular e responsabilidades claras. Antes de modificar, ler o arquivo original completo e identificar consumidores, contratos e comportamento aprovado.
 
 - Reutilizar recursos existentes.
 - Extrair módulos quando houver responsabilidade concreta.
@@ -212,13 +218,15 @@ Preservar arquitetura modular e responsabilidades claras.
 
 ### Comentários em PT-BR
 
+Comentários de organização usam dois níveis: seções principais e subseções. Manter títulos claros, nomenclatura consistente e apenas blocos relevantes.
+
 Seção principal:
 
 `/* === CONFIGURAÇÃO === */`
 
 Subseção:
 
-`/* ----- VALIDAÇÃO DE ENTRADA ----- */`
+`/* ----- Validação de entrada ----- */`
 
 Explicação:
 
@@ -229,6 +237,17 @@ Em documentos Markdown, usar comentários HTML equivalentes de seção e subseç
 Comentários devem explicar responsabilidades, regras e decisões não evidentes. Atualizar comentários incorretos; remover os obsoletos. Não comentar operações triviais nem aumentar artificialmente os arquivos.
 
 Em JSX, utilizar a sintaxe apropriada de comentário.
+
+<!-- ----- JavaScript e JSX ----- -->
+
+### JavaScript e JSX
+
+- Indentação consistente de dois espaços.
+- Imports organizados, sem alterar dependências por conveniência.
+- Funções e blocos separados por linhas em branco.
+- Expressões longas e propriedades JSX distribuídas de forma legível.
+- Hooks, dependências e comportamento React preservados, sem novos avisos de ESLint.
+- Lógica separada da apresentação somente quando houver responsabilidade concreta.
 
 <!-- ----- CSS ----- -->
 
@@ -436,7 +455,7 @@ Aplicar somente com apontador compatível. Não substituir todos os estados por 
 | Editor          | Edição, busca/substituição, salvamento, cópia, conflito e descarte protegido                                                                                       |
 | Visualizador    | Texto, imagem e PDF, metadados, zoom/ajuste, download e fallback                                                                                                   |
 | Calculadora     | Modos existentes, operações, erros, histórico, teclado e toque                                                                                                     |
-| Jogos           | Snake, Memória, Campo Minado, Flappy Bird e Paciência; recordes e rankings suportados                                                                                            |
+| Jogos           | Snake, Memória, Campo Minado, Flappy Bird e Paciência; recordes e rankings suportados                                                                              |
 | Terminal        | Comandos existentes, ajuda, navegação, histórico e login seguro                                                                                                    |
 | Wally           | Navegação, pesquisa pública e ações locais autorizadas                                                                                                             |
 | Administração   | Conteúdo, destaques, publicações, arquivos, eventos, solicitações e moderação previstos                                                                            |
@@ -569,7 +588,6 @@ A ordem abaixo substitui a sequência antiga de execução. Os problemas conheci
 
 **Aceite:** recursos funcionando na interface real, com persistência e testes pertinentes.
 
-
 <!-- ----- ETAPA 05 — ARQUIVOS, EDITOR E VISUALIZADOR ----- -->
 
 ### Etapa 05 — Arquivos, Editor e Visualizador
@@ -577,6 +595,7 @@ A ordem abaixo substitui a sequência antiga de execução. Os problemas conheci
 **Status:** Implementada — validação local concluída, com pendências de homologação.
 
 **Escopo realizado:**
+
 - Revisão do fluxo entre Arquivos, Editor e Visualizador.
 - Validação de operações, persistência, quota e conflitos de revisão.
 - Correção da lixeira e recuperação de exclusões independentes.
@@ -589,14 +608,16 @@ A ordem abaixo substitui a sequência antiga de execução. Os problemas conheci
 - Revisão dos testes afetados pelas alterações legítimas de contrato.
 
 **Validação:**
+
 - ESLint: aprovado.
 - Build de produção: aprovado, com aviso de tamanho do bundle.
 - Testes de armazenamento e recuperação: aprovados.
 - Testes manuais de visualização, download e conflitos entre abas: aprovados.
-- Suíte completa: resultado esperado de 541/546 testes, pendente de confirmação do resumo final.
-- Falhas preexistentes: quatro relacionadas ao Snake (Etapa 08) e uma à tradução "Carga horária" em Certificados (Etapa 06).
+- Suíte completa na R04, em 30/10/2026: 552 testes aprovados, sem falhas.
+- Os resultados de 541/546 e as cinco falhas de 26/10 são históricos, não reproduzidos na suíte atual.
 
 **Pendências de homologação:**
+
 - P14: avaliar o bundle do Visualizador, atualmente com aproximadamente 621 kB.
 - Validar a integração real dos arquivos oficiais gerenciados pelo backend.
 - Homologar em dispositivos físicos e com leitor de tela.
@@ -604,8 +625,7 @@ A ordem abaixo substitui a sequência antiga de execução. Os problemas conheci
 
 **Aceite:** fluxo local entre os três aplicativos validado, com proteção contra perda de documentos, conflitos de revisão e exposição indevida nos cenários verificados. Homologação remota e de produção permanece pendente.
 
-**Encerramento:** Etapa 05 concluída funcionalmente, sujeita à confirmação final dos testes e ao registro do commit na `main`, sem push.
-
+**Encerramento:** implementação local preservada e revalidada na R04 em 30/10/2026. Commit e push continuam sujeitos à autorização explícita; não são critério técnico para aprovar os testes locais.
 
 <!-- ----- ETAPA 06 — APLICATIVOS PROFISSIONAIS ----- -->
 
@@ -725,7 +745,7 @@ Após aprovação, reabrir somente por:
 
 Antes de reabrir, indicar o motivo e limitar a correção ao impacto. Não repetir auditoria geral de módulos estáveis.
 
-Pendências externas independentes podem ser acompanhadas sem paralisar outras etapas, mas continuam bloqueando o aceite final quando obrigatórias.
+No fluxo sequencial vigente, uma pendência obrigatória da revisão atual impede o avanço à próxima revisão. Registrar responsável e ação precisa, concluir o trabalho independente da própria revisão e aguardar o proprietário. Não transferir o bloqueio para uma revisão posterior apenas para declarar 100%.
 
 <!-- === 14. TESTES E EVIDÊNCIAS === -->
 
@@ -767,24 +787,247 @@ Não exigir toda combinação cartesiana em toda alteração. Cobrir riscos e di
 
 Este é o checklist único vigente. R01–R14 são revisões de finalização da auditoria de 28/10/2026; não renumeram as 12 etapas de requisitos da seção 12. Checkpoints e seções 18 e 22–24 preservam evidências datadas, sem conceder autorizações atuais.
 
-Base: main, HEAD 48b0993d9022b306187bd48d62e766678da5e3f3, com alterações locais do proprietário preservadas. A aprovação histórica de 547 testes no checkout limpo de 28/10 não validava essas alterações. Nesta revisão, lint, build externo e 552 testes (547 existentes e cinco regressões novas) passaram após as correções locais. Percursos sem execução real permanecem não testados.
+Base da R01: main, HEAD d6c0c2f4051898d8eb5213443511b4cd63d7bed8, inicialmente limpo e sincronizado com o GitHub. A auditoria desse candidato em 30/10 aprovou lint, build externo, 552 testes e CI da execução 41; npm audit não reportou vulnerabilidades conhecidas no lockfile consultado. Essas evidências pertencem ao candidato auditado, não homologam automaticamente as alterações posteriores ou as revisões R02–R14. Os registros anteriores de 26/10 e 28/10 permanecem históricos.
 
-| Revisão | Etapas do mestre | Estado e evidência local | Pendência / responsável |
-| --- | --- | --- | --- |
-| R01 — Escopo e acompanhamento | 01 | Reconciliado em 30/10; 17 entradas, Currículo atalho, cinco jogos; sem demos/DOOM | Aceite documental / proprietário |
-| R02 — Segurança e banco | 02 | Contratos e testes negativos locais aprovados; sem consulta remota nesta revisão | Rotação/revogação, histórico real, migração incremental, RLS por identidade, D1/Turnstile e retenção / proprietário e operador autorizado |
-| R03 — Core e personalização | 03/04 | Testes locais aprovados; removida sobrescrita entre temas; percurso Desktop de troca de wallpaper verificado | Matriz física e leitor de tela / proprietário e revisor |
-| R04 — Arquivos, Editor e Visualizador | 05 | Implementação existente e testes de armazenamento/UI aprovados; build FileViewer 620,95 kB, gzip 186,51 kB | Desempenho medido no dispositivo, matriz completa e oficiais remotos / revisor e operador |
-| R05 — Conteúdo profissional | 06 | Testes de conteúdo/UI aprovados; 11 caminhos locais de certificados existentes | Conferir conteúdo dos PDFs, dados e provedores reais / proprietário e revisor |
-| R06 — Projetos e destaques | 06/07 | Testes locais de catálogo e destaques aprovados; sem demos ou ordem manual | Persistência real e decisão sobre edição concorrente sem revisão otimista / proprietário e operador |
-| R07 — Notas, apresentação e Configurações | 07/11 | Testes locais aprovados; boot e boas-vindas em duas etapas observados | Aceite bilíngue completo e backend editorial; créditos React Icons, Font Awesome 5 e Simple Icons corrigidos / proprietário e revisor |
-| R08 — Cinco jogos e Calculadora | 08 | Regras e UI com testes aprovados; início/pausa/reinício observados nos cinco jogos; traduções dinâmicas corrigidas | Percurso completo em dispositivo; rankings reais em R11 / revisor e operador |
-| R09 — Terminal, Wally e busca | 09 | Testes locais aprovados; flag do Wally e ajuda bilíngue do Terminal corrigidas; remoto continua desativado | P09: mapear aprovação e alcance de cada ação; não ampliar ferramentas arbitrariamente / proprietário e revisor |
-| R10 — Desktop e Taskbar até WS Menu | 10 | Revisão local em andamento; traduções e exclusividade do contexto corrigidas | Aceite visual/teclado, auto-hide e continuidade a partir do WS Menu / revisor e proprietário |
-| R11 — Serviços administrativos reais | 02/07 | Não executada; depende de R02 | Homologação isolada e autorizada / operador e proprietário |
-| R12 — Mobile e tablets | 10 | Não encerrada por testes locais | Dispositivo físico, orientação, teclado e navegação / proprietário e revisor |
-| R13 — Revisão transversal final | Todas/12 | Não encerrada; suíte local não equivale ao aceite final | Matriz de integração, acessibilidade e CI / revisor e proprietário |
-| R14 — Operação e publicação | 12 | Não executada | Licenças atuais, backup/restauração, rollback, limites e autorização de publicação / operador e proprietário |
+| Revisão                                         | Etapas do mestre | Estado e evidência local                                                                                                    | Pendência / responsável                                                                               |
+| ----------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| R01 — Escopo e acompanhamento                   | 01               | Concluída e aceita pelo proprietário em 30/10/2026; baseline d6c0c2f                                                        | Nenhuma pendência desta revisão                                                                       |
+| R02 — Segurança e banco                         | 02               | Finalizada por aceite explícito do proprietário em 30/10/2026; testes externos de 29/10 informados como aprovados           | Evidência local e metadados preservados; proteção de senhas desativada conhecida no aceite            |
+| R03 — Core e personalização                     | 03/04            | Finalizada por aceite explícito do proprietário em 30/10/2026; 102 testes aprovados e percurso visual registrado            | Matriz física e leitor de tela na revisão transversal                                                 |
+| R04 — Arquivos, Editor e Visualizador           | 05               | Finalizada por aceite explícito do proprietário em 30/10/2026; lint, 552 testes e build aprovados                           | Desempenho físico em R13 e arquivos gerenciados em R11                                                |
+| R05 — Conteúdo profissional                     | 06               | Finalizada por aceite explícito do proprietário em 30/10/2026; correções, lint/552 testes/build aprovados                   | Matriz física e inspeção visual integral dos comprovantes não certificadas                            |
+| R06 — Projetos e destaques                      | 06/07            | Finalizada por aceite explícito do proprietário em 30/10/2026; catálogo/README/permissões reais e 24 testes aprovados       | Concorrência conserva última gravação, sem revisão otimista                                           |
+| R07 — Notas, apresentação e Configurações       | 07/11            | Finalizada após exclusão autorizada da nota de teste e continuidade autorizada pelo proprietário                            | CRUD real da interface permanece em R11                                                               |
+| R08 — Cinco jogos e Calculadora                 | 08               | Finalizada por aceite do proprietário em 30/10/2026; percursos e testes registrados                                         | Toque físico e rankings reais nas revisões próprias                                                   |
+| R09 — Terminal, Wally e busca                   | 09               | Finalizada por aceite do proprietário em 30/10/2026; tema autorizado e lint/553 testes/build aprovados                      | Arquivos somente no app Arquivos conforme decisão vigente                                             |
+| R10 — Desktop, Taskbar, menu, painéis e widgets | 10               | Finalizada por aceite do desempenho observado pelo proprietário; lint/553 testes/build aprovados                            | Medição instrumental não realizada, sem certificação de FPS/latência                                  |
+| R11 — Serviços administrativos reais            | 02/07            | Validação local aprovada; proprietário corrigiu que não realizou testes reais e autorizou avançar                           | Homologação real não executada; não considerar produção certificada                                   |
+| R12 — Mobile e tablets                          | 10               | 22 testes locais aprovados; Home/catálogo/Currículo/retorno e orientação conferidos em emulação                             | Toque físico, teclado virtual e dispositivos reais não testados                                       |
+| R13 — Revisão transversal final                 | Todas/12         | Validação local: lint, 553 testes, build e 33 testes dirigidos aprovados; CI do commit base confirmado                      | R11 real e dispositivos/acessibilidade física não homologados; CI não cobre diff local                |
+| R14 — Operação e publicação                     | 12               | Candidato local validado: lint/554 testes/build, npm audit sem vulnerabilidades conhecidas, cabeçalhos testados em Wrangler | Sem commit/push/deploy; backup/restore, cotas e alertas não ensaiados; limites de R11/R12 preservados |
+
+<!-- ----- Validação da R02 em 30/10/2026 ----- -->
+
+### R02 — Segurança e banco: encerrada por aceite do proprietário
+
+- **Execução local:** Wrangler 4.156.0 pelo cache existente, sem instalação, deploy ou migração remota. As quatro migrações D1 foram aplicadas somente ao armazenamento descartável em entregas/ws-os-r02-wrangler-state, fora do repositório.
+- **Resultado HTTP:** oito rotas administrativas recusaram visitantes com 401 e cabeçalhos no-store/nosniff; API inexistente retornou 404 JSON. Com D1 preparado e IP de teste, JSON inválido e credenciais vazias retornaram 400; a sexta tentativa retornou 429 com Retry-After. A indisponibilidade inicial do login decorreu do D1 local vazio, sem demonstrar defeito de produção.
+- **Testes controlados:** 47 testes existentes de backend, autenticação, Worker e proteção Wally aprovados, sem falhas. Não equivalem a login real ou homologação completa de identidades.
+- **Banco real, somente leitura:** dez tabelas com RLS, Snake 397, Flappy 100000, view legada com security_invoker/security_barrier e SELECT negado a anon/authenticated; leitura pública dos IDs de destaques preservada; bucket privado de 10 MiB. Não reaplicar a migração incremental já confirmada.
+- **Informação do proprietário:** confirmou rotação/revogação e testes externos de RLS com visitante/usuário comum/admin, rankings, Turnstile e retenção realizados em 29/10/2026, com resultado aprovado. Em 30/10/2026 determinou considerar R01 e R02 finalizadas e avançar à R03. Ambiente e relatórios detalhados não foram apresentados; não atribuir esses testes ao assistente.
+- **Limites preservados no aceite:** Supabase continua remoto mesmo com Wrangler local; nenhum cron de retenção foi invocado pelo assistente. Proteção contra senhas vazadas permanece desativada no advisor; o aceite não altera essa configuração nem comprova sua correção.
+- **Próxima revisão:** R03 autorizada expressamente pelo proprietário.
+
+<!-- ----- Revisão rápida da R03 em 30/10/2026 ----- -->
+
+### R03 — Core, janelas e personalização
+
+- **Base:** main, d6c0c2f, preservadas as alterações documentais e exclusões residuais de R01/R02.
+- **Contratos controlados:** 102 testes existentes aprovados, sem falhas, em windows-interaction, navigation-pending, lifecycle, settings, settings-ui, appearance, branding, desktop, desktop-shell-ui e mobile-shell-ui. Cobrem foco/geometria, descarte e troca de shell, movimento por teclado, persistência por tema/shell, destaque automático/manual, cursor, favicon, enquadramento e restauração com preservação de dados.
+- **Percurso visual atual:** origem isolada 127.0.0.1:4194, boas-vindas em duas etapas, entrada Mobile e Desktop em 1440×900; Configurações abriu, maximizou, restaurou, minimizou e retornou pela Taskbar. Dark Green foi preservado após selecionar Light Violet e retornar ao tema escuro.
+- **Resultado:** nenhum defeito reproduzido nesse conjunto; implementação preservada, sem refatoração ou exclusão adicional. Percursos anteriores de rascunho e troca de shell permanecem registrados abaixo, complementados pelos testes atuais.
+- **Limites:** não executados nesta revisão rápida leitor de tela, toque físico ou benchmark. A matriz transversal permanece em R13; os testes controlados não são apresentados como reprodução visual de todos os casos.
+
+<!-- ----- Revisão rápida da R04 em 30/10/2026 ----- -->
+
+### R04 — Arquivos, Editor e Visualizador
+
+- **Base e modo:** main, d6c0c2f, revisão rápida local; preservadas as alterações anteriores. Aceite da R03 recebido pela instrução “r03 finalizada vai pra R04”.
+- **Correções:** src/apps/files/Files.jsx traduz os caminhos visuais das áreas do sistema, descrições, contagens, tipos e orientação de pesquisa. Nomes pessoais e caminhos virtuais canônicos foram preservados. src/apps/file-viewer/PdfPreview.jsx traduz os links acessíveis e atualiza seus rótulos após troca de idioma sem redesenhar o canvas. Catálogos PT-BR/EN receberam somente a mensagem correspondente. Formatação dos componentes tocados ajustada pelo Prettier existente.
+- **Percurso atual:** em 127.0.0.1:4195, Desktop 1440×900 e idioma EN, criada pasta R04-teste e rascunho.txt; salvo texto de duas linhas no Editor e confirmado conteúdo no Visualizador; renomeado para revisado.txt, enviado à lixeira e restaurado. Descrições e caminho visual traduzidos, nome pessoal preservado. Currículo real renderizado em 1/1 página, zoom 125%, rotação e busca por Software com cinco resultados; links com Open PDF link e noopener noreferrer.
+- **Testes controlados:** 73 testes pertinentes passaram antes da alteração; após as correções, lint e suíte completa de 552 testes aprovados, sem falhas. Incluem revisão concorrente, quota, lixeira/exclusão, importação de imagem/PDF, busca/substituição, cópia e proteção de rascunhos. Esses casos automatizados não são apresentados como todos repetidos manualmente em duas abas reais nesta revisão.
+- **Build:** saída externa em entregas/ws-os-r04-2026-10-30 aprovada. Chunk FileViewer 621,10 kB, gzip 186,55 kB; anteriormente 620,95 kB, gzip 186,50 kB. Sem alteração do limite de aviso ou refatoração para escondê-lo. Tamanho e abertura local não certificam desempenho físico; P14 permanece para medição representativa na revisão transversal.
+- **Limites:** arquivos gerenciados remotos em R11; matriz física/leitor de tela e desempenho representativo em R13. Não executada exclusão permanente via UI nesta origem; contrato coberto pelos testes. Sem remoção adicional de arquivos, migração, commit ou push.
+- **Estado:** aceita pelo proprietário em 30/10/2026 pela instrução “Esta aceita vai pra R05”.
+
+<!-- ----- Revisão rápida da R05 em 30/10/2026 ----- -->
+
+### R05 — Conteúdo profissional
+
+- **Base e escopo:** main, d6c0c2f, alterações locais anteriores preservadas. Sobre Mim, Dev Insights, Currículo e Certificados; Projetos pertence à R06 conforme a auditoria.
+- **Sobre Mim:** conteúdo PT-BR/EN lido no componente e perfil; percurso EN confirmou apresentação, formação, tecnologias, objetivos, links GitHub/LinkedIn e navegação contextual. Nenhuma experiência inventada ou conteúdo profissional reescrito.
+- **Dev Insights:** GitHub real respondeu 200 para perfil e catálogo de 16 repositórios. Worker público respondeu 200 para WakaTime em 7/30/365 dias. A janela de 30 dias retornou 25/09 a 25/10, independente da consulta de 30/10. Corrigida a UI para mostrar o período efetivo de data.start/data.end, reutilizando textos PT-BR/EN existentes; ausência, inversão ou datas inválidas não viram uma janela fictícia. Quatro verificações dirigidas do formatador passaram. Não foi alterado o provedor ou inventado dado para atualizar a janela.
+- **Currículo:** PDF versionado lido, uma página, conteúdo profissional e endereço de documento conferidos; atalho, canvas, busca, links e download já conferidos no percurso R04 e preservados. Documento continua em português também no shell EN; não foi criada tradução não aprovada do comprovante.
+- **Certificados:** 11 PDFs existentes interpretados por PDF.js. Títulos, datas e cargas presentes conferidos no texto extraído; nenhum documento alterado. GitHub Copilot Dev Days e We Make Software tinham duração apenas nas descrições: preenchido workload de 2 e 4 horas em PT-BR/EN, conforme comprovantes. Categorias Palestras/Outros ganharam tradução. Na UI EN, pesquisa Copilot + Eventos produziu um resultado, detalhes mostraram 12/05/2026 e 2 hours, com ações View/Download. A leitura textual não certifica o layout de todas as páginas nem autenticação junto aos emissores.
+- **Arquivos da R05:** src/content/portfolioContent.js (metadados e formatação), src/apps/dev-insights/DevInsights.jsx (período registrado e formatação), catálogos en.json/pt-BR.json (duas categorias) e documentação vigente. Sem exclusão adicional.
+- **Validação:** 35 testes pertinentes passaram antes das correções; após mudanças, lint, suíte completa com 552 aprovados e build externo entregas/ws-os-r05-2026-10-30 aprovados. Aviso conhecido FileViewer 621,10 kB preservado.
+- **Limites e estado:** revisão técnica rápida entregue para aceite. Testes controlados cobrem cache, falhas e navegação contextual; frontend Vite local sem Worker não homologa WakaTime remoto por si só. Inspeção visual integral de cada comprovante, toque e leitor de tela não foram certificados. Sem commit, push, alteração dos PDFs ou escrita remota.
+
+<!-- ----- Revisão da R06 em 30/10/2026 ----- -->
+
+### R06 — Projetos e destaques por ID
+
+- **Base:** main, d6c0c2f, alterações anteriores preservadas. R05 aceita pelo proprietário com “Pode avancar”.
+- **Catálogo e navegação:** prévia isolada 127.0.0.1:4195, Desktop 1440×900, EN. Carregados 16 repositórios reais, pesquisa ws-os produziu um resultado, detalhes exibiram metadados reais, README e links seguros. Voltar preservou a pesquisa. Combinação ws-os/Python produziu vazio explícito pelo filtro operado por teclado. Ordenação existente por atualização/nome preservada, sem ordem editorial manual.
+- **Destaques públicos:** Worker real respondeu 200 com repositoryIds contendo github-1369893821. Banco consultado somente em leitura: anon pode ler repository_ids, não demos, nem inserir/atualizar; políticas pública/admin preservadas. A prévia Vite não serve o Worker: seu aviso de destaques indisponíveis não reproduz falha da API pública real.
+- **Fluxo administrativo:** proprietário confirmou em 30/10/2026 que testou seleção de projetos em destaque em 29/10/2026 e funcionou. Os testes controlados complementam o relato com selecionar/remover, salvar, recuperar, projeção pública e preservação em erro. Nenhuma gravação remota foi executada pelo assistente nesta revisão.
+- **Concorrência:** contrato existente não possui controle otimista de revisão; duas gravações autorizadas podem fazer prevalecer a última seleção. Foi mantido o comportamento documentado, sem adicionar migração, revisão ou ordenação não previstas. Evitar editar a seleção simultaneamente em duas sessões. Confirmação do payload devolvido não elimina essa limitação.
+- **Validação:** 24 testes pertinentes aprovados, sem falhas, incluindo APIs, componentes, filtros/contratos, navegação, permissões e tratamento de falhas. Nenhuma regressão reproduzida que justifique reabrir a implementação. Lint/build completos da R05 permanecem a evidência anterior; não foram reexecutados como se houvesse mudança de código na R06.
+- **Alterações desta revisão:** apenas README e este acompanhamento. Sem código novo, exclusões adicionais, demos, iframe, migração, commit ou push.
+- **Estado:** revisão entregue para aceite; matriz física/Mobile transversal permanece nas revisões próprias.
+
+<!-- ----- Revisão da R07 em 30/10/2026 ----- -->
+
+### R07 — Notas, Sobre o Sistema, Configurações e boas-vindas
+
+- **Base e ambiente:** main, d6c0c2f, alterações anteriores preservadas. R06 aceita com “Pode ir”. Wrangler 4.156.0 local em 127.0.0.1:8787, assets do build externo validado na R05 e D1 local já preparado. Sem deploy, escrita editorial, curtida, login ou cron de retenção.
+- **Notas:** API real/local respondeu 200. UI PT-BR: listagem, busca sem resultado, recuperação e abertura da publicação conferidas; EN: busca, assunto, data e ação de leitura traduzidos. Dados editoriais mantidos no idioma publicado, sem tradução inventada. Anexos públicos válidos/privados, erros e navegação cobertos pelos testes controlados; a nota real não forneceu anexo para repetir o percurso completo com provedor. CRUD permanece em R11.
+- **Conteúdo de teste:** publicação c091333a-7dbe-4696-9d54-2d343155f205, título gsg, permanece pública na última consulta. Proprietário confirmou ser teste e informou que vai despublicar pela Administração. Não excluída ou modificada pelo assistente. Reconsultar /api/posts após a ação do proprietário; a retirada ainda não foi comprovada.
+- **Sobre o Sistema:** versão 2.0.0 conferida na UI EN; identidade, arquitetura, recursos e repositório preservados. Créditos presentes para React Icons, Font Awesome 5, Simple Icons, React/React DOM, Vite, Lucide e PDF.js; links HTTPS com abertura externa segura. Não foi necessário reimplementar créditos já existentes.
+- **Configurações:** percorridas as sete seções na UI PT-BR: Aparência, Idioma, Acessibilidade, Área de Trabalho, Widgets, Mobile e Restaurar. Movimento reduzido acionado; ocultar relógio retirou consumidor real. Cancelar reset preservou estado; confirmar aplicou padrões e devolveu relógio. Troca para EN atualizou interface e idioma persistiu após reload. Preferências/dados pessoais permanecem cobertos pelos testes de allowlist e restauração parcial. Não foi apresentada certificação de toda combinação visual por dispositivo.
+- **Boot e boas-vindas:** primeira visita na origem isolada apresentou boot e duas etapas; foco inicial no título, Escape não dispensou, conclusão explícita entrou no Desktop. Reload voltou ao Desktop em EN sem repetir boas-vindas.
+- **Validação:** 53 testes existentes pertinentes aprovados, zero falhas. Formatação documental e git diff --check aprovados. Sem alteração de implementação, não repetidos lint/build completos já aprovados na R05 como se fossem uma nova execução.
+- **Resolução posterior do conteúdo de teste:** em 30/10/2026, o proprietário autorizou explicitamente apagar a nota gsg. Exclusão pelo conector Supabase limitada ao ID c091333a-7dbe-4696-9d54-2d343155f205, título, status e revisão previamente conferidos. Removida uma publicação e suas duas curtidas em cascata; nenhum anexo existia. Consulta posterior confirmou zero registros desse ID e suas curtidas; /api/posts respondeu 200 com lista vazia. Essa ação não é homologação do CRUD pela interface.
+
+- **Alterações e estado anteriores à exclusão autorizada:** somente README e acompanhamento vigente nesta R07. Nenhum arquivo adicional removido. Sem commit ou push. Revisão técnica sem regressão reproduzida; pendência editorial resolvida pela exclusão autorizada registrada acima, liberando a continuidade da R08. Leitor de tela e toque físico permanecem nas revisões transversais próprias.
+
+<!-- ----- Revisão da R08 em 30/10/2026 ----- -->
+
+### R08 — Cinco jogos e Calculadora
+
+- **Base e modo:** main, d6c0c2f, alterações anteriores preservadas; revisão local em 127.0.0.1:4195, Desktop EN. R07 liberada após excluir a nota de teste autorizada e confirmar retirada pública; proprietário autorizou continuar.
+- **Snake:** catálogo, início, pausa e reinício conferidos na UI. Modelos/testes cobrem direção, colisão e limite 397.
+- **Memória:** início e revelação produziram um par, 1/8, uma tentativa; pausa e reinício conferidos. Modelo real completou oito pares e vitória em verificação controlada, sem modificar recordes da UI.
+- **Campo Minado:** primeiro clique seguro abriu área e chegou a 48% na partida observada; pausa e reinício conferidos. Modelo real confirmou derrota gameover ao revelar mina e vitória won ao revelar células seguras. O roteiro temporário inicialmente esperava o nome incorreto lost; corrigido o roteiro para o estado oficial, sem mudança no produto.
+- **Flappy Bird:** início, impulso e pausa observados; controle de voo bloqueado em pausa. Colisão, delta e suspensão cobertos pelos testes. A sessão de navegador foi encerrada entre turnos; a verificação retomou em nova aba sem declarar retomada do estado transitório antigo.
+- **Paciência:** início, Ás para base, revelação da carta anterior, compra e pausa observados; compra/destinos bloqueados em pausa, reinício acionado. Modelo real confirmou último movimento para quatro bases completas e progresso de 100%, em estado controlado. Não se apresenta esse cenário como partida completa jogada na UI.
+- **Calculadora:** UI EN confirmou -2.5+50% = -2, erro de divisão por zero, modo científico e sin(30) = 0.5 em graus, entrada por teclado e histórico. Testes existentes cobrem edição, seleção, unidade graus/radianos, persistência/falha e recuperação do histórico.
+- **Validação:** 35 testes de jogos/calculadora/rankings aprovados no início da R08 e 29 adicionais de utilitários, contratos e Mobile aprovados nesta continuação; zero falhas. Verificações dirigidas adicionais dos modelos aprovadas conforme descritas. Não houve mudança de código ou necessidade de refatoração; formatação documental e git diff --check aprovados.
+- **Limites:** UI não percorreu todas as vitórias/derrotas ou reload de cada recorde; cenários controlados e cobertura de recordes complementam o percurso rápido. Toque físico, matriz transversal e escrita/moderação de ranking real permanecem nas revisões próprias. DOOM não integra o escopo.
+- **Arquivos e estado:** somente README e acompanhamento alterados na R08; nenhum arquivo removido, commit, push ou envio de pontuação. Revisão técnica local entregue para aceite antes de R09.
+
+<!-- ----- Revisão da R09 em 30/10/2026 ----- -->
+
+### R09 — Terminal, Wally local e busca
+
+- **Base e escopo:** main, d6c0c2f, alterações anteriores preservadas. R08 aceita com “Vai”. Proprietário decidiu incluir mudança de tema pelo Wally; operações pessoais permanecem no app Arquivos. Não foi adicionada ferramenta de shell ou ação administrativa.
+- **Implementação:** wallyService reconhece pedido explícito PT/EN por tema claro/escuro e retorna sugestão, sem executar. Pedidos negados, ambíguos ou informativos não oferecem mudança. WallyPanel e WallyExtended mostram botão somente em resposta local para light/dark; o clique usa appearance.set-theme com contexto wally. Feedback distingue persistência, sessão apenas e falha. Mensagem remota não recebe o botão de tema.
+- **Traduções:** corrigidas Habilidades, ASSISTENTE e expandir/recolher campo; mensagens/botões do novo fluxo presentes em PT-BR/EN. Componentes tocados formatados, sem mudanças de CSS.
+- **Percurso visual:** prévia isolada 127.0.0.1:4195, EN. Switch to light theme manteve dark até clicar Enable light theme; clique aplicou light e Theme applied. Histórico compartilhado apareceu no modo estendido; Set dark mode ofereceu Enable dark theme e clique aplicou dark. Terminal exibiu ajuda em inglês e pwd retornou ~. Busca por aplicativos e destinos públicos já exercitada nos percursos anteriores; testes atuais conferem parâmetros, origem e acesso.
+
+| Ação registrada              | Alcance efetivo nesta versão                                 | Confirmação e acesso                                                                               |
+| ---------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| app.open                     | Wally, busca e Terminal abrem destinos públicos              | Contrato valida app público e parâmetros; Core preserva guards                                     |
+| content.search               | Busca usa consulta pública; Wally orienta e navega para apps | Sem dados privados; executor genérico não é apresentado como ferramenta de pesquisa livre do Wally |
+| appearance.set-theme         | Wally local: botão claro/escuro; Terminal: theme existente   | Clique explícito; contexto local; apenas light/dark                                                |
+| personal-files.create-folder | Aplicativo Arquivos; executor interno preservado             | Não exposto pelo Wally nesta versão                                                                |
+| personal-files.rename        | Aplicativo Arquivos; executor interno preservado             | Contrato exige confirmação; não exposto pelo Wally                                                 |
+| personal-files.trash         | Aplicativo Arquivos; executor interno preservado             | Contrato exige confirmação; não exposto pelo Wally                                                 |
+| preferences.reset            | Configurações com confirmação                                | Contexto wally é negado pelo catálogo                                                              |
+| administration.open          | Terminal/login e entradas protegidas existentes              | Exige sessão administrativa; Worker revalida; Wally não concede privilégio                         |
+
+- **Testes:** 39 pertinentes aprovados antes das alterações. Adicionada regressão de pedidos PT/EN explícitos, negados, ambíguos e informativos. Lint final aprovado; suíte final 553 testes aprovados, zero falhas; build externo entregas/ws-os-r09-final-2026-10-30 aprovado com aviso conhecido do Visualizador. Integração faltante do botão estendido detectada pelo lint durante execução foi corrigida e validada antes da entrega.
+- **Fronteiras:** Wally remoto permanece desativado. Testes cobrem sanitização de login/histórico, cancelamento, sessão, respostas tardias e conteúdo seguro. Não houve login real, segredo em histórico, ação de arquivos pelo Wally, instalação, remoção adicional, commit ou push. Matriz física permanece nas revisões próprias.
+- **Arquivos:** src/services/wallyService.js; src/features/wally/WallyPanel.jsx; src/apps/wally-extended/WallyExtended.jsx; catálogos en.json/pt-BR.json; tests/core/wally-security.test.cjs; README e este acompanhamento.
+- **Estado:** revisão técnica entregue para aceite antes da R10.
+
+<!-- ----- Revisão da R10 em 30/10/2026 ----- -->
+
+### R10 — Composição Desktop
+
+- **Base:** main, d6c0c2f, alterações anteriores preservadas; R09 aceita pelo proprietário com “Vai”. Prévia isolada 127.0.0.1:4195, Desktop EN, 1440×1000.
+- **Correção:** src/features/notifications/NotificationToasts.jsx usa tradução parametrizada para a quantidade de notificações aguardando. Mensagem adicionada aos catálogos PT-BR/EN; quantidade/fluxo da fila preservados.
+- **Janelas e Taskbar:** Sobre Mim, Projetos e Terminal mantidos montados, com minimização e restauração da instância correta pelo grupo da Taskbar. Não houve perda das instâncias observadas. Previsão, privacidade de miniaturas e grupos cobertos pelos testes pertinentes.
+- **Painéis e menu:** sequência Notificações → Controles Rápidos → WS Menu dispensou painel anterior; auto-ocultação ativada, menu permaneceu operável. Todos mostrou 13 apps públicos conforme showInMenu, sem Administração. Escape fechou o menu e devolveu foco ao WS Menu; o mesmo devolveu foco a Quick controls. Auto-ocultação restaurada ao valor original da origem de teste.
+- **Atalhos e widgets:** 49 testes pertinentes aprovados: grade em 96 combinações, áreas insuficientes, movimentação de grupo, posições inválidas, persistência, multiwidget, fuso, calendário/eventos, clima/unidades, geolocalização negada e Dev Insights. Consumidor real de visibilidade de relógio já conferido na R07. Não apresentar esses testes como todos repetidos manualmente no dispositivo físico.
+- **Validação da correção:** lint aprovado, suíte completa com 553 testes aprovados (zero falhas) e build externo entregas/ws-os-r10-2026-10-30 aprovado. Aviso conhecido FileViewer 621,10 kB preservado. Formatação e git diff --check conferidos. Sem mudança de arquitetura, remoção adicional, migração, commit ou push.
+- **Medição pendente:** as ferramentas de navegador utilizadas não forneceram captura de quadros/latência. Não foram certificados FPS, long tasks ou ausência de travamento físico com várias janelas. Tempo de build e os testes de coalescência de movimentos não substituem essa evidência. Para fechar esse critério, registrar no dispositivo alvo uma captura de desempenho durante arraste/resize e troca de foco com várias janelas, efeitos normais e baixo custo, anotando duração, fluidez e travamentos.
+- **Estado:** proprietário informou que o desempenho está bom e autorizou avançar à R11. R10 encerrada por esse aceite; tentativa de captura nativa foi interrompida pelo controle do computador por não confirmar a URL com confiança. Sem métricas instrumentais ou certificação de FPS/latência.
+
+<!-- ----- Revisão da R11 em 30/10/2026 ----- -->
+
+### R11 — Homologação administrativa e serviços
+
+- **Base:** main, d6c0c2f; alterações anteriores preservadas. R10 encerrada pelo aceite do desempenho observado pelo proprietário, sem medição instrumental.
+- **Leituras reais:** APIs públicas posts/files/events/highlights/rankings responderam 200 JSON; oito rotas auth/admin recusaram visitante com 401, no-store e nosniff. Nenhuma chamada GET retornou HTML como API. Isso não certifica usuário comum ou administrador autenticado.
+- **Decisão de Contato:** proprietário determinou manter somente mensagem e atualizar documentação. Formulário já fixava kind=message; retirado texto que prometia solicitação de horário. Backend/contratos de agendamento e registros legados preservados, sem migração.
+- **Correções locais:** Contact.jsx traduz canais, descrições, títulos, rótulos acessíveis, placeholders e verificação. Catálogos PT-BR/EN completados; interface EN conferida sem envio. README e guia operacional alinhados ao escopo vigente.
+- **Validação:** 86 testes pertinentes aprovados; após correções, lint aprovado, 553 testes completos aprovados e build externo entregas/ws-os-r11-2026-10-30 aprovado, com aviso conhecido FileViewer 621,10 kB. Formatação e git diff --check conferidos. Nenhum dado de contato enviado ou operação administrativa autenticada executada pelo assistente nesta revisão.
+- **Advisor:** permanecem os avisos já avaliados em R02: tabela post_likes sem política pública intencional, RPC de contagem pública restrita e proteção contra senhas vazadas desativada. Não foram alterados grants para silenciar alertas; configurações de Auth não modificadas.
+
+| Fluxo real                                                               | Evidência nesta R11                                                                             | Situação                                            |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Visitante nas rotas administrativas                                      | GET real retornou 401                                                                           | Conferido pelo assistente                           |
+| Usuário comum, admin, login/logout/expiração com rascunho                | Testes controlados aprovados; proprietário corrigiu posteriormente: testes reais não realizados | Não realizado; avanço autorizado                    |
+| Contato mensagem, Turnstile, recibo, idempotência e e-mail independente  | Correções locais e testes aprovados                                                             | Não realizado; avanço autorizado                    |
+| Notas: ciclo editorial, curtida, anexo e acesso após despublicação       | Testes controlados; exclusão do teste anterior não certifica CRUD UI                            | Aguardando resultado real do proprietário           |
+| Arquivos oficiais: upload, download, publicação, exclusão, reconciliação | Testes controlados aprovados                                                                    | Aguardando resultado real do proprietário           |
+| Conteúdo/eventos: revisão, datas/fusos e projeção pública                | API pública e testes controlados                                                                | Não realizado; avanço autorizado                    |
+| Destaques                                                                | Proprietário confirmou funcionamento em 29/10 na R06; API real reconferida                      | Evidência anterior preservada                       |
+| Rankings: proteção, envio, melhor resultado e moderação                  | Leitura pública e testes controlados                                                            | Aguardando resultado real do proprietário           |
+| Retenção/limpeza isolada                                                 | Proprietário confirmou teste em 29/10 na R02                                                    | Evidência anterior preservada; nenhum cron invocado |
+
+- **Limite local do Turnstile:** ao encerrar a prévia, o console registrou 110200 (domínio não autorizado). O teste visual local não certifica o desafio nem o envio; não alterar a allowlist de produção para contornar a verificação. Consultar https://developers.cloudflare.com/turnstile/additional-configuration/hostname-management/. Não reproduzido no domínio público nesta revisão.
+
+- **Retomada:** registrar quais fluxos o proprietário testou, data, resultado e eventuais falhas. Não enviar senhas/tokens ao chat. Não considerar o bloco encerrado apenas por testes Node/metadados. Sem commit, push, exclusão adicional ou escrita remota nesta R11.
+
+<!-- ----- Retificação da R11 e revisão local da R12 ----- -->
+
+### R11 — Retificação do proprietário
+
+Em 30/10/2026, o proprietário esclareceu “Nao realizei testes, se voce nao consegue realizer apenas avance”. Essa declaração substitui a indicação anterior de testes reais existentes na R11. Login/logout/expiração, Contato/Turnstile/envio, ciclo editorial/anexos, arquivos oficiais, eventos e rankings não foram homologados em fluxos reais nesta revisão. Testes automatizados e leituras remotas continuam válidos apenas em seus limites. Avanço autorizado à R12 sem certificar esses fluxos. Evidências datadas de R02/R06 não são convertidas em homologação geral da R11.
+
+### R12 — Mobile: revisão nas condições disponíveis
+
+- **Base:** main, d6c0c2f, alterações anteriores preservadas; prévia local 127.0.0.1:4195 em EN.
+- **Testes:** 22 testes existentes de mobile-shell-ui, navigation-pending e app-contracts aprovados, sem falhas; cobrem instâncias, pausa de jogos, navegação contextual, guards e retorno.
+- **Emulação:** Home e catálogo conferidos em 390×844, Wally disponível como app e Administração ausente para visitante. Currículo abriu o PDF real no Visualizador com 1/1 página, download e links; Back retornou à Home. Documento sem overflow horizontal global na leitura registrada: clientWidth=scrollWidth=380. Catálogo horizontal 844×390: clientWidth=scrollWidth=844.
+- **Limites:** emulação não equivale a dispositivo físico. Não testados toque físico, teclado virtual real, barras nativas e áreas seguras em aparelhos. Não há certificação integral de Mobile/tablet nem execução remota autenticada.
+- **Alterações:** somente registros documentais; nenhuma regressão reproduzida que exigisse mudar o shell. Sem instalação, exclusão adicional, commit ou push.
+
+<!-- ----- Revisão transversal R13 em 30/10/2026 ----- -->
+
+### R13 — Consolidação e validação transversal
+
+- **Base e autorização:** main, d6c0c2f; diff local preservado. Proprietário autorizou continuar após a revisão local da R12; as limitações anteriores não foram convertidas em homologação integral.
+- **Validação atual:** lint aprovado, suíte completa 553/553 aprovada sem falhas/cancelados/ignorados; build externo entregas/ws-os-r13-2026-10-30 aprovado. Índice principal 495,52 kB, gzip 150,52 kB; FileViewer 621,10 kB, gzip 186,55 kB. Aviso não suprimido. 33 testes selecionados de acessibilidade, i18n, app-contracts e public-data-sync aprovados.
+- **Acessos e integrações:** consolidados os percursos e contratos das revisões R03–R12. Registro com 17 entradas, Currículo como atalho, Administração protegida; catálogo Desktop público conforme showInMenu. Não se afirma novo percurso manual integral de 17 entradas autenticadas nesta R13.
+- **Cobertura transversal:** testes conferem paridade das chaves PT-BR/EN, foco/guards/limites de acesso, normalização, fallback de armazenamento, cache e sincronização. Percursos visuais datados anteriores complementam a suíte. Nenhuma regressão crítica nova reproduzida pelo conjunto executado; testes de cobertura de traduções não garantem toda string dinâmica ou conteúdo externo traduzido.
+- **Revisão do diff:** git diff --check aprovado. Inventário de 490 arquivos rastreados não encontrou ambiente local/segredo por nome na seleção consultada; padrões conhecidos de chave privada, GitHub e sb_secret não apareceram nas linhas adicionadas. Varredura limitada, sem impressão de segredos; não é garantia absoluta de ausência de credenciais. Exclusões seguem limitadas aos dois SVGs residuais autorizados na R01.
+- **CI:** remoto main continua d6c0c2f; execução 41 de Validação com success em https://github.com/warlleyz/ws-os/actions/runs/41092189534. Isso aprova somente o commit base. Alterações locais ainda não têm CI remoto; não houve commit/push autorizado.
+- **Limites preservados:** testes reais da R11 não realizados conforme retificação; toque físico, teclado virtual real, leitor de tela e zoom nativo 200% não homologados. Desempenho aceito pelo proprietário por observação, sem captura instrumental. Turnstile local com domínio não autorizado não equivale a teste de envio em produção.
+- **Alterações e continuidade:** somente documentação nesta R13; sem novo código, exclusão, publicação ou escrita remota. Revisão local concluída nos limites descritos; candidato exige consolidar os riscos/pendências operacionais na R14, sem declarar versão 100% homologada.
+
+<!-- ----- Preparação operacional da R14 em 30/10/2026 ----- -->
+
+### R14 — Candidato local e operação
+
+- **Base e autorizações:** main, d6c0c2f; R13 aceita para continuidade com “Pode tambem”. Não houve commit, push, deploy, migração ou alteração de segredo/flag remota. Candidato é o checkout com diff, não uma revisão Git publicada.
+- **Dependências e licenças:** npm audit do lockfile com ignore-scripts/package-lock-only, sem instalação, retornou zero vulnerabilidades conhecidas. Créditos dos componentes e conjuntos de ícones conferidos na R07. Varredura/inventário de assets não equivale a parecer de licença individual de todo material; demos/DOOM continuam fora do escopo.
+- **Metadados e domínio:** index.html contém título, descrição, viewport, tema e metadados sociais. Origem pública informada pelo proprietário responde HTTPS em ws-os.warlleysilvax.workers.dev. Não configurado domínio personalizado nem inventada URL canônica alternativa.
+- **Cabeçalhos corrigidos:** worker/index.js preserva assets/status/cache e aplica nosniff/referrer-policy; HTML recebe SAMEORIGIN e CSP de base-uri/object-src/frame-ancestors. Teste cobre corpo/status/cache/ETag e 304 sem corpo. Wrangler local confirmou HTML 200 com os novos cabeçalhos; produção 200 continua sem esses cabeçalhos, pois a mudança não foi publicada. Não declarar CSP restritiva de scripts/conexões ou HSTS configurado.
+- **Flags e manutenção:** wrangler.jsonc conserva requests, managed-files, rankings e retenção true; Wally remoto false; cron 0 3 * * * (03:00 UTC). Nenhuma execução manual de retenção. Binding D1 e Supabase existentes preservados; nomes dev não comprovam isolamento. Cotas/plano, orçamento, destinatário de alertas e backup remoto não foram verificados por painel nesta revisão.
+- **Validação final:** lint aprovado; 554/554 testes aprovados, zero falhas; build externo entregas/ws-os-r14-2026-10-30 aprovado. FileViewer 621,10 kB, gzip 186,55 kB, aviso preservado. Formatação e git diff --check aprovados. Sem arquivos staged; somente os dois SVGs residuais removidos na R01.
+- **Cópia local do diff:** entregas/ws-os-r14-candidato-2026-10-30.patch, fora do repositório; git apply --reverse --check validou correspondência, sem aplicar ou reverter. Esse patch preserva código/documentação, não contém backup de banco/Storage/D1/segredos.
+
+<!-- ----- Roteiro operacional, sujeito a autorização de publicação ----- -->
+
+#### Roteiro operacional manual
+
+1. **Candidato:** revisar o diff e as limitações de R11/R12; preservar o patch e identificar exatamente os arquivos antes de qualquer staging. Não incluir .env, .dev.vars, node_modules, dist ou entregas.
+2. **Dados:** em painéis autorizados, obter backup/exportação do PostgreSQL, manifestos e objetos privados do Storage e exportação D1, com data e ambiente. Armazenar com acesso restrito fora do repositório; segredos não vão ao chat. Nenhum desses backups foi criado pelo assistente.
+3. **Restauração:** restaurar as cópias em ambiente isolado e conferir schema, RLS, contagens, referências e integridade dos arquivos antes de usar como garantia operacional. Teste não executado; não apontar restore ao projeto público.
+4. **Publicação:** somente após autorização específica, criar commit(s) revisáveis, enviar e aguardar CI do novo SHA. CI da execução 41 aprova apenas a base d6c0c2f. Fazer deploy apenas do candidato identificado, sem reaplicar migrações já existentes.
+5. **Pós-publicação:** conferir HTTPS/HTML/cabeçalhos, APIs públicas, recusa do visitante em admin, Wally remoto desligado, arquivos e desafio no hostname correto. Realizar os testes administrativos ainda ausentes ou manter a liberação explicitamente limitada. Conferir cotas/alertas e monitorar erros sem dados privados.
+6. **Retorno:** preservar o artefato implantado anterior e usar rollback do Worker autorizado se necessário; verificar compatibilidade com schema e Snake 397. Rollback de código não reverte dados. Não voltar cegamente a versão com limite 222, restaurar banco sobre dados novos ou apagar arquivos para simular recuperação. Ensaiar restauração de dados separadamente com autorização.
+
+- **Resultado:** preparação local entregue. Publicação, restore/rollback real, cotas/alertas e homologações reais/físicas continuam não executados. Não declarar projeto 100% homologado ou publicado. Nenhuma dessas limitações foi ocultada pelo avanço autorizado das revisões.
+
+<!-- ----- Encerramento documental da R01 ----- -->
+
+### R01 — Registro de encerramento documental
+
+- **Escopo congelado:** 17 entradas; Currículo integrado ao Visualizador; cinco jogos; Projetos com catálogo GitHub, filtros, ordenação automática, detalhes/README, links e destaques por ID; demos e DOOM removidos; Wally remoto desativado; traduções na própria área.
+- **Baseline:** d6c0c2f, main limpa e sincronizada antes desta intervenção. CI aprovado: [execução 41](https://github.com/warlleyz/ws-os/actions/runs/41092189534).
+- **Modo vigente:** R01 → R14, uma revisão por vez. Ações externas não executáveis pelo assistente são entregues ao proprietário antes de qualquer avanço.
+- **Arquivos desta R01:** README.md e este mestre; removidos somente src/assets/react.svg e src/assets/vite.svg, logos residuais do template sem referência executável. A menção no inventário histórico não é um consumidor e foi preservada como evidência datada.
+- **Limpeza:** nenhuma migração, checkpoint, licença, comprovante, configuração local ou dado pessoal foi removido. hero.png e os logs antigos não foram considerados descartáveis apenas por ausência de import.
+- **Validação desta R01:** formatação dos dois documentos e git diff --check aprovados; lint aprovado; 552 testes aprovados, sem falhas; build externo em entregas/ws-os-r01-2026-10-30 aprovado, mantendo o aviso conhecido do Visualizador.
+- **Pendências técnicas da R01:** nenhuma identificação de escopo em aberto; não confundir esse resultado com homologação de R02–R14.
+- **Aceite do proprietário:** recebido em 30/10/2026 pela instrução “Pode ir para a R02”.
+- **Próxima revisão:** R02, iniciada após o aceite.
+
+<!-- ----- Evidências históricas anteriores desta data ----- -->
 
 ### Evidências da revisão de 30/10/2026 até o WS Menu
 
@@ -849,6 +1092,8 @@ O mestre consolida as decisões de conclusão; não reproduz literalmente todas 
 
 ## 18. Etapa 01 — Entrega e decisões vigentes
 
+> Registro histórico de 26/10/2026. Decisões de produto preservadas continuam aplicáveis quando não superadas; autorizações de execução/commit e o baseline abaixo não são atuais. O acompanhamento vigente está na seção 15.
+
 <!-- ----- AUTORIZAÇÃO E LIMITES ----- -->
 
 ### Autorização e limites
@@ -912,23 +1157,23 @@ As cinco falhas são: duas por FaJava ausente no harness, duas pelo contrato ant
 
 Cada pendência possui responsável primário. Etapas posteriores apenas validam sua integração; não repetem a auditoria completa.
 
-| ID  | Pendência / evidência                                                                   | Etapa responsável   | Critério de encerramento                                                                                 |
-| --- | --------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| P01 | Limite Snake 397 unificado no contrato, API e interface; migração incremental preparada | 02                  | Concluído localmente; aplicar e homologar a migração antes de publicar                                   |
-| P02 | Currículo confirma file-viewer e Mobile seleciona o destino efetivo                     | 03                  | Encerrado no Core; regressões e PDF real no navegador Desktop/Mobile aprovados; conteúdo permanece na 06 |
-| P03 | Preparação assíncrona consumida pelo Core | 03 | Contrato geral preservado; homologação de motor DOOM superada pela remoção |
-| P04 | Metadados de RLS/grants, bucket e histórico 005–014 conferidos no ws-os-dev             | 02                  | Ainda requer identidades reais, execução dos roteiros SQL, migração incremental e D1 remoto              |
-| P05 | Contratos locais de personalização corrigidos na Etapa 04; seção 24                     | 04 / 11             | Implementação local verificada; resta walkthrough integral de Configurações na 11                        |
-| P06 | Falhas antigas dos testes Snake | R08 | Não reproduzidas na auditoria de 28/10 nem na suíte atual; não tratar como defeito aberto |
-| P07 | Antiga ausência de tradução Carga horária | R05 | Não reproduzida na suíte atual; aceite de conteúdo em inglês permanece próprio |
-| P08 | Integridade/NOTICE de UZDoom | — | Superada pela remoção; não bloqueia a versão atual |
-| P09 | Busca/Wally expõem principalmente abertura de apps                                      | 09                  | Ações locais aprovadas alcançáveis com parâmetros, permissões e confirmação                              |
-| P10 | Risco de rolagem global Mobile e ausência de aceite físico atual                        | 10                  | Reproduzir antes de alterar; navegação, altura dinâmica, orientação e teclado aprovados                  |
-| P11 | Licenças e rastreabilidade UZDoom/SoundFont | — | Superada pela remoção; licenças dos recursos atuais permanecem em R14 |
-| P12 | Proprietário informou em 26/10/2026 que ainda não confirmou rotação/revogação           | 02                  | Bloqueio externo: confirmar correção sem divulgar credenciais ou considerar logout suficiente            |
-| P13 | Backup, restauração, rollback e limites operacionais                                    | 12                  | Procedimentos ensaiados em ambiente autorizado e compatibilidade de schema registrada                    |
-| P14 | Chunk do Visualizador acima de 500 kB                                                   | 05                  | Medir impacto e registrar solução ou justificativa; não elevar limite para esconder o aviso              |
-| P15 | Conteúdo, acessibilidade, visual, CI e integrações externas                             | Por aplicativo e 12 | Evidências efetivas e aceite do proprietário, sem falsa certificação                                     |
+| ID  | Pendência / evidência                                                                     | Etapa responsável   | Critério de encerramento                                                                                 |
+| --- | ----------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
+| P01 | Limite Snake 397 no contrato, API e banco real; migração confirmada na auditoria de 30/10 | R02                 | Falta homologar limites e permissões com identidades e operação reais; não reaplicar a migração          |
+| P02 | Currículo confirma file-viewer e Mobile seleciona o destino efetivo                       | 03                  | Encerrado no Core; regressões e PDF real no navegador Desktop/Mobile aprovados; conteúdo permanece na 06 |
+| P03 | Preparação assíncrona consumida pelo Core                                                 | 03                  | Contrato geral preservado; homologação de motor DOOM superada pela remoção                               |
+| P04 | Metadados reais: dez tabelas com RLS, bucket privado e view legada isolada em 30/10       | R02                 | Executar homologação com identidades, roteiros SQL e D1; metadados não são aceite integral               |
+| P05 | Contratos locais de personalização corrigidos na Etapa 04; seção 24                       | 04 / 11             | Implementação local verificada; resta walkthrough integral de Configurações na 11                        |
+| P06 | Falhas antigas dos testes Snake                                                           | R08                 | Não reproduzidas na auditoria de 28/10 nem na suíte atual; não tratar como defeito aberto                |
+| P07 | Antiga ausência de tradução Carga horária                                                 | R05                 | Não reproduzida na suíte atual; aceite de conteúdo em inglês permanece próprio                           |
+| P08 | Integridade/NOTICE de UZDoom                                                              | —                   | Superada pela remoção; não bloqueia a versão atual                                                       |
+| P09 | Alcance de ações do Wally/busca delimitado pelo proprietário na R09                       | R09                 | Tema por botão local implementado; arquivos somente no app Arquivos; sem ampliação administrativa        |
+| P10 | Risco de rolagem global Mobile e ausência de aceite físico atual                          | 10                  | Reproduzir antes de alterar; navegação, altura dinâmica, orientação e teclado aprovados                  |
+| P11 | Licenças e rastreabilidade UZDoom/SoundFont                                               | —                   | Superada pela remoção; licenças dos recursos atuais permanecem em R14                                    |
+| P12 | Proprietário informou em 30/10 que não sabe confirmar rotação/revogação                   | R02                 | Proprietário/operador comprovar correção sem divulgar segredos; logout isolado não comprova revogação    |
+| P13 | Backup, restauração, rollback e limites operacionais                                      | 12                  | Procedimentos ensaiados em ambiente autorizado e compatibilidade de schema registrada                    |
+| P14 | Chunk do Visualizador acima de 500 kB                                                     | 05                  | Medir impacto e registrar solução ou justificativa; não elevar limite para esconder o aviso              |
+| P15 | Conteúdo, acessibilidade, visual, CI e integrações externas                               | Por aplicativo e 12 | Evidências efetivas e aceite do proprietário, sem falsa certificação                                     |
 
 <!-- ----- ACESSOS E MATERIAIS A PREPARAR ----- -->
 
@@ -1042,7 +1287,7 @@ wrangler.jsonc já contém binding D1 e flags REQUESTS_ENABLED, MANAGED_FILES_EN
 
 ### Continuidade imediata
 
-Seguir o checklist único R01–R14 da seção 15. A revisão autorizada em 30/10 cobre R01–R09 e R10 até o WS Menu, preservando as entregas e alterações locais existentes. Os gates remotos de R02/R11 permanecem pendentes de evidência e acesso autorizado; não reconstruir aplicativos já entregues.
+Seguir o checklist único da seção 15 na ordem R01–R14, conforme a instrução mais recente. R01, R02, R03, R04, R05, R06, R07, R08, R09 e R10 foram consideradas finalizadas pelo proprietário em 30/10/2026; revisão corrente R14; avanço autorizado com a homologação real da R11 não executada. Não avançar revisões com critérios obrigatórios pendentes. Preservar entregas existentes e limitar limpeza e formatação à área revisada.
 
 <!-- === 22. ETAPA 02 — BACKEND, SEGURANÇA E DADOS === -->
 

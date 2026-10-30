@@ -7,7 +7,7 @@ const widgetDefinitions = [
     description: 'Exibe a data e a hora atuais.',
     defaultSize: { columns: 2, rows: 2 },
     allowedSizes: ['2x1', '2x2', '3x2', '3x3'],
-    defaultVisible: true,
+    defaultVisible: false,
   },
   {
     id: 'calendar',
@@ -15,7 +15,7 @@ const widgetDefinitions = [
     description: 'Exibe datas, feriados e eventos públicos.',
     defaultSize: { columns: 3, rows: 3 },
     allowedSizes: ['3x3', '4x3', '4x4'],
-    defaultVisible: true,
+    defaultVisible: false,
   },
   {
     id: 'weather',
@@ -23,7 +23,7 @@ const widgetDefinitions = [
     description: 'Exibe as condições meteorológicas e a previsão.',
     defaultSize: { columns: 3, rows: 2 },
     allowedSizes: ['2x2', '3x2', '4x3'],
-    defaultVisible: true,
+    defaultVisible: false,
   },
   {
     id: 'dev-insights',

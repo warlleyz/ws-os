@@ -1,49 +1,361 @@
+/* === CALCULADORA — IDENTIDADE WS OS V2 === */
+/* ----- Estrutura do aplicativo ----- */
 .ws-calculator {
-  max-width: 100%;
-}
-.ws-calculator__keys {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-block: 16px;
-}
-.ws-calculator__keys button {
+  --calculator-border: var(--border-default);
+  --calculator-surface: color-mix(in srgb, var(--surface-primary) 72%, transparent);
+  --calculator-key: color-mix(in srgb, var(--surface-secondary) 85%, transparent);
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
   min-width: 0;
-  padding: 10px 2px;
+  min-height: 0;
+  max-width: 100%;
+  padding: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  color: var(--text-primary);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
 }
+
+/* === CABEÇALHO === */
+/* ----- Título e modo atual ----- */
+.ws-calculator__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ws-calculator__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ws-calculator__heading h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.ws-calculator__mode-label {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+/* ----- Ativação do modo científico ----- */
+.ws-calculator__mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.ws-calculator__mode-toggle input[type='checkbox'] {
+  width: 17px;
+  height: 17px;
+  min-height: 17px;
+  margin: 0;
+  accent-color: var(--accent-secondary);
+  cursor: pointer;
+}
+
+/* === VISOR === */
+/* ----- Superfície e campos de cálculo ----- */
+.ws-calculator__display {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--calculator-border);
+  border-radius: 13px;
+  background: var(--calculator-surface);
+}
+
+.ws-calculator__expression-label {
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.ws-calculator__expression {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 18px;
+  text-align: right;
+  box-sizing: border-box;
+}
+
+.ws-calculator__expression:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
 .ws-calculator__result {
   display: block;
-  padding: 14px;
-  margin-block: 12px;
+  min-width: 0;
+  min-height: 39px;
+  margin: 0;
+  padding: 7px 0 0;
+  border: 0;
+  border-top: 1px solid var(--calculator-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--accent-secondary);
+  font-size: clamp(22px, 4.5cqi, 30px);
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: right;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.ws-calculator__error {
+  margin: 0;
+  padding: 8px 10px;
   border: 1px solid var(--border-default);
   border-radius: 8px;
   background: var(--surface-secondary);
-  font-size: 24px;
-  overflow-wrap: anywhere;
-}
-.ws-calculator input[type='checkbox'] {
-  width: 22px;
-  min-height: 22px;
+  color: var(--text-primary);
+  font-size: 11px;
+  line-height: 1.4;
 }
 
-/* === Dimensões mínimas de toque e conteúdo extenso === */
-.ws-calculator__keys button {
-  min-height: 44px;
-}
-.ws-calculator label > input:not([type='checkbox']) {
+/* === TECLADO === */
+/* ----- Grade principal ----- */
+.ws-calculator__keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
   min-width: 0;
+  margin: 0;
+}
+
+.ws-calculator__key {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 43px;
+  padding: 7px 2px;
+  border: 1px solid var(--calculator-border);
+  border-radius: 10px;
+  background: var(--calculator-key);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.ws-calculator__key:hover {
+  border-color: var(--accent-secondary);
+  background: var(--surface-secondary);
+}
+
+.ws-calculator__key:active {
+  background: var(--surface-primary);
+}
+
+.ws-calculator__key:focus-visible,
+.ws-calculator__history button:focus-visible,
+.ws-calculator__angle select:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+/* ----- Operadores e ações especiais ----- */
+.ws-calculator__key--operator {
+  color: var(--accent-secondary);
+  background: color-mix(in srgb, var(--accent-secondary) 9%, var(--calculator-key));
+}
+
+.ws-calculator__key--utility {
+  color: var(--text-secondary);
+  background: var(--calculator-surface);
+}
+
+.ws-calculator__key--equals {
+  grid-column: 1 / -1;
+  min-height: 42px;
+  border-color: var(--accent-secondary);
+  background: var(--accent-secondary);
+  color: var(--surface-primary);
+  font-weight: 800;
+}
+
+.ws-calculator__key--equals:hover {
+  border-color: var(--accent-secondary);
+  background: var(--accent-primary);
+  color: var(--surface-primary);
+}
+
+/* === FUNÇÕES CIENTÍFICAS === */
+/* ----- Seleção de unidade angular ----- */
+.ws-calculator__scientific {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--calculator-border);
+  border-radius: 12px;
+  background: var(--calculator-surface);
+}
+
+.ws-calculator__angle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.ws-calculator__angle select {
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid var(--calculator-border);
+  border-radius: 7px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+.ws-calculator__keys--scientific {
+  gap: 5px;
+}
+
+.ws-calculator__key--scientific {
+  min-height: 34px;
+  padding: 5px 2px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* === AJUDA E HISTÓRICO === */
+/* ----- Instrução de teclado ----- */
+.ws-calculator__hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* ----- Área do histórico ----- */
+.ws-calculator__history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--calculator-border);
+}
+
+.ws-calculator__history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ws-calculator__history-header h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.ws-calculator__history-header button {
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid var(--calculator-border);
+  border-radius: 7px;
+  background: var(--calculator-key);
+  color: var(--text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.ws-calculator__history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ws-calculator__history-list li {
+  min-width: 0;
+}
+
+.ws-calculator__history-list li button {
   width: 100%;
-  box-sizing: border-box;
-}
-.ws-calculator ol {
-  padding-inline-start: 1.5rem;
-}
-.ws-calculator li button {
+  min-height: 35px;
   max-width: 100%;
-  white-space: normal;
+  padding: 8px 10px;
+  border: 1px solid var(--calculator-border);
+  border-radius: 8px;
+  background: var(--calculator-surface);
+  color: var(--text-primary);
+  font-size: 11px;
+  text-align: left;
   overflow-wrap: anywhere;
-  text-align: start;
+  white-space: normal;
+  cursor: pointer;
 }
-.ws-calculator__result {
-  user-select: text;
+
+.ws-calculator__history-list li button:hover,
+.ws-calculator__history-header button:hover {
+  border-color: var(--accent-secondary);
+}
+
+/* === RESPONSIVIDADE E ACESSIBILIDADE === */
+@media (max-height: 560px) {
+  .ws-calculator {
+    gap: 9px;
+    padding: 12px;
+  }
+
+  .ws-calculator__display {
+    padding: 10px;
+  }
+
+  .ws-calculator__key {
+    min-height: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-calculator__key {
+    transition: none;
+  }
 }

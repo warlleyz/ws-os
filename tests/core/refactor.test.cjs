@@ -474,7 +474,7 @@ test('widgets recuperam estado padrão quando armazenamento falha', () => {
 
   assert.equal(state.widgets.length, m.getRegisteredWidgets().length);
   assert.equal(state.widgets[0].instanceId, 'clock-default');
-  assert.equal(state.widgets[0].visible, true);
+  assert.equal(state.widgets[0].visible, false);
   assert.equal(m.saveWidgetState(state), false);
 });
 
@@ -493,7 +493,7 @@ test('widgets recuperam dados corrompidos sem perder valores padrão', () => {
 
   assert.equal(state.widgets.length, m.getRegisteredWidgets().length);
   assert.equal(state.widgets[0].widgetId, 'clock');
-  assert.equal(state.widgets[0].visible, true);
+  assert.equal(state.widgets[0].visible, false);
   assert.equal(state.widgets[0].size.columns, 2);
   assert.equal(state.widgets[0].size.rows, 2);
 });

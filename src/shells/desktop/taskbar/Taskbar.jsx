@@ -9,17 +9,18 @@ import NotificationCenter from '../../../features/notifications/NotificationCent
 import QuickControls from '../../../features/quick-controls/QuickControls';
 import WallyPanel from '../../../features/wally/WallyPanel';
 import CalendarPanel from '../../../features/calendar/CalendarPanel';
-import WeatherPanel from '../../../features/weather/WeatherPanel';
+import WeatherPanel, { WeatherIcon } from '../../../features/weather/WeatherPanel';
 import WSMenu from '../../../features/launcher/WSMenu';
 import TaskbarPreview from './TaskbarPreview';
 import PanelLayer from '../../../features/panels/PanelLayer';
 import TaskbarApps from './TaskbarApps';
 import { resolvePanel } from '../../../core/panelManager';
-import { Bell, CloudSun, SlidersHorizontal } from 'lucide-react';
+import { Bell, SlidersHorizontal } from 'lucide-react';
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getBrandingLogo } from '../../../core/branding';
 import { useAppearance } from '../../../core/appearanceManager';
+import Tooltip from '../../../shared/components/Tooltip';
 import {
   activateApp,
   closeApp,
@@ -645,25 +646,30 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
         aria-label={t('Barra de tarefas')}
         onContextMenu={handleTaskbarContextMenu}
       >
+        {/* === MENU PRINCIPAL === */}
         <div className="taskbar__section taskbar__section--start">
-          <button
-            ref={menuButtonRef}
-            type="button"
-            className="taskbar__system-button taskbar__menu-button"
-            aria-label="WS Menu"
-            aria-expanded={menuOpen}
-            title="WS Menu"
-            onClick={toggleWSMenu}
-          >
-            <img
-              src={wsMenuLogo}
-              alt=""
-              aria-hidden="true"
-              className="taskbar__menu-logo"
-            />
-          </button>
+          <Tooltip content="WS Menu" delay={450}>
+            <button
+              ref={menuButtonRef}
+              type="button"
+              className="taskbar__system-button taskbar__menu-button"
+              aria-label="WS Menu"
+              aria-expanded={menuOpen}
+              onClick={toggleWSMenu}
+            >
+              <img
+                src={wsMenuLogo}
+                alt=""
+                aria-hidden="true"
+                className="taskbar__menu-logo"
+              />
+            </button>
+          </Tooltip>
         </div>
+
         <span className="taskbar__divider" aria-hidden="true" />
+
+        {/* === APLICATIVOS ABERTOS === */}
         {groups.length > 0 && (
           <TaskbarApps
             appsScroll={appsScroll}
@@ -682,85 +688,122 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
             handleContextKeyDown={handleContextKeyDown}
           />
         )}
-        {groups.length > 0 && <span className="taskbar__divider" aria-hidden="true" />}
+
+        {groups.length > 0 && (
+          <span className="taskbar__divider" aria-hidden="true" />
+        )}
+
+        {/* === PAINÉIS DO SISTEMA === */}
         <div className="taskbar__section taskbar__section--system">
-          <button
-            type="button"
-            className="taskbar__system-button taskbar__system-button--notifications"
-            title={t('Notificações')}
-            aria-label={
-              unreadCount > 0
-                ? `${t('Notificações')} (${unreadCount})`
-                : t('Notificações')
-            }
-            aria-expanded={notificationOpen}
-            onClick={toggleNotifications}
-          >
-            <span className="taskbar-notifications__trigger">
-              <Bell size={21} strokeWidth={2} />
-              {/* ----- Indicador de notificações não lidas ----- */}
-              {unreadCount > 0 && (
-                <span
-                  className="taskbar-notifications__dot"
-                  aria-hidden="true"
-                />
-              )}
-            </span>
-          </button>
-          <button
-            type="button"
-            className="taskbar__system-button taskbar__system-button--controls"
-            title={t('Controle Rápido')}
-            aria-label={t('Controle Rápido')}
-            aria-expanded={quickControlsOpen}
-            onClick={toggleQuickControls}
-          >
-            <SlidersHorizontal size={21} strokeWidth={2} />
-          </button>
-          <button
-            type="button"
-            className="taskbar__system-button taskbar__system-button--wally"
-            title="Wally"
-            aria-label="Wally"
-            aria-expanded={wallyOpen}
-            onClick={toggleWally}
-          >
-            <img
-              src={`${import.meta.env.BASE_URL}assets/wally/wally-rosto.svg`}
-              alt=""
-              aria-hidden="true"
-              className="taskbar__wally-avatar"
-            />
-          </button>
+          {/* ----- Notificações ----- */}
+          <Tooltip content={t('Notificações')} delay={450}>
+            <button
+              type="button"
+              className="taskbar__system-button taskbar__system-button--notifications"
+              aria-label={
+                unreadCount > 0
+                  ? `${t('Notificações')} (${unreadCount})`
+                  : t('Notificações')
+              }
+              aria-expanded={notificationOpen}
+              onClick={toggleNotifications}
+            >
+              <span className="taskbar-notifications__trigger">
+                <Bell size={21} strokeWidth={2} />
+
+                {unreadCount > 0 && (
+                  <span
+                    className="taskbar-notifications__dot"
+                    aria-hidden="true"
+                  />
+                )}
+              </span>
+            </button>
+          </Tooltip>
+
+          {/* ----- Controle Rápido ----- */}
+          <Tooltip content={t('Controle Rápido')} delay={450}>
+            <button
+              type="button"
+              className="taskbar__system-button taskbar__system-button--controls"
+              aria-label={t('Controle Rápido')}
+              aria-expanded={quickControlsOpen}
+              onClick={toggleQuickControls}
+            >
+              <SlidersHorizontal size={21} strokeWidth={2} />
+            </button>
+          </Tooltip>
+
+          {/* ----- Wally ----- */}
+          <Tooltip content="Wally" delay={450}>
+            <button
+              type="button"
+              className="taskbar__system-button taskbar__system-button--wally"
+              aria-label="Wally"
+              aria-expanded={wallyOpen}
+              onClick={toggleWally}
+            >
+              <img
+                src={`${import.meta.env.BASE_URL}assets/wally/wally-rosto.svg`}
+                alt=""
+                aria-hidden="true"
+                className="taskbar__wally-avatar"
+              />
+            </button>
+          </Tooltip>
         </div>
+
         <span className="taskbar__divider" aria-hidden="true" />
+
+        {/* === CLIMA E RELÓGIO === */}
         <div className="taskbar__weather-group">
-          <button
-            type="button"
-            className="taskbar__weather"
-            title={t('Clima')}
-            aria-label={weather ? `${t('Clima')}: ${Math.round(weather.temperature_2m)}°` : t('Clima')}
-            aria-expanded={weatherOpen}
-            onClick={toggleWeather}
-          >
-            <CloudSun size={21} strokeWidth={1.9} />
-            {weather && (
-              <span className="taskbar__temperature">{Math.round(weather.temperature_2m)}°</span>
-            )}
-          </button>
-          <button
-            type="button"
-            className="taskbar__clock"
-            title={dateText}
-            aria-label={t(`Calendário, ${dateText}`)}
-            aria-expanded={calendarOpen}
-            onClick={toggleCalendar}
-          >
-            <span className="taskbar__datetime">
-              <time dateTime={currentTime.toISOString()}>{timeText}</time>
-              <span className="taskbar__date">{shortDateText}</span>
-            </span>
-          </button>
+          {/* ----- Clima ----- */}
+          <Tooltip content={t('Clima')} delay={450}>
+            <button
+              type="button"
+              className="taskbar__weather"
+              aria-label={
+                weather
+                  ? `${t('Clima')}: ${Math.round(weather.temperature_2m)}°`
+                  : t('Clima')
+              }
+              aria-expanded={weatherOpen}
+              onClick={toggleWeather}
+            >
+              {/* ----- Ícone correspondente à condição meteorológica atual ----- */}
+              <WeatherIcon
+                code={weather?.weather_code}
+                size={21}
+              />  
+
+              {weather && (
+                <span className="taskbar__temperature">
+                  {Math.round(weather.temperature_2m)}°
+                </span>
+              )}
+            </button>
+          </Tooltip>
+
+          {/* ----- Relógio e Calendário ----- */}
+          <Tooltip content={dateText} delay={450}>
+            <button
+              type="button"
+              className="taskbar__clock"
+              aria-label={t(`Calendário, ${dateText}`)}
+              aria-expanded={calendarOpen}
+              onClick={toggleCalendar}
+            >
+              <span className="taskbar__datetime">
+                <time dateTime={currentTime.toISOString()}>
+                  {timeText}
+                </time>
+
+                <span className="taskbar__date">
+                  {shortDateText}
+                </span>
+              </span>
+            </button>
+          </Tooltip>
         </div>
       </nav>
     </div>

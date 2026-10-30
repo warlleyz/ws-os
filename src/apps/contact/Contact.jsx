@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowUpRight,
@@ -75,31 +74,26 @@ function contactLinks(locale) {
   return CHANNELS.map((channel) => {
     const record = links.find(
       (item) =>
-        contentText(item.label, locale)
-          .toLocaleLowerCase() === channel.label.toLocaleLowerCase(),
+        contentText(item.label, locale).toLocaleLowerCase() === channel.label.toLocaleLowerCase(),
     );
 
     const url = record ? safeContactUrl(record.url) : null;
 
     return url
       ? {
-        ...channel,
-        url,
-      }
+          ...channel,
+          url,
+        }
       : null;
   }).filter(Boolean);
 }
 
 function contactEmail() {
-  const emailLink = (portfolio.contact?.links ?? []).find(
-    (item) => item.label === 'E-mail',
-  );
+  const emailLink = (portfolio.contact?.links ?? []).find((item) => item.label === 'E-mail');
 
   const url = emailLink ? safeContactUrl(emailLink.url) : null;
 
-  return url?.startsWith('mailto:')
-    ? { url, address: url.slice(7).split('?')[0] }
-    : null;
+  return url?.startsWith('mailto:') ? { url, address: url.slice(7).split('?')[0] } : null;
 }
 
 /* === Cabeçalho V2 === */
@@ -107,22 +101,14 @@ function ContactHeader() {
   return (
     <header className="ws-contact__hero">
       <div className="ws-contact__hero-copy">
-        <span className="ws-contact__eyebrow">
-          WS OS / CONTACT
-        </span>
+        <span className="ws-contact__eyebrow">WS OS / CONTACT</span>
 
         <h2>{t('Contato')}</h2>
 
-        <p>
-          {t('Envie uma mensagem profissional ou solicite um horário para análise.')}
-        </p>
+        <p>{t('Envie uma mensagem profissional.')}</p>
       </div>
 
-      <MessageCircle
-        className="ws-contact__hero-icon"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      />
+      <MessageCircle className="ws-contact__hero-icon" strokeWidth={1.5} aria-hidden="true" />
     </header>
   );
 }
@@ -133,24 +119,19 @@ function ContactChannels({ locale }) {
   const email = contactEmail();
 
   return (
-    <section className="ws-contact__channels" aria-label="Canais de contato">
+    <section className="ws-contact__channels" aria-label={t('Canais de contato')}>
       <div className="ws-contact__section-heading">
         <div>
-          <span className="ws-contact__section-eyebrow">
-            CONEXÕES
-          </span>
+          <span className="ws-contact__section-eyebrow">{t('CONEXÕES')}</span>
 
-          <h3>Canais profissionais</h3>
+          <h3>{t('Canais profissionais')}</h3>
 
-          <p>Escolha a plataforma que preferir para entrar em contato.</p>
+          <p>{t('Escolha a plataforma que preferir para entrar em contato.')}</p>
         </div>
       </div>
 
       {email && (
-        <a
-          className="ws-contact__email"
-          href={email.url}
-        >
+        <a className="ws-contact__email" href={email.url}>
           <span className="ws-contact__email-icon">
             <Mail size={21} strokeWidth={1.7} aria-hidden="true" />
           </span>
@@ -160,11 +141,7 @@ function ContactChannels({ locale }) {
             <strong>{email.address}</strong>
           </span>
 
-          <ArrowUpRight
-            size={19}
-            className="ws-contact__email-arrow"
-            aria-hidden="true"
-          />
+          <ArrowUpRight size={19} className="ws-contact__email-arrow" aria-hidden="true" />
         </a>
       )}
 
@@ -179,7 +156,7 @@ function ContactChannels({ locale }) {
               href={channel.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`${channel.label} — abrir em nova aba`}
+              aria-label={`${channel.label} — ${t('Abrir em nova aba')}`}
             >
               <div className="ws-contact__channel-top">
                 <span className="ws-contact__channel-icon">
@@ -195,11 +172,11 @@ function ContactChannels({ locale }) {
 
               <div className="ws-contact__channel-copy">
                 <strong>{channel.label}</strong>
-                <p>{channel.description}</p>
+                <p>{t(channel.description)}</p>
               </div>
 
               <span className="ws-contact__channel-action">
-                Acessar perfil
+                {t('Acessar perfil')}
                 <ArrowUpRight size={15} aria-hidden="true" />
               </span>
             </a>
@@ -247,14 +224,7 @@ export default function Contact({ instance }) {
   /* ----- Proteção de alterações não salvas ----- */
   useUnsavedChanges(
     instance?.id,
-    Boolean(
-      form.name ||
-      form.email ||
-      form.message ||
-      form.consent ||
-      busy ||
-      uncertain,
-    ),
+    Boolean(form.name || form.email || form.message || form.consent || busy || uncertain),
   );
 
   /* ----- Atualização dos campos ----- */
@@ -274,11 +244,7 @@ export default function Contact({ instance }) {
   async function submit(event) {
     event.preventDefault();
 
-    if (
-      requestRef.current ||
-      !token ||
-      !isContactConfigured()
-    ) {
+    if (requestRef.current || !token || !isContactConfigured()) {
       return;
     }
 
@@ -321,9 +287,7 @@ export default function Contact({ instance }) {
       }
 
       const resultUncertain = Boolean(
-        pendingRef.current &&
-        controller &&
-        (uncertain || isContactResultUncertain(error)),
+        pendingRef.current && controller && (uncertain || isContactResultUncertain(error)),
       );
 
       if (!resultUncertain) {
@@ -361,15 +325,11 @@ export default function Contact({ instance }) {
       <section className="ws-contact__message-section">
         <div className="ws-contact__section-heading">
           <div>
-            <span className="ws-contact__section-eyebrow">
-              MENSAGEM DIRETA
-            </span>
+            <span className="ws-contact__section-eyebrow">{t('MENSAGEM DIRETA')}</span>
 
             <h3>{t('Enviar mensagem')}</h3>
 
-            <p>
-              Preencha os campos abaixo para enviar uma mensagem profissional.
-            </p>
+            <p>{t('Preencha os campos abaixo para enviar uma mensagem profissional.')}</p>
           </div>
 
           <span className="ws-contact__section-icon">
@@ -387,18 +347,9 @@ export default function Contact({ instance }) {
           </div>
         )}
 
-        <form
-          className="ws-contact__form"
-          onSubmit={submit}
-          aria-busy={busy}
-        >
-          <fieldset
-            className="ws-contact__fields"
-            disabled={busy}
-          >
-            <legend className="ws-contact__legend">
-              {t('Enviar mensagem')}
-            </legend>
+        <form className="ws-contact__form" onSubmit={submit} aria-busy={busy}>
+          <fieldset className="ws-contact__fields" disabled={busy}>
+            <legend className="ws-contact__legend">{t('Enviar mensagem')}</legend>
 
             <div className="ws-contact__field-row">
               <label className="ws-contact__field">
@@ -407,11 +358,9 @@ export default function Contact({ instance }) {
                 <input
                   type="text"
                   autoComplete="name"
-                  placeholder="Seu nome"
+                  placeholder={t('Seu nome')}
                   value={form.name}
-                  onChange={(event) =>
-                    updateField('name', event.target.value)
-                  }
+                  onChange={(event) => updateField('name', event.target.value)}
                   readOnly={uncertain}
                   minLength={2}
                   maxLength={100}
@@ -425,11 +374,9 @@ export default function Contact({ instance }) {
                 <input
                   type="email"
                   autoComplete="email"
-                  placeholder="seu@email.com"
+                  placeholder={t('seu@email.com')}
                   value={form.email}
-                  onChange={(event) =>
-                    updateField('email', event.target.value)
-                  }
+                  onChange={(event) => updateField('email', event.target.value)}
                   readOnly={uncertain}
                   maxLength={254}
                   required
@@ -442,11 +389,9 @@ export default function Contact({ instance }) {
 
               <textarea
                 rows={6}
-                placeholder="Escreva sua mensagem..."
+                placeholder={t('Escreva sua mensagem...')}
                 value={form.message}
-                onChange={(event) =>
-                  updateField('message', event.target.value)
-                }
+                onChange={(event) => updateField('message', event.target.value)}
                 readOnly={uncertain}
                 minLength={10}
                 maxLength={5000}
@@ -455,19 +400,13 @@ export default function Contact({ instance }) {
             </label>
 
             {/* ----- Campo invisível de proteção anti-spam ----- */}
-            <label
-              className="ws-contact__honeypot"
-              aria-hidden="true"
-            >
+            <label className="ws-contact__honeypot" aria-hidden="true">
               Website
-
               <input
                 tabIndex={-1}
                 autoComplete="off"
                 value={form.website}
-                onChange={(event) =>
-                  updateField('website', event.target.value)
-                }
+                onChange={(event) => updateField('website', event.target.value)}
                 readOnly={uncertain}
               />
             </label>
@@ -477,16 +416,12 @@ export default function Contact({ instance }) {
               <input
                 type="checkbox"
                 checked={form.consent}
-                onChange={(event) =>
-                  updateField('consent', event.target.checked)
-                }
+                onChange={(event) => updateField('consent', event.target.checked)}
                 disabled={locked}
                 required
               />
 
-              <span>
-                {t('Concordo em enviar estes dados para receber uma resposta.')}
-              </span>
+              <span>{t('Concordo em enviar estes dados para receber uma resposta.')}</span>
             </label>
           </fieldset>
 
@@ -494,19 +429,12 @@ export default function Contact({ instance }) {
           <div className="ws-contact__form-footer">
             <div className="ws-contact__protection">
               <div className="ws-contact__protection-label">
-                <ShieldCheck
-                  size={16}
-                  aria-hidden="true"
-                />
-                <span>Verificação de segurança</span>
+                <ShieldCheck size={16} aria-hidden="true" />
+                <span>{t('Verificação de segurança')}</span>
               </div>
 
               <div className="ws-contact__verification">
-                <WallyTurnstile
-                  key={verification}
-                  onTokenChange={setToken}
-                  action="public-write"
-                />
+                <WallyTurnstile key={verification} onTokenChange={setToken} action="public-write" />
               </div>
             </div>
 
@@ -532,22 +460,10 @@ export default function Contact({ instance }) {
           {/* === Feedback da operação === */}
           {message && (
             <div
-              className={[
-                'ws-contact__feedback',
-                `ws-contact__feedback--${status}`,
-              ].join(' ')}
-              role={
-                status === 'error' || uncertain
-                  ? 'alert'
-                  : 'status'
-              }
+              className={['ws-contact__feedback', `ws-contact__feedback--${status}`].join(' ')}
+              role={status === 'error' || uncertain ? 'alert' : 'status'}
             >
-              {status === 'success' && (
-                <CheckCircle2
-                  size={18}
-                  aria-hidden="true"
-                />
-              )}
+              {status === 'success' && <CheckCircle2 size={18} aria-hidden="true" />}
 
               <p>{t(message)}</p>
             </div>
@@ -555,22 +471,15 @@ export default function Contact({ instance }) {
 
           {/* ----- Comprovante de solicitação ----- */}
           {receipt && (
-            <section
-              className="ws-contact__receipt"
-              aria-label={t('Solicitações')}
-            >
+            <section className="ws-contact__receipt" aria-label={t('Solicitações')}>
               <div className="ws-contact__receipt-heading">
-                <CheckCircle2
-                  size={18}
-                  aria-hidden="true"
-                />
+                <CheckCircle2 size={18} aria-hidden="true" />
 
                 <strong>{t('Solicitações')}</strong>
               </div>
 
               <p>
-                {t('Solicitações')}:{' '}
-                <strong>{receipt.requestId}</strong>
+                {t('Solicitações')}: <strong>{receipt.requestId}</strong>
               </p>
 
               <p>

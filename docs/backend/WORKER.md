@@ -54,3 +54,11 @@ DOOM/UZDoom e o tratamento específico de seus recursos foram removidos. Não h�
 Vite dev/preview servem somente o frontend. Testes Node exercitam o entrypoint real com Request/Response e dependências controladas; não substituem workerd/Cloudflare, RLS ou fornecedores reais. Flags existentes não comprovam publicação/homologação.
 
 Arquivos oficiais utilizam o bucket privado ws-os-official-files, acessado pelo Worker. Ver [configuração](CONFIGURACAO.md) e o [registro histórico de homologação](../finalizacao/ETAPAS-03-04-ENTREGA.md). Nenhuma operação remota foi executada na Etapa 01.
+
+<!-- === CABEÇALHOS DOS ASSETS — R14 === -->
+
+## Cabeçalhos dos assets — R14
+
+O candidato local adiciona X-Content-Type-Options: nosniff e Referrer-Policy: strict-origin-when-cross-origin aos assets, preservando corpo, status, ETag e cache. Respostas text/html recebem X-Frame-Options: SAMEORIGIN e Content-Security-Policy: base-uri 'self'; object-src 'none'; frame-ancestors 'self'. Essa CSP limita base, objetos e incorporação; não é uma allowlist restritiva de scripts/conexões. Não foi alterado o HSTS da borda. APIs conservam suas próprias políticas.
+
+Validado em testes Node e Wrangler local em 30/10/2026, incluindo resposta 304 sem corpo. O domínio público consultado ainda não possuía esses cabeçalhos: nenhuma publicação foi executada. Backup, restore e rollback operacional continuam descritos no checklist único do mestre.

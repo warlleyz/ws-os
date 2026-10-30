@@ -132,3 +132,32 @@ test('Wally cliente só usa remoto com opt-in true e verificação', async () =>
     assert.equal(remoteCalls, flag === 'true' ? 1 : 0);
   }
 });
+
+/* === MUDANÇA LOCAL DE TEMA AUTORIZADA === */
+test('Wally oferece tema por pedido explícito sem executar, interpretar ambiguidade ou aceitar negação', () => {
+  const source = read('src/services/wallyService.js').replace(/export /g, '');
+  const answer = vm.runInNewContext('(()=>{' + source + ';return localWallyAnswer})()');
+  for (const [question, theme, locale] of [
+    ['Mude para o tema claro', 'light', 'pt-BR'],
+    ['Troque para o tema escuro', 'dark', 'pt-BR'],
+    ['Switch to light theme', 'light', 'en'],
+    ['Set dark mode', 'dark', 'en'],
+  ]) {
+    const response = answer(question, '', locale);
+    assert.equal(response.actions.length, 1);
+    assert.equal(response.actions[0].type, 'set-theme');
+    assert.equal(response.actions[0].theme, theme);
+  }
+  for (const question of [
+    'Não mude o tema claro',
+    'Do not switch to dark theme',
+    'Mude o tema claro ou escuro',
+    'Explique o tema claro',
+    'Crie uma pasta',
+  ]) {
+    assert.equal(
+      answer(question).actions.some((action) => action.type === 'set-theme'),
+      false,
+    );
+  }
+});

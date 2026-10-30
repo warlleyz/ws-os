@@ -53,7 +53,7 @@ function WallyWelcome({ onAsk }) {
         <div className="wally-ext__welcome-copy">
           <span className="wally-ext__eyebrow">
             <Sparkles size={14} aria-hidden="true" />
-            WS OS / ASSISTENTE
+            WS OS / {t('ASSISTENTE')}
           </span>
           <h3>{t('Como posso ajudar você?')}</h3>
           <p>
@@ -82,7 +82,7 @@ function WallyWelcome({ onAsk }) {
 }
 
 /* === HISTÓRICO DE CONVERSA === */
-function WallyMessages({ messages, onOpenApp }) {
+function WallyMessages({ messages, onOpenApp, onTheme }) {
   return (
     <div className="wally-ext__messages">
       {messages.map((message) => {
@@ -95,30 +95,49 @@ function WallyMessages({ messages, onOpenApp }) {
             {/* ----- Identificação e conteúdo ----- */}
             {!isUser && <WallyAvatar />}
             <div className="wally-ext__message-content">
-              <span className="wally-ext__message-author">
-                {isUser ? t('Você') : 'Wally'}
-              </span>
+              <span className="wally-ext__message-author">{isUser ? t('Você') : 'Wally'}</span>
               <div className="wally-ext__bubble">
                 <p>{isUser ? message.text : t(message.text)}</p>
                 {message.cancelled && (
                   <span className="wally-ext__cancelled">{t('Resposta cancelada')}</span>
                 )}
-                {!isUser && message.actions
-                  ?.filter((action) => action.type === 'open-app' && getAppDefinition(action.appId)?.public)
-                  .map((action) => {
-                    const app = getAppDefinition(action.appId);
-                    return (
+                {!isUser &&
+                  message.provider === 'local' &&
+                  message.actions
+                    ?.filter(
+                      (action) =>
+                        action.type === 'set-theme' && ['dark', 'light'].includes(action.theme),
+                    )
+                    .map((action) => (
                       <button
-                        key={action.appId}
+                        key={action.theme}
                         type="button"
                         className="wally-ext__app-link"
-                        onClick={() => onOpenApp(action.appId)}
+                        onClick={() => onTheme(action.theme)}
                       >
-                        <ExternalLink size={14} aria-hidden="true" />
-                        {t(app.name)}
+                        {t(action.theme === 'light' ? 'Ativar tema claro' : 'Ativar tema escuro')}
                       </button>
-                    );
-                  })}
+                    ))}
+                {!isUser &&
+                  message.actions
+                    ?.filter(
+                      (action) =>
+                        action.type === 'open-app' && getAppDefinition(action.appId)?.public,
+                    )
+                    .map((action) => {
+                      const app = getAppDefinition(action.appId);
+                      return (
+                        <button
+                          key={action.appId}
+                          type="button"
+                          className="wally-ext__app-link"
+                          onClick={() => onOpenApp(action.appId)}
+                        >
+                          <ExternalLink size={14} aria-hidden="true" />
+                          {t(app.name)}
+                        </button>
+                      );
+                    })}
               </div>
               {!isUser && message.provider && (
                 <span className="wally-ext__message-provider">
@@ -138,6 +157,7 @@ export default function WallyExtended({ instance }) {
   useLocale();
   const { run } = useSystem();
   const [question, setQuestion] = useState('');
+  const [actionFeedback, setActionFeedback] = useState('');
   const [composerExpanded, setComposerExpanded] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState(null);
   const [verificationKey, setVerificationKey] = useState(0);
@@ -163,6 +183,22 @@ export default function WallyExtended({ instance }) {
       behavior: 'smooth',
     });
   }, [messages, status]);
+
+  /* ----- Aplicar somente o tema oferecido por uma resposta local ----- */
+  async function applyTheme(theme) {
+    if (!['dark', 'light'].includes(theme)) return;
+    const result = await executeSystemAction(
+      { id: 'appearance.set-theme', params: { theme } },
+      { run, context: 'wally', origin: 'wally-extended', originInstanceId: instance?.id },
+    );
+    setActionFeedback(
+      !result.ok
+        ? 'Não foi possível alterar o tema.'
+        : result.result?.persisted === false
+          ? 'Tema aplicado somente nesta sessão.'
+          : 'Tema aplicado.',
+    );
+  }
 
   /* ----- Enviar uma pergunta ----- */
   async function submitQuestion(value) {
@@ -248,7 +284,7 @@ export default function WallyExtended({ instance }) {
           <WallyWelcome onAsk={(value) => void submitQuestion(value)} />
         )}
         {messages.length > 0 && (
-          <WallyMessages messages={messages} onOpenApp={openRelatedApp} />
+          <WallyMessages messages={messages} onOpenApp={openRelatedApp} onTheme={applyTheme} />
         )}
         {isResponding && (
           <div className="wally-ext__thinking" role="status">
@@ -267,6 +303,7 @@ export default function WallyExtended({ instance }) {
 
       {/* ----- Redação e envio de mensagens ----- */}
       <div className="wally-ext__bottom">
+        {actionFeedback && <p role="status">{t(actionFeedback)}</p>}
         {status === 'error' && (
           <p className="wally-ext__notice" role="alert">
             {t('Não foi possível gerar uma resposta.')}
@@ -279,10 +316,7 @@ export default function WallyExtended({ instance }) {
         )}
         {remoteEnabled && (
           <div className="wally-ext__turnstile">
-            <WallyTurnstile
-              key={verificationKey}
-              onTokenChange={setTurnstileToken}
-            />
+            <WallyTurnstile key={verificationKey} onTokenChange={setTurnstileToken} />
           </div>
         )}
         <form
@@ -307,7 +341,9 @@ export default function WallyExtended({ instance }) {
             <button
               type="button"
               className="wally-ext__expand-button"
-              aria-label={t(composerExpanded ? 'Recolher campo de texto' : 'Expandir campo de texto')}
+              aria-label={t(
+                composerExpanded ? 'Recolher campo de texto' : 'Expandir campo de texto',
+              )}
               aria-pressed={composerExpanded}
               onClick={() => setComposerExpanded((current) => !current)}
             >

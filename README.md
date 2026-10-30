@@ -8,9 +8,9 @@ Portfólio profissional de Warlley Silva, com experiências Desktop e Mobile em 
 
 ## Estado do projeto
 
-17 entradas de aplicativos: 16 públicas e Administração protegida. Currículo encaminha o documento ao Visualizador. O sistema de demonstrações foi removido; destaques são selecionados por ID na Administração e a ordenação restante continua automática. Wally remoto permanece desativado.
+17 entradas de aplicativos: 16 públicas e Administração protegida. Currículo encaminha o documento ao Visualizador. O sistema de demonstrações foi removido; destaques são selecionados por ID na Administração e a ordenação restante continua automática. Wally remoto permanece desativado. Contato oferece somente mensagem profissional; solicitação de horário foi retirada do escopo desta versão por decisão do proprietário.
 
-O documento mestre mantém 12 etapas de requisitos e um único acompanhamento R01–R14 na seção 15, conforme a auditoria de 28/10/2026. A revisão de 30/10 preserva as entregas existentes e as alterações locais do proprietário. Código e testes locais não representam aceite visual completo ou homologação de produção.
+O documento mestre mantém 12 etapas de requisitos e um único acompanhamento R01–R14 na seção 15, conforme a auditoria de 28/10/2026. O fluxo vigente é sequencial: conferir, corrigir e encerrar cada revisão antes de avançar; ações dependentes do proprietário são informadas e resolvidas na própria revisão. R01, R02, R03, R04, R05, R06, R07, R08, R09 e R10 foram consideradas finalizadas pelo proprietário em 30/10/2026. A revisão corrente é a R14, com candidato local validado e publicação não realizada; a R11 conserva testes reais não realizados e avanço autorizado pelo proprietário, com resultados na seção 15 do mestre. Código e testes locais não representam aceite visual completo ou homologação de produção.
 
 <!-- === EXECUTAR E VALIDAR === -->
 
@@ -38,9 +38,9 @@ Dev/preview servem somente o frontend. O backend é o Cloudflare Worker em worke
 
 ## Validação local — 30/10/2026
 
-Base main, HEAD 48b0993d9022b306187bd48d62e766678da5e3f3, com alterações locais não commitadas preservadas. Lint, 552 testes (547 existentes e cinco regressões novas) e build com saída externa aprovados após correções. FileViewer: 620,95 kB, gzip 186,51 kB; entrada principal: aproximadamente 494 kB, gzip 150,07 kB. Tamanho de bundle não comprova fluidez da interface.
+Candidato auditado: main, HEAD d6c0c2f4051898d8eb5213443511b4cd63d7bed8, limpo e sincronizado com o GitHub antes da R01. A auditoria inicial de 30/10 aprovou lint, 552 testes e build com saída externa. Após as correções R01–R14, a validação local final aprovou lint, 554 testes e build externo; alterações ainda sem commit/push/deploy. FileViewer: 620,95 kB, gzip 186,50 kB; entrada principal: aproximadamente 494,34 kB, gzip 150,14 kB. Tamanho de bundle não comprova fluidez da interface. Os resultados referem-se ao candidato auditado; não constituem homologação integral de R02–R14.
 
-O baseline de 28/10 no mesmo commit limpo também tinha 547 testes aprovados; os antigos resultados de cinco falhas pertencem aos registros de 26/10. A aplicação remota da migração incremental e a homologação operacional precisam de confirmação atual, antes da publicação. Nenhuma migração, escrita remota ou rotação de credenciais foi realizada nesta revisão.
+O baseline de 28/10 no mesmo commit limpo também tinha 547 testes aprovados; os antigos resultados de cinco falhas pertencem aos registros de 26/10. A consulta de metadados reais confirmou a migração incremental aplicada, Snake até 397 e a view legada isolada. A homologação com identidades e operações reais permanece em R02/R11; o proprietário confirmou a rotação/revogação e os testes de RLS, rankings, Turnstile e retenção em 29/10/2026, com resultado aprovado, e encerrou a R02. O ambiente e os relatórios detalhados não foram apresentados ao assistente. Nenhuma migração, escrita remota ou rotação de credenciais foi realizada pela auditoria ou pela R01.
 
 <!-- === DOCUMENTAÇÃO === -->
 
@@ -62,4 +62,4 @@ Conteúdo público em src/content/portfolioContent.js. Documentos pessoais perma
 
 Boot mantém o processador, favicon acompanha tema/destaque e animações das janelas permanecem no escopo. Reiniciar/Desligar ficam fora desta versão. Jogos contém Snake, Memória, Campo Minado, Flappy Bird e Paciência. DOOM/UZDoom e seus recursos foram removidos e não bloqueiam esta versão.
 
-O workflow [Validação](.github/workflows/validacao.yml) executa lint, build e testes, sem deploy. Sua execução remota não foi conferida nesta etapa. Push, migrações e publicação exigem autorização específica; o commit documental da Etapa 01 não concede essas permissões.
+O workflow [Validação](.github/workflows/validacao.yml) executa lint, build e testes, sem deploy. A [execução 41](https://github.com/warlleyz/ws-os/actions/runs/41092189534) passou no candidato d6c0c2f. Push, migrações e publicação exigem autorização específica; o commit documental da Etapa 01 não concede essas permissões.

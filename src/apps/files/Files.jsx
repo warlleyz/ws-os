@@ -334,7 +334,7 @@ export default function Files({ instance }) {
           ? item.trashed && !store.entries.find((parent) => parent.id === item.parentId)?.trashed
           : !unavailableFolder &&
             !item.trashed &&
-          (space === 'personal' && term ? true : item.parentId === parentId);
+            (space === 'personal' && term ? true : item.parentId === parentId);
       return inSpace && (!term || normalized(item.name).includes(term));
     })
     .sort((a, b) =>
@@ -921,11 +921,13 @@ export default function Files({ instance }) {
                       <>
                         <ChevronRight size={14} aria-hidden="true" />
                         <button type="button" onClick={() => navigate(space)}>
-                          {space === 'personal'
-                            ? 'Meus arquivos'
-                            : space === 'official'
-                              ? 'Arquivos oficiais'
-                              : 'Lixeira'}
+                          {t(
+                            space === 'personal'
+                              ? 'Meus arquivos'
+                              : space === 'official'
+                                ? 'Arquivos oficiais'
+                                : 'Lixeira',
+                          )}
                         </button>
                       </>
                     )}
@@ -1022,7 +1024,9 @@ export default function Files({ instance }) {
                 <section className="ws-files__home-section">
                   <div className="ws-files__section-heading">
                     <h3>{t('Resultados da pesquisa')}</h3>
-                    <span>{homeResults.length} resultados</span>
+                    <span>
+                      {homeResults.length} {t('resultados')}
+                    </span>
                   </div>
                   <div className="ws-files__recent-list">
                     {homeResults.map((item) => {
@@ -1061,11 +1065,13 @@ export default function Files({ instance }) {
                           <span className="ws-files__recent-info">
                             <strong>{item.name}</strong>
                             <small>
-                              {item.source === 'local'
-                                ? item.kind === 'folder'
-                                  ? 'Pasta pessoal'
-                                  : 'Arquivo pessoal'
-                                : 'Arquivo oficial'}
+                              {t(
+                                item.source === 'local'
+                                  ? item.kind === 'folder'
+                                    ? 'Pasta pessoal'
+                                    : 'Arquivo pessoal'
+                                  : 'Arquivo oficial',
+                              )}
                             </small>
                           </span>
                           <ChevronRight size={17} aria-hidden="true" />
@@ -1123,7 +1129,7 @@ export default function Files({ instance }) {
                           </span>
                           <span className="ws-files__home-card-content">
                             <strong>{t(label)}</strong>
-                            <span className="ws-files__home-description">{description}</span>
+                            <span className="ws-files__home-description">{t(description)}</span>
                           </span>
                           <span className="ws-files__home-card-footer">
                             <span>
@@ -1139,7 +1145,9 @@ export default function Files({ instance }) {
                   <section className="ws-files__home-section">
                     <div className="ws-files__section-heading">
                       <h3>{t('Acessados recentemente')}</h3>
-                      <span>{availableRecentFiles.length} arquivos</span>
+                      <span>
+                        {availableRecentFiles.length} {t('Arquivos').toLocaleLowerCase(locale)}
+                      </span>
                     </div>
                     {availableRecentFiles.length ? (
                       <div className="ws-files__recent-list">
@@ -1174,7 +1182,9 @@ export default function Files({ instance }) {
                               <span className="ws-files__recent-info">
                                 <strong>{item.name}</strong>
                                 <small>
-                                  {item.source === 'local' ? 'Arquivo pessoal' : 'Arquivo oficial'}
+                                  {t(
+                                    item.source === 'local' ? 'Arquivo pessoal' : 'Arquivo oficial',
+                                  )}
                                 </small>
                               </span>
                               <time dateTime={new Date(item.openedAt).toISOString()}>
@@ -1200,23 +1210,23 @@ export default function Files({ instance }) {
               {/* ----- Barra unificada de ferramentas ----- */}
               <div className="ws-files__tools">
                 <div className="ws-files__commandbar" role="toolbar" aria-label={t('Arquivos')}>
-                    <div className="ws-files__sort">
-                      <span>{t('Ordenar')}</span>
-                      <Select
-                        label={t('Ordenar')}
-                        variant="compact"
-                        value={sort}
-                        onChange={(value) => {
-                          setSort(value);
-                          persist('ws-os:files-sort', value);
-                        }}
-                        options={[
-                          { value: 'name', label: t('Nome') },
-                          { value: 'updated', label: t('Atualização') },
-                          { value: 'size', label: t('Tamanho') },
-                        ]}
-                      />
-                    </div>
+                  <div className="ws-files__sort">
+                    <span>{t('Ordenar')}</span>
+                    <Select
+                      label={t('Ordenar')}
+                      variant="compact"
+                      value={sort}
+                      onChange={(value) => {
+                        setSort(value);
+                        persist('ws-os:files-sort', value);
+                      }}
+                      options={[
+                        { value: 'name', label: t('Nome') },
+                        { value: 'updated', label: t('Atualização') },
+                        { value: 'size', label: t('Tamanho') },
+                      ]}
+                    />
+                  </div>
                   <div className="ws-files__view-controls">
                     <button
                       type="button"
@@ -1300,7 +1310,7 @@ export default function Files({ instance }) {
                     />
                   </div>
                 )}
-            
+
                 {/* ----- Ações contextuais da seleção ----- */}
                 {space !== 'official' && currentSelection.length > 0 && (
                   <div className="ws-files__selection" role="group" aria-label={t('Ações')}>
@@ -1621,7 +1631,7 @@ export default function Files({ instance }) {
                         </strong>
                         <p>
                           {term
-                            ? 'Tente pesquisar com outro nome.'
+                            ? t('Tente pesquisar com outro nome.')
                             : space === 'trash'
                               ? t('Os itens removidos aparecerão aqui.')
                               : t('Crie uma pasta ou importe um documento para começar.')}

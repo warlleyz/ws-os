@@ -28,7 +28,6 @@ import {
   onRequestAdminStatus,
 } from '../functions/api/auth.js';
 
-
 const routes = {
   '/api/admin/rankings': { methods: ['GET', 'DELETE'], handler: handleRankings },
   '/api/requests': { methods: ['POST'], handler: handleRequests },
@@ -114,7 +113,21 @@ export default {
 
     const assetResponse = await env.ASSETS.fetch(request);
 
-    return assetResponse;
-
+    /* ----- Preservar conteúdo, status e cache com proteção de documentos HTML ----- */
+    const headers = new Headers(assetResponse.headers);
+    headers.set('X-Content-Type-Options', 'nosniff');
+    headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    if (/^text\/html(?:;|$)/i.test(headers.get('Content-Type') ?? '')) {
+      headers.set('X-Frame-Options', 'SAMEORIGIN');
+      headers.set(
+        'Content-Security-Policy',
+        "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
+      );
+    }
+    return new Response(assetResponse.body, {
+      status: assetResponse.status,
+      statusText: assetResponse.statusText,
+      headers,
+    });
   },
 };

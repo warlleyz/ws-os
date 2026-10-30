@@ -151,14 +151,7 @@ const WAKA_VIEWS = [
   { key: 'projects', pt: 'Projetos', en: 'Projects' },
 ];
 
-const WAKA_COLORS = [
-  '#59a6ff',
-  '#a58aff',
-  '#42cdb1',
-  '#edaf74',
-  '#df84bd',
-  '#8eca80',
-];
+const WAKA_COLORS = ['#59a6ff', '#a58aff', '#42cdb1', '#edaf74', '#df84bd', '#8eca80'];
 
 /* === Utilitários === */
 function formatCodingTime(seconds, locale) {
@@ -175,6 +168,17 @@ function formatCodingTime(seconds, locale) {
   }
 
   return `${Math.round(seconds / 60).toLocaleString(locale)} min`;
+}
+
+/* ----- Intervalo efetivamente informado pela fonte ----- */
+function formatRecordedPeriod(data, locale, copy) {
+  const start = typeof data?.start === 'string' ? Date.parse(data.start) : NaN;
+  const end = typeof data?.end === 'string' ? Date.parse(data.end) : NaN;
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) {
+    return copy.unknown;
+  }
+  const format = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' });
+  return format.format(start) + ' ' + copy.to + ' ' + format.format(end);
 }
 
 /* === Componentes compartilhados === */
@@ -216,11 +220,7 @@ function ResourceStatus({ resource, copy, onRetry }) {
   if (resource.status === 'loading' && !resource.data) {
     return (
       <div className="ws-insights__resource-state" role="status">
-        <RefreshCw
-          className="ws-insights__spin"
-          size={20}
-          aria-hidden="true"
-        />
+        <RefreshCw className="ws-insights__spin" size={20} aria-hidden="true" />
         <span>{copy.loading}</span>
       </div>
     );
@@ -246,42 +246,32 @@ function ResourceStatus({ resource, copy, onRetry }) {
 /* === Resumo da atividade de programação === */
 function WakaTimeSummary({ data, locale, copy }) {
   const languages = useMemo(() => {
-    const values = Array.isArray(data.languages)
-      ? data.languages
-      : [];
+    const values = Array.isArray(data.languages) ? data.languages : [];
 
     return values.filter(
-      (item) =>
-        typeof item.name === 'string' &&
-        Number.isFinite(item.seconds) &&
-        item.seconds >= 0,
+      (item) => typeof item.name === 'string' && Number.isFinite(item.seconds) && item.seconds >= 0,
     );
   }, [data.languages]);
 
-  const totalLanguageSeconds = languages.reduce(
-    (sum, item) => sum + item.seconds,
-    0,
-  );
+  const totalLanguageSeconds = languages.reduce((sum, item) => sum + item.seconds, 0);
 
   const mainLanguage = languages[0] ?? null;
 
   const visibleLanguages = languages.slice(0, 5);
   const remainingLanguages = languages.slice(5);
 
-  const remainingSeconds = remainingLanguages.reduce(
-    (sum, item) => sum + item.seconds,
-    0,
-  );
+  const remainingSeconds = remainingLanguages.reduce((sum, item) => sum + item.seconds, 0);
 
-  const distribution = remainingSeconds > 0
-    ? [
-      ...visibleLanguages,
-      {
-        name: copy.otherLanguages,
-        seconds: remainingSeconds,
-      },
-    ]
-    : visibleLanguages;
+  const distribution =
+    remainingSeconds > 0
+      ? [
+          ...visibleLanguages,
+          {
+            name: copy.otherLanguages,
+            seconds: remainingSeconds,
+          },
+        ]
+      : visibleLanguages;
 
   return (
     <div className="ws-insights__coding-summary">
@@ -289,9 +279,7 @@ function WakaTimeSummary({ data, locale, copy }) {
       <div className="ws-insights__coding-metrics">
         <div className="ws-insights__coding-metric">
           <span>{copy.totalTime}</span>
-          <strong>
-            {formatCodingTime(data.totalSeconds, locale)}
-          </strong>
+          <strong>{formatCodingTime(data.totalSeconds, locale)}</strong>
           <small>WakaTime</small>
         </div>
 
@@ -300,10 +288,7 @@ function WakaTimeSummary({ data, locale, copy }) {
           <strong>{mainLanguage?.name ?? '—'}</strong>
           <small>
             {mainLanguage
-              ? `${copy.mainLanguageTime}: ${formatCodingTime(
-                mainLanguage.seconds,
-                locale,
-              )}`
+              ? `${copy.mainLanguageTime}: ${formatCodingTime(mainLanguage.seconds, locale)}`
               : copy.noLanguages}
           </small>
         </div>
@@ -319,23 +304,19 @@ function WakaTimeSummary({ data, locale, copy }) {
         </div>
 
         {distribution.length === 0 ? (
-          <p className="ws-insights__muted">
-            {copy.noLanguages}
-          </p>
+          <p className="ws-insights__muted">{copy.noLanguages}</p>
         ) : (
           <div className="ws-insights__coding-list">
             {distribution.map((item, index) => {
-              const percentage = totalLanguageSeconds > 0
-                ? (item.seconds / totalLanguageSeconds) * 100
-                : 0;
+              const percentage =
+                totalLanguageSeconds > 0 ? (item.seconds / totalLanguageSeconds) * 100 : 0;
 
               return (
                 <div
                   className="ws-insights__coding-row"
                   key={item.name}
                   style={{
-                    '--coding-color':
-                      WAKA_COLORS[index % WAKA_COLORS.length],
+                    '--coding-color': WAKA_COLORS[index % WAKA_COLORS.length],
                     '--coding-width': `${percentage}%`,
                   }}
                 >
@@ -377,48 +358,30 @@ function WakaTimeExplorer({ data, locale, copy }) {
 
   const isEnglish = locale === 'en';
 
-  const availableViews = WAKA_VIEWS.filter(
-    (view) => data.available?.[view.key] !== false,
-  );
+  const availableViews = WAKA_VIEWS.filter((view) => data.available?.[view.key] !== false);
 
   const currentView =
-    availableViews.find((view) => view.key === activeView) ??
-    availableViews[0] ??
-    WAKA_VIEWS[0];
+    availableViews.find((view) => view.key === activeView) ?? availableViews[0] ?? WAKA_VIEWS[0];
 
   const items = data[currentView.key] ?? [];
   const visibleItems = expanded ? items : items.slice(0, 6);
 
-  const totalCategorySeconds = items.reduce(
-    (sum, item) => sum + item.seconds,
-    0,
-  );
+  const totalCategorySeconds = items.reduce((sum, item) => sum + item.seconds, 0);
 
-  const selected =
-    items.find((item) => item.name === selectedName) ??
-    items[0] ??
-    null;
+  const selected = items.find((item) => item.name === selectedName) ?? items[0] ?? null;
 
   const selectedPercentage =
-    selected && totalCategorySeconds > 0
-      ? (selected.seconds / totalCategorySeconds) * 100
-      : 0;
+    selected && totalCategorySeconds > 0 ? (selected.seconds / totalCategorySeconds) * 100 : 0;
 
   return (
     <div className="ws-waka2">
       {/* === Categorias de exploração === */}
-      <div
-        className="ws-waka2__tabs"
-        role="group"
-        aria-label={copy.breakdown}
-      >
+      <div className="ws-waka2__tabs" role="group" aria-label={copy.breakdown}>
         {availableViews.map((view) => (
           <button
             key={view.key}
             type="button"
-            className={
-              currentView.key === view.key ? 'is-active' : ''
-            }
+            className={currentView.key === view.key ? 'is-active' : ''}
             aria-pressed={currentView.key === view.key}
             onClick={() => {
               setActiveView(view.key);
@@ -436,9 +399,7 @@ function WakaTimeExplorer({ data, locale, copy }) {
         <div className="ws-waka2__chart">
           <div className="ws-waka2__chart-heading">
             <div>
-              <strong>
-                {isEnglish ? currentView.en : currentView.pt}
-              </strong>
+              <strong>{isEnglish ? currentView.en : currentView.pt}</strong>
               <span>{copy.breakdown}</span>
             </div>
 
@@ -448,35 +409,25 @@ function WakaTimeExplorer({ data, locale, copy }) {
           </div>
 
           {data.available?.[currentView.key] === false ? (
-            <p className="ws-waka2__empty">
-              {copy.notProvided}
-            </p>
+            <p className="ws-waka2__empty">{copy.notProvided}</p>
           ) : items.length === 0 ? (
-            <p className="ws-waka2__empty">
-              {copy.noCategoryActivity}
-            </p>
+            <p className="ws-waka2__empty">{copy.noCategoryActivity}</p>
           ) : (
             <>
               <div className="ws-waka2__list">
                 {visibleItems.map((item, index) => {
                   const percentage =
-                    totalCategorySeconds > 0
-                      ? (item.seconds / totalCategorySeconds) * 100
-                      : 0;
+                    totalCategorySeconds > 0 ? (item.seconds / totalCategorySeconds) * 100 : 0;
 
-                  const color =
-                    WAKA_COLORS[index % WAKA_COLORS.length];
+                  const color = WAKA_COLORS[index % WAKA_COLORS.length];
 
                   return (
                     <button
                       key={item.name}
                       type="button"
-                      className={[
-                        'ws-waka2__item',
-                        selected?.name === item.name
-                          ? 'is-active'
-                          : '',
-                      ].filter(Boolean).join(' ')}
+                      className={['ws-waka2__item', selected?.name === item.name ? 'is-active' : '']
+                        .filter(Boolean)
+                        .join(' ')}
                       style={{
                         '--waka-color': color,
                         '--waka-width': `${percentage}%`,
@@ -490,9 +441,7 @@ function WakaTimeExplorer({ data, locale, copy }) {
                           {item.name}
                         </span>
 
-                        <strong>
-                          {formatCodingTime(item.seconds, locale)}
-                        </strong>
+                        <strong>{formatCodingTime(item.seconds, locale)}</strong>
                       </span>
 
                       <span className="ws-waka2__track">
@@ -519,15 +468,11 @@ function WakaTimeExplorer({ data, locale, copy }) {
 
         {/* === Detalhes da seleção === */}
         <aside className="ws-waka2__details" aria-live="polite">
-          <span className="ws-waka2__details-label">
-            {copy.selection}
-          </span>
+          <span className="ws-waka2__details-label">{copy.selection}</span>
 
           {selected ? (
             <>
-              <strong className="ws-waka2__selected-name">
-                {selected.name}
-              </strong>
+              <strong className="ws-waka2__selected-name">{selected.name}</strong>
 
               <div className="ws-waka2__selected-time">
                 {formatCodingTime(selected.seconds, locale)}
@@ -552,9 +497,7 @@ function WakaTimeExplorer({ data, locale, copy }) {
               </div>
             </>
           ) : (
-            <p className="ws-waka2__empty">
-              {copy.noSelection}
-            </p>
+            <p className="ws-waka2__empty">{copy.noSelection}</p>
           )}
         </aside>
       </div>
@@ -563,29 +506,16 @@ function WakaTimeExplorer({ data, locale, copy }) {
 }
 
 /* === Painel de atividade WakaTime === */
-function WakaTimePanel({
-  data,
-  locale,
-  copy,
-  resource,
-  onRetry,
-}) {
+function WakaTimePanel({ data, locale, copy, resource, onRetry }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
   return (
-    <section
-      className="ws-insights__panel ws-insights__wakatime-panel"
-      aria-label={copy.wakatime}
-    >
+    <section className="ws-insights__panel ws-insights__wakatime-panel" aria-label={copy.wakatime}>
       <SectionHeading
         icon={Code2}
         title={copy.wakatime}
         description={copy.wakatimeDescription}
-        action={
-          <span className="ws-insights__source">
-            WakaTime
-          </span>
-        }
+        action={<span className="ws-insights__source">WakaTime</span>}
       />
 
       {!portfolio.wakatimeProxy ? (
@@ -595,20 +525,16 @@ function WakaTimePanel({
         </div>
       ) : (
         <>
-          <ResourceStatus
-            resource={resource}
-            copy={copy}
-            onRetry={onRetry}
-          />
+          <ResourceStatus resource={resource} copy={copy} onRetry={onRetry} />
 
           {data && (
             <>
+              {/* ----- Período real, independente da data de consulta ----- */}
+              <p className="ws-insights__note">
+                {copy.recordedPeriod}: {formatRecordedPeriod(data, locale, copy)}
+              </p>
               {/* === Resumo sempre visível === */}
-              <WakaTimeSummary
-                data={data}
-                locale={locale}
-                copy={copy}
-              />
+              <WakaTimeSummary data={data} locale={locale} copy={copy} />
 
               {/* === Exploração sob demanda === */}
               <button
@@ -618,9 +544,7 @@ function WakaTimePanel({
                 aria-controls="ws-insights-wakatime-details"
                 onClick={() => setDetailsOpen((value) => !value)}
               >
-                <span>
-                  {detailsOpen ? copy.collapse : copy.explore}
-                </span>
+                <span>{detailsOpen ? copy.collapse : copy.explore}</span>
 
                 <ChevronDown
                   size={17}
@@ -634,43 +558,29 @@ function WakaTimePanel({
                 className="ws-insights__explore-content"
                 hidden={!detailsOpen}
               >
-                {detailsOpen && (
-                  <WakaTimeExplorer
-                    data={data}
-                    locale={locale}
-                    copy={copy}
-                  />
-                )}
+                {detailsOpen && <WakaTimeExplorer data={data} locale={locale} copy={copy} />}
               </div>
 
               {/* === Proveniência e atualização === */}
               <div className="ws-insights__metadata">
                 <span>
                   <Clock3 size={13} aria-hidden="true" />
-                  {resource.source === 'cache'
-                    ? copy.cached
-                    : copy.updated}{' '}
-                  · {Number.isFinite(resource.updatedAt)
+                  {resource.source === 'cache' ? copy.cached : copy.updated} ·{' '}
+                  {Number.isFinite(resource.updatedAt)
                     ? new Date(resource.updatedAt).toLocaleString(locale)
                     : copy.unknown}
                 </span>
 
-                {!data.upToDate && (
-                  <span>{copy.wakaUpdating}</span>
-                )}
+                {!data.upToDate && <span>{copy.wakaUpdating}</span>}
 
-                {resource.warning && (
-                  <span>{resource.warning}</span>
-                )}
+                {resource.warning && <span>{resource.warning}</span>}
               </div>
             </>
           )}
         </>
       )}
 
-      <p className="ws-insights__note">
-        {copy.wakaInfo}
-      </p>
+      <p className="ws-insights__note">{copy.wakaInfo}</p>
     </section>
   );
 }
@@ -685,34 +595,20 @@ export default function DevInsights() {
 
   /* === Integração GitHub === */
   const githubLoad = useCallback(
-    (options) =>
-      fetchGithubPortfolio(portfolio.githubUser, options),
+    (options) => fetchGithubPortfolio(portfolio.githubUser, options),
     [],
   );
 
-  const github = usePublicResource(
-    githubLoad,
-    'github',
-    Boolean(portfolio.githubUser),
-  );
+  const github = usePublicResource(githubLoad, 'github', Boolean(portfolio.githubUser));
 
   /* === Integração WakaTime === */
-  const wakaLoad = useCallback(
-    (options) =>
-      fetchWakatimeStats(range, options),
-    [range],
-  );
+  const wakaLoad = useCallback((options) => fetchWakatimeStats(range, options), [range]);
 
-  const waka = usePublicResource(
-    wakaLoad,
-    range,
-    Boolean(portfolio.wakatimeProxy),
-  );
+  const waka = usePublicResource(wakaLoad, range, Boolean(portfolio.wakatimeProxy));
 
   /* === Calendário de contribuições === */
   const contributionsLoad = useCallback(
-    (options) =>
-      fetchGithubContributions(portfolio.githubUser, options),
+    (options) => fetchGithubContributions(portfolio.githubUser, options),
     [],
   );
 
@@ -723,21 +619,14 @@ export default function DevInsights() {
   );
 
   /* === Dados derivados === */
-  const repositories = useMemo(
-    () => github.data?.repositories ?? [],
-    [github.data],
-  );
+  const repositories = useMemo(() => github.data?.repositories ?? [], [github.data]);
 
   const stats = useMemo(() => {
     const days = PERIOD_DAYS[range];
 
-    const cutoff =
-      github.updatedAt - days * 86400000;
+    const cutoff = github.updatedAt - days * 86400000;
 
-    const stars = repositories.reduce(
-      (sum, repo) => sum + (Number(repo.stars) || 0),
-      0,
-    );
+    const stars = repositories.reduce((sum, repo) => sum + (Number(repo.stars) || 0), 0);
 
     const recent = repositories.filter((repo) => {
       const date = Date.parse(repo.updatedAt ?? '');
@@ -756,8 +645,7 @@ export default function DevInsights() {
   }, [contributions.data, range]);
 
   /* === Formatação === */
-  const number = (value) =>
-    Number(value ?? 0).toLocaleString(locale);
+  const number = (value) => Number(value ?? 0).toLocaleString(locale);
 
   const timestamp = (value) => {
     if (!Number.isFinite(value)) {
@@ -780,17 +668,11 @@ export default function DevInsights() {
   const isRefreshing =
     github.status === 'loading' ||
     contributions.status === 'loading' ||
-    (
-      Boolean(portfolio.wakatimeProxy) &&
-      waka.status === 'loading'
-    );
+    (Boolean(portfolio.wakatimeProxy) && waka.status === 'loading');
 
   /* === Interface === */
   return (
-    <article
-      className="desktop-window__content ws-app ws-insights"
-      lang={language}
-    >
+    <article className="desktop-window__content ws-app ws-insights" lang={language}>
       {/* === Cabeçalho === */}
       <header className="ws-insights__hero">
         <div className="ws-insights__hero-content">
@@ -828,15 +710,11 @@ export default function DevInsights() {
           >
             <RefreshCw
               size={15}
-              className={
-                isRefreshing ? 'ws-insights__spin' : ''
-              }
+              className={isRefreshing ? 'ws-insights__spin' : ''}
               aria-hidden="true"
             />
 
-            {isRefreshing
-              ? copy.updating
-              : copy.refresh}
+            {isRefreshing ? copy.updating : copy.refresh}
           </button>
         </div>
       </header>
@@ -859,20 +737,13 @@ export default function DevInsights() {
                 rel="noopener noreferrer"
               >
                 {copy.openGithub}
-                <ArrowUpRight
-                  size={15}
-                  aria-hidden="true"
-                />
+                <ArrowUpRight size={15} aria-hidden="true" />
               </a>
             )
           }
         />
 
-        <ResourceStatus
-          resource={github}
-          copy={copy}
-          onRetry={github.refresh}
-        />
+        <ResourceStatus resource={github} copy={copy} onRetry={github.refresh} />
 
         {github.data && (
           <>
@@ -902,32 +773,23 @@ export default function DevInsights() {
                 icon={Activity}
                 label={copy.recent}
                 value={number(stats.recent)}
-                detail={`${PERIOD_DAYS[range]} ${language === 'en' ? 'days' : 'dias'
-                  }`}
+                detail={`${PERIOD_DAYS[range]} ${language === 'en' ? 'days' : 'dias'}`}
               />
             </div>
 
             <div className="ws-insights__metadata">
               <span>
                 <Clock3 size={13} aria-hidden="true" />
-                {github.source === 'cache'
-                  ? copy.cached
-                  : copy.updated}{' '}
-                · {timestamp(github.updatedAt)}
+                {github.source === 'cache' ? copy.cached : copy.updated} ·{' '}
+                {timestamp(github.updatedAt)}
               </span>
 
-              {github.warning && (
-                <span>{github.warning}</span>
-              )}
+              {github.warning && <span>{github.warning}</span>}
 
-              {!github.data.complete && (
-                <span>{copy.limited}</span>
-              )}
+              {!github.data.complete && <span>{copy.limited}</span>}
             </div>
 
-            <p className="ws-insights__note">
-              {copy.githubInfo}
-            </p>
+            <p className="ws-insights__note">{copy.githubInfo}</p>
           </>
         )}
       </section>
@@ -952,10 +814,7 @@ export default function DevInsights() {
       </section>
 
       {/* === Universo de projetos === */}
-      <RepositoryOrbit
-        repositories={repositories}
-        locale={locale}
-      />
+      <RepositoryOrbit repositories={repositories} locale={locale} />
     </article>
   );
 }

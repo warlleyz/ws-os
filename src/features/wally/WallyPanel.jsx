@@ -35,6 +35,7 @@ export default function WallyPanel({ setWallyOpen }) {
   useLocale();
   const { run } = useSystem();
   const [question, setQuestion] = useState('');
+  const [actionFeedback, setActionFeedback] = useState('');
   const [turnstileToken, setTurnstileToken] = useState(null);
   const [verificationKey, setVerificationKey] = useState(0);
   const {
@@ -68,6 +69,22 @@ export default function WallyPanel({ setWallyOpen }) {
       { run, context: 'wally', origin: 'system' },
     );
     if (opened.ok) setWallyOpen(false);
+  }
+
+  /* ----- Aplicar somente o tema oferecido por uma resposta local ----- */
+  async function applyTheme(theme) {
+    if (!['dark', 'light'].includes(theme)) return;
+    const result = await executeSystemAction(
+      { id: 'appearance.set-theme', params: { theme } },
+      { run, context: 'wally', origin: 'system' },
+    );
+    setActionFeedback(
+      !result.ok
+        ? 'Não foi possível alterar o tema.'
+        : result.result?.persisted === false
+          ? 'Tema aplicado somente nesta sessão.'
+          : 'Tema aplicado.',
+    );
   }
 
   /* ----- Enviar pergunta ----- */
@@ -136,9 +153,7 @@ export default function WallyPanel({ setWallyOpen }) {
             </span>
             <h2>{t('Como posso ajudar?')}</h2>
             <p>{t('Posso orientar você pelos aplicativos e conteúdos do WS OS.')}</p>
-            <span className="ws-wally__suggestion-title">
-              {t('Experimente perguntar')}
-            </span>
+            <span className="ws-wally__suggestion-title">{t('Experimente perguntar')}</span>
             <div className="ws-wally__suggestions">
               {SUGGESTIONS.map((suggestion) => (
                 <button
@@ -166,10 +181,25 @@ export default function WallyPanel({ setWallyOpen }) {
                   </span>
                 )}
                 <div className="ws-wally__bubble">
-                  {message.cancelled && (
-                    <small role="status">{t('Resposta cancelada')}</small>
-                  )}
+                  {message.cancelled && <small role="status">{t('Resposta cancelada')}</small>}
                   <p>{message.role === 'assistant' ? t(message.text) : message.text}</p>
+                  {message.role === 'assistant' &&
+                    message.provider === 'local' &&
+                    message.actions
+                      ?.filter(
+                        (action) =>
+                          action.type === 'set-theme' && ['dark', 'light'].includes(action.theme),
+                      )
+                      .map((action) => (
+                        <button
+                          key={action.theme}
+                          type="button"
+                          className="ws-wally__app-action"
+                          onClick={() => void applyTheme(action.theme)}
+                        >
+                          {t(action.theme === 'light' ? 'Ativar tema claro' : 'Ativar tema escuro')}
+                        </button>
+                      ))}
                   {message.actions?.map((action) => {
                     const app = getAppDefinition(action.appId);
                     if (!app) return null;
@@ -196,11 +226,7 @@ export default function WallyPanel({ setWallyOpen }) {
       {/* ----- Indicador de resposta em andamento ----- */}
       {status === 'responding' && (
         <div className="ws-wally__responding" role="status" aria-live="polite">
-          <LoaderCircle
-            size={15}
-            className="ws-wally__loading-icon"
-            aria-hidden="true"
-          />
+          <LoaderCircle size={15} className="ws-wally__loading-icon" aria-hidden="true" />
           <span>{t('Wally está preparando uma resposta...')}</span>
           <button type="button" onClick={cancelResponse}>
             <Square size={12} aria-hidden="true" />
@@ -211,11 +237,9 @@ export default function WallyPanel({ setWallyOpen }) {
 
       {/* ----- Campo de pergunta e acesso ao modo estendido ----- */}
       <div className="ws-wally__composer-area">
+        {actionFeedback && <p role="status">{t(actionFeedback)}</p>}
         {remoteEnabled && (
-          <WallyTurnstile
-            key={verificationKey}
-            onTokenChange={setTurnstileToken}
-          />
+          <WallyTurnstile key={verificationKey} onTokenChange={setTurnstileToken} />
         )}
         {lastError && (
           <p className="ws-wally__verification-info" role="status">

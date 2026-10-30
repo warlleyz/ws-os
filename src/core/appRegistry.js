@@ -42,7 +42,7 @@ function WallyAppIcon({ size = 20 }) {
 const windowProfiles = {
   'about-me': { width: 950, height: 890 },
   projects: { width: 1100, height: 760 },
-  'dev-insights': { width: 1100, height: 715 },
+  'dev-insights': { width: 1100, height: 745 },
   resume: { width: 950, height: 760 },
   certificates: { width: 980, height: 785 },
   contact: { width: 980, height: 890 },
@@ -52,10 +52,11 @@ const windowProfiles = {
   files: { width: 1080, height: 720 },
   settings: { width: 980, height: 680 },
   'about-system': { width: 920, height: 820 },
-  calculator: { width: 360, height: 520 },
   'file-editor': { width: 920, height: 680 },
   'file-viewer': { width: 1040, height: 720 },
   'wally-extended': { width: 1050, height: 740 },
+  'calculator': { width: 400, height: 750 },
+  'administration': { width: 1050, height: 740 },
 };
 const appDefinitions = [
   /* ----- Aplicativos Desktop ----- */

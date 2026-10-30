@@ -18,7 +18,7 @@ import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import './WeatherPanel.css';
 
 /* === REPRESENTAÇÃO DAS CONDIÇÕES === */
-function WeatherIcon({ code, size = 24 }) {
+export function WeatherIcon({ code, size = 24 }) {
   const props = { size, strokeWidth: 1.7, 'aria-hidden': true };
 
   if (code === 0) return <Sun {...props} />;

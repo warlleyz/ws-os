@@ -81,3 +81,39 @@ test('Worker real roteia novos domínios e métodos sem cair nos assets', async 
     assert.ok(wrong.headers.get('allow'));
   }
 });
+
+/* === CABEÇALHOS DOS ASSETS E PRESERVAÇÃO DO CACHE === */
+test('assets preservam corpo, status e cache e restringem incorporação do HTML', async () => {
+  const app = await worker();
+  for (const [type, status, body] of [
+    ['text/html; charset=utf-8', 200, '<!doctype html>'],
+    ['text/javascript', 200, 'export {};'],
+    ['text/html', 304, null],
+  ]) {
+    const response = await app.fetch(new Request('https://ws.test/'), {
+      ASSETS: {
+        fetch: () =>
+          new Response(body, {
+            status,
+            headers: {
+              'Content-Type': type,
+              'Cache-Control': 'public, max-age=60',
+              ETag: 'test-version',
+            },
+          }),
+      },
+    });
+    assert.equal(response.status, status);
+    assert.equal(await response.text(), body ?? '');
+    assert.equal(response.headers.get('cache-control'), 'public, max-age=60');
+    assert.equal(response.headers.get('etag'), 'test-version');
+    assert.equal(response.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(response.headers.get('referrer-policy'), 'strict-origin-when-cross-origin');
+    if (type.startsWith('text/html')) {
+      assert.equal(response.headers.get('x-frame-options'), 'SAMEORIGIN');
+      assert.match(response.headers.get('content-security-policy'), /frame-ancestors 'self'/);
+    } else {
+      assert.equal(response.headers.get('content-security-policy'), null);
+    }
+  }
+});

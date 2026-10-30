@@ -205,6 +205,8 @@ export default function useWindowInteraction({ instance, app }) {
           'notes',
           'about-system',
           'wally-extended',
+          'calculator',
+          'administration',
         ].includes(instance.appId)
       ) {
         const bounds = getBounds(element);

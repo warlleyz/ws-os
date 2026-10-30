@@ -26,7 +26,7 @@ function normalizeText(value) {
 
 function matchesOnPage(content, term, pageNumber) {
   const text = normalizeText(
-    content.items.map((item) => `${item.str || ''}${item.hasEOL ? ' ' : ''}`).join('')
+    content.items.map((item) => `${item.str || ''}${item.hasEOL ? ' ' : ''}`).join(''),
   );
   const found = [];
   let start = 0;
@@ -43,7 +43,7 @@ function matchesOnPage(content, term, pageNumber) {
 
 /* === Pré-visualização de PDF === */
 export default function PdfPreview({ blob, name }) {
-  useLocale();
+  const locale = useLocale();
 
   /* ----- Referências do documento e das camadas ----- */
   const canvasRef = useRef(null);
@@ -81,12 +81,12 @@ export default function PdfPreview({ blob, name }) {
   const error =
     result.blob === blob
       ? result.error ||
-      (renderError?.document === document &&
+        (renderError?.document === document &&
         renderError.pageNumber === pageNumber &&
         renderError.scale === scale &&
         renderError.rotation === rotation
-        ? renderError.message
-        : '')
+          ? renderError.message
+          : '')
       : '';
 
   /* === Carregamento e descarte do documento === */
@@ -123,7 +123,7 @@ export default function PdfPreview({ blob, name }) {
     load();
     return () => {
       active = false;
-      task?.destroy().catch(() => { });
+      task?.destroy().catch(() => {});
     };
   }, [blob]);
 
@@ -195,12 +195,15 @@ export default function PdfPreview({ blob, name }) {
   function fitWidth() {
     if (!document || !containerRef.current) return;
     const request = ++fitRequestRef.current;
-    document.getPage(pageNumber).then((page) => {
-      if (request !== fitRequestRef.current) return;
-      const original = page.getViewport({ scale: 1, rotation });
-      const available = containerRef.current?.clientWidth ?? 0;
-      if (available > 32) setScale(clampZoom(((available - 32) / original.width) * 100) / 100);
-    }).catch(() => { });
+    document
+      .getPage(pageNumber)
+      .then((page) => {
+        if (request !== fitRequestRef.current) return;
+        const original = page.getViewport({ scale: 1, rotation });
+        const available = containerRef.current?.clientWidth ?? 0;
+        if (available > 32) setScale(clampZoom(((available - 32) / original.width) * 100) / 100);
+      })
+      .catch(() => {});
   }
 
   /* ----- Invalidação do ajuste à largura ao mudar a página ----- */
@@ -333,7 +336,8 @@ export default function PdfPreview({ blob, name }) {
             const top = Math.min(y1, y2);
             const width = Math.abs(x2 - x1);
             const height = Math.abs(y2 - y1);
-            if (![left, top, width, height].every(Number.isFinite) || width <= 0 || height <= 0) continue;
+            if (![left, top, width, height].every(Number.isFinite) || width <= 0 || height <= 0)
+              continue;
 
             const anchor = window.document.createElement('a');
             anchor.className = 'ws-file-viewer__annotation-link';
@@ -341,16 +345,22 @@ export default function PdfPreview({ blob, name }) {
             anchor.style.top = `${top}px`;
             anchor.style.width = `${width}px`;
             anchor.style.height = `${height}px`;
-            anchor.setAttribute('aria-label', 'Abrir link do PDF');
+            anchor.setAttribute('aria-label', t('Abrir link do PDF'));
 
             if (annotation.url) {
               let safeUrl;
               try {
                 const parsed = new URL(annotation.url);
-                if (parsed.protocol === 'https:' || parsed.protocol === 'http:' || parsed.protocol === 'mailto:') {
+                if (
+                  parsed.protocol === 'https:' ||
+                  parsed.protocol === 'http:' ||
+                  parsed.protocol === 'mailto:'
+                ) {
                   safeUrl = parsed.href;
                 }
-              } catch { /* URL não suportada */ }
+              } catch {
+                /* URL não suportada */
+              }
               if (!safeUrl) continue;
               anchor.href = safeUrl;
               anchor.target = '_blank';
@@ -378,7 +388,10 @@ export default function PdfPreview({ blob, name }) {
         if (active && reason?.name !== 'RenderingCancelledException') {
           console.error('[WS Files] Falha ao desenhar canvas do PDF:', reason);
           setRenderError({
-            document, pageNumber, scale, rotation,
+            document,
+            pageNumber,
+            scale,
+            rotation,
             message: 'Falha ao desenhar a página do PDF.',
           });
         }
@@ -395,13 +408,22 @@ export default function PdfPreview({ blob, name }) {
     };
   }, [document, pageNumber, scale, rotation]);
 
+  /* ----- Atualização dos rótulos sem redesenhar a página ----- */
+  useEffect(() => {
+    const anchors = annotationRef.current?.querySelectorAll?.('a') ?? [];
+    for (const anchor of anchors) {
+      anchor.setAttribute('aria-label', t('Abrir link do PDF'));
+    }
+  }, [locale, renderRevision]);
+
   /* ----- Destaque visual dos fragmentos encontrados ----- */
   useEffect(() => {
     const layer = textRef.current;
     if (!layer) return;
-    const spans = typeof layer.querySelectorAll === 'function'
-      ? Array.from(layer.querySelectorAll('span'))
-      : [];
+    const spans =
+      typeof layer.querySelectorAll === 'function'
+        ? Array.from(layer.querySelectorAll('span'))
+        : [];
     for (const span of spans) span.classList.remove('ws-file-viewer__pdf-match', 'is-active');
     if (!query.trim() || !matches.length) return;
 
@@ -429,9 +451,10 @@ export default function PdfPreview({ blob, name }) {
         }
       }
     }
-    const selected = typeof layer.querySelector === 'function'
-      ? layer.querySelector('.ws-file-viewer__pdf-match.is-active')
-      : null;
+    const selected =
+      typeof layer.querySelector === 'function'
+        ? layer.querySelector('.ws-file-viewer__pdf-match.is-active')
+        : null;
     if (selected) selected.scrollIntoView({ block: 'center', inline: 'nearest' });
   }, [query, matches, matchIndex, pageNumber, renderRevision]);
 
@@ -439,35 +462,61 @@ export default function PdfPreview({ blob, name }) {
     <section className="ws-file-viewer__pdf" aria-label={`PDF: ${name}`}>
       {/* === Ferramentas de navegação e zoom === */}
       <div className="ws-file-viewer__pdf-tools" role="toolbar" aria-label={t('Controles do PDF')}>
-        <button type="button" aria-label={t('Página anterior')} title={t('Página anterior')}
+        <button
+          type="button"
+          aria-label={t('Página anterior')}
+          title={t('Página anterior')}
           disabled={!document || pageNumber === 1}
-          onClick={() => setPageNumber((value) => Math.max(1, value - 1))}>
+          onClick={() => setPageNumber((value) => Math.max(1, value - 1))}
+        >
           <ChevronLeft size={17} />
         </button>
-        <span className="ws-file-viewer__page-count">{pageNumber} / {document?.numPages ?? '—'}</span>
-        <button type="button" aria-label={t('Próxima página')} title={t('Próxima página')}
+        <span className="ws-file-viewer__page-count">
+          {pageNumber} / {document?.numPages ?? '—'}
+        </span>
+        <button
+          type="button"
+          aria-label={t('Próxima página')}
+          title={t('Próxima página')}
           disabled={!document || pageNumber >= document.numPages}
-          onClick={() => setPageNumber((value) => Math.min(document.numPages, value + 1))}>
+          onClick={() => setPageNumber((value) => Math.min(document.numPages, value + 1))}
+        >
           <ChevronRight size={17} />
         </button>
 
         <span className="ws-file-viewer__tool-divider" aria-hidden="true" />
-        <button type="button" aria-label={t('Reduzir zoom')} title={t('Reduzir zoom')}
+        <button
+          type="button"
+          aria-label={t('Reduzir zoom')}
+          title={t('Reduzir zoom')}
           disabled={!document || scale <= MIN_ZOOM / 100}
-          onClick={() => setScale((value) => clampZoom(Math.round(value * 100) - 25) / 100)}>
+          onClick={() => setScale((value) => clampZoom(Math.round(value * 100) - 25) / 100)}
+        >
           <Minus size={17} />
         </button>
 
         {/* ----- Indicador editável ao clicar na porcentagem ----- */}
-        <form className="ws-file-viewer__zoom-form" onSubmit={(event) => {
-          event.preventDefault();
-          commitZoom();
-          zoomInputRef.current?.blur();
-        }}>
-          <input ref={zoomInputRef} type="text" inputMode="decimal"
-            aria-label={t('Zoom')} title={t('Zoom')} disabled={!document}
+        <form
+          className="ws-file-viewer__zoom-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            commitZoom();
+            zoomInputRef.current?.blur();
+          }}
+        >
+          <input
+            ref={zoomInputRef}
+            type="text"
+            inputMode="decimal"
+            aria-label={t('Zoom')}
+            title={t('Zoom')}
+            disabled={!document}
             value={editingZoom ? zoomInput : String(Math.round(scale * 100))}
-            onFocus={(event) => { setEditingZoom(true); setZoomInput(String(Math.round(scale * 100))); event.target.select(); }}
+            onFocus={(event) => {
+              setEditingZoom(true);
+              setZoomInput(String(Math.round(scale * 100)));
+              event.target.select();
+            }}
             onChange={(event) => setZoomInput(event.target.value)}
             onBlur={() => {
               if (skipZoomBlurRef.current) {
@@ -482,19 +531,38 @@ export default function PdfPreview({ blob, name }) {
                 cancelZoom();
                 event.currentTarget.blur();
               }
-            }} />
+            }}
+          />
           <span aria-hidden="true">%</span>
         </form>
-        <button type="button" aria-label={t('Aumentar zoom')} title={t('Aumentar zoom')}
+        <button
+          type="button"
+          aria-label={t('Aumentar zoom')}
+          title={t('Aumentar zoom')}
           disabled={!document || scale >= MAX_ZOOM / 100}
-          onClick={() => setScale((value) => clampZoom(Math.round(value * 100) + 25) / 100)}>
+          onClick={() => setScale((value) => clampZoom(Math.round(value * 100) + 25) / 100)}
+        >
           <Plus size={17} />
         </button>
-        <button type="button" disabled={!document} onClick={() => setScale(1)}
-          title={t('Restaurar zoom')} aria-label={t('Restaurar zoom')}>100%</button>
-        <button type="button" disabled={!document} onClick={fitWidth}>{t('Ajustar largura')}</button>
-        <button type="button" aria-label={t('Girar página')} title={t('Girar página')}
-          disabled={!document} onClick={() => setRotation((value) => (value + 90) % 360)}>
+        <button
+          type="button"
+          disabled={!document}
+          onClick={() => setScale(1)}
+          title={t('Restaurar zoom')}
+          aria-label={t('Restaurar zoom')}
+        >
+          100%
+        </button>
+        <button type="button" disabled={!document} onClick={fitWidth}>
+          {t('Ajustar largura')}
+        </button>
+        <button
+          type="button"
+          aria-label={t('Girar página')}
+          title={t('Girar página')}
+          disabled={!document}
+          onClick={() => setRotation((value) => (value + 90) % 360)}
+        >
           <RotateCw size={17} />
         </button>
 
@@ -502,9 +570,14 @@ export default function PdfPreview({ blob, name }) {
         <div className="ws-file-viewer__search-group">
           <label className="ws-file-viewer__pdf-search">
             <Search size={16} aria-hidden="true" />
-            <input type="search" aria-label={t('Pesquisar no PDF')}
-              placeholder={t('Buscar no PDF')} disabled={!document}
-              value={query} onChange={(event) => changeQuery(event.target.value)} />
+            <input
+              type="search"
+              aria-label={t('Pesquisar no PDF')}
+              placeholder={t('Buscar no PDF')}
+              disabled={!document}
+              value={query}
+              onChange={(event) => changeQuery(event.target.value)}
+            />
           </label>
           {query.trim() && (
             <span className="ws-file-viewer__search-count" role="status">
@@ -513,13 +586,27 @@ export default function PdfPreview({ blob, name }) {
           )}
           {matches.length > 0 && (
             <>
-              <button type="button" className="ws-file-viewer__search-action"
-                onClick={() => goToMatch(-1)} title={t('Resultado anterior')}
-                aria-label={t('Resultado anterior')}><ChevronLeft size={16} /></button>
-              <span className="ws-file-viewer__search-count">{matchIndex + 1}/{matches.length}</span>
-              <button type="button" className="ws-file-viewer__search-action"
-                onClick={() => goToMatch(1)} title={t('Próximo resultado')}
-                aria-label={t('Próximo resultado')}><ChevronRight size={16} /></button>
+              <button
+                type="button"
+                className="ws-file-viewer__search-action"
+                onClick={() => goToMatch(-1)}
+                title={t('Resultado anterior')}
+                aria-label={t('Resultado anterior')}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="ws-file-viewer__search-count">
+                {matchIndex + 1}/{matches.length}
+              </span>
+              <button
+                type="button"
+                className="ws-file-viewer__search-action"
+                onClick={() => goToMatch(1)}
+                title={t('Próximo resultado')}
+                aria-label={t('Próximo resultado')}
+              >
+                <ChevronRight size={16} />
+              </button>
             </>
           )}
         </div>
@@ -529,11 +616,17 @@ export default function PdfPreview({ blob, name }) {
       <div className="ws-file-viewer__pdf-viewport" ref={containerRef}>
         {loading && <p role="status">{t('Carregando PDF...')}</p>}
         {error && <p role="alert">{t(error)}</p>}
-        <div className="ws-file-viewer__pdf-page" ref={pageRef}
-          hidden={!document || Boolean(error)}>
-          <canvas ref={canvasRef} aria-label={t('Página {0} de {1}')
-            .replace('{0}', pageNumber)
-            .replace('{1}', document?.numPages ?? 0)} />
+        <div
+          className="ws-file-viewer__pdf-page"
+          ref={pageRef}
+          hidden={!document || Boolean(error)}
+        >
+          <canvas
+            ref={canvasRef}
+            aria-label={t('Página {0} de {1}')
+              .replace('{0}', pageNumber)
+              .replace('{1}', document?.numPages ?? 0)}
+          />
           <div ref={textRef} className="textLayer ws-file-viewer__text-layer" />
           <div ref={annotationRef} className="annotationLayer ws-file-viewer__annotation-layer" />
         </div>

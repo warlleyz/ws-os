@@ -1,10 +1,4 @@
-
-import {
-  AlertCircle,
-  CheckCircle2,
-  Info,
-  TriangleAlert,
-} from 'lucide-react';
+import { AlertCircle, CheckCircle2, Info, TriangleAlert } from 'lucide-react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { NotificationToast } from './NotificationToast';
 
@@ -28,10 +22,7 @@ export default function NotificationToasts({
 
   /* === RENDERIZAÇÃO DA FILA === */
   return (
-    <aside
-      className="ws-toast-container"
-      aria-label={t('Notificações recentes')}
-    >
+    <aside className="ws-toast-container" aria-label={t('Notificações recentes')}>
       {/* ----- Notificação ativa ----- */}
       {active && (
         <div className="ws-toast-queue">
@@ -45,7 +36,7 @@ export default function NotificationToasts({
           {/* ----- Notificações aguardando ----- */}
           <div
             className="ws-toast-queue__pending"
-            aria-label={`${pending.length} notificações aguardando`}
+            aria-label={t('{0} notificações aguardando').replace('{0}', pending.length)}
           >
             {pending.slice(0, 3).map((notification, index) => {
               const Icon = ICONS[notification.type] ?? Info;
@@ -60,20 +51,14 @@ export default function NotificationToasts({
                   style={{ '--queue-index': index }}
                   title={t(notification.title)}
                 >
-                  <Icon
-                    size={17}
-                    strokeWidth={1.8}
-                    aria-hidden="true"
-                  />
+                  <Icon size={17} strokeWidth={1.8} aria-hidden="true" />
                 </span>
               );
             })}
 
             {/* ----- Quantidade adicional na fila ----- */}
             {pending.length > 3 && (
-              <span className="ws-toast-queue__more">
-                +{pending.length - 3}
-              </span>
+              <span className="ws-toast-queue__more">+{pending.length - 3}</span>
             )}
           </div>
         </div>

@@ -32,6 +32,21 @@ export function localWallyAnswer(question, profileSummary = '', locale = 'pt-BR'
           .trim()
       : '';
   if (!text || text.length > 1000) return reply('Faça uma pergunta de até 1000 caracteres.');
+  /* ----- Sugerir tema apenas para um pedido explícito e sem executar automaticamente ----- */
+  const themeRequest =
+    /\b(tema|theme|mode|modo)\b/.test(text) &&
+    /\b(mude|mudar|troque|trocar|alterar|ative|ativar|change|switch|set|enable|use)\b/.test(text) &&
+    !/\b(nao|not|never|nunca|dont|don't)\b/.test(text);
+  const light = /\b(claro|light)\b/.test(text);
+  const dark = /\b(escuro|dark)\b/.test(text);
+  if (themeRequest && light !== dark) {
+    return reply(
+      locale === 'en'
+        ? 'Use the button to apply the requested theme.'
+        : 'Use o botão para aplicar o tema solicitado.',
+      [{ type: 'set-theme', theme: light ? 'light' : 'dark' }],
+    );
+  }
   const subjects = [
     [
       /projet|project/,

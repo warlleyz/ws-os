@@ -2,7 +2,7 @@
 
 # Configuração do backend — Consulta operacional
 
-Atualizado na Etapa 02, em 26/10/2026. Seguir o [mestre vigente](../WS-OS-V2-MESTRE.md) e o [mapa de rotas](WORKER.md). Os registros de 20/10/2026 são evidências históricas, não homologação atual. Nenhuma instrução deste guia autoriza produção, SQL remoto ou uso de credenciais reais nesta etapa.
+Atualizado na revisão R02, em 30/10/2026. Seguir o [mestre vigente](../WS-OS-V2-MESTRE.md) e o [mapa de rotas](WORKER.md). Os registros de 20/10/2026 são evidências históricas, não homologação atual. Nenhuma instrução deste guia autoriza produção, SQL remoto ou uso de credenciais reais nesta etapa.
 
 <!-- === AMBIENTE ISOLADO === -->
 
@@ -57,7 +57,7 @@ O wrangler.jsonc atual já declara REQUESTS_ENABLED, MANAGED_FILES_ENABLED, RANK
 
 - Auth: login incorreto/correto, usuário comum, cadastro administrativo, expiração, logout e operação já iniciada; confirmar a semântica efetiva de revogação dos JWTs no Supabase e o prazo de validade. Frontend guarda sessão só em memória.
 - Notas/curtidas: ciclo editorial completo, revisão antiga, anexo privado, publicação futura, acesso direto negado, limites e indisponibilidade do D1. Nada disso foi escrito em conta real nesta entrega.
-- Solicitações: enviar mensagem/agendamento com consentimento e desafio, perder resposta, reenviar **a mesma chave/conteúdo**, confirmar um único ID; outro conteúdo deve conflitar. Nunca confirmar reunião por haver persistência ou e-mail entregue.
+- Solicitações: enviar mensagem profissional com consentimento e desafio, perder resposta, reenviar **a mesma chave/conteúdo**, confirmar um único ID; outro conteúdo deve conflitar. O proprietário definiu em 30/10/2026 que Contato oferece somente mensagem; agendamento não é critério de aceite do formulário atual. Suporte legado no contrato/banco permanece preservado para registros existentes; não criar nem confirmar eventos ou reuniões automaticamente.
 - EmailJS: conferir template/destino fixos, recebimento real, falha e timeout. O resultado técnico é `persisted` e `email` independentes. Não reutilizar o envio direto antigo do formulário junto ao novo fluxo, para não duplicar notificações; a Etapa 07 já migrou a UI para /api/requests e retirou o envio direto do navegador. Conferir VITE_TURNSTILE_SITE_KEY no frontend, hostname/action public-write e REQUESTS_ENABLED no Worker; presença de chave pública não comprova disponibilidade do serviço. [Entrega e homologação da Etapa 07](../finalizacao/ETAPA-07-ANDAMENTO.md).
 - Arquivos: criar metadados no PostgreSQL e enviar bytes ao bucket privado `ws-os-official-files` pelo Worker. Exigir `If-Match`, validar MIME, assinatura, tamanho e SHA-256. Testar arquivo inválido, corpo maior/menor, resposta perdida, repetição com bytes iguais/diferentes e uploads concorrentes. Conferir o objeto no Supabase Storage antes de confirmar o estado `available`. A exclusão exige revisão atual, confirmação explícita e verificação da remoção física antes do estado `deleted`. Testar reconciliação dos estados `uploading` e `deleting`, inclusive falhas do provedor. Visitantes não recebem credenciais nem acesso direto ao bucket.
 - Anexos: vincular cinco recursos, recusar o sexto inclusive com concorrência; rascunho/futuro não pode entregar bytes. Despublicar deve retirar o acesso imediatamente em novas requisições. Excluir publicação retira vínculos; excluir recurso retira referências pela migração 009.
@@ -91,7 +91,7 @@ O editor reutilizado por Notas/Administração envia uma identidade estável na 
 
 ### Jogos — validação local da Etapa 10
 
-Cliente de rankings utiliza o transporte compartilhado, confirma accepted=true e conserva o payload de tentativa incerta para retry explícito com novo Turnstile. Atualização de lista não serve como recibo individual de escrita. O contrato compartilhado, a API e a interface agora utilizam Snake 397 e Flappy 100000. O banco inspecionado ainda limita Snake a 222. Aplicar/homologar database/migrations/20261026141305_etapa02_rankings_e_permissoes_legadas.sql antes de publicar esta mudança; a migração também isola a view pública legada das demos sem apagar dados. Executar database/tests/etapa02_rankings_permissions.sql em homologação autorizada. Nenhuma migração foi aplicada nesta entrega. O hash proporcional do backend e a pontuação originada no browser não garantem identidade global ou ausência de fraude. Homologação de envio/moderação depende do ambiente autorizado, flags de cliente/servidor e proteção pública configurada. Ver o checkpoint da Etapa 10 para pendências; nenhuma pontuação real foi enviada nesta tarefa.
+Cliente de rankings utiliza o transporte compartilhado, confirma accepted=true e conserva o payload de tentativa incerta para retry explícito com novo Turnstile. Atualização de lista não serve como recibo individual de escrita. O contrato compartilhado, a API e a interface agora utilizam Snake 397 e Flappy 100000. A inspeção somente de leitura de 30/10/2026 confirmou Snake 397 e a migração incremental equivalente a database/migrations/20261026141305_etapa02_rankings_e_permissoes_legadas.sql já aplicada; não reaplicá-la. A view pública legada está isolada sem apagar dados. Executar database/tests/etapa02_rankings_permissions.sql em homologação autorizada. Nenhuma migração foi aplicada nesta entrega. O hash proporcional do backend e a pontuação originada no browser não garantem identidade global ou ausência de fraude. Homologação de envio/moderação depende do ambiente autorizado, flags de cliente/servidor e proteção pública configurada. Ver o checkpoint da Etapa 10 para pendências; nenhuma pontuação real foi enviada nesta tarefa.
 
 <!-- ----- ADMINISTRAÇÃO — INTEGRAÇÃO LOCAL DA ETAPA 11 ----- -->
 
@@ -105,10 +105,20 @@ O painel consome as APIs existentes de solicitações privadas, arquivos oficiai
 
 A inspeção somente de leitura confirmou histórico equivalente a 005–014, RLS nas dez tabelas públicas da aplicação e bucket privado com limite de 10 MiB. Não executou testes de identidade, escrita, retenção ou D1 remoto. Metadados/grants não certificam o fluxo completo.
 
-O proprietário ainda não confirmou rotação de credenciais e revogação das sessões citadas no histórico. Confirmar esses procedimentos pelo painel autorizado e atualizar os segredos dos consumidores somente mediante autorização; não enviar chaves ao chat. Logout não comprova por si só invalidação imediata de access tokens já emitidos: homologar o comportamento e o prazo do provedor.
+O proprietário informou em 30/10/2026 ter concluído a rotação de credenciais, a revogação das sessões citadas no histórico e os testes em 29/10/2026. O proprietário confirmou resultado aprovado nos testes de RLS, rankings, Turnstile e retenção e determinou encerrar a R02 em 30/10/2026. Ambiente e relatórios detalhados não foram apresentados ao assistente. Não divulgar segredos. Logout não comprova por si só invalidação imediata de access tokens já emitidos: homologar o comportamento e o prazo do provedor.
 
-A view project_highlights_public permanece publicamente legível no banco até a aplicação autorizada da migração incremental. A aplicação ativa não a utiliza. Preservar a tabela de destaques, os IDs selecionados e a cadeia antiga de migrações.
+A consulta de 30/10/2026 confirmou SELECT negado a anon/authenticated na view project_highlights_public, com security_invoker e security_barrier. A aplicação ativa não a utiliza. Preservar a tabela de destaques, os IDs selecionados e a cadeia antiga de migrações.
 
 O roteiro transacional novo testa limites e permissões e termina com ROLLBACK. O roteiro etapa03_rls.sql continua exigindo ambiente descartável e administrador de teste. Ambos precisam ser executados por uma conexão autorizada, com interrupção em erro; não foram executados nesta etapa.
 
-O inventário de resultados, alertas intencionais e bloqueios está na seção 22 do [mestre](../WS-OS-V2-MESTRE.md). Não publicar o código antes de homologar a migração; rollback de código não reverte dados nem autoriza truncar pontuações.
+O inventário de resultados, alertas intencionais e bloqueios está na seção 22 do [mestre](../WS-OS-V2-MESTRE.md). A migração já confirmada não deve ser reaplicada; homologar os fluxos antes da publicação. Rollback de código não reverte dados nem autoriza truncar pontuações.
+
+<!-- === WRANGLER LOCAL — R02 === -->
+
+## Wrangler local — R02
+
+O proprietário autorizou usar npx wrangler dev. Na validação de 30/10/2026 foi usado npx --no-install wrangler dev --local, com persistência D1 fora do repositório. O D1 local vazio exige preparar as migrações de database/d1/migrations no mesmo caminho --persist-to; essa preparação não migra o D1 remoto. As quatro tabelas foram preparadas e o bloqueio de login na sexta tentativa foi observado.
+
+O Wrangler local carrega .dev.vars e pode chamar Supabase, Storage e outros provedores remotos por HTTPS. --local isola os bindings locais, não esses serviços. Não chamar o endpoint de cron local com REQUEST_RETENTION_ENABLED=true e credenciais reais: ele pode excluir solicitações no Supabase configurado. Para testar retenção, usar banco descartável autorizado ou desabilitar a flag apenas na execução local para testar exclusivamente a limpeza D1. Não editar a flag de produção para esse fim.
+
+Os resultados completos e as pendências de evidência permanecem no checklist único, seção 15 do mestre. A R02 foi encerrada por aceite explícito do proprietário, incluindo sua confirmação dos testes externos; iniciar o servidor local isoladamente não comprova esses testes.
