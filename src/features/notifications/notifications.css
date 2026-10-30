@@ -645,19 +645,27 @@
   line-clamp: unset;
 }
 
-/* ----- Botão de fechar ----- */
+/* === BOTÃO DE FECHAR DO TOAST === */
+/* ----- Posicionado no canto superior direito, acima do ícone de gravidade ----- */
 .ws-toast__close {
+  position: absolute;
+  top: 5px;
+  right: 3px;
+  z-index: 2;
   display: grid;
   place-items: center;
   width: 23px;
   height: 23px;
-  flex: 0 0 23px;
   padding: 0;
   border: 0;
   border-radius: 7px;
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
+}
+
+.ws-toast__header {
+  padding-right: 15px;
 }
 
 .ws-toast__close:hover {

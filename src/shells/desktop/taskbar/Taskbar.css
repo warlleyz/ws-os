@@ -358,6 +358,7 @@
   font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  transform: translateY(2px);
 }
 
 /* ----- Botão do calendário e horário ----- */
@@ -523,20 +524,34 @@ button.taskbar__clock:focus-visible {
 }
 
 /* === 12. ÍCONES DOS PAINÉIS === */
-/* ----- Escala consistente dos controles de sistema ----- */
+/* ----- Alinhamento dos botões do sistema ----- */
+.taskbar__system-button--notifications,
+.taskbar__system-button--controls,
+.taskbar__system-button--wally {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  padding: 0;
+}
+
+/* ----- Dimensões dos ícones ----- */
 .taskbar__system-button--notifications svg,
 .taskbar__system-button--controls svg {
+  display: block;
   width: 21px;
   height: 21px;
   flex-shrink: 0;
 }
 
+/* ----- Cores dos controles ----- */
 .taskbar__system-button--notifications,
 .taskbar__system-button--controls {
   color: var(--text-primary);
 }
 
-/* ----- Avatar original do Wally ----- */
+/* ----- Avatar do Wally ----- */
 .taskbar__wally-avatar {
   display: block;
   width: 28px;
@@ -545,41 +560,50 @@ button.taskbar__clock:focus-visible {
   object-fit: contain;
   pointer-events: none;
   user-select: none;
+  transform: translateY(-2px);
 }
 
+/* ----- Estado do Wally ----- */
 .taskbar__system-button--wally {
   color: var(--accent-secondary);
 }
 
+/* ----- Interação com Wally ----- */
 .taskbar__system-button--wally:not(:disabled):hover,
 .taskbar__system-button--wally[aria-expanded='true'] {
   background: var(--surface-secondary);
 }
 
-/* === ALINHAMENTO DAS NOTIFICAÇÕES === */
-/* ----- Centralizar o sino com os demais ícones da Taskbar ----- */
-
-.taskbar__system-button--notifications {
-  display: grid;
-  place-items: center;
-}
-
+/* === 13. INDICADOR DE NOTIFICAÇÕES === */
+/* ----- Centralização do sino ----- */
 .taskbar-notifications__trigger {
   position: relative;
   display: grid;
   place-items: center;
-
   width: 24px;
   height: 24px;
-  flex-shrink: 0;
-
+  flex: 0 0 auto;
   margin: 0;
   padding: 0;
   line-height: 1;
 }
 
+/* ----- Ícone do sino ----- */
 .taskbar-notifications__trigger>svg {
   display: block;
   width: 21px;
   height: 21px;
+}
+
+/* ----- Ponto vermelho de notificação não lida ----- */
+.taskbar-notifications__dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--taskbar-background);
+  border-radius: 50%;
+  background: #ef4444;
+  pointer-events: none;
 }

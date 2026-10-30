@@ -688,23 +688,22 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
             type="button"
             className="taskbar__system-button taskbar__system-button--notifications"
             title={t('Notificações')}
-            aria-label={t('Notificações')}
+            aria-label={
+              unreadCount > 0
+                ? `${t('Notificações')} (${unreadCount})`
+                : t('Notificações')
+            }
             aria-expanded={notificationOpen}
             onClick={toggleNotifications}
           >
             <span className="taskbar-notifications__trigger">
               <Bell size={21} strokeWidth={2} />
+              {/* ----- Indicador de notificações não lidas ----- */}
               {unreadCount > 0 && (
                 <span
-                  className="taskbar-notifications__badge"
-                  aria-label={t(
-                    unreadCount === 1
-                      ? '1 notificação não lida'
-                      : `${unreadCount} notificações não lidas`,
-                  )}
-                >
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
+                  className="taskbar-notifications__dot"
+                  aria-hidden="true"
+                />
               )}
             </span>
           </button>

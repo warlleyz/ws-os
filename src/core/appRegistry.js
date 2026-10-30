@@ -13,10 +13,29 @@ import {
   NotebookPen,
   Settings,
   Shield,
-  Sparkles,
   TerminalSquare,
   UserRound,
 } from 'lucide-react';
+import { createElement } from 'react';
+
+/* === ÍCONE PERSONALIZADO DO WALLY === */
+/* ----- Utilizar o rosto oficial do assistente ----- */
+function WallyAppIcon({ size = 20 }) {
+  return createElement('img', {
+    src: `${import.meta.env.BASE_URL}assets/wally/wally-rosto.svg`,
+    alt: '',
+    'aria-hidden': true,
+    width: size,
+    height: size,
+    style: {
+      display: 'block',
+      width: size,
+      height: size,
+      objectFit: 'contain',
+      flexShrink: 0,
+    },
+  });
+}
 
 /* === Registro de aplicativos === */
 /* === Dimensões iniciais por tarefa; geometria permanece somente na sessão === */
@@ -255,7 +274,7 @@ const appDefinitions = [
   {
     id: 'wally-extended',
     name: 'Wally Estendido',
-    icon: Sparkles,
+    icon: WallyAppIcon,
     category: 'system',
     menuCategory: 'system',
     desktopShortcut: false,
