@@ -1,9 +1,18 @@
-import useCalendarEvents from './useCalendarEvents';
 import { useState } from 'react';
-import { CalendarDays, ChevronLeft, ChevronRight, X, CalendarCheck2, Flag } from 'lucide-react';
+import {
+  CalendarCheck2,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Flag,
+  X,
+} from 'lucide-react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { getCalendarEntries, toCalendarDateKey } from './CalendarService';
+import useCalendarEvents from './useCalendarEvents';
+import './CalendarPanel.css';
 
+/* === PAINEL DE CALENDÁRIO === */
 export default function CalendarPanel({
   monthLabel,
   setCalendarMonth,
@@ -17,11 +26,15 @@ export default function CalendarPanel({
   const month = calendarMonth.getMonth();
   const todayKey = toCalendarDateKey(currentTime);
   const [selectedDate, setSelectedDate] = useState(() => todayKey);
+
+  /* ----- Data ativa e mês exibido ----- */
   const selectedInMonth =
     selectedDate.slice(0, 7) === `${year}-${String(month + 1).padStart(2, '0')}`;
   const activeDateKey = selectedInMonth
     ? selectedDate
     : toCalendarDateKey(new Date(year, month, 1));
+
+  /* ----- Feriados e eventos públicos ----- */
   const entries = [
     ...getCalendarEntries(year - 1),
     ...getCalendarEntries(year),
@@ -34,44 +47,61 @@ export default function CalendarPanel({
       url: event.url,
     })),
   ];
-  const firstWeekday = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const gridCellCount = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
   const entriesByDate = new Map();
+
   for (const entry of entries) {
     const dayEntries = entriesByDate.get(entry.date) ?? [];
     dayEntries.push(entry);
     entriesByDate.set(entry.date, dayEntries);
   }
+
+  /* ----- Geometria do mês ----- */
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const gridCellCount = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
+  const weekdays = Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(locale, {
+      weekday: 'narrow',
+    }).format(new Date(2024, 0, 7 + index)),
+  );
+
+  /* ----- Informações da data selecionada ----- */
   const selectedEntries = entriesByDate.get(activeDateKey) ?? [];
-  const [selectedYear, selectedMonth, selectedDay] = activeDateKey.split('-').map(Number);
+  const [selectedYear, selectedMonth, selectedDay] = activeDateKey
+    .split('-')
+    .map(Number);
   const selectedLabel = new Intl.DateTimeFormat(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
   }).format(new Date(selectedYear, selectedMonth - 1, selectedDay));
 
+  /* === NAVEGAÇÃO === */
+  /* ----- Mover entre meses ----- */
   function moveMonth(direction) {
     const next = new Date(year, month + direction, 1);
     setCalendarMonth(next);
     setSelectedDate(toCalendarDateKey(next));
   }
 
+  /* ----- Retornar ao dia atual ----- */
   function goToday() {
     setCalendarMonth(new Date(currentTime.getFullYear(), currentTime.getMonth(), 1));
     setSelectedDate(toCalendarDateKey(currentTime));
   }
 
-  const weekdays = Array.from({ length: 7 }, (_, index) =>
-    new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(new Date(2024, 0, 7 + index)),
-  );
-
   return (
     <section className="taskbar-calendar" role="region" aria-label={t('Calendário')}>
+      {/* === CABEÇALHO === */}
       <header className="taskbar-calendar__header">
         <div className="taskbar-calendar__heading">
-          <CalendarDays size={17} aria-hidden="true" />
-          <strong>{monthLabel}</strong>
+          <span className="taskbar-calendar__heading-icon">
+            <CalendarDays size={19} aria-hidden="true" />
+          </span>
+          <div className="taskbar-calendar__heading-copy">
+            <strong>{t('Calendário')}</strong>
+            <small>{monthLabel}</small>
+          </div>
         </div>
         <div className="taskbar-calendar__actions">
           <button
@@ -80,9 +110,13 @@ export default function CalendarPanel({
             title={t('Mês anterior')}
             onClick={() => moveMonth(-1)}
           >
-            <ChevronLeft size={17} />
+            <ChevronLeft size={17} aria-hidden="true" />
           </button>
-          <button type="button" className="taskbar-calendar__today-button" onClick={goToday}>
+          <button
+            type="button"
+            className="taskbar-calendar__today-button"
+            onClick={goToday}
+          >
             {t('Hoje')}
           </button>
           <button
@@ -91,7 +125,7 @@ export default function CalendarPanel({
             title={t('Próximo mês')}
             onClick={() => moveMonth(1)}
           >
-            <ChevronRight size={17} />
+            <ChevronRight size={17} aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -99,18 +133,26 @@ export default function CalendarPanel({
             title={t('Fechar calendário')}
             onClick={() => setCalendarOpen(false)}
           >
-            <X size={16} />
+            <X size={17} aria-hidden="true" />
           </button>
         </div>
       </header>
 
-      {remoteEvents.warning && <p role="status">{t(remoteEvents.warning)}</p>}
-      {remoteEvents.error && (
-        <p role="status">
-          {t('Eventos remotos indisponíveis. Os feriados continuam disponíveis.')}
-        </p>
-      )}
+      {/* === CONTEÚDO DO CALENDÁRIO === */}
       <div className="taskbar-calendar__body">
+        {/* ----- Estado dos eventos externos ----- */}
+        {remoteEvents.warning && (
+          <p className="taskbar-calendar__notice" role="status">
+            {t(remoteEvents.warning)}
+          </p>
+        )}
+        {remoteEvents.error && (
+          <p className="taskbar-calendar__notice" role="status">
+            {t('Eventos remotos indisponíveis. Os feriados continuam disponíveis.')}
+          </p>
+        )}
+
+        {/* ----- Grade de dias ----- */}
         <div className="taskbar-calendar__grid" aria-label={monthLabel}>
           {weekdays.map((day, index) => (
             <span className="taskbar-calendar__weekday" key={`weekday-${index}`}>
@@ -133,6 +175,7 @@ export default function CalendarPanel({
               year: 'numeric',
             }).format(date);
 
+            /* ----- Selecionar dia e ajustar mês, quando necessário ----- */
             function handleSelectDate() {
               setSelectedDate(key);
               if (isOutside) {
@@ -156,7 +199,9 @@ export default function CalendarPanel({
                   .join(' ')}
                 aria-pressed={isSelected}
                 aria-current={isToday ? 'date' : undefined}
-                aria-label={`${dateLabel}${dayEntries.length ? `: ${dayEntries.map((entry) => t(entry.name)).join(', ')}` : ''}`}
+                aria-label={`${dateLabel}${dayEntries.length
+                  ? `: ${dayEntries.map((entry) => t(entry.name)).join(', ')}`
+                  : ''}`}
                 title={dayEntries.map((entry) => t(entry.name)).join(' · ') || dateLabel}
                 onClick={handleSelectDate}
               >
@@ -166,10 +211,13 @@ export default function CalendarPanel({
           })}
         </div>
 
+        {/* === AGENDA DA DATA SELECIONADA === */}
         <div className="taskbar-calendar__agenda" aria-live="polite">
           <div className="taskbar-calendar__agenda-heading">
             <strong>{selectedLabel}</strong>
-            <span>{selectedEntries.length ? `${selectedEntries.length}` : ''}</span>
+            {selectedEntries.length > 0 && (
+              <span>{selectedEntries.length}</span>
+            )}
           </div>
           {selectedEntries.length ? (
             <ul className="taskbar-calendar__agenda-list">
