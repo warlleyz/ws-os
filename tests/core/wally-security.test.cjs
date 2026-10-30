@@ -100,3 +100,35 @@ test('Wally transmite idioma e contexto público selecionado, sem ferramentas pr
   assert.doesNotMatch(JSON.stringify(payload), /SHOULD_NOT_BE_SENT|test-key/);
   assert.deepEqual((await response.json()).actions, []);
 });
+
+/* === FLAG DO CLIENTE E AUSÊNCIA DE TRANSMISSÃO INVOLUNTÁRIA === */
+test('Wally cliente só usa remoto com opt-in true e verificação', async () => {
+  for (const flag of [undefined, 'false', 'true']) {
+    const source = read('src/features/wally/useWallyConversation.js')
+      .replace(/^import[\s\S]*?;\s*$/gm, '')
+      .replace('import.meta.env.VITE_WALLY_REMOTE_ENABLED', 'remoteFlag')
+      .replace('export default function', 'function');
+    let remoteCalls = 0;
+    const hook = vm.runInNewContext(source + ';useWallyConversation', {
+      remoteFlag: flag,
+      useLocale: () => 'pt-BR',
+      useRef: (value) => ({ current: value }),
+      useState: (value) => [value, () => {}],
+      useEffect: () => {},
+      useCallback: (callback) => callback,
+      AbortController,
+      portfolio: { profile: { summary: 'Perfil público' } },
+      contentText: (value) => value,
+      localWallyAnswer: () => ({ message: 'Local', actions: [] }),
+      askWallyRemote: async () => {
+        remoteCalls += 1;
+        return { message: 'Remoto', provider: 'remote' };
+      },
+    })();
+    assert.equal(hook.remoteEnabled, flag === 'true');
+    assert.equal(await hook.sendMessage('Projetos', { turnstileToken: 'token-de-teste' }), true);
+    assert.equal(remoteCalls, flag === 'true' ? 1 : 0);
+    await hook.sendMessage('Currículo');
+    assert.equal(remoteCalls, flag === 'true' ? 1 : 0);
+  }
+});

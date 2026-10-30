@@ -166,6 +166,21 @@ const FEATURES = [
 /* === CRÉDITOS E LICENÇAS === */
 const CREDITS = [
   {
+    name: 'React Icons',
+    license: 'MIT',
+    url: 'https://github.com/react-icons/react-icons/blob/master/LICENSE',
+  },
+  {
+    name: 'Font Awesome 5',
+    license: 'CC BY 4.0',
+    url: 'https://creativecommons.org/licenses/by/4.0/',
+  },
+  {
+    name: 'Simple Icons',
+    license: 'CC0 1.0',
+    url: 'https://creativecommons.org/publicdomain/zero/1.0/',
+  },
+  {
     name: 'React / React DOM',
     license: 'MIT',
     url: 'https://github.com/facebook/react/blob/main/LICENSE',

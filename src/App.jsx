@@ -4,9 +4,16 @@ import { useEffect, useState } from 'react';
 import { translate as t, useLocale } from './shared/i18n/i18n';
 
 import { applyTheme, useTheme, setTheme } from './core/themeManager';
-import { updateAppearanceContext, useAppearance } from './core/appearanceManager';
+import {
+  updateAppearanceContext,
+  useAppearance,
+} from './core/appearanceManager';
 import { applyAccessibility, useAccessibility } from './core/effectsManager';
-import { getWallpaper, getWallpaperDefinition, subscribeWallpapers } from './core/wallpaperManager';
+import {
+  getWallpaper,
+  getWallpaperDefinition,
+  subscribeWallpapers,
+} from './core/wallpaperManager';
 import { useCursorMode } from './core/cursorManager';
 import { CURSOR_VARIANTS, getCursorCssValue } from './core/cursorCatalog';
 
@@ -62,6 +69,7 @@ export default function App() {
     document.documentElement.lang = locale;
   }, [locale]);
 
+  // Trocar o tema recupera suas preferências sem sobrescrever o outro tema.
   /* ----- Tema ----- */
   useEffect(() => {
     applyTheme(theme);

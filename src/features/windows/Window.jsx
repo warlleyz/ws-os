@@ -22,6 +22,7 @@ export default function Window({
     windowRef,
     mode,
     appName,
+    recoverWindow,
     resizeWindow,
     startInteraction,
     moveInteraction,
@@ -72,11 +73,18 @@ export default function Window({
         '--window-motion-duration': `${motion.duration}ms`,
         pointerEvents: unavailable ? 'none' : 'auto',
       }}
+      onFocusCapture={recoverWindow}
       onPointerDown={(event) => {
         if (event.target.closest('.desktop-window__controls')) {
           return;
         }
+
         onActivate();
+
+        /* ----- Recuperar janela parcialmente fora do Desktop ----- */
+        if (!event.target.closest('.desktop-window__drag-area')) {
+          recoverWindow();
+        }
       }}
     >
       <header className="desktop-window__header">

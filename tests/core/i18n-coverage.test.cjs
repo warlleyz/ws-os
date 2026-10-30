@@ -120,3 +120,28 @@ test('Visualizador, PDF e Arquivos não reintroduzem texto literal traduzível',
     }
   }
 });
+
+/* === CATÁLOGO DE JOGOS COM CHAVES DINÂMICAS === */
+test('nomes, categorias, descrições e controles dos cinco jogos possuem tradução', () => {
+  const source = fs.readFileSync(path.join(root, 'src/apps/games/catalog/gameDefinitions.js'), 'utf8').replace(/export /g, '');
+  const catalog = vm.runInNewContext(source + ';GAMES_CATALOG');
+  for (const game of catalog) {
+    for (const field of ['name', 'category', 'description', 'controls']) {
+      assert.ok(translatedSources.has(game[field]), game.id + ': ' + field + ' sem tradução');
+    }
+  }
+});
+
+test('ajuda do Terminal traduz descrições sem alterar os comandos', () => {
+  const source = fs.readFileSync(path.join(root, 'src/apps/terminal/terminalCommands.js'), 'utf8').replace(/export /g, '');
+  const api = vm.runInNewContext(source + ';({commandHelp, TERMINAL_GROUPS})');
+  const lookup = new Map([...portugueseEntries].map(([key,value]) => [value, englishEntries.get(key)]));
+  for (const group of api.TERMINAL_GROUPS) {
+    assert.ok(lookup.has(group.title), group.title);
+    for (const [,description] of group.commands) assert.ok(lookup.has(description), description);
+  }
+  const lines = api.commandHelp(undefined, (value) => lookup.get(value) ?? value);
+  assert.ok(lines.some((line) => line.includes('help') && line.includes('Show help')));
+  assert.ok(lines.includes('SYSTEM'));
+  assert.ok(!lines.some((line) => line.includes('Exibe a ajuda')));
+});

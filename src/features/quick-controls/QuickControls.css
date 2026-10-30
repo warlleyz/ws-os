@@ -416,9 +416,11 @@
 
 /* Mantém o comportamento já existente da Taskbar */
 
+/* === Taskbar com ocultação automática === */
+/* ----- Manter o mesmo posicionamento da barra visível ----- */
 .taskbar-container--auto-hide {
-  bottom: 0;
-  transform: translate(-50%, calc(100% - 8px));
+  bottom: 16px;
+  transform: translate(-50%, calc(100% + 8px));
   transition: transform calc(var(--motion-scale, 1) * 180ms) ease;
 }
 

@@ -540,7 +540,7 @@ export default function Terminal({ instance }) {
       switch (name) {
         /* === AJUDA === */
         case 'help': {
-          output = commandHelp(args[0]);
+          output = commandHelp(args[0], t);
           break;
         }
 
@@ -1020,7 +1020,7 @@ export default function Terminal({ instance }) {
         {/* === INICIALIZAÇÃO === */}
         <div className="ws-terminal__welcome">
           <p>
-            Digite <strong>help</strong> para consultar os comandos disponíveis.
+            {t('Digite help para consultar os comandos disponíveis.')}
           </p>
         </div>
 
@@ -1108,7 +1108,7 @@ export default function Terminal({ instance }) {
             </p>
 
             <button className="ws-terminal__sr-only" type="submit" disabled={busy}>
-              {loginStep === 'email' ? 'Continuar' : t(busy ? 'Autenticando...' : 'Entrar')}
+              {loginStep === 'email' ? t('Continuar') : t(busy ? 'Autenticando...' : 'Entrar')}
             </button>
           </form>
         ) : (
@@ -1156,7 +1156,7 @@ export default function Terminal({ instance }) {
         {/* === OPERAÇÃO EM ANDAMENTO === */}
         {busy && (
           <p className="ws-terminal__processing" role="status">
-            {loginStep !== null ? t('Autenticando...') : 'Processando...'}
+            {loginStep !== null ? t('Autenticando...') : t('Processando...')}
           </p>
         )}
       </div>

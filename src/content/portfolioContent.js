@@ -280,11 +280,188 @@ export const portfolio = {
           'Participation in a four-hour We Make Software event organized by the Software Engineering department at PUC Minas.',
       },
 
+
       url: 'certificates/events/we-make-software-coreu-2026-01.pdf',
+    },
+
+    // === Cursos adicionais — outubro de 2026 ===
+
+    {
+      id: 'aprendendo-python-enap',
+      title: {
+        'pt-BR': 'Aprendendo com Python',
+        en: 'Learning with Python',
+      },
+      issuer: 'Escola Nacional de Administração Pública — ENAP',
+      category: 'course',
+      date: '2026-10-26',
+      workload: {
+        'pt-BR': '20 horas',
+        en: '20 hours',
+      },
+      description: {
+        'pt-BR':
+          'Curso sobre variáveis, operações, estruturas condicionais, funções, estruturas de dados, orientação a objetos e bibliotecas Python.',
+        en:
+          'Course covering variables, operators, conditionals, functions, data structures, object-oriented programming, and Python libraries.',
+      },
+      url: 'certificates/courses/aprendendo-python-enap.pdf',
+    },
+
+    {
+      id: 'java-completo-udemy',
+      title: {
+        'pt-BR': 'Java COMPLETO — Programação Orientada a Objetos + Projetos',
+        en: 'Complete Java — Object-Oriented Programming + Projects',
+      },
+      issuer: 'Udemy — Nelio Alves',
+      category: 'course',
+      date: '2026-10-26',
+      workload: {
+        'pt-BR': '54 horas',
+        en: '54 hours',
+      },
+      description: {
+        'pt-BR':
+          'Conclusão do curso Java COMPLETO, com foco em programação orientada a objetos e projetos.',
+        en:
+          'Completed the Complete Java course, focused on object-oriented programming and projects.',
+      },
+      url: 'certificates/courses/java-completo-udemy.pdf',
+    },
+
+    {
+      id: 'fundamentos-engenharia-dados-dsa',
+      title: {
+        'pt-BR': 'Fundamentos de Engenharia de Dados',
+        en: 'Data Engineering Fundamentals',
+      },
+      issuer: 'Data Science Academy',
+      category: 'course',
+      date: '2026-10-27',
+      workload: {
+        'pt-BR': '24 horas',
+        en: '24 hours',
+      },
+      description: {
+        'pt-BR':
+          'Formação introdutória em fundamentos de Engenharia de Dados, concluída com 100% de aproveitamento.',
+        en:
+          'Introductory training in Data Engineering fundamentals, completed with a 100% final score.',
+      },
+      url: 'certificates/courses/fundamentos-engenharia-dados-dsa.pdf',
+    },
+
+    {
+      id: 'eixo-1-analise-consulta-dados-enap',
+      title: {
+        'pt-BR': 'Eixo 1 — Análise e Consulta de Dados',
+        en: 'Track 1 — Data Analysis and Querying',
+      },
+      issuer: 'ENAP — Engenharia de Dados e IA Aplicada para Gestores de TIC',
+      category: 'course',
+      date: '2026-10-28',
+      workload: {
+        'pt-BR': '44 horas',
+        en: '44 hours',
+      },
+      description: {
+        'pt-BR':
+          'Certificação do primeiro eixo do programa Engenharia de Dados e IA Aplicada para Gestores de TIC.',
+        en:
+          'Certification for the first track of the Data Engineering and Applied AI for IT Managers program.',
+      },
+      url: 'certificates/courses/eixo-1-analise-consulta-dados-enap.pdf',
+    },
+
+    {
+      id: 'eixo-2-ciencia-dados-enap',
+      title: {
+        'pt-BR': 'Eixo 2 — Fundamentos de Ciência de Dados',
+        en: 'Track 2 — Data Science Fundamentals',
+      },
+      issuer: 'ENAP — Engenharia de Dados e IA Aplicada para Gestores de TIC',
+      category: 'course',
+      date: '2026-10-26',
+      workload: {
+        'pt-BR': '4 horas',
+        en: '4 hours',
+      },
+      description: {
+        'pt-BR':
+          'Certificação do segundo eixo do programa, dedicado aos fundamentos de Ciência de Dados.',
+        en:
+          'Certification for the second program track, focused on Data Science fundamentals.',
+      },
+      url: 'certificates/courses/eixo-2-ciencia-dados-enap.pdf',
+    },
+
+    {
+      id: 'eixo-3-engenharia-dados-enap',
+      title: {
+        'pt-BR': 'Eixo 3 — Engenharia de Dados',
+        en: 'Track 3 — Data Engineering',
+      },
+      issuer: 'ENAP — Engenharia de Dados e IA Aplicada para Gestores de TIC',
+      category: 'course',
+      date: '2026-10-27',
+      workload: {
+        'pt-BR': '24 horas',
+        en: '24 hours',
+      },
+      description: {
+        'pt-BR':
+          'Certificação do terceiro eixo do programa, dedicado à Engenharia de Dados.',
+        en:
+          'Certification for the third program track, focused on Data Engineering.',
+      },
+      url: 'certificates/courses/eixo-3-engenharia-dados-enap.pdf',
+    },
+
+    {
+      id: 'introducao-ciencia-dados-enap',
+      title: {
+        'pt-BR': 'Introdução à Ciência de Dados — Conceitos e Ferramentas',
+        en: 'Introduction to Data Science — Concepts and Tools',
+      },
+      issuer: 'Escola Nacional de Administração Pública — ENAP',
+      category: 'course',
+      date: '2026-10-26',
+      workload: {
+        'pt-BR': '4 horas',
+        en: '4 hours',
+      },
+      description: {
+        'pt-BR':
+          'Introdução à Ciência de Dados, mineração de dados, preparação de dados, ferramentas analíticas e KNIME.',
+        en:
+          'Introduction to Data Science, data mining, data preparation, analytical tools, and KNIME.',
+      },
+      url: 'certificates/courses/introducao-ciencia-dados-enap.pdf',
+    },
+
+    {
+      id: 'sql-fgv',
+      title: 'SQL — Structured Query Language',
+      issuer: 'Fundação Getulio Vargas — FGV Online',
+      category: 'course',
+      date: '2026-10-25',
+      workload: {
+        'pt-BR': '24 horas',
+        en: '24 hours',
+      },
+      description: {
+        'pt-BR':
+          'Declaração de participação no curso autoinstrucional SQL — Structured Query Language, nível de atualização.',
+        en:
+          'Statement of participation in the self-paced SQL — Structured Query Language continuing education course.',
+      },
+      url: 'certificates/courses/sql-fgv.pdf',
     },
   ],
 
   // PROJETOS
+
 
   // Repositórios carregados automaticamente pela API do GitHub.
   // Este array permanece disponível para futuras personalizações.

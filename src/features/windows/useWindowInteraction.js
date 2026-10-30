@@ -105,6 +105,35 @@ export default function useWindowInteraction({ instance, app }) {
     }
   }
 
+  /* === RECUPERAÇÃO DE JANELAS FORA DA ÁREA VISÍVEL === */
+  /* ----- Reposicionar somente quando houver conteúdo fora do Desktop ----- */
+  function recoverWindow() {
+    const element = windowRef.current;
+
+    if (
+      !element ||
+      modeRef.current !== 'normal' ||
+      interactionRef.current ||
+      instance.minimized ||
+      instance.closing
+    ) {
+      return;
+    }
+
+    const bounds = getBounds(element);
+    const geometry = readGeometry(element);
+
+    const outside =
+      geometry.x < 0 ||
+      geometry.y < 0 ||
+      geometry.x + geometry.width > bounds.width ||
+      geometry.y + geometry.height > bounds.height;
+
+    if (!outside) return;
+
+    geometryRef.current = applyGeometry(element, geometry, bounds);
+  }
+
   /* === DIMENSÕES SOLICITADAS PELO APLICATIVO === */
   function resizeWindow(size) {
     const element = windowRef.current;
@@ -405,6 +434,7 @@ export default function useWindowInteraction({ instance, app }) {
     windowRef,
     mode,
     appName,
+    recoverWindow,
     resizeWindow,
     startInteraction,
     moveInteraction,

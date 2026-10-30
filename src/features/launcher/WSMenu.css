@@ -1,45 +1,62 @@
-/* ==========================================================
-   WS OS — WS Menu
-   Launcher lateral / W6.1
-   ========================================================== */
+/* ==========================================================================
+   WS OS — WS MENU
+   Launcher integrado ao sistema de aparência V2
+   ========================================================================== */
 
+/* === 01. SUPERFÍCIE === */
 .taskbar-launcher {
   position: relative;
   z-index: 1;
 }
 
 .taskbar-launcher--redesign.ws-menu {
+  --ws-menu-surface: var(--panel-background, var(--surface-primary));
   display: flex;
   flex-direction: column;
   isolation: isolate;
-
   width: min(540px, calc(100vw - 24px));
   height: min(480px, calc(100dvh - 100px));
   min-width: 0;
   min-height: 0;
   padding: 0;
   overflow: visible;
-
   border: 1px solid var(--panel-border, var(--border-default));
   border-radius: 17px;
-  background: var(--panel-background);
+  background: var(--ws-menu-surface);
   color: var(--text-primary);
   box-shadow: var(--shadow-floating);
+  backdrop-filter: blur(var(--blur-medium));
+  -webkit-backdrop-filter: blur(var(--blur-medium));
 }
 
-/* ==========================================================
-   Pesquisa superior
-   ========================================================== */
+/* ----- Respeitar opções oficiais de transparência e blur ----- */
+:root[data-transparency='solid'] .taskbar-launcher--redesign.ws-menu {
+  --ws-menu-surface: var(--surface-primary);
+}
 
+:root[data-transparency='high'] .taskbar-launcher--redesign.ws-menu {
+  --ws-menu-surface: color-mix(in srgb, var(--panel-background, var(--surface-primary)) 77%, transparent);
+}
+
+:root[data-blur='off'] .taskbar-launcher--redesign.ws-menu,
+:root[data-low-effects='true'] .taskbar-launcher--redesign.ws-menu {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:root[data-transparency='solid'] .ws-menu__sidebar,
+:root[data-transparency='solid'] .ws-menu__footer {
+  background: var(--surface-secondary);
+}
+
+/* === 02. CABEÇALHO E BUSCA === */
 .ws-menu__top {
   display: flex;
   align-items: center;
   gap: 14px;
   flex: 0 0 auto;
-
   min-width: 0;
   padding: 14px 17px;
-
   border-bottom: 1px solid var(--border-default);
 }
 
@@ -48,18 +65,14 @@
   align-items: center;
   gap: 10px;
   flex: 1;
-
   height: 39px;
   min-width: 0;
   padding: 0 12px;
-
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-control, var(--border-default));
   border-radius: 10px;
-  background: var(--surface-secondary);
+  background: var(--surface-primary);
   color: var(--text-secondary);
-
-  transition:
-    border-color calc(var(--motion-scale, 1) * 140ms) ease,
+  transition: border-color calc(var(--motion-scale, 1) * 140ms) ease,
     box-shadow calc(var(--motion-scale, 1) * 140ms) ease;
 }
 
@@ -68,7 +81,7 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-secondary) 10%, transparent);
 }
 
-.ws-menu__search > svg {
+.ws-menu__search>svg {
   flex-shrink: 0;
 }
 
@@ -76,11 +89,9 @@
   flex: 1;
   min-width: 0;
   width: 100%;
-
   padding: 0;
   border: 0;
   outline: 0;
-
   background: transparent;
   color: var(--text-primary);
   font: inherit;
@@ -98,11 +109,9 @@
 .ws-menu__clear {
   display: grid;
   place-items: center;
-
   width: 25px;
   height: 25px;
   flex: 0 0 25px;
-
   padding: 0;
   border: 0;
   border-radius: 6px;
@@ -112,22 +121,19 @@
 }
 
 .ws-menu__clear:hover {
-  background: var(--surface-primary);
+  background: var(--surface-secondary);
   color: var(--text-primary);
 }
 
 .ws-menu__top-brand {
   flex: 0 0 auto;
+  color: var(--accent-secondary);
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.1em;
-  color: var(--accent-secondary);
+  letter-spacing: .1em;
 }
 
-/* ==========================================================
-   Área principal: navegação + aplicativos
-   ========================================================== */
-
+/* === 03. NAVEGAÇÃO LATERAL === */
 .ws-menu__workspace {
   display: grid;
   grid-template-columns: 133px minmax(0, 1fr);
@@ -135,30 +141,25 @@
   min-height: 0;
 }
 
-/* Navegação lateral */
-
 .ws-menu__sidebar {
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-
   padding: 19px 9px 15px;
   border-right: 1px solid var(--border-default);
   border-radius: 0 0 0 8px;
-
-  background: color-mix(in srgb, var(--surface-secondary) 65%, var(--surface-primary));
+  background: color-mix(in srgb, var(--surface-secondary) 55%, transparent);
 }
 
 .ws-menu__sidebar-label,
 .ws-menu__sidebar-caption {
   display: block;
   padding: 0 10px;
-
   color: var(--text-secondary);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.09em;
+  letter-spacing: .09em;
   text-transform: uppercase;
 }
 
@@ -173,16 +174,13 @@
   display: flex;
   align-items: center;
   gap: 9px;
-
   width: 100%;
   min-height: 39px;
   padding: 9px 10px;
-
   border: 1px solid transparent;
   border-radius: 9px;
   background: transparent;
   color: var(--text-secondary);
-
   font: inherit;
   font-size: 11px;
   font-weight: 600;
@@ -190,7 +188,7 @@
   cursor: pointer;
 }
 
-.ws-menu__nav-button > svg {
+.ws-menu__nav-button>svg {
   flex-shrink: 0;
 }
 
@@ -203,11 +201,10 @@
   color: var(--accent-secondary);
   background: var(--surface-primary);
   border-color: var(--border-default);
-  box-shadow: 0 2px 7px rgb(0 0 0 / 4%);
 }
 
 .ws-menu__nav-button:disabled {
-  opacity: 0.45;
+  opacity: .45;
   cursor: default;
 }
 
@@ -225,7 +222,6 @@
   align-items: center;
   gap: 8px;
   margin-left: 8px;
-
   color: var(--text-secondary);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
@@ -235,14 +231,13 @@
   color: var(--accent-secondary);
 }
 
-/* Conteúdo */
-
+/* === 04. CONTEÚDO E ROLAGEM === */
 .ws-menu__content {
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  padding: 18px 14px 15px 16px;
+  padding: 18px 14px 12px 16px;
 }
 
 .ws-menu__content-heading {
@@ -250,7 +245,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-
   flex: 0 0 auto;
   min-width: 0;
   padding: 0 3px 15px;
@@ -267,7 +261,7 @@
   color: var(--accent-secondary);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: .08em;
   text-transform: uppercase;
 }
 
@@ -282,53 +276,50 @@
 .ws-menu__result-count {
   display: grid;
   place-items: center;
-
   min-width: 25px;
   height: 25px;
   padding: 0 6px;
-
   border: 1px solid var(--border-default);
   border-radius: 8px;
   background: var(--surface-secondary);
   color: var(--text-secondary);
-
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
-/* ==========================================================
-   Lista de aplicativos
-   ========================================================== */
+.ws-menu__results-scroll {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 2px 4px 6px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+
+.ws-menu__results-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ws-menu__results-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ws-menu__results-scroll::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: var(--border-default);
+}
 
 .ws-menu__apps {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  flex: 1;
-
-  min-height: 0;
+  flex: 0 0 auto;
   min-width: 0;
-  padding: 2px 4px 5px 0;
-
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-default) transparent;
-}
-
-.ws-menu__apps::-webkit-scrollbar {
-  width: 5px;
-}
-
-.ws-menu__apps::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.ws-menu__apps::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  background: var(--border-default);
 }
 
 .ws-menu__app-item {
@@ -341,22 +332,17 @@
   display: flex;
   align-items: center;
   gap: 11px;
-
   width: 100%;
   min-height: 54px;
   min-width: 0;
   padding: 7px 9px;
-
   border: 1px solid transparent;
   border-radius: 10px;
   background: transparent;
   color: var(--text-primary);
-
   text-align: left;
   cursor: pointer;
-
-  transition:
-    background-color calc(var(--motion-scale, 1) * 140ms) ease,
+  transition: background-color calc(var(--motion-scale, 1) * 140ms) ease,
     border-color calc(var(--motion-scale, 1) * 140ms) ease;
 }
 
@@ -366,21 +352,12 @@
   background: var(--surface-secondary);
 }
 
-.ws-menu__app:focus-visible,
-.ws-menu__nav-button:focus-visible,
-.ws-menu__clear:focus-visible {
-  outline: 2px solid var(--accent-secondary);
-  outline-offset: -2px;
-}
-
 .ws-menu__app-icon {
   display: grid;
   place-items: center;
   flex: 0 0 37px;
-
   width: 37px;
   height: 37px;
-
   border: 1px solid var(--border-default);
   border-radius: 10px;
   background: var(--surface-secondary);
@@ -392,7 +369,6 @@
   flex-direction: column;
   justify-content: center;
   gap: 4px;
-
   flex: 1;
   min-width: 0;
 }
@@ -401,7 +377,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
   color: var(--text-primary);
   font-size: 12px;
   font-weight: 650;
@@ -411,13 +386,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
   color: var(--text-secondary);
   font-size: 10px;
-  font-weight: 400;
 }
-
-/* Estado vazio */
 
 .ws-menu__empty {
   display: flex;
@@ -425,17 +396,15 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-
   flex: 1;
-  min-height: 150px;
+  min-height: 140px;
   padding: 15px;
-
   color: var(--text-secondary);
   text-align: center;
 }
 
-.ws-menu__empty > svg {
-  opacity: 0.5;
+.ws-menu__empty>svg {
+  opacity: .5;
 }
 
 .ws-menu__empty p {
@@ -451,7 +420,6 @@
   border-radius: 8px;
   background: var(--surface-secondary);
   color: var(--text-primary);
-
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -461,24 +429,25 @@
   border-color: var(--accent-secondary);
 }
 
-/* ==========================================================
-   Rodapé / Visitante
-   ========================================================== */
+.ws-menu__app:focus-visible,
+.ws-menu__nav-button:focus-visible,
+.ws-menu__clear:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+}
 
+/* === 05. RODAPÉ === */
 .ws-menu__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-
   flex: 0 0 auto;
   min-height: 63px;
   padding: 10px 17px;
-
   border-top: 1px solid var(--border-default);
   border-radius: 0 0 17px 17px;
-
-  background: color-mix(in srgb, var(--surface-secondary) 50%, var(--surface-primary));
+  background: color-mix(in srgb, var(--surface-secondary) 60%, transparent);
 }
 
 .ws-menu__user {
@@ -492,13 +461,10 @@
   display: grid;
   place-items: center;
   flex: 0 0 35px;
-
   width: 35px;
   height: 35px;
-
   border: 1px solid var(--border-default);
   border-radius: 10px;
-
   background: var(--surface-primary);
   color: var(--accent-secondary);
 }
@@ -526,34 +492,28 @@
   color: var(--text-secondary);
   font-size: 10px;
   font-weight: 750;
-  letter-spacing: 0.08em;
+  letter-spacing: .08em;
 }
 
-/* ==========================================================
-   Menu contextual
-   ========================================================== */
-
+/* === 06. MENU DE CONTEXTO === */
 .ws-menu__context {
   position: absolute;
   z-index: 100;
-
   display: flex;
   flex-direction: column;
   gap: 3px;
-
   width: 220px;
   max-height: min(300px, calc(100dvh - 115px));
   overflow-x: hidden;
   overflow-y: auto;
   padding: 7px;
-
   border: 1px solid var(--panel-border, var(--border-default));
   border-radius: 12px;
-
-  background: var(--surface-primary);
+  background: var(--panel-background, var(--surface-primary));
   color: var(--text-primary);
   box-shadow: var(--shadow-floating);
-
+  backdrop-filter: blur(var(--blur-medium));
+  -webkit-backdrop-filter: blur(var(--blur-medium));
   scrollbar-width: thin;
   scrollbar-color: var(--border-default) transparent;
 }
@@ -562,7 +522,6 @@
   display: flex;
   align-items: center;
   gap: 9px;
-
   min-width: 0;
   padding: 7px 7px 9px;
 }
@@ -572,20 +531,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-
   font-size: 12px;
   font-weight: 700;
-  color: var(--text-primary);
 }
 
 .ws-menu__context-icon {
   display: grid;
   place-items: center;
   flex: 0 0 30px;
-
   width: 30px;
   height: 30px;
-
   border: 1px solid var(--border-default);
   border-radius: 8px;
   background: var(--surface-secondary);
@@ -603,16 +558,13 @@
   display: flex;
   align-items: center;
   gap: 9px;
-
   width: 100%;
   min-height: 36px;
   padding: 8px;
-
   border: 0;
   border-radius: 8px;
   background: transparent;
   color: var(--text-primary);
-
   font: inherit;
   font-size: 11px;
   text-align: left;
@@ -631,7 +583,7 @@
 }
 
 .ws-menu__context button:disabled {
-  opacity: 0.4;
+  opacity: .4;
   cursor: default;
 }
 
@@ -658,31 +610,29 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-
   margin: 3px;
   padding: 10px;
-
   border: 1px solid var(--border-default);
   border-radius: 9px;
   background: var(--surface-secondary);
   color: var(--text-secondary);
-
   font-size: 10px;
   line-height: 1.5;
 }
 
-/* ==========================================================
-   Telas menores
-   ========================================================== */
+:root[data-blur='off'] .ws-menu__context {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 
+/* === 07. RESPONSIVIDADE === */
 @media (max-height: 600px) {
   .taskbar-launcher--redesign.ws-menu {
     height: min(390px, calc(100dvh - 85px));
   }
 
   .ws-menu__top {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-block: 10px;
   }
 
   .ws-menu__content {
@@ -696,7 +646,7 @@
 
 @media (max-width: 430px) {
   .taskbar-launcher--redesign.ws-menu {
-    width: min(100vw - 16px, 540px);
+    width: min(540px, calc(100vw - 16px));
   }
 
   .ws-menu__workspace {
@@ -704,8 +654,7 @@
   }
 
   .ws-menu__sidebar {
-    padding-left: 5px;
-    padding-right: 5px;
+    padding-inline: 5px;
     align-items: center;
   }
 
@@ -740,6 +689,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .ws-menu__search,
   .ws-menu__app {
     transition: none;

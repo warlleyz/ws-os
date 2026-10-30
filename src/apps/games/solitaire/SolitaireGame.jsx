@@ -71,7 +71,7 @@ function SolitaireCard({
             aria-pressed={selected}
             aria-label={
                 card.faceUp
-                    ? `${getRankLabel(card.rank)} de ${suit.label}`
+                    ? t(`Carta ${getRankLabel(card.rank)} de ${t(suit.label)}`)
                     : t('Carta virada para baixo')
             }
         >

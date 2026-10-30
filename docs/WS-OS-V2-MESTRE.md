@@ -2,8 +2,8 @@
 
 # WS OS V2 — Documento mestre de revisão e conclusão
 
-- **Versão:** 1.4
-- **Data:** 26/10/2026
+- **Versão:** 1.6
+- **Data:** 30/10/2026
 - **Projeto:** WS OS — Portfólio interativo
 - **Repositório:** https://github.com/warlleyz/ws-os
 - **Diretório local:** `C:\Projetos\ws-os`
@@ -27,7 +27,7 @@ A revisão deve encerrar, em cada área:
 
 Não deixar traduções, Mobile, estados de erro ou acessibilidade de todos os aplicativos para a última etapa.
 
-Este documento consolida a direção de conclusão. A autorização vigente permite executar diretamente a Etapa 04 na main e realizar um único commit ao final desta etapa, sem push. As Etapas 01, 02 e 03 já receberam seus commits. Não há autorização para avançar à Etapa 05, mudar de branch, aplicar migrações, publicar ou alterar infraestrutura remota.
+Este documento consolida a direção de conclusão. Em 30/10/2026, o proprietário autorizou revisar R01–R09 e R10 até o WS Menu e corrigir erros e pendências locais, preservando suas alterações. Autorizações anteriores de etapas e commits são históricas. Não há autorização para commit, push, troca de branch/worktree, migrações, publicação ou escrita remota.
 
 <!-- === 2. PRECEDÊNCIA E DECISÕES === -->
 
@@ -51,11 +51,11 @@ As autorizações antigas não constituem permissão permanente.
 
 ### Decisões superadas
 
-- O sistema de demonstrações de projetos foi removido.
+- O sistema de demonstrações de projetos foi removido. DOOM, UZDoom e seus recursos também foram removidos; engine, SoundFont, saves e distribuição não são bloqueadores desta versão.
 - Supabase Storage privado substituiu Cloudflare R2 para arquivos oficiais.
 - A antiga restrição de adiar traduções não orienta esta revisão final: traduções devem ser encerradas na própria área revisada.
 - Referências históricas a 18 aplicativos, Administração inexistente ou Mobile reservado não descrevem a base atual.
-- Recomendações antigas de commits não concedem permissão permanente. As autorizações das Etapas 01, 02 e 03 foram cumpridas com um commit cada. O pedido posterior autoriza o mesmo modelo na Etapa 04.
+- Recomendações e autorizações antigas de commits são históricas e não concedem permissão para commits futuros.
 - Boot com processador e logos oficiais reservadas ao favicon, por confirmação do proprietário nesta etapa.
 - A Administração seleciona os projetos destacados por ID; a ordenação restante continua automática, com os filtros existentes. Não há ordenação editorial manual a implementar.
 - Animações das janelas permanecem obrigatórias, respeitando movimento reduzido. Comandos Reiniciar e Desligar ficam fora desta versão.
@@ -100,7 +100,7 @@ A WS OS apresenta um portfólio profissional por meio de uma interface inspirada
 16. Sobre o Sistema.
 17. Administração.
 
-Currículo pode funcionar como atalho para o Visualizador, preservando confirmação de abertura e navegação.
+Currículo funciona como atalho para o Visualizador, preservando confirmação de abertura e navegação.
 
 Administração é restrita. A visibilidade no catálogo não substitui autorização.
 
@@ -436,7 +436,7 @@ Aplicar somente com apontador compatível. Não substituir todos os estados por 
 | Editor          | Edição, busca/substituição, salvamento, cópia, conflito e descarte protegido                                                                                       |
 | Visualizador    | Texto, imagem e PDF, metadados, zoom/ajuste, download e fallback                                                                                                   |
 | Calculadora     | Modos existentes, operações, erros, histórico, teclado e toque                                                                                                     |
-| Jogos           | Cinco jogos, recordes, rankings e DOOM conforme distribuição autorizada                                                                                            |
+| Jogos           | Snake, Memória, Campo Minado, Flappy Bird e Paciência; recordes e rankings suportados                                                                                            |
 | Terminal        | Comandos existentes, ajuda, navegação, histórico e login seguro                                                                                                    |
 | Wally           | Navegação, pesquisa pública e ações locais autorizadas                                                                                                             |
 | Administração   | Conteúdo, destaques, publicações, arquivos, eventos, solicitações e moderação previstos                                                                            |
@@ -471,7 +471,7 @@ Aplicar somente com apontador compatível. Não substituir todos os estados por 
 - Build não executado nessa auditoria de leitura.
 - Nenhuma homologação atual de produção ou ensaio visual.
 
-Esses dados precisam ser atualizados na retomada.
+Fotografia histórica: os defeitos e bloqueios abaixo descrevem 26/10, não pendências atuais. DOOM foi removido depois; o baseline de 28/10 e a revisão de 30/10 estão na seção 15.
 
 <!-- ----- DEFEITOS IDENTIFICADOS ----- -->
 
@@ -549,7 +549,7 @@ A ordem abaixo substitui a sequência antiga de execução. Os problemas conheci
 ### Etapa 03 — Core, persistência e ciclo de vida
 
 - Abertura, confirmação, instâncias e navegação.
-- Corrigir Currículo e preparação assíncrona do DOOM.
+- Preservar abertura do Currículo no Visualizador e preparação assíncrona de saída dos consumidores atuais.
 - Foco, isolamento de erros, pausa e cleanup.
 - Guards, mudança de shell e proteção de rascunhos.
 - Sincronização e reset seguro.
@@ -639,10 +639,9 @@ Encerrar um por vez:
 - Operações, regras, teclado e toque.
 - Cinco jogos, pausa, retorno, reinício, término e recordes.
 - Ranking integrado ao contrato encerrado.
-- DOOM: carregamento, persistência, erros, integridade e licenças.
 - Corrigir testes desatualizados sem enfraquecer verificações.
 
-**Aceite:** fluxos representativos e condições de distribuição comprovados.
+**Aceite:** fluxos representativos dos cinco jogos e da Calculadora comprovados. DOOM não integra este aceite.
 
 <!-- ----- ETAPA 09 — TERMINAL, WALLY E BUSCA ----- -->
 
@@ -766,22 +765,37 @@ Não exigir toda combinação cartesiana em toda alteração. Cobrir riscos e di
 
 ## 15. Registro único de continuidade
 
-Manter neste documento, ou no local único combinado, uma tabela:
+Este é o checklist único vigente. R01–R14 são revisões de finalização da auditoria de 28/10/2026; não renumeram as 12 etapas de requisitos da seção 12. Checkpoints e seções 18 e 22–24 preservam evidências datadas, sem conceder autorizações atuais.
 
-| Etapa                            | Estado                                               | Evidências                                                                    | Pendências                                                          | Aceite                                                        |
-| -------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
-| 01 — Base e escopo               | Encerrada e aprovada                                 | Commit 0bf511d                                                                | Nenhuma pendência de escopo                                         | Autorização do proprietário para avançar à Etapa 02           |
-| 02 — Backend e dados             | Bloqueada externamente; implementação local validada | Seção 22; 505/510 testes, mesmas cinco falhas anteriores                      | Aplicar/homologar migração, identidades reais, D1 remoto e P12      | Aceite integral pendente                                      |
-| 03 — Core e persistência         | Concluída tecnicamente, aguardando aceite            | Seção 23; 523/528 testes, mesmas cinco falhas anteriores; navegador local     | Homologação do motor DOOM na 08 e aceite físico nas etapas próprias | Pendente                                                      |
-| 04 — Design System               | Entrega local concluída, aguardando aceite           | Quatro contextos, enquadramento, cores por tema, coleção e cursores; seção 24 | Walkthrough integral na 11 e dispositivos na 10                     | Lint/build aprovados; 539/544 testes, cinco falhas anteriores |
-| 05 — Arquivos                    | Não iniciada nesta revisão                           | Contratos preservados                                                         | Revisão funcional e visual; P14                                     | Pendente                                                      |
-| 06 — Profissionais               | Não iniciada nesta revisão                           | Catálogo preservado                                                           | P07 e conteúdo                                                      | Pendente                                                      |
-| 07 — Contato/Notas/Administração | Não iniciada nesta revisão                           | APIs existentes                                                               | Homologação dos fluxos                                              | Pendente                                                      |
-| 08 — Calculadora/Jogos           | Não iniciada nesta revisão                           | Baseline registrada                                                           | P06, P08 e P11                                                      | Pendente                                                      |
-| 09 — Terminal/Wally/Busca        | Não iniciada nesta revisão                           | Catálogo existente                                                            | P09                                                                 | Pendente                                                      |
-| 10 — Shells                      | Não iniciada nesta revisão                           | Integração existente                                                          | P10 e dispositivos                                                  | Pendente                                                      |
-| 11 — Apresentação                | Não iniciada nesta revisão                           | Escopo fechado                                                                | Walkthrough e informações finais                                    | Pendente                                                      |
-| 12 — Aceite integrado            | Não iniciada                                         | CI existente; execução remota não conferida                                   | P13 e P15                                                           | Pendente                                                      |
+Base: main, HEAD 48b0993d9022b306187bd48d62e766678da5e3f3, com alterações locais do proprietário preservadas. A aprovação histórica de 547 testes no checkout limpo de 28/10 não validava essas alterações. Nesta revisão, lint, build externo e 552 testes (547 existentes e cinco regressões novas) passaram após as correções locais. Percursos sem execução real permanecem não testados.
+
+| Revisão | Etapas do mestre | Estado e evidência local | Pendência / responsável |
+| --- | --- | --- | --- |
+| R01 — Escopo e acompanhamento | 01 | Reconciliado em 30/10; 17 entradas, Currículo atalho, cinco jogos; sem demos/DOOM | Aceite documental / proprietário |
+| R02 — Segurança e banco | 02 | Contratos e testes negativos locais aprovados; sem consulta remota nesta revisão | Rotação/revogação, histórico real, migração incremental, RLS por identidade, D1/Turnstile e retenção / proprietário e operador autorizado |
+| R03 — Core e personalização | 03/04 | Testes locais aprovados; removida sobrescrita entre temas; percurso Desktop de troca de wallpaper verificado | Matriz física e leitor de tela / proprietário e revisor |
+| R04 — Arquivos, Editor e Visualizador | 05 | Implementação existente e testes de armazenamento/UI aprovados; build FileViewer 620,95 kB, gzip 186,51 kB | Desempenho medido no dispositivo, matriz completa e oficiais remotos / revisor e operador |
+| R05 — Conteúdo profissional | 06 | Testes de conteúdo/UI aprovados; 11 caminhos locais de certificados existentes | Conferir conteúdo dos PDFs, dados e provedores reais / proprietário e revisor |
+| R06 — Projetos e destaques | 06/07 | Testes locais de catálogo e destaques aprovados; sem demos ou ordem manual | Persistência real e decisão sobre edição concorrente sem revisão otimista / proprietário e operador |
+| R07 — Notas, apresentação e Configurações | 07/11 | Testes locais aprovados; boot e boas-vindas em duas etapas observados | Aceite bilíngue completo e backend editorial; créditos React Icons, Font Awesome 5 e Simple Icons corrigidos / proprietário e revisor |
+| R08 — Cinco jogos e Calculadora | 08 | Regras e UI com testes aprovados; início/pausa/reinício observados nos cinco jogos; traduções dinâmicas corrigidas | Percurso completo em dispositivo; rankings reais em R11 / revisor e operador |
+| R09 — Terminal, Wally e busca | 09 | Testes locais aprovados; flag do Wally e ajuda bilíngue do Terminal corrigidas; remoto continua desativado | P09: mapear aprovação e alcance de cada ação; não ampliar ferramentas arbitrariamente / proprietário e revisor |
+| R10 — Desktop e Taskbar até WS Menu | 10 | Revisão local em andamento; traduções e exclusividade do contexto corrigidas | Aceite visual/teclado, auto-hide e continuidade a partir do WS Menu / revisor e proprietário |
+| R11 — Serviços administrativos reais | 02/07 | Não executada; depende de R02 | Homologação isolada e autorizada / operador e proprietário |
+| R12 — Mobile e tablets | 10 | Não encerrada por testes locais | Dispositivo físico, orientação, teclado e navegação / proprietário e revisor |
+| R13 — Revisão transversal final | Todas/12 | Não encerrada; suíte local não equivale ao aceite final | Matriz de integração, acessibilidade e CI / revisor e proprietário |
+| R14 — Operação e publicação | 12 | Não executada | Licenças atuais, backup/restauração, rollback, limites e autorização de publicação / operador e proprietário |
+
+### Evidências da revisão de 30/10/2026 até o WS Menu
+
+- Ambiente: prévia do build externo em 127.0.0.1:4187, visitante e armazenamento local isolado; sem login administrativo, escrita remota ou mudança de provedores.
+- R03/R07: boot, duas etapas de boas-vindas, Desktop, troca Dark Green → Light Violet → Dark com recuperação de Dark Green; confirmação de fechamento do Editor cancelada preservou o texto.
+- R04/R05: criação de validacao-r04.txt, edição, salvamento confirmado e Currículo no Visualizador com PDF de uma página e controles de leitura/download. Certificados exibiu os 11 registros; não foi certificada a exatidão de cada comprovante.
+- R05/R06/R07: Sobre Mim, Dev Insights, Certificados, Projetos, Notas e Sobre o Sistema abriram. GitHub apresentou 16 projetos; destaques, Notas, eventos e WakaTime sem backend local mostraram indisponibilidade. Isso não comprova defeito de produção nem homologação remota.
+- R08: cinco jogos abriram; início/pausa executados nos cinco e reinício nos quatro percursos seguintes; regras/vitória/derrota permanecem cobertas por testes controlados e exigem aceite representativo completo. Identificadas e corrigidas traduções dinâmicas de categorias, descrições, controles, estados e rótulos acessíveis.
+- R09: Terminal abriu e executou help; corrigidas ajuda/introdução que permaneciam em português em EN. Wally respondeu localmente em inglês; a Calculadora retornou 14 para 2+3*4 e erro de divisão por zero para 1/0. Wally cliente tem regressão impedindo transmissão com flag ausente/false e exige verificação para opt-in true. Não foram acrescentadas novas ações a P09.
+- R10 até WS Menu: contexto da Taskbar e troca para Controles/Menu observados; contexto anterior foi dispensado. Textos novos em EN e retorno ao WS Menu observados. O registro tem 17 entradas; Todos exibe 13 públicas no Desktop conforme showInMenu, enquanto Editor, Visualizador e Wally Estendido usam acessos contextuais e Administração permanece protegida. Revisão posterior de painéis/widgets e matriz física não foram antecipadas como aceites.
+- Não homologados nesta execução: identidades/RLS, migrações, retenção/D1/Turnstile reais, CRUD remoto, dispositivo físico, leitor de tela, desempenho medido e CI remoto. Responsáveis e revisões permanecem na tabela acima.
 
 Ao terminar uma etapa, registrar:
 
@@ -902,15 +916,15 @@ Cada pendência possui responsável primário. Etapas posteriores apenas validam
 | --- | --------------------------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
 | P01 | Limite Snake 397 unificado no contrato, API e interface; migração incremental preparada | 02                  | Concluído localmente; aplicar e homologar a migração antes de publicar                                   |
 | P02 | Currículo confirma file-viewer e Mobile seleciona o destino efetivo                     | 03                  | Encerrado no Core; regressões e PDF real no navegador Desktop/Mobile aprovados; conteúdo permanece na 06 |
-| P03 | Preparação assíncrona consumida pelo Core, sem descarte ou desmontagem prematura        | 03                  | Encerrado no Core; ACK/erro/timeout e cleanup testados; persistência real do motor pertence à 08         |
+| P03 | Preparação assíncrona consumida pelo Core | 03 | Contrato geral preservado; homologação de motor DOOM superada pela remoção |
 | P04 | Metadados de RLS/grants, bucket e histórico 005–014 conferidos no ws-os-dev             | 02                  | Ainda requer identidades reais, execução dos roteiros SQL, migração incremental e D1 remoto              |
 | P05 | Contratos locais de personalização corrigidos na Etapa 04; seção 24                     | 04 / 11             | Implementação local verificada; resta walkthrough integral de Configurações na 11                        |
-| P06 | Quatro testes Snake incompatíveis com a base recuperada                                 | 08                  | Harness e fixtures atualizados preservando testes reais de regras, pausa e reinício                      |
-| P07 | Tradução “Carga horária” ausente                                                        | 06                  | Catálogos completos e interface bilíngue validada                                                        |
-| P08 | NOTICE anuncia validação de hash no build, inexistente no script                        | 08                  | Integridade automatizada e avisos compatíveis com o comportamento efetivo                                |
+| P06 | Falhas antigas dos testes Snake | R08 | Não reproduzidas na auditoria de 28/10 nem na suíte atual; não tratar como defeito aberto |
+| P07 | Antiga ausência de tradução Carga horária | R05 | Não reproduzida na suíte atual; aceite de conteúdo em inglês permanece próprio |
+| P08 | Integridade/NOTICE de UZDoom | — | Superada pela remoção; não bloqueia a versão atual |
 | P09 | Busca/Wally expõem principalmente abertura de apps                                      | 09                  | Ações locais aprovadas alcançáveis com parâmetros, permissões e confirmação                              |
 | P10 | Risco de rolagem global Mobile e ausência de aceite físico atual                        | 10                  | Reproduzir antes de alterar; navegação, altura dinâmica, orientação e teclado aprovados                  |
-| P11 | Licença SoundFont, commit/build do UZDoom e conjunto antigo de assets                   | 08                  | Rastreabilidade e direitos verificados; limpeza apenas se autorizada e sem dependências                  |
+| P11 | Licenças e rastreabilidade UZDoom/SoundFont | — | Superada pela remoção; licenças dos recursos atuais permanecem em R14 |
 | P12 | Proprietário informou em 26/10/2026 que ainda não confirmou rotação/revogação           | 02                  | Bloqueio externo: confirmar correção sem divulgar credenciais ou considerar logout suficiente            |
 | P13 | Backup, restauração, rollback e limites operacionais                                    | 12                  | Procedimentos ensaiados em ambiente autorizado e compatibilidade de schema registrada                    |
 | P14 | Chunk do Visualizador acima de 500 kB                                                   | 05                  | Medir impacto e registrar solução ou justificativa; não elevar limite para esconder o aviso              |
@@ -1028,11 +1042,13 @@ wrangler.jsonc já contém binding D1 e flags REQUESTS_ENABLED, MANAGED_FILES_EN
 
 ### Continuidade imediata
 
-As Etapas 02, 03 e 04 receberam execução local, conforme seções 22 a 24. Os bloqueios externos da Etapa 02 continuam abertos. O próximo incremento de implementação é a Etapa 05, somente quando autorizado, sem repetir os contratos já encerrados.
+Seguir o checklist único R01–R14 da seção 15. A revisão autorizada em 30/10 cobre R01–R09 e R10 até o WS Menu, preservando as entregas e alterações locais existentes. Os gates remotos de R02/R11 permanecem pendentes de evidência e acesso autorizado; não reconstruir aplicativos já entregues.
 
 <!-- === 22. ETAPA 02 — BACKEND, SEGURANÇA E DADOS === -->
 
 ## 22. Etapa 02 — Backend, segurança e dados
+
+> Registro histórico de 26/10. Autorizações e próximos passos desta seção e das seções 23–24 não são vigentes; seguir a seção 15. Menções ao motor DOOM preservam evidência histórica e não integram o escopo atual.
 
 <!-- ----- ESCOPO E AUTORIZAÇÃO ----- -->
 

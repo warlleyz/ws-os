@@ -93,7 +93,7 @@ const MinesCell = memo(function MinesCell({
                 showMine ? 'is-mine' : '',
             ].filter(Boolean).join(' ')}
             data-count={number || undefined}
-            aria-label={`${t(label)}, linha ${cell.row + 1}, coluna ${cell.column + 1}`}
+            aria-label={t(`${t(label)}, linha ${cell.row + 1}, coluna ${cell.column + 1}`)}
             disabled={disabled || cell.revealed}
             onClick={handleClick}
             onContextMenu={handleContextMenu}

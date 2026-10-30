@@ -180,3 +180,33 @@ test('clique no grupo encontra a janela reativada, não a última criada', () =>
   assert.equal(context.getPreferredInstance(next, 'projects'), null);
   assert.equal(next.activeInstanceId, 'other');
 });
+
+/* === EXCLUSIVIDADE DO CONTEXTO DA TASKBAR === */
+test('abrir painel da Taskbar dispensa seu menu de contexto anterior', () => {
+  const source = read('src/shells/desktop/taskbar/Taskbar.jsx');
+  for (const name of ['toggleWSMenu', 'toggleNotifications', 'toggleQuickControls', 'toggleWally', 'toggleWeather', 'toggleCalendar']) {
+    const start = source.indexOf('  function ' + name + '(');
+    const bodyStart = source.indexOf('{', start);
+    let end = bodyStart + 1, depth = 1;
+    while (depth) {
+      if (source[end] === '{') depth += 1;
+      if (source[end] === '}') depth -= 1;
+      end += 1;
+    }
+    let contextOpen = true;
+    const noop = () => {};
+    const bindings = Object.fromEntries([
+      'clearWindowHighlight', 'closePreview', 'setContextGroup', 'setShortcutContext',
+      'setQuickControlsOpen', 'setWallyOpen', 'setWeatherOpen', 'setMenuView',
+      'setMenuSearch', 'setMenuOpen', 'setNotificationOpen', 'setCalendarOpen',
+    ].map((key) => [key, noop]));
+    vm.runInNewContext(source.slice(start, end) + ';' + name + '()', {
+      ...bindings,
+      menuOpen: false,
+      contextTriggerRef: { current: null },
+      shortcutTriggerRef: { current: null },
+      setTaskbarContextOpen: (value) => { contextOpen = value; },
+    });
+    assert.equal(contextOpen, false, name + ' deve preservar exclusividade');
+  }
+});

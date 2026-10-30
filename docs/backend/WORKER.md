@@ -41,13 +41,11 @@ Rotas desconhecidas sob `/api/` retornam JSON 404; métodos incompatíveis retor
 
 `scheduled` chama manutenção D1 e, somente com opt-in, retenção. Nenhum cron ou binding remoto foi criado nesta entrega.
 
-<!-- === ASSETS E UZDOOM === -->
+<!-- === ASSETS ATUAIS === -->
 
-## Assets e UZDoom
+## Assets atuais
 
-GET/HEAD em /games/uzdoom/uzdoom.data passa por worker/doomAssets.js e reúne seis partes por streaming. Métodos diferentes retornam 405 e parte indisponível/inválida retorna 503, sem considerar fallback HTML como pacote. Cancelamento deve liberar leitores e corpos pendentes.
-
-O entrypoint aplica cabeçalhos de isolamento nas respostas GET bem-sucedidas de / e /games/uzdoom/. Homologar a compatibilidade com recursos externos; esse isolamento não comprova licença, integridade automatizada ou sincronização de saves.
+DOOM/UZDoom e o tratamento específico de seus recursos foram removidos. Não há montagem de uzdoom.data nem contrato operacional de worker/doomAssets.js no runtime atual. Preservar somente APIs e assets ainda utilizados; registros antigos não criam obrigação de reintrodução.
 
 <!-- === AMBIENTE E EVIDÊNCIAS === -->
 

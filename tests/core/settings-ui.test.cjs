@@ -265,7 +265,10 @@ test('Sobre o Sistema apresenta versão técnica e licenças seguras', async () 
     (node) => node.props.href.includes('LICENSE'),
   );
 
-  assert.equal(licenseLinks.length, 4);
+  assert.equal(licenseLinks.length, 5);
+  for (const name of ['React Icons', 'Font Awesome 5', 'Simple Icons']) assert.ok(content.includes(name));
+  assert.ok(links.some((link) => link.props.href === 'https://creativecommons.org/licenses/by/4.0/'));
+  assert.ok(links.some((link) => link.props.href === 'https://creativecommons.org/publicdomain/zero/1.0/'));
 
   for (const link of links) {
     assert.equal(link.props.rel, 'noopener noreferrer');
@@ -300,4 +303,17 @@ test('Configurações encaminha modo de cor, escolha manual e cursor sem alterar
   assert.equal(changes[0][1], 'native');
   assert.equal(changes[1][1].accentMode, 'auto');
   assert.equal(changes[2][1].accent, 'green');
+});
+
+/* === TROCA DE TEMA SEM REGRAVAR OUTRAS PREFERÊNCIAS === */
+test('Configurações troca tema sem sobrescrever wallpaper ou destaque do destino', async () => {
+  const changes = [];
+  const { ui } = await settings('appearance', {
+    setTheme: (value) => { changes.push(['theme', value]); return true; },
+    setWallpaper: () => assert.fail('Trocar tema não deve regravar wallpaper'),
+    setAppearance: () => assert.fail('Trocar tema não deve regravar destaque'),
+  });
+  ui.nodes().find((node) => node.type === 'button' && ui.text(node).includes('Claro')).props.onClick();
+  assert.deepEqual(changes, [['theme', 'light']]);
+  ui.unmount();
 });

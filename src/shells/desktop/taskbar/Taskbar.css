@@ -1,84 +1,286 @@
+/* ==========================================================================
+   WS OS — TASKBAR
+   Barra flutuante, compacta e integrada ao sistema de temas
+   ========================================================================== */
+/* === 01. CONTAINER === */
+/* ----- Posicionamento centralizado no Desktop ----- */
 .taskbar-container {
   position: absolute;
   z-index: 5;
   bottom: 16px;
   left: 50%;
   display: flex;
-  width: max-content;
-  max-width: min(720px, calc(100% - 32px));
-  min-width: 0;
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  width: max-content;
+  max-width: min(850px, calc(100% - 32px));
+  min-width: 0;
   transform: translateX(-50%);
 }
 
+/* === 02. ESTRUTURA DA BARRA === */
+/* ----- Superfície flutuante com dimensões controladas ----- */
 .taskbar {
   position: relative;
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 6px;
   width: max-content;
   max-width: 100%;
   min-width: 0;
-  min-height: 52px;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
+  height: 54px;
+  min-height: 54px;
+  max-height: 54px;
+  padding: 5px 9px;
+  box-sizing: border-box;
   border: 1px solid var(--taskbar-border);
-  border-radius: 14px;
+  border-radius: 16px;
   background: var(--taskbar-background);
-  box-shadow: var(--shadow-taskbar);
+  box-shadow:
+    var(--shadow-taskbar),
+    inset 0 1px 0 color-mix(in srgb,
+      var(--text-primary) 5%,
+      transparent);
   backdrop-filter: blur(var(--blur-medium));
   -webkit-backdrop-filter: blur(var(--blur-medium));
   transform: none;
 }
 
+/* === 03. SEÇÕES E SEPARADORES === */
+/* ----- Todos os grupos permanecem na mesma linha ----- */
 .taskbar__section {
   display: flex;
-  flex: 0 0 auto;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 3px;
+  height: 40px;
+  min-width: 0;
+}
+
+.taskbar__section--start,
+.taskbar__section--system,
+.taskbar__section--status {
+  flex-shrink: 0;
 }
 
 .taskbar__divider {
+  display: block;
   width: 1px;
-  height: 21px;
-  flex: 0 0 auto;
-  background: rgb(255 255 255 / 10%);
+  height: 23px;
+  flex: 0 0 1px;
+  margin: 0 3px;
+  background: color-mix(in srgb,
+      var(--text-secondary) 23%,
+      transparent);
+}
+
+/* === 04. BOTÕES DE SISTEMA === */
+/* ----- WS Menu, notificações, controles e Wally ----- */
+.taskbar__system-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  transition:
+    background-color calc(var(--motion-scale, 1) * 150ms) ease,
+    color calc(var(--motion-scale, 1) * 150ms) ease,
+    border-color calc(var(--motion-scale, 1) * 150ms) ease,
+    transform calc(var(--motion-scale, 1) * 150ms) ease;
+}
+
+.taskbar__system-button:not(:disabled) {
+  cursor: pointer;
+}
+
+.taskbar__system-button:not(:disabled):hover,
+.taskbar__system-button[aria-expanded='true'] {
+  background: color-mix(in srgb,
+      var(--accent-secondary) 10%,
+      var(--surface-secondary));
+  color: var(--accent-secondary);
+  border-color: color-mix(in srgb,
+      var(--accent-secondary) 14%,
+      transparent);
+}
+
+.taskbar__system-button[aria-expanded='true'] {
+  border-color: color-mix(in srgb,
+      var(--accent-secondary) 18%,
+      transparent);
+}
+
+.taskbar__system-button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+.taskbar__system-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* === 05. WS MENU === */
+/* ----- Logo oficial dinâmico por tema e cor ----- */
+.taskbar__menu-button {
+  color: var(--accent-secondary);
+}
+
+.taskbar__menu-logo {
+  display: block;
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* === 06. NAVEGAÇÃO DE APLICATIVOS === */
+/* ----- Grupo de janelas abertas ----- */
+.taskbar__apps-navigation {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 0 1 auto;
+  gap: 3px;
+  min-width: 0;
+  height: 40px;
 }
 
 .taskbar__apps {
   display: flex;
-  flex: 0 1 auto;
-  min-width: 0;
+  flex-direction: row;
   align-items: center;
+  flex: 0 1 auto;
   gap: 4px;
+  min-width: 0;
+  height: 40px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
   scroll-behavior: smooth;
 }
 
-.taskbar__apps-navigation {
-  display: flex;
-  flex: 0 1 auto;
-  min-width: 0;
-  align-items: center;
-  gap: 2px;
+.taskbar__apps::-webkit-scrollbar {
+  display: none;
 }
 
-.taskbar__scroll-button {
+/* === 07. BOTÕES DOS APLICATIVOS === */
+/* ----- Estados normal, hover, ativo e minimizado ----- */
+.taskbar__app {
+  position: relative;
   display: grid;
-  width: 22px;
-  height: 36px;
-  flex: 0 0 22px;
   place-items: center;
+  width: 39px;
+  height: 39px;
+  flex: 0 0 39px;
   padding: 0;
-  border: 0;
-  border-radius: 6px;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 11px;
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
-  font-size: 22px;
+  transition:
+    background-color calc(var(--motion-scale, 1) * 150ms) ease,
+    opacity calc(var(--motion-scale, 1) * 150ms) ease,
+    border-color calc(var(--motion-scale, 1) * 150ms) ease;
+}
+
+.taskbar__app:hover {
+  background: var(--surface-secondary);
+}
+
+.taskbar__app--active {
+  background: color-mix(in srgb,
+      var(--accent-secondary) 12%,
+      var(--surface-secondary));
+  border-color: color-mix(in srgb,
+      var(--accent-secondary) 12%,
+      transparent);
+}
+
+.taskbar__app--active:hover {
+  background: color-mix(in srgb,
+      var(--accent-secondary) 18%,
+      var(--surface-secondary));
+}
+
+.taskbar__app:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+.taskbar__app-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* ----- Indicador de janela aberta ----- */
+.taskbar__app-indicator {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 5px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--text-secondary);
+  opacity: 0.6;
+  transform: translateX(-50%);
+  transition:
+    width calc(var(--motion-scale, 1) * 150ms) ease,
+    background-color calc(var(--motion-scale, 1) * 150ms) ease,
+    opacity calc(var(--motion-scale, 1) * 150ms) ease;
+}
+
+.taskbar__app--active .taskbar__app-indicator {
+  width: 17px;
+  background: var(--accent-secondary);
+  opacity: 1;
+}
+
+.taskbar__app--minimized {
+  opacity: 0.65;
+}
+
+.taskbar__app--minimized.taskbar__app--active {
+  opacity: 1;
+}
+
+/* === 08. NAVEGAÇÃO HORIZONTAL === */
+/* ----- Setas quando existem muitos aplicativos ----- */
+.taskbar__scroll-button {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 36px;
+  flex: 0 0 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 21px;
+  line-height: 1;
 }
 
 .taskbar__scroll-button:hover:not(:disabled) {
@@ -96,172 +298,43 @@
   outline-offset: -2px;
 }
 
-.taskbar__apps::-webkit-scrollbar {
-  display: none;
-}
-
-.taskbar__app {
-  position: relative;
-  display: grid;
-  width: 37px;
-  height: 37px;
-  flex: 0 0 auto;
-  place-items: center;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--text-primary);
-  transition:
-    background-color calc(var(--motion-scale, 1) * 150ms) ease,
-    opacity calc(var(--motion-scale, 1) * 150ms) ease;
-}
-
-.taskbar__app:hover,
-.taskbar__app--active {
-  background: var(--surface-secondary);
-}
-
-.taskbar__app:focus-visible {
-  outline: 2px solid var(--accent-secondary);
-  outline-offset: 2px;
-}
-
-.taskbar__app-icon {
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.taskbar__app-indicator {
-  position: absolute;
-  bottom: 1px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--text-secondary);
-  opacity: 0.55;
-}
-
-.taskbar__app--active .taskbar__app-indicator {
-  width: 16px;
-  border-radius: 5px;
-  background: var(--accent-secondary);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-secondary) 35%, transparent);
-  opacity: 1;
-}
-
-.taskbar__app--minimized {
-  opacity: 0.65;
-}
-
-.taskbar__section--system,
-.taskbar__section--status {
-  gap: 2px;
-}
-
-.taskbar__system-button {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  flex: 0 0 auto;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--text-secondary);
-  transition:
-    background-color calc(var(--motion-scale, 1) * 140ms) ease,
-    color calc(var(--motion-scale, 1) * 140ms) ease;
-}
-
-.taskbar__system-button:not(:disabled) {
-  cursor: pointer;
-}
-
-.taskbar__system-button:not(:disabled):hover,
-.taskbar__system-button[aria-expanded='true'] {
-  background: rgb(255 255 255 / 8%);
-  color: var(--accent-secondary);
-}
-
-.taskbar__system-button:disabled {
-  cursor: default;
-  opacity: 0.7;
-}
-
-.taskbar__system-button:focus-visible {
-  outline: 2px solid var(--accent-secondary);
-  outline-offset: 1px;
-}
-
-.taskbar__menu-button {
-  color: var(--accent-secondary);
-}
-
-.taskbar__weather {
-  display: grid;
-  width: 30px;
-  height: 36px;
-  flex: 0 0 auto;
-  place-items: center;
-  color: var(--text-secondary);
-}
-
-.taskbar__clock {
+/* === 09. CLIMA E RELÓGIO === */
+/* ----- Grupo horizontal, sem empilhamento acidental ----- */
+.taskbar__weather-group {
   display: flex;
-  min-width: 46px;
-  height: 36px;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
-  font-size: 11px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+  gap: 7px;
+  height: 40px;
+  min-height: 0;
+  min-width: 0;
   white-space: nowrap;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .taskbar__app {
-    transition: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .taskbar__system-button {
-    transition: none;
-  }
-}
-
-@media (max-width: 720px) {
-  .taskbar-container {
-    bottom: 10px;
-    max-width: calc(100% - 20px);
-  }
-}
-
-@media (max-width: 720px) {
-  .taskbar {
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 720px) {
-  .taskbar__apps {
-    max-width: 110px;
-  }
-}
-
+/* ----- Botão de previsão do tempo ----- */
+/* ----- Ícone e temperatura compartilham uma área clicável ----- */
 .taskbar__weather {
-  gap: 4px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 7px;
   width: auto;
-  min-width: 30px;
-  padding: 0 5px;
-  border: 0;
-  border-radius: 8px;
+  min-width: 68px;
+  height: 40px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 11px;
   background: transparent;
-  font-size: 11px;
+  color: var(--text-secondary);
   cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color calc(var(--motion-scale, 1) * 150ms) ease,
+    color calc(var(--motion-scale, 1) * 150ms) ease;
 }
 
 .taskbar__weather:hover,
@@ -275,33 +348,67 @@
   outline-offset: 2px;
 }
 
+.taskbar__temperature {
+  display: inline-flex;
+  align-items: center;
+  height: auto;
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- Botão do calendário e horário ----- */
 button.taskbar__clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 65px;
+  height: 40px;
+  margin: 0;
+  padding: 2px 7px;
   border: 0;
+  border-radius: 10px;
   background: transparent;
-  color: inherit;
+  color: var(--text-primary);
   cursor: pointer;
   font: inherit;
+  transition:
+    background-color calc(var(--motion-scale, 1) * 150ms) ease;
 }
 
 button.taskbar__clock:hover,
 button.taskbar__clock[aria-expanded='true'] {
-  background: rgb(255 255 255 / 8%);
+  background: var(--surface-secondary);
 }
 
+button.taskbar__clock:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+/* ----- Data e hora em duas linhas compactas ----- */
 .taskbar__datetime {
   display: flex;
-  min-width: 54px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
+  height: 100%;
+  min-width: 0;
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .taskbar__datetime time {
-  font-size: 11px;
+  color: var(--text-primary);
+  font-size: 12px;
   font-weight: 700;
+  letter-spacing: -0.1px;
 }
 
 .taskbar__date {
@@ -311,12 +418,168 @@ button.taskbar__clock[aria-expanded='true'] {
   text-transform: capitalize;
 }
 
+/* === 10. RESPONSIVIDADE === */
+/* ----- Limites de largura sem quebrar o alinhamento ----- */
+@media (max-width: 900px) {
+  .taskbar-container {
+    max-width: calc(100% - 24px);
+  }
+
+  .taskbar {
+    gap: 4px;
+    padding-inline: 7px;
+  }
+
+  .taskbar__divider {
+    margin-inline: 1px;
+  }
+
+  .taskbar__section {
+    gap: 1px;
+  }
+}
+
+@media (max-width: 720px) {
+  .taskbar-container {
+    bottom: 10px;
+    max-width: calc(100% - 20px);
+  }
+
+  .taskbar {
+    max-width: 100%;
+    gap: 3px;
+    padding-inline: 6px;
+  }
+
+  .taskbar__apps {
+    max-width: 120px;
+  }
+
+  .taskbar__system-button {
+    width: 35px;
+    height: 35px;
+    flex-basis: 35px;
+  }
+
+  .taskbar__app {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .taskbar__weather-group {
+    gap: 2px;
+  }
+
+  button.taskbar__clock {
+    min-width: 55px;
+    padding-inline: 4px;
+  }
+}
+
 @media (max-width: 480px) {
   .taskbar__datetime {
-    min-width: 46px;
+    min-width: 0;
   }
 
   .taskbar__date {
     font-size: 9px;
   }
+}
+
+/* === 11. ACESSIBILIDADE === */
+/* ----- Respeitar preferências de movimento reduzido ----- */
+@media (prefers-reduced-motion: reduce) {
+
+  .taskbar__app,
+  .taskbar__app-indicator,
+  .taskbar__system-button,
+  .taskbar__weather,
+  button.taskbar__clock {
+    transition: none;
+  }
+
+  .taskbar__apps {
+    scroll-behavior: auto;
+  }
+}
+
+:root[data-reduced-motion='true'] .taskbar__app,
+:root[data-reduced-motion='true'] .taskbar__app-indicator,
+:root[data-reduced-motion='true'] .taskbar__system-button,
+:root[data-reduced-motion='true'] .taskbar__weather,
+:root[data-reduced-motion='true'] button.taskbar__clock {
+  transition: none;
+}
+
+/* === Menu de contexto da Taskbar === */
+/* ----- Superfície consistente com os menus dos aplicativos ----- */
+.taskbar-context--system {
+  min-width: 235px;
+}
+
+.taskbar-context--system .taskbar-context__actions button[aria-pressed='true'] {
+  color: var(--accent-secondary);
+}
+
+/* === 12. ÍCONES DOS PAINÉIS === */
+/* ----- Escala consistente dos controles de sistema ----- */
+.taskbar__system-button--notifications svg,
+.taskbar__system-button--controls svg {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+}
+
+.taskbar__system-button--notifications,
+.taskbar__system-button--controls {
+  color: var(--text-primary);
+}
+
+/* ----- Avatar original do Wally ----- */
+.taskbar__wally-avatar {
+  display: block;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.taskbar__system-button--wally {
+  color: var(--accent-secondary);
+}
+
+.taskbar__system-button--wally:not(:disabled):hover,
+.taskbar__system-button--wally[aria-expanded='true'] {
+  background: var(--surface-secondary);
+}
+
+/* === ALINHAMENTO DAS NOTIFICAÇÕES === */
+/* ----- Centralizar o sino com os demais ícones da Taskbar ----- */
+
+.taskbar__system-button--notifications {
+  display: grid;
+  place-items: center;
+}
+
+.taskbar-notifications__trigger {
+  position: relative;
+  display: grid;
+  place-items: center;
+
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+
+.taskbar-notifications__trigger>svg {
+  display: block;
+  width: 21px;
+  height: 21px;
 }

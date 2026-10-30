@@ -81,26 +81,26 @@ export const TERMINAL_USAGE = {
   logout: 'logout',
 };
 
-export function commandHelp(name) {
+export function commandHelp(name, t = (value) => value) {
   if (!name) {
     return [
-      'WS OS TERMINAL — COMANDOS',
+      t('WS OS TERMINAL — COMANDOS'),
       '',
       ...TERMINAL_GROUPS.flatMap((group) => [
-        group.title,
+        t(group.title),
         ...group.commands.map(
           ([command, description]) =>
-            `  ${command.padEnd(15)} ${description}`,
+            `  ${command.padEnd(15)} ${t(description)}`,
         ),
         '',
       ]),
-      'ATALHOS',
-      '  Enter           Executar',
-      '  Tab             Autocompletar',
-      '  ↑ / ↓           Navegar no histórico',
-      '  Esc             Cancelar autenticação',
+      t('ATALHOS'),
+      t('  Enter           Executar'),
+      t('  Tab             Autocompletar'),
+      t('  ↑ / ↓           Navegar no histórico'),
+      t('  Esc             Cancelar autenticação'),
       '',
-      'Digite help <comando> para consultar a sintaxe.',
+      t('Digite help <comando> para consultar a sintaxe.'),
     ];
   }
 
@@ -118,9 +118,9 @@ export function commandHelp(name) {
   );
 
   return [
-    `COMANDO: ${normalized}`,
-    description,
-    `Uso: ${TERMINAL_USAGE[normalized]}`,
+    t(`COMANDO: ${normalized}`),
+    t(description),
+    t(`Uso: ${t(TERMINAL_USAGE[normalized])}`),
   ];
 }
 

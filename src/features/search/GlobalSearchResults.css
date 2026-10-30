@@ -1,0 +1,79 @@
+/* === RESULTADOS DA BUSCA GLOBAL === */
+.ws-global-search {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  gap: 5px;
+  min-width: 0;
+  padding: 12px 2px 5px;
+  border-top: 1px solid var(--border-default);
+}
+
+.ws-global-search h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 5px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .055em;
+}
+
+.ws-global-search h3 svg { color: var(--accent-secondary); flex-shrink: 0; }
+
+.ws-global-search > p[role='status'] {
+  margin: 3px 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 9px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.ws-global-search > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 9px 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color calc(var(--motion-scale, 1) * 140ms) ease,
+    border-color calc(var(--motion-scale, 1) * 140ms) ease;
+}
+
+.ws-global-search > button:hover,
+.ws-global-search > button:focus-visible {
+  border-color: var(--border-default);
+  background: var(--surface-secondary);
+}
+
+.ws-global-search > button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+}
+
+.ws-global-search > button > span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ws-global-search > button strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ws-global-search > button small { color: var(--text-secondary); font-size: 10px; }
+.ws-global-search > button > svg { flex: 0 0 auto; color: var(--accent-secondary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-global-search > button { transition: none; }
+}

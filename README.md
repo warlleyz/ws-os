@@ -10,7 +10,7 @@ Portfólio profissional de Warlley Silva, com experiências Desktop e Mobile em 
 
 17 entradas de aplicativos: 16 públicas e Administração protegida. Currículo encaminha o documento ao Visualizador. O sistema de demonstrações foi removido; destaques são selecionados por ID na Administração e a ordenação restante continua automática. Wally remoto permanece desativado.
 
-A revisão atual segue as 12 etapas do [documento mestre](docs/WS-OS-V2-MESTRE.md). A Etapa 01 consolidou escopo e referências. A Etapa 02 recebeu correções locais e inspeção remota de metadados; sua homologação integral permanece condicionada. A Etapa 03 encerrou os contratos locais de navegação e ciclo de vida, com validação em navegador. A Etapa 04 entregou personalização local com seleções/enquadramentos independentes, cores automáticas/manuais por tema e cursores completos. Código existente e testes controlados não representam aceite visual ou homologação de produção.
+O documento mestre mantém 12 etapas de requisitos e um único acompanhamento R01–R14 na seção 15, conforme a auditoria de 28/10/2026. A revisão de 30/10 preserva as entregas existentes e as alterações locais do proprietário. Código e testes locais não representam aceite visual completo ou homologação de produção.
 
 <!-- === EXECUTAR E VALIDAR === -->
 
@@ -36,11 +36,11 @@ Dev/preview servem somente o frontend. O backend é o Cloudflare Worker em worke
 
 <!-- === VALIDAÇÃO ATUAL === -->
 
-## Validação da Etapa 04
+## Validação local — 30/10/2026
 
-Executada sobre ac808a5 em 26/10/2026. Lint e build aprovados; 539 de 544 testes aprovados, com as mesmas cinco falhas preexistentes registradas no mestre. Os 53 testes pertinentes de aparência, Settings, branding e integração de janelas passaram. Prévia compilada conferida em Desktop/Mobile: temas, seleção independente, enquadramento, cores, persistência, imagem pessoal, favicon, efeitos e cursor. Permanece aviso de chunk FileViewer acima de 500 kB.
+Base main, HEAD 48b0993d9022b306187bd48d62e766678da5e3f3, com alterações locais não commitadas preservadas. Lint, 552 testes (547 existentes e cinco regressões novas) e build com saída externa aprovados após correções. FileViewer: 620,95 kB, gzip 186,51 kB; entrada principal: aproximadamente 494 kB, gzip 150,07 kB. Tamanho de bundle não comprova fluidez da interface.
 
-A migração incremental de rankings e permissões legadas está preparada, mas não aplicada. Homologá-la antes de publicar o limite Snake 397. Metadados remotos foram consultados somente para leitura; não houve escrita de dados, deploy ou rotação de credenciais. Consultar as seções 22 a 24 do mestre para resultados e bloqueios.
+O baseline de 28/10 no mesmo commit limpo também tinha 547 testes aprovados; os antigos resultados de cinco falhas pertencem aos registros de 26/10. A aplicação remota da migração incremental e a homologação operacional precisam de confirmação atual, antes da publicação. Nenhuma migração, escrita remota ou rotação de credenciais foi realizada nesta revisão.
 
 <!-- === DOCUMENTAÇÃO === -->
 
@@ -60,6 +60,6 @@ O inventário completo e o destino de cada documento estão na seção 20 do mes
 
 Conteúdo público em src/content/portfolioContent.js. Documentos pessoais permanecem no IndexedDB do visitante; oficiais usam Supabase Storage privado mediado pelo Worker. Nunca adicionar credenciais, dados privados ou rascunhos ao conteúdo público, public/, testes ou documentação. Ambientes locais são ignorados pelo Git.
 
-Boot mantém o processador, favicon acompanha tema/destaque e animações das janelas permanecem no escopo. Reiniciar/Desligar ficam fora desta versão. Distribuição do UZDoom depende da rastreabilidade e licenças registradas no mestre.
+Boot mantém o processador, favicon acompanha tema/destaque e animações das janelas permanecem no escopo. Reiniciar/Desligar ficam fora desta versão. Jogos contém Snake, Memória, Campo Minado, Flappy Bird e Paciência. DOOM/UZDoom e seus recursos foram removidos e não bloqueiam esta versão.
 
 O workflow [Validação](.github/workflows/validacao.yml) executa lint, build e testes, sem deploy. Sua execução remota não foi conferida nesta etapa. Push, migrações e publicação exigem autorização específica; o commit documental da Etapa 01 não concede essas permissões.

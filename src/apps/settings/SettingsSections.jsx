@@ -193,7 +193,7 @@ function WallpaperGallery({ shell, report, announce }) {
   return (
     <SettingsCard
       title={t(shell === 'mobile' ? 'Papel de parede do Mobile' : 'Papel de parede do Desktop')}
-      description={t('Escolha uma imagem oficial ou adicione a sua. Ao trocar de tema, a família de cor é preservada.')}
+      description={t('Escolha uma imagem oficial ou adicione a sua. Cada tema mantém sua própria seleção.')}
     >
       <SettingsSelect
         label={t('Enquadramento da imagem')}
@@ -324,41 +324,12 @@ export default function SettingsSections({ activeSection }) {
       : 'As preferências foram aplicadas nesta sessão, mas algumas não puderam ser salvas.', !result.ok);
   }
 
-  /* === SINCRONIZAÇÃO VISUAL ENTRE TEMAS === */
-  /* ----- Mantém a família do wallpaper e a preferência de destaque ----- */
+  /* === ALTERAÇÃO DO TEMA === */
+  /* ----- Recuperar as preferências próprias do tema selecionado ----- */
   function changeTheme(nextTheme) {
     if (nextTheme === theme) return;
 
-    /* ----- Parear wallpapers Desktop e Mobile pela família de cor ----- */
-    for (const shell of ['desktop', 'mobile']) {
-      const sourceWallpaper = getWallpaper(shell, theme);
-      const sourceIsPersonal = sourceWallpaper.startsWith('personal:') || sourceWallpaper === 'custom';
-      const family = sourceWallpaper.match(/^(dark|light)-(blue|green|violeta)$/)?.[2];
-      const targetWallpaper = sourceIsPersonal
-        ? sourceWallpaper
-        : family
-          ? `${nextTheme}-${family}`
-          : getDefaultWallpaper(nextTheme);
-
-      if (!setWallpaper(targetWallpaper, shell, nextTheme)) {
-        report(false);
-        return;
-      }
-    }
-
-    /* ----- Preservar também a escolha manual ou automática de cor ----- */
-    const accents = {
-      ...appearance.accents,
-      [nextTheme]: {
-        ...(appearance.accents?.[theme] ?? {
-          mode: appearance.accentMode ?? 'auto',
-          manual: appearance.accent ?? 'blue',
-        }),
-      },
-    };
-    const accentSaved = setAppearance({ accents });
-    const themeSaved = setTheme(nextTheme);
-    report(accentSaved && themeSaved);
+    report(setTheme(nextTheme));
   }
 
   let content = null;
@@ -408,7 +379,7 @@ export default function SettingsSections({ activeSection }) {
               </button>
             ))}
           </fieldset>
-          <p className="ws-settings__hint">{t('A cor automática é calculada a partir do papel de parede. A preferência de cor acompanha a troca entre os temas claro e escuro.')}</p>
+          <p className="ws-settings__hint">{t('A cor automática é calculada a partir do papel de parede. Cada tema mantém sua preferência de cor.')}</p>
         </SettingsCard>
         <SettingsCard title={t('Superfícies e animações')} description={t('Controle os efeitos visuais sem comprometer a leitura dos aplicativos.')}>
           {/* ----- Desfoque das superfícies ----- */}

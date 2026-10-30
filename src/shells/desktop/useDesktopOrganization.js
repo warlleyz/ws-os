@@ -282,11 +282,21 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     const dx = event.clientX - drag.x;
     const dy = event.clientY - drag.y;
     if (drag.type === 'area') {
+      /* ----- Limitar a seleção à área visível do Desktop ----- */
+      const pointerX = Math.min(
+        Math.max(event.clientX, drag.rect.left),
+        drag.rect.right,
+      );
+      const pointerY = Math.min(
+        Math.max(event.clientY, drag.rect.top),
+        drag.rect.bottom,
+      );
+
       const area = {
-        left: Math.min(drag.x, event.clientX) - drag.rect.left,
-        top: Math.min(drag.y, event.clientY) - drag.rect.top,
-        width: Math.abs(dx),
-        height: Math.abs(dy),
+        left: Math.min(drag.x, pointerX) - drag.rect.left,
+        top: Math.min(drag.y, pointerY) - drag.rect.top,
+        width: Math.abs(pointerX - drag.x),
+        height: Math.abs(pointerY - drag.y),
       };
       const box = selectionBoxRef.current;
       if (box) {

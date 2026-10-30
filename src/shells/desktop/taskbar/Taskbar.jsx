@@ -15,10 +15,11 @@ import TaskbarPreview from './TaskbarPreview';
 import PanelLayer from '../../../features/panels/PanelLayer';
 import TaskbarApps from './TaskbarApps';
 import { resolvePanel } from '../../../core/panelManager';
-import { CloudSun } from 'lucide-react';
-import { SystemIcon } from '../../../shared/components/SystemIcon';
+import { Bell, CloudSun, SlidersHorizontal } from 'lucide-react';
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { getBrandingLogo } from '../../../core/branding';
+import { useAppearance } from '../../../core/appearanceManager';
 import {
   activateApp,
   closeApp,
@@ -29,10 +30,14 @@ import {
 } from '../../../core/appManager';
 import { getAppDefinition } from '../../../core/appRegistry';
 import { useTaskbarAutoHide, setTaskbarAutoHide } from '../../../core/taskbarPreferences';
-
 // Utilitários e preferências persistentes do WS Menu.
-
 function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
+  const appearance = useAppearance();
+  const wsMenuLogo = getBrandingLogo(
+    theme,
+    appearance.accent,
+    import.meta.env.BASE_URL,
+  );
   const locale = useLocale();
   const {
     appState,
@@ -42,7 +47,6 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     handleNotificationAction: onNotificationAction,
     handleNotificationOpen: onNotificationOpen,
   } = useSystem();
-
   const {
     weather,
     forecast,
@@ -52,17 +56,14 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     getWeatherDescription,
     selectedCity,
   } = weatherData;
-
   const notifications = notificationState?.items ?? [];
   const unreadCount = notifications.filter((item) => !item.read).length;
   const [contextGroup, setContextGroup] = useState(null);
+  const [taskbarContextOpen, setTaskbarContextOpen] = useState(false);
   const [activePanel, setActivePanel] = useState(null);
-
   const autoHide = useTaskbarAutoHide();
-
   function changeAutoHide(enabled) {
     const saved = setTaskbarAutoHide(enabled);
-
     if (!saved) {
       notify({
         title: t('Preferência não salva'),
@@ -72,7 +73,6 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
       });
     }
   }
-
   const menuOpen = activePanel === 'menu';
   const notificationOpen = activePanel === 'notifications';
   const quickControlsOpen = activePanel === 'controls';
@@ -139,7 +139,6 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     group.instances.push(instance);
   }
   // Detecta excesso de aplicativos e mantém a navegação atualizada.
-
   const {
     previewGroup,
     setPreviewGroup,
@@ -159,6 +158,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     onPreviewOpen: () => {
       setActivePanel(null);
       setContextGroup(null);
+      setTaskbarContextOpen(false);
       setShortcutContext(null);
       contextTriggerRef.current = null;
       shortcutTriggerRef.current = null;
@@ -189,6 +189,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
         clearPreviewTimers();
         setPreviewGroup(null);
         setContextGroup(null);
+        setTaskbarContextOpen(false);
         setShortcutContext(null);
         setActivePanel(null);
         contextTriggerRef.current = null;
@@ -218,6 +219,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     clearWindowHighlight();
     closePreview();
     setContextGroup(null);
+    setTaskbarContextOpen(false);
     setShortcutContext(null);
     setActivePanel(null);
     setMenuView('home');
@@ -231,30 +233,23 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
   }
   function handleGroupClick(group) {
     const target = getTargetInstance(group);
-
     closePanels();
-
     if (!target) return;
-
     if (appState.activeInstanceId === target.id && !target.minimized) {
       onAppAction(minimizeApp, target.id);
       return;
     }
-
     onAppAction(target.minimized ? restoreApp : activateApp, target.id);
   }
   function handleContextMenu(event, group) {
     event.preventDefault();
-
     clearWindowHighlight();
     closePreview();
-
     contextTriggerRef.current = event.currentTarget;
-
     setActivePanel(null);
     setShortcutContext(null);
     shortcutTriggerRef.current = null;
-
+    setTaskbarContextOpen(false);
     setContextGroup((current) => (current === group.appId ? null : group.appId));
   }
   function handleContextKeyDown(event, group) {
@@ -265,16 +260,13 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     }
     if (event.key === 'F10' && event.shiftKey) {
       event.preventDefault();
-
       clearWindowHighlight();
       closePreview();
-
       contextTriggerRef.current = event.currentTarget;
-
       setActivePanel(null);
       setShortcutContext(null);
       shortcutTriggerRef.current = null;
-
+      setTaskbarContextOpen(false);
       setContextGroup(group.appId);
     }
   }
@@ -328,9 +320,42 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     }
     closePanels();
   }
+  /* === MENU DE CONTEXTO DA TASKBAR === */
+  /* ----- Abrir apenas fora dos controles interativos ----- */
+  function handleTaskbarContextMenu(event) {
+    if (event.defaultPrevented) return;
+    if (event.target.closest('button, a, input, [role="button"]')) {
+      return;
+    }
+    event.preventDefault();
+    clearWindowHighlight();
+    closePreview();
+    setContextGroup(null);
+    setShortcutContext(null);
+    setActivePanel(null);
+    setTaskbarContextOpen(true);
+  }
+  /* ----- Executar ações da barra ----- */
+  function runTaskbarContextAction(action) {
+    closePanels();
+    switch (action) {
+      case 'desktop':
+        onShowDesktop();
+        break;
+      case 'auto-hide':
+        changeAutoHide(!autoHide);
+        break;
+      case 'controls':
+        setActivePanel('controls');
+        break;
+      default:
+        break;
+    }
+  }
   function toggleWSMenu() {
     clearWindowHighlight();
     closePreview();
+    setTaskbarContextOpen(false);
     setContextGroup(null);
     setShortcutContext(null);
     setQuickControlsOpen(false);
@@ -348,6 +373,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
   function toggleNotifications() {
     clearWindowHighlight();
     closePreview();
+    setTaskbarContextOpen(false);
     setContextGroup(null);
     setShortcutContext(null);
     setMenuOpen(false);
@@ -361,6 +387,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
   function toggleQuickControls() {
     clearWindowHighlight();
     closePreview();
+    setTaskbarContextOpen(false);
     setContextGroup(null);
     setShortcutContext(null);
     setMenuOpen(false);
@@ -372,6 +399,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
   function toggleWally() {
     clearWindowHighlight();
     closePreview();
+    setTaskbarContextOpen(false);
     setContextGroup(null);
     setShortcutContext(null);
     setMenuOpen(false);
@@ -384,6 +412,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
   function toggleWeather() {
     clearWindowHighlight();
     closePreview();
+    setTaskbarContextOpen(false);
     setContextGroup(null);
     setShortcutContext(null);
     setMenuOpen(false);
@@ -420,6 +449,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
   function toggleCalendar() {
     clearWindowHighlight();
     closePreview();
+    setTaskbarContextOpen(false);
     setContextGroup(null);
     setShortcutContext(null);
     contextTriggerRef.current = null;
@@ -455,7 +485,12 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     <div
       className={[
         'taskbar-container',
-        autoHide && activePanel === null && !preview && !contextGroup && !shortcutContext
+        autoHide &&
+          activePanel === null &&
+          !preview &&
+          !contextGroup &&
+          !shortcutContext &&
+          !taskbarContextOpen
           ? 'taskbar-container--auto-hide'
           : '',
       ]
@@ -539,7 +574,6 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
               onAutoHideTaskbarChange={changeAutoHide}
             />
           )}
-
           {notificationOpen && (
             <NotificationCenter
               unreadCount={unreadCount}
@@ -548,6 +582,48 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
               onNotificationAction={onNotificationAction}
               onNotificationOpen={onNotificationOpen}
             />
+          )}
+          {taskbarContextOpen && (
+            <section
+              className="taskbar-context taskbar-context--system"
+              aria-label={t('Opções da barra de tarefas')}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') {
+                  event.stopPropagation();
+                  closePanels();
+                  taskbarRef.current
+                    ?.querySelector('.taskbar__menu-button')
+                    ?.focus({ preventScroll: true });
+                }
+              }}
+            >
+              <strong className="taskbar-context__title">
+                {t('Barra de tarefas')}
+              </strong>
+              <div className="taskbar-context__actions">
+                <button
+                  type="button"
+                  onClick={() => runTaskbarContextAction('desktop')}
+                >
+                  {t('Mostrar área de trabalho')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => runTaskbarContextAction('auto-hide')}
+                  aria-pressed={autoHide}
+                >
+                  {autoHide ? '✓ ' : ''}
+                  {t('Ocultar automaticamente')}
+                </button>
+                <div className="taskbar-context__divider" />
+                <button
+                  type="button"
+                  onClick={() => runTaskbarContextAction('controls')}
+                >
+                  {t('Abrir Painel de Controle')}
+                </button>
+              </div>
+            </section>
           )}
           {context && (
             <TaskbarContextMenu
@@ -564,7 +640,11 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
         </PanelLayer>,
         document.body,
       )}
-      <nav className="taskbar" aria-label={t('Barra de tarefas')}>
+      <nav
+        className="taskbar"
+        aria-label={t('Barra de tarefas')}
+        onContextMenu={handleTaskbarContextMenu}
+      >
         <div className="taskbar__section taskbar__section--start">
           <button
             ref={menuButtonRef}
@@ -575,7 +655,12 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
             title="WS Menu"
             onClick={toggleWSMenu}
           >
-            <SystemIcon name="menu" size={19} />
+            <img
+              src={wsMenuLogo}
+              alt=""
+              aria-hidden="true"
+              className="taskbar__menu-logo"
+            />
           </button>
         </div>
         <span className="taskbar__divider" aria-hidden="true" />
@@ -601,14 +686,14 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
         <div className="taskbar__section taskbar__section--system">
           <button
             type="button"
-            className="taskbar__system-button"
+            className="taskbar__system-button taskbar__system-button--notifications"
             title={t('Notificações')}
             aria-label={t('Notificações')}
             aria-expanded={notificationOpen}
             onClick={toggleNotifications}
           >
             <span className="taskbar-notifications__trigger">
-              <SystemIcon name="bell" />
+              <Bell size={21} strokeWidth={2} />
               {unreadCount > 0 && (
                 <span
                   className="taskbar-notifications__badge"
@@ -625,23 +710,28 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
           </button>
           <button
             type="button"
-            className="taskbar__system-button"
+            className="taskbar__system-button taskbar__system-button--controls"
             title={t('Controle Rápido')}
             aria-label={t('Controle Rápido')}
             aria-expanded={quickControlsOpen}
             onClick={toggleQuickControls}
           >
-            <SystemIcon name="controls" />
+            <SlidersHorizontal size={21} strokeWidth={2} />
           </button>
           <button
             type="button"
-            className="taskbar__system-button"
+            className="taskbar__system-button taskbar__system-button--wally"
             title="Wally"
             aria-label="Wally"
             aria-expanded={wallyOpen}
             onClick={toggleWally}
           >
-            <SystemIcon name="wally" />
+            <img
+              src={`${import.meta.env.BASE_URL}assets/wally/wally-rosto.svg`}
+              alt=""
+              aria-hidden="true"
+              className="taskbar__wally-avatar"
+            />
           </button>
         </div>
         <span className="taskbar__divider" aria-hidden="true" />
@@ -650,16 +740,15 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
             type="button"
             className="taskbar__weather"
             title={t('Clima')}
-            aria-label={t('Clima')}
+            aria-label={weather ? `${t('Clima')}: ${Math.round(weather.temperature_2m)}°` : t('Clima')}
             aria-expanded={weatherOpen}
             onClick={toggleWeather}
           >
-            <CloudSun size={19} />
+            <CloudSun size={21} strokeWidth={1.9} />
+            {weather && (
+              <span className="taskbar__temperature">{Math.round(weather.temperature_2m)}°</span>
+            )}
           </button>
-
-          {weather && (
-            <span className="taskbar__temperature">{Math.round(weather.temperature_2m)}°</span>
-          )}
           <button
             type="button"
             className="taskbar__clock"
@@ -678,9 +767,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
     </div>
   );
 }
-
 const MemoizedTaskbar = memo(Taskbar);
-
 // Mantém a Taskbar isolada do resize sem reter um callback antigo do Desktop.
 export default function TaskbarContainer(props) {
   const showDesktopRef = useRef(props.onShowDesktop);
