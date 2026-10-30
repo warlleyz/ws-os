@@ -1,19 +1,18 @@
-import { executeSystemAction } from '../../services/actionService';
 import {
   ArrowUp,
   Bot,
   ChevronRight,
   CircleHelp,
   ExternalLink,
+  LoaderCircle,
   MessageCircle,
   Sparkles,
+  Square,
   Trash2,
   X,
-  LoaderCircle,
-  Square,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-
+import { executeSystemAction } from '../../services/actionService';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useSystem } from '../../core/useSystem';
 import { getAppDefinition } from '../../core/appRegistry';
@@ -21,9 +20,9 @@ import Tooltip from '../../shared/components/Tooltip';
 import useSharedWallyConversation from './useSharedWallyConversation';
 import WallyTurnstile from './WallyTurnstile';
 import { getWallyErrorMessage } from './wallyErrorMessages';
-
 import './WallyPanel.css';
 
+/* === SUGESTÕES INICIAIS === */
 const SUGGESTIONS = [
   { label: 'Projetos', question: 'Quais projetos posso explorar?' },
   { label: 'Currículo', question: 'Onde encontro o currículo?' },
@@ -31,10 +30,10 @@ const SUGGESTIONS = [
   { label: 'Configurações', question: 'Como personalizar o WS OS?' },
 ];
 
+/* === PAINEL COMPACTO DO WALLY === */
 export default function WallyPanel({ setWallyOpen }) {
   useLocale();
   const { run } = useSystem();
-
   const [question, setQuestion] = useState('');
   const [turnstileToken, setTurnstileToken] = useState(null);
   const [verificationKey, setVerificationKey] = useState(0);
@@ -48,23 +47,22 @@ export default function WallyPanel({ setWallyOpen }) {
     clearConversation,
     cancelResponse,
   } = useSharedWallyConversation();
-
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
 
+  /* ----- Acompanhar novas mensagens ----- */
   useEffect(() => {
     if (!messages.length) return;
-
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
       behavior: 'auto',
     });
   }, [messages]);
 
+  /* ----- Abrir aplicativo com autorização ----- */
   async function open(appId) {
     const app = getAppDefinition(appId);
     if (!app) return;
-
     const opened = await executeSystemAction(
       { id: 'app.open', params: { appId } },
       { run, context: 'wally', origin: 'system' },
@@ -72,33 +70,30 @@ export default function WallyPanel({ setWallyOpen }) {
     if (opened.ok) setWallyOpen(false);
   }
 
+  /* ----- Enviar pergunta ----- */
   async function ask(value) {
     if (status === 'responding') return;
-
     const token = turnstileToken;
-
     const sent = await sendMessage(value, {
       turnstileToken: token,
     });
-
     if (remoteEnabled && token) {
       setTurnstileToken(null);
       setVerificationKey((current) => current + 1);
     }
-
     if (!sent) return;
-
     setQuestion((current) => (current.trim() === String(value).trim() ? '' : current));
     inputRef.current?.focus();
   }
 
+  /* === INTERFACE DO PAINEL === */
   return (
     <section className="taskbar-wally ws-wally" role="region" aria-label="Wally">
+      {/* ----- Identidade e ações do cabeçalho ----- */}
       <header className="ws-wally__header">
         <span className="ws-wally__avatar">
           <Bot size={22} aria-hidden="true" />
         </span>
-
         <div className="ws-wally__identity">
           <strong>Wally</strong>
           <small>
@@ -106,7 +101,6 @@ export default function WallyPanel({ setWallyOpen }) {
             {t('Assistente local')}
           </small>
         </div>
-
         <div className="ws-wally__header-actions">
           <Tooltip content={t('Limpar conversa')}>
             <button
@@ -121,7 +115,6 @@ export default function WallyPanel({ setWallyOpen }) {
               <Trash2 size={16} />
             </button>
           </Tooltip>
-
           <Tooltip content={t('Fechar Wally')}>
             <button
               type="button"
@@ -134,19 +127,18 @@ export default function WallyPanel({ setWallyOpen }) {
         </div>
       </header>
 
+      {/* ----- Apresentação ou histórico de conversa ----- */}
       <div className="ws-wally__messages" ref={scrollRef}>
         {messages.length === 0 ? (
           <div className="ws-wally__welcome">
             <span className="ws-wally__welcome-symbol">
               <Sparkles size={25} aria-hidden="true" />
             </span>
-
             <h2>{t('Como posso ajudar?')}</h2>
-
             <p>{t('Posso orientar você pelos aplicativos e conteúdos do WS OS.')}</p>
-
-            <span className="ws-wally__suggestion-title">{t('Experimente perguntar')}</span>
-
+            <span className="ws-wally__suggestion-title">
+              {t('Experimente perguntar')}
+            </span>
             <div className="ws-wally__suggestions">
               {SUGGESTIONS.map((suggestion) => (
                 <button
@@ -173,15 +165,14 @@ export default function WallyPanel({ setWallyOpen }) {
                     <Bot size={15} />
                   </span>
                 )}
-
                 <div className="ws-wally__bubble">
-                  {message.cancelled && <small role="status">{t('Resposta cancelada')}</small>}
+                  {message.cancelled && (
+                    <small role="status">{t('Resposta cancelada')}</small>
+                  )}
                   <p>{message.role === 'assistant' ? t(message.text) : message.text}</p>
-
                   {message.actions?.map((action) => {
                     const app = getAppDefinition(action.appId);
                     if (!app) return null;
-
                     return (
                       <button
                         key={action.appId}
@@ -202,12 +193,15 @@ export default function WallyPanel({ setWallyOpen }) {
         )}
       </div>
 
+      {/* ----- Indicador de resposta em andamento ----- */}
       {status === 'responding' && (
         <div className="ws-wally__responding" role="status" aria-live="polite">
-          <LoaderCircle size={15} className="ws-wally__loading-icon" aria-hidden="true" />
-
+          <LoaderCircle
+            size={15}
+            className="ws-wally__loading-icon"
+            aria-hidden="true"
+          />
           <span>{t('Wally está preparando uma resposta...')}</span>
-
           <button type="button" onClick={cancelResponse}>
             <Square size={12} aria-hidden="true" />
             {t('Cancelar')}
@@ -215,11 +209,14 @@ export default function WallyPanel({ setWallyOpen }) {
         </div>
       )}
 
+      {/* ----- Campo de pergunta e acesso ao modo estendido ----- */}
       <div className="ws-wally__composer-area">
         {remoteEnabled && (
-          <WallyTurnstile key={verificationKey} onTokenChange={setTurnstileToken} />
+          <WallyTurnstile
+            key={verificationKey}
+            onTokenChange={setTurnstileToken}
+          />
         )}
-
         {lastError && (
           <p className="ws-wally__verification-info" role="status">
             {t(getWallyErrorMessage(lastError))}
@@ -241,7 +238,6 @@ export default function WallyPanel({ setWallyOpen }) {
             placeholder={t('Pergunte ao Wally...')}
             onChange={(event) => setQuestion(event.target.value)}
           />
-
           <Tooltip content={t('Enviar')}>
             <button
               type="submit"
@@ -252,13 +248,11 @@ export default function WallyPanel({ setWallyOpen }) {
             </button>
           </Tooltip>
         </form>
-
         <div className="ws-wally__composer-footer">
           <span>
             <MessageCircle size={12} aria-hidden="true" />
             {t(provider === 'gemini' ? 'Gemini' : 'Respostas locais')}
           </span>
-
           <button type="button" onClick={() => open('wally-extended')}>
             {t('Wally Estendido')}
             <ExternalLink size={12} aria-hidden="true" />

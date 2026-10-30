@@ -30,12 +30,13 @@ const windowProfiles = {
   terminal: { width: 1000, height: 525 },
   games: { width: 1050, height: 800 },
   notes: { width: 980, height: 760 },
+  files: { width: 1080, height: 720 },
+  settings: { width: 980, height: 680 },
   'about-system': { width: 920, height: 820 },
   calculator: { width: 360, height: 520 },
-  settings: { width: 980, height: 680 },
   'file-editor': { width: 920, height: 680 },
   'file-viewer': { width: 1040, height: 720 },
-  files: { width: 1080, height: 720 },
+  'wally-extended': { width: 1050, height: 740 },
 };
 const appDefinitions = [
   /* ----- Aplicativos Desktop ----- */

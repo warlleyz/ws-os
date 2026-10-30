@@ -148,6 +148,8 @@ async function renderApp(
           'GraduationCap',
           'Layers3',
           'LoaderCircle',
+          'Maximize2',
+          'Minimize2',
           'RefreshCw',
           'UserRound',
           'Wrench',

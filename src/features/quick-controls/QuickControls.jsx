@@ -189,7 +189,7 @@ export default function QuickControls({
 
       {/* ----- Acesso às configurações avançadas ----- */}
       <footer className="ws-controls__footer">
-        <span>{t('Preferências avançadas')}</span>
+        <span>{t('Configurações')}</span>
         <Tooltip content={t('Abrir Configurações')}>
           <button
             type="button"
