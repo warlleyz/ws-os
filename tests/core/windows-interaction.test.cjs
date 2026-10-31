@@ -266,7 +266,13 @@ test('App não pede descarte para o shell atual e revalida a mudança nos dois s
         confirmations.push(proceed);
         return true;
       },
-      window: { matchMedia: () => media, setTimeout: () => 0, clearTimeout() {} },
+      resolveSharedEntry: () => null,
+      window: {
+        location: { search: '' },
+        matchMedia: () => media,
+        setTimeout: () => 0,
+        clearTimeout() {},
+      },
       localStorage: { getItem: () => 'true' },
       document: {
         documentElement: { dataset: {}, style: { setProperty() {}, removeProperty() {} } },

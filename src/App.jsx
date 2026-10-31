@@ -1,4 +1,5 @@
 import { requestGuardedTransition } from './core/appCloseGuards';
+import { resolveSharedEntry } from './features/search/searchService';
 import { useEffect, useState } from 'react';
 
 import { translate as t, useLocale } from './shared/i18n/i18n';
@@ -37,6 +38,13 @@ const MOBILE_BREAKPOINT = '(max-width: 767px)';
 /* === Preferências iniciais === */
 /* ----- Verificar apresentação de boas-vindas ----- */
 function shouldShowWelcome() {
+
+  /* ----- Entrada por link compartilhado ----- */
+  if (resolveSharedEntry(window.location.search)) {
+    return false;
+  }
+
+  /* ----- Preferência persistida ----- */
   try {
     return localStorage.getItem(WELCOME_STORAGE_KEY) !== 'true';
   } catch {

@@ -18,7 +18,7 @@
 | 04 | Arquitetura, núcleo e contratos | **Concluída e aprovada** |
 | 05 | Componentes compartilhados, hooks e utilitários | **Concluída e aprovada** |
 | 06 | Identidade visual e sistema de estilos | **Concluída** |
-| 07 | Inicialização, apresentação e entrada do visitante | Não iniciada |
+| 07 | Inicialização, apresentação e entrada do visitante | **Concluída e aprovada** |
 | 08 | Desktop, atalhos e área de trabalho | Não iniciada |
 | 09 | Janelas, barra de tarefas e menu principal | Não iniciada |
 | 10 | Experiência Mobile e adaptação entre telas | Não iniciada |
@@ -206,4 +206,34 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 ### Encerramento
 
 - Alterações consolidadas e validadas.
+- Etapa aprovada pelo proprietário.
+
+## Etapa 07 — Inicialização, apresentação e entrada do visitante
+
+**Estado:** concluída e aprovada pelo proprietário.
+
+### Trabalhos realizados
+
+- Preservação do boot intencional de 1,5 segundo.
+- Melhoria da apresentação profissional do portfólio.
+- Implementação da opção de pular as boas-vindas.
+- Preservação das configurações de tema, idioma, cores e wallpapers.
+- Entrada direta por links compartilhados de projetos e notas.
+- Preservação do funcionamento quando o armazenamento está indisponível.
+- Ajustes de acessibilidade e navegação por teclado.
+- Melhorias de responsividade em telas pequenas.
+- Atualização das traduções e dos testes relacionados.
+
+### Validações
+
+- ESLint aprovado.
+- Testes automatizados aprovados.
+- Build de produção aprovado.
+- git diff --check aprovado.
+- Diff consolidado revisado.
+
+### Encerramento
+
+- Inicialização e apresentação revisadas.
+- Comportamentos e contratos existentes preservados.
 - Etapa aprovada pelo proprietário.

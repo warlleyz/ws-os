@@ -511,3 +511,20 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ----- Telas muito estreitas ----- */
+@media (max-width: 380px) {
+  .ws-welcome__accent-options {
+    grid-template-columns: 1fr;
+  }
+
+  .ws-welcome__wallpapers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ws-welcome .ws-welcome__primary,
+  .ws-welcome .ws-welcome__back {
+    min-width: 0;
+    padding: 11px 12px;
+  }
+}

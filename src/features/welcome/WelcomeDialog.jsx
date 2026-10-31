@@ -20,9 +20,9 @@ const MESSAGES = [
     description: 'Seu assistente dentro do WS OS',
   },
   {
-    title: 'Portfólio',
+    title: 'Portfólio de Desenvolvimento',
     description:
-      'Este portfólio apresenta projetos e experiências em uma interface inspirada em sistemas operacionais.',
+      'Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo.',
   },
   {
     title: 'Explore o portfólio',
@@ -129,11 +129,24 @@ export default function WelcomeDialog({ onClose }) {
 
     const activeIndex = controls.indexOf(document.activeElement);
 
-    /* ----- Conter o foco também ao partir do título da etapa ----- */
+    /* ----- Navegação a partir do título ----- */
+    if (document.activeElement === headingRef.current) {
+      event.preventDefault();
+
+      if (event.shiftKey) {
+        last.focus();
+      } else {
+        first.focus();
+      }
+
+      return;
+    }
+
+    /* ----- Contenção do foco ----- */
     if (event.shiftKey && activeIndex <= 0) {
       event.preventDefault();
       last.focus();
-    } else if (!event.shiftKey && (activeIndex === -1 || document.activeElement === last)) {
+    } else if (!event.shiftKey && (activeIndex === -1 || activeIndex === controls.length - 1)) {
       event.preventDefault();
       first.focus();
     }
@@ -192,8 +205,20 @@ export default function WelcomeDialog({ onClose }) {
                 ))}
               </div>
 
-              <footer className="ws-welcome__actions">
-                <button type="button" className="ws-welcome__primary" onClick={() => setStep(1)}>
+              <footer className="ws-welcome__actions ws-welcome__actions--split">
+                <button
+                  type="button"
+                  className="ws-welcome__back"
+                  onClick={onClose}
+                >
+                  {t('Pular apresentação')}
+                </button>
+
+                <button
+                  type="button"
+                  className="ws-welcome__primary"
+                  onClick={() => setStep(1)}
+                >
                   {t('Próximo')}
                   <ArrowRight size={18} aria-hidden="true" />
                 </button>
@@ -218,6 +243,7 @@ export default function WelcomeDialog({ onClose }) {
 
             {/* === Tema e idioma === */}
             <div className="ws-welcome__preferences">
+
               {/* ----- Seleção de tema ----- */}
               <fieldset className="ws-welcome__field">
                 <legend>{t('Tema do sistema')}</legend>
