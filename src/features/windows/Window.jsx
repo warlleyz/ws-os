@@ -1,14 +1,26 @@
 import { useLayoutEffect, useRef } from 'react';
+
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
-import useWindowInteraction from './useWindowInteraction';
-import AppHost from './AppHost';
-import useWindowMotion from './useWindowMotion';
 import Tooltip from '../../shared/components/Tooltip';
 
-/* === CONFIGURAÇÃO DAS JANELAS === */
-const RESIZE_DIRECTIONS = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+import AppHost from './AppHost';
+import useWindowInteraction from './useWindowInteraction';
+import useWindowMotion from './useWindowMotion';
 
-/* === MOLDURA E CONTROLES DA INSTÂNCIA === */
+/* === Configuração das janelas === */
+/* ----- Direções de redimensionamento ----- */
+const RESIZE_DIRECTIONS = [
+  'n',
+  's',
+  'e',
+  'w',
+  'ne',
+  'nw',
+  'se',
+  'sw',
+];
+
+/* === Janela de aplicativo === */
 export default function Window({
   instance,
   app,
@@ -19,7 +31,11 @@ export default function Window({
   onMinimize,
   onClose,
 }) {
+
+  /* ----- Idioma do sistema ----- */
   useLocale();
+
+  /* ----- Geometria e interações ----- */
   const {
     windowRef,
     mode,
@@ -34,34 +50,60 @@ export default function Window({
     handleMoveKeyDown,
   } = useWindowInteraction({ instance, app });
 
-  /* ----- GERENCIAMENTO DO FOCO ----- */
+  /* ----- Animações e visibilidade ----- */
+  const motion = useWindowMotion(instance, mode);
+  const unavailable = instance.minimized || instance.closing;
+
+  /* === Gerenciamento do foco === */
+  /* ----- Recuperar foco ao abrir ou restaurar ----- */
   const focusStateRef = useRef(null);
+
   useLayoutEffect(() => {
     const previous = focusStateRef.current;
-    focusStateRef.current = { minimized: instance.minimized };
-    if (active && !instance.minimized && !instance.closing && (!previous || previous.minimized)) {
+
+    focusStateRef.current = {
+      minimized: instance.minimized,
+    };
+
+    if (
+      active &&
+      !instance.minimized &&
+      !instance.closing &&
+      (!previous || previous.minimized)
+    ) {
       windowRef.current
         ?.querySelector('.desktop-window__drag-area')
         ?.focus({ preventScroll: true });
     }
   }, [active, instance.minimized, instance.closing, windowRef]);
+
+  /* ----- Transferir foco antes de ocultar a janela ----- */
   function moveFocusOutsideWindow() {
     const focused = document.activeElement;
+
     if (!windowRef.current?.contains(focused)) return;
-    const destination = document.querySelector('.taskbar__menu-button')
-      ?? document.querySelector('.desktop__workspace');
+
+    const destination =
+      document.querySelector('.taskbar__menu-button') ??
+      document.querySelector('.desktop__workspace');
+
     destination?.focus({ preventScroll: true });
   }
+
+  /* === Ações da janela === */
+  /* ----- Minimizar ----- */
   function handleMinimize() {
     moveFocusOutsideWindow();
     onMinimize();
   }
+
+  /* ----- Fechar ----- */
   function handleClose() {
     moveFocusOutsideWindow();
     onClose();
   }
-  const motion = useWindowMotion(instance, mode);
-  const unavailable = instance.minimized || instance.closing;
+
+  /* === Renderização da janela === */
   return (
     <section
       ref={windowRef}
@@ -74,7 +116,9 @@ export default function Window({
         'desktop-window',
         active ? 'desktop-window--active' : '',
         mode !== 'normal' ? `desktop-window--${mode}` : '',
-      ].filter(Boolean).join(' ')}
+      ]
+        .filter(Boolean)
+        .join(' ')}
       aria-label={t(`Janela de ${appName}`)}
       aria-hidden={unavailable || undefined}
       inert={unavailable}
@@ -87,36 +131,53 @@ export default function Window({
       }}
       onFocusCapture={recoverWindow}
       onPointerDown={(event) => {
-        if (event.target.closest('.desktop-window__controls')) return;
+        if (event.target.closest('.desktop-window__controls')) {
+          return;
+        }
+
         onActivate();
 
-        /* ----- RECUPERAÇÃO DA JANELA NO DESKTOP ----- */
-        if (!event.target.closest('.desktop-window__drag-area')) recoverWindow();
+        if (!event.target.closest('.desktop-window__drag-area')) {
+          recoverWindow();
+        }
       }}
     >
+
+      {/* === Cabeçalho da janela === */}
       <header className="desktop-window__header">
+
+        {/* ----- Indicador de foco ----- */}
         <span
           className="desktop-window__focus"
           data-active={active}
           title={active ? t('Janela ativa') : t('Janela inativa')}
         />
-        <strong className="desktop-window__title">{t(appName)}</strong>
+
+        {/* ----- Título do aplicativo ----- */}
+        <strong className="desktop-window__title">
+          {t(appName)}
+        </strong>
+
+        {/* ----- Área de movimentação ----- */}
         <div
           tabIndex={0}
           role="button"
           aria-label={t('Arrastar para mover ou encaixar')}
-          onKeyDown={handleMoveKeyDown}
           className="desktop-window__drag-area"
+          title={t('Arrastar para mover ou encaixar')}
+          onKeyDown={handleMoveKeyDown}
           onPointerDown={(event) => startInteraction(event, 'drag')}
           onPointerMove={moveInteraction}
           onPointerUp={endInteraction}
           onPointerCancel={endInteraction}
           onLostPointerCapture={endInteraction}
           onDoubleClick={toggleMaximize}
-          title={t('Arrastar para mover ou encaixar')}
         />
+
+        {/* === Controles da janela === */}
         <div className="desktop-window__controls">
-          {/* ----- MINIMIZAR JANELA ----- */}
+
+          {/* ----- Minimizar ----- */}
           <Tooltip content={t('Minimizar')}>
             <button
               className="desktop-window__control desktop-window__control--minimize"
@@ -129,27 +190,51 @@ export default function Window({
               </svg>
             </button>
           </Tooltip>
-          {/* ----- MAXIMIZAR OU RESTAURAR JANELA ----- */}
-          <Tooltip content={mode === 'normal' ? t('Maximizar') : t('Restaurar tamanho')}>
+
+          {/* ----- Maximizar ou restaurar ----- */}
+          <Tooltip
+            content={
+              mode === 'normal'
+                ? t('Maximizar')
+                : t('Restaurar tamanho')
+            }
+          >
             <button
               className="desktop-window__control desktop-window__control--maximize"
               type="button"
-              aria-label={mode === 'normal' ? t('Maximizar') : t('Restaurar tamanho')}
+              aria-label={
+                mode === 'normal'
+                  ? t('Maximizar')
+                  : t('Restaurar tamanho')
+              }
               onClick={toggleMaximize}
             >
               <svg viewBox="0 0 12 12" aria-hidden="true">
                 {mode === 'normal' ? (
-                  <rect x="2.5" y="2.5" width="7" height="7" rx="1" />
+                  <rect
+                    x="2.5"
+                    y="2.5"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  />
                 ) : (
                   <>
-                    <rect x="2" y="4" width="6" height="6" rx="1" />
+                    <rect
+                      x="2"
+                      y="4"
+                      width="6"
+                      height="6"
+                      rx="1"
+                    />
                     <path d="M4 4V2h6v6H8" />
                   </>
                 )}
               </svg>
             </button>
           </Tooltip>
-          {/* ----- FECHAR JANELA ----- */}
+
+          {/* ----- Fechar ----- */}
           <Tooltip content={t('Fechar')}>
             <button
               className="desktop-window__control desktop-window__control--close"
@@ -164,12 +249,16 @@ export default function Window({
           </Tooltip>
         </div>
       </header>
+
+      {/* === Conteúdo do aplicativo === */}
       <AppHost
         key={instance.id}
         appName={t(appName)}
         instance={instance}
         onWindowResize={resizeWindow}
       />
+
+      {/* === Redimensionamento da janela === */}
       {mode === 'normal' &&
         RESIZE_DIRECTIONS.map((direction) => (
           <div
@@ -178,9 +267,17 @@ export default function Window({
             role="separator"
             tabIndex={0}
             aria-label={t(`Redimensionar janela: ${direction}`)}
-            aria-orientation={direction === 'n' || direction === 's' ? 'horizontal' : 'vertical'}
-            onKeyDown={(event) => handleResizeKeyDown(event, direction)}
-            onPointerDown={(event) => startInteraction(event, 'resize', direction)}
+            aria-orientation={
+              direction === 'n' || direction === 's'
+                ? 'horizontal'
+                : 'vertical'
+            }
+            onKeyDown={(event) =>
+              handleResizeKeyDown(event, direction)
+            }
+            onPointerDown={(event) =>
+              startInteraction(event, 'resize', direction)
+            }
             onPointerMove={moveInteraction}
             onPointerUp={endInteraction}
             onPointerCancel={endInteraction}

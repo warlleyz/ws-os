@@ -1,15 +1,21 @@
 import { memo } from 'react';
-import Window from './Window';
 import { getAppDefinition } from '../../core/appRegistry';
 import { activateApp, minimizeApp, closeApp } from '../../core/appManager';
+import Window from './Window';
 
-/* === COMPOSIÇÃO DAS INSTÂNCIAS E ORDEM DE FOCO === */
+/* === Camada de janelas do Desktop === */
 function WindowLayer({ appState, run }) {
+
+  /* === Renderização das instâncias === */
   return (
     <div className="desktop__window-layer">
       {appState.instances.map((instance, index) => {
+
+        /* ----- Estado de foco e sobreposição ----- */
         const focusIndex = appState.focusHistory.indexOf(instance.id);
         const isActive = appState.activeInstanceId === instance.id;
+
+        /* ----- Janela da instância ----- */
         return (
           <Window
             key={instance.id}
@@ -28,4 +34,5 @@ function WindowLayer({ appState, run }) {
   );
 }
 
+/* === Otimização de renderização === */
 export default memo(WindowLayer);

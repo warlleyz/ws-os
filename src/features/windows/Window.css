@@ -393,21 +393,6 @@
     0 0 28px color-mix(in srgb, var(--accent-secondary) 12%, transparent);
 }
 
-/* === RESPONSIVIDADE === */
-/* ----- TÍTULOS EM TELAS COMPACTAS ----- */
-@media (max-width: 720px) {
-  .desktop-window__title {
-    max-width: 100px;
-  }
-}
-
-/* === ACESSIBILIDADE === */
-/* ----- MOVIMENTO REDUZIDO ----- */
-@media (prefers-reduced-motion: reduce) {
-  .desktop-window__control svg {
-    transition: none;
-  }
-}
 /* === CICLO VISUAL DAS JANELAS === */
 /* ----- ANIMAR SOMENTE OPACIDADE E TRANSFORMAÇÃO, SEM INTERPOLAR GEOMETRIA ----- */
 .desktop-window[data-window-motion='opening'],
@@ -447,8 +432,21 @@
   }
 }
 
-/* ----- MOVIMENTO REDUZIDO NÃO ADIA O FECHAMENTO NEM OCULTA DADOS ----- */
+/* === Responsividade === */
+/* ----- Títulos em telas compactas ----- */
+@media (max-width: 720px) {
+  .desktop-window__title {
+    max-width: 100px;
+  }
+}
+
+/* === Acessibilidade === */
+/* ----- Movimento reduzido ----- */
 @media (prefers-reduced-motion: reduce) {
+  .desktop-window__control svg {
+    transition: none;
+  }
+
   .desktop-window[data-window-motion] {
     animation: none;
   }

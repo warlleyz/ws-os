@@ -1,21 +1,31 @@
 import { useLayoutEffect, useState } from 'react';
 import { getWindowMotionDuration } from '../../core/windowLifecycle';
 
-/* === APRESENTAÇÃO SEM DESTRUIR O ESTADO DA INSTÂNCIA === */
+/* === Gerenciamento das animações das janelas === */
 export default function useWindowMotion(instance, mode) {
+
+  /* ----- Configuração das animações ----- */
   const duration = getWindowMotionDuration();
   const closing = instance.closing === true;
+
+  /* ----- Estado inicial da apresentação ----- */
   const [motion, setMotion] = useState(() => ({
     minimized: instance.minimized,
     closing,
     mode,
     duration,
-    phase: instance.minimized ? 'hidden' : duration ? 'opening' : 'idle',
+    phase: instance.minimized
+      ? 'hidden'
+      : duration
+        ? 'opening'
+        : 'idle',
     cycle: 0,
   }));
 
-  /* ----- AJUSTAR ÀS PROPS ANTES DO COMMIT, SEM RENDERIZAÇÃO EM CASCATA POR EFEITO ----- */
+  /* === Sincronização dos estados === */
+  /* ----- Atualizar fase da animação ----- */
   let current = motion;
+
   if (
     motion.minimized !== instance.minimized ||
     motion.closing !== closing ||
@@ -23,11 +33,15 @@ export default function useWindowMotion(instance, mode) {
     motion.duration !== duration
   ) {
     let phase = instance.minimized ? 'hidden' : 'idle';
+
     if (duration && !closing) {
-      if (motion.minimized !== instance.minimized)
+      if (motion.minimized !== instance.minimized) {
         phase = instance.minimized ? 'minimizing' : 'restoring';
-      else if (motion.mode !== mode && !instance.minimized) phase = 'restoring';
+      } else if (motion.mode !== mode && !instance.minimized) {
+        phase = 'restoring';
+      }
     }
+
     current = {
       minimized: instance.minimized,
       closing,
@@ -36,27 +50,42 @@ export default function useWindowMotion(instance, mode) {
       phase,
       cycle: motion.cycle + 1,
     };
+
     setMotion(current);
   }
 
-  /* ----- O RELÓGIO ALTERA SOMENTE A APRESENTAÇÃO E É LIBERADO AO DESMONTAR ----- */
+  /* === Ciclo das animações === */
+  /* ----- Finalizar animações temporárias ----- */
   useLayoutEffect(() => {
-    if (!['opening', 'restoring', 'minimizing'].includes(motion.phase)) return undefined;
+    if (
+      !['opening', 'restoring', 'minimizing'].includes(motion.phase)
+    ) {
+      return undefined;
+    }
+
     const timer = setTimeout(
-      () =>
+      () => {
         setMotion((latest) =>
           latest.cycle === motion.cycle
-            ? { ...latest, phase: latest.minimized ? 'hidden' : 'idle' }
+            ? {
+              ...latest,
+              phase: latest.minimized ? 'hidden' : 'idle',
+            }
             : latest,
-        ),
+        );
+      },
       motion.duration,
     );
+
     return () => clearTimeout(timer);
   }, [motion]);
 
+  /* === Apresentação da janela === */
   return {
     phase: closing ? 'closing' : current.phase,
     duration,
-    visible: !instance.minimized || current.phase === 'minimizing',
+    visible:
+      !instance.minimized ||
+      current.phase === 'minimizing',
   };
 }

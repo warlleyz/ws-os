@@ -1,9 +1,8 @@
+/* === Menu contextual da Taskbar === */
+/* ----- Estrutura principal ----- */
 .taskbar-context {
   position: relative;
   z-index: 1;
-}
-
-.taskbar-context {
   width: min(260px, calc(100vw - 32px));
   padding: 8px;
   border: 1px solid var(--border-default);
@@ -12,6 +11,8 @@
   box-shadow: 0 16px 45px rgb(0 0 0 / 28%);
 }
 
+/* === Cabeçalho do menu === */
+/* ----- Título do aplicativo ----- */
 .taskbar-context__title {
   display: block;
   padding: 8px 10px 12px;
@@ -19,11 +20,14 @@
   font-size: 12px;
 }
 
+/* === Ações do menu === */
+/* ----- Organização das opções ----- */
 .taskbar-context__actions {
   display: grid;
   gap: 3px;
 }
 
+/* ----- Botões de ação ----- */
 .taskbar-context__actions button {
   width: 100%;
   min-height: 36px;
@@ -36,26 +40,34 @@
   text-align: left;
 }
 
+/* === Estados dos botões === */
+/* ----- Hover e foco ----- */
 .taskbar-context__actions button:hover:not(:disabled),
 .taskbar-context__actions button:focus-visible {
   background: var(--surface-secondary);
 }
 
+/* ----- Botões desabilitados ----- */
 .taskbar-context__actions button:disabled {
   cursor: default;
   opacity: 0.4;
 }
 
+/* ----- Ações de fechamento ----- */
+.taskbar-context__actions .taskbar-context__danger {
+  color: #f28b8b;
+}
+
+/* === Separadores === */
+/* ----- Divisão entre grupos de ações ----- */
 .taskbar-context__divider {
   height: 1px;
   margin: 5px 0;
   background: var(--border-default);
 }
 
-.taskbar-context__actions .taskbar-context__danger {
-  color: #f28b8b;
-}
-
+/* === Acessibilidade === */
+/* ----- Foco por teclado ----- */
 .taskbar-context__actions button:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: -2px;

@@ -1,4 +1,8 @@
+/* === Container das prévias === */
+/* ----- Estrutura principal ----- */
 .taskbar-preview {
+  position: relative;
+  z-index: 1;
   width: max-content;
   max-width: min(640px, calc(100vw - 32px));
   padding: 10px;
@@ -8,6 +12,8 @@
   box-shadow: 0 16px 45px rgb(0 0 0 / 30%);
 }
 
+/* === Lista de janelas === */
+/* ----- Organização horizontal ----- */
 .taskbar-preview__list {
   display: flex;
   gap: 8px;
@@ -16,6 +22,8 @@
   scrollbar-width: thin;
 }
 
+/* === Item da prévia === */
+/* ----- Estrutura da janela ----- */
 .taskbar-preview__item {
   position: relative;
   display: flex;
@@ -31,62 +39,16 @@
   text-align: left;
 }
 
+/* ----- Hover e foco interno ----- */
 .taskbar-preview__item:hover,
+.taskbar-preview__item:focus-within,
 .taskbar-preview__item:focus-visible {
   border-color: var(--border-default);
   background: var(--surface-secondary);
 }
 
-.taskbar-preview__item strong {
-  max-width: 100%;
-  overflow: hidden;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.taskbar-preview__placeholder {
-  position: relative;
-  display: grid;
-  width: 100%;
-  height: 86px;
-  place-items: center;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--accent-secondary) 16%, transparent);
-  border-radius: 9px;
-  background:
-    radial-gradient(
-      circle at 50% 45%,
-      color-mix(in srgb, var(--accent-secondary) 18%, transparent),
-      transparent 65%
-    ),
-    linear-gradient(135deg, rgb(35 65 96 / 90%), rgb(16 27 43 / 96%));
-}
-
-.taskbar-preview__placeholder-icon {
-  display: grid;
-  width: 46px;
-  height: 46px;
-  place-items: center;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 14px;
-  background: rgb(255 255 255 / 7%);
-  color: var(--accent-secondary);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
-  font-size: 23px;
-  font-weight: 800;
-}
-
-.taskbar-preview__item small {
-  color: var(--text-secondary);
-  font-size: 11px;
-}
-
-.taskbar-preview {
-  position: relative;
-  z-index: 1;
-}
-
+/* === Cabeçalho da prévia === */
+/* ----- Organização do título e controles ----- */
 .taskbar-preview__header {
   display: flex;
   min-width: 0;
@@ -95,11 +57,23 @@
   gap: 4px;
 }
 
+/* ----- Título da janela ----- */
+.taskbar-preview__item strong {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ----- Ajuste do título no cabeçalho ----- */
 .taskbar-preview__header strong {
   min-width: 0;
   flex: 1;
 }
 
+/* === Controle de fechamento === */
+/* ----- Botão de fechar ----- */
 .taskbar-preview__close {
   display: grid;
   width: 22px;
@@ -114,12 +88,15 @@
   cursor: pointer;
 }
 
+/* ----- Hover e foco ----- */
 .taskbar-preview__close:hover,
 .taskbar-preview__close:focus-visible {
   background: rgb(238 100 100 / 16%);
   color: #ee6464;
 }
 
+/* === Ativação da janela === */
+/* ----- Área clicável ----- */
 .taskbar-preview__open {
   display: flex;
   width: 100%;
@@ -133,32 +110,51 @@
   cursor: pointer;
 }
 
+/* ----- Foco por teclado ----- */
 .taskbar-preview__open:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
-.taskbar-preview__item:hover,
-.taskbar-preview__item:focus-within {
-  border-color: var(--border-default);
-  background: var(--surface-secondary);
+/* === Miniatura da janela === */
+/* ----- Superfície visual ----- */
+.taskbar-preview__placeholder {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 86px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb,
+      var(--accent-secondary) 16%,
+      transparent);
+  border-radius: 9px;
+  background:
+    radial-gradient(circle at 50% 45%,
+      color-mix(in srgb, var(--accent-secondary) 18%, transparent),
+      transparent 65%),
+    linear-gradient(135deg,
+      rgb(35 65 96 / 90%),
+      rgb(16 27 43 / 96%));
 }
 
-@media (max-width: 480px) {
-  .taskbar-preview {
-    max-width: calc(100vw - 20px);
-  }
+/* ----- Ícone de fallback ----- */
+.taskbar-preview__placeholder-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 7%);
+  color: var(--accent-secondary);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 16%);
+  font-size: 23px;
+  font-weight: 800;
 }
 
-@media (max-width: 480px) {
-  .taskbar-preview__item {
-    width: 150px;
-    min-width: 150px;
-  }
-}
-
-/* === Miniatura estática da instância, descartada ao fechar a prévia === */
+/* ----- Captura estática do conteúdo ----- */
 .taskbar-preview__snapshot {
   position: absolute;
   inset: 0;
@@ -166,4 +162,24 @@
   height: 100%;
   pointer-events: none;
   background: var(--surface-primary);
+}
+
+/* === Estado da janela === */
+/* ----- Texto informativo ----- */
+.taskbar-preview__item small {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+/* === Responsividade === */
+/* ----- Telas até 480px ----- */
+@media (max-width: 480px) {
+  .taskbar-preview {
+    max-width: calc(100vw - 20px);
+  }
+
+  .taskbar-preview__item {
+    width: 150px;
+    min-width: 150px;
+  }
 }

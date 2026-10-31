@@ -155,6 +155,43 @@ test('hover mantém prévia e saída sem foco permite fechamento', () => {
   assert.equal(h.flush().previewGroup, null);
 });
 
+/* === Cancelamento das prévias === */
+/* ----- Impedir abertura após fechamento explícito ----- */
+test('fechar prévia cancela abertura pendente sem reabrir aplicativo', () => {
+  const h = previewsHarness();
+  const hook = h.render();
+
+  hook.schedulePreviewOpen('projects');
+
+  assert.equal(h.timers.size, 1);
+
+  hook.closePreview();
+
+  assert.equal(h.timers.size, 0);
+  assert.equal(h.flush().previewGroup, null);
+  assert.equal(h.opened, 0);
+
+  h.unmount();
+});
+
+/* ----- Nova abertura substitui temporizador anterior ----- */
+test('agendar outra prévia substitui a abertura anterior', () => {
+  const h = previewsHarness();
+  const hook = h.render();
+
+  hook.schedulePreviewOpen('projects');
+  hook.schedulePreviewOpen('about-me');
+
+  assert.equal(h.timers.size, 1);
+
+  const next = h.flush();
+
+  assert.equal(next.previewGroup, 'about-me');
+  assert.equal(h.opened, 1);
+
+  h.unmount();
+});
+
 test('clique no grupo encontra a janela reativada, não a última criada', () => {
   const context = vm.createContext({ getAppDefinition: () => ({ public: true }) });
   vm.runInContext(read('src/core/appManager.js')

@@ -20,7 +20,7 @@
 | 06 | Identidade visual e sistema de estilos | **Concluída** |
 | 07 | Inicialização, apresentação e entrada do visitante | **Concluída e aprovada** |
 | 08 | Desktop, atalhos e área de trabalho | **Concluída e validada** |
-| 09 | Janelas, barra de tarefas e menu principal | Não iniciada |
+| 09 | Janelas, barra de tarefas e menu principal | **Concluída e validada** |
 | 10 | Experiência Mobile e adaptação entre telas | Não iniciada |
 | 11 | Perfil profissional e Sobre Mim | Não iniciada |
 | 12 | Projetos e apresentação dos trabalhos | Não iniciada |
@@ -292,4 +292,37 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Organização dos arquivos do Desktop concluída.
 - Funcionalidades revisadas e validadas.
 - Etapa aprovada para encerramento.
-```
+
+## Etapa 09 — Janelas, barra de tarefas e menu principal
+
+**Estado:** concluída e validada pelo proprietário.
+
+### Trabalhos realizados
+
+- Revisão e organização dos sete arquivos do sistema de janelas.
+- Revisão de movimentação, redimensionamento, encaixe, maximização e recuperação de janelas.
+- Organização da Taskbar e seus dez arquivos.
+- Revisão de aplicativos agrupados, prévias, miniaturas e menus contextuais.
+- Organização dos quatro arquivos do WS Menu.
+- Revisão dos favoritos, aplicativos recentes, pesquisa e navegação.
+- Padronização dos comentários e estilos CSS.
+- Correção das dependências dos hooks React e atualização dos mocks de testes.
+- Ampliação dos testes automatizados de janelas, Taskbar, Desktop e favoritos.
+- Correção da maximização e restauração de janelas previamente encaixadas.
+- Ajuste da geometria restaurada para respeitar os limites do Desktop.
+
+### Validações
+
+- ESLint sem erros ou avisos, conforme última validação informada.
+- Testes automatizados aprovados, conforme última validação informada.
+- Build de produção aprovado, conforme última validação informada.
+- `git diff --check` aprovado, conforme última validação informada.
+- Revisão consolidada do diff ainda pendente.
+
+### Pendências e decisões
+
+- Conferir o diff completo da Etapa 09.
+- Verificar alterações não relacionadas à etapa.
+- Confirmar a cobertura dos critérios restantes do planejamento.
+- Realizar a validação final antes de solicitar aprovação para encerramento.
+- Não realizar commit ou push sem autorização do proprietário.

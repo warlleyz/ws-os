@@ -1,9 +1,11 @@
-/* === SUPERFÍCIE === */
+/* === Estrutura do WS Menu === */
+/* ----- Container do launcher ----- */
 .taskbar-launcher {
   position: relative;
   z-index: 1;
 }
 
+/* ----- Superfície principal ----- */
 .taskbar-launcher--redesign.ws-menu {
   display: flex;
   flex-direction: column;
@@ -23,7 +25,8 @@
   -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
 }
 
-/* === CABEÇALHO E BUSCA === */
+/* === Cabeçalho do WS Menu === */
+/* ----- Estrutura do cabeçalho ----- */
 .ws-menu__top {
   display: flex;
   align-items: center;
@@ -34,6 +37,17 @@
   border-bottom: 1px solid var(--border-default);
 }
 
+/* ----- Identidade do sistema ----- */
+.ws-menu__top-brand {
+  flex: 0 0 auto;
+  color: var(--accent-secondary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+/* === Pesquisa de aplicativos === */
+/* ----- Campo de pesquisa ----- */
 .ws-menu__search {
   display: flex;
   align-items: center;
@@ -46,18 +60,25 @@
   border-radius: 10px;
   background: var(--surface-primary);
   color: var(--text-secondary);
-  transition: border-color calc(var(--motion-scale, 1) * 140ms) ease, box-shadow calc(var(--motion-scale, 1) * 140ms) ease;
+  transition:
+    border-color calc(var(--motion-scale, 1) * 140ms) ease,
+    box-shadow calc(var(--motion-scale, 1) * 140ms) ease;
 }
 
+/* ----- Campo em foco ----- */
 .ws-menu__search:focus-within {
   border-color: var(--accent-secondary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-secondary) 10%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb,
+      var(--accent-secondary) 10%,
+      transparent);
 }
 
+/* ----- Ícone da pesquisa ----- */
 .ws-menu__search>svg {
   flex-shrink: 0;
 }
 
+/* ----- Entrada de texto ----- */
 .ws-menu__search input {
   flex: 1;
   min-width: 0;
@@ -71,14 +92,17 @@
   font-size: 12px;
 }
 
+/* ----- Placeholder ----- */
 .ws-menu__search input::placeholder {
   color: var(--text-secondary);
 }
 
+/* ----- Ocultar controle nativo de limpeza ----- */
 .ws-menu__search input::-webkit-search-cancel-button {
   display: none;
 }
 
+/* ----- Botão de limpar pesquisa ----- */
 .ws-menu__clear {
   display: grid;
   place-items: center;
@@ -93,20 +117,14 @@
   cursor: pointer;
 }
 
+/* ----- Hover do botão de limpeza ----- */
 .ws-menu__clear:hover {
   background: var(--surface-secondary);
   color: var(--text-primary);
 }
 
-.ws-menu__top-brand {
-  flex: 0 0 auto;
-  color: var(--accent-secondary);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .1em;
-}
-
-/* === NAVEGAÇÃO LATERAL === */
+/* === Área de trabalho do WS Menu === */
+/* ----- Organização das colunas ----- */
 .ws-menu__workspace {
   display: grid;
   grid-template-columns: 133px minmax(0, 1fr);
@@ -114,6 +132,8 @@
   min-height: 0;
 }
 
+/* === Navegação lateral === */
+/* ----- Estrutura da barra lateral ----- */
 .ws-menu__sidebar {
   display: flex;
   flex-direction: column;
@@ -125,6 +145,7 @@
   background: transparent;
 }
 
+/* ----- Identificadores das seções ----- */
 .ws-menu__sidebar-label,
 .ws-menu__sidebar-caption {
   display: block;
@@ -132,10 +153,11 @@
   color: var(--text-secondary);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: .09em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
+/* ----- Lista de navegação ----- */
 .ws-menu__sidebar-items {
   display: flex;
   flex-direction: column;
@@ -143,6 +165,8 @@
   margin-top: 13px;
 }
 
+/* === Botões de navegação === */
+/* ----- Estrutura dos botões ----- */
 .ws-menu__nav-button {
   display: flex;
   align-items: center;
@@ -161,26 +185,32 @@
   cursor: pointer;
 }
 
+/* ----- Ícones de navegação ----- */
 .ws-menu__nav-button>svg {
   flex-shrink: 0;
 }
 
+/* ----- Hover ----- */
 .ws-menu__nav-button:hover:not(:disabled) {
+  background: var(--surface-primary);
   color: var(--text-primary);
-  background: var(--surface-primary);
 }
 
+/* ----- Seção selecionada ----- */
 .ws-menu__nav-button.is-active {
-  color: var(--accent-secondary);
-  background: var(--surface-primary);
   border-color: var(--border-default);
+  background: var(--surface-primary);
+  color: var(--accent-secondary);
 }
 
+/* ----- Navegação desabilitada ----- */
 .ws-menu__nav-button:disabled {
-  opacity: .45;
   cursor: default;
+  opacity: 0.45;
 }
 
+/* === Favoritos da barra lateral === */
+/* ----- Área inferior ----- */
 .ws-menu__sidebar-bottom {
   display: flex;
   flex-direction: column;
@@ -190,6 +220,7 @@
   border-top: 1px solid var(--border-default);
 }
 
+/* ----- Contador de favoritos ----- */
 .ws-menu__favorite-count {
   display: flex;
   align-items: center;
@@ -200,11 +231,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ----- Ícone dos favoritos ----- */
 .ws-menu__favorite-count svg {
   color: var(--accent-secondary);
 }
 
-/* === CONTEÚDO E ROLAGEM === */
+/* === Conteúdo principal === */
+/* ----- Estrutura da área de conteúdo ----- */
 .ws-menu__content {
   display: flex;
   flex-direction: column;
@@ -213,6 +246,7 @@
   padding: 18px 14px 12px 16px;
 }
 
+/* ----- Cabeçalho da seção ----- */
 .ws-menu__content-heading {
   display: flex;
   align-items: center;
@@ -223,6 +257,7 @@
   padding: 0 3px 15px;
 }
 
+/* ----- Agrupamento do título ----- */
 .ws-menu__content-title {
   display: flex;
   flex-direction: column;
@@ -230,14 +265,16 @@
   min-width: 0;
 }
 
+/* ----- Identificador da seção ----- */
 .ws-menu__eyebrow {
   color: var(--accent-secondary);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: .08em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+/* ----- Título da seção ----- */
 .ws-menu__content-title h2 {
   margin: 0;
   color: var(--text-primary);
@@ -246,6 +283,7 @@
   line-height: 1.25;
 }
 
+/* ----- Quantidade de resultados ----- */
 .ws-menu__result-count {
   display: grid;
   place-items: center;
@@ -260,6 +298,8 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* === Rolagem dos resultados === */
+/* ----- Container rolável ----- */
 .ws-menu__results-scroll {
   display: flex;
   flex-direction: column;
@@ -274,19 +314,24 @@
   scrollbar-color: var(--border-default) transparent;
 }
 
+/* ----- Largura da scrollbar ----- */
 .ws-menu__results-scroll::-webkit-scrollbar {
   width: 5px;
 }
 
+/* ----- Trilha da scrollbar ----- */
 .ws-menu__results-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
 
+/* ----- Indicador da scrollbar ----- */
 .ws-menu__results-scroll::-webkit-scrollbar-thumb {
   border-radius: 8px;
   background: var(--border-default);
 }
 
+/* === Lista de aplicativos === */
+/* ----- Organização vertical ----- */
 .ws-menu__apps {
   display: flex;
   flex-direction: column;
@@ -295,12 +340,15 @@
   min-width: 0;
 }
 
+/* ----- Item da lista ----- */
 .ws-menu__app-item {
   display: flex;
   min-width: 0;
   flex: 0 0 auto;
 }
 
+/* === Botões dos aplicativos === */
+/* ----- Estrutura principal ----- */
 .ws-menu__app {
   display: flex;
   align-items: center;
@@ -315,15 +363,19 @@
   color: var(--text-primary);
   text-align: left;
   cursor: pointer;
-  transition: background-color calc(var(--motion-scale, 1) * 140ms) ease, border-color calc(var(--motion-scale, 1) * 140ms) ease;
+  transition:
+    background-color calc(var(--motion-scale, 1) * 140ms) ease,
+    border-color calc(var(--motion-scale, 1) * 140ms) ease;
 }
 
+/* ----- Hover e foco ----- */
 .ws-menu__app:hover,
 .ws-menu__app:focus-visible {
   border-color: var(--border-default);
   background: var(--surface-secondary);
 }
 
+/* ----- Ícone do aplicativo ----- */
 .ws-menu__app-icon {
   display: grid;
   place-items: center;
@@ -336,6 +388,7 @@
   color: var(--accent-secondary);
 }
 
+/* ----- Informações do aplicativo ----- */
 .ws-menu__app-info {
   display: flex;
   flex-direction: column;
@@ -345,6 +398,7 @@
   min-width: 0;
 }
 
+/* ----- Nome do aplicativo ----- */
 .ws-menu__app-info strong {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -354,6 +408,7 @@
   font-weight: 650;
 }
 
+/* ----- Categoria do aplicativo ----- */
 .ws-menu__app-info small {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -362,6 +417,8 @@
   font-size: 10px;
 }
 
+/* === Estado vazio === */
+/* ----- Container de resultados vazios ----- */
 .ws-menu__empty {
   display: flex;
   flex-direction: column;
@@ -375,10 +432,12 @@
   text-align: center;
 }
 
+/* ----- Ícone do estado vazio ----- */
 .ws-menu__empty>svg {
-  opacity: .5;
+  opacity: 0.5;
 }
 
+/* ----- Mensagem do estado vazio ----- */
 .ws-menu__empty p {
   margin: 0;
   max-width: 245px;
@@ -386,6 +445,7 @@
   line-height: 1.55;
 }
 
+/* ----- Botão de navegação ----- */
 .ws-menu__empty-action {
   padding: 8px 11px;
   border: 1px solid var(--border-default);
@@ -397,18 +457,13 @@
   cursor: pointer;
 }
 
+/* ----- Hover do botão ----- */
 .ws-menu__empty-action:hover {
   border-color: var(--accent-secondary);
 }
 
-.ws-menu__app:focus-visible,
-.ws-menu__nav-button:focus-visible,
-.ws-menu__clear:focus-visible {
-  outline: 2px solid var(--accent-secondary);
-  outline-offset: -2px;
-}
-
-/* === RODAPÉ === */
+/* === Rodapé do WS Menu === */
+/* ----- Estrutura do rodapé ----- */
 .ws-menu__footer {
   display: flex;
   align-items: center;
@@ -422,6 +477,8 @@
   background: transparent;
 }
 
+/* === Identidade do usuário === */
+/* ----- Agrupamento do perfil ----- */
 .ws-menu__user {
   display: flex;
   align-items: center;
@@ -429,6 +486,7 @@
   min-width: 0;
 }
 
+/* ----- Avatar ----- */
 .ws-menu__user-avatar {
   display: grid;
   place-items: center;
@@ -441,6 +499,7 @@
   color: var(--accent-secondary);
 }
 
+/* ----- Informações do usuário ----- */
 .ws-menu__user-info {
   display: flex;
   flex-direction: column;
@@ -448,26 +507,30 @@
   min-width: 0;
 }
 
+/* ----- Nome do usuário ----- */
 .ws-menu__user-info strong {
   color: var(--text-primary);
   font-size: 11px;
   font-weight: 700;
 }
 
+/* ----- Mensagem secundária ----- */
 .ws-menu__user-info small {
   color: var(--text-secondary);
   font-size: 10px;
 }
 
+/* ----- Identidade do sistema ----- */
 .ws-menu__footer-brand {
   flex-shrink: 0;
   color: var(--text-secondary);
   font-size: 10px;
   font-weight: 750;
-  letter-spacing: .08em;
+  letter-spacing: 0.08em;
 }
 
-/* === MENU DE CONTEXTO === */
+/* === Menu contextual dos aplicativos === */
+/* ----- Estrutura principal ----- */
 .ws-menu__context {
   position: absolute;
   z-index: 100;
@@ -490,6 +553,7 @@
   scrollbar-color: var(--border-default) transparent;
 }
 
+/* ----- Cabeçalho do menu contextual ----- */
 .ws-menu__context-header {
   display: flex;
   align-items: center;
@@ -498,6 +562,7 @@
   padding: 7px 7px 9px;
 }
 
+/* ----- Nome do aplicativo ----- */
 .ws-menu__context-header strong {
   min-width: 0;
   overflow: hidden;
@@ -507,6 +572,7 @@
   font-weight: 700;
 }
 
+/* ----- Ícone do aplicativo ----- */
 .ws-menu__context-icon {
   display: grid;
   place-items: center;
@@ -519,6 +585,7 @@
   color: var(--accent-secondary);
 }
 
+/* ----- Separadores do menu contextual ----- */
 .ws-menu__context-divider {
   flex: 0 0 1px;
   height: 1px;
@@ -526,6 +593,8 @@
   background: var(--border-default);
 }
 
+/* === Ações do menu contextual === */
+/* ----- Botões de ação ----- */
 .ws-menu__context button {
   display: flex;
   align-items: center;
@@ -543,22 +612,26 @@
   cursor: pointer;
 }
 
+/* ----- Hover e foco ----- */
 .ws-menu__context button:hover:not(:disabled),
 .ws-menu__context button:focus-visible {
   background: var(--surface-secondary);
   color: var(--accent-secondary);
 }
 
+/* ----- Foco por teclado ----- */
 .ws-menu__context button:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: -2px;
 }
 
+/* ----- Ações desabilitadas ----- */
 .ws-menu__context button:disabled {
-  opacity: .4;
+  opacity: 0.4;
   cursor: default;
 }
 
+/* ----- Container dos ícones ----- */
 .ws-menu__context-action-icon {
   display: grid;
   place-items: center;
@@ -568,6 +641,7 @@
   color: var(--accent-secondary);
 }
 
+/* ----- Ícones SVG ----- */
 .ws-menu__context-action-icon svg {
   width: 16px;
   height: 16px;
@@ -578,6 +652,7 @@
   stroke-linejoin: round;
 }
 
+/* ----- Informações detalhadas ----- */
 .ws-menu__context-details {
   display: flex;
   flex-direction: column;
@@ -592,12 +667,35 @@
   line-height: 1.5;
 }
 
-:root:is([data-blur='off'], [data-transparency='solid'], [data-reduced-transparency='true'], [data-low-effects='true']) .ws-menu__context {
+/* === Acessibilidade === */
+/* ----- Foco dos controles principais ----- */
+.ws-menu__app:focus-visible,
+.ws-menu__nav-button:focus-visible,
+.ws-menu__clear:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
+}
+
+/* ----- Transparência e efeitos reduzidos ----- */
+:root:is([data-blur='off'],
+  [data-transparency='solid'],
+  [data-reduced-transparency='true'],
+  [data-low-effects='true']) .ws-menu__context {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* === RESPONSIVIDADE === */
+/* ----- Preferência de movimento reduzido ----- */
+@media (prefers-reduced-motion: reduce) {
+
+  .ws-menu__search,
+  .ws-menu__app {
+    transition: none;
+  }
+}
+
+/* === Responsividade === */
+/* ----- Telas com altura até 600px ----- */
 @media (max-height: 600px) {
   .taskbar-launcher--redesign.ws-menu {
     height: min(390px, calc(100dvh - 85px));
@@ -616,6 +714,7 @@
   }
 }
 
+/* ----- Telas com largura até 430px ----- */
 @media (max-width: 430px) {
   .taskbar-launcher--redesign.ws-menu {
     width: min(540px, calc(100vw - 16px));
@@ -657,13 +756,5 @@
 
   .ws-menu__top-brand {
     font-size: 10px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-  .ws-menu__search,
-  .ws-menu__app {
-    transition: none;
   }
 }

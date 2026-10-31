@@ -73,6 +73,7 @@ function interaction() {
         modeChanges.push(next);
       },
     ],
+    useCallback: (callback) => callback,
     useEffect: (callback) => effects.push(callback),
     useLayoutEffect: (callback) => layouts.push(callback),
     document: {
@@ -211,6 +212,64 @@ test('Escape depois de arrastar janela maximizada recupera o modo anterior', () 
   env.flush();
   env.listeners.get('keydown')({ key: 'Escape' });
   assert.equal(env.modeChanges.at(-1), 'maximized');
+  env.cleanup();
+});
+
+
+/* === Cancelamento das interações === */
+/* ----- Restaurar geometria após cancelamento do ponteiro ----- */
+test('pointercancel restaura a geometria e libera os recursos da interação', () => {
+  const env = interaction();
+
+  env.api.startInteraction(
+    env.event(400, 200, 'pointerdown'),
+    'drag',
+  );
+
+  env.api.moveInteraction(env.event(700, 400));
+  env.flush();
+
+  assert.equal(env.element.style.left, '500px');
+  assert.equal(env.element.style.top, '300px');
+
+  env.api.endInteraction(
+    env.event(700, 400, 'pointercancel'),
+  );
+
+  assert.equal(env.element.style.left, '200px');
+  assert.equal(env.element.style.top, '100px');
+  assert.equal(env.frames.size, 0);
+
+  env.cleanup();
+});
+
+/* === Redimensionamento por teclado === */
+/* ----- Respeitar direção e incremento com Shift ----- */
+test('redimensionamento por teclado respeita direção e incremento', () => {
+  const env = interaction();
+
+  env.api.handleResizeKeyDown(
+    {
+      key: 'ArrowRight',
+      preventDefault() { },
+    },
+    'e',
+  );
+
+  assert.equal(env.element.style.width, '730px');
+
+  env.api.handleResizeKeyDown(
+    {
+      key: 'ArrowDown',
+      shiftKey: true,
+      preventDefault() { },
+    },
+    's',
+  );
+
+  assert.equal(env.element.style.height, '500px');
+  assert.equal(env.renders, 0);
+
   env.cleanup();
 });
 

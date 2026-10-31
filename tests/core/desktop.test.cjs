@@ -172,6 +172,62 @@ test('posições duplicadas, negativas e fora da grade são realocadas determini
   );
 });
 
+
+/* === Integridade das posições do Desktop === */
+/* ----- Preservar preferências durante o cálculo ----- */
+test('calcular layout não modifica as posições fornecidas', () => {
+  const m = layoutModule();
+
+  const positions = [
+    { column: 2, row: 1 },
+    { column: 4, row: 2 },
+    { column: 0, row: 3 },
+  ];
+
+  const original = JSON.stringify(positions);
+
+  m.getDesktopLayout(
+    12,
+    1440,
+    900,
+    null,
+    positions,
+  );
+
+  assert.equal(JSON.stringify(positions), original);
+});
+
+/* ----- Manter posicionamento determinístico ----- */
+test('layouts consecutivos com as mesmas entradas são idênticos', () => {
+  const m = layoutModule();
+
+  const positions = [
+    { column: 1, row: 1 },
+    { column: 3, row: 2 },
+  ];
+
+  const first = m.getDesktopLayout(
+    12,
+    1280,
+    720,
+    null,
+    positions,
+  );
+
+  const second = m.getDesktopLayout(
+    12,
+    1280,
+    720,
+    null,
+    positions,
+  );
+
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(first)),
+    JSON.parse(JSON.stringify(second)),
+  );
+});
+
 test('movimento de grupo conserva deslocamento relativo e rejeita colisão ou borda', () => {
   const m = layoutModule();
   const layout = m.getDesktopLayout(12, 1000, 700, clock());

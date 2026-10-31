@@ -206,6 +206,61 @@ test('favoritos sincronizam entre abas e avisam quando a gravação falha', asyn
   ui.unmount();
   assert.equal(listener, null);
 });
+
+/* === Limites dos favoritos do WS Menu === */
+/* ----- Impedir duplicações e respeitar o limite configurado ----- */
+test('WS Menu limita favoritos e não duplica aplicativos', async () => {
+  let stored = null;
+
+  const ui = await renderApp(
+    'src/features/launcher/useMenuPreferences.js',
+    {},
+    {
+      localStorage: {
+        getItem: () => stored,
+        setItem: (_key, value) => {
+          stored = value;
+        },
+      },
+      window: {
+        addEventListener() { },
+        removeEventListener() { },
+      },
+      useSystem: () => ({
+        notify() { },
+      }),
+    },
+  );
+
+  const initial = ui.render();
+
+  assert.equal(initial.favoriteIds.length, 6);
+  assert.equal(initial.MAX_FAVORITES, 6);
+
+  initial.toggleFavorite('calculator');
+  assert.equal(ui.render().favoriteIds.length, 6);
+
+  initial.toggleFavorite('projects');
+  assert.equal(ui.render().favoriteIds.length, 5);
+
+  ui.render().toggleFavorite('calculator');
+
+  const updated = ui.render();
+
+  assert.equal(updated.favoriteIds.length, 6);
+  assert.equal(
+    updated.favoriteIds.filter((id) => id === 'calculator').length,
+    1,
+  );
+
+  assert.equal(
+    new Set(updated.favoriteIds).size,
+    updated.favoriteIds.length,
+  );
+
+  ui.unmount();
+});
+
 test('negação síncrona de localização não deixa o clima carregando indefinidamente', async () => {
   const ui = await renderApp(
     'src/features/weather/useWeather.js',
