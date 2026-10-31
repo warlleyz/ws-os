@@ -1,33 +1,33 @@
-/* === Sistema de vidro === */
-/* ----- Superfície principal das janelas ----- */
+/* === SISTEMA DE VIDRO === */
+/* ----- SUPERFÍCIE PRINCIPAL DAS JANELAS ----- */
 .desktop-window {
   border: 1px solid var(--panel-border);
   background: var(--ws-window-background);
 
-  /* ----- Desfoque da janela ----- */
+  /* ----- DESFOQUE DA JANELA ----- */
   -webkit-backdrop-filter: blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
   backdrop-filter: blur(var(--blur-medium)) saturate(var(--ws-glass-saturation));
 }
 
-/* ----- Cabeçalho das janelas ----- */
+/* ----- CABEÇALHO DAS JANELAS ----- */
 .desktop-window>.desktop-window__header {
   background:
     color-mix(in srgb, var(--surface-secondary) 45%, transparent);
 }
 
-/* ----- Conteúdo das janelas ----- */
+/* ----- CONTEÚDO DAS JANELAS ----- */
 .desktop-window>.desktop-window__content {
   background:
     color-mix(in srgb, var(--surface-primary) 16%, transparent);
 }
 
-/* ----- Superfície dos aplicativos dentro das janelas ----- */
+/* ----- SUPERFÍCIE DOS APLICATIVOS NAS JANELAS ----- */
 .desktop-window>.desktop-window__content.ws-app {
   background:
     color-mix(in srgb, var(--surface-primary) 16%, transparent);
 }
 
-/* ----- Superfícies internas das Configurações ----- */
+/* ----- SUPERFÍCIES INTERNAS DAS CONFIGURAÇÕES ----- */
 .desktop-window>.ws-settings,
 .desktop-window .ws-settings__content,
 .desktop-window .ws-settings__header,
@@ -35,7 +35,7 @@
   background: transparent;
 }
 
-/* ----- Cards internos ----- */
+/* ----- CARDS INTERNOS ----- */
 .desktop-window .ws-settings__card,
 .desktop-window .ws-app__card {
   background:
@@ -43,7 +43,7 @@
 }
 
 /* === PAINÉIS FLUTUANTES === */
-/* ----- Vidro compartilhado ----- */
+/* ----- VIDRO COMPARTILHADO ----- */
 .taskbar-launcher--redesign,
 .taskbar-notifications,
 .taskbar-quick-controls,
@@ -58,7 +58,7 @@
   backdrop-filter: blur(var(--blur-strong)) saturate(var(--ws-glass-saturation));
 }
 
-/* ----- Evitar camadas duplicadas no Mobile ----- */
+/* ----- EVITAR CAMADAS DUPLICADAS NO MOBILE ----- */
 .ws-mobile__panel>.taskbar-quick-controls,
 .ws-mobile__panel>.taskbar-notifications,
 .ws-mobile__panel>.taskbar-quick-controls.ws-controls {
@@ -67,27 +67,27 @@
   -webkit-backdrop-filter: none;
 }
 
-/* === Interação com janelas === */
-/* ----- Movimento e redimensionamento ----- */
+/* === INTERAÇÃO COM JANELAS === */
+/* ----- MOVIMENTO E REDIMENSIONAMENTO ----- */
 .desktop-window[data-interacting='true'] {
   background: var(--ws-window-background);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* ----- Superfície grafite durante a interação no Dark ----- */
+/* ----- SUPERFÍCIE GRAFITE DURANTE A INTERAÇÃO NO ESCURO ----- */
 :root:not([data-theme='light']) .desktop-window[data-interacting='true'] {
   background: #252629;
 }
 
-/* ----- Prévia de encaixe ----- */
+/* ----- PRÉVIA DE ENCAIXE ----- */
 .desktop-snap-preview {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* === Acessibilidade === */
-/* ----- Desativar desfoque conforme preferências ----- */
+/* === ACESSIBILIDADE === */
+/* ----- DESATIVAR DESFOQUE CONFORME PREFERÊNCIAS ----- */
 :root:is([data-blur='off'],
   [data-transparency='solid'],
   [data-reduced-transparency='true'],
@@ -109,7 +109,7 @@
   -webkit-backdrop-filter: none;
 }
 
-/* ----- Preferência do sistema operacional ----- */
+/* ----- PREFERÊNCIA DO SISTEMA OPERACIONAL ----- */
 @media (prefers-reduced-transparency: reduce) {
 
   :is(.desktop-window,
@@ -131,8 +131,8 @@
   }
 }
 
-/* === Compatibilidade === */
-/* ----- Navegadores sem suporte a backdrop-filter ----- */
+/* === COMPATIBILIDADE === */
+/* ----- NAVEGADORES SEM SUPORTE A BACKDROP-FILTER ----- */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root {
     --ws-glass: var(--surface-primary);
@@ -142,8 +142,8 @@
   }
 }
 
-/* === Legibilidade do Desktop === */
-/* ----- Rótulos dos atalhos ----- */
+/* === LEGIBILIDADE DO DESKTOP === */
+/* ----- RÓTULOS DOS ATALHOS ----- */
 .desktop__shortcut-label {
   padding: 0;
   border-radius: 0;
@@ -155,7 +155,7 @@
     0 2px 6px rgb(0 0 0 / 60%);
 }
 
-/* ----- Foco dos atalhos ----- */
+/* ----- FOCO DOS ATALHOS ----- */
 .desktop__shortcut:focus-visible {
   background: rgb(17 25 37 / 92%);
   outline-color: #ffffff;

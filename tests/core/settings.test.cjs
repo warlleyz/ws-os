@@ -369,14 +369,14 @@ test('wallpapers oficiais utilizam arquivos correspondentes ao tema', async () =
 
   const light = m.getWallpaperDefinition('light-green', 'mobile', 'light');
 
-  assert.match(dark.background, /dark-green\.jpg/);
-  assert.match(light.background, /light-green\.jpg/);
+  assert.match(dark.background, /dark-green\.webp/);
+  assert.match(light.background, /light-green\.webp/);
 
   assert.notEqual(dark.background, light.background);
 
   assert.match(
     m.getWallpaperDefinition('original', 'desktop', 'dark').background,
-    /dark-blue\.jpg/,
+    /dark-blue\.webp/,
   );
 });
 
@@ -1107,7 +1107,7 @@ test('imagem inválida não bloqueia recuperação de outra imagem válida', asy
   assert.equal(m.getPersonalWallpapers()[0].id, 'personal:good');
   assert.equal(m.getWallpaperStatus(), 'missing');
   assert.equal(m.getWallpaper('desktop', 'dark'), 'personal:broken');
-  assert.match(m.getWallpaperDefinition('personal:broken').background, /dark-blue.jpg/);
+  assert.match(m.getWallpaperDefinition('personal:broken').background, /dark-blue.webp/);
   assert.equal(files.has('broken'), true);
 });
 test('seleção persistida em outra aba impede exclusão da imagem', async () => {

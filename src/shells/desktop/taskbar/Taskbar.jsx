@@ -744,7 +744,7 @@ function Taskbar({ onShowDesktop, theme, onThemeChange, weatherData }) {
               onClick={toggleWally}
             >
               <img
-                src={`${import.meta.env.BASE_URL}assets/wally/wally-rosto.svg`}
+                src={`${import.meta.env.BASE_URL}assets/wally/wally-rosto.webp`}
                 alt=""
                 aria-hidden="true"
                 className="taskbar__wally-avatar"

@@ -1,14 +1,26 @@
-/* Ordem explícita preserva a cascata durante a migração dos módulos. */
+/* === ESTRUTURA DO DESKTOP === */
+/* ----- ÁREA DE TRABALHO E JANELAS ----- */
 @import '../shells/desktop/Desktop.css';
 @import '../features/windows/Window.css';
+
+/* === BARRA DE TAREFAS === */
+/* ----- COMPONENTES E MENUS ----- */
 @import '../shells/desktop/taskbar/Taskbar.css';
 @import '../features/panels/PanelLayer.css';
 @import '../shells/desktop/taskbar/TaskbarPreview.css';
 @import '../shells/desktop/taskbar/TaskbarContextMenu.css';
 @import '../features/launcher/WSMenu.css';
+
+/* === PAINÉIS DO SISTEMA === */
+/* ----- NOTIFICAÇÕES E CONTROLES ----- */
 @import '../features/notifications/notifications.css';
 @import '../features/quick-controls/QuickControls.css';
+
+/* ----- ASSISTENTE E INFORMAÇÕES ----- */
 @import '../features/wally/WallyPanel.css';
 @import '../features/weather/WeatherPanel.css';
 @import '../features/calendar/CalendarPanel.css';
+
+/* === WIDGETS === */
+/* ----- COMPONENTES COMPARTILHADOS ----- */
 @import '../features/widgets/widgets.css';

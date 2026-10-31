@@ -17,7 +17,7 @@
 | 03 | Ferramentas, dependências e qualidade de desenvolvimento | **Concluída** |
 | 04 | Arquitetura, núcleo e contratos | **Concluída e aprovada** |
 | 05 | Componentes compartilhados, hooks e utilitários | **Concluída e aprovada** |
-| 06 | Identidade visual e sistema de estilos | Não iniciada |
+| 06 | Identidade visual e sistema de estilos | **Concluída** |
 | 07 | Inicialização, apresentação e entrada do visitante | Não iniciada |
 | 08 | Desktop, atalhos e área de trabalho | Não iniciada |
 | 09 | Janelas, barra de tarefas e menu principal | Não iniciada |
@@ -170,4 +170,40 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 - Diff consolidado revisado.
 - Verificações automatizadas e manuais aprovadas.
+- Etapa aprovada pelo proprietário.
+
+## Etapa 06 — Identidade visual e sistema de estilos
+
+**Estado:** concluída e aprovada pelo proprietário.
+
+### Trabalhos realizados
+
+- Revisão e padronização dos estilos globais e dos estilos de aplicativos.
+- Organização dos tokens, temas claro e escuro, controles, efeitos e estilos responsivos.
+- Correção de conflitos entre os estilos do componente Select e os controles genéricos.
+- Otimização das imagens do Wally, wallpapers e capas dos jogos para WebP.
+- Atualização das referências aos recursos convertidos e dos testes relacionados.
+- Auditoria dos recursos de branding e dos 26 cursores personalizados.
+- Atualização do inventário dos recursos visuais.
+- Preservação dos contratos e comportamentos existentes.
+
+### Validações
+
+- ESLint aprovado.
+- Testes automatizados aprovados.
+- Build de produção aprovado.
+- `git diff --check` aprovado.
+- Revisão consolidada do código e das alterações de estilos.
+- Verificação das referências aos arquivos removidos.
+- Conferência da estrutura dos recursos visuais.
+
+### Pendências e decisões
+
+- Manter os arquivos SVG de branding e cursores, sem conversão desnecessária.
+- Confirmar posteriormente a origem e as licenças dos recursos visuais ainda não identificados no inventário.
+- Preservar os identificadores dos wallpapers e as preferências persistidas.
+
+### Encerramento
+
+- Alterações consolidadas e validadas.
 - Etapa aprovada pelo proprietário.

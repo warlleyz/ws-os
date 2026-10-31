@@ -1,30 +1,30 @@
-/* === Aplicativos compartilhados === */
-/* ----- Superfície principal ----- */
+/* === APLICATIVOS COMPARTILHADOS === */
+/* ----- SUPERFÍCIE PRINCIPAL ----- */
 .ws-app {
   min-width: 0;
   background: var(--surface-primary);
   color: var(--text-primary);
 }
 
-/* ----- Títulos ----- */
+/* ----- TÍTULOS ----- */
 .ws-app h2 {
   margin-top: 0;
 }
 
-/* ----- Conteúdo textual ----- */
+/* ----- CONTEÚDO TEXTUAL ----- */
 .ws-app p,
 .ws-app li {
   line-height: 1.65;
   overflow-wrap: anywhere;
 }
 
-/* ----- Espaçamento entre seções ----- */
+/* ----- ESPAÇAMENTO ENTRE SEÇÕES ----- */
 .ws-app section+section {
   margin-top: 24px;
 }
 
-/* === Ferramentas dos aplicativos === */
-/* ----- Barras e filtros ----- */
+/* === FERRAMENTAS DOS APLICATIVOS === */
+/* ----- BARRAS E FILTROS ----- */
 .ws-app__toolbar,
 .ws-app__filters {
   display: flex;
@@ -34,8 +34,8 @@
   margin-block: 16px;
 }
 
-/* === Formulários dos aplicativos === */
-/* ----- Rótulos ----- */
+/* === FORMULÁRIOS DOS APLICATIVOS === */
+/* ----- RÓTULOS ----- */
 .ws-app label {
   display: flex;
   min-width: 0;
@@ -44,7 +44,7 @@
   font-size: 13px;
 }
 
-/* ----- Campos ----- */
+/* ----- CAMPOS ----- */
 .ws-app input,
 .ws-app select,
 .ws-app textarea {
@@ -58,15 +58,15 @@
   color: var(--text-primary);
 }
 
-/* ----- Foco dos campos ----- */
+/* ----- FOCO DOS CAMPOS ----- */
 .ws-app :where(input, select, textarea):focus-visible {
   border-color: var(--accent-secondary);
   outline-offset: 2px;
 }
 
-/* === Botões dos aplicativos === */
-/* ----- Estrutura compartilhada ----- */
-.ws-app button,
+/* === BOTÕES DOS APLICATIVOS === */
+/* ----- ESTRUTURA COMPARTILHADA ----- */
+.ws-app button:not(.ws-select__trigger),
 .ws-app__toolbar a {
   min-height: 44px;
   padding: 10px 14px;
@@ -79,26 +79,26 @@
   cursor: pointer;
 }
 
-/* ----- Hover ----- */
+/* ----- HOVER ----- */
 @media (hover: hover) {
-  .ws-app button:hover {
+  .ws-app button:not(.ws-select__trigger):hover {
     border-color: var(--accent-secondary);
   }
 }
 
-/* ----- Pressionado ----- */
-.ws-app button:not(:disabled):active {
+/* ----- PRESSIONADO ----- */
+.ws-app button:not(.ws-select__trigger):not(:disabled):active {
   filter: brightness(0.96);
 }
 
-/* ----- Desabilitado ----- */
-.ws-app button:disabled {
+/* ----- DESABILITADO ----- */
+.ws-app button:not(.ws-select__trigger):disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* === Grades dos aplicativos === */
-/* ----- Grade de cards ----- */
+/* === GRADES DOS APLICATIVOS === */
+/* ----- GRADE DE CARDS ----- */
 .ws-app__grid {
   display: grid;
   grid-template-columns:
@@ -106,8 +106,8 @@
   gap: 16px;
 }
 
-/* === Cards dos aplicativos === */
-/* ----- Superfície padrão ----- */
+/* === CARDS DOS APLICATIVOS === */
+/* ----- SUPERFÍCIE PADRÃO ----- */
 .ws-app__card {
   min-width: 0;
   padding: 20px;
@@ -117,33 +117,33 @@
   box-shadow: 0 4px 18px rgb(0 0 0 / 4%);
 }
 
-/* ----- Títulos dos cards ----- */
+/* ----- TÍTULOS DOS CARDS ----- */
 .ws-app__card h3 {
   margin-top: 0;
   overflow-wrap: anywhere;
 }
 
-/* ----- Foco interno ----- */
+/* ----- FOCO INTERNO ----- */
 .ws-app__card:focus-within {
   border-color: var(--accent-secondary);
 }
 
-/* === Conteúdo auxiliar === */
-/* ----- Textos secundários ----- */
+/* === CONTEÚDO AUXILIAR === */
+/* ----- TEXTOS SECUNDÁRIOS ----- */
 .ws-app__muted {
   color: var(--text-secondary);
   font-size: 13px;
 }
 
-/* ----- Imagens de capa ----- */
+/* ----- IMAGENS DE CAPA ----- */
 .ws-app__cover {
   max-width: 100%;
   max-height: 320px;
   object-fit: contain;
 }
 
-/* === Métricas === */
-/* ----- Grade de indicadores ----- */
+/* === MÉTRICAS === */
+/* ----- GRADE DE INDICADORES ----- */
 .ws-app__metrics {
   display: grid;
   grid-template-columns:
@@ -151,7 +151,7 @@
   gap: 14px;
 }
 
-/* ----- Cards de indicadores ----- */
+/* ----- CARDS DE INDICADORES ----- */
 .ws-app__metrics div {
   padding: 20px;
   border: 1px solid var(--border-default);
@@ -162,13 +162,13 @@
       var(--surface-secondary));
 }
 
-/* ----- Rótulos ----- */
+/* ----- RÓTULOS ----- */
 .ws-app__metrics dt {
   color: var(--text-secondary);
   font-size: 13px;
 }
 
-/* ----- Valores ----- */
+/* ----- VALORES ----- */
 .ws-app__metrics dd {
   margin: 10px 0 0;
   font-size: 32px;
@@ -176,13 +176,13 @@
   letter-spacing: -0.04em;
 }
 
-/* === Estados e mensagens === */
-/* ----- Mensagens de erro ----- */
+/* === ESTADOS E MENSAGENS === */
+/* ----- MENSAGENS DE ERRO ----- */
 .ws-app__error {
   color: var(--status-error);
 }
 
-/* ----- Alertas ----- */
+/* ----- ALERTAS ----- */
 .ws-app [role='alert'] {
   padding: 12px 14px;
   border-left: 3px solid var(--status-error);
@@ -192,14 +192,14 @@
     color-mix(in srgb, var(--status-error) 7%, transparent);
 }
 
-/* ----- Conteúdo pré-formatado ----- */
+/* ----- CONTEÚDO PRÉ-FORMATADO ----- */
 .ws-app pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-/* === Arquivos e editor === */
-/* ----- Lista de arquivos ----- */
+/* === ARQUIVOS E EDITOR === */
+/* ----- LISTA DE ARQUIVOS ----- */
 .ws-files__list {
   display: grid;
   gap: 12px;
@@ -207,7 +207,7 @@
   list-style: none;
 }
 
-/* ----- Área de edição ----- */
+/* ----- ÁREA DE EDIÇÃO ----- */
 .ws-editor__text {
   width: 100%;
   min-height: 240px;
@@ -216,14 +216,14 @@
   line-height: 1.6;
 }
 
-/* === Tipografia das janelas === */
-/* ----- Conteúdo principal ----- */
+/* === TIPOGRAFIA DAS JANELAS === */
+/* ----- CONTEÚDO PRINCIPAL ----- */
 .desktop-window__content {
   font-size: 14px;
   line-height: 1.6;
 }
 
-/* ----- Títulos principais ----- */
+/* ----- TÍTULOS PRINCIPAIS ----- */
 .desktop-window__content :where(h2) {
   margin: 0 0 12px;
   font-size: clamp(23px, 2.2vw, 29px);
@@ -232,7 +232,7 @@
   letter-spacing: -0.035em;
 }
 
-/* ----- Subtítulos ----- */
+/* ----- SUBTÍTULOS ----- */
 .desktop-window__content :where(h3) {
   margin-block: 20px 10px;
   font-size: 17px;
@@ -240,37 +240,37 @@
   letter-spacing: -0.02em;
 }
 
-/* ----- Títulos menores ----- */
+/* ----- TÍTULOS MENORES ----- */
 .desktop-window__content :where(h4) {
   margin-block: 16px 8px;
   font-size: 14px;
 }
 
-/* ----- Parágrafos ----- */
+/* ----- PARÁGRAFOS ----- */
 .desktop-window__content :where(p) {
   margin-block: 10px;
 }
 
-/* ----- Listas de definição ----- */
+/* ----- LISTAS DE DEFINIÇÃO ----- */
 .desktop-window__content :where(dl) {
   margin-block: 16px;
 }
 
-/* ----- Cabeçalhos de conteúdo ----- */
+/* ----- CABEÇALHOS DE CONTEÚDO ----- */
 .desktop-window__content>header {
   padding-bottom: 20px;
   margin-bottom: 24px;
   border-bottom: 1px solid var(--border-default);
 }
 
-/* ----- Descrições de cabeçalho ----- */
+/* ----- DESCRIÇÕES DE CABEÇALHO ----- */
 .desktop-window__content>header>p {
   max-width: 70ch;
   color: var(--text-secondary);
 }
 
-/* === Interações das janelas === */
-/* ----- Transições dos controles ----- */
+/* === INTERAÇÕES DAS JANELAS === */
+/* ----- TRANSIÇÕES DOS CONTROLES ----- */
 .desktop-window__content :where(button,
   a,
   input,
@@ -282,13 +282,13 @@
     color var(--transition-fast);
 }
 
-/* ----- Controles desabilitados ----- */
+/* ----- CONTROLES DESABILITADOS ----- */
 .desktop-window__content :where(button):disabled {
   cursor: not-allowed;
 }
 
-/* === Identidade dos aplicativos === */
-/* ----- Texto de destaque ----- */
+/* === IDENTIDADE DOS APLICATIVOS === */
+/* ----- TEXTO DE DESTAQUE ----- */
 .ws-app__eyebrow {
   color: var(--accent-secondary);
   font-size: 10px;
@@ -297,8 +297,8 @@
   text-transform: uppercase;
 }
 
-/* === Sobre Mim === */
-/* ----- Cabeçalho de apresentação ----- */
+/* === SOBRE MIM === */
+/* ----- CABEÇALHO DE APRESENTAÇÃO ----- */
 .ws-profile>header {
   padding: 28px;
   border: 1px solid var(--border-default);
@@ -309,13 +309,13 @@
       transparent);
 }
 
-/* ----- Títulos de apresentação ----- */
+/* ----- TÍTULOS DE APRESENTAÇÃO ----- */
 .ws-profile>header h3 {
   margin-block: 10px;
   font-size: clamp(22px, 3vw, 34px);
 }
 
-/* ----- Subtítulo da apresentação ----- */
+/* ----- SUBTÍTULO DA APRESENTAÇÃO ----- */
 .ws-profile>header h3+h3 {
   color: var(--text-secondary);
   font-size: 20px;
@@ -323,12 +323,12 @@
   letter-spacing: -0.015em;
 }
 
-/* ----- Seções de apresentação ----- */
+/* ----- SEÇÕES DE APRESENTAÇÃO ----- */
 .ws-profile>section {
   padding-block: 10px;
 }
 
-/* ----- Lista de habilidades ----- */
+/* ----- LISTA DE HABILIDADES ----- */
 .ws-profile>section>ul {
   display: flex;
   flex-wrap: wrap;
@@ -337,7 +337,7 @@
   list-style: none;
 }
 
-/* ----- Habilidades individuais ----- */
+/* ----- HABILIDADES INDIVIDUAIS ----- */
 .ws-profile>section>ul>li {
   padding: 8px 12px;
   border: 1px solid var(--border-default);
@@ -346,8 +346,8 @@
   font-size: 13px;
 }
 
-/* === Projetos === */
-/* ----- Organização dos cards ----- */
+/* === PROJETOS === */
+/* ----- ORGANIZAÇÃO DOS CARDS ----- */
 .ws-projects .ws-app__card {
   display: flex;
   flex-direction: column;
@@ -355,18 +355,18 @@
   gap: 4px;
 }
 
-/* ----- Ações dos projetos ----- */
+/* ----- AÇÕES DOS PROJETOS ----- */
 .ws-projects .ws-app__card>button {
   margin-top: auto;
 }
 
-/* ----- Títulos dos projetos ----- */
+/* ----- TÍTULOS DOS PROJETOS ----- */
 .ws-projects .ws-app__card h3 {
   font-size: 18px;
 }
 
-/* === Pesquisa global === */
-/* ----- Área de resultados ----- */
+/* === PESQUISA GLOBAL === */
+/* ----- ÁREA DE RESULTADOS ----- */
 .ws-global-search {
   max-height: 300px;
   padding: 12px 16px;
@@ -374,7 +374,7 @@
   border-top: 1px solid var(--border-default);
 }
 
-/* ----- Títulos de categoria ----- */
+/* ----- TÍTULOS DE CATEGORIA ----- */
 .ws-global-search h3 {
   display: flex;
   align-items: center;
@@ -385,7 +385,7 @@
   text-transform: uppercase;
 }
 
-/* ----- Botões de resultado ----- */
+/* ----- BOTÕES DE RESULTADO ----- */
 .ws-global-search button {
   display: flex;
   width: 100%;
@@ -400,7 +400,7 @@
   text-align: left;
 }
 
-/* ----- Hover dos resultados ----- */
+/* ----- HOVER DOS RESULTADOS ----- */
 @media (hover: hover) {
   .ws-global-search button:hover {
     border-color: var(--border-default);
@@ -408,26 +408,26 @@
   }
 }
 
-/* ----- Conteúdo dos resultados ----- */
+/* ----- CONTEÚDO DOS RESULTADOS ----- */
 .ws-global-search button span {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-/* ----- Textos auxiliares ----- */
+/* ----- TEXTOS AUXILIARES ----- */
 .ws-global-search small {
   color: var(--text-secondary);
   font-size: 11px;
 }
 
-/* ----- Nomes dos resultados ----- */
+/* ----- NOMES DOS RESULTADOS ----- */
 .ws-global-search strong {
   font-size: 13px;
 }
 
-/* === Responsividade === */
-/* ----- Janelas compactas ----- */
+/* === RESPONSIVIDADE === */
+/* ----- JANELAS COMPACTAS ----- */
 @media (max-width: 767px) {
   .desktop-window__content {
     padding: 20px 16px;
@@ -451,8 +451,8 @@
   }
 }
 
-/* === Acessibilidade === */
-/* ----- Movimento reduzido ----- */
+/* === ACESSIBILIDADE === */
+/* ----- MOVIMENTO REDUZIDO ----- */
 @media (prefers-reduced-motion: reduce) {
 
   .desktop-window__content :where(button,

@@ -11,37 +11,37 @@ export const OFFICIAL_WALLPAPERS = Object.freeze([
         id: 'dark-blue',
         name: 'Dark Blue',
         theme: 'dark',
-        file: 'wallpapers/dark-blue.jpg',
+        file: 'wallpapers/dark-blue.webp',
     },
     {
         id: 'dark-green',
         name: 'Dark Green',
         theme: 'dark',
-        file: 'wallpapers/dark-green.jpg',
+        file: 'wallpapers/dark-green.webp',
     },
     {
         id: 'dark-violeta',
         name: 'Dark Violet',
         theme: 'dark',
-        file: 'wallpapers/dark-violeta.jpg',
+        file: 'wallpapers/dark-violeta.webp',
     },
     {
         id: 'light-blue',
         name: 'Light Blue',
         theme: 'light',
-        file: 'wallpapers/light-blue.jpg',
+        file: 'wallpapers/light-blue.webp',
     },
     {
         id: 'light-green',
         name: 'Light Green',
         theme: 'light',
-        file: 'wallpapers/light-green.jpg',
+        file: 'wallpapers/light-green.webp',
     },
     {
         id: 'light-violeta',
         name: 'Light Violet',
         theme: 'light',
-        file: 'wallpapers/light-violeta.jpg',
+        file: 'wallpapers/light-violeta.webp',
     },
 ]);
 

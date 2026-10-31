@@ -1,104 +1,99 @@
-/* === Cores funcionais === */
-/* ----- Estados do tema Dark ----- */
+/* === CORES FUNCIONAIS === */
+/* ----- ESTADOS DO TEMA ESCURO ----- */
 :root {
   --action-text: #ffffff;
   --border-control: #71869b;
-
   --status-success: #83d5ae;
   --status-warning: #f0cb7a;
   --status-error: #ffabb2;
-
   --badge-background: #b42338;
 }
 
-/* ----- Estados do tema Light ----- */
+/* ----- ESTADOS DO TEMA CLARO ----- */
 :root[data-theme='light'] {
   --border-control: #6b7a8b;
-
   --status-success: #176b45;
   --status-warning: #795000;
   --status-error: #9a2536;
 }
 
-/* === Elementos de formulário === */
-/* ----- Campos compartilhados ----- */
+/* === ELEMENTOS DE FORMULÁRIO === */
+/* ----- CAMPOS COMPARTILHADOS ----- */
 :where(input, select, textarea) {
   font: inherit;
   color: var(--text-primary);
   background: var(--surface-primary);
 }
 
-/* ----- Dimensões mínimas ----- */
+/* ----- DIMENSÕES MÍNIMAS ----- */
 button,
 select {
   min-width: 24px;
   min-height: 24px;
 }
 
-/* ----- Foco acessível ----- */
+/* ----- FOCO ACESSÍVEL ----- */
 :where(button, a, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 3px;
 }
 
-/* ----- Elementos desativados ----- */
+/* ----- ELEMENTOS DESATIVADOS ----- */
 :where(button:disabled, input:disabled, select:disabled, textarea:disabled) {
   cursor: not-allowed;
 }
 
-/* === Links === */
-/* ----- Cor de destaque ----- */
+/* === LINKS === */
+/* ----- COR DE DESTAQUE ----- */
 a {
   color: var(--link-color);
 }
 
-/* === Navegação acessível === */
-/* ----- Atalho para conteúdo ----- */
+/* === NAVEGAÇÃO ACESSÍVEL === */
+/* ----- ATALHO PARA CONTEÚDO ----- */
 .ws-skip-link {
   position: fixed;
   z-index: 30000;
   top: 8px;
   left: 8px;
-
   padding: 10px;
   background: var(--surface-primary);
-
   transform: translateY(-200%);
 }
 
-/* ----- Atalho em foco ----- */
+/* ----- ATALHO EM FOCO ----- */
 .ws-skip-link:focus {
   transform: none;
 }
 
-/* === Componentes de inicialização === */
-/* ----- Superfícies principais ----- */
+/* === COMPONENTES DE INICIALIZAÇÃO === */
+/* ----- SUPERFÍCIES PRINCIPAIS ----- */
 .ws-boot,
 .ws-welcome {
   background: var(--surface-primary);
   color: var(--text-primary);
 }
 
-/* ----- Janela de boas-vindas ----- */
+/* ----- JANELA DE BOAS-VINDAS ----- */
 .ws-welcome {
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
   box-shadow: var(--shadow-floating);
 }
 
-/* ----- Botões das boas-vindas ----- */
+/* ----- BOTÕES DAS BOAS-VINDAS ----- */
 .ws-welcome button {
   background: var(--action-background);
   color: var(--action-text);
 }
 
-/* === WS Menu === */
-/* ----- Bordas compartilhadas ----- */
+/* === WS MENU === */
+/* ----- BORDAS COMPARTILHADAS ----- */
 .taskbar-launcher--redesign {
   border-color: var(--border-default);
 }
 
-/* ----- Ícones e elementos de identificação ----- */
+/* ----- ÍCONES E ELEMENTOS DE IDENTIFICAÇÃO ----- */
 .ws-menu__avatar,
 .ws-menu__app-icon,
 .taskbar-preview__placeholder,
@@ -108,25 +103,25 @@ a {
   border-color: var(--border-default);
 }
 
-/* ----- Campo de pesquisa ----- */
+/* ----- CAMPO DE PESQUISA ----- */
 .ws-menu__search {
   background: var(--surface-primary);
   border-color: var(--border-control);
 }
 
-/* ----- Pesquisa em foco ----- */
+/* ----- PESQUISA EM FOCO ----- */
 .ws-menu__search:focus-within {
   background: var(--surface-primary);
 }
 
-/* ----- Itens interativos ----- */
+/* ----- ITENS INTERATIVOS ----- */
 .ws-menu__app-item:hover,
 .ws-menu__app-item:focus-within {
   background: var(--surface-secondary);
 }
 
-/* === Notificações === */
-/* ----- Superfície das mensagens ----- */
+/* === NOTIFICAÇÕES === */
+/* ----- SUPERFÍCIE DAS MENSAGENS ----- */
 .ws-toast {
   background: var(--surface-primary);
   color: var(--text-primary);
@@ -134,7 +129,7 @@ a {
   box-shadow: var(--shadow-floating);
 }
 
-/* ----- Textos secundários ----- */
+/* ----- TEXTOS SECUNDÁRIOS ----- */
 .ws-toast__source,
 .ws-toast__type,
 .ws-toast__message,
@@ -142,25 +137,25 @@ a {
   color: var(--text-secondary);
 }
 
-/* ----- Botão de fechar ----- */
+/* ----- BOTÃO DE FECHAR ----- */
 .ws-toast__close:hover {
   background: var(--surface-secondary);
   color: var(--text-primary);
 }
 
-/* ----- Ações das notificações ----- */
+/* ----- AÇÕES DAS NOTIFICAÇÕES ----- */
 .ws-toast__action {
   color: var(--link-color);
   border-color: var(--border-control);
   background: var(--surface-secondary);
 }
 
-/* ----- Foco das ações ----- */
+/* ----- FOCO DAS AÇÕES ----- */
 .ws-toast__action:focus-visible {
   outline-color: var(--accent-secondary);
 }
 
-/* ----- Indicadores por categoria ----- */
+/* ----- INDICADORES POR CATEGORIA ----- */
 .ws-toast--info {
   --toast-accent: var(--accent-secondary);
 }
@@ -177,47 +172,47 @@ a {
   --toast-accent: var(--status-error);
 }
 
-/* === Taskbar === */
-/* ----- Contador de notificações ----- */
+/* === BARRA DE TAREFAS === */
+/* ----- CONTADOR DE NOTIFICAÇÕES ----- */
 .taskbar-notifications__badge {
   background: var(--badge-background);
   color: #ffffff;
   border-color: var(--surface-primary);
 }
 
-/* ----- Conteúdo dos painéis ----- */
+/* ----- CONTEÚDO DOS PAINÉIS ----- */
 .taskbar-notifications__item,
 .taskbar-quick-controls__section {
   background: var(--surface-primary);
   border-color: var(--border-default);
 }
 
-/* ----- Seções dos controles rápidos ----- */
+/* ----- SEÇÕES DOS CONTROLES RÁPIDOS ----- */
 .taskbar-quick-controls__section {
   min-width: 0;
   margin: 0;
 }
 
-/* ----- Títulos das seções ----- */
+/* ----- TÍTULOS DAS SEÇÕES ----- */
 .taskbar-quick-controls__section legend {
   padding: 0;
   font-weight: 700;
 }
 
-/* ----- Controles de seleção ----- */
+/* ----- CONTROLES DE SELEÇÃO ----- */
 .taskbar-quick-controls__theme select,
 .desktop__widget-size select {
   border-color: var(--border-control);
 }
 
-/* ----- Organização das opções de tema ----- */
+/* ----- ORGANIZAÇÃO DAS OPÇÕES DE TEMA ----- */
 .taskbar-quick-controls__theme {
   gap: 8px;
   flex-wrap: wrap;
 }
 
-/* === Controles de efeitos === */
-/* ----- Organização das opções ----- */
+/* === CONTROLES DE EFEITOS === */
+/* ----- ORGANIZAÇÃO DAS OPÇÕES ----- */
 .ws-effect-option {
   display: flex;
   align-items: center;
@@ -225,23 +220,23 @@ a {
   margin-block: 8px;
 }
 
-/* ----- Campos de ativação ----- */
+/* ----- CAMPOS DE ATIVAÇÃO ----- */
 .ws-effect-option input {
   width: 20px;
   height: 20px;
   accent-color: var(--action-background);
 }
 
-/* === Desktop === */
-/* ----- Indicação de posicionamento inválido ----- */
+/* === DESKTOP === */
+/* ----- INDICAÇÃO DE POSICIONAMENTO INVÁLIDO ----- */
 .desktop__shortcut[data-drop-valid='false'],
 .desktop__widget[data-drop-valid='false'] {
   outline: 2px dashed var(--status-error);
   opacity: 0.7;
 }
 
-/* === Rolagem === */
-/* ----- Áreas compartilhadas ----- */
+/* === ROLAGEM === */
+/* ----- ÁREAS COMPARTILHADAS ----- */
 :where(.desktop-window__content,
   .ws-app,
   .ws-mobile__app,
@@ -252,8 +247,8 @@ a {
   overscroll-behavior: contain;
 }
 
-/* === Seleção de texto === */
-/* ----- Superfícies do sistema ----- */
+/* === SELEÇÃO DE TEXTO === */
+/* ----- SUPERFÍCIES DO SISTEMA ----- */
 :where(.desktop-window,
   .taskbar-floating-layer,
   .ws-mobile__panel) ::selection {
@@ -261,8 +256,8 @@ a {
   color: var(--action-text);
 }
 
-/* === Responsividade === */
-/* ----- Controles para dispositivos de toque ----- */
+/* === RESPONSIVIDADE === */
+/* ----- CONTROLES PARA DISPOSITIVOS DE TOQUE ----- */
 @media (pointer: coarse) {
 
   button,
@@ -280,15 +275,15 @@ a {
   }
 }
 
-/* === Acessibilidade === */
-/* ----- Modo de baixo custo ----- */
+/* === ACESSIBILIDADE === */
+/* ----- MODO DE BAIXO CUSTO ----- */
 :root[data-low-effects='true'] *,
 :root[data-low-effects='true'] *::before,
 :root[data-low-effects='true'] *::after {
   box-shadow: none !important;
 }
 
-/* ----- Contraste forçado ----- */
+/* ----- CONTRASTE FORÇADO ----- */
 @media (forced-colors: active) {
   :where(button, input, select, textarea, a, [tabindex]):focus-visible {
     outline: 2px solid Highlight;

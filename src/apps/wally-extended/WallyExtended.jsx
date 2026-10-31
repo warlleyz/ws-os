@@ -23,8 +23,8 @@ import './WallyExtended.css';
 
 /* === RECURSOS VISUAIS === */
 /* ----- Imagens públicas do Wally ----- */
-const WALLY_FACE = `${import.meta.env.BASE_URL}assets/wally/wally-rosto.svg`;
-const WALLY_BODY = `${import.meta.env.BASE_URL}assets/wally/wally-corpo.svg`;
+const WALLY_FACE = `${import.meta.env.BASE_URL}assets/wally/wally-rosto.webp`;
+const WALLY_BODY = `${import.meta.env.BASE_URL}assets/wally/wally-corpo.webp`;
 
 /* ----- Perguntas sugeridas ----- */
 const SUGGESTIONS = [

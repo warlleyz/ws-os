@@ -1,56 +1,55 @@
-/* === Fontes === */
-/* ----- Tipografia do sistema ----- */
+/* === FONTES === */
+/* ----- TIPOGRAFIA DO SISTEMA ----- */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
 
-/* === Design System === */
-/* ----- Tokens estruturais ----- */
+/* === DESIGN SYSTEM === */
+/* ----- TOKENS ESTRUTURAIS ----- */
 @import './themes/tokens.css';
 
-/* ----- Paletas dos temas ----- */
+/* ----- PALETAS DOS TEMAS ----- */
 @import './themes/dark.css';
 @import './themes/light.css';
 
-/* ----- Personalização e efeitos ----- */
+/* ----- PERSONALIZAÇÃO E EFEITOS ----- */
 @import './themes/customization.css';
 @import './themes/effects.css';
 
-/* ----- Estrutura do sistema ----- */
+/* ----- ESTRUTURA DO SISTEMA ----- */
 @import './system.css';
 
-/* ----- Fundamentos e superfícies ----- */
+/* ----- FUNDAMENTOS E SUPERFÍCIES ----- */
 @import './themes/foundation.css';
 @import './themes/glass.css';
 
-/* ----- Controles compartilhados ----- */
+/* ----- CONTROLES COMPARTILHADOS ----- */
 @import './themes/controls.css';
 
-/* ----- Cursores personalizados ----- */
+/* ----- CURSORES PERSONALIZADOS ----- */
 @import './themes/cursors.css';
 
-/* ----- Padrões responsivos ----- */
+/* ----- PADRÕES RESPONSIVOS ----- */
 @import './themes/responsive.css';
 
-/* === Configuração global === */
-/* ----- Tipografia e aparência ----- */
+/* === CONFIGURAÇÃO GLOBAL === */
+/* ----- TIPOGRAFIA E APARÊNCIA ----- */
 :root {
   font-family: var(--font-interface);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-
   color: var(--text-primary);
   background: var(--surface-canvas);
 }
 
-/* === Reset global === */
-/* ----- Dimensionamento dos elementos ----- */
+/* === RESET GLOBAL === */
+/* ----- DIMENSIONAMENTO DOS ELEMENTOS ----- */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-/* ----- Área principal do sistema ----- */
+/* ----- ÁREA PRINCIPAL DO SISTEMA ----- */
 html,
 body,
 #root {
@@ -59,45 +58,45 @@ body,
   margin: 0;
 }
 
-/* ----- Largura mínima suportada ----- */
+/* ----- LARGURA MÍNIMA SUPORTADA ----- */
 body {
   min-width: 320px;
 }
 
-/* === Elementos interativos === */
-/* ----- Tipografia dos controles ----- */
+/* === ELEMENTOS INTERATIVOS === */
+/* ----- TIPOGRAFIA DOS CONTROLES ----- */
 button,
 input,
 textarea {
   font: inherit;
 }
 
-/* ----- Cursor nativo de segurança ----- */
+/* ----- CURSOR NATIVO DE SEGURANÇA ----- */
 button {
   cursor: pointer;
 }
 
-/* === Acessibilidade === */
-/* ----- Seleção de texto ----- */
+/* === ACESSIBILIDADE === */
+/* ----- SELEÇÃO DE TEXTO ----- */
 ::selection {
   background: var(--accent-primary);
   color: #ffffff;
 }
 
-/* === Scrollbars globais === */
-/* ----- Aparência padrão ----- */
+/* === BARRAS DE ROLAGEM === */
+/* ----- APARÊNCIA GLOBAL ----- */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border-control) transparent;
 }
 
-/* ----- Dimensões ----- */
+/* ----- DIMENSÕES ----- */
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-/* ----- Indicador de rolagem ----- */
+/* ----- INDICADOR DE ROLAGEM ----- */
 *::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 20px;
@@ -105,7 +104,7 @@ button {
   background-clip: padding-box;
 }
 
-/* ----- Trilho de rolagem ----- */
+/* ----- TRILHO DE ROLAGEM ----- */
 *::-webkit-scrollbar-track {
   background: transparent;
 }

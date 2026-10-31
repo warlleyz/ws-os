@@ -1,20 +1,20 @@
-/* === Geometria === */
-/* ----- Raios de borda ----- */
+/* === GEOMETRIA === */
+/* ----- RAIOS DE BORDA ----- */
 :root {
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 18px;
 }
 
-/* === Tipografia === */
-/* ----- Famílias oficiais ----- */
+/* === TIPOGRAFIA === */
+/* ----- FAMÍLIAS OFICIAIS ----- */
 :root {
   --font-interface: 'Nunito Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* === Espaçamento === */
-/* ----- Escala compartilhada ----- */
+/* === ESPAÇAMENTO === */
+/* ----- ESCALA COMPARTILHADA ----- */
 :root {
   --space-1: 4px;
   --space-2: 8px;
@@ -25,23 +25,23 @@
   --space-8: 32px;
 }
 
-/* === Controles === */
-/* ----- Dimensões mínimas ----- */
+/* === CONTROLES === */
+/* ----- DIMENSÕES MÍNIMAS ----- */
 :root {
   --control-height-sm: 32px;
   --control-height-md: 40px;
   --control-height-lg: 44px;
 }
 
-/* === Transições === */
-/* ----- Durações compartilhadas ----- */
+/* === TRANSIÇÕES === */
+/* ----- DURAÇÕES COMPARTILHADAS ----- */
 :root {
   --transition-fast: 120ms;
   --transition-normal: 200ms;
 }
 
-/* === Acessibilidade === */
-/* ----- Movimento reduzido ----- */
+/* === ACESSIBILIDADE === */
+/* ----- MOVIMENTO REDUZIDO ----- */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --transition-fast: 0ms;

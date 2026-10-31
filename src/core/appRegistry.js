@@ -21,7 +21,7 @@ import { createElement } from 'react';
 /* === ÍCONE PERSONALIZADO DO WALLY === */
 function WallyAppIcon({ size = 20 }) {
   return createElement('img', {
-    src: '/assets/wally/wally-rosto.svg',
+    src: '/assets/wally/wally-rosto.webp',
     alt: '',
     'aria-hidden': true,
     width: size,

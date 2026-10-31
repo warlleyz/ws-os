@@ -1,5 +1,5 @@
-/* === Personalização de cores === */
-/* ----- Azul Dark ----- */
+/* === PERSONALIZAÇÃO DE CORES === */
+/* ----- AZUL ESCURO ----- */
 :root,
 :root[data-theme='dark'],
 :root[data-theme='dark'][data-accent='blue'] {
@@ -9,7 +9,7 @@
   --link-color: #8dc2ff;
 }
 
-/* ----- Azul Light ----- */
+/* ----- AZUL CLARO ----- */
 :root[data-theme='light'],
 :root[data-theme='light'][data-accent='blue'] {
   --accent-primary: #2876d0;
@@ -18,8 +18,8 @@
   --link-color: #185a9d;
 }
 
-/* === Verde === */
-/* ----- Verde Dark ----- */
+/* === VERDE === */
+/* ----- VERDE ESCURO ----- */
 :root[data-theme='dark'][data-accent='green'] {
   --accent-primary: #229b83;
   --accent-secondary: #7de1c4;
@@ -27,7 +27,7 @@
   --link-color: #7de1c4;
 }
 
-/* ----- Verde Light ----- */
+/* ----- VERDE CLARO ----- */
 :root[data-theme='light'][data-accent='green'] {
   --accent-primary: #08775f;
   --accent-secondary: #08634f;
@@ -35,8 +35,8 @@
   --link-color: #08634f;
 }
 
-/* === Violeta === */
-/* ----- Violeta Dark ----- */
+/* === VIOLETA === */
+/* ----- VIOLETA ESCURO ----- */
 :root[data-theme='dark'][data-accent='violet'] {
   --accent-primary: #9270ed;
   --accent-secondary: #c3abff;
@@ -44,7 +44,7 @@
   --link-color: #c3abff;
 }
 
-/* ----- Violeta Light ----- */
+/* ----- VIOLETA CLARO ----- */
 :root[data-theme='light'][data-accent='violet'] {
   --accent-primary: #6942bb;
   --accent-secondary: #6439a9;

@@ -11,7 +11,7 @@ import './WelcomeDialog.css';
 
 /* === Recursos da apresentação === */
 /* ----- Identidade do Wally ----- */
-const WALLY_IMAGE = `${import.meta.env.BASE_URL}assets/wally/wally-corpo.svg`;
+const WALLY_IMAGE = `${import.meta.env.BASE_URL}assets/wally/wally-corpo.webp`;
 
 /* ----- Conteúdo dos balões ----- */
 const MESSAGES = [

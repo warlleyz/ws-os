@@ -1,62 +1,28 @@
+
 /* === ILUSTRAÇÕES DO CATÁLOGO DE JOGOS === */
 export default function GameArtwork({ game }) {
-    switch (game) {
-        case 'snake':
-            return (
-                <img
-                    src="/assets/games/snake.jpg"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    draggable="false"
-                />
-            );
 
-        case 'memory':
-            return (
-                <img
-                    src="/assets/games/memory.png"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    draggable="false"
-                />
-            );
+  /* ----- SELEÇÃO DAS ILUSTRAÇÕES ----- */
+  const artwork = {
+    snake: 'snake.webp',
+    memory: 'memory.webp',
+    mines: 'mines.webp',
+    flappy: 'flappy.webp',
+    solitaire: 'solitaire.webp',
+  };
 
-        case 'mines':
-            return (
-                <img
-                    src="/assets/games/mines.png"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    draggable="false"
-                />
-            );
+  /* ----- RENDERIZAÇÃO ----- */
+  const file = artwork[game];
 
-        case 'flappy':
-            return (
-                <img
-                    src="/assets/games/flappy.png"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    draggable="false"
-                />
-            );
+  if (!file) return null;
 
-        case 'solitaire':
-            return (
-                <img
-                    src="/assets/games/solitaire.png"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    draggable="false"
-                />
-            );;
-
-        default:
-            return null;
-    }
+  return (
+    <img
+      src={`${import.meta.env.BASE_URL}assets/games/${file}`}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      draggable="false"
+    />
+  );
 }

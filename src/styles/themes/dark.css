@@ -1,12 +1,12 @@
-/* === Tema Dark === */
-/* ----- Configuração do navegador ----- */
+/* === TEMA ESCURO === */
+/* ----- CONFIGURAÇÃO DO NAVEGADOR ----- */
 :root,
 :root[data-theme='dark'] {
   color-scheme: dark;
 }
 
-/* === Superfícies === */
-/* ----- Fundos e áreas de conteúdo ----- */
+/* === SUPERFÍCIES === */
+/* ----- FUNDOS E ÁREAS DE CONTEÚDO ----- */
 :root,
 :root[data-theme='dark'] {
   --surface-canvas: #111925;
@@ -14,23 +14,23 @@
   --surface-secondary: #26384a;
 }
 
-/* === Tipografia === */
-/* ----- Cores de texto ----- */
+/* === TIPOGRAFIA === */
+/* ----- CORES DE TEXTO ----- */
 :root,
 :root[data-theme='dark'] {
   --text-primary: #ebf2fb;
   --text-secondary: #acbdcd;
 }
 
-/* === Bordas === */
-/* ----- Contornos principais ----- */
+/* === BORDAS === */
+/* ----- CONTORNOS PRINCIPAIS ----- */
 :root,
 :root[data-theme='dark'] {
   --border-default: #35465b;
 }
 
-/* === Destaques === */
-/* ----- Paleta azul padrão ----- */
+/* === DESTAQUES === */
+/* ----- PALETA AZUL PADRÃO ----- */
 :root,
 :root[data-theme='dark'] {
   --accent-primary: #378ce4;
