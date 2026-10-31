@@ -1,14 +1,16 @@
+/* === Constantes da grade === */
 export const COLUMN_STEP = 90;
 export const ROW_STEP = 88;
-
 export const SHORTCUT_WIDTH = 82;
 export const MIN_COLUMN_STEP = 82;
-
 export const TASKBAR_RESERVED_WIDTH = 480;
 export const TASKBAR_RESERVED_BOTTOM = 64;
 
+/* === Utilitários de coordenadas === */
+/* ----- Identificação de células ----- */
 const key = (column, row) => `${column}:${row}`;
 
+/* ----- Dimensões da grade ----- */
 export function getColumnStep(layout) {
   return layout.columnStep ?? COLUMN_STEP;
 }
@@ -33,10 +35,11 @@ export function getWidgetWidth(columns, layout) {
   return (columns - 1) * getColumnStep(layout) + SHORTCUT_WIDTH;
 }
 
+/* === Restrições da grade === */
+/* ----- Limites de arraste ----- */
 export function clampDesktopDrag(dx, dy, bounds, layout) {
   const minDx = -bounds.left;
   const maxDx = Math.max(minDx, layout.width - bounds.right);
-
   const minDy = -bounds.top;
   const maxDy = Math.max(minDy, layout.height - bounds.bottom);
 
@@ -46,6 +49,7 @@ export function clampDesktopDrag(dx, dy, bounds, layout) {
   };
 }
 
+/* ----- Disponibilidade das células ----- */
 export function isDesktopCellAvailable(column, row, layout) {
   if (
     !Number.isInteger(column) ||
@@ -62,26 +66,21 @@ export function isDesktopCellAvailable(column, row, layout) {
   const top = getCellTop(row);
 
   const isBottomArea =
-    top < layout.viewportHeight && top + ROW_STEP > layout.viewportHeight - TASKBAR_RESERVED_BOTTOM;
+    top < layout.viewportHeight &&
+    top + ROW_STEP > layout.viewportHeight - TASKBAR_RESERVED_BOTTOM;
 
   if (!isBottomArea) {
     return true;
   }
 
   const reservedWidth = Math.min(TASKBAR_RESERVED_WIDTH, layout.width);
-
   const reservedLeft = (layout.width - reservedWidth) / 2;
 
-  // Inferior esquerdo: aplicativos e widgets.
-  // Inferior central: Taskbar.
-  // Inferior direito: futuras notificações.
   return left + SHORTCUT_WIDTH <= reservedLeft;
 }
 
-/**
- * Retorna todas as células ocupadas por um widget.
- * As dimensões são expressas em células da grade.
- */
+/* === Ocupação dos widgets === */
+/* ----- Células ocupadas ----- */
 export function getWidgetCells(position, size) {
   if (
     !position ||
@@ -112,10 +111,7 @@ export function getWidgetCells(position, size) {
   return cells;
 }
 
-/**
- * Verifica se um widget cabe na grade sem ocupar
- * células reservadas ou já utilizadas.
- */
+/* ----- Verificação de disponibilidade ----- */
 export function canPlaceWidget(position, size, layout, occupied = new Set()) {
   const cells = getWidgetCells(position, size);
 
@@ -125,14 +121,12 @@ export function canPlaceWidget(position, size, layout, occupied = new Set()) {
 
   return cells.every(
     ({ column, row }) =>
-      isDesktopCellAvailable(column, row, layout) && !occupied.has(`${column}:${row}`),
+      isDesktopCellAvailable(column, row, layout) &&
+      !occupied.has(`${column}:${row}`),
   );
 }
 
-/**
- * Marca todas as células de um widget como ocupadas.
- * Retorna um novo Set, preservando o original.
- */
+/* ----- Registro de ocupação ----- */
 export function occupyWidgetCells(occupied, position, size) {
   const next = new Set(occupied);
 
@@ -143,17 +137,19 @@ export function occupyWidgetCells(occupied, position, size) {
   return next;
 }
 
-/**
- * Procura posições válidas na grade.
- * Se houver preferência, prioriza posições próximas.
- */
-// Visita posições na mesma ordem determinística sem materializar toda a grade.
-// O caminho comum encerra assim que a primeira posição válida é encontrada.
+/* === Posicionamento dos widgets === */
+/* ----- Candidatos de posicionamento ----- */
 function* widgetCandidates(size, layout, preferred, rightFirst = false) {
   const maxColumn = layout.columns - size.columns;
   const maxRow = layout.rows - size.rows;
+
   if (maxColumn < 0 || maxRow < 0) return;
-  const hasPreferred = Number.isInteger(preferred?.column) && Number.isInteger(preferred?.row);
+
+  const hasPreferred =
+    Number.isInteger(preferred?.column) &&
+    Number.isInteger(preferred?.row);
+
+  /* ----- Preferência dentro da grade ----- */
   if (
     hasPreferred &&
     preferred.column >= 0 &&
@@ -162,7 +158,11 @@ function* widgetCandidates(size, layout, preferred, rightFirst = false) {
     preferred.row <= maxRow
   ) {
     const { column, row } = preferred;
-    const distanceLimit = Math.max(column, maxColumn - column) + Math.max(row, maxRow - row);
+
+    const distanceLimit =
+      Math.max(column, maxColumn - column) +
+      Math.max(row, maxRow - row);
+
     for (let distance = 0; distance <= distanceLimit; distance += 1) {
       for (
         let x = Math.max(0, column - distance);
@@ -170,43 +170,74 @@ function* widgetCandidates(size, layout, preferred, rightFirst = false) {
         x += 1
       ) {
         const dy = distance - Math.abs(x - column);
-        const low = row - dy,
-          high = row + dy;
-        if (low >= 0 && low <= maxRow) yield { column: x, row: low };
-        if (high !== low && high >= 0 && high <= maxRow) yield { column: x, row: high };
+        const low = row - dy;
+        const high = row + dy;
+
+        if (low >= 0 && low <= maxRow) {
+          yield { column: x, row: low };
+        }
+
+        if (high !== low && high >= 0 && high <= maxRow) {
+          yield { column: x, row: high };
+        }
       }
     }
+
     return;
   }
+
+  /* ----- Preferência fora da grade ----- */
   if (hasPreferred) {
-    // Preferência fora da nova área: ordenar apenas as coordenadas finitas.
     const positions = [];
-    for (let column = 0; column <= maxColumn; column += 1)
-      for (let row = 0; row <= maxRow; row += 1) positions.push({ column, row });
+
+    for (let column = 0; column <= maxColumn; column += 1) {
+      for (let row = 0; row <= maxRow; row += 1) {
+        positions.push({ column, row });
+      }
+    }
+
     positions.sort(
       (a, b) =>
         Math.abs(a.column - preferred.column) +
-          Math.abs(a.row - preferred.row) -
-          (Math.abs(b.column - preferred.column) + Math.abs(b.row - preferred.row)) ||
+        Math.abs(a.row - preferred.row) -
+        (Math.abs(b.column - preferred.column) +
+          Math.abs(b.row - preferred.row)) ||
         a.column - b.column ||
         a.row - b.row,
     );
+
     yield* positions;
     return;
   }
+
+  /* ----- Distribuição automática ----- */
   for (let i = 0; i <= maxColumn; i += 1) {
     const column = rightFirst ? maxColumn - i : i;
-    for (let row = 0; row <= maxRow; row += 1) yield { column, row };
+
+    for (let row = 0; row <= maxRow; row += 1) {
+      yield { column, row };
+    }
   }
 }
 
-export function findWidgetPosition(size, layout, occupied = new Set(), preferred = null) {
+/* ----- Localização de posição válida ----- */
+export function findWidgetPosition(
+  size,
+  layout,
+  occupied = new Set(),
+  preferred = null,
+) {
   for (const position of widgetCandidates(size, layout, preferred)) {
-    if (canPlaceWidget(position, size, layout, occupied)) return position;
+    if (canPlaceWidget(position, size, layout, occupied)) {
+      return position;
+    }
   }
+
   return null;
 }
 
+/* === Layout principal do Desktop === */
+/* ----- Construção da grade ----- */
 export function getDesktopLayout(count, width, height, widget, preferred = []) {
   if (width <= 0 || height <= 0) {
     return {
@@ -223,9 +254,15 @@ export function getDesktopLayout(count, width, height, widget, preferred = []) {
     };
   }
 
-  const columns = Math.max(1, Math.floor((width - SHORTCUT_WIDTH) / MIN_COLUMN_STEP) + 1);
+  const columns = Math.max(
+    1,
+    Math.floor((width - SHORTCUT_WIDTH) / MIN_COLUMN_STEP) + 1,
+  );
 
-  const columnStep = columns > 1 ? (width - SHORTCUT_WIDTH) / (columns - 1) : COLUMN_STEP;
+  const columnStep =
+    columns > 1
+      ? (width - SHORTCUT_WIDTH) / (columns - 1)
+      : COLUMN_STEP;
 
   const layout = {
     width,
@@ -240,6 +277,7 @@ export function getDesktopLayout(count, width, height, widget, preferred = []) {
     overflow: false,
   };
 
+  /* ----- Células disponíveis ----- */
   function cells() {
     const result = [];
 
@@ -260,6 +298,7 @@ export function getDesktopLayout(count, width, height, widget, preferred = []) {
   const widgetColumns = widget?.size?.columns ?? 2;
   const widgetRows = widget?.size?.rows ?? 2;
 
+  /* ----- Verificação do widget inicial ----- */
   function fits(column, row) {
     for (let x = column; x < column + widgetColumns; x += 1) {
       for (let y = row; y < row + widgetRows; y += 1) {
@@ -272,6 +311,7 @@ export function getDesktopLayout(count, width, height, widget, preferred = []) {
     return true;
   }
 
+  /* ----- Posicionamento do widget inicial ----- */
   if (
     widget?.visible &&
     Number.isInteger(widgetColumns) &&
@@ -290,7 +330,11 @@ export function getDesktopLayout(count, width, height, widget, preferred = []) {
       chosen = widget.position;
     }
 
-    for (let column = layout.columns - widgetColumns; column >= 0 && !chosen; column -= 1) {
+    for (
+      let column = layout.columns - widgetColumns;
+      column >= 0 && !chosen;
+      column -= 1
+    ) {
       for (let row = 0; row < layout.rows; row += 1) {
         if (fits(column, row)) {
           chosen = { column, row };
@@ -315,16 +359,22 @@ export function getDesktopLayout(count, width, height, widget, preferred = []) {
 
   layout.widgetBlocked = Boolean(widget?.visible && !layout.widget);
 
+  /* ----- Expansão em caso de espaço insuficiente ----- */
   if (available.length < count) {
     layout.overflow = true;
+
     layout.rows = Math.max(
       layout.rows,
-      Math.ceil(height / ROW_STEP) + Math.ceil(count / layout.columns) + 1,
+      Math.ceil(height / ROW_STEP) +
+      Math.ceil(count / layout.columns) +
+      1,
     );
+
     layout.height = layout.rows * ROW_STEP;
     available = cells();
   }
 
+  /* ----- Recuperação das posições salvas ----- */
   const result = Array.from({ length: count }, () => null);
 
   for (let index = 0; index < count; index += 1) {
@@ -344,6 +394,7 @@ export function getDesktopLayout(count, width, height, widget, preferred = []) {
     }
   }
 
+  /* ----- Distribuição dos atalhos restantes ----- */
   let nextCell = 0;
 
   for (let index = 0; index < count; index += 1) {
@@ -351,7 +402,9 @@ export function getDesktopLayout(count, width, height, widget, preferred = []) {
 
     while (
       nextCell < available.length &&
-      occupied.has(key(available[nextCell].column, available[nextCell].row))
+      occupied.has(
+        key(available[nextCell].column, available[nextCell].row),
+      )
     ) {
       nextCell += 1;
     }
@@ -373,35 +426,36 @@ export function getDesktopLayout(count, width, height, widget, preferred = []) {
   return layout;
 }
 
-/**
- * Calcula a distribuição de múltiplos widgets
- * sem alterar a organização atual do Desktop.
- *
- * Nesta fase, os atalhos existentes têm prioridade.
- * A reorganização inteligente será integrada na W2.3.
- */
-
-export function getMultiWidgetLayout(count, width, height, widgets = [], preferred = []) {
+/* === Layout com múltiplos widgets === */
+/* ----- Distribuição compartilhada ----- */
+export function getMultiWidgetLayout(
+  count,
+  width,
+  height,
+  widgets = [],
+  preferred = [],
+) {
   const base = getDesktopLayout(count, width, height, null, preferred);
 
   const placements = {};
   const blockedWidgets = [];
   const widgetOccupied = new Set();
 
-  // Preserva a posição calculada anteriormente para cada atalho.
   const originalShortcuts = base.shortcuts.map((point) =>
     point
       ? {
-          column: getCellColumn(point.left, base),
-          row: getCellRow(point.top),
-        }
+        column: getCellColumn(point.left, base),
+        row: getCellRow(point.top),
+      }
       : null,
   );
 
+  /* ----- Distribuição dos atalhos ----- */
   function placeShortcuts(reserved) {
     const occupied = new Set(reserved);
     const result = Array(count).fill(null);
 
+    /* ----- Verificação de posição ----- */
     function available(position) {
       return (
         position &&
@@ -410,6 +464,7 @@ export function getMultiWidgetLayout(count, width, height, widgets = [], preferr
       );
     }
 
+    /* ----- Atribuição de posição ----- */
     function assign(index, position) {
       result[index] = {
         left: getCellLeft(position.column, base),
@@ -419,27 +474,32 @@ export function getMultiWidgetLayout(count, width, height, widgets = [], preferr
       occupied.add(key(position.column, position.row));
     }
 
-    // Primeira passagem: manter posições escolhidas pelo usuário.
+    /* ----- Posições escolhidas pelo usuário ----- */
     for (let index = 0; index < count; index += 1) {
       if (available(preferred[index])) {
         assign(index, preferred[index]);
       }
     }
 
-    // Segunda passagem: manter a distribuição anterior.
+    /* ----- Posições previamente calculadas ----- */
     for (let index = 0; index < count; index += 1) {
       if (!result[index] && available(originalShortcuts[index])) {
         assign(index, originalShortcuts[index]);
       }
     }
 
-    // Terceira passagem: realocar somente os atalhos afetados.
+    /* ----- Realocação dos atalhos afetados ----- */
     for (let index = 0; index < count; index += 1) {
       if (result[index]) continue;
 
       const anchor = preferred[index] ?? originalShortcuts[index];
 
-      const position = findWidgetPosition({ columns: 1, rows: 1 }, base, occupied, anchor);
+      const position = findWidgetPosition(
+        { columns: 1, rows: 1 },
+        base,
+        occupied,
+        anchor,
+      );
 
       if (!position) return null;
 
@@ -451,8 +511,7 @@ export function getMultiWidgetLayout(count, width, height, widgets = [], preferr
 
   let shortcuts = placeShortcuts(widgetOccupied);
 
-  // Posições de widgets são avaliadas sem modificar
-  // a distribuição aceita anteriormente.
+  /* ----- Posicionamento dos widgets ----- */
   for (const widget of widgets) {
     if (!widget.visible) continue;
 
@@ -466,18 +525,33 @@ export function getMultiWidgetLayout(count, width, height, widgets = [], preferr
       size.columns < 1 ||
       size.rows < 1
     ) {
-      if (instanceId) blockedWidgets.push(instanceId);
+      if (instanceId) {
+        blockedWidgets.push(instanceId);
+      }
+
       continue;
     }
 
     let accepted = false;
-    for (const position of widgetCandidates(size, base, widget.position, true)) {
-      if (!canPlaceWidget(position, size, base, widgetOccupied)) continue;
-      const trialOccupied = occupyWidgetCells(widgetOccupied, position, size);
+
+    for (const position of widgetCandidates(
+      size,
+      base,
+      widget.position,
+      true,
+    )) {
+      if (!canPlaceWidget(position, size, base, widgetOccupied)) {
+        continue;
+      }
+
+      const trialOccupied = occupyWidgetCells(
+        widgetOccupied,
+        position,
+        size,
+      );
 
       const trialShortcuts = placeShortcuts(trialOccupied);
 
-      // Só aceita quando todos os atalhos continuam presentes.
       if (!trialShortcuts) continue;
 
       for (const cell of trialOccupied) {
@@ -514,8 +588,19 @@ export function getMultiWidgetLayout(count, width, height, widgets = [], preferr
   };
 }
 
-export function moveDesktopShortcuts(shortcuts, layout, selectedIds, anchorId, column, row) {
-  const anchor = layout.shortcuts[shortcuts.findIndex((app) => app.id === anchorId)];
+/* === Movimentação dos atalhos === */
+/* ----- Movimentação individual e em grupo ----- */
+export function moveDesktopShortcuts(
+  shortcuts,
+  layout,
+  selectedIds,
+  anchorId,
+  column,
+  row,
+) {
+  const anchor = layout.shortcuts[
+    shortcuts.findIndex((app) => app.id === anchorId)
+  ];
 
   if (!anchor) return null;
 
@@ -525,8 +610,10 @@ export function moveDesktopShortcuts(shortcuts, layout, selectedIds, anchorId, c
   const targets = new Map();
   const stationary = new Set();
 
+  /* ----- Posições de origem e destino ----- */
   for (let index = 0; index < shortcuts.length; index += 1) {
     const position = layout.shortcuts[index];
+
     if (!position) return null;
 
     const current = {
@@ -546,12 +633,15 @@ export function moveDesktopShortcuts(shortcuts, layout, selectedIds, anchorId, c
 
   if (!targets.size) return null;
 
+  /* ----- Ocupação dos widgets ----- */
   const widgetOccupied = new Set();
-
   const placedWidgets = Object.values(layout.widgets ?? {});
 
-  // Compatibilidade com o layout antigo do relógio.
-  if (placedWidgets.length === 0 && layout.widget && layout.widgetSize) {
+  if (
+    placedWidgets.length === 0 &&
+    layout.widget &&
+    layout.widgetSize
+  ) {
     placedWidgets.push({
       position: {
         column: getCellColumn(layout.widget.left, layout),
@@ -567,6 +657,7 @@ export function moveDesktopShortcuts(shortcuts, layout, selectedIds, anchorId, c
     }
   }
 
+  /* ----- Validação dos destinos ----- */
   for (const position of targets.values()) {
     if (
       !isDesktopCellAvailable(position.column, position.row, layout) ||
@@ -580,6 +671,7 @@ export function moveDesktopShortcuts(shortcuts, layout, selectedIds, anchorId, c
     }
   }
 
+  /* ----- Resultado da movimentação ----- */
   return Object.fromEntries(
     shortcuts.map((app, index) => [
       app.id,
@@ -591,15 +683,8 @@ export function moveDesktopShortcuts(shortcuts, layout, selectedIds, anchorId, c
   );
 }
 
-/**
- * Converte as posições dos atalhos calculadas pelo layout
- * para o formato utilizado por desktopPreferences.
- *
- * Valida as células ocupadas pelos widgets e atalhos,
- * impedindo sobreposições e posições inválidas.
- *
- * Não modifica o layout nem salva preferências.
- */
+/* === Persistência das posições === */
+/* ----- Validação do layout completo ----- */
 export function getPersistableShortcutPositions(shortcuts, layout) {
   if (
     !Array.isArray(shortcuts) ||
@@ -610,11 +695,14 @@ export function getPersistableShortcutPositions(shortcuts, layout) {
   }
 
   const occupied = new Set();
-
   const placedWidgets = Object.values(layout.widgets ?? {});
 
-  // Compatibilidade com o layout antigo do Relógio.
-  if (placedWidgets.length === 0 && layout.widget && layout.widgetSize) {
+  /* ----- Compatibilidade com o widget anterior ----- */
+  if (
+    placedWidgets.length === 0 &&
+    layout.widget &&
+    layout.widgetSize
+  ) {
     placedWidgets.push({
       position: {
         column: getCellColumn(layout.widget.left, layout),
@@ -624,11 +712,14 @@ export function getPersistableShortcutPositions(shortcuts, layout) {
     });
   }
 
-  // Validar todas as células ocupadas pelos widgets.
+  /* ----- Validação da ocupação dos widgets ----- */
   for (const widget of placedWidgets) {
     const cells = getWidgetCells(widget.position, widget.size);
 
-    if (!widget.size || cells.length !== widget.size.columns * widget.size.rows) {
+    if (
+      !widget.size ||
+      cells.length !== widget.size.columns * widget.size.rows
+    ) {
       return null;
     }
 
@@ -647,10 +738,10 @@ export function getPersistableShortcutPositions(shortcuts, layout) {
     }
   }
 
+  /* ----- Validação da ocupação dos atalhos ----- */
   const positions = {};
   const ids = new Set();
 
-  // Validar os atalhos contra a ocupação completa da grade.
   for (let index = 0; index < shortcuts.length; index += 1) {
     const app = shortcuts[index];
     const point = layout.shortcuts[index];
@@ -682,17 +773,19 @@ export function getPersistableShortcutPositions(shortcuts, layout) {
   return positions;
 }
 
+/* === Seleção por área === */
+/* ----- Identificação dos atalhos selecionados ----- */
 export function getShortcutsInArea(shortcuts, positions, area) {
   return shortcuts
     .filter((_app, index) => {
-      const p = positions[index];
+      const position = positions[index];
 
       return (
-        p &&
-        p.left < area.left + area.width &&
-        p.left + SHORTCUT_WIDTH > area.left &&
-        p.top < area.top + area.height &&
-        p.top + 82 > area.top
+        position &&
+        position.left < area.left + area.width &&
+        position.left + SHORTCUT_WIDTH > area.left &&
+        position.top < area.top + area.height &&
+        position.top + 82 > area.top
       );
     })
     .map((app) => app.id);

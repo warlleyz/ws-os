@@ -1,6 +1,4 @@
-
 import { useState } from 'react';
-import useContextMenuPosition from './useContextMenuPosition';
 import {
   ArrowDownAZ,
   ArrowUpToLine,
@@ -13,9 +11,11 @@ import {
   LayoutGrid,
 } from 'lucide-react';
 
-import useMenuNavigation from '../../shared/hooks/useMenuNavigation';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
+import useMenuNavigation from '../../shared/hooks/useMenuNavigation';
+import useContextMenuPosition from './useContextMenuPosition';
 
+/* === Menu contextual dos atalhos === */
 export default function ShortcutContextMenu({
   shortcutContextRef,
   app,
@@ -24,9 +24,12 @@ export default function ShortcutContextMenu({
   hasOpenInstance,
   shortcutOrder,
 }) {
-  useLocale();
 
+  /* ----- Idioma e navegação ----- */
+  useLocale();
   const [page, setPage] = useState('main');
+
+  /* ----- Posicionamento do menu ----- */
   const position = useContextMenuPosition(
     shortcutContextRef,
     shortcutContext,
@@ -34,6 +37,7 @@ export default function ShortcutContextMenu({
 
   useMenuNavigation(shortcutContextRef, `${app.id}:${page}`);
 
+  /* === Renderização === */
   return (
     <div
       ref={shortcutContextRef}
@@ -44,6 +48,8 @@ export default function ShortcutContextMenu({
     >
       {page === 'main' ? (
         <>
+
+          {/* === Cabeçalho do aplicativo === */}
           <div className="desktop__context-header">
             <app.icon size={17} aria-hidden="true" />
             <strong>{t(app.name)}</strong>
@@ -51,6 +57,7 @@ export default function ShortcutContextMenu({
 
           <div className="desktop__context-divider" />
 
+          {/* === Abertura e gerenciamento === */}
           <button
             type="button"
             onClick={() => runShortcutContextAction('open')}
@@ -81,6 +88,7 @@ export default function ShortcutContextMenu({
 
           <div className="desktop__context-divider" />
 
+          {/* === Submenus === */}
           <button
             type="button"
             onClick={() => setPage('info')}
@@ -109,6 +117,8 @@ export default function ShortcutContextMenu({
         </>
       ) : (
         <>
+
+          {/* === Navegação do submenu === */}
           <button
             type="button"
             className="desktop__context-back"
@@ -123,39 +133,46 @@ export default function ShortcutContextMenu({
           <div className="desktop__context-divider" />
 
           {page === 'info' ? (
-            <div className="desktop__context-info">
-              <span>
-                {t('Nome:')} {t(app.name)}
-              </span>
-              <span>
-                {t('Tipo:')}{' '}
-                {t(
-                  app.category === 'system'
-                    ? 'Aplicativo de Sistema'
-                    : 'Aplicativo Desktop',
-                )}
-              </span>
-              <span>
-                {t('Estado:')}{' '}
-                {t(
-                  app.implemented
-                    ? 'Implementado'
-                    : 'Em desenvolvimento',
-                )}
-              </span>
-              <span>
-                {t('Múltiplas janelas:')}{' '}
-                {t(app.allowMultipleInstances ? 'Sim' : 'Não')}
-              </span>
-            </div>
+            <>
+
+              {/* === Informações do aplicativo === */}
+              <div className="desktop__context-info">
+                <span>
+                  {t('Nome:')} {t(app.name)}
+                </span>
+
+                <span>
+                  {t('Tipo:')}{' '}
+                  {t(
+                    app.category === 'system'
+                      ? 'Aplicativo de Sistema'
+                      : 'Aplicativo Desktop',
+                  )}
+                </span>
+
+                <span>
+                  {t('Estado:')}{' '}
+                  {t(
+                    app.implemented
+                      ? 'Implementado'
+                      : 'Em desenvolvimento',
+                  )}
+                </span>
+
+                <span>
+                  {t('Múltiplas janelas:')}{' '}
+                  {t(app.allowMultipleInstances ? 'Sim' : 'Não')}
+                </span>
+              </div>
+            </>
           ) : (
             <>
+
+              {/* === Opções de organização === */}
               <button
                 type="button"
                 aria-pressed={shortcutOrder === 'default'}
-                onClick={() =>
-                  runShortcutContextAction('sort-default')
-                }
+                onClick={() => runShortcutContextAction('sort-default')}
               >
                 <ArrowDownAZ size={16} aria-hidden="true" />
                 <span>{t('Organização padrão')}</span>
@@ -167,9 +184,7 @@ export default function ShortcutContextMenu({
               <button
                 type="button"
                 aria-pressed={shortcutOrder === 'name'}
-                onClick={() =>
-                  runShortcutContextAction('sort-name')
-                }
+                onClick={() => runShortcutContextAction('sort-name')}
               >
                 <ArrowDownAZ size={16} aria-hidden="true" />
                 <span>{t('Ordenar por nome')}</span>

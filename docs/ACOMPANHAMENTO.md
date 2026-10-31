@@ -19,7 +19,7 @@
 | 05 | Componentes compartilhados, hooks e utilitários | **Concluída e aprovada** |
 | 06 | Identidade visual e sistema de estilos | **Concluída** |
 | 07 | Inicialização, apresentação e entrada do visitante | **Concluída e aprovada** |
-| 08 | Desktop, atalhos e área de trabalho | Não iniciada |
+| 08 | Desktop, atalhos e área de trabalho | **Concluída e validada** |
 | 09 | Janelas, barra de tarefas e menu principal | Não iniciada |
 | 10 | Experiência Mobile e adaptação entre telas | Não iniciada |
 | 11 | Perfil profissional e Sobre Mim | Não iniciada |
@@ -237,3 +237,59 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Inicialização e apresentação revisadas.
 - Comportamentos e contratos existentes preservados.
 - Etapa aprovada pelo proprietário.
+
+
+## Etapa 08 — Desktop, atalhos e área de trabalho
+
+**Estado:** concluída e validada pelo proprietário.
+
+### Trabalhos realizados
+
+- Revisão da organização e distribuição dos atalhos na área de trabalho.
+- Validação da grade em diferentes resoluções.
+- Verificação das áreas reservadas à Taskbar e às notificações.
+- Revisão da seleção individual e múltipla dos atalhos.
+- Validação do arraste individual e em grupo.
+- Verificação da movimentação por teclado.
+- Melhoria da persistência das posições, preservando a organização anterior em caso de falha de gravação.
+- Revisão da interação entre atalhos e widgets, incluindo detecção de colisões.
+- Organização dos componentes, hooks, utilitários e menus contextuais do Desktop.
+- Revisão do CSS existente, sem alterações desnecessárias.
+- Preservação dos contratos e comportamentos existentes.
+
+### Arquivos revisados
+
+- `src/shells/desktop/Desktop.jsx`
+- `src/shells/desktop/DesktopShortcuts.jsx`
+- `src/shells/desktop/DesktopContextMenu.jsx`
+- `src/shells/desktop/ShortcutContextMenu.jsx`
+- `src/shells/desktop/desktopLayout.js`
+- `src/shells/desktop/desktopPreferences.js`
+- `src/shells/desktop/useContextMenuPosition.js`
+- `src/shells/desktop/useDesktopLayout.js`
+- `src/shells/desktop/useDesktopOrganization.js`
+- `src/shells/desktop/Desktop.css`
+- `tests/core/desktop.test.cjs`
+
+### Validações
+
+- ESLint aprovado.
+- Testes automatizados aprovados.
+- Build de produção aprovado.
+- `git diff --check` aprovado.
+- Seleção, movimentação e organização dos atalhos verificadas manualmente.
+- Menus contextuais e navegação por teclado verificados.
+- Persistência e comportamento após recarregamento verificados.
+
+### Pendências e decisões
+
+- A reorganização visual dos widgets permanece na Etapa 24.
+- A revisão específica da Taskbar permanece na Etapa 09.
+- Preservar as alterações não relacionadas à etapa, sem incluí-las no commit.
+
+### Encerramento
+
+- Organização dos arquivos do Desktop concluída.
+- Funcionalidades revisadas e validadas.
+- Etapa aprovada para encerramento.
+```

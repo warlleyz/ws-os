@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   ArrowDownAZ,
@@ -11,19 +10,23 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import useMenuNavigation from '../../shared/hooks/useMenuNavigation';
 import useContextMenuPosition from './useContextMenuPosition';
-import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
+/* === Menu contextual do Desktop === */
 export default function DesktopContextMenu({
   desktopContextRef,
   desktopContext,
   runDesktopContextAction,
   shortcutOrder,
 }) {
-  useLocale();
 
+  /* ----- Idioma e navegação ----- */
+  useLocale();
   const [page, setPage] = useState('main');
+
+  /* ----- Posicionamento do menu ----- */
   const position = useContextMenuPosition(
     desktopContextRef,
     desktopContext,
@@ -31,6 +34,7 @@ export default function DesktopContextMenu({
 
   useMenuNavigation(desktopContextRef, page);
 
+  /* === Renderização === */
   return (
     <div
       ref={desktopContextRef}
@@ -41,6 +45,8 @@ export default function DesktopContextMenu({
     >
       {page === 'main' ? (
         <>
+
+          {/* === Cabeçalho === */}
           <div className="desktop__context-header">
             <Monitor size={17} aria-hidden="true" />
             <strong>{t('Área de trabalho')}</strong>
@@ -48,6 +54,7 @@ export default function DesktopContextMenu({
 
           <div className="desktop__context-divider" />
 
+          {/* === Ações do Desktop === */}
           <button
             type="button"
             onClick={() => runDesktopContextAction('refresh')}
@@ -71,6 +78,7 @@ export default function DesktopContextMenu({
 
           <div className="desktop__context-divider" />
 
+          {/* === Personalização === */}
           <button
             type="button"
             onClick={() => runDesktopContextAction('personalize')}
@@ -89,6 +97,8 @@ export default function DesktopContextMenu({
         </>
       ) : (
         <>
+
+          {/* === Navegação do submenu === */}
           <button
             type="button"
             className="desktop__context-back"
@@ -100,6 +110,7 @@ export default function DesktopContextMenu({
 
           <div className="desktop__context-divider" />
 
+          {/* === Opções de organização === */}
           <button
             type="button"
             aria-pressed={shortcutOrder === 'default'}

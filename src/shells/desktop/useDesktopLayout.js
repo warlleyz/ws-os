@@ -1,53 +1,62 @@
-
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+/* === Gerenciamento do layout do Desktop === */
 export default function useDesktopLayout() {
+
+  /* ----- Estado da grade ----- */
   const [gridSize, setGridSize] = useState({
     width: 0,
     height: 0,
   });
 
+  /* ----- Referências dos elementos ----- */
   const shortcutsRef = useRef(null);
   const workspaceRef = useRef(null);
 
-  const refreshLayout = useCallback(() => {
+  /* === Dimensões do Desktop === */
+  /* ----- Calcular dimensões disponíveis ----- */
+  const measureLayout = useCallback(() => {
     const workspace = workspaceRef.current;
 
-    if (!workspace) return;
+    if (!workspace) return null;
 
-    const width = Math.round(
-      shortcutsRef.current?.clientWidth ?? workspace.clientWidth,
-    );
-
-    const height = Math.max(
-      0,
-      Math.round(workspace.clientHeight) - 38,
-    );
-
-    // Atualização explícita, inclusive quando as dimensões
-    // não mudaram. Não altera as preferências salvas.
-    setGridSize({ width, height });
+    return {
+      width: Math.round(
+        shortcutsRef.current?.clientWidth ?? workspace.clientWidth,
+      ),
+      height: Math.max(
+        0,
+        Math.round(workspace.clientHeight) - 38,
+      ),
+    };
   }, []);
 
+  /* ----- Atualizar dimensões manualmente ----- */
+  const refreshLayout = useCallback(() => {
+    const dimensions = measureLayout();
+
+    if (!dimensions) return;
+
+    setGridSize(dimensions);
+  }, [measureLayout]);
+
+  /* === Observação de redimensionamento === */
+  /* ----- Monitorar alterações da área de trabalho ----- */
   useEffect(() => {
     const workspace = workspaceRef.current;
 
     if (!workspace) return;
 
     const observer = new ResizeObserver(() => {
-      const width = Math.round(
-        shortcutsRef.current?.clientWidth ?? workspace.clientWidth,
-      );
+      const dimensions = measureLayout();
 
-      const height = Math.max(
-        0,
-        Math.round(workspace.clientHeight) - 38,
-      );
+      if (!dimensions) return;
 
       setGridSize((current) =>
-        current.width === width && current.height === height
+        current.width === dimensions.width &&
+          current.height === dimensions.height
           ? current
-          : { width, height },
+          : dimensions,
       );
     });
 
@@ -55,8 +64,9 @@ export default function useDesktopLayout() {
     refreshLayout();
 
     return () => observer.disconnect();
-  }, [refreshLayout]);
+  }, [measureLayout, refreshLayout]);
 
+  /* === Interface do hook === */
   return {
     gridSize,
     shortcutsRef,

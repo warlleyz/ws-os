@@ -1,5 +1,5 @@
-import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { getRegisteredApps } from '../../core/appRegistry';
 import { useSystem } from '../../core/useSystem';
 import { writePreferencesBatch } from '../../services/storage/preferencesStorage';
@@ -8,7 +8,6 @@ import {
   loadDesktopPreferences,
   saveDesktopPreferences,
 } from './desktopPreferences';
-
 import {
   clampDesktopDrag,
   getCellColumn,
@@ -18,12 +17,17 @@ import {
   moveDesktopShortcuts,
 } from './desktopLayout';
 
+/* === Organização do Desktop === */
 export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
+
+  /* ----- Preferências e serviços ----- */
   const locale = useLocale();
   const { notify } = useSystem();
   const [initial] = useState(loadDesktopPreferences);
   const [preferences, setPreferences] = useState(initial);
   const [selectedIds, setSelectedIds] = useState([]);
+
+  /* ----- Referências de interação ----- */
   const selectionAnchorRef = useRef(null);
   const dragRef = useRef(null);
   const selectionBoxRef = useRef(null);
@@ -31,29 +35,45 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
   const clickTimerRef = useRef(null);
   const warningRef = useRef(false);
   const skipNextSaveRef = useRef(false);
+
+  /* === Atalhos === */
+  /* ----- Catálogo e ordenação ----- */
   const shortcuts = useMemo(() => {
     const apps = getRegisteredApps().filter(
       (app) => app.desktopShortcut && DEFAULT_SHORTCUT_ORDER.includes(app.id),
     );
+
     return apps.sort(
       preferences.order === 'name'
         ? (a, b) => t(a.name).localeCompare(t(b.name), locale)
-        : (a, b) => DEFAULT_SHORTCUT_ORDER.indexOf(a.id) - DEFAULT_SHORTCUT_ORDER.indexOf(b.id),
+        : (a, b) =>
+          DEFAULT_SHORTCUT_ORDER.indexOf(a.id) -
+          DEFAULT_SHORTCUT_ORDER.indexOf(b.id),
     );
   }, [preferences.order, locale]);
+
+  /* === Persistência === */
+  /* ----- Sincronização das preferências ----- */
   useEffect(() => {
     if (skipNextSaveRef.current) {
       skipNextSaveRef.current = false;
       return;
     }
+
     const failed =
-      preferences === initial && initial.error ? true : !saveDesktopPreferences(preferences);
+      preferences === initial && initial.error
+        ? true
+        : !saveDesktopPreferences(preferences);
+
     if (!failed) {
       warningRef.current = false;
       return;
     }
+
     if (warningRef.current) return;
+
     warningRef.current = true;
+
     notify({
       title: 'Preferências da área de trabalho',
       message:
@@ -63,66 +83,56 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     });
   }, [preferences, initial, notify]);
 
-  const clearDrag = useCallback(() => {
-    const drag = dragRef.current;
-    dragRef.current = null;
-    for (const element of drag?.elements ?? []) {
-      element.style.translate = '';
-      delete element.dataset.dropValid;
+  /* ----- Salvar posições dos atalhos ----- */
+  function saveShortcutPositions(positions) {
+    const nextPreferences = {
+      ...preferences,
+      positions,
+      error: null,
+    };
+
+    if (!saveDesktopPreferences(nextPreferences)) {
+      notify({
+        title: 'Falha ao salvar organização',
+        message:
+          'Não foi possível salvar as posições dos atalhos. A organização anterior foi mantida na interface.',
+        source: 'Desktop',
+        type: 'warning',
+      });
+
+      return false;
     }
-    if (selectionBoxRef.current) selectionBoxRef.current.hidden = true;
-    if (drag?.target.hasPointerCapture?.(drag.pointerId))
-      drag.target.releasePointerCapture(drag.pointerId);
-    return drag;
-  }, []);
-  useEffect(
-    () => () => {
-      clearDrag();
-    },
-    [gridSize.width, gridSize.height, clearDrag],
-  );
-  useEffect(
-    () => () => {
-      window.clearTimeout(clickTimerRef.current);
-    },
-    [],
-  );
 
-  function warnBlocked() {
-    notify({
-      title: 'Posição indisponível',
-      message:
-        'Escolha células livres da grade, sem sobrepor atalhos, relógio ou barra de tarefas.',
-      source: 'Desktop',
-      type: 'warning',
-    });
-  }
-  function select(id, event = {}) {
-    let next;
-    if (event.shiftKey && selectionAnchorRef.current) {
-      const a = shortcuts.findIndex((app) => app.id === selectionAnchorRef.current);
-      const b = shortcuts.findIndex((app) => app.id === id);
-      next = shortcuts.slice(Math.min(a, b), Math.max(a, b) + 1).map((app) => app.id);
-    } else if (event.ctrlKey || event.metaKey) {
-      next = selectedIds.includes(id)
-        ? selectedIds.filter((value) => value !== id)
-        : [...selectedIds, id];
-    } else next = [id];
-    if (!event.shiftKey) selectionAnchorRef.current = id;
-    setSelectedIds(next);
-    return next;
+    skipNextSaveRef.current = true;
+    setPreferences(nextPreferences);
+
+    return true;
   }
 
+  /* ----- Confirmar posições do layout ----- */
+  function commitLayoutPositions(layout) {
+    if (dragRef.current) return false;
+
+    const positions = getPersistableShortcutPositions(shortcuts, layout);
+
+    if (!positions) return false;
+
+    return saveShortcutPositions(positions);
+  }
+
+  /* ----- Confirmar organização dos widgets ----- */
   function commitWidgetLayout(nextWidgetState, layout) {
-    if (dragRef.current || !nextWidgetState || !Array.isArray(nextWidgetState.widgets)) {
+    if (
+      dragRef.current ||
+      !nextWidgetState ||
+      !Array.isArray(nextWidgetState.widgets)
+    ) {
       return false;
     }
 
     const positions = getPersistableShortcutPositions(shortcuts, layout);
 
-    if (!positions) {
-      return false;
-    }
+    if (!positions) return false;
 
     let serializedWidgets;
     let serializedPositions;
@@ -158,8 +168,6 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       return false;
     }
 
-    // As duas preferências já foram gravadas.
-    // Evita que o efeito execute uma segunda gravação.
     skipNextSaveRef.current = true;
 
     setPreferences((current) => ({
@@ -171,74 +179,139 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     return true;
   }
 
-  function commitLayoutPositions(layout) {
-    // Não salvar enquanto houver uma operação
-    // de arraste ou seleção em andamento.
-    if (dragRef.current) {
-      return false;
-    }
-
-    const positions = getPersistableShortcutPositions(shortcuts, layout);
-
-    // Rejeitar organizações incompletas,
-    // inválidas ou com células sobrepostas.
-    if (!positions) {
-      return false;
-    }
-
-    const nextPreferences = {
-      ...preferences,
-      positions,
-      error: null,
-    };
-
-    // Confirmar a gravação antes de alterar
-    // o estado utilizado pelo React.
-    const saved = saveDesktopPreferences(nextPreferences);
-
-    if (!saved) {
-      notify({
-        title: 'Falha ao salvar organização',
-        message:
-          'Não foi possível salvar as posições dos atalhos. A organização anterior foi mantida na interface.',
-        source: 'Desktop',
-        type: 'warning',
-      });
-
-      return false;
-    }
-
-    // Somente uma gravação bem-sucedida
-    // poderá atualizar a organização.
-    setPreferences(nextPreferences);
-
-    return true;
-  }
-
+  /* === Operações de organização === */
+  /* ----- Ordenar atalhos ----- */
   function sort(order) {
     clearDrag();
     setPreferences({ order, positions: {}, error: null });
   }
+
+  /* ----- Avisar posição indisponível ----- */
+  function warnBlocked() {
+    notify({
+      title: 'Posição indisponível',
+      message:
+        'Escolha células livres da grade, sem sobrepor atalhos, relógio ou barra de tarefas.',
+      source: 'Desktop',
+      type: 'warning',
+    });
+  }
+
+  /* === Seleção de atalhos === */
+  /* ----- Seleção individual e múltipla ----- */
+  function select(id, event = {}) {
+    let next;
+
+    if (event.shiftKey && selectionAnchorRef.current) {
+      const a = shortcuts.findIndex(
+        (app) => app.id === selectionAnchorRef.current,
+      );
+      const b = shortcuts.findIndex((app) => app.id === id);
+
+      next = shortcuts
+        .slice(Math.min(a, b), Math.max(a, b) + 1)
+        .map((app) => app.id);
+    } else if (event.ctrlKey || event.metaKey) {
+      next = selectedIds.includes(id)
+        ? selectedIds.filter((value) => value !== id)
+        : [...selectedIds, id];
+    } else {
+      next = [id];
+    }
+
+    if (!event.shiftKey) {
+      selectionAnchorRef.current = id;
+    }
+
+    setSelectedIds(next);
+
+    return next;
+  }
+
+  /* ----- Seleção por clique ----- */
+  function handleClick(event, id) {
+    if (suppressClickRef.current) return;
+
+    if (
+      event.detail === 0 ||
+      (!event.ctrlKey && !event.metaKey && !event.shiftKey)
+    ) {
+      select(id, event);
+    }
+  }
+
+  /* === Controle de arraste === */
+  /* ----- Limpar operação ativa ----- */
+  const clearDrag = useCallback(() => {
+    const drag = dragRef.current;
+
+    dragRef.current = null;
+
+    for (const element of drag?.elements ?? []) {
+      element.style.translate = '';
+      delete element.dataset.dropValid;
+    }
+
+    if (selectionBoxRef.current) {
+      selectionBoxRef.current.hidden = true;
+    }
+
+    if (drag?.target.hasPointerCapture?.(drag.pointerId)) {
+      drag.target.releasePointerCapture(drag.pointerId);
+    }
+
+    return drag;
+  }, []);
+
+  /* ----- Limpeza durante redimensionamento ----- */
+  useEffect(
+    () => () => {
+      clearDrag();
+    },
+    [gridSize.width, gridSize.height, clearDrag],
+  );
+
+  /* ----- Limpeza dos temporizadores ----- */
+  useEffect(
+    () => () => {
+      window.clearTimeout(clickTimerRef.current);
+    },
+    [],
+  );
+
+  /* ----- Iniciar arraste dos atalhos ----- */
   function startShortcutDrag(event, appId, index, layout) {
     if (event.button !== 0 || !layout.shortcuts[index]) return;
+
     const ids =
-      selectedIds.includes(appId) && !event.ctrlKey && !event.metaKey && !event.shiftKey
+      selectedIds.includes(appId) &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.shiftKey
         ? selectedIds
         : select(appId, event);
+
     if (!ids.includes(appId)) return;
-    const elements = Array.from(shortcutsRef.current.querySelectorAll('[data-app-id]')).filter(
-      (element) => ids.includes(element.dataset.appId),
-    );
+
+    const elements = Array.from(
+      shortcutsRef.current.querySelectorAll('[data-app-id]'),
+    ).filter((element) => ids.includes(element.dataset.appId));
 
     const selectedPositions = shortcuts
-      .map((app, shortcutIndex) => (ids.includes(app.id) ? layout.shortcuts[shortcutIndex] : null))
+      .map((app, shortcutIndex) =>
+        ids.includes(app.id) ? layout.shortcuts[shortcutIndex] : null,
+      )
       .filter(Boolean);
 
     const bounds = {
-      left: Math.min(...selectedPositions.map((p) => p.left)),
-      top: Math.min(...selectedPositions.map((p) => p.top)),
-      right: Math.max(...selectedPositions.map((p) => p.left + 82)),
-      bottom: Math.max(...selectedPositions.map((p) => p.top + 82)),
+      left: Math.min(...selectedPositions.map((position) => position.left)),
+      top: Math.min(...selectedPositions.map((position) => position.top)),
+      right: Math.max(
+        ...selectedPositions.map((position) => position.left + 82),
+      ),
+      bottom: Math.max(
+        ...selectedPositions.map((position) => position.top + 82),
+      ),
     };
 
     dragRef.current = {
@@ -255,14 +328,27 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       initialPosition: layout.shortcuts[index],
       moved: false,
     };
+
     event.currentTarget.setPointerCapture(event.pointerId);
   }
+
+  /* ----- Iniciar seleção por área ----- */
   function startAreaSelection(event, layout) {
-    if (event.button !== 0 || event.pointerType === 'touch' || event.target !== event.currentTarget)
+    if (
+      event.button !== 0 ||
+      event.pointerType === 'touch' ||
+      event.target !== event.currentTarget
+    ) {
       return;
+    }
+
     const rect = event.currentTarget.getBoundingClientRect();
     const initialIds = selectedIds;
-    if (!event.ctrlKey && !event.metaKey && !event.shiftKey) setSelectedIds([]);
+
+    if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
+      setSelectedIds([]);
+    }
+
     dragRef.current = {
       type: 'area',
       target: event.currentTarget,
@@ -274,19 +360,27 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       initialIds,
       additive: event.ctrlKey || event.metaKey || event.shiftKey,
     };
+
     event.currentTarget.setPointerCapture(event.pointerId);
   }
+
+  /* ----- Atualizar movimentação do ponteiro ----- */
   function movePointer(event) {
     const drag = dragRef.current;
+
     if (!drag || drag.pointerId !== event.pointerId) return;
+
     const dx = event.clientX - drag.x;
     const dy = event.clientY - drag.y;
+
     if (drag.type === 'area') {
-      /* ----- Limitar a seleção à área visível do Desktop ----- */
+
+      /* ----- Limites da seleção por área ----- */
       const pointerX = Math.min(
         Math.max(event.clientX, drag.rect.left),
         drag.rect.right,
       );
+
       const pointerY = Math.min(
         Math.max(event.clientY, drag.rect.top),
         drag.rect.bottom,
@@ -298,9 +392,12 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
         width: Math.abs(pointerX - drag.x),
         height: Math.abs(pointerY - drag.y),
       };
+
       const box = selectionBoxRef.current;
+
       if (box) {
         box.hidden = false;
+
         Object.assign(box.style, {
           left: `${area.left}px`,
           top: `${area.top}px`,
@@ -308,27 +405,44 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
           height: `${area.height}px`,
         });
       }
+
       const ids = [
         ...new Set([
           ...(drag.additive ? drag.initialIds : []),
           ...getShortcutsInArea(shortcuts, drag.layout.shortcuts, area),
         ]),
       ];
+
       setSelectedIds((current) =>
-        current.length === ids.length && current.every((id) => ids.includes(id)) ? current : ids,
+        current.length === ids.length &&
+          current.every((id) => ids.includes(id))
+          ? current
+          : ids,
       );
+
       return;
     }
 
+    /* ----- Movimentação dos atalhos ----- */
     if (!drag.moved && Math.hypot(dx, dy) < 6) return;
 
     drag.moved = true;
 
-    const limited = clampDesktopDrag(dx, dy, drag.bounds, drag.layout);
+    const limited = clampDesktopDrag(
+      dx,
+      dy,
+      drag.bounds,
+      drag.layout,
+    );
 
-    const column = getCellColumn(drag.initialPosition.left + limited.dx, drag.layout);
+    const column = getCellColumn(
+      drag.initialPosition.left + limited.dx,
+      drag.layout,
+    );
 
-    const row = getCellRow(drag.initialPosition.top + limited.dy);
+    const row = getCellRow(
+      drag.initialPosition.top + limited.dy,
+    );
 
     drag.candidate = moveDesktopShortcuts(
       shortcuts,
@@ -340,35 +454,52 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
     );
 
     for (const element of drag.elements) {
-      element.style.setProperty('translate', `${limited.dx}px ${limited.dy}px`);
+      element.style.setProperty(
+        'translate',
+        `${limited.dx}px ${limited.dy}px`,
+      );
 
-      element.setAttribute('data-drop-valid', String(Boolean(drag.candidate)));
+      element.setAttribute(
+        'data-drop-valid',
+        String(Boolean(drag.candidate)),
+      );
     }
   }
+
+  /* ----- Finalizar operação do ponteiro ----- */
   function finishPointer(event) {
     if (dragRef.current?.pointerId !== event.pointerId) return;
+
     const drag = clearDrag();
+
     if (drag.type === 'area') {
-      if (event.type !== 'pointerup') setSelectedIds(drag.initialIds);
+      if (event.type !== 'pointerup') {
+        setSelectedIds(drag.initialIds);
+      }
+
       return;
     }
+
     if (!drag.moved || event.type !== 'pointerup') return;
+
     suppressClickRef.current = true;
+
     window.clearTimeout(clickTimerRef.current);
+
     clickTimerRef.current = window.setTimeout(() => {
       suppressClickRef.current = false;
     }, 0);
+
     if (!drag.candidate) {
       warnBlocked();
       return;
     }
-    setPreferences((current) => ({ ...current, positions: drag.candidate, error: null }));
+
+    saveShortcutPositions(drag.candidate);
   }
-  function handleClick(event, id) {
-    if (suppressClickRef.current) return;
-    if (event.detail === 0 || (!event.ctrlKey && !event.metaKey && !event.shiftKey))
-      select(id, event);
-  }
+
+  /* === Navegação por teclado === */
+  /* ----- Selecionar, mover e abrir aplicativos ----- */
   function handleKeyDown(event, app, index, layout, open) {
     const directions = {
       ArrowLeft: [-1, 0],
@@ -376,34 +507,63 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       ArrowUp: [0, -1],
       ArrowDown: [0, 1],
     };
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
+
+    if (
+      (event.ctrlKey || event.metaKey) &&
+      event.key.toLowerCase() === 'a'
+    ) {
       event.preventDefault();
       setSelectedIds(shortcuts.map((item) => item.id));
       return;
     }
+
     if (event.key === 'Escape') {
       clearDrag();
       setSelectedIds([]);
       return;
     }
+
     if (event.altKey && directions[event.key]) {
       event.preventDefault();
+
       const position = layout.shortcuts[index];
       const [dx, dy] = directions[event.key];
-      const ids = selectedIds.includes(app.id) ? selectedIds : [app.id];
+      const ids = selectedIds.includes(app.id)
+        ? selectedIds
+        : [app.id];
+
       let column = getCellColumn(position.left, layout) + dx;
       let row = getCellRow(position.top) + dy;
       let candidate = null;
-      while (column >= 0 && row >= 0 && column < layout.columns && row < layout.rows) {
-        candidate = moveDesktopShortcuts(shortcuts, layout, ids, app.id, column, row);
+
+      while (
+        column >= 0 &&
+        row >= 0 &&
+        column < layout.columns &&
+        row < layout.rows
+      ) {
+        candidate = moveDesktopShortcuts(
+          shortcuts,
+          layout,
+          ids,
+          app.id,
+          column,
+          row,
+        );
+
         if (candidate) break;
+
         column += dx;
         row += dy;
       }
+
       if (candidate) {
-        setSelectedIds(ids);
-        setPreferences((current) => ({ ...current, positions: candidate, error: null }));
-      } else warnBlocked();
+        if (saveShortcutPositions(candidate)) {
+          setSelectedIds(ids);
+        }
+      } else {
+        warnBlocked();
+      }
     } else if (event.key === 'Enter') {
       event.preventDefault();
       select(app.id);
@@ -413,6 +573,8 @@ export default function useDesktopOrganization({ shortcutsRef, gridSize }) {
       select(app.id, event);
     }
   }
+
+  /* === Interface do hook === */
   return {
     shortcuts,
     commitLayoutPositions,

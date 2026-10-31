@@ -17,6 +17,98 @@ const layoutModule = () => load('src/shells/desktop/desktopLayout.js');
 const apps = Array.from({ length: 12 }, (_, index) => ({ id: `app-${index}` }));
 const clock = (size = { columns: 2, rows: 2 }) => ({ visible: true, size, position: null });
 
+/* === Redimensionamento do Desktop === */
+/* ----- Preservação de atalhos e widgets ----- */
+test('redimensionamento mantém atalhos acessíveis e widgets sem colisões', () => {
+  const m = layoutModule();
+
+  const widgets = [
+    {
+      instanceId: 'clock-default',
+      widgetId: 'clock',
+      visible: true,
+      size: { columns: 2, rows: 2 },
+      position: { column: 0, row: 0 },
+    },
+    {
+      instanceId: 'calendar-default',
+      widgetId: 'calendar',
+      visible: true,
+      size: { columns: 3, rows: 2 },
+      position: { column: 6, row: 0 },
+    },
+  ];
+
+  for (const [width, height] of [
+    [1440, 900],
+    [1280, 720],
+    [1024, 768],
+    [800, 600],
+    [360, 640],
+  ]) {
+    const layout = m.getMultiWidgetLayout(12, width, height, widgets);
+
+    assert.equal(layout.shortcuts.length, 12);
+
+    const occupied = new Set();
+
+    for (const position of layout.shortcuts) {
+      assert.ok(position, `${width}x${height}: atalho ausente`);
+
+      const column = m.getCellColumn(position.left, layout);
+      const row = m.getCellRow(position.top);
+      const cell = `${column}:${row}`;
+
+      assert.ok(m.isDesktopCellAvailable(column, row, layout));
+      assert.ok(!occupied.has(cell), `Colisão de atalho: ${cell}`);
+
+      occupied.add(cell);
+    }
+
+    for (const widget of Object.values(layout.widgets)) {
+      for (const cell of m.getWidgetCells(widget.position, widget.size)) {
+        const id = `${cell.column}:${cell.row}`;
+
+        assert.ok(m.isDesktopCellAvailable(cell.column, cell.row, layout));
+        assert.ok(!occupied.has(id), `Colisão com widget: ${id}`);
+
+        occupied.add(id);
+      }
+    }
+
+    assert.equal(
+      Object.keys(layout.widgets).length + layout.blockedWidgets.length,
+      widgets.length,
+    );
+  }
+});
+
+/* === Áreas reservadas do Desktop === */
+/* ----- Proteção da Taskbar e notificações ----- */
+test('faixa inferior preserva Taskbar e notificações', () => {
+  const m = layoutModule();
+  const layout = m.getDesktopLayout(12, 1440, 700, null);
+
+  const reservedLeft = (layout.width - m.TASKBAR_RESERVED_WIDTH) / 2;
+
+  for (let row = 0; row < layout.rows; row += 1) {
+    const top = m.getCellTop(row);
+    const isBottomArea =
+      top < layout.viewportHeight &&
+      top + m.ROW_STEP > layout.viewportHeight - m.TASKBAR_RESERVED_BOTTOM;
+
+    for (let column = 0; column < layout.columns; column += 1) {
+      const left = m.getCellLeft(column, layout);
+      const available = m.isDesktopCellAvailable(column, row, layout);
+
+      const expected =
+        !isBottomArea || left + m.SHORTCUT_WIDTH <= reservedLeft;
+
+      assert.equal(available, expected, `Célula ${column}:${row}`);
+    }
+  }
+});
+
 test('grade preserva os 12 acessos sem colisões em 96 combinações de viewport/widget', () => {
   const m = layoutModule();
   for (const width of [60, 180, 360, 720, 1000, 1440]) {

@@ -1,17 +1,7 @@
-import { translate as t, useLocale } from '../../shared/i18n/i18n';
-import useDesktopWidgets from '../../features/widgets/useDesktopWidgets';
-import { useSystem } from '../../core/useSystem';
-import useDesktopLayout from './useDesktopLayout';
-import useDesktopOrganization from './useDesktopOrganization';
-import ShortcutContextMenu from './ShortcutContextMenu';
-import DesktopContextMenu from './DesktopContextMenu';
-import WindowLayer from '../../features/windows/WindowLayer';
-import DesktopShortcuts from './DesktopShortcuts';
-import NotificationToasts from '../../features/notifications/NotificationToasts';
-import useWeather from '../../features/weather/useWeather';
 import { useEffect, useRef, useState } from 'react';
-import Taskbar from './taskbar/Taskbar';
-import WidgetContextMenu from '../../features/widgets/WidgetContextMenu';
+
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
+import { useSystem } from '../../core/useSystem';
 import { getPreferredInstance, openApp, restoreApp } from '../../core/appManager';
 import { getAppDefinition } from '../../core/appRegistry';
 import {
@@ -19,29 +9,66 @@ import {
   useWallpaperRevision,
   getWallpaperDefinition,
 } from '../../core/wallpaperManager';
-// Avisos temporários: o histórico é mantido pelo notificationManager.
 
+import useDesktopWidgets from '../../features/widgets/useDesktopWidgets';
+import WidgetContextMenu from '../../features/widgets/WidgetContextMenu';
+import WindowLayer from '../../features/windows/WindowLayer';
+import NotificationToasts from '../../features/notifications/NotificationToasts';
+import useWeather from '../../features/weather/useWeather';
+
+import useDesktopLayout from './useDesktopLayout';
+import useDesktopOrganization from './useDesktopOrganization';
+import DesktopShortcuts from './DesktopShortcuts';
+import DesktopContextMenu from './DesktopContextMenu';
+import ShortcutContextMenu from './ShortcutContextMenu';
+import Taskbar from './taskbar/Taskbar';
+
+/* === Desktop principal === */
 export default function Desktop({ theme, onThemeChange }) {
+
+  /* === Serviços do sistema === */
+  /* ----- Idioma e clima ----- */
   useLocale();
   const weatherData = useWeather();
-  const { appState, minimizeAllApps, visibleToasts, run, dismissToast, handleNotificationOpen } =
-    useSystem();
-  const { gridSize, shortcutsRef, workspaceRef, refreshLayout } = useDesktopLayout();
-  const organization = useDesktopOrganization({ shortcutsRef, gridSize });
-  const { commitWidgetLayout } = organization;
-  const { shortcuts, shortcutPositions, shortcutOrder, setSelectedIds } = organization;
-  const [widgetContext, setWidgetContext] = useState(null);
-  const widgetContextRef = useRef(null);
-  function setSelectedShortcut(id) {
-    if (id) organization.select(id);
-    else setSelectedIds([]);
-  }
-  const [desktopContext, setDesktopContext] = useState(null);
-  const [shortcutContext, setShortcutContext] = useState(null);
-  const desktopContextRef = useRef(null);
+
+  /* ----- Aplicativos e notificações ----- */
+  const {
+    appState,
+    minimizeAllApps,
+    visibleToasts,
+    run,
+    dismissToast,
+    handleNotificationOpen,
+  } = useSystem();
+
+  /* ----- Papel de parede ----- */
   const wallpaper = useWallpaper();
   useWallpaperRevision();
-  const shortcutContextRef = useRef(null);
+
+  /* === Organização do Desktop === */
+  /* ----- Dimensões da grade ----- */
+  const {
+    gridSize,
+    shortcutsRef,
+    workspaceRef,
+    refreshLayout,
+  } = useDesktopLayout();
+
+  /* ----- Atalhos e seleção ----- */
+  const organization = useDesktopOrganization({
+    shortcutsRef,
+    gridSize,
+  });
+
+  const {
+    shortcuts,
+    shortcutPositions,
+    shortcutOrder,
+    setSelectedIds,
+    commitWidgetLayout,
+  } = organization;
+
+  /* ----- Widgets e posicionamento ----- */
   const {
     widgetState,
     toggleWidget,
@@ -60,17 +87,39 @@ export default function Desktop({ theme, onThemeChange }) {
     shortcutPositions,
     commitWidgetLayout,
   });
+
+  /* === Menus contextuais === */
+  /* ----- Estados dos menus ----- */
+  const [desktopContext, setDesktopContext] = useState(null);
+  const [shortcutContext, setShortcutContext] = useState(null);
+  const [widgetContext, setWidgetContext] = useState(null);
+
+  /* ----- Referências dos menus ----- */
+  const desktopContextRef = useRef(null);
+  const shortcutContextRef = useRef(null);
+  const widgetContextRef = useRef(null);
+
+  /* === Ações gerais === */
+  /* ----- Seleção dos atalhos ----- */
+  function setSelectedShortcut(id) {
+    if (id) {
+      organization.select(id);
+    } else {
+      setSelectedIds([]);
+    }
+  }
+
+  /* ----- Mostrar área de trabalho ----- */
   function showDesktop() {
     minimizeAllApps();
     setSelectedShortcut(null);
   }
 
-  // Único ponto de entrada para ações de aplicativos e avisos do sistema.
-
+  /* === Menu contextual dos atalhos === */
+  /* ----- Abrir menu do atalho ----- */
   function openShortcutContext(event, app) {
     event.preventDefault();
     event.stopPropagation();
-
     event.currentTarget.focus();
 
     const workspace = event.currentTarget.closest('.desktop__workspace');
@@ -89,6 +138,7 @@ export default function Desktop({ theme, onThemeChange }) {
     });
   }
 
+  /* ----- Executar ação do atalho ----- */
   function runShortcutContextAction(action) {
     if (!shortcutContext) return;
 
@@ -107,6 +157,7 @@ export default function Desktop({ theme, onThemeChange }) {
 
       case 'new-window':
         if (!app?.allowMultipleInstances) return;
+
         run(openApp, appId, {
           origin: 'desktop-shortcut-context-menu',
         });
@@ -114,6 +165,7 @@ export default function Desktop({ theme, onThemeChange }) {
 
       case 'focus':
         if (!existing) return;
+
         run(restoreApp, existing.id);
         break;
 
@@ -132,6 +184,8 @@ export default function Desktop({ theme, onThemeChange }) {
     setShortcutContext(null);
   }
 
+  /* === Menu contextual dos widgets === */
+  /* ----- Abrir menu do widget ----- */
   function openWidgetContextMenu(event, widget) {
     event.preventDefault();
     event.stopPropagation();
@@ -152,6 +206,7 @@ export default function Desktop({ theme, onThemeChange }) {
     });
   }
 
+  /* ----- Executar ação do widget ----- */
   function runWidgetContextAction(action, instanceId, value) {
     switch (action) {
       case 'personalize':
@@ -183,6 +238,8 @@ export default function Desktop({ theme, onThemeChange }) {
     setWidgetContext(null);
   }
 
+  /* === Menu contextual da área de trabalho === */
+  /* ----- Abrir menu do Desktop ----- */
   function openDesktopContext(event) {
     if (
       event.target.closest(
@@ -191,10 +248,14 @@ export default function Desktop({ theme, onThemeChange }) {
     ) {
       return;
     }
+
     event.preventDefault();
+
     const workspace = event.currentTarget;
     workspace.focus();
+
     const rect = workspace.getBoundingClientRect();
+
     setShortcutContext(null);
 
     setDesktopContext({
@@ -203,6 +264,7 @@ export default function Desktop({ theme, onThemeChange }) {
     });
   }
 
+  /* ----- Executar ação do Desktop ----- */
   function runDesktopContextAction(action) {
     switch (action) {
       case 'refresh':
@@ -227,7 +289,6 @@ export default function Desktop({ theme, onThemeChange }) {
           origin: 'desktop-context-menu',
           params: { section },
         });
-
         break;
       }
 
@@ -238,18 +299,23 @@ export default function Desktop({ theme, onThemeChange }) {
     setDesktopContext(null);
   }
 
+  /* === Gerenciamento dos menus === */
+  /* ----- Fechamento por clique externo e Escape ----- */
   useEffect(() => {
     function handlePointerDown(event) {
       if (!desktopContextRef.current?.contains(event.target)) {
         setDesktopContext(null);
       }
+
       if (!shortcutContextRef.current?.contains(event.target)) {
         setShortcutContext(null);
       }
+
       if (!widgetContextRef.current?.contains(event.target)) {
         setWidgetContext(null);
       }
     }
+
     function handleEscape(event) {
       if (event.key === 'Escape') {
         setDesktopContext(null);
@@ -257,15 +323,21 @@ export default function Desktop({ theme, onThemeChange }) {
         setWidgetContext(null);
       }
     }
+
     document.addEventListener('pointerdown', handlePointerDown);
     document.addEventListener('keydown', handleEscape);
+
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown);
       document.removeEventListener('keydown', handleEscape);
     };
   }, []);
+
+  /* === Renderização do Desktop === */
   return (
     <main className="desktop" id="ws-desktop" tabIndex={-1}>
+
+      {/* === Papel de parede === */}
       <div
         className="desktop__wallpaper"
         aria-hidden="true"
@@ -273,31 +345,37 @@ export default function Desktop({ theme, onThemeChange }) {
           background: getWallpaperDefinition(wallpaper).background,
         }}
       />
+
+      {/* === Área de trabalho === */}
       <section
         ref={workspaceRef}
         tabIndex={0}
         className="desktop__workspace"
+        aria-label={t('Área de trabalho')}
         onScroll={() => {
           organization.clearDrag();
           cancelWidgetDrag();
         }}
-        aria-label={t('Área de trabalho')}
         onContextMenu={openDesktopContext}
         onKeyDown={(event) => {
           if (
-            ((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu') &&
+            ((event.shiftKey && event.key === 'F10') ||
+              event.key === 'ContextMenu') &&
             event.target === event.currentTarget
           ) {
             event.preventDefault();
+
             const rect = event.currentTarget.getBoundingClientRect();
+
             openDesktopContext({
-              preventDefault() {},
+              preventDefault() { },
               target: event.currentTarget,
               currentTarget: event.currentTarget,
               clientX: rect.left + 8,
               clientY: rect.top + 8,
             });
           }
+
           if (event.key === 'Escape') {
             organization.clearDrag();
             cancelWidgetDrag();
@@ -305,6 +383,8 @@ export default function Desktop({ theme, onThemeChange }) {
           }
         }}
       >
+
+        {/* ----- Menu contextual do Desktop ----- */}
         {desktopContext && (
           <DesktopContextMenu
             desktopContextRef={desktopContextRef}
@@ -315,22 +395,28 @@ export default function Desktop({ theme, onThemeChange }) {
           />
         )}
 
+        {/* ----- Menu contextual dos atalhos ----- */}
         {shortcutContext &&
           (() => {
             const app = getAppDefinition(shortcutContext.appId);
+
             if (!app) return null;
+
             return (
               <ShortcutContextMenu
                 shortcutContextRef={shortcutContextRef}
                 app={app}
                 shortcutContext={shortcutContext}
                 runShortcutContextAction={runShortcutContextAction}
-                hasOpenInstance={appState.instances.some((instance) => instance.appId === app.id)}
+                hasOpenInstance={appState.instances.some(
+                  (instance) => instance.appId === app.id,
+                )}
                 shortcutOrder={shortcutOrder}
               />
             );
           })()}
 
+        {/* ----- Menu contextual dos widgets ----- */}
         {widgetContext &&
           (() => {
             const widget = widgetState.widgets.find(
@@ -350,6 +436,7 @@ export default function Desktop({ theme, onThemeChange }) {
             );
           })()}
 
+        {/* ----- Atalhos e widgets ----- */}
         <DesktopShortcuts
           shortcutsRef={shortcutsRef}
           desktopLayout={desktopLayout}
@@ -368,13 +455,19 @@ export default function Desktop({ theme, onThemeChange }) {
           onWidgetContextMenu={openWidgetContextMenu}
         />
       </section>
+
+      {/* === Camada de janelas === */}
       <WindowLayer appState={appState} run={run} />
+
+      {/* === Barra de tarefas === */}
       <Taskbar
         onShowDesktop={showDesktop}
         theme={theme}
         onThemeChange={onThemeChange}
         weatherData={weatherData}
       />
+
+      {/* === Notificações temporárias === */}
       {visibleToasts.length > 0 && (
         <NotificationToasts
           visibleToasts={visibleToasts}
