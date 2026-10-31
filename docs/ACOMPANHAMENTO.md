@@ -13,8 +13,8 @@
 | Etapa | Área | Estado |
 |---|---|---|
 | 01 | Diagnóstico completo e definição da versão | **Concluída e aprovada** |
-| 02 | Documentação, decisões e organização do repositório | **Em andamento** |
-| 03 | Ferramentas, dependências e qualidade de desenvolvimento | Não iniciada |
+| 02 | Documentação, decisões e organização do repositório | **Concluída** |
+| 03 | Ferramentas, dependências e qualidade de desenvolvimento | **Concluída** |
 | 04 | Arquitetura, núcleo e contratos | Não iniciada |
 | 05 | Componentes compartilhados, hooks e utilitários | Não iniciada |
 | 06 | Identidade visual e sistema de estilos | Não iniciada |
@@ -96,3 +96,21 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Alterações pontuais: indicar caminho e trechos literais `Depois de / Adicione`, `Altere / Por` ou `Remova`.
 - Alterações extensas ou arquivo enviado integralmente: fornecer o arquivo completo atualizado.
 - No código, comentários delimitadores: `/* === BLOCO === */` e `/* ----- Sub-Bloco ----- */`; não acrescentar comentários explicativos.
+
+
+## Etapa 03 — Ferramentas, dependências e qualidade
+
+**Estado:** concluída.
+
+- Dependências atualizadas dentro das versões permitidas.
+- `package-lock.json` atualizado.
+- Node.js 24.19.0 e npm 11.17.0.
+- Instalação limpa com `npm ci` aprovada.
+- ESLint aprovado.
+- 554 testes automatizados aprovados.
+- Build de produção aprovado com Vite 8.3.5.
+- Auditoria de produção: zero vulnerabilidades.
+- Seis alertas moderados em dependências de desenvolvimento registrados para acompanhamento.
+- Avisos de tamanho dos bundles encaminhados à Etapa 30.
+- Configurações de Vite, ESLint e GitHub Actions revisadas.
+- Prettier mantido sem introduzir novas regras de formatação.
