@@ -6,12 +6,10 @@ import {
   listPersonalWallpaperImages,
 } from '../services/storage/wallpaperStorage';
 
-/* === Configuração da coleção === */
-/* ----- Identificadores reservados ----- */
+/* === CONFIGURAÇÃO DA COLEÇÃO === */
 const LEGACY_PERSONAL_ID = 'legacy';
 
-/* === Metadados === */
-/* ----- Normalização dos arquivos ----- */
+/* === METADADOS DAS IMAGENS === */
 function createWallpaperEntry(id, file) {
   return {
     id,
@@ -22,8 +20,8 @@ function createWallpaperEntry(id, file) {
   };
 }
 
-/* === Identificadores === */
-/* ----- Geração segura ----- */
+/* === IDENTIFICADORES === */
+/* ----- GERAÇÃO SEGURA ----- */
 function generateWallpaperId() {
   if (typeof crypto === 'undefined' || typeof crypto.randomUUID !== 'function') {
     throw new Error('Não foi possível gerar um identificador seguro para a imagem.');
@@ -32,8 +30,8 @@ function generateWallpaperId() {
   return crypto.randomUUID();
 }
 
-/* === Migração === */
-/* ----- Preservar imagem pessoal legada ----- */
+/* === MIGRAÇÃO DE IMAGENS === */
+/* ----- MIGRAÇÃO DA IMAGEM LEGADA ----- */
 async function migrateLegacyWallpaper(existing) {
   const alreadyMigrated = existing.some((entry) => entry.id === LEGACY_PERSONAL_ID);
 
@@ -50,7 +48,7 @@ async function migrateLegacyWallpaper(existing) {
   try {
     await writePersonalWallpaperImage(LEGACY_PERSONAL_ID, legacyFile);
   } catch {
-    // Quota ou bloqueio não impedem o uso da cópia original nem das demais imagens.
+    /* ----- FALHA NA MIGRAÇÃO ----- */
   }
 
   return [
@@ -62,11 +60,10 @@ async function migrateLegacyWallpaper(existing) {
   ];
 }
 
-/* === Consultas === */
-/* ----- Carregar coleção ----- */
+/* === CONSULTAS À COLEÇÃO === */
+/* ----- CARREGAMENTO DA COLEÇÃO ----- */
 export async function loadPersonalWallpaperCollection() {
   const stored = await listPersonalWallpaperImages();
-
   const migrated = await migrateLegacyWallpaper(stored);
 
   return migrated
@@ -74,7 +71,7 @@ export async function loadPersonalWallpaperCollection() {
     .sort((first, second) => first.name.localeCompare(second.name));
 }
 
-/* ----- Consultar imagem pessoal ----- */
+/* ----- CONSULTA DE IMAGEM ----- */
 export async function getPersonalWallpaperFile(id) {
   if (id === LEGACY_PERSONAL_ID) {
     const migrated = await readPersonalWallpaperImage(id);
@@ -89,8 +86,7 @@ export async function getPersonalWallpaperFile(id) {
   return readPersonalWallpaperImage(id);
 }
 
-/* === Inclusão === */
-/* ----- Adicionar imagem validada ----- */
+/* === INCLUSÃO DE IMAGENS === */
 export async function addPersonalWallpaper(file, validate) {
   if (typeof validate !== 'function') {
     throw new Error('Validação de wallpaper indisponível.');
@@ -105,8 +101,8 @@ export async function addPersonalWallpaper(file, validate) {
   return createWallpaperEntry(id, file);
 }
 
-/* === Remoção === */
-/* ----- Impedir exclusão de imagem em uso ----- */
+/* === REMOÇÃO DE IMAGENS === */
+/* ----- VERIFICAÇÃO DE USO ----- */
 export async function removePersonalWallpaper(id, isInUse) {
   if (typeof isInUse !== 'function') {
     throw new Error('Não foi possível verificar o uso da imagem.');
@@ -128,10 +124,11 @@ export async function removePersonalWallpaper(id, isInUse) {
     };
   }
 
-  // A seleção pode ter mudado durante a leitura assíncrona.
+  /* ----- REVALIDAÇÃO ANTES DA EXCLUSÃO ----- */
   if (isInUse(id)) {
     return { ok: false, code: 'WALLPAPER_IN_USE' };
   }
+
   await deletePersonalWallpaperImage(id);
 
   return {
@@ -140,8 +137,8 @@ export async function removePersonalWallpaper(id, isInUse) {
   };
 }
 
-/* === Compatibilidade === */
-/* ----- Identificador da imagem migrada ----- */
+/* === COMPATIBILIDADE === */
+/* ----- IDENTIFICADOR LEGADO ----- */
 export function getLegacyPersonalWallpaperId() {
   return LEGACY_PERSONAL_ID;
 }

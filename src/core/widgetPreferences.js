@@ -6,63 +6,60 @@ import {
   saveWidgetState,
 } from './widgetManager';
 
+/* === ESTADO COMPARTILHADO DOS WIDGETS === */
 const initial = loadWidgetPreferences();
 let current = initial.state;
 let validator = null;
 const listeners = new Set();
+
+/* ----- ASSINATURA DE ALTERAÇÕES ----- */
 const subscribe = (listener) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
 };
+
+/* ----- CONSULTA DE PREFERÊNCIAS ----- */
 export const getWidgetPreferences = () => current;
 export const getWidgetPreferenceError = () => initial.error;
+
+/* ----- HOOK DE PREFERÊNCIAS ----- */
 export function useWidgetPreferences() {
   return useSyncExternalStore(subscribe, getWidgetPreferences, getWidgetPreferences);
 }
+
+/* === VALIDAÇÃO DE CAPACIDADE === */
+/* ----- REGISTRO DO VALIDADOR ----- */
 export function registerWidgetValidator(callback) {
   validator = callback;
+
   return () => {
     if (validator === callback) validator = null;
   };
 }
 
+/* === PERSISTÊNCIA DOS WIDGETS === */
+/* ----- SALVAMENTO ----- */
 export function saveWidgetPreferences(next) {
   const previous = current;
+  const candidate = typeof next === 'function' ? next(previous) : next;
 
-  const candidate =
-    typeof next === 'function'
-      ? next(previous)
-      : next;
-
-  if (
-    !candidate ||
-    !Array.isArray(candidate.widgets)
-  ) {
+  if (!candidate || !Array.isArray(candidate.widgets)) {
     return false;
   }
 
   const saved = saveWidgetState(candidate);
 
-  // A preferência só é aplicada ao estado compartilhado
-  // depois que a gravação é confirmada.
   if (!saved) {
     return false;
   }
 
   current = candidate;
-
   listeners.forEach((listener) => listener());
 
   return true;
 }
 
-
-/**
- * Publica no React um estado de widgets que já foi
- * gravado por uma operação coordenada.
- *
- * Não realiza uma segunda gravação.
- */
+/* ----- PUBLICAÇÃO DO ESTADO ----- */
 export function publishWidgetPreferences(state) {
   if (!state || !Array.isArray(state.widgets)) {
     return false;
@@ -74,19 +71,14 @@ export function publishWidgetPreferences(state) {
   return true;
 }
 
-
+/* === CONFIGURAÇÃO DOS WIDGETS === */
+/* ----- VALIDAÇÃO DA ALTERAÇÃO ----- */
 export function configureWidget(instanceId, patch) {
-  if (
-    !patch ||
-    typeof patch !== 'object' ||
-    Array.isArray(patch)
-  ) {
+  if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
     return { ok: false, reason: 'invalid' };
   }
 
-  const widget = current.widgets.find(
-    (item) => item.instanceId === instanceId,
-  );
+  const widget = current.widgets.find((item) => item.instanceId === instanceId);
 
   if (!widget) {
     return { ok: false, reason: 'not-found' };
@@ -107,59 +99,40 @@ export function configureWidget(instanceId, patch) {
     return { ok: false, reason: 'invalid' };
   }
 
-  if (
-    Object.hasOwn(patch, 'visible') &&
-    typeof patch.visible !== 'boolean'
-  ) {
+  /* ----- VALIDAÇÃO DA VISIBILIDADE ----- */
+  if (Object.hasOwn(patch, 'visible') && typeof patch.visible !== 'boolean') {
     return { ok: false, reason: 'invalid' };
   }
 
+  /* ----- VALIDAÇÃO DO TAMANHO ----- */
   if (Object.hasOwn(patch, 'size')) {
     const { size } = patch;
 
     if (
       !Number.isInteger(size?.columns) ||
       !Number.isInteger(size?.rows) ||
-      !definition.allowedSizes.includes(
-        `${size.columns}x${size.rows}`,
-      )
+      !definition.allowedSizes.includes(`${size.columns}x${size.rows}`)
     ) {
       return { ok: false, reason: 'invalid' };
     }
   }
 
-  // Até a W2, somente o relógio está conectado
-  // ao motor de layout e ao validador de capacidade.
-  if (
-    ![
-      'clock',
-      'calendar',
-      'weather',
-      'dev-insights',
-    ].includes(widget.widgetId)
-  ) {
+  /* ----- WIDGETS CONFIGURÁVEIS ----- */
+  if (!['clock', 'calendar', 'weather', 'dev-insights'].includes(widget.widgetId)) {
     return { ok: false, reason: 'not-ready' };
   }
 
-
-
+  /* ----- VALIDAÇÃO DAS CONFIGURAÇÕES ----- */
   if (Object.hasOwn(patch, 'settings')) {
     const settings = patch.settings;
 
-    if (
-      !settings ||
-      typeof settings !== 'object' ||
-      Array.isArray(settings)
-    ) {
+    if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
       return { ok: false, reason: 'invalid' };
     }
 
+    /* ----- CONFIGURAÇÕES DO RELÓGIO ----- */
     if (widget.widgetId === 'clock') {
-      if (
-        Object.keys(settings).some(
-          (key) => key !== 'timeZone',
-        )
-      ) {
+      if (Object.keys(settings).some((key) => key !== 'timeZone')) {
         return { ok: false, reason: 'invalid' };
       }
 
@@ -178,7 +151,10 @@ export function configureWidget(instanceId, patch) {
           return { ok: false, reason: 'invalid' };
         }
       }
-    } else if (widget.widgetId === 'weather') {
+    }
+
+    /* ----- CONFIGURAÇÕES DO CLIMA ----- */
+    else if (widget.widgetId === 'weather') {
       const allowedKeys = [
         'temperatureUnit',
         'windUnit',
@@ -186,27 +162,18 @@ export function configureWidget(instanceId, patch) {
         'showForecast',
       ];
 
-      if (
-        Object.keys(settings).some(
-          (key) => !allowedKeys.includes(key),
-        )
-      ) {
+      if (Object.keys(settings).some((key) => !allowedKeys.includes(key))) {
         return { ok: false, reason: 'invalid' };
       }
 
       if (
         settings.temperatureUnit !== undefined &&
-        !['celsius', 'fahrenheit'].includes(
-          settings.temperatureUnit,
-        )
+        !['celsius', 'fahrenheit'].includes(settings.temperatureUnit)
       ) {
         return { ok: false, reason: 'invalid' };
       }
 
-      if (
-        settings.windUnit !== undefined &&
-        !['kmh', 'mph'].includes(settings.windUnit)
-      ) {
+      if (settings.windUnit !== undefined && !['kmh', 'mph'].includes(settings.windUnit)) {
         return { ok: false, reason: 'invalid' };
       }
 
@@ -223,8 +190,10 @@ export function configureWidget(instanceId, patch) {
       ) {
         return { ok: false, reason: 'invalid' };
       }
+    }
 
-    } else if (widget.widgetId === 'dev-insights') {
+    /* ----- CONFIGURAÇÕES DO DEV INSIGHTS ----- */
+    else if (widget.widgetId === 'dev-insights') {
       const allowedKeys = [
         'showStars',
         'showFollowers',
@@ -232,21 +201,11 @@ export function configureWidget(instanceId, patch) {
         'showLanguages',
       ];
 
-      // Impede configurações desconhecidas.
-      if (
-        Object.keys(settings).some(
-          (key) => !allowedKeys.includes(key),
-        )
-      ) {
+      if (Object.keys(settings).some((key) => !allowedKeys.includes(key))) {
         return { ok: false, reason: 'invalid' };
       }
 
-      // Todas as opções do Dev Insights são booleanas.
-      if (
-        Object.values(settings).some(
-          (value) => typeof value !== 'boolean',
-        )
-      ) {
+      if (Object.values(settings).some((value) => typeof value !== 'boolean')) {
         return { ok: false, reason: 'invalid' };
       }
     } else {
@@ -254,28 +213,27 @@ export function configureWidget(instanceId, patch) {
     }
   }
 
+  /* ----- VERIFICAÇÃO DE CAPACIDADE ----- */
   const candidate = { ...widget, ...patch };
-
 
   if (candidate.visible && validator && !validator(candidate)) {
     return { ok: false, reason: 'capacity' };
   }
 
+  /* ----- PERSISTÊNCIA DA CONFIGURAÇÃO ----- */
   return {
     ok: true,
     saved: saveWidgetPreferences({
       ...current,
       widgets: current.widgets.map((item) =>
-        item.instanceId === instanceId
-          ? candidate
-          : item,
+        item.instanceId === instanceId ? candidate : item,
       ),
     }),
   };
 }
 
+/* === RESTAURAÇÃO DOS WIDGETS === */
 export function resetWidgetPreferences() {
-  // Reset visual preferences, retaining the user's arrangement even when the widget cannot fit now.
   return saveWidgetPreferences({
     widgets: initialWidgetState.widgets.map((item) => ({
       ...item,
@@ -285,9 +243,11 @@ export function resetWidgetPreferences() {
   });
 }
 
+/* === SINCRONIZAÇÃO ENTRE ABAS === */
 if (typeof window !== 'undefined')
   window.addEventListener('storage', (event) => {
     if (event.key !== 'ws-os:desktop-widgets' && event.key !== null) return;
+
     current = loadWidgetPreferences().state;
     listeners.forEach((listener) => listener());
   });

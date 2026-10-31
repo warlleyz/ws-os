@@ -1,6 +1,5 @@
 import { resetCursorMode } from './cursorManager';
 import { setDoNotDisturb } from './notificationPreferences';
-
 import { createPreferenceResetPlan } from './preferenceContract';
 import { setTheme } from './themeManager';
 import { setLocale } from '../shared/i18n/i18n';
@@ -12,20 +11,20 @@ import { setWallpaper, setWallpaperFit } from './wallpaperManager';
 import { getDefaultWallpaper } from './wallpaperCatalog';
 import { resetWidgetPreferences } from './widgetPreferences';
 
-/* === Restauração de wallpapers === */
-/* ----- Restaurar os dois temas de uma plataforma ----- */
+/* === RESTAURAÇÃO DOS WALLPAPERS === */
+/* ----- RESTAURAÇÃO POR PLATAFORMA ----- */
 function resetShellWallpapers(shell) {
   const dark = setWallpaper(getDefaultWallpaper('dark'), shell, 'dark');
-
   const light = setWallpaper(getDefaultWallpaper('light'), shell, 'light');
 
   const darkFit = setWallpaperFit('cover', shell, 'dark');
   const lightFit = setWallpaperFit('cover', shell, 'light');
+
   return dark && light && darkFit && lightFit;
 }
 
-/* === Restauração do sistema === */
-/* ----- Preferências autorizadas ----- */
+/* === RESTAURAÇÃO DO SISTEMA === */
+/* ----- VALIDAÇÃO DAS CATEGORIAS ----- */
 export function restoreSystemPreferences(categories) {
   const plan = createPreferenceResetPlan(categories);
 
@@ -37,6 +36,7 @@ export function restoreSystemPreferences(categories) {
     };
   }
 
+  /* ----- AÇÕES DE RESTAURAÇÃO ----- */
   const actions = {
     theme: () => setTheme('dark'),
     cursor: resetCursorMode,
@@ -60,7 +60,7 @@ export function restoreSystemPreferences(categories) {
     widgets: resetWidgetPreferences,
   };
 
-  /* ----- Executar todas as ações solicitadas ----- */
+  /* ----- EXECUÇÃO DAS AÇÕES ----- */
   const failed = [];
 
   for (const key of plan.actions) {

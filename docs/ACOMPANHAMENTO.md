@@ -15,7 +15,7 @@
 | 01 | Diagnóstico completo e definição da versão | **Concluída e aprovada** |
 | 02 | Documentação, decisões e organização do repositório | **Concluída** |
 | 03 | Ferramentas, dependências e qualidade de desenvolvimento | **Concluída** |
-| 04 | Arquitetura, núcleo e contratos | Não iniciada |
+| 04 | Arquitetura, núcleo e contratos | **Validada — aguardando aprovação** |
 | 05 | Componentes compartilhados, hooks e utilitários | Não iniciada |
 | 06 | Identidade visual e sistema de estilos | Não iniciada |
 | 07 | Inicialização, apresentação e entrada do visitante | Não iniciada |
@@ -114,3 +114,34 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Avisos de tamanho dos bundles encaminhados à Etapa 30.
 - Configurações de Vite, ESLint e GitHub Actions revisadas.
 - Prettier mantido sem introduzir novas regras de formatação.
+
+
+## Etapa 04 — Arquitetura, núcleo e contratos
+
+**Estado:** validada tecnicamente, aguardando aprovação do proprietário.
+
+### Trabalhos realizados
+
+- Revisão do núcleo e do provedor global do sistema.
+- Verificação do registro, gerenciamento e ciclo de vida dos aplicativos.
+- Revisão dos contratos de ações, autorização, navegação e preferências.
+- Padronização de comentários e organização dos arquivos de `src/core`.
+- Revisão dos gerenciadores de aparência, temas, cursores e acessibilidade.
+- Revisão da persistência e sincronização das preferências.
+- Revisão dos contratos de wallpapers e widgets.
+- Preservação dos contratos e comportamentos existentes.
+
+### Validações
+
+- ESLint aprovado.
+- Testes automatizados aprovados.
+- Build de produção aprovado.
+- `git diff --check` aprovado.
+- Diff de 30 arquivos revisado, sem alterações funcionais indevidas identificadas.
+
+### Pendências e decisões
+
+- Nenhuma alteração funcional adicional necessária nesta etapa.
+- Ajustes cosméticos de quebra de linha e indentação podem ser realizados posteriormente.
+- Alterações ainda não commitadas.
+- Commit e push dependem de autorização do proprietário.

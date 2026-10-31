@@ -1,4 +1,3 @@
-
 import { useSyncExternalStore } from 'react';
 
 import {
@@ -7,23 +6,20 @@ import {
     normalizeCursorMode,
 } from './cursorCatalog';
 
-/* === Configuração === */
-/* ----- Chave de persistência ----- */
+/* === CONFIGURAÇÃO DO CURSOR === */
 export const CURSOR_STORAGE_KEY = 'ws-os:cursor-mode';
 
-/* === Persistência === */
-/* ----- Recuperar preferência salva ----- */
+/* === PERSISTÊNCIA DO CURSOR === */
+/* ----- CARREGAMENTO ----- */
 function loadCursorMode() {
     try {
-        return normalizeCursorMode(
-            localStorage.getItem(CURSOR_STORAGE_KEY),
-        );
+        return normalizeCursorMode(localStorage.getItem(CURSOR_STORAGE_KEY));
     } catch {
         return DEFAULT_CURSOR_MODE;
     }
 }
 
-/* ----- Salvar preferência ----- */
+/* ----- SALVAMENTO ----- */
 function saveCursorMode(mode) {
     try {
         localStorage.setItem(CURSOR_STORAGE_KEY, mode);
@@ -33,13 +29,11 @@ function saveCursorMode(mode) {
     }
 }
 
-/* === Estado compartilhado === */
-/* ----- Modo atual ----- */
+/* === ESTADO COMPARTILHADO === */
 let currentMode = loadCursorMode();
-
 const listeners = new Set();
 
-/* ----- Assinaturas ----- */
+/* ----- ASSINATURA DE ALTERAÇÕES ----- */
 function subscribe(listener) {
     listeners.add(listener);
 
@@ -48,20 +42,20 @@ function subscribe(listener) {
     };
 }
 
-/* ----- Notificar consumidores ----- */
+/* ----- NOTIFICAÇÃO DE ALTERAÇÕES ----- */
 function emit() {
     for (const listener of listeners) {
         listener();
     }
 }
 
-/* === Consultas === */
-/* ----- Modo selecionado ----- */
+/* === CONSULTAS DO CURSOR === */
+/* ----- MODO ATUAL ----- */
 export function getCursorMode() {
     return currentMode;
 }
 
-/* ----- Hook React ----- */
+/* ----- HOOK DO CURSOR ----- */
 export function useCursorMode() {
     return useSyncExternalStore(
         subscribe,
@@ -70,13 +64,13 @@ export function useCursorMode() {
     );
 }
 
-/* ----- Disponibilidade de modos ----- */
+/* ----- MODOS DISPONÍVEIS ----- */
 export function getAvailableCursorModes() {
     return CURSOR_MODES;
 }
 
-/* === Atualização de preferência === */
-/* ----- Selecionar modo ----- */
+/* === ATUALIZAÇÃO DO CURSOR === */
+/* ----- ALTERAÇÃO DO MODO ----- */
 export function setCursorMode(mode) {
     if (!CURSOR_MODES.includes(mode)) {
         return false;
@@ -90,13 +84,13 @@ export function setCursorMode(mode) {
     return saveCursorMode(mode);
 }
 
-/* ----- Restaurar modo padrão ----- */
+/* ----- RESTAURAÇÃO DO PADRÃO ----- */
 export function resetCursorMode() {
     return setCursorMode(DEFAULT_CURSOR_MODE);
 }
 
-/* === Sincronização entre abas === */
-/* ----- Recarregar preferência externa ----- */
+/* === SINCRONIZAÇÃO ENTRE ABAS === */
+/* ----- RESTAURAÇÃO DE ALTERAÇÕES EXTERNAS ----- */
 function restoreCursorMode() {
     const restored = loadCursorMode();
 
@@ -106,13 +100,10 @@ function restoreCursorMode() {
     }
 }
 
-/* ----- Escutar alterações do navegador ----- */
+/* ----- MONITORAMENTO DE ALTERAÇÕES ----- */
 if (typeof window !== 'undefined') {
     window.addEventListener('storage', (event) => {
-        if (
-            event.key !== CURSOR_STORAGE_KEY &&
-            event.key !== null
-        ) {
+        if (event.key !== CURSOR_STORAGE_KEY && event.key !== null) {
             return;
         }
 

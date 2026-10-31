@@ -1,11 +1,13 @@
+/* === CONFIGURAÇÃO DAS NOTIFICAÇÕES === */
 const MAX_NOTIFICATIONS = 100;
-
 const VALID_TYPES = ['info', 'success', 'warning', 'error'];
 
+/* === ESTADO INICIAL === */
 export const initialNotificationState = {
   items: [],
 };
 
+/* === CRIAÇÃO DE NOTIFICAÇÕES === */
 export function createNotification({
   title,
   message,
@@ -20,10 +22,10 @@ export function createNotification({
   const validAction =
     action?.type === 'open-app' && typeof action.appId === 'string' && action.appId.trim()
       ? {
-          type: 'open-app',
-          appId: action.appId.trim(),
-          label: 'Abrir aplicativo',
-        }
+        type: 'open-app',
+        appId: action.appId.trim(),
+        label: 'Abrir aplicativo',
+      }
       : null;
 
   return {
@@ -38,6 +40,8 @@ export function createNotification({
   };
 }
 
+/* === GERENCIAMENTO DE NOTIFICAÇÕES === */
+/* ----- ADIÇÃO ----- */
 export function addNotification(state, notification) {
   if (!notification) return state;
 
@@ -47,6 +51,7 @@ export function addNotification(state, notification) {
   };
 }
 
+/* ----- MARCAR COMO LIDA ----- */
 export function markNotificationAsRead(state, id) {
   return {
     ...state,
@@ -54,6 +59,7 @@ export function markNotificationAsRead(state, id) {
   };
 }
 
+/* ----- MARCAR TODAS COMO LIDAS ----- */
 export function markAllNotificationsAsRead(state) {
   return {
     ...state,
@@ -64,6 +70,7 @@ export function markAllNotificationsAsRead(state) {
   };
 }
 
+/* ----- REMOVER NOTIFICAÇÃO ----- */
 export function removeNotification(state, id) {
   return {
     ...state,
@@ -71,6 +78,7 @@ export function removeNotification(state, id) {
   };
 }
 
+/* ----- LIMPAR NOTIFICAÇÕES ----- */
 export function clearNotifications(state) {
   return {
     ...state,
@@ -78,6 +86,8 @@ export function clearNotifications(state) {
   };
 }
 
+/* === CONSULTAS DE NOTIFICAÇÕES === */
+/* ----- CONTAGEM DE NÃO LIDAS ----- */
 export function getUnreadCount(state) {
   return state.items.filter((item) => !item.read).length;
 }

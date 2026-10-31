@@ -1,5 +1,7 @@
+/* === CONFIGURAÇÃO DOS WIDGETS === */
 const WIDGETS_STORAGE_KEY = 'ws-os:desktop-widgets';
 
+/* === CATÁLOGO DE WIDGETS === */
 const widgetDefinitions = [
   {
     id: 'clock',
@@ -35,6 +37,7 @@ const widgetDefinitions = [
   },
 ];
 
+/* === ESTADO INICIAL === */
 export const initialWidgetState = {
   widgets: widgetDefinitions.map((definition) => ({
     instanceId: `${definition.id}-default`,
@@ -46,14 +49,19 @@ export const initialWidgetState = {
   })),
 };
 
+/* === CONSULTAS AO CATÁLOGO === */
+/* ----- DEFINIÇÃO DO WIDGET ----- */
 export function getWidgetDefinition(widgetId) {
   return widgetDefinitions.find((widget) => widget.id === widgetId) ?? null;
 }
 
+/* ----- LISTA DE WIDGETS ----- */
 export function getRegisteredWidgets() {
   return [...widgetDefinitions];
 }
 
+/* === VALIDAÇÃO DE GEOMETRIA === */
+/* ----- TAMANHO ----- */
 function validSize(size, fallback, allowedSizes) {
   if (
     !size ||
@@ -77,6 +85,7 @@ function validSize(size, fallback, allowedSizes) {
   };
 }
 
+/* ----- POSIÇÃO ----- */
 function validPosition(position) {
   if (
     !position ||
@@ -94,6 +103,8 @@ function validPosition(position) {
   };
 }
 
+/* === PERSISTÊNCIA DE WIDGETS === */
+/* ----- CARREGAMENTO DE PREFERÊNCIAS ----- */
 export function loadWidgetPreferences() {
   try {
     const saved = localStorage.getItem(WIDGETS_STORAGE_KEY);
@@ -126,8 +137,7 @@ export function loadWidgetPreferences() {
           widget?.instanceId === defaults.instanceId && widget?.widgetId === definition.id,
       );
 
-      // Widget novo: adiciona os valores padrão
-      // sem alterar os widgets já existentes.
+      /* ----- RECUPERAÇÃO DOS PADRÕES ----- */
       if (!stored) {
         return {
           ...defaults,
@@ -136,12 +146,10 @@ export function loadWidgetPreferences() {
         };
       }
 
+      /* ----- VALIDAÇÃO DOS DADOS ARMAZENADOS ----- */
       const size = validSize(stored.size, defaults.size, definition.allowedSizes);
-
       const position = validPosition(stored.position);
-
       const validVisible = typeof stored.visible === 'boolean';
-
       const validSettings =
         stored.settings !== null &&
         typeof stored.settings === 'object' &&
@@ -177,20 +185,23 @@ export function loadWidgetPreferences() {
   }
 }
 
+/* ----- CONSULTA DO ESTADO ARMAZENADO ----- */
 export function loadWidgetState() {
   return loadWidgetPreferences().state;
 }
 
+/* ----- SALVAMENTO ----- */
 export function saveWidgetState(state) {
   try {
     localStorage.setItem(WIDGETS_STORAGE_KEY, JSON.stringify(state));
-
     return true;
   } catch {
     return false;
   }
 }
 
+/* === GERENCIAMENTO DE WIDGETS === */
+/* ----- VISIBILIDADE ----- */
 export function setWidgetVisibility(state, instanceId, visible) {
   return {
     ...state,
@@ -200,20 +211,22 @@ export function setWidgetVisibility(state, instanceId, visible) {
   };
 }
 
+/* ----- POSIÇÃO ----- */
 export function setWidgetPosition(state, instanceId, position) {
   return {
     ...state,
     widgets: state.widgets.map((widget) =>
       widget.instanceId === instanceId
         ? {
-            ...widget,
-            position: validPosition(position),
-          }
+          ...widget,
+          position: validPosition(position),
+        }
         : widget,
     ),
   };
 }
 
+/* ----- TAMANHO ----- */
 export function setWidgetSize(state, instanceId, size) {
   return {
     ...state,

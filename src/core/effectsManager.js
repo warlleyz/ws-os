@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
-/* === Configuração === */
-/* ----- Persistência das preferências ----- */
+/* === CONFIGURAÇÃO DE ACESSIBILIDADE === */
 const STORAGE_KEY = 'ws-os:accessibility';
 
 const DEFAULT_ACCESSIBILITY = Object.freeze({
@@ -10,8 +9,8 @@ const DEFAULT_ACCESSIBILITY = Object.freeze({
   lowEffects: false,
 });
 
-/* === Normalização === */
-/* ----- Garantir valores booleanos ----- */
+/* === VALIDAÇÃO DE PREFERÊNCIAS === */
+/* ----- NORMALIZAÇÃO ----- */
 function normalizeAccessibility(preferences) {
   return {
     motion: preferences?.motion === true,
@@ -20,7 +19,7 @@ function normalizeAccessibility(preferences) {
   };
 }
 
-/* ----- Comparar preferências ----- */
+/* ----- COMPARAÇÃO DE PREFERÊNCIAS ----- */
 function isSameAccessibility(first, second) {
   return (
     first.motion === second.motion &&
@@ -29,36 +28,31 @@ function isSameAccessibility(first, second) {
   );
 }
 
-/* === Armazenamento === */
-/* ----- Carregar preferências ----- */
+/* === PERSISTÊNCIA DE PREFERÊNCIAS === */
+/* ----- CARREGAMENTO ----- */
 export function loadAccessibility() {
   try {
-    const saved = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) ?? '{}',
-    );
-
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
     return normalizeAccessibility(saved);
   } catch {
     return { ...DEFAULT_ACCESSIBILITY };
   }
 }
 
-/* ----- Salvar preferências ----- */
+/* ----- SALVAMENTO ----- */
 export function saveAccessibility(preferences) {
   try {
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(normalizeAccessibility(preferences)),
     );
-
     return true;
   } catch {
     return false;
   }
 }
 
-/* === Aplicação visual === */
-/* ----- Atualizar atributos globais ----- */
+/* === APLICAÇÃO VISUAL === */
 export function applyAccessibility(preferences) {
   if (typeof document === 'undefined') return;
 
@@ -70,35 +64,32 @@ export function applyAccessibility(preferences) {
   root.dataset.lowEffects = String(normalized.lowEffects);
 }
 
-/* === Estado compartilhado === */
-/* ----- Preferências atuais ----- */
+/* === ESTADO COMPARTILHADO === */
 let current = loadAccessibility();
-
 const listeners = new Set();
 
-/* ----- Inscrição de consumidores ----- */
+/* ----- ASSINATURA DE ALTERAÇÕES ----- */
 function subscribe(listener) {
   listeners.add(listener);
-
   return () => {
     listeners.delete(listener);
   };
 }
 
-/* ----- Notificação de alterações ----- */
+/* ----- NOTIFICAÇÃO DE ALTERAÇÕES ----- */
 function emit() {
   for (const listener of listeners) {
     listener();
   }
 }
 
-/* === Consultas === */
-/* ----- Obter preferências ----- */
+/* === CONSULTA DE PREFERÊNCIAS === */
+/* ----- ESTADO ATUAL ----- */
 export function getAccessibility() {
   return current;
 }
 
-/* ----- Hook React ----- */
+/* ----- HOOK DE ACESSIBILIDADE ----- */
 export function useAccessibility() {
   return useSyncExternalStore(
     subscribe,
@@ -107,8 +98,7 @@ export function useAccessibility() {
   );
 }
 
-/* === Atualização das preferências === */
-/* ----- Alterar configuração ----- */
+/* === ATUALIZAÇÃO DE PREFERÊNCIAS === */
 export function setAccessibility(preferences) {
   const next = normalizeAccessibility(preferences);
   const changed = !isSameAccessibility(current, next);
@@ -122,8 +112,8 @@ export function setAccessibility(preferences) {
   return saveAccessibility(next);
 }
 
-/* === Sincronização entre abas === */
-/* ----- Recuperar alterações externas ----- */
+/* === SINCRONIZAÇÃO ENTRE ABAS === */
+/* ----- RESTAURAÇÃO DE PREFERÊNCIAS ----- */
 function restoreAccessibility() {
   const next = loadAccessibility();
 
@@ -132,18 +122,14 @@ function restoreAccessibility() {
   }
 
   current = next;
-
   applyAccessibility(current);
   emit();
 }
 
-/* ----- Escutar alterações do navegador ----- */
+/* ----- MONITORAMENTO DE ALTERAÇÕES ----- */
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event) => {
-    if (
-      event.key !== STORAGE_KEY &&
-      event.key !== null
-    ) {
+    if (event.key !== STORAGE_KEY && event.key !== null) {
       return;
     }
 

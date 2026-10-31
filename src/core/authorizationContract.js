@@ -1,4 +1,4 @@
-/* === Capacidades e fronteiras de confiança === */
+/* === CAPACIDADES E FRONTEIRAS DE CONFIANÇA === */
 export const CAPABILITY_POLICIES = Object.freeze({
   'public.read': { scope: 'public', administrator: false },
   'requests.submit': { scope: 'server', administrator: false },
@@ -15,7 +15,7 @@ export const CAPABILITY_POLICIES = Object.freeze({
   'requests.manage': { scope: 'server', administrator: true },
 });
 
-/* ----- Pré-checagem local não substitui autorização no Worker ----- */
+/* ----- VERIFICAÇÃO DE CAPACIDADES ----- */
 export function checkCapability(capability, { administrator = false, localBrowser = false } = {}) {
   if (!Object.hasOwn(CAPABILITY_POLICIES, capability))
     return { ok: false, code: 'UNKNOWN_CAPABILITY' };
@@ -26,7 +26,7 @@ export function checkCapability(capability, { administrator = false, localBrowse
   return { ok: true, requiresServerAuthorization: policy.scope === 'server' };
 }
 
-/* === Matriz recurso × operação; condições vêm de código confiável === */
+/* === MATRIZ DE AUTORIZAÇÃO DE RECURSOS === */
 export function authorizeResourceOperation(resource, operation, context = {}) {
   const map = {
     posts: { read: 'public.read', manage: 'posts.manage', like: 'posts.like' },

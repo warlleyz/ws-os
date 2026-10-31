@@ -1,7 +1,7 @@
 import { getWidgetDefinition } from './widgetManager.js';
 import { isContractData, isRecord, validId } from '../shared/utils/contractValidation.js';
 
-/* === Preferências: versões lógicas sem renomear chaves existentes === */
+/* === CONTRATOS DE PREFERÊNCIAS === */
 export const PREFERENCE_SCHEMA_VERSION = 1;
 export const PREFERENCE_KEYS = Object.freeze({
   'ws-os:theme': { category: 'appearance', encoding: 'raw' },
@@ -23,7 +23,7 @@ export const PREFERENCE_KEYS = Object.freeze({
   'ws-os:files-location': { category: 'apps', encoding: 'json' },
 });
 
-/* ----- Validação estrutural; gerenciadores mantêm suas regras específicas ----- */
+/* ----- VALIDAÇÃO DE PREFERÊNCIAS ----- */
 export function validatePreferenceValue(key, value) {
   if (!Object.hasOwn(PREFERENCE_KEYS, key) || !isContractData(value)) return false;
   const enums = {
@@ -108,7 +108,7 @@ export function validatePreferenceValue(key, value) {
   return false;
 }
 
-/* === Adaptação em memória: nunca sobrescreve leitura legada ou inválida === */
+/* === COMPATIBILIDADE E PERSISTÊNCIA === */
 export function createPreferenceRecord(key, value) {
   return validatePreferenceValue(key, value)
     ? {
@@ -174,7 +174,7 @@ export function encodeStoredPreference(record) {
   };
 }
 
-/* === Redefinição seletiva: ações confiáveis, sem clear ou bancos pessoais === */
+/* === RESTAURAÇÃO SELETIVA DE PREFERÊNCIAS === */
 export const PREFERENCE_RESET_ACTIONS = Object.freeze({
   theme: 'appearance',
   cursor: 'appearance',

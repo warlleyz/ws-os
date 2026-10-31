@@ -19,7 +19,6 @@ import {
 import { createElement } from 'react';
 
 /* === ÍCONE PERSONALIZADO DO WALLY === */
-/* ----- Utilizar o rosto oficial do assistente ----- */
 function WallyAppIcon({ size = 20 }) {
   return createElement('img', {
     src: '/assets/wally/wally-rosto.svg',
@@ -37,8 +36,8 @@ function WallyAppIcon({ size = 20 }) {
   });
 }
 
-/* === Registro de aplicativos === */
-/* === Dimensões iniciais por tarefa; geometria permanece somente na sessão === */
+/* === REGISTRO DE APLICATIVOS === */
+/* ----- Dimensões iniciais das janelas ----- */
 const windowProfiles = {
   'about-me': { width: 950, height: 890 },
   projects: { width: 1100, height: 760 },

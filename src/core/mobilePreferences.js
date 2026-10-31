@@ -1,5 +1,7 @@
+
 import { useSyncExternalStore } from 'react';
 
+/* === CONFIGURAÇÃO MOBILE === */
 const STORAGE_KEY = 'ws-os:mobile-preferences';
 
 export const DEFAULT_MOBILE_PREFERENCES = Object.freeze({
@@ -8,6 +10,7 @@ export const DEFAULT_MOBILE_PREFERENCES = Object.freeze({
 
 const GRID_DENSITIES = ['default', 'comfortable'];
 
+/* === VALIDAÇÃO DE PREFERÊNCIAS === */
 function normalize(value) {
   return {
     gridDensity: GRID_DENSITIES.includes(value?.gridDensity)
@@ -16,6 +19,8 @@ function normalize(value) {
   };
 }
 
+/* === PERSISTÊNCIA DE PREFERÊNCIAS === */
+/* ----- CARREGAMENTO ----- */
 function load() {
   try {
     return normalize(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null'));
@@ -24,22 +29,28 @@ function load() {
   }
 }
 
+/* === ESTADO COMPARTILHADO === */
 let current = load();
 const listeners = new Set();
 
+/* ----- ASSINATURA DE ALTERAÇÕES ----- */
 function subscribe(listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
 
+/* ----- CONSULTA DE PREFERÊNCIAS ----- */
 export function getMobilePreferences() {
   return current;
 }
 
+/* ----- HOOK DE PREFERÊNCIAS ----- */
 export function useMobilePreferences() {
   return useSyncExternalStore(subscribe, getMobilePreferences, () => DEFAULT_MOBILE_PREFERENCES);
 }
 
+/* === GERENCIAMENTO DE PREFERÊNCIAS === */
+/* ----- ATUALIZAÇÃO E PERSISTÊNCIA ----- */
 export function setMobilePreferences(values) {
   const next = normalize({ ...current, ...values });
 
@@ -54,13 +65,16 @@ export function setMobilePreferences(values) {
   }
 }
 
+/* ----- RESTAURAÇÃO DOS PADRÕES ----- */
 export function resetMobilePreferences() {
   return setMobilePreferences(DEFAULT_MOBILE_PREFERENCES);
 }
 
+/* === SINCRONIZAÇÃO ENTRE ABAS === */
 if (typeof window !== 'undefined')
   window.addEventListener('storage', (event) => {
     if (event.key !== STORAGE_KEY && event.key !== null) return;
+
     current = load();
     listeners.forEach((listener) => listener());
   });

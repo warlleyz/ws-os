@@ -1,11 +1,10 @@
-
 import {
     getDefaultWallpaper,
     isOfficialWallpaper,
 } from './wallpaperCatalog';
 
-/* === Configuração das seleções === */
-/* ----- Plataformas e temas ----- */
+/* === CONFIGURAÇÃO DAS SELEÇÕES === */
+/* ----- PLATAFORMAS E TEMAS ----- */
 export const WALLPAPER_SHELLS = Object.freeze([
     'desktop',
     'mobile',
@@ -16,7 +15,7 @@ export const WALLPAPER_THEMES = Object.freeze([
     'light',
 ]);
 
-/* ----- Chaves de persistência ----- */
+/* ----- CHAVES DE PERSISTÊNCIA ----- */
 export const WALLPAPER_SELECTION_KEYS = Object.freeze({
     desktop: Object.freeze({
         dark: 'ws-os:wallpaper:desktop:dark',
@@ -28,20 +27,18 @@ export const WALLPAPER_SELECTION_KEYS = Object.freeze({
     }),
 });
 
-/* ----- Chaves legadas ----- */
+/* ----- CHAVES LEGADAS ----- */
 export const LEGACY_WALLPAPER_KEYS = Object.freeze({
     desktop: 'ws-os:wallpaper',
     mobile: 'ws-os:mobile-wallpaper',
 });
 
-/* === Wallpapers pessoais === */
-/* ----- Identificador legado ----- */
+/* === WALLPAPERS PESSOAIS === */
+/* ----- IDENTIFICADORES ----- */
 export const LEGACY_CUSTOM_WALLPAPER_ID = 'custom';
-
-/* ----- Prefixo dos wallpapers da coleção ----- */
 export const PERSONAL_WALLPAPER_PREFIX = 'personal:';
 
-/* ----- Validação dos identificadores ----- */
+/* ----- VALIDAÇÃO DOS IDENTIFICADORES ----- */
 export function isPersonalWallpaperId(id) {
     if (typeof id !== 'string') {
         return false;
@@ -51,14 +48,12 @@ export function isPersonalWallpaperId(id) {
         return false;
     }
 
-    const personalId = id.slice(
-        PERSONAL_WALLPAPER_PREFIX.length,
-    );
+    const personalId = id.slice(PERSONAL_WALLPAPER_PREFIX.length);
 
     return /^[a-zA-Z0-9_-]{1,64}$/.test(personalId);
 }
 
-/* ----- Extrair identificador de armazenamento ----- */
+/* ----- IDENTIFICADOR DE ARMAZENAMENTO ----- */
 export function getPersonalWallpaperStorageId(id) {
     if (!isPersonalWallpaperId(id)) {
         return null;
@@ -67,32 +62,23 @@ export function getPersonalWallpaperStorageId(id) {
     return id.slice(PERSONAL_WALLPAPER_PREFIX.length);
 }
 
-/* ----- Construir identificador de seleção ----- */
+/* ----- IDENTIFICADOR DE SELEÇÃO ----- */
 export function createPersonalWallpaperSelectionId(id) {
-    if (
-        typeof id !== 'string' ||
-        !/^[a-zA-Z0-9_-]{1,64}$/.test(id)
-    ) {
+    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(id)) {
         return null;
     }
 
     return `${PERSONAL_WALLPAPER_PREFIX}${id}`;
 }
 
-/* === Validação === */
-/* ----- Contexto de seleção ----- */
+/* === VALIDAÇÃO DE SELEÇÕES === */
+/* ----- CONTEXTO DE SELEÇÃO ----- */
 export function isWallpaperContext(shell, theme) {
-    return (
-        WALLPAPER_SHELLS.includes(shell) &&
-        WALLPAPER_THEMES.includes(theme)
-    );
+    return WALLPAPER_SHELLS.includes(shell) && WALLPAPER_THEMES.includes(theme);
 }
 
-/* ----- Identificador oficial ----- */
-export function normalizeWallpaperSelection(
-    id,
-    theme = 'dark',
-) {
+/* ----- NORMALIZAÇÃO DA SELEÇÃO ----- */
+export function normalizeWallpaperSelection(id, theme = 'dark') {
     if (isOfficialWallpaper(id, theme)) {
         return id;
     }
@@ -100,7 +86,7 @@ export function normalizeWallpaperSelection(
     return getDefaultWallpaper(theme);
 }
 
-/* ----- Identificador aceito pelo contrato ----- */
+/* ----- IDENTIFICADORES ACEITOS ----- */
 export function isWallpaperSelectionId(id, theme) {
     return (
         isOfficialWallpaper(id, theme) ||
@@ -109,8 +95,8 @@ export function isWallpaperSelectionId(id, theme) {
     );
 }
 
-/* === Migração de preferências === */
-/* ----- Resolução da seleção existente ----- */
+/* === MIGRAÇÃO DE PREFERÊNCIAS === */
+/* ----- RESOLUÇÃO DA SELEÇÃO EXISTENTE ----- */
 export function resolveWallpaperSelection({
     savedId,
     legacyId,
@@ -128,8 +114,7 @@ export function resolveWallpaperSelection({
             ok: true,
             id: savedId,
             source: 'saved',
-            requiresMigration:
-                savedId === LEGACY_CUSTOM_WALLPAPER_ID,
+            requiresMigration: savedId === LEGACY_CUSTOM_WALLPAPER_ID,
         };
     }
 
@@ -150,8 +135,8 @@ export function resolveWallpaperSelection({
     };
 }
 
-/* === Preferências independentes === */
-/* ----- Estado inicial ----- */
+/* === PREFERÊNCIAS INDEPENDENTES === */
+/* ----- ESTADO INICIAL ----- */
 export function createDefaultWallpaperSelections() {
     return {
         desktop: {
@@ -165,15 +150,12 @@ export function createDefaultWallpaperSelections() {
     };
 }
 
-/* ----- Atualização imutável ----- */
+/* ----- ATUALIZAÇÃO IMUTÁVEL ----- */
 export function updateWallpaperSelection(
     selections,
     { shell, theme, id } = {},
 ) {
-    if (
-        !isWallpaperContext(shell, theme) ||
-        !isWallpaperSelectionId(id, theme)
-    ) {
+    if (!isWallpaperContext(shell, theme) || !isWallpaperSelectionId(id, theme)) {
         return {
             ok: false,
             code: 'INVALID_WALLPAPER_SELECTION',
@@ -192,12 +174,9 @@ export function updateWallpaperSelection(
     };
 }
 
-/* === Proteção de exclusão === */
-/* ----- Verificar uso nas quatro seleções ----- */
-export function isWallpaperSelectedAnywhere(
-    selections,
-    id,
-) {
+/* === PROTEÇÃO DE EXCLUSÃO === */
+/* ----- VERIFICAÇÃO DE SELEÇÕES EM USO ----- */
+export function isWallpaperSelectedAnywhere(selections, id) {
     if (!isPersonalWallpaperId(id)) {
         return false;
     }

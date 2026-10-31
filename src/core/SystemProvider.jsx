@@ -11,13 +11,16 @@ import {
   restoreApp,
   validateAppOpen,
 } from './appManager';
+
 import {
   requestGuardedAction,
   releaseCloseGuard,
   useCloseConfirmation,
   useClosePreparation,
 } from './appCloseGuards';
+
 import { getAppDefinition, getAppNavigationContract } from './appRegistry';
+
 import {
   addNotification,
   clearNotifications,
@@ -27,10 +30,12 @@ import {
   markNotificationAsRead,
   removeNotification,
 } from './notificationManager';
+
 import {
   getNotificationPreferences,
   subscribeNotificationPreferences,
 } from './notificationPreferences';
+
 import { SystemContext } from './systemContext';
 import { getWindowMotionDuration } from './windowLifecycle';
 

@@ -1,12 +1,11 @@
-
-/* === Catálogo oficial de wallpapers === */
-/* ----- Temas disponíveis ----- */
+/* === CATÁLOGO OFICIAL DE WALLPAPERS === */
+/* ----- TEMAS DISPONÍVEIS ----- */
 export const WALLPAPER_THEMES = Object.freeze([
     'dark',
     'light',
 ]);
 
-/* ----- Wallpapers oficiais ----- */
+/* ----- WALLPAPERS OFICIAIS ----- */
 export const OFFICIAL_WALLPAPERS = Object.freeze([
     {
         id: 'dark-blue',
@@ -46,40 +45,34 @@ export const OFFICIAL_WALLPAPERS = Object.freeze([
     },
 ]);
 
-/* === Configuração padrão === */
-/* ----- Wallpaper inicial por tema ----- */
+/* === CONFIGURAÇÃO PADRÃO === */
+/* ----- WALLPAPER INICIAL POR TEMA ----- */
 export const DEFAULT_WALLPAPERS = Object.freeze({
     dark: 'dark-blue',
     light: 'light-blue',
 });
 
-/* === Consultas ao catálogo === */
-/* ----- Wallpaper pelo identificador ----- */
+/* === CONSULTAS AO CATÁLOGO === */
+/* ----- CONSULTA POR IDENTIFICADOR ----- */
 export function getOfficialWallpaper(id) {
-    return (
-        OFFICIAL_WALLPAPERS.find(
-            (wallpaper) => wallpaper.id === id,
-        ) ?? null
-    );
+    return OFFICIAL_WALLPAPERS.find((wallpaper) => wallpaper.id === id) ?? null;
 }
 
-/* ----- Wallpapers disponíveis por tema ----- */
+/* ----- CONSULTA POR TEMA ----- */
 export function getOfficialWallpapersByTheme(theme) {
     if (!WALLPAPER_THEMES.includes(theme)) {
         return [];
     }
 
-    return OFFICIAL_WALLPAPERS.filter(
-        (wallpaper) => wallpaper.theme === theme,
-    );
+    return OFFICIAL_WALLPAPERS.filter((wallpaper) => wallpaper.theme === theme);
 }
 
-/* ----- Wallpaper padrão ----- */
+/* ----- CONSULTA DO PADRÃO ----- */
 export function getDefaultWallpaper(theme = 'dark') {
     return DEFAULT_WALLPAPERS[theme] ?? DEFAULT_WALLPAPERS.dark;
 }
 
-/* ----- Verificação de compatibilidade ----- */
+/* ----- VERIFICAÇÃO DE COMPATIBILIDADE ----- */
 export function isOfficialWallpaper(id, theme) {
     const wallpaper = getOfficialWallpaper(id);
 

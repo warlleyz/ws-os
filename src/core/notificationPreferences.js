@@ -60,7 +60,7 @@ export function setDoNotDisturb(enabled) {
   }
 }
 
-/* === Sincronização entre abas: somente a preferência, nunca as notificações === */
+/* === SINCRONIZAÇÃO DE PREFERÊNCIAS ENTRE ABAS === */
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event) => {
     if (event.key !== STORAGE_KEY && event.key !== null) return;

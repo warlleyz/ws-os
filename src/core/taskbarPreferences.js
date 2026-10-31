@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from 'react';
 
+/* === CONFIGURAÇÃO DA TASKBAR === */
 const STORAGE_KEY = 'ws-os:taskbar-auto-hide';
 
+/* === CARREGAMENTO DE PREFERÊNCIAS === */
 function loadAutoHide() {
   try {
     return localStorage.getItem(STORAGE_KEY) === 'true';
@@ -13,6 +15,8 @@ function loadAutoHide() {
 let currentAutoHide = loadAutoHide();
 const listeners = new Set();
 
+/* === ESTADO COMPARTILHADO === */
+/* ----- ASSINATURA DE ALTERAÇÕES ----- */
 function subscribe(listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
@@ -26,6 +30,7 @@ export function useTaskbarAutoHide() {
   return useSyncExternalStore(subscribe, getTaskbarAutoHide, () => false);
 }
 
+/* === ATUALIZAÇÃO DE PREFERÊNCIAS === */
 export function setTaskbarAutoHide(enabled) {
   if (typeof enabled !== 'boolean') return false;
 
@@ -42,6 +47,7 @@ export function setTaskbarAutoHide(enabled) {
   }
 }
 
+/* === SINCRONIZAÇÃO ENTRE ABAS === */
 if (typeof window !== 'undefined')
   window.addEventListener('storage', (event) => {
     if (event.key !== STORAGE_KEY && event.key !== null) return;

@@ -6,7 +6,7 @@ import {
 } from '../shared/utils/contractValidation.js';
 import { checkCapability } from './authorizationContract.js';
 
-/* === Catálogo extensível de ações confiáveis === */
+/* === CATÁLOGO DE AÇÕES === */
 const allContexts = ['search', 'wally', 'terminal', 'system'];
 const definitions = [
   {
@@ -95,7 +95,7 @@ export function getRegisteredActions() {
   return [...catalog];
 }
 
-/* === Validação de chamadas: respostas remotas não fornecem executores === */
+/* === VALIDAÇÃO DE AÇÕES === */
 export function validateActionRequest(
   request,
   { context, getApp, administrator = false, localBrowser = false } = {},
@@ -144,7 +144,7 @@ export function validateActionRequest(
   return { ok: true, action, params: JSON.parse(JSON.stringify(params)) };
 }
 
-/* === Execução por adaptadores definidos pelo aplicativo === */
+/* === EXECUÇÃO DE AÇÕES === */
 export async function executeRegisteredAction(request, options = {}) {
   let validation = validateActionRequest(request, options);
   if (!validation.ok) return validation;
@@ -170,7 +170,7 @@ export async function executeRegisteredAction(request, options = {}) {
   }
 }
 
-/* ----- Adaptação das sugestões legadas do Wally ----- */
+/* ----- ADAPTAÇÃO DE SUGESTÕES DO WALLY ----- */
 export function adaptSuggestedAction(suggestion) {
   if (!isRecord(suggestion)) return null;
   if (

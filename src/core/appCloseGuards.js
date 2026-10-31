@@ -183,7 +183,6 @@ export function requestGuardedTransition(proceed) {
   function next(index) {
     if (transition !== owner) return;
     if (index >= snapshot.length) {
-      // Um novo rascunho ou registro substituído exige uma nova solicitação.
       if (
         [...guards].some(
           ([id, entry]) => !snapshot.some(([savedId, saved]) => id === savedId && entry === saved),
