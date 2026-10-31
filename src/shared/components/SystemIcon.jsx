@@ -1,4 +1,6 @@
+/* === ÍCONES DO SISTEMA === */
 export function SystemIcon({ name, size = 18 }) {
+  /* ----- DEFINIÇÕES DOS ÍCONES ----- */
   const paths = {
     menu: (
       <>
@@ -42,6 +44,8 @@ export function SystemIcon({ name, size = 18 }) {
       </>
     ),
   };
+
+  /* ----- RENDERIZAÇÃO DO SVG ----- */
   return (
     <svg
       width={size}

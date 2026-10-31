@@ -1,35 +1,31 @@
+/* === TOOLTIP DO SISTEMA === */
+/* ----- POSICIONAMENTO E DIMENSÕES ----- */
 .ws-tooltip {
   position: fixed;
   z-index: 2147483647;
-
   display: block;
   width: max-content;
   max-width: min(260px, calc(100vw - 16px));
-
   padding: 7px 10px;
-
   border: 1px solid var(--border-default);
   border-radius: 8px;
-
   background: var(--surface-primary);
   color: var(--text-primary);
-
   box-shadow:
     0 8px 24px rgb(0 0 0 / 20%),
     0 2px 6px rgb(0 0 0 / 10%);
-
   font-size: 11px;
   font-weight: 500;
   line-height: 1.4;
   text-align: center;
   overflow-wrap: anywhere;
-
   pointer-events: auto;
   user-select: none;
-
   animation: ws-tooltip-enter calc(var(--motion-scale, 1) * 120ms) ease-out both;
 }
 
+/* === ANIMAÇÕES === */
+/* ----- ENTRADA DO TOOLTIP ----- */
 @keyframes ws-tooltip-enter {
   from {
     opacity: 0;
@@ -40,6 +36,8 @@
   }
 }
 
+/* === ACESSIBILIDADE === */
+/* ----- MOVIMENTO REDUZIDO ----- */
 @media (prefers-reduced-motion: reduce) {
   .ws-tooltip {
     animation: none;

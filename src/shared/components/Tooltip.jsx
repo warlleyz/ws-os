@@ -8,32 +8,28 @@ import {
   useRef,
   useState,
 } from 'react';
-
 import { createPortal } from 'react-dom';
 
 import './Tooltip.css';
 
-/* === Configurações === */
-/* ----- Temporização e posicionamento ----- */
+/* === CONFIGURAÇÃO DO TOOLTIP === */
 const DEFAULT_DELAY = 450;
 const GAP = 6;
 const MARGIN = 8;
 const POINTER_OFFSET_X = 12;
 const POINTER_OFFSET_Y = 16;
 
-/* === Utilitários de posicionamento === */
-/* ----- Limitar valores à área visível ----- */
+/* === POSICIONAMENTO === */
+/* ----- LIMITAÇÃO DE COORDENADAS ----- */
 function clamp(value, min, max) {
   return Math.max(min, Math.min(value, max));
 }
 
-/* ----- Calcular posição do tooltip ----- */
+/* ----- CÁLCULO DA POSIÇÃO ----- */
 function calculatePosition(trigger, tooltip, pointer) {
   const anchor = trigger.getBoundingClientRect();
-
   const width = tooltip.offsetWidth;
   const height = tooltip.offsetHeight;
-
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
@@ -41,7 +37,6 @@ function calculatePosition(trigger, tooltip, pointer) {
   let top;
 
   if (pointer) {
-    /* ----- Posicionamento próximo ao ponteiro ----- */
     left = pointer.x + POINTER_OFFSET_X;
     top = pointer.y + POINTER_OFFSET_Y;
 
@@ -53,7 +48,6 @@ function calculatePosition(trigger, tooltip, pointer) {
       top = pointer.y - height - POINTER_OFFSET_Y;
     }
   } else {
-    /* ----- Posicionamento pelo foco do teclado ----- */
     left = anchor.left + anchor.width / 2 - width / 2;
     top = anchor.bottom + GAP;
   }
@@ -64,38 +58,41 @@ function calculatePosition(trigger, tooltip, pointer) {
   };
 }
 
-/* === Componente Tooltip === */
-export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disabled = false }) {
-  /* ----- Identificação e referências ----- */
+/* === COMPONENTE TOOLTIP === */
+export default function Tooltip({
+  content,
+  children,
+  delay = DEFAULT_DELAY,
+  disabled = false,
+}) {
+  /* ----- REFERÊNCIAS ----- */
   const id = useId();
-
   const triggerRef = useRef(null);
   const tooltipRef = useRef(null);
   const pointerRef = useRef(null);
   const timerRef = useRef(null);
 
-  /* ----- Estado de exibição ----- */
+  /* ----- ESTADO DE EXIBIÇÃO ----- */
   const [visible, setVisible] = useState(false);
-
   const [position, setPosition] = useState({
     left: 0,
     top: 0,
   });
 
-  /* === Controle de temporização === */
-  /* ----- Cancelar abertura agendada ----- */
+  /* === CONTROLE DE TEMPORIZAÇÃO === */
+  /* ----- CANCELAMENTO DO TEMPORIZADOR ----- */
   const clearTimer = useCallback(() => {
     window.clearTimeout(timerRef.current);
     timerRef.current = null;
   }, []);
 
-  /* ----- Ocultar tooltip ----- */
+  /* ----- OCULTAÇÃO ----- */
   const hide = useCallback(() => {
     clearTimer();
     setVisible(false);
   }, [clearTimer]);
 
-  /* ----- Exibir após atraso ----- */
+  /* ----- EXIBIÇÃO COM ATRASO ----- */
   function showWithDelay() {
     if (disabled || !content) return;
 
@@ -107,7 +104,7 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
     }, delay);
   }
 
-  /* ----- Exibir imediatamente por teclado ----- */
+  /* ----- EXIBIÇÃO IMEDIATA ----- */
   function showImmediately() {
     if (disabled || !content) return;
 
@@ -116,27 +113,25 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
     setVisible(true);
   }
 
-  /* === Referência externa === */
-  /* ----- Preservar acesso ao elemento de origem ----- */
+  /* === REFERÊNCIA EXTERNA === */
   useImperativeHandle(children?.props?.ref, () => triggerRef.current);
 
-  /* === Ciclo de vida === */
-  /* ----- Limpeza ao desmontar ----- */
+  /* === CICLO DE VIDA === */
+  /* ----- LIMPEZA AO DESMONTAR ----- */
   useEffect(() => {
     return () => {
       clearTimer();
     };
   }, [clearTimer]);
 
-  /* ----- Alterações de disponibilidade ----- */
+  /* ----- ALTERAÇÃO DE DISPONIBILIDADE ----- */
   useEffect(() => {
     if (disabled || !content) {
       clearTimer();
     }
   }, [disabled, content, clearTimer]);
 
-  /* === Posicionamento dinâmico === */
-  /* ----- Atualização enquanto estiver visível ----- */
+  /* === POSICIONAMENTO DINÂMICO === */
   useLayoutEffect(() => {
     if (!visible || disabled || !content) return undefined;
 
@@ -160,7 +155,9 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
     updatePosition();
 
     const observer =
-      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updatePosition) : null;
+      typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(updatePosition)
+        : null;
 
     observer?.observe(trigger);
     observer?.observe(tooltip);
@@ -170,19 +167,18 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
 
     return () => {
       observer?.disconnect();
-
       window.removeEventListener('resize', updatePosition);
       window.removeEventListener('scroll', hide, true);
     };
   }, [visible, disabled, content, hide]);
 
-  /* === Validação do elemento de origem === */
+  /* === VALIDAÇÃO DO ELEMENTO === */
   if (!isValidElement(children) || !content) {
     return children;
   }
 
-  /* === Eventos de interação === */
-  /* ----- Entrada do ponteiro ----- */
+  /* === EVENTOS DE INTERAÇÃO === */
+  /* ----- ENTRADA DO PONTEIRO ----- */
   function handlePointerEnter(event) {
     children.props.onPointerEnter?.(event);
 
@@ -196,7 +192,7 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
     showWithDelay();
   }
 
-  /* ----- Movimentação do ponteiro ----- */
+  /* ----- MOVIMENTAÇÃO DO PONTEIRO ----- */
   function handlePointerMove(event) {
     children.props.onPointerMove?.(event);
 
@@ -217,7 +213,7 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
     setPosition(calculatePosition(trigger, tooltip, pointerRef.current));
   }
 
-  /* ----- Saída do ponteiro ----- */
+  /* ----- SAÍDA DO PONTEIRO ----- */
   function handlePointerLeave(event) {
     children.props.onPointerLeave?.(event);
 
@@ -226,13 +222,13 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
     timerRef.current = window.setTimeout(hide, 150);
   }
 
-  /* ----- Pressionamento ----- */
+  /* ----- PRESSIONAMENTO ----- */
   function handlePointerDown(event) {
     children.props.onPointerDown?.(event);
     hide();
   }
 
-  /* ----- Foco por teclado ----- */
+  /* ----- FOCO POR TECLADO ----- */
   function handleFocus(event) {
     children.props.onFocus?.(event);
 
@@ -241,13 +237,13 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
     }
   }
 
-  /* ----- Perda de foco ----- */
+  /* ----- PERDA DE FOCO ----- */
   function handleBlur(event) {
     children.props.onBlur?.(event);
     hide();
   }
 
-  /* ----- Tecla Escape ----- */
+  /* ----- TECLA ESCAPE ----- */
   function handleKeyDown(event) {
     if (event.key === 'Escape' && visible) {
       event.preventDefault();
@@ -255,17 +251,21 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
       hide();
       return;
     }
+
     children.props.onKeyDown?.(event);
   }
 
-  /* === Propriedades do elemento de origem === */
-  /* ----- Preservar propriedades e eventos existentes ----- */
+  /* === PROPRIEDADES DO ELEMENTO === */
+  /* ----- DESCRIÇÃO ACESSÍVEL ----- */
   const describedBy =
-    [children.props['aria-describedby'], visible && !disabled && content ? id : null]
+    [
+      children.props['aria-describedby'],
+      visible && !disabled && content ? id : null,
+    ]
       .filter(Boolean)
       .join(' ') || undefined;
 
-  /* ----- Preservar propriedades e eventos existentes ----- */
+  /* ----- PRESERVAÇÃO DOS EVENTOS ----- */
   const triggerProps = {
     ...children.props,
     ref: triggerRef,
@@ -281,13 +281,11 @@ export default function Tooltip({ content, children, delay = DEFAULT_DELAY, disa
 
   const trigger = <children.type key={children.key} {...triggerProps} />;
 
-  /* === Renderização === */
+  /* === RENDERIZAÇÃO === */
   return (
     <>
-      {/* ----- Elemento de origem ----- */}
       {trigger}
 
-      {/* ----- Tooltip renderizado em portal ----- */}
       {visible &&
         !disabled &&
         content &&

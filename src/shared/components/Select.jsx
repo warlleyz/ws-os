@@ -1,9 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
+
 import './Select.css';
 
-/* === Seletor personalizado do sistema === */
-/* ----- Lista acessível controlada por botão ----- */
+/* === SELETOR PERSONALIZADO === */
 export default function Select({
   label,
   value,
@@ -12,16 +12,19 @@ export default function Select({
   className = '',
   variant = 'default',
 }) {
+  /* ----- ESTADO E REFERÊNCIAS ----- */
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef(null);
   const triggerRef = useRef(null);
   const optionRefs = useRef([]);
   const listId = useId();
+
   const selectedIndex = Math.max(0, options.findIndex((item) => item.value === value));
   const selected = options[selectedIndex];
 
-  /* ----- Fechar ao clicar fora ou mover o foco para outra área ----- */
+  /* === CONTROLE DE EXIBIÇÃO === */
+  /* ----- FECHAMENTO EXTERNO ----- */
   useEffect(() => {
     if (!open) return undefined;
 
@@ -42,25 +45,32 @@ export default function Select({
     };
   }, [open]);
 
-  /* ----- Manter a opção ativa visível na lista ----- */
+  /* ----- VISIBILIDADE DA OPÇÃO ATIVA ----- */
   useEffect(() => {
     if (!open) return;
+
     optionRefs.current[activeIndex]?.scrollIntoView({ block: 'nearest' });
   }, [open, activeIndex]);
 
+  /* === SELEÇÃO DE OPÇÕES === */
+  /* ----- ABERTURA DA LISTA ----- */
   function openList(index = selectedIndex) {
     setActiveIndex(index);
     setOpen(true);
   }
 
+  /* ----- CONFIRMAÇÃO DA SELEÇÃO ----- */
   function choose(index) {
     const option = options[index];
+
     if (!option) return;
+
     onChange(option.value);
     setOpen(false);
     triggerRef.current?.focus();
   }
 
+  /* === NAVEGAÇÃO POR TECLADO === */
   function handleKeyDown(event) {
     if (event.key === 'Escape') {
       if (open) {
@@ -69,23 +79,33 @@ export default function Select({
         setOpen(false);
         triggerRef.current?.focus();
       }
+
       return;
     }
 
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      if (!options.length) return;
+
       event.preventDefault();
+
       if (!open) {
-        openList(event.key === 'ArrowDown'
-          ? Math.min(selectedIndex + 1, options.length - 1)
-          : Math.max(selectedIndex - 1, 0));
+        openList(
+          event.key === 'ArrowDown'
+            ? Math.min(selectedIndex + 1, options.length - 1)
+            : Math.max(selectedIndex - 1, 0),
+        );
       } else {
-        setActiveIndex((index) => (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length);
+        setActiveIndex(
+          (index) => (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length,
+        );
       }
+
       return;
     }
 
     if (event.key === 'Home' || event.key === 'End') {
-      if (!open) return;
+      if (!open || !options.length) return;
+
       event.preventDefault();
       setActiveIndex(event.key === 'Home' ? 0 : options.length - 1);
       return;
@@ -97,6 +117,7 @@ export default function Select({
     }
   }
 
+  /* === RENDERIZAÇÃO === */
   return (
     <div
       ref={rootRef}
@@ -117,7 +138,7 @@ export default function Select({
         aria-activedescendant={open ? `${listId}-option-${activeIndex}` : undefined}
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
-        onClick={() => open ? setOpen(false) : openList()}
+        onClick={() => (open ? setOpen(false) : openList())}
       >
         <span className="ws-select__value">{selected?.label ?? value}</span>
         <ChevronDown size={15} strokeWidth={1.8} aria-hidden="true" />

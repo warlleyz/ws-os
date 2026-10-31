@@ -1,10 +1,11 @@
-/* === Seletor personalizado === */
-/* ----- Contêiner e controle principal ----- */
+/* === SELETOR PERSONALIZADO === */
+/* ----- CONTÊINER ----- */
 .ws-select {
   position: relative;
   min-width: 0;
 }
 
+/* ----- CONTROLE PRINCIPAL ----- */
 .ws-select__trigger {
   display: flex;
   align-items: center;
@@ -25,6 +26,7 @@
   transition: border-color 160ms, background-color 160ms, box-shadow 160ms;
 }
 
+/* ----- VALOR SELECIONADO ----- */
 .ws-select__value {
   flex: 1;
   min-width: 0;
@@ -33,10 +35,7 @@
   white-space: nowrap;
 }
 
-.ws-select__trigger>svg {
-  flex: 0 0 auto;
-}
-
+/* ----- INDICADOR DE ABERTURA ----- */
 .ws-select__trigger>svg {
   flex: none;
   color: var(--text-secondary);
@@ -47,19 +46,22 @@
   transform: rotate(180deg);
 }
 
+/* === INTERAÇÕES === */
+/* ----- HOVER E ABERTURA ----- */
 .ws-select__trigger:hover,
 .ws-select--open .ws-select__trigger {
   border-color: var(--accent-primary);
   background: color-mix(in srgb, var(--accent-primary) 7%, var(--surface-primary));
 }
 
+/* ----- FOCO PELO TECLADO ----- */
 .ws-select__trigger:focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
 
-/* === Lista de opções === */
-/* ----- Menu suspenso com rolagem ----- */
+/* === LISTA DE OPÇÕES === */
+/* ----- MENU SUSPENSO ----- */
 .ws-select__options {
   position: absolute;
   z-index: 100;
@@ -77,6 +79,7 @@
   box-shadow: 0 14px 32px rgb(0 0 0 / 20%);
 }
 
+/* ----- ITEM DA LISTA ----- */
 .ws-select__option {
   display: flex;
   align-items: center;
@@ -91,30 +94,25 @@
   user-select: none;
 }
 
+/* ----- ITEM ATIVO ----- */
 .ws-select__option--active,
 .ws-select__option:hover {
   background: var(--surface-secondary);
 }
 
+/* ----- ITEM SELECIONADO ----- */
 .ws-select__option[aria-selected='true'] {
   color: var(--accent-primary);
   font-weight: 600;
 }
 
+/* ----- ÍCONE DO ITEM ----- */
 .ws-select__option>svg {
   flex: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-
-  .ws-select__trigger,
-  .ws-select__trigger>svg {
-    transition: none;
-  }
-}
-
-/* === Variantes do seletor === */
-/* ----- Compacta ----- */
+/* === VARIANTES DO SELETOR === */
+/* ----- VARIANTE COMPACTA ----- */
 .ws-select--compact .ws-select__trigger {
   min-height: 36px;
   padding: 6px 10px;
@@ -122,7 +120,7 @@
   font-size: 11px;
 }
 
-/* ----- Sem moldura ----- */
+/* ----- VARIANTE SEM MOLDURA ----- */
 .ws-select--ghost .ws-select__trigger {
   min-height: 36px;
   padding: 6px 10px;
@@ -132,7 +130,7 @@
   box-shadow: none;
 }
 
-/* ----- Interações da variante sem moldura ----- */
+/* ----- INTERAÇÕES DA VARIANTE SEM MOLDURA ----- */
 .ws-select--ghost .ws-select__trigger:hover,
 .ws-select--ghost.ws-select--open .ws-select__trigger {
   border-color: transparent;
@@ -140,9 +138,19 @@
   box-shadow: none;
 }
 
-/* ----- Opções das variantes ----- */
+/* ----- OPÇÕES COMPACTAS ----- */
 .ws-select--compact .ws-select__option,
 .ws-select--ghost .ws-select__option {
   min-height: 32px;
   font-size: 11px;
+}
+
+/* === ACESSIBILIDADE === */
+/* ----- MOVIMENTO REDUZIDO ----- */
+@media (prefers-reduced-motion: reduce) {
+
+  .ws-select__trigger,
+  .ws-select__trigger>svg {
+    transition: none;
+  }
 }

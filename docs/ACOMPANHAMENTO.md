@@ -15,8 +15,8 @@
 | 01 | Diagnóstico completo e definição da versão | **Concluída e aprovada** |
 | 02 | Documentação, decisões e organização do repositório | **Concluída** |
 | 03 | Ferramentas, dependências e qualidade de desenvolvimento | **Concluída** |
-| 04 | Arquitetura, núcleo e contratos | **Validada — aguardando aprovação** |
-| 05 | Componentes compartilhados, hooks e utilitários | Não iniciada |
+| 04 | Arquitetura, núcleo e contratos | **Concluída e aprovada** |
+| 05 | Componentes compartilhados, hooks e utilitários | **Concluída e aprovada** |
 | 06 | Identidade visual e sistema de estilos | Não iniciada |
 | 07 | Inicialização, apresentação e entrada do visitante | Não iniciada |
 | 08 | Desktop, atalhos e área de trabalho | Não iniciada |
@@ -118,7 +118,7 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 ## Etapa 04 — Arquitetura, núcleo e contratos
 
-**Estado:** validada tecnicamente, aguardando aprovação do proprietário.
+**Estado:** concluída, aprovada e publicada no commit `ba450f6`.
 
 ### Trabalhos realizados
 
@@ -145,3 +145,29 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Ajustes cosméticos de quebra de linha e indentação podem ser realizados posteriormente.
 - Alterações ainda não commitadas.
 - Commit e push dependem de autorização do proprietário.
+
+## Etapa 05 — Componentes compartilhados, hooks e utilitários
+
+**Estado:** concluída e aprovada pelo proprietário.
+
+### Trabalhos realizados
+
+- Revisão e padronização dos componentes compartilhados.
+- Organização dos estilos de Tooltip, Select e AppCloseDialog.
+- Revisão dos cinco hooks compartilhados.
+- Organização dos utilitários de URL e validação de contratos.
+- Preservação dos contratos públicos e comportamentos existentes.
+- Tratamento de lista vazia na navegação por teclado do Select.
+
+### Validações
+
+- ESLint aprovado nos lotes realizados.
+- Testes automatizados aprovados nos lotes realizados.
+- Build de produção aprovado nos lotes realizados.
+- `git diff --check` aprovado nos lotes realizados.
+
+### Encerramento
+
+- Diff consolidado revisado.
+- Verificações automatizadas e manuais aprovadas.
+- Etapa aprovada pelo proprietário.

@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 
 import { cancelCloseConfirmation, confirmAppClose } from '../../core/appCloseGuards';
-
 import { translate as t, useLocale } from '../i18n/i18n';
 
 import './AppCloseDialog.css';
@@ -42,6 +41,7 @@ export default function AppCloseDialog({ request }) {
           ) ??
           document.querySelector('.taskbar__menu-button') ??
           document.querySelector('#ws-mobile');
+
         fallback?.focus();
       }
     };
@@ -108,7 +108,11 @@ export default function AppCloseDialog({ request }) {
             {t('Continuar editando')}
           </button>
 
-          <button type="button" className="ws-button ws-button--danger" onClick={confirmAppClose}>
+          <button
+            type="button"
+            className="ws-button ws-button--danger"
+            onClick={confirmAppClose}
+          >
             {t(confirmLabel)}
           </button>
         </div>

@@ -1,16 +1,24 @@
-/* === Validações de fronteira dos contratos === */
+/* === VALIDAÇÃO DOS CONTRATOS === */
+/* ----- OBJETOS SIMPLES ----- */
 export function isRecord(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+
   const prototype = Object.getPrototypeOf(value);
+
   return prototype === null || Object.getPrototypeOf(prototype) === null;
 }
 
+/* ----- IDENTIFICADORES ----- */
 export function validId(value) {
   return typeof value === 'string' && /^[a-z\d][a-z\d._:-]{0,199}$/i.test(value);
 }
+
+/* ----- TEXTOS ----- */
 export function validText(value, max = 2000, min = 0) {
   return typeof value === 'string' && value.trim().length >= min && value.length <= max;
 }
+
+/* ----- DATA E HORA ----- */
 export function validInstant(value) {
   return (
     typeof value === 'string' &&
@@ -20,6 +28,8 @@ export function validInstant(value) {
     Number(value.slice(11, 13)) < 24
   );
 }
+
+/* ----- DATAS ----- */
 export function validDate(value) {
   return (
     typeof value === 'string' &&
@@ -28,8 +38,11 @@ export function validDate(value) {
     new Date(value).toISOString().slice(0, 10) === value
   );
 }
+
+/* ----- FUSOS HORÁRIOS ----- */
 export function validTimezone(value) {
   if (!validText(value, 100, 1)) return false;
+
   try {
     new Intl.DateTimeFormat('en', { timeZone: value });
     return true;
@@ -38,8 +51,10 @@ export function validTimezone(value) {
   }
 }
 
+/* ----- TEXTOS LOCALIZADOS ----- */
 export function validLocalizedText(value, max = 2000, required = false) {
   if (typeof value === 'string') return validText(value, max, required ? 1 : 0);
+
   return (
     isRecord(value) &&
     Object.keys(value).length > 0 &&
@@ -50,13 +65,19 @@ export function validLocalizedText(value, max = 2000, required = false) {
   );
 }
 
-/* ----- Dados JSON: sem funções, referências cíclicas ou protótipos executáveis ----- */
+/* === VALIDAÇÃO DE DADOS === */
+/* ----- ESTRUTURAS COMPATÍVEIS COM JSON ----- */
 export function isContractData(value, depth = 0) {
   if (depth > 15) return false;
+
   if (value === null || typeof value === 'boolean' || typeof value === 'string') return true;
+
   if (typeof value === 'number') return Number.isFinite(value);
-  if (Array.isArray(value))
+
+  if (Array.isArray(value)) {
     return value.length <= 500 && value.every((item) => isContractData(item, depth + 1));
+  }
+
   return (
     isRecord(value) &&
     Object.keys(value).length <= 500 &&
@@ -67,11 +88,13 @@ export function isContractData(value, depth = 0) {
   );
 }
 
+/* === ERROS DOS CONTRATOS === */
 export function contractError(code) {
   return { ok: false, code };
 }
 
-/* ----- Seleção administrativa de repositórios públicos ----- */
+/* === VALIDAÇÃO DE REPOSITÓRIOS === */
+/* ----- IDENTIFICADORES DO GITHUB ----- */
 export function validRepositoryIds(ids) {
   return (
     Array.isArray(ids) &&
