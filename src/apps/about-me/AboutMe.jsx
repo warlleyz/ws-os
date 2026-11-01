@@ -31,30 +31,31 @@ const copy = {
     introductionLabel: 'Apresentação',
     introduction: 'Quem sou',
     introductionParagraphs: [
-      'Meu interesse por tecnologia vai além de escrever código. Gosto de entender como os sistemas funcionam, como suas partes se conectam e como transformar uma ideia em uma aplicação funcional.',
-      'Durante minha formação, venho explorando diferentes tecnologias e áreas do desenvolvimento, principalmente programação, backend e integração de sistemas.',
-      'Aprendo colocando a teoria em prática, desenvolvendo projetos acadêmicos e pessoais que me permitem enfrentar desafios e evoluir minhas habilidades.',
+      'Tenho interesse em compreender todo o processo de desenvolvimento de software, desde a criação das interfaces até a implementação das regras de negócio e integração com bancos de dados.',
+      'Durante minha formação, venho estudando desenvolvimento frontend e backend, programação orientada a objetos, APIs e arquitetura de aplicações, utilizando esses conhecimentos em projetos acadêmicos e pessoais.',
+      'Busco constantemente aprimorar minhas habilidades, desenvolver soluções funcionais e conquistar minha primeira oportunidade profissional na área de tecnologia.',
     ],
     learningLabel: 'Tecnologias',
     learning: 'Globo de tecnologias',
-    learningDescription: 'Tecnologias presentes nos meus estudos e projetos.',
+    learningDescription:
+      'Linguagens, frameworks e ferramentas que utilizo ou venho estudando durante minha formação e no desenvolvimento de projetos.',
     goalsLabel: 'Próximos passos',
     goals: 'Objetivos profissionais',
     goalsItems: [
       {
-        title: 'Oportunidade profissional',
+        title: 'Primeira oportunidade profissional',
         description:
-          'Conquistar uma oportunidade de estágio em desenvolvimento de software, contribuindo com projetos reais e adquirindo experiência em equipe.',
+          'Conquistar um estágio em desenvolvimento de software, colocando meus conhecimentos em prática e aprendendo com uma equipe de desenvolvimento.',
       },
       {
-        title: 'Evolução técnica',
+        title: 'Desenvolvimento Full Stack',
         description:
-          'Aprofundar meus conhecimentos em backend, arquitetura de aplicações, APIs e bancos de dados.',
+          'Aprofundar meus conhecimentos em React, Java, Spring Boot, APIs, bancos de dados e arquitetura de aplicações.',
       },
       {
-        title: 'Projetos e experiência prática',
+        title: 'Evolução contínua',
         description:
-          'Continuar desenvolvendo projetos próprios e acadêmicos, aprimorando qualidade de código, organização e experiência de uso.',
+          'Desenvolver projetos acadêmicos e pessoais, aprimorando organização, qualidade de código, testes e experiência de uso.',
       },
     ],
     linksLabel: 'Conexões',
@@ -95,30 +96,31 @@ const copy = {
     introductionLabel: 'Introduction',
     introduction: 'About me',
     introductionParagraphs: [
-      'My interest in technology goes beyond writing code. I enjoy understanding how systems work, how their parts connect, and how to turn an idea into a functional application.',
-      'Throughout my studies, I have been exploring different technologies and areas of development, especially programming, backend development, and systems integration.',
-      'I learn by putting theory into practice, building academic and personal projects that challenge me and help me develop my skills.',
+      'I am interested in understanding the entire software development process, from building user interfaces to implementing business logic and integrating databases.',
+      'Throughout my studies, I have been learning frontend and backend development, object-oriented programming, APIs, and application architecture, applying this knowledge through academic and personal projects.',
+      'I continuously seek to improve my skills, build functional solutions, and secure my first professional opportunity in the technology field.',
     ],
     learningLabel: 'Technologies',
     learning: 'Technology globe',
-    learningDescription: 'Technologies featured in my studies and projects.',
+    learningDescription:
+      'Programming languages, frameworks, and tools I use or am currently learning through my studies and development projects.',
     goalsLabel: 'Next steps',
     goals: 'Professional goals',
     goalsItems: [
       {
-        title: 'Professional opportunity',
+        title: 'First professional opportunity',
         description:
-          'Secure a software development internship, contributing to real projects and gaining experience working with a team.',
+          'Secure a software development internship where I can apply my knowledge and learn from an experienced development team.',
       },
       {
-        title: 'Technical development',
+        title: 'Full Stack Development',
         description:
-          'Deepen my knowledge of backend development, application architecture, APIs, and databases.',
+          'Deepen my knowledge of React, Java, Spring Boot, APIs, databases, and application architecture.',
       },
       {
-        title: 'Projects and practical experience',
+        title: 'Continuous improvement',
         description:
-          'Continue developing personal and academic projects, improving code quality, organization, and user experience.',
+          'Build academic and personal projects while improving code organization, quality, testing, and user experience.',
       },
     ],
     linksLabel: 'Connections',

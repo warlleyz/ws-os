@@ -13,7 +13,7 @@
   overflow: hidden;
   isolation: isolate;
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: none;
   user-select: none;
 }
 

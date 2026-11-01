@@ -63,7 +63,10 @@ export default function SkillsGlobe({ locale = 'pt-BR', minimized = false }) {
   const rafRef = useRef(0);
   const projectRef = useRef(null);
   const points = useMemo(() => spherePoints(TECHNOLOGIES.length), []);
-  const help = locale === 'en' ? 'Drag to rotate the technologies' : 'Arraste para girar as tecnologias';
+  const help =
+    locale === 'en'
+      ? 'Drag or swipe to explore the technologies'
+      : 'Arraste ou deslize para explorar as tecnologias';
 
   useEffect(() => {
     const stage = stageRef.current;

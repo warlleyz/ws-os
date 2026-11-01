@@ -22,7 +22,7 @@
 | 08 | Desktop, atalhos e área de trabalho | **Concluída e validada** |
 | 09 | Janelas, barra de tarefas e menu principal | **Concluída e validada** |
 | 10 | Experiência Mobile e adaptação entre telas | **Base concluída, validada e integrada à `main`** |
-| 11 | Perfil profissional e Sobre Mim | **Próxima etapa — não iniciada** |
+| 11 | Perfil profissional e Sobre Mim | **Concluída e aprovada** |
 | 12 | Projetos e apresentação dos trabalhos | Não iniciada |
 | 13 | Currículo e certificados | Não iniciada |
 | 14 | Dev Insights e visualização de dados | Não iniciada |
@@ -373,3 +373,41 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 - Etapa 10 encerrada pelo proprietário quanto à base do Mobile.
 - **Próxima etapa: 11 — Perfil profissional e Sobre Mim.**
+
+## Etapa 11 — Perfil profissional e Sobre Mim
+
+**Estado:** concluída e aprovada pelo proprietário.
+
+### Trabalhos realizados
+
+- Atualização da apresentação profissional com foco em Desenvolvimento Full Stack.
+- Revisão dos conteúdos em português e inglês.
+- Refinamento da formação acadêmica e dos objetivos profissionais.
+- Atualização das descrições do globo de tecnologias.
+- Melhorias de responsividade no Desktop e Mobile.
+- Reorganização do primeiro card para dispositivos móveis.
+- Ajustes de espaçamento e distribuição dos cards em janelas maximizadas.
+- Padronização dos comentários e organização do conteúdo profissional.
+
+### Arquivos modificados
+
+- `src/apps/about-me/AboutMe.css`
+- `src/apps/about-me/AboutMe.jsx`
+- `src/apps/about-me/SkillsGlobe.css`
+- `src/apps/about-me/SkillsGlobe.jsx`
+- `src/content/portfolioContent.js`
+
+### Validação
+
+- `npm run lint` — aprovado.
+- `npm run test` — aprovado.
+- `npm run build` — aprovado.
+- `git diff --check` — aprovado.
+
+### Encerramento
+
+- Etapa 11 concluída e aprovada pelo proprietário.
+- Validações técnicas aprovadas.
+- Melhorias aplicadas ao Desktop e Mobile.
+- Inventário CSV preservado por decisão do proprietário.
+- **Próxima etapa: 12 — Projetos e apresentação dos trabalhos.**

@@ -1,28 +1,27 @@
-// Conteúdo público do portfólio WS OS.
-// Não adicionar chaves privadas ou informações de visitantes.
-
+/* === CONFIGURAÇÃO PÚBLICA === */
 export const portfolio = {
-  githubUser: 'warlleyz',
 
+  /* ----- Identificadores e endpoints ----- */
+  githubUser: 'warlleyz',
   notesEndpoint: '/api/posts',
   wakatimeProxy: '/api/wakatime',
 
   /* === PERFIL PROFISSIONAL === */
-
   profile: {
+
+    /* ----- Identificação e apresentação ----- */
     name: 'Warlley Silva',
-
     headline: {
-      'pt-BR': 'Estudante de Engenharia de Software',
-      en: 'Software Engineering Student',
+      'pt-BR': 'Estudante de Engenharia de Software | Desenvolvimento Full Stack',
+      en: 'Software Engineering Student | Full Stack Development',
     },
-
     summary: {
       'pt-BR':
-        'Estudante de Engenharia de Software na PUC Minas, com foco em desenvolvimento de software, backend e integração de sistemas. Busco aplicar meus conhecimentos em projetos práticos e evoluir profissionalmente na área de tecnologia.',
-      en: 'Software Engineering student at PUC Minas, focused on software development, backend development, and systems integration. I aim to apply my knowledge through practical projects and grow professionally in the technology field.',
+        'Sou estudante de Engenharia de Software na PUC Minas, com interesse em Desenvolvimento Full Stack. Desenvolvo projetos acadêmicos e pessoais utilizando tecnologias como Java, Spring Boot, React e JavaScript. Busco uma oportunidade de estágio para aplicar meus conhecimentos, ampliar minha experiência prática e contribuir para o desenvolvimento de soluções reais.',
+      en: 'I am a Software Engineering student at PUC Minas with an interest in Full Stack Development. I build academic and personal projects using technologies such as Java, Spring Boot, React, and JavaScript. I am seeking an internship opportunity to apply my knowledge, gain practical experience, and contribute to real-world software solutions.',
     },
 
+    /* ----- Formação acadêmica ----- */
     education: {
       degree: {
         'pt-BR': 'Bacharelado em Engenharia de Software',
@@ -40,6 +39,7 @@ export const portfolio = {
       },
     },
 
+    /* ----- Áreas de atuação ----- */
     areas: [
       {
         'pt-BR': 'Desenvolvimento de software e aplicações web',
@@ -59,6 +59,7 @@ export const portfolio = {
       },
     ],
 
+    /* ----- Trajetória ----- */
     timeline: [
       {
         id: 'software-engineering',
@@ -69,12 +70,13 @@ export const portfolio = {
         },
         description: {
           'pt-BR':
-            'Formação em andamento, com estudos em lógica de programação, desenvolvimento web, orientação a objetos, APIs e arquitetura de aplicações.',
-          en: 'Ongoing undergraduate studies focused on programming fundamentals, web development, object-oriented programming, APIs, and application architecture.',
+            'Graduação em andamento na PUC Minas, com estudos em programação, engenharia de software, desenvolvimento web, arquitetura de aplicações e bancos de dados. Os conhecimentos são aplicados em atividades práticas e projetos acadêmicos.',
+          en: 'Currently pursuing a Software Engineering degree at PUC Minas, studying programming, software engineering, web development, application architecture, and databases. I apply this knowledge through practical assignments and academic projects.',
         },
       },
     ],
 
+    /* ----- Interesses profissionais ----- */
     interests: [
       {
         'pt-BR': 'Desenvolvimento de sistemas e aplicações',
@@ -94,6 +96,7 @@ export const portfolio = {
       },
     ],
 
+    /* ----- Redes profissionais ----- */
     links: [
       {
         label: 'GitHub',
@@ -106,11 +109,11 @@ export const portfolio = {
     ],
   },
 
-  // CURRÍCULO
-
+  /* === CURRÍCULO === */
   resume: {
     url: 'documents/curriculo-warlley.pdf',
 
+    /* ----- Seções do currículo ----- */
     sections: [
       {
         id: 'education',
@@ -118,7 +121,6 @@ export const portfolio = {
           'pt-BR': 'Formação acadêmica',
           en: 'Education',
         },
-
         items: [
           {
             title: {
@@ -134,14 +136,12 @@ export const portfolio = {
           },
         ],
       },
-
       {
         id: 'technical-skills',
         title: {
           'pt-BR': 'Conhecimentos técnicos',
           en: 'Technical Skills',
         },
-
         items: [
           {
             title: {
@@ -184,25 +184,20 @@ export const portfolio = {
   },
 
   /* === CERTIFICADOS === */
-
   certificates: [
     {
       id: 'power-bi-gestao-enap',
-
       title: {
         'pt-BR': 'Aplicação do Power BI para Aprimoramento da Gestão',
         en: 'Applying Power BI to Improve Management',
       },
-
       issuer: 'Escola Nacional de Administração Pública — ENAP',
       category: 'course',
       date: '2026-09-21',
-
       workload: {
         'pt-BR': '25 horas',
         en: '25 hours',
       },
-
       subjects: [
         {
           'pt-BR': 'Obtenção e transformação de dados',
@@ -225,21 +220,16 @@ export const portfolio = {
           en: 'Report publishing',
         },
       ],
-
       description: {
         'pt-BR':
           'Curso de 25 horas sobre obtenção e transformação de dados, modelagem, cálculos, visualização e publicação de relatórios com Power BI.',
         en: 'A 25-hour course covering data acquisition and transformation, modeling, calculations, visualization, and report publishing with Power BI.',
       },
-
       url: 'certificates/courses/power-bi-gestao.pdf',
     },
-
     {
       id: 'github-copilot-dev-days',
-
       title: 'GitHub Copilot Dev Days na PUC Minas',
-
       issuer: 'PUC Minas — ICEI',
       category: 'achievement',
       date: '2026-05-12',
@@ -247,21 +237,16 @@ export const portfolio = {
         'pt-BR': '2 horas',
         en: '2 hours',
       },
-
       description: {
         'pt-BR':
           'Participação de 2 horas em evento sobre desenvolvimento de software e inteligência artificial aplicada à programação.',
         en: 'Participation in a two-hour event about software development and artificial intelligence applied to programming.',
       },
-
       url: 'certificates/events/github-copilot-dev-days.pdf',
     },
-
     {
       id: 'we-make-software-coreu-2026-01',
-
       title: 'We Make Software — COREU 2026/1',
-
       issuer: 'PUC Minas — Engenharia de Software',
       category: 'achievement',
       date: '2026-03-16',
@@ -269,18 +254,15 @@ export const portfolio = {
         'pt-BR': '4 horas',
         en: '4 hours',
       },
-
       description: {
         'pt-BR':
           'Participação de 4 horas no evento We Make Software, promovido pela área de Engenharia de Software da PUC Minas.',
         en: 'Participation in a four-hour We Make Software event organized by the Software Engineering department at PUC Minas.',
       },
-
       url: 'certificates/events/we-make-software-coreu-2026-01.pdf',
     },
 
     /* ----- Cursos adicionais — outubro de 2026 ----- */
-
     {
       id: 'aprendendo-python-enap',
       title: {
@@ -301,7 +283,6 @@ export const portfolio = {
       },
       url: 'certificates/courses/aprendendo-python-enap.pdf',
     },
-
     {
       id: 'java-completo-udemy',
       title: {
@@ -322,7 +303,6 @@ export const portfolio = {
       },
       url: 'certificates/courses/java-completo-udemy.pdf',
     },
-
     {
       id: 'fundamentos-engenharia-dados-dsa',
       title: {
@@ -343,7 +323,6 @@ export const portfolio = {
       },
       url: 'certificates/courses/fundamentos-engenharia-dados-dsa.pdf',
     },
-
     {
       id: 'eixo-1-analise-consulta-dados-enap',
       title: {
@@ -364,7 +343,6 @@ export const portfolio = {
       },
       url: 'certificates/courses/eixo-1-analise-consulta-dados-enap.pdf',
     },
-
     {
       id: 'eixo-2-ciencia-dados-enap',
       title: {
@@ -385,7 +363,6 @@ export const portfolio = {
       },
       url: 'certificates/courses/eixo-2-ciencia-dados-enap.pdf',
     },
-
     {
       id: 'eixo-3-engenharia-dados-enap',
       title: {
@@ -405,7 +382,6 @@ export const portfolio = {
       },
       url: 'certificates/courses/eixo-3-engenharia-dados-enap.pdf',
     },
-
     {
       id: 'introducao-ciencia-dados-enap',
       title: {
@@ -426,7 +402,6 @@ export const portfolio = {
       },
       url: 'certificates/courses/introducao-ciencia-dados-enap.pdf',
     },
-
     {
       id: 'sql-fgv',
       title: 'SQL — Structured Query Language',
@@ -447,18 +422,15 @@ export const portfolio = {
   ],
 
   /* === PROJETOS === */
-
-  // Repositórios carregados automaticamente pela API do GitHub.
-  // Este array permanece disponível para futuras personalizações.
   projects: [],
 
   /* === ARQUIVOS OFICIAIS === */
-
   officialFiles: [],
 
   /* === CONTATO E EMAILJS === */
-
   contact: {
+
+    /* ----- Canais de contato ----- */
     links: [
       {
         label: 'E-mail',
@@ -482,6 +454,7 @@ export const portfolio = {
       },
     ],
 
+    /* ----- Configuração pública do formulário ----- */
     emailService: 'service_ss81zgq',
     emailTemplate: 'template_heie6oa',
     emailPublicKey: 'dR_srJZx9lh9_GOta',
@@ -489,12 +462,9 @@ export const portfolio = {
 };
 
 /* === LEITURA DE CONTEÚDO MULTILÍNGUE === */
-
 export function contentText(value, locale = 'pt-BR') {
   if (typeof value === 'string') return value;
-
   if (!value || typeof value !== 'object') return '';
-
   return typeof value[locale] === 'string'
     ? value[locale]
     : typeof value['pt-BR'] === 'string'
