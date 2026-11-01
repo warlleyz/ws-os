@@ -252,6 +252,10 @@ export default function AboutMe({ instance }) {
 
       {/* === Formação, apresentação e tecnologias === */}
       <div className="ws-about__main">
+
+        {/* ----- Coluna de informações ----- */}
+        <div className="ws-about__information">
+
         {/* ----- Formação acadêmica ----- */}
         <section
           className="ws-about__section ws-about__education"
@@ -285,12 +289,13 @@ export default function AboutMe({ instance }) {
             id="ws-about-intro"
           />
 
-          <div className="ws-about__text">
-            {words.introductionParagraphs.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
-        </section>
+            <div className="ws-about__text">
+              {words.introductionParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+          </section>
+        </div>
 
         {/* ----- Globo de tecnologias ----- */}
         <section

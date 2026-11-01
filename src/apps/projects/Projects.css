@@ -143,11 +143,11 @@
 /* ----- Pesquisa em destaque e filtros compactos ----- */
 .ws-projects__filters {
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(150px, 180px) minmax(150px, 180px) auto;
+  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(150px, 180px));
   align-items: end;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
-  padding: 14px 16px;
+  padding: 10px 12px;
   border: 1px solid color-mix(in srgb, var(--border-default) 52%, transparent);
   border-radius: 16px;
   background: linear-gradient(125deg,
@@ -192,7 +192,7 @@
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  height: 40px;
+  height: 36px;
   padding: 0 12px;
   border: 1px solid color-mix(in srgb, var(--border-default) 55%, transparent);
   border-radius: 10px;
@@ -241,11 +241,6 @@
   box-shadow: none;
 }
 
-.ws-projects__input-wrap:focus-within {
-  border-color: var(--projects-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--projects-accent) 12%, transparent);
-}
-
 /* ----- Select compartilhado sem molduras duplicadas ----- */
 .ws-projects__filter-field .ws-select {
   min-width: 0;
@@ -258,8 +253,8 @@
 .ws-projects__filter-field .ws-select__trigger {
   box-sizing: border-box;
   width: 100%;
-  min-height: 40px;
-  padding: 8px 11px;
+  min-height: 36px;
+  padding: 6px 10px;
   border: 1px solid color-mix(in srgb, var(--border-default) 55%, transparent);
   border-radius: 10px;
   background: color-mix(in srgb, var(--surface-primary) 77%, transparent);
@@ -273,19 +268,6 @@
 .ws-projects__filter-field .ws-select__trigger:focus-visible {
   border-color: var(--projects-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--projects-accent) 10%, transparent);
-}
-
-/* ----- Resultado discreto junto aos filtros ----- */
-.ws-projects__count {
-  align-self: end;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-height: 40px;
-  white-space: nowrap;
-  color: var(--text-secondary);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
 }
 
 /* === Galeria === */
@@ -520,13 +502,7 @@
 /* === Responsividade do catálogo === */
 @container (max-width: 920px) {
   .ws-projects__filters {
-    grid-template-columns: minmax(180px, 1fr) minmax(140px, 0.45fr) minmax(155px, 0.45fr);
-  }
-
-  .ws-projects__count {
-    grid-column: 1 / -1;
-    min-height: auto;
-    justify-self: end;
+    grid-template-columns: minmax(0, 1fr) repeat(2, minmax(130px, 0.45fr));
   }
 }
 
@@ -545,6 +521,10 @@
 
   .ws-projects__search {
     grid-column: 1 / -1;
+  }
+
+  .ws-projects__filter-field {
+    min-width: 0;
   }
 
   .ws-projects__hero-icon {
@@ -581,7 +561,6 @@
     transform: none;
   }
 }
-
 
 /* === Detalhes editoriais do projeto === */
 /* ----- Identidade e apresentação principal ----- */
@@ -1061,9 +1040,4 @@
   outline: none;
   background: transparent;
   box-shadow: none;
-}
-
-.ws-projects__input-wrap:focus-within {
-  border-color: var(--projects-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--projects-accent) 12%, transparent);
 }

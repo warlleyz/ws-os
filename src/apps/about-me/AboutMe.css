@@ -183,26 +183,27 @@
 .ws-about__main {
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  grid-template-areas:
-    "education learning"
-    "introduction learning";
-  grid-template-rows: max-content max-content;
-  align-content: start;
   align-items: stretch;
   gap: 14px;
   min-width: 0;
 }
 
-.ws-about__education {
-  grid-area: education;
+/* ----- Coluna de informações ----- */
+.ws-about__information {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  gap: 14px;
+  min-width: 0;
 }
 
-.ws-about__introduction {
-  grid-area: introduction;
+.ws-about__information>.ws-about__introduction {
+  flex: 1;
 }
 
+/* ----- Coluna de tecnologias ----- */
 .ws-about__learning {
-  grid-area: learning;
+  align-self: stretch;
 }
 
 /* === Formação acadêmica === */
@@ -271,7 +272,8 @@
   display: flex;
   flex-direction: column;
   align-self: stretch;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 12px;
   min-width: 0;
   min-height: 0;
   padding: 20px;
@@ -459,11 +461,19 @@
 @container (max-width: 700px) {
   .ws-about__main {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "education"
-      "introduction"
-      "learning";
-    grid-template-rows: auto;
+  }
+
+  .ws-about__information {
+    align-self: start;
+    gap: 14px;
+  }
+
+  .ws-about__information>.ws-about__introduction {
+    flex: initial;
+  }
+
+  .ws-about__learning {
+    align-self: start;
   }
 
   .ws-about__goals-grid {
@@ -497,6 +507,8 @@
   .ws-about__photo {
     grid-column: 1;
     grid-row: 1 / span 2;
+    width: 86px;
+    border-radius: 14px;
   }
 
   .ws-about__eyebrow {
@@ -510,47 +522,26 @@
     grid-column: 2;
     grid-row: 2;
     align-self: start;
+    font-size: 22px;
   }
 
   .ws-about__profile-content>p {
     grid-column: 1 / -1;
     grid-row: 3;
     margin-top: 8px;
-  }
-
-  .ws-about__meta {
-    grid-column: 1 / -1;
-    margin-top: 5px;
-  }
-
-  .ws-about__section {
-    padding: 15px;
-  }
-
-  .ws-about__photo {
-    width: 86px;
-    border-radius: 14px;
-  }
-
-  .ws-about__profile h1 {
-    font-size: 22px;
-  }
-
-  .ws-about__profile-content>p {
     font-size: 12px;
-  }
-
-  .ws-about__profile-content {
-    gap: 9px;
-  }
-
-  .ws-about__profile-content>p {
     line-height: 1.7;
     overflow-wrap: anywhere;
   }
 
   .ws-about__meta {
+    grid-column: 1 / -1;
+    margin-top: 5px;
     gap: 6px;
+  }
+
+  .ws-about__section {
+    padding: 15px;
   }
 
   .ws-about__goals-grid {
@@ -579,10 +570,6 @@
     width: 72px;
   }
 
-  .ws-about__profile-content {
-    width: 100%;
-  }
-
   .ws-about__education-meta {
     flex-direction: column;
   }
@@ -602,6 +589,43 @@
   .ws-about {
     gap: 11px;
     padding: 12px !important;
+  }
+}
+
+/* === Layout para janelas amplas === */
+@container (min-width: 1100px) {
+
+  /* ----- Distribuição principal ----- */
+  .ws-about__main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  /* ----- Coluna de informações ----- */
+  .ws-about__information {
+    display: grid;
+    grid-template-rows: repeat(2, minmax(min-content, 1fr));
+    align-self: stretch;
+    gap: 14px;
+  }
+
+  /* ----- Formação e apresentação ----- */
+  .ws-about__education,
+  .ws-about__introduction {
+    align-self: stretch;
+    min-height: 0;
+  }
+
+  /* ----- Tecnologias ----- */
+  .ws-about__learning {
+    align-self: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  .ws-about__learning .ws-skills-globe__stage {
+    height: 340px;
   }
 }
 

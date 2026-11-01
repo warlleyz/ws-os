@@ -23,7 +23,7 @@
 | 09 | Janelas, barra de tarefas e menu principal | **Concluída e validada** |
 | 10 | Experiência Mobile e adaptação entre telas | **Base concluída, validada e integrada à `main`** |
 | 11 | Perfil profissional e Sobre Mim | **Concluída e aprovada** |
-| 12 | Projetos e apresentação dos trabalhos | Não iniciada |
+| 12 | Projetos e apresentação dos trabalhos | **Concluída e aprovada** |
 | 13 | Currículo e certificados | Não iniciada |
 | 14 | Dev Insights e visualização de dados | Não iniciada |
 | 15 | Busca global, navegação e compartilhamento | Não iniciada |
@@ -410,4 +410,57 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Validações técnicas aprovadas.
 - Melhorias aplicadas ao Desktop e Mobile.
 - Inventário CSV preservado por decisão do proprietário.
+- A distribuição dos cards foi refinada posteriormente para janelas normais e maximizadas.
+- O tamanho inicial da janela foi ajustado no registro de aplicativos.
 - **Próxima etapa: 12 — Projetos e apresentação dos trabalhos.**
+
+## Etapa 12 — Projetos e apresentação dos trabalhos
+
+**Estado:** concluída e aprovada pelo proprietário.
+
+### Trabalhos realizados
+
+- Revisão do catálogo de projetos integrado ao GitHub.
+- Preservação da exibição automática dos repositórios públicos.
+- Preservação da seleção administrativa de projetos em destaque.
+- Revisão dos filtros por pesquisa, tecnologia e ordenação.
+- Refinamento visual e redução da área ocupada pelos filtros.
+- Remoção do contador de resultados da interface.
+- Revisão da apresentação dos cards e dos detalhes dos projetos.
+- Preservação da obtenção automática de informações e documentação dos repositórios.
+- Tratamento de informações ausentes sem inventar conteúdo.
+- Organização e padronização dos arquivos JavaScript, JSX e CSS.
+- Consolidação de regras CSS duplicadas e remoção de estilos obsoletos.
+- Preservação da adaptação entre Desktop e Mobile.
+
+### Arquivos revisados
+
+- `src/apps/projects/Projects.jsx`
+- `src/apps/projects/Projects.css`
+- `src/apps/projects/projectModel.js`
+- `src/apps/projects/readmeSummary.js`
+
+### Refinamentos complementares
+
+- Correção da distribuição dos cards do aplicativo Sobre Mim.
+- Alinhamento dos cards em janelas normais e maximizadas.
+- Ajuste do tamanho inicial da janela no registro de aplicativos.
+
+### Decisões
+
+- Exibir automaticamente os repositórios públicos disponíveis no GitHub.
+- Manter a definição dos destaques pelo administrador.
+- Não exigir cadastro manual dos projetos.
+- Utilizar somente informações disponíveis nos repositórios.
+- Não modificar `docs/INVENTARIO.csv`, conforme decisão do proprietário.
+
+### Validação
+
+- Revisão visual dos aplicativos Sobre Mim e Projetos aprovada pelo proprietário.
+- ESLint, testes automatizados, build e integridade do diff deverão ser conferidos antes do commit.
+
+### Encerramento
+
+- Etapa 12 concluída e aprovada pelo proprietário.
+- Funcionalidades e organização dos arquivos revisadas.
+- **Próxima etapa: 13 — Currículo e certificados.**

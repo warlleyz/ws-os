@@ -25,16 +25,20 @@ import { filterProjects, mergeProjects } from './projectModel';
 import { summarizeReadme } from './readmeSummary';
 import '../../styles/apps.css';
 import './Projects.css';
+
 /* === Aplicativo Projetos === */
 export default function Projects({ instance }) {
+
   /* ----- Integrações e contexto ----- */
   const locale = useLocale();
+
   /* ----- Catálogo e dados remotos ----- */
   const load = useCallback(
     (options) => fetchGithubPortfolio(portfolio.githubUser, { ...options, force: true }),
     [],
   );
   const remote = usePublicResource(load, 'github', Boolean(portfolio.githubUser));
+
   /* ----- Atualizar a seleção quando o administrador salvar os destaques ----- */
   const loadHighlights = useCallback((options) => fetchProjectHighlights(options), []);
   const highlights = usePublicResource(loadHighlights, 'project-highlights', true, {
@@ -47,6 +51,7 @@ export default function Projects({ instance }) {
       highlights.status === 'ready' ? highlights.data?.repositoryIds : null,
     );
   }, [remote.data, highlights.status, highlights.data]);
+
   /* ----- Pesquisa, filtros e ordenação ----- */
   const [search, setSearch] = useState('');
   const [technology, setTechnology] = useState('all');
@@ -61,6 +66,7 @@ export default function Projects({ instance }) {
     () => [...new Set(projects.flatMap((item) => item.technologies))].sort(),
     [projects],
   );
+
   /* ----- Navegação entre catálogo e detalhes ----- */
   const navigation = instance?.navigationRequestId ?? 0;
   const [selection, setSelection] = useState({
@@ -78,6 +84,7 @@ export default function Projects({ instance }) {
     return true;
   });
   const selected = projects.find((item) => item.id === selectedId);
+
   /* === Documentação GitHub === */
   /* ----- Prévia do README carregada somente nos detalhes ----- */
   const [readme, setReadme] = useState({ key: '', status: 'idle', paragraphs: [] });
@@ -100,6 +107,7 @@ export default function Projects({ instance }) {
         });
         if (!response.ok) throw new Error('README indisponível');
         const markdown = (await response.text()).slice(0, 24000);
+
         /* ----- Priorizar contexto, funcionalidades e tecnologias do README ----- */
         const paragraphs = summarizeReadme(markdown);
         if (!controller.signal.aborted) setReadme({ key, status: 'ready', paragraphs });
@@ -110,6 +118,7 @@ export default function Projects({ instance }) {
     loadReadme();
     return () => controller.abort();
   }, [selectedId, selected?.id, selected?.repository]);
+
   /* ----- Formatação de datas reais do repositório ----- */
   function formatProjectDate(date) {
     if (!date || Number.isNaN(Date.parse(date))) return null;
@@ -119,10 +128,12 @@ export default function Projects({ instance }) {
       year: 'numeric',
     }).format(new Date(date));
   }
+
   /* ----- Conteúdo editorial opcional ----- */
   function editorial(value) {
     return contentText(value, locale).trim();
   }
+
   /* === Card unificado de projeto === */
   /* ----- Tamanho e ações consistentes para todos os projetos ----- */
   function renderProjectCard(item) {
@@ -180,9 +191,11 @@ export default function Projects({ instance }) {
       </article>
     );
   }
+
   /* === Interface === */
   return (
     <article className="desktop-window__content ws-app ws-projects">
+
       {/* === Cabeçalho exclusivo do catálogo === */}
       {!selectedId && (
         <header className="ws-projects__hero">
@@ -204,6 +217,7 @@ export default function Projects({ instance }) {
           />
         </header>
       )}
+
       {/* ----- Situação da integração ----- */}
       <div className="ws-projects__feedback" aria-live="polite">
         {highlights.status === 'error' && (
@@ -228,6 +242,7 @@ export default function Projects({ instance }) {
           </p>
         )}
       </div>
+
       {/* === Catálogo ou detalhes do projeto === */}
       {selectedId ? (
         selected ? (
@@ -236,6 +251,7 @@ export default function Projects({ instance }) {
               <ArrowLeft size={16} aria-hidden="true" />
               {t("Voltar ao catálogo")}
             </button>
+
             {/* === Apresentação editorial do projeto === */}
             <header className="ws-projects__case-hero">
               <div className="ws-projects__case-cover">
@@ -278,12 +294,14 @@ export default function Projects({ instance }) {
                 )}
               </div>
             </header>
+
             {/* === Conteúdo principal e informações rápidas === */}
             <div className="ws-projects__case-layout">
               <aside
                 className="ws-projects__case-aside"
                 aria-label={label('Resumo do repositório', 'Repository summary')}
               >
+
                 {/* ----- Metadados reais do GitHub ----- */}
                 {(Number.isFinite(selected.stars) ||
                   Number.isFinite(selected.forks) ||
@@ -295,6 +313,7 @@ export default function Projects({ instance }) {
                   formatProjectDate(selected.updatedAt)) && (
                     <section className="ws-projects__case-sidebar-block">
                       <h4>{label('Informações do projeto', 'Project information')}</h4>
+
                       {/* ----- Dados mais úteis para contextualizar o repositório ----- */}
                       <dl className="ws-projects__case-facts">
                         {selected.language && (
@@ -355,6 +374,7 @@ export default function Projects({ instance }) {
                       )}
                     </section>
                   )}
+
                 {/* ----- Acesso a recursos válidos ----- */}
                 {(safeExternalUrl(selected.repository) || safeExternalUrl(selected.homepage)) && (
                   <section className="ws-projects__case-sidebar-block">
@@ -386,6 +406,7 @@ export default function Projects({ instance }) {
                 )}
               </aside>
               <div className="ws-projects__case-content">
+
                 {/* ----- Apresentação e objetivos opcionais ----- */}
                 {(editorial(selected.details?.description) ||
                   editorial(selected.details?.objective) ||
@@ -412,6 +433,7 @@ export default function Projects({ instance }) {
                       )}
                     </section>
                   )}
+
                 {/* ----- Conhecimentos e características documentadas ----- */}
                 {Array.isArray(selected.details?.features) &&
                   selected.details.features.some((feature) => editorial(feature)) && (
@@ -446,6 +468,7 @@ export default function Projects({ instance }) {
                       )}
                     </div>
                   )}
+
                 {/* ----- Documentação resumida em parágrafos legíveis ----- */}
                 {readme.key === selected.id &&
                   readme.status === 'ready' &&
@@ -477,6 +500,7 @@ export default function Projects({ instance }) {
                       )}
                     </section>
                   )}
+
                 {/* ----- Orientação discreta quando não há conteúdo adicional ----- */}
                 {!editorial(selected.details?.description) &&
                   !editorial(selected.details?.objective) &&
@@ -505,6 +529,7 @@ export default function Projects({ instance }) {
         )
       ) : (
         <>
+
           {/* === Destaques definidos pelo administrador === */}
           {featuredProjects.length > 0 && (
             <section
@@ -527,6 +552,7 @@ export default function Projects({ instance }) {
               </div>
             </section>
           )}
+
           {/* === Catálogo e barra única de filtros === */}
           <section
             className="ws-projects__catalog"
@@ -573,11 +599,9 @@ export default function Projects({ instance }) {
                   ]}
                 />
               </div>
-              <span className="ws-projects__count" role="status">
-                {visible.length} {label('resultados', 'results')}
-              </span>
             </div>
           </section>
+
           {/* === Catálogo completo sem duplicar os destaques === */}
           {regularProjects.length > 0 && (
             <section

@@ -39,7 +39,7 @@ function WallyAppIcon({ size = 20 }) {
 /* === REGISTRO DE APLICATIVOS === */
 /* ----- Dimensões iniciais das janelas ----- */
 const windowProfiles = {
-  'about-me': { width: 950, height: 890 },
+  'about-me': { width: 950, height: 915 },
   projects: { width: 1100, height: 760 },
   'dev-insights': { width: 1100, height: 745 },
   resume: { width: 950, height: 760 },

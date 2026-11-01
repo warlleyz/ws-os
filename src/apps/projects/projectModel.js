@@ -1,13 +1,21 @@
 import { safeExternalUrl } from '../../shared/utils/urls';
 import { resolveSharedEntry } from '../../features/search/searchService';
+
+/* === GERENCIAMENTO DE PROJETOS === */
+/* ----- Integração entre projetos cadastrados e GitHub ----- */
 export function mergeProjects(curated, repositories) {
-  const remaining = new Map(repositories.map((item) => [item.repository, item]));
+  const remaining = new Map(
+    repositories.map((item) => [item.repository, item]),
+  );
+
   const items = curated
     .filter((item) => typeof item.id === 'string' && item.id && item.name)
     .map((item) => {
       const repository = safeExternalUrl(item.repository);
       const remote = remaining.get(repository);
+
       remaining.delete(repository);
+
       return {
         ...remote,
         ...item,
@@ -18,41 +26,64 @@ export function mergeProjects(curated, repositories) {
         source: 'Portfólio',
       };
     });
+
   return [...items, ...remaining.values()];
 }
+
+/* === FILTRAGEM E ORDENAÇÃO === */
+/* ----- Pesquisa e normalização de texto ----- */
 export function filterProjects(projects, search, technology, order, locale, text) {
   const normalize = (value) =>
     value
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase();
+
   return projects
     .filter(
       (item) =>
         (technology === 'all' || item.technologies.includes(technology)) &&
         normalize(
-          [text(item.name, locale), text(item.description, locale), ...item.technologies].join(' '),
+          [
+            text(item.name, locale),
+            text(item.description, locale),
+            ...item.technologies,
+          ].join(' '),
         ).includes(normalize(search.trim())),
     )
     .sort(
       order === 'name'
-        ? (a, b) => text(a.name, locale).localeCompare(text(b.name, locale), locale)
-        : (a, b) => (Date.parse(b.updatedAt) || 0) - (Date.parse(a.updatedAt) || 0),
+        ? (a, b) =>
+          text(a.name, locale).localeCompare(text(b.name, locale), locale)
+        : (a, b) =>
+          (Date.parse(b.updatedAt) || 0) -
+          (Date.parse(a.updatedAt) || 0),
     );
 }
 
-/* === Compartilhamento público de projetos === */
-/* ----- Mesmo formato de entrada utilizado pelo Core, preservando BASE_URL ----- */
+/* === COMPARTILHAMENTO DE PROJETOS === */
+/* ----- Geração de links públicos ----- */
 export function createProjectShareUrl(projectId, baseUrl) {
-  if (typeof projectId !== 'string' || typeof baseUrl !== 'string') return null;
+  if (typeof projectId !== 'string' || typeof baseUrl !== 'string') {
+    return null;
+  }
+
   try {
     const url = new URL(baseUrl);
-    if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) return null;
+
+    if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) {
+      return null;
+    }
+
     url.search = '';
     url.hash = '';
     url.searchParams.set('project', projectId);
+
     const entry = resolveSharedEntry(url.search);
-    return entry?.appId === 'projects' && entry.params.projectId === projectId ? url.href : null;
+
+    return entry?.appId === 'projects' && entry.params.projectId === projectId
+      ? url.href
+      : null;
   } catch {
     return null;
   }
