@@ -21,8 +21,8 @@
 | 07 | Inicialização, apresentação e entrada do visitante | **Concluída e aprovada** |
 | 08 | Desktop, atalhos e área de trabalho | **Concluída e validada** |
 | 09 | Janelas, barra de tarefas e menu principal | **Concluída e validada** |
-| 10 | Experiência Mobile e adaptação entre telas | Não iniciada |
-| 11 | Perfil profissional e Sobre Mim | Não iniciada |
+| 10 | Experiência Mobile e adaptação entre telas | **Base concluída, validada e integrada à `main`** |
+| 11 | Perfil profissional e Sobre Mim | **Próxima etapa — não iniciada** |
 | 12 | Projetos e apresentação dos trabalhos | Não iniciada |
 | 13 | Currículo e certificados | Não iniciada |
 | 14 | Dev Insights e visualização de dados | Não iniciada |
@@ -317,12 +317,59 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Testes automatizados aprovados, conforme última validação informada.
 - Build de produção aprovado, conforme última validação informada.
 - `git diff --check` aprovado, conforme última validação informada.
-- Revisão consolidada do diff ainda pendente.
+- Etapa 09 posteriormente considerada concluída e validada pelo proprietário, conforme o controle das etapas.
 
-### Pendências e decisões
+### Encerramento
 
-- Conferir o diff completo da Etapa 09.
-- Verificar alterações não relacionadas à etapa.
-- Confirmar a cobertura dos critérios restantes do planejamento.
-- Realizar a validação final antes de solicitar aprovação para encerramento.
-- Não realizar commit ou push sem autorização do proprietário.
+- Etapa 09 encerrada antes da reconstrução do Mobile.
+- Revisões específicas das interfaces internas de aplicativos continuam nas etapas próprias.
+- A verificação detalhada do histórico de commits e da publicação não está documentada neste registro.
+
+## Etapa 10 — Experiência Mobile e adaptação entre telas
+
+**Estado:** base do Shell Mobile concluída, testes aprovados pelo proprietário e alterações integradas à `main` e publicadas por push, conforme confirmação na conversa. O refinamento de cada aplicativo permanece na etapa temática correspondente.
+
+### Trabalhos realizados
+
+- Reconstrução do Shell Mobile sobre os serviços compartilhados do WS OS, sem replicar a Taskbar, o WS Menu, o Dock ou um alternador de aplicativos.
+- Home organizada em duas páginas: Aplicativos e Widgets, com indicadores de página e navegação por deslize horizontal.
+- Grade responsiva dos aplicativos e organização automática dos widgets, com seleção independente do Desktop e persistência local.
+- Barra superior fixa com data, hora, informação meteorológica e acesso a notificações e controles rápidos.
+- Integração dos serviços de clima, notificações, Não Perturbe, temas, idioma e Configurações existentes.
+- Janelas Mobile adaptadas, com um aplicativo principal visível e barra inferior de saída.
+- Revisão dos fluxos de abertura, fechamento protegido e navegação contextual entre aplicativos.
+- Reutilização dos componentes compartilhados dos widgets Relógio, Calendário, Clima e Dev Insights.
+- Ajustes de traduções PT-BR/EN e atualização dos testes específicos do Mobile.
+- Remoção dos componentes antigos de drawer, alternador de aplicativos, home e status bar, substituídos pela nova estrutura.
+
+### Arquivos envolvidos
+
+- `src/shells/mobile/Mobile.jsx` e `src/shells/mobile/Mobile.css`.
+- `src/shells/mobile/home/MobileWidgets.jsx`.
+- `src/shells/mobile/system/MobileWeatherStatus.jsx`.
+- `src/core/mobilePreferences.js`.
+- `src/apps/settings/SettingsSections.jsx`.
+- `src/features/quick-controls/QuickControls.jsx`.
+- `src/shared/i18n/locales/pt-BR.json` e `src/shared/i18n/locales/en.json`.
+- `tests/core/mobile-shell-ui.test.cjs`.
+- Removidos: `src/shells/mobile/apps/MobileAppDrawer.jsx`, `src/shells/mobile/apps/MobileAppSwitcher.jsx`, `src/shells/mobile/home/MobileHome.jsx` e `src/shells/mobile/system/MobileStatusBar.jsx`.
+
+### Validações e integração
+
+- Proprietário informou aprovação dos testes após a aplicação das alterações.
+- Proprietário confirmou a conclusão do processo de commit, merge para `main` e push.
+- Não foi informado o SHA final do commit nesta conversa; registrar quando disponível, sem inventar referência.
+- O resultado dos comandos de validação e a homologação visual detalhada de todos os aplicativos não foram anexados a este documento.
+
+### Limites e decisões
+
+- O Shell Mobile está encerrado como base funcional desta versão; isso não equivale a homologar individualmente todos os aplicativos em telas pequenas.
+- A revisão visual e funcional de cada aplicativo no Mobile será feita quando sua etapa chegar, simultaneamente à respectiva versão Desktop, sem mudar a ordem das 33 etapas.
+- O refinamento visual dos widgets e seus comportamentos específicos pertence à Etapa 24.
+- Ajustes de integração, acessibilidade, desempenho e homologação geral continuam contemplados pelas etapas 29, 30 e 32, quando aplicável.
+- Preservar os contratos compartilhados e evitar criar implementações Mobile independentes sem necessidade.
+
+### Encerramento
+
+- Etapa 10 encerrada pelo proprietário quanto à base do Mobile.
+- **Próxima etapa: 11 — Perfil profissional e Sobre Mim.**
