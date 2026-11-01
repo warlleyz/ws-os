@@ -1,486 +1,204 @@
-.ws-mobile {
-  display: flex;
-  min-height: 100dvh;
-  flex-direction: column;
-  background: var(--surface-primary);
-  color: var(--text-primary);
-}
+/* === ESTRUTURA MOBILE === */
+.ws-mobile{position:fixed;inset:0;z-index:100;isolation:isolate;display:flex;flex-direction:column;width:100%;height:100dvh;overflow:hidden;color:var(--text-primary,#fff);background:var(--surface-primary,#0c1222);font-family:inherit}
+.ws-mobile *{box-sizing:border-box}
+.ws-mobile button,.ws-mobile input{font:inherit}
+.ws-mobile button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ws-mobile button:focus-visible,.ws-mobile input:focus-visible{outline:2px solid var(--accent-secondary,#86aaff);outline-offset:2px}
+.ws-mobile__wallpaper{position:absolute;inset:0;z-index:-1;pointer-events:none;background-position:center;background-size:cover;background-repeat:no-repeat}
 
-.ws-mobile__header {
-  display: flex;
-  min-height: 64px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border-default);
-}
+/* === BARRA DE STATUS === */
+.ws-mobile__status-bar{position:relative;z-index:20;display:flex;min-height:calc(48px + env(safe-area-inset-top,0px));flex:0 0 auto;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.ws-mobile__status-bar time{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;text-shadow:0 2px 8px #0006}
+.ws-mobile__status-actions{display:flex;align-items:center;gap:6px}
+.ws-mobile__status-actions button{position:relative;display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:14px;background:#111a2f55;color:inherit;backdrop-filter:blur(12px)}
+.ws-mobile__status-actions button[aria-expanded=true]{background:var(--accent-secondary,#7695dc);color:#101321}
+.ws-mobile__badge{position:absolute;top:0;right:0;min-width:17px;height:17px;padding:1px 4px;border-radius:20px;background:#fa637d;color:#fff;font-size:10px;font-weight:700}
 
-.ws-mobile__header button {
-  border: 0;
-  background: transparent;
-  color: var(--text-primary);
-  font: inherit;
-  cursor: pointer;
-}
+/* === HOME === */
+.ws-mobile__home{position:relative;display:flex;min-height:0;flex:1;flex-direction:column;gap:8px;padding:8px max(15px,env(safe-area-inset-right,0px)) 8px max(15px,env(safe-area-inset-left,0px));overflow:hidden}
+.ws-mobile__home-tools{display:flex;min-height:44px;flex:0 0 auto;align-items:center;justify-content:space-between;gap:12px;padding:0 8px}
+.ws-mobile__home-brand{font-size:13px;font-weight:800;letter-spacing:.18em;text-shadow:0 2px 8px #0008}
+.ws-mobile__home-tools button{min-height:36px;display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid #fff3;border-radius:14px;background:#15203690;color:inherit;backdrop-filter:blur(12px)}
+.ws-mobile__tool-actions{display:flex;gap:6px}
+.ws-mobile__home-pages{min-height:0;flex:1;overflow-y:auto;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y}
+.ws-mobile__home-pages::-webkit-scrollbar{display:none}
+.ws-mobile__home-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-content:start;gap:24px 8px;padding:16px 0}
+.ws-mobile__tile-wrap{position:relative;display:flex;min-width:0;justify-content:center}
+.ws-mobile__home-app{display:flex;min-width:0;width:100%;flex-direction:column;align-items:center;gap:9px;padding:4px 0;border:0;background:transparent;color:inherit}
+.ws-mobile__home-app-icon,.ws-mobile__dock-icon{display:grid;place-items:center;width:clamp(46px,13vw,61px);height:clamp(46px,13vw,61px);border:1px solid #fff3;border-radius:18px;background:linear-gradient(145deg,#263854cf,#142037dd);box-shadow:0 6px 18px #0004;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
+.ws-mobile__home-app-name{display:-webkit-box;max-width:100%;overflow:hidden;text-align:center;font-size:11px;line-height:1.3;text-shadow:0 1px 6px #000a;overflow-wrap:anywhere;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ws-mobile__home-app:active .ws-mobile__home-app-icon,.ws-mobile__dock-app:active .ws-mobile__dock-icon{transform:scale(.94)}
+.ws-mobile__home-dots{display:flex;min-height:28px;align-items:center;justify-content:center;gap:2px}
+.ws-mobile__home-dots button{display:grid;place-items:center;width:27px;height:27px;border:0;background:transparent}
+.ws-mobile__home-dots span{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.4}
+.ws-mobile__home-dots .is-active span{width:8px;height:8px;opacity:1}
+.ws-mobile__dock{display:flex;min-height:78px;flex:0 0 auto;align-items:center;justify-content:space-around;gap:4px;padding:8px 10px;border:1px solid #fff3;border-radius:26px;background:#18253e99;box-shadow:0 12px 30px #0003;backdrop-filter:blur(24px) saturate(135%);-webkit-backdrop-filter:blur(24px) saturate(135%)}
+.ws-mobile__tile-wrap--dock{flex:1}
+.ws-mobile__dock-app{display:grid;place-items:center;width:100%;height:59px;border:0;background:transparent;color:inherit}
+.ws-mobile__dock-icon{width:54px;height:54px;border-radius:17px}
+.ws-mobile__dock-empty{display:grid;flex:1;place-items:center;color:#fffb}
+.ws-mobile__drawer-launcher{align-self:center;min-height:32px;padding:3px 14px;border:0;border-radius:12px;background:#111b2d33;color:inherit;font-size:11px;text-shadow:0 1px 6px #000a}
+.ws-mobile__drawer-launcher span{margin-left:8px;font-size:17px}
+.ws-mobile__home[data-editing=true] .ws-mobile__home-app-icon,.ws-mobile__home[data-editing=true] .ws-mobile__dock-icon{outline:1px dashed #fffa;outline-offset:3px}
+.ws-mobile__tile-edit{position:absolute;top:-8px;right:4px;z-index:2;display:grid;place-items:center;width:25px;height:25px;border:1px solid #fff6;border-radius:50%;background:#334b77;color:#fff}
 
-.ws-mobile__welcome {
-  padding: 36px 24px;
-  background: var(--surface-secondary);
-}
+/* === CATÁLOGO E MULTITAREFA === */
+.ws-mobile__drawer,.ws-mobile__switcher{display:flex;min-height:0;flex:1;flex-direction:column;gap:16px;padding:14px 16px;overflow:hidden}
+.ws-mobile__screen-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ws-mobile__screen-header small{font-size:11px;font-weight:800;letter-spacing:.12em;opacity:.65}
+.ws-mobile__screen-header h1{margin:3px 0 0;font-size:24px;line-height:1.2}
+.ws-mobile__screen-header button{min-width:44px;min-height:40px;padding:8px 12px;border:1px solid #fff3;border-radius:13px;background:#15233dc4;color:inherit}
+.ws-mobile__search{display:flex;min-height:47px;align-items:center;gap:10px;padding:0 14px;border:1px solid #fff3;border-radius:17px;background:#18243dc4;backdrop-filter:blur(16px)}
+.ws-mobile__search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:inherit}
+.ws-mobile__search input::placeholder{color:#fff9}
+.ws-mobile__drawer-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-content:start;gap:24px 8px;min-height:0;overflow:auto;padding:12px 0}
+.ws-mobile__empty{margin:18px 0;text-align:center;font-size:14px;opacity:.75}
+.ws-mobile__switcher-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:14px;min-height:0;overflow:auto;padding:4px}
+.ws-mobile__switcher-card{position:relative;min-height:214px;overflow:hidden;border:1px solid #fff3;border-radius:24px;background:#182640c9;box-shadow:0 8px 20px #0004;backdrop-filter:blur(18px)}
+.ws-mobile__switcher-card[data-active=true]{border-color:var(--accent-secondary,#8caeff)}
+.ws-mobile__switcher-select{display:flex;width:100%;min-height:214px;flex-direction:column;align-items:center;justify-content:center;gap:17px;padding:24px 12px;border:0;background:transparent;color:inherit}
+.ws-mobile__switcher-preview{display:grid;width:96px;height:112px;place-items:center;border:1px solid #fff2;border-radius:19px;background:#101b32c2}
+.ws-mobile__switcher-select strong{max-width:100%;overflow:hidden;font-size:12px;text-overflow:ellipsis;white-space:nowrap}
+.ws-mobile__switcher-close{position:absolute;top:8px;right:8px;display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:50%;background:#fff2;color:inherit}
 
-.ws-mobile__welcome > span {
-  color: var(--accent-secondary);
-  font-size: 12px;
-  font-weight: 700;
-}
+/* === APLICATIVOS EM TELA CHEIA === */
+.ws-mobile__app-content{position:relative;min-height:0;flex:1;overflow:hidden;background:var(--surface-primary,#11182a)}
+.ws-mobile__instance{position:absolute;inset:0;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain}
+.ws-mobile__instance[hidden],.ws-mobile__app-content[hidden]{display:none}
+.ws-mobile__instance .desktop-window__content{max-width:100%;min-width:0;min-height:100%;overflow:auto}
 
-.ws-mobile__welcome h1 {
-  margin: 12px 0;
-  font-size: clamp(26px, 8vw, 36px);
-}
-
-.ws-mobile__welcome p {
-  max-width: 420px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.ws-mobile__catalog {
-  flex: 1;
-  padding: 24px 20px 100px;
-}
-
-.ws-mobile__catalog h2 {
-  margin: 0 0 20px;
-  font-size: 18px;
-}
-
-.ws-mobile__grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px 10px;
-}
-
-.ws-mobile__app-button {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: 9px;
-  padding: 10px 4px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-primary);
-  font: inherit;
-  font-size: 11px;
-  text-align: center;
-  cursor: pointer;
-  overflow-wrap: anywhere;
-}
-
-.ws-mobile__app-button:hover,
-.ws-mobile__app-button:focus-visible {
-  background: var(--surface-secondary);
-}
-
-.ws-mobile__app-icon {
-  display: grid;
-  width: 58px;
-  height: 58px;
-  place-items: center;
-  border: 1px solid var(--border-default);
-  border-radius: 16px;
-  background: var(--surface-secondary);
-  color: var(--accent-secondary);
-}
-
-.ws-mobile__app-content {
-  min-height: 0;
-  flex: 1;
-  overflow: auto;
-  padding: 20px;
-}
-
-.ws-mobile__navigation {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  min-height: 64px;
-  justify-content: space-around;
-  align-items: center;
-  margin-top: auto;
-  border-top: 1px solid var(--border-default);
-  background: var(--surface-primary);
-}
-
-.ws-mobile__navigation button {
-  padding: 12px 20px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--text-primary);
-  font: inherit;
-  cursor: pointer;
-}
-
-.ws-mobile button:focus-visible {
-  outline: 2px solid var(--accent-secondary);
-  outline-offset: 2px;
-}
-
-.ws-mobile__section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.ws-mobile__section-header h2 {
-  margin: 0;
-}
-
-.ws-mobile__section-header button {
-  border: 0;
-  background: transparent;
-  color: var(--accent-secondary);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.ws-mobile__search {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
-  color: var(--text-secondary);
-  font-size: 12px;
-}
-
-.ws-mobile__search input {
-  width: 100%;
-  min-height: 44px;
-  padding: 12px;
-  border: 1px solid var(--border-default);
-  border-radius: 10px;
-  background: var(--surface-secondary);
-  color: var(--text-primary);
-  font: inherit;
-}
-
-.ws-mobile__search input:focus-visible {
-  outline: 2px solid var(--accent-secondary);
-  outline-offset: 2px;
-}
-
-.ws-mobile__navigation {
-  position: sticky;
-  z-index: 20;
-  bottom: 0;
-  display: flex;
-  width: 100%;
-  min-height: 68px;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: space-around;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  border-top: 1px solid var(--border-default);
-  background: var(--surface-primary);
-}
-
-.ws-mobile__navigation button {
-  display: flex;
-  min-width: 100px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 14px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.ws-mobile__navigation button.ws-mobile__nav-active {
-  background: var(--surface-secondary);
-  color: var(--accent-secondary);
-}
-
-.ws-mobile__app-content {
-  width: 100%;
-  min-width: 0;
-  flex: 1;
-  overflow: auto;
-  overscroll-behavior: contain;
-}
-
-.ws-mobile__navigation {
-  box-sizing: border-box;
-  padding-right: env(safe-area-inset-right, 0px);
-  padding-left: env(safe-area-inset-left, 0px);
-}
-
-.ws-mobile__navigation button {
-  min-width: 0;
-  flex: 1;
-}
-
-.ws-mobile__catalog h1 {
-  margin: 0 0 20px;
-  font-size: 20px;
-}
-
-.ws-mobile__system-bar {
-  display: flex;
-  min-height: 48px;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 16px;
-  border-bottom: 1px solid var(--border-default);
-  background: var(--surface-primary);
-}
-
-.ws-mobile__system-bar > strong {
-  color: var(--accent-secondary);
-  font-size: 13px;
-  letter-spacing: 0.4px;
-}
-
-.ws-mobile__system-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ws-mobile__system-actions button {
+/* === BARRA DE AÇÕES DO APLICATIVO === */
+/* ----- Estrutura e identidade ----- */
+.ws-mobile__app-toolbar {
   position: relative;
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-.ws-mobile__system-actions button:hover,
-.ws-mobile__system-actions button[aria-expanded='true'] {
-  background: var(--surface-secondary);
-  color: var(--accent-secondary);
-}
-
-.ws-mobile__badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: grid;
-  min-width: 15px;
-  height: 15px;
-  place-items: center;
-  padding: 0 3px;
-  border-radius: 999px;
-  background: var(--accent-secondary);
-  color: var(--surface-primary);
-  font-size: 9px;
-  font-weight: 700;
-}
-
-.ws-mobile__overlay {
-  position: fixed;
-  z-index: 100;
-  inset: 0;
+  z-index: 21;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  background: rgb(0 0 0 / 55%);
+  min-width: 0;
+  min-height: 62px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px max(12px, env(safe-area-inset-right, 0px)) 10px max(12px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid color-mix(in srgb, var(--text-primary, #fff) 12%, transparent);
+  background: var(--surface-primary, #121b2c);
 }
 
-.ws-mobile__panel {
-  width: 100%;
-  max-width: 600px;
-  max-height: min(80dvh, 720px);
-  overflow-y: auto;
-  border-radius: 18px 18px 0 0;
-  background: var(--panel-background);
-  box-shadow: var(--panel-shadow);
-}
-
-.ws-mobile__panel .taskbar-notifications,
-.ws-mobile__panel .taskbar-quick-controls {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: none;
-  max-height: min(80dvh, 720px);
-  border: 0;
-  border-radius: 18px 18px 0 0;
-  box-shadow: none;
-}
-
-.ws-mobile__system-actions button:focus-visible,
-.ws-mobile__panel button:focus-visible {
-  outline: 2px solid var(--accent-secondary);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ws-mobile__overlay {
-    scroll-behavior: auto;
-  }
-}
-
-.ws-mobile__content-shell {
+.ws-mobile__app-toolbar-start, .ws-mobile__app-toolbar-actions {
   display: flex;
-  min-height: 100dvh;
-  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+}
+
+.ws-mobile__app-identity {
+  display: flex;
+  min-width: 0;
   flex-direction: column;
+  gap: 2px;
+  padding-left: 5px;
 }
 
-.ws-mobile__app-content[hidden],
-.ws-mobile__instance[hidden] {
-  display: none !important;
+.ws-mobile__app-eyebrow {
+  color: var(--text-secondary, #aab5ce);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
 }
 
-.ws-mobile__instance {
+.ws-mobile__app-identity strong {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ----- Botões de navegação e encerramento ----- */
+.ws-mobile__app-action {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--text-primary, #fff) 13%, transparent);
+  border-radius: 13px;
+  background: var(--surface-secondary, #253149);
+  color: var(--text-primary, #fff);
+}
+
+.ws-mobile__app-action:hover { background: var(--surface-hover, #34435e); }
+.ws-mobile__app-action--close { color: #fff; background: #923b4a; border-color: #a24d5c; }
+.ws-mobile__app-action--close:hover { background: #a74454; }
+
+/* === SUPERFÍCIE DE APLICATIVO === */
+/* ----- Conteúdo útil e rolagem ----- */
+.ws-mobile[data-screen='app'] .ws-mobile__app-content {
+  margin: 0;
+  background: var(--surface-primary, #121b2c);
+}
+
+.ws-mobile[data-screen='app'] .ws-mobile__instance {
+  overflow: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+}
+
+.ws-mobile[data-screen='app'] .ws-mobile__instance > .desktop-window__content {
+  width: 100%;
   min-width: 0;
   min-height: 100%;
 }
 
-.ws-mobile__loading {
-  margin: 20px;
-  color: var(--text-secondary);
-  font-size: 13px;
-}
-
-.ws-mobile__overlay {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-.ws-mobile__panel {
-  overscroll-behavior: contain;
-}
-
-.ws-mobile__app-content {
-  overflow-x: hidden;
-}
-
-/* Preferência visual exclusiva do Mobile. */
-
-.ws-mobile[data-grid-density='default'] .ws-mobile__grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.ws-mobile[data-grid-density='comfortable'] .ws-mobile__grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 16px;
-  row-gap: 20px;
-}
-
-.ws-mobile[data-grid-density='comfortable'] .ws-mobile__app-button {
-  min-height: 96px;
-  padding: 12px 8px;
-}
-
-@media (max-width: 360px) {
-  .ws-mobile .ws-mobile__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* Wallpaper is isolated from app documents; text remains on readable surfaces. */
-.ws-mobile {
+/* === NAVEGAÇÃO COM BOTÕES === */
+/* ----- Barra de navegação das telas do sistema ----- */
+.ws-mobile__bottom-navigation {
   position: relative;
-  isolation: isolate;
-}
-.ws-mobile__wallpaper {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-.ws-mobile__catalog {
-  background: color-mix(in srgb, var(--surface-primary) 96%, transparent);
-}
-.ws-mobile__welcome {
-  background: color-mix(in srgb, var(--surface-secondary) 96%, transparent);
-}
-@media (max-width: 360px) {
-  .ws-mobile[data-grid-density='default'] .ws-mobile__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  z-index: 25;
+  display: flex;
+  min-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px max(12px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(12px, env(safe-area-inset-left, 0px));
+  border-top: 1px solid #ffffff20;
+  background: var(--surface-primary, #10192bd9);
+  backdrop-filter: blur(18px);
 }
 
-.ws-mobile__welcome {
-  padding: 32px 22px;
-  border: 1px solid var(--border-default);
-  border-radius: 22px;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--accent-primary) 15%, var(--surface-primary)),
-    var(--surface-primary)
-  );
-  margin-bottom: 22px;
-}
-.ws-mobile__welcome > span {
-  color: var(--accent-secondary);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  font-weight: 800;
-}
-.ws-mobile__welcome h1 {
-  font-size: 32px;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-}
-.ws-mobile__welcome p {
-  line-height: 1.65;
-  max-width: 60ch;
-}
-.ws-mobile__app-button {
-  min-height: 110px;
-  border: 1px solid var(--border-default);
-  border-radius: 16px;
-}
-
-/* === Área disponível e alvos de toque === */
-.ws-mobile[data-screen='app'] .ws-mobile__content-shell {
-  height: 100dvh;
-  min-height: 0;
-  overflow: hidden;
-}
-.ws-mobile__header {
-  flex-shrink: 0;
-  padding-inline: max(12px, env(safe-area-inset-left, 0px))
-    max(12px, env(safe-area-inset-right, 0px));
-}
-.ws-mobile__header strong {
+.ws-mobile__navigation-button {
+  display: flex;
+  max-width: 150px;
   min-width: 0;
-  overflow-wrap: anywhere;
+  min-height: 45px;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #ffffff20;
+  border-radius: 14px;
+  background: var(--surface-secondary, #253149);
+  color: var(--text-primary, #fff);
+  font-size: 12px;
+  font-weight: 600;
 }
-.ws-mobile__header button,
-.ws-mobile__system-actions button,
-.ws-mobile__section-header button,
-.ws-mobile__navigation button {
-  min-height: 44px;
-  min-width: 44px;
+
+/* === RESPONSIVIDADE DAS AÇÕES === */
+/* ----- Telas estreitas ----- */
+@media (max-width: 365px) {
+  .ws-mobile__app-action { width: 36px; height: 38px; flex-basis: 36px; }
+  .ws-mobile__app-toolbar { gap: 4px; padding-inline: 8px; }
+  .ws-mobile__app-identity strong { font-size: 13px; }
+  .ws-mobile__navigation-button { gap: 4px; font-size: 11px; }
 }
-.ws-mobile__system-bar {
-  padding-top: max(6px, env(safe-area-inset-top, 0px));
-}
-@media (min-width: 600px) {
-  .ws-mobile[data-grid-density='default'] .ws-mobile__grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .ws-mobile[data-grid-density='comfortable'] .ws-mobile__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
+
+/* === PAINÉIS === */
+.ws-mobile__overlay{position:absolute;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(48px + env(safe-area-inset-top,0px)) 10px calc(16px + env(safe-area-inset-bottom,0px));background:#05091080;backdrop-filter:blur(5px)}
+.ws-mobile__panel{width:100%;max-width:540px;max-height:100%;overflow:auto;border:1px solid #fff3;border-radius:24px;background:var(--surface-primary,#151c2e);box-shadow:0 18px 60px #0008}
+.ws-mobile__panel .taskbar-notifications,.ws-mobile__panel .taskbar-quick-controls{position:static;inset:auto;transform:none;max-height:100%;width:100%;max-width:100%;box-shadow:none}
+
+/* === RESPONSIVIDADE E ACESSIBILIDADE === */
+@media(max-width:340px){.ws-mobile__home-grid,.ws-mobile__drawer-grid{column-gap:4px;row-gap:15px}.ws-mobile__home,.ws-mobile__drawer,.ws-mobile__switcher{padding-right:9px;padding-left:9px}.ws-mobile__dock-icon{width:47px;height:47px}.ws-mobile__switcher-card,.ws-mobile__switcher-select{min-height:170px}}
+@media(max-height:520px) and (orientation:landscape){.ws-mobile__home{gap:3px}.ws-mobile__home-tools{min-height:31px}.ws-mobile__home-grid{row-gap:12px;padding:5px 0}.ws-mobile__dock{min-height:55px;padding:3px}.ws-mobile__dock-app{height:46px}.ws-mobile__dock-icon{width:43px;height:43px}}
+@media(prefers-reduced-motion:reduce){.ws-mobile *{scroll-behavior:auto!important;animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
