@@ -7,9 +7,10 @@
     min-height: 350px;
     flex-shrink: 0;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
-    border-radius: 15px;
-    background: color-mix(in srgb, var(--text-primary) 2.5%, transparent);
+    border: 0;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--surface-secondary) 68%, var(--surface-primary));
+    box-shadow: 0 5px 18px rgb(0 0 0 / 5%);
     container-type: inline-size;
 }
 
@@ -158,12 +159,8 @@
     min-width: 0;
     min-height: 330px;
     padding: 22px;
-    border-left: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
-    background:
-        radial-gradient(ellipse at 85% 10%,
-            color-mix(in srgb, var(--accent-primary) 5%, transparent),
-            transparent 70%),
-        color-mix(in srgb, var(--text-primary) 2%, transparent);
+    border-left: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+    background: color-mix(in srgb, var(--surface-primary) 24%, transparent);
 }
 
 .ws-orbit__details-label {
@@ -204,10 +201,10 @@
     min-width: 0;
     min-height: 96px;
     padding: 15px;
-    border: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
-    border-radius: 11px;
-    background: color-mix(in srgb, var(--text-primary) 3%, transparent);
-    color: var(--text-muted);
+    border: 0;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--surface-secondary) 82%, var(--surface-primary));
+    color: var(--text-secondary);
     font-size: 11px;
 }
 
@@ -215,7 +212,6 @@
     color: var(--accent-primary);
 }
 
-/* ----- Valores dos indicadores ----- */
 .ws-orbit__details-grid strong {
     color: var(--text-primary);
     font-size: 22px;

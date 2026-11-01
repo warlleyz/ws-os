@@ -25,7 +25,7 @@
 | 11 | Perfil profissional e Sobre Mim | **Concluída e aprovada** |
 | 12 | Projetos e apresentação dos trabalhos | **Concluída e aprovada** |
 | 13 | Currículo e certificados | **Concluída e aprovada** |
-| 14 | Dev Insights e visualização de dados | Não iniciada |
+| 14 | Dev Insights e visualização de dados | **Concluída e aprovada** |
 | 15 | Busca global, navegação e compartilhamento | Não iniciada |
 | 16 | Notas e publicações | Não iniciada |
 | 17 | Arquivos e armazenamento pessoal | Não iniciada |
@@ -505,3 +505,50 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Catálogo e detalhes dos certificados revisados.
 - Currículo e certificados acessíveis no Desktop e Mobile.
 - **Próxima etapa: 14 — Dev Insights e visualização de dados.**
+
+## Etapa 14 — Dev Insights e visualização de dados
+
+**Estado:** em validação final.
+
+### Trabalhos realizados
+
+- Revisão dos indicadores públicos do GitHub.
+- Correção do cálculo de repositórios ativos por período.
+- Adequação dos cálculos às regras de pureza do React.
+- Revisão dos períodos e percentuais do WakaTime.
+- Padronização da apresentação das datas.
+- Correção dos estados de carregamento, indisponibilidade e ausência de dados.
+- Refinamento visual dos indicadores, gráficos e painéis.
+- Revisão da Cidade de Contribuições e do Universo de Projetos.
+- Organização dos arquivos JSX e CSS.
+- Preservação da responsividade no Desktop e Mobile.
+- Preservação dos controles interativos e das visualizações existentes.
+
+### Arquivos revisados
+
+- `src/apps/dev-insights/DevInsights.jsx`
+- `src/apps/dev-insights/DevInsights.css`
+- `src/apps/dev-insights/ContributionCity.jsx`
+- `src/apps/dev-insights/ContributionCity.css`
+- `src/apps/dev-insights/RepositoryOrbit.jsx`
+- `src/apps/dev-insights/RepositoryOrbit.css`
+
+### Validação pendente
+
+- Executar ESLint.
+- Executar testes automatizados.
+- Executar build de produção.
+- Conferir a integridade do diff.
+- Confirmar o funcionamento no Desktop e Mobile.
+
+### Decisões
+
+- Preservar as integrações existentes com GitHub e WakaTime.
+- Não tratar indicadores de atividade como medida automática de produtividade.
+- Não modificar `docs/INVENTARIO.csv`.
+- Manter a ordem das 33 etapas do planejamento.
+
+### Encerramento
+
+- A conclusão depende da aprovação das verificações finais.
+- **Próxima etapa prevista: 15 — Busca global, navegação e compartilhamento.**

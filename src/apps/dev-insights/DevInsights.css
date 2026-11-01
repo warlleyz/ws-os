@@ -3,6 +3,10 @@
     --insights-line: color-mix(in srgb, var(--text-primary) 10%, transparent);
     --insights-panel: color-mix(in srgb, var(--text-primary) 3%, transparent);
     --insights-accent: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+    --insights-surface: color-mix(in srgb, var(--surface-secondary) 68%, var(--surface-primary));
+    --insights-surface-hover: color-mix(in srgb, var(--surface-secondary) 85%, var(--surface-primary));
+    --insights-radius: 16px;
+    --insights-shadow: 0 5px 18px rgb(0 0 0 / 5%);
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -182,6 +186,7 @@
     to {
         transform: rotate(360deg);
     }
+
 }
 
 /* === Estrutura das seções === */
@@ -192,9 +197,10 @@
 
 .ws-insights__panel {
     padding: 22px;
-    border: 1px solid var(--insights-line);
-    border-radius: 15px;
-    background: var(--insights-panel);
+    border: 0;
+    border-radius: var(--insights-radius);
+    background: var(--insights-surface);
+    box-shadow: var(--insights-shadow);
 }
 
 /* === Cabeçalhos das seções === */
@@ -219,7 +225,7 @@
     flex: 0 0 38px;
     place-items: center;
     height: 38px;
-    border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    border: 0;
     border-radius: 11px;
     background: var(--insights-accent);
     color: var(--accent-primary);
@@ -273,31 +279,44 @@
     flex-direction: column;
     justify-content: space-between;
     min-width: 0;
-    min-height: 122px;
-    gap: 13px;
-    padding: 17px 19px;
-    border: 1px solid var(--insights-line);
-    border-radius: 13px;
-    background: var(--insights-panel);
-    transition: border-color 160ms ease, background-color 160ms ease;
+    min-height: 132px;
+    gap: 14px;
+    padding: 19px;
+    border: 0;
+    border-radius: 16px;
+    background: color-mix(in srgb,
+            var(--surface-secondary) 68%,
+            var(--surface-primary));
+    box-shadow: 0 5px 18px rgb(0 0 0 / 5%);
+    transition:
+        background-color 160ms ease,
+        box-shadow 160ms ease,
+        transform 160ms ease;
 }
 
 .ws-insights__metric:hover {
-    border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent);
-    background: color-mix(in srgb, var(--accent-primary) 5%, transparent);
+    transform: translateY(-2px);
+    background: color-mix(in srgb,
+            var(--surface-secondary) 85%,
+            var(--surface-primary));
+    box-shadow: 0 9px 22px rgb(0 0 0 / 8%);
 }
 
 .ws-insights__metric-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    color: var(--text-muted);
+    gap: 10px;
+    color: var(--text-secondary);
     font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
 }
 
 .ws-insights__metric-top svg {
     flex: none;
+    width: 18px;
+    height: 18px;
     color: var(--accent-primary);
 }
 
@@ -417,26 +436,24 @@
     flex-direction: column;
     justify-content: center;
     min-width: 0;
-    min-height: 126px;
-    gap: 9px;
-    padding: 20px;
-    border: 1px solid var(--insights-line);
-    border-radius: 12px;
-    background: var(--insights-panel);
+    min-height: 132px;
+    gap: 13px;
+    padding: 19px;
+    border: 0;
+    border-radius: var(--insights-radius);
+    background: var(--insights-surface-hover);
+    box-shadow: var(--insights-shadow);
 }
 
 .ws-insights__coding-metric:first-child {
-    border-color: color-mix(in srgb, var(--accent-primary) 19%, transparent);
-    background:
-        radial-gradient(ellipse at 85% 10%,
-            color-mix(in srgb, var(--accent-primary) 12%, transparent),
-            transparent 75%),
-        var(--insights-panel);
+    background: color-mix(in srgb, var(--accent-primary) 8%, var(--insights-surface-hover));
 }
 
 .ws-insights__coding-metric>span {
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
 }
 
 .ws-insights__coding-metric>strong {
@@ -461,9 +478,9 @@
     gap: 15px;
     min-width: 0;
     padding: 20px;
-    border: 1px solid var(--insights-line);
-    border-radius: 12px;
-    background: var(--insights-panel);
+    border: 0;
+    border-radius: var(--insights-radius);
+    background: var(--insights-surface-hover);
 }
 
 .ws-insights__coding-distribution-heading h4 {
@@ -803,12 +820,7 @@
     flex-direction: column;
     justify-content: flex-start;
     gap: 16px;
-    border-color: color-mix(in srgb, var(--accent-primary) 17%, transparent);
-    background:
-        radial-gradient(ellipse at 85% 5%,
-            color-mix(in srgb, var(--accent-primary) 8%, transparent),
-            transparent 65%),
-        var(--insights-panel);
+    background: color-mix(in srgb, var(--accent-primary) 7%, var(--insights-surface-hover));
 }
 
 .ws-waka2__details-label {
@@ -886,6 +898,7 @@
     .ws-insights__coding-list {
         grid-template-columns: minmax(0, 1fr);
     }
+
 }
 
 /* === Janelas médias === */
@@ -897,6 +910,7 @@
     .ws-insights__coding-metrics {
         grid-template-columns: minmax(0, 1fr);
     }
+
 }
 
 /* === Janelas compactas === */
@@ -937,6 +951,7 @@
     .ws-insights__section-title {
         align-items: flex-start;
     }
+
 }
 
 /* === Janelas muito estreitas === */
@@ -954,6 +969,7 @@
         flex-direction: column;
         gap: 5px;
     }
+
 }
 
 /* === Responsividade do explorador === */
@@ -965,6 +981,7 @@
     .ws-waka2__details {
         gap: 12px;
     }
+
 }
 
 @container (max-width: 400px) {
@@ -977,45 +994,26 @@
     .ws-waka2__tabs button {
         flex: 1 1 40%;
     }
+
 }
 
-/* === Botões padronizados da V2 === */
-.ws-insights :is(.ws-insights__refresh,
-    .ws-insights__explore-toggle,
-    .ws-insights__resource-state button,
-    .ws-waka2__expand) {
+/* === Controles padronizados === */
+.ws-insights :is(.ws-insights__refresh, .ws-insights__explore-toggle, .ws-insights__resource-state button, .ws-waka2__expand) {
     min-height: 38px;
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--insights-line);
     border-radius: 10px;
-    background: var(--surface-secondary);
+    background: var(--insights-surface);
     color: var(--text-primary);
     font: inherit;
     font-size: 12px;
     font-weight: 650;
     cursor: pointer;
-    transition:
-        background-color 160ms ease,
-        border-color 160ms ease,
-        color 160ms ease;
+    transition: background-color 160ms ease, border-color 160ms ease;
 }
 
-.ws-insights :is(.ws-insights__refresh,
-    .ws-insights__explore-toggle,
-    .ws-insights__resource-state button,
-    .ws-waka2__expand):hover:not(:disabled) {
+.ws-insights :is(.ws-insights__refresh, .ws-insights__explore-toggle, .ws-insights__resource-state button, .ws-waka2__expand):hover:not(:disabled) {
     border-color: var(--accent-primary);
-    background: color-mix(in srgb,
-            var(--accent-primary) 10%,
-            var(--surface-secondary));
-}
-
-.ws-insights :is(.ws-insights__refresh,
-    .ws-insights__explore-toggle,
-    .ws-insights__resource-state button,
-    .ws-waka2__expand):active:not(:disabled) {
-    background: color-mix(in srgb,
-            var(--accent-primary) 16%,
-            var(--surface-secondary));
+    background: var(--insights-accent);
 }
 
 .ws-insights button:disabled {
@@ -1026,11 +1024,9 @@
 /* === Categorias do explorador === */
 .ws-insights .ws-waka2__tabs {
     padding: 5px;
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--insights-line);
     border-radius: 12px;
-    background: color-mix(in srgb,
-            var(--surface-secondary) 65%,
-            transparent);
+    background: var(--insights-surface);
 }
 
 .ws-insights .ws-waka2__tabs button {
@@ -1044,18 +1040,14 @@
 }
 
 .ws-insights .ws-waka2__tabs button:hover:not(.is-active) {
-    border-color: var(--border-default);
-    background: var(--surface-secondary);
+    border-color: var(--insights-line);
+    background: var(--insights-surface-hover);
     color: var(--text-primary);
 }
 
 .ws-insights .ws-waka2__tabs button.is-active {
-    border-color: color-mix(in srgb,
-            var(--accent-primary) 35%,
-            transparent);
-    background: color-mix(in srgb,
-            var(--accent-primary) 12%,
-            var(--surface-secondary));
+    border-color: color-mix(in srgb, var(--accent-primary) 35%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 12%, var(--surface-secondary));
     color: var(--accent-primary);
     box-shadow: none;
 }
@@ -1064,9 +1056,7 @@
 .ws-insights__period-control .ws-select__trigger {
     border-radius: 10px;
     background: var(--surface-secondary);
-    transition:
-        border-color 160ms ease,
-        background-color 160ms ease;
+    transition: border-color 160ms ease, background-color 160ms ease;
 }
 
 /* === Acessibilidade === */
@@ -1091,4 +1081,5 @@
     .ws-waka2__fill {
         transition: none;
     }
+
 }

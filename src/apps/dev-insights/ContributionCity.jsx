@@ -9,6 +9,7 @@ import {
     ZoomOut,
 } from 'lucide-react';
 import './ContributionCity.css';
+
 /* === Configuração geométrica === */
 const WEEKS_PER_DISTRICT = 14;
 const DISTRICT_WIDTH = 350;
@@ -18,6 +19,7 @@ const TILE_DEPTH = 7;
 const MIN_HEIGHT = 2;
 const MAX_HEIGHT = 54;
 const ZOOM_LEVELS = [1, 1.25, 1.5, 1.8];
+
 /* === Textos === */
 const COPY = {
     'pt-BR': {
@@ -83,10 +85,12 @@ const COPY = {
         scale: 'Height represents daily activity',
     },
 };
+
 /* === Utilitários de datas === */
 function dateToUTC(value) {
     return new Date(`${value}T12:00:00Z`);
 }
+
 function formatDate(value, locale) {
     return new Intl.DateTimeFormat(locale, {
         day: 'numeric',
@@ -95,6 +99,7 @@ function formatDate(value, locale) {
         timeZone: 'UTC',
     }).format(dateToUTC(value));
 }
+
 function formatMonth(value, locale) {
     return new Intl.DateTimeFormat(locale, {
         month: 'short',
@@ -102,6 +107,7 @@ function formatMonth(value, locale) {
         timeZone: 'UTC',
     }).format(dateToUTC(value));
 }
+
 /* === Preparação dos dados reais === */
 function buildCity(days) {
     const valid = days
@@ -174,6 +180,7 @@ function buildCity(days) {
         districts: [...districtMap.values()],
     };
 }
+
 /* === Geometria e desenho da cidade === */
 function buildingFaces({ x, y, height }) {
     return {
@@ -197,12 +204,14 @@ function buildingFaces({ x, y, height }) {
         ],
     };
 }
+
 function tracePolygon(ctx, points) {
     ctx.beginPath();
     ctx.moveTo(...points[0]);
     for (let i = 1; i < points.length; i += 1) ctx.lineTo(...points[i]);
     ctx.closePath();
 }
+
 function drawCity(ctx, buildings, districts, selectedDate, bestDate, locale, districtLabel, colors) {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     districts.forEach(({ originX, originY, index, firstDate, lastDate }) => {
@@ -245,6 +254,7 @@ function drawCity(ctx, buildings, districts, selectedDate, bestDate, locale, dis
         }
     });
 }
+
 function pointInPolygon(x, y, polygon) {
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
@@ -256,6 +266,7 @@ function pointInPolygon(x, y, polygon) {
     }
     return inside;
 }
+
 function hitTestBuilding(buildings, x, y) {
     for (let i = buildings.length - 1; i >= 0; i -= 1) {
         const faces = buildingFaces(buildings[i]);
@@ -265,6 +276,7 @@ function hitTestBuilding(buildings, x, y) {
     }
     return null;
 }
+
 /* === Camada Canvas: independente do React para cada edifício === */
 function CityCanvas({ buildings, districts, selectedDate, bestDate, locale, districtLabel, width, height, zoom, onSelect, ariaLabel }) {
     const canvasRef = useRef(null);
@@ -358,6 +370,7 @@ function CityCanvas({ buildings, districts, selectedDate, bestDate, locale, dist
         </div>
     );
 }
+
 /* === Indicador de resumo === */
 function SummaryItem({ label, value }) {
     return (
@@ -367,6 +380,7 @@ function SummaryItem({ label, value }) {
         </div>
     );
 }
+
 /* === Componente principal === */
 export default function ContributionCity({
     days = [],
@@ -418,6 +432,7 @@ export default function ContributionCity({
         : null;
     return (
         <section className="ws-city">
+
             {/* === Cabeçalho === */}
             <header className="ws-city__header">
                 <div className="ws-city__heading">
@@ -465,6 +480,7 @@ export default function ContributionCity({
                     </button>
                 </div>
             </header>
+
             {/* === Estados de carregamento === */}
             {status !== 'ready' ? (
                 <div className="ws-city__state" role="status">
@@ -489,6 +505,7 @@ export default function ContributionCity({
                 </div>
             ) : (
                 <>
+
                     {/* === Visualização e painel contextual === */}
                     <div className="ws-city__workspace">
                         <div className="ws-city__visualization">
@@ -514,6 +531,7 @@ export default function ContributionCity({
                                 </span>
                             </div>
                         </div>
+
                         {/* === Detalhes da seleção === */}
                         <aside className="ws-city__details">
                             <div className="ws-city__details-heading">
@@ -573,6 +591,7 @@ export default function ContributionCity({
                             </div>
                         </aside>
                     </div>
+
                     {/* === Resumo === */}
                     <footer className="ws-city__summary">
                         <SummaryItem

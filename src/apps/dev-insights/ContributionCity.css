@@ -5,13 +5,12 @@
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--accent-primary) 18%, transparent);
+    border: 0;
     border-radius: 16px;
-    background:
-        radial-gradient(ellipse at 35% 35%,
-            color-mix(in srgb, var(--accent-primary) 7%, transparent),
-            transparent 65%),
-        color-mix(in srgb, var(--text-primary) 2%, transparent);
+    background: color-mix(in srgb,
+            var(--surface-secondary) 68%,
+            var(--surface-primary));
+    box-shadow: 0 5px 18px rgb(0 0 0 / 5%);
     container-type: inline-size;
 }
 
@@ -23,7 +22,9 @@
     flex-wrap: wrap;
     gap: 16px;
     padding: 22px 24px;
-    border-bottom: 1px solid color-mix(in srgb, var(--text-primary) 7%, transparent);
+    border-bottom: 1px solid color-mix(in srgb,
+            var(--text-primary) 8%,
+            transparent);
 }
 
 .ws-city__heading {
@@ -197,8 +198,12 @@
     flex-direction: column;
     min-width: 0;
     padding: 21px;
-    border-left: 1px solid color-mix(in srgb, var(--text-primary) 9%, transparent);
-    background: color-mix(in srgb, var(--text-primary) 2%, transparent);
+    border-left: 1px solid color-mix(in srgb,
+            var(--text-primary) 8%,
+            transparent);
+    background: color-mix(in srgb,
+            var(--surface-primary) 24%,
+            transparent);
 }
 
 .ws-city__details-heading {

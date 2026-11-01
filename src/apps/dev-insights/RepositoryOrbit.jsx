@@ -1,25 +1,21 @@
-
 import { useMemo, useState } from 'react';
 import {
     ArrowUpRight,
-    GitFork,
     GitBranch,
+    GitFork,
     Layers3,
     Star,
 } from 'lucide-react';
-
 import './RepositoryOrbit.css';
 
 /* === Configuração das órbitas === */
 const MAX_VISIBLE = 15;
 const ORBIT_CAPACITIES = [4, 5, 6];
-
 const ORBITS = [
     { rx: 105, ry: 48 },
     { rx: 185, ry: 85 },
     { rx: 265, ry: 123 },
 ];
-
 const COLORS = [
     '#65a9ff',
     '#a68aff',
@@ -28,7 +24,6 @@ const COLORS = [
     '#dd81be',
     '#86c96d',
 ];
-
 const COPY = {
     'pt-BR': {
         title: 'Universo de projetos',
@@ -45,6 +40,9 @@ const COPY = {
         open: 'Abrir no GitHub',
         more: 'repositórios adicionais',
         empty: 'Nenhum repositório disponível.',
+        loading: 'Carregando repositórios do GitHub...',
+        unavailable: 'Não foi possível consultar os repositórios.',
+        notConfigured: 'GitHub não configurado.',
         navigation: 'Navegação entre repositórios',
         all: 'Todos os projetos',
     },
@@ -63,6 +61,9 @@ const COPY = {
         open: 'Open on GitHub',
         more: 'additional repositories',
         empty: 'No repositories available.',
+        loading: 'Loading GitHub repositories...',
+        unavailable: 'Unable to fetch repositories.',
+        notConfigured: 'GitHub is not configured.',
         navigation: 'Repository navigation',
         all: 'All projects',
     },
@@ -74,38 +75,29 @@ function createNodes(repositories) {
         .sort((a, b) => {
             const stars = (b.stars ?? 0) - (a.stars ?? 0);
             if (stars) return stars;
-
             const recent =
                 Date.parse(b.updatedAt ?? '') -
                 Date.parse(a.updatedAt ?? '');
-
             return (Number.isFinite(recent) ? recent : 0) ||
                 a.name.localeCompare(b.name);
         })
         .slice(0, MAX_VISIBLE);
-
     let position = 0;
-
     return ORBIT_CAPACITIES.flatMap((capacity, orbitIndex) => {
         const group = visible.slice(position, position + capacity);
         position += capacity;
-
         const { rx, ry } = ORBITS[orbitIndex];
-
         return group.map((repo, index) => {
             const angle =
                 (index / capacity) * Math.PI * 2 -
                 Math.PI / 2 +
                 orbitIndex * 0.28;
-
             const x = 300 + Math.cos(angle) * rx;
             const y = 190 + Math.sin(angle) * ry;
-
             const size = Math.min(
                 22,
                 10 + Math.log2(1 + Math.max(0, repo.stars ?? 0)) * 3,
             );
-
             return {
                 repo,
                 x,
@@ -120,10 +112,8 @@ function createNodes(repositories) {
 /* === Formatação === */
 function formatDate(value, locale) {
     if (!value) return '—';
-
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return '—';
-
     return new Intl.DateTimeFormat(locale, {
         day: '2-digit',
         month: 'short',
@@ -135,34 +125,30 @@ function formatDate(value, locale) {
 export default function RepositoryOrbit({
     repositories = [],
     locale = 'pt-BR',
+    status = 'ready',
 }) {
     const copy = COPY[locale] || COPY['pt-BR'];
     const [selectedId, setSelectedId] = useState(null);
-
     const nodes = useMemo(
         () => createNodes(repositories),
         [repositories],
     );
-
     const selected =
         nodes.find(({ repo }) => repo.id === selectedId)?.repo ?? null;
-
     const visible = nodes.length;
     const remaining = Math.max(0, repositories.length - visible);
-
     const languages = [...new Set(
         nodes.map(({ repo }) => repo.language).filter(Boolean),
     )];
-
     const languageColors = new Map(
         languages.map((name, index) => [
             name,
             COLORS[index % COLORS.length],
         ]),
     );
-
     return (
         <section className="ws-orbit">
+
             {/* === Cabeçalho === */}
             <header className="ws-orbit__header">
                 <div>
@@ -173,19 +159,24 @@ export default function RepositoryOrbit({
                     <h3>{copy.title}</h3>
                     <p>{copy.description}</p>
                 </div>
-
                 <span className="ws-orbit__count">
                     <GitBranch size={14} />
                     {repositories.length} {copy.repositories.toLowerCase()}
                 </span>
             </header>
-
-            {nodes.length === 0 ? (
+            {status !== 'ready' || nodes.length === 0 ? (
                 <div className="ws-orbit__empty" role="status">
-                    {copy.empty}
+                    {status === 'loading'
+                        ? copy.loading
+                        : status === 'error'
+                            ? copy.unavailable
+                            : status === 'idle'
+                                ? copy.notConfigured
+                                : copy.empty}
                 </div>
             ) : (
                 <div className="ws-orbit__layout">
+
                     {/* === Área orbital === */}
                     <div className="ws-orbit__stage">
                         <svg
@@ -216,7 +207,6 @@ export default function RepositoryOrbit({
                                 r="95"
                                 fill="url(#ws-orbit-core)"
                             />
-
                             {ORBITS.map((orbit, index) => (
                                 <ellipse
                                     key={index}
@@ -227,7 +217,6 @@ export default function RepositoryOrbit({
                                     className="ws-orbit__ring"
                                 />
                             ))}
-
                             <circle
                                 cx="300"
                                 cy="190"
@@ -247,13 +236,11 @@ export default function RepositoryOrbit({
                                 const color =
                                     languageColors.get(repo.language) ||
                                     'var(--accent-primary)';
-
                                 const label = [
                                     repo.name,
                                     repo.language || copy.unknown,
                                     `${repo.stars ?? 0} ${copy.stars}`,
                                 ].join(', ');
-
                                 return (
                                     <g
                                         key={repo.id}
@@ -278,21 +265,18 @@ export default function RepositoryOrbit({
                                         style={{ '--orbit-color': color }}
                                     >
                                         <title>{label}</title>
-
                                         <circle
                                             cx={x}
                                             cy={y}
                                             r={size + 8}
                                             className="ws-orbit__node-halo"
                                         />
-
                                         <circle
                                             cx={x}
                                             cy={y}
                                             r={size}
                                             className="ws-orbit__node-body"
                                         />
-
                                         <circle
                                             cx={x - size * 0.25}
                                             cy={y - size * 0.25}
@@ -303,7 +287,6 @@ export default function RepositoryOrbit({
                                 );
                             })}
                         </svg>
-
                         <div className="ws-orbit__stage-footer">
                             <span>{copy.selectHint}</span>
                             <span>
@@ -319,38 +302,32 @@ export default function RepositoryOrbit({
                                 <span className="ws-orbit__details-label">
                                     REPOSITORY DETAILS
                                 </span>
-
                                 <h4>{selected.name}</h4>
                                 <p className="ws-orbit__description">
                                     {selected.description || copy.noDescription}
                                 </p>
-
                                 <div className="ws-orbit__details-grid">
                                     <div>
                                         <Star size={14} />
                                         <span>{copy.stars}</span>
                                         <strong>{selected.stars ?? '—'}</strong>
                                     </div>
-
                                     <div>
                                         <GitFork size={14} />
                                         <span>{copy.forks}</span>
                                         <strong>{selected.forks ?? '—'}</strong>
                                     </div>
                                 </div>
-
                                 <dl className="ws-orbit__properties">
                                     <div>
                                         <dt>{copy.language}</dt>
                                         <dd>{selected.language || copy.unknown}</dd>
                                     </div>
-
                                     <div>
                                         <dt>{copy.updated}</dt>
                                         <dd>{formatDate(selected.updatedAt, locale)}</dd>
                                     </div>
                                 </dl>
-
                                 {selected.repository && (
                                     <a
                                         className="ws-orbit__link"
@@ -375,7 +352,7 @@ export default function RepositoryOrbit({
             )}
 
             {/* === Legenda === */}
-            {nodes.length > 0 && (
+            {status === 'ready' && nodes.length > 0 && (
                 <footer className="ws-orbit__footer">
                     <div className="ws-orbit__legend">
                         {languages.map((name) => (
@@ -389,7 +366,6 @@ export default function RepositoryOrbit({
                             </span>
                         ))}
                     </div>
-
                     {remaining > 0 && (
                         <span className="ws-orbit__remaining">
                             +{remaining} {copy.more}
