@@ -508,7 +508,7 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 ## Etapa 14 — Dev Insights e visualização de dados
 
-**Estado:** em validação final.
+**Estado:** concluída e aprovada.
 
 ### Trabalhos realizados
 
@@ -550,5 +550,5 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 ### Encerramento
 
-- A conclusão depende da aprovação das verificações finais.
+- Etapa 14 concluída e validada pelo proprietário.
 - **Próxima etapa prevista: 15 — Busca global, navegação e compartilhamento.**
