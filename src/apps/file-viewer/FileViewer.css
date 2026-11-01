@@ -246,6 +246,12 @@
   padding: 4px 8px;
 }
 
+/* ----- Grupos de navegação e ferramentas ----- */
+.ws-file-viewer__pdf-tools-primary,
+.ws-file-viewer__pdf-tools-secondary {
+  display: contents;
+}
+
 .ws-file-viewer__zoom-value,
 .ws-file-viewer__page-count {
   min-width: 38px;
@@ -615,5 +621,188 @@
   .ws-file-viewer__pdf-tools button,
   .ws-file-viewer__properties-heading button {
     transition: none;
+  }
+}
+
+/* === Experiência Mobile do visualizador === */
+/* ----- Aproveitamento da área disponível ----- */
+@media (max-width: 600px) {
+  .ws-file-viewer {
+    gap: 0;
+    padding: 10px !important;
+  }
+
+  .ws-file-viewer__header {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 9px;
+    margin-bottom: 9px;
+  }
+
+  .ws-file-viewer__identity {
+    flex: 1 1 100%;
+    gap: 9px;
+  }
+
+  .ws-file-viewer__file-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ws-file-viewer__identity-content h2 {
+    font-size: 13px;
+  }
+
+  .ws-file-viewer__identity-content p,
+  .ws-file-viewer__eyebrow {
+    font-size: 10px;
+  }
+
+  /* ----- Ações compactas ----- */
+  .ws-file-viewer__actions {
+    flex-wrap: nowrap;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .ws-file-viewer__actions a,
+  .ws-file-viewer__actions button {
+    flex: 1;
+    min-width: 0;
+    min-height: 36px;
+    padding: 7px;
+  }
+
+  /* ----- Controles do PDF em uma linha rolável ----- */
+  .ws-file-viewer__pdf-tools {
+    flex-wrap: nowrap;
+    gap: 5px;
+    min-height: 42px;
+    padding: 5px;
+    margin-bottom: 7px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+  }
+
+  .ws-file-viewer__pdf-tools button,
+  .ws-file-viewer__zoom-form,
+  .ws-file-viewer__page-count,
+  .ws-file-viewer__tool-divider {
+    flex-shrink: 0;
+  }
+
+  .ws-file-viewer__search-group {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    width: auto;
+    margin-left: 0;
+    gap: 6px;
+  }
+
+  .ws-file-viewer .ws-file-viewer__pdf-search {
+    flex: 0 0 170px;
+    width: 170px;
+    min-width: 170px;
+  }
+
+  /* ----- Prioridade para leitura do documento ----- */
+  .ws-file-viewer__workspace,
+  .ws-file-viewer__content,
+  .ws-file-viewer__pdf {
+    min-height: 0;
+  }
+
+  .ws-file-viewer__pdf-viewport {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 8px;
+  }
+}
+
+/* === Barra de ferramentas Mobile === */
+/* ----- Distribuição em dois níveis ----- */
+@media (max-width: 600px) {
+  .ws-file-viewer__pdf-tools {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 6px;
+    padding: 7px;
+    overflow: visible;
+  }
+
+  .ws-file-viewer__pdf-tools-primary,
+  .ws-file-viewer__pdf-tools-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .ws-file-viewer__pdf-tools-primary {
+    padding-bottom: 7px;
+    border-bottom: 1px solid var(--viewer-border);
+  }
+
+  .ws-file-viewer__pdf-tools-secondary {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  /* ----- Controles de navegação e zoom ----- */
+  .ws-file-viewer__pdf-tools-primary button {
+    flex: 0 0 auto;
+    min-width: 30px;
+    padding: 5px;
+  }
+
+  .ws-file-viewer__pdf-tools-primary .ws-file-viewer__tool-divider {
+    margin: 0 2px;
+  }
+
+  .ws-file-viewer__page-count {
+    flex: 0 0 auto;
+    min-width: 34px;
+  }
+
+  .ws-file-viewer__zoom-form {
+    flex: 0 0 auto;
+    padding: 0 5px;
+  }
+
+  /* ----- Ferramentas complementares ----- */
+  .ws-file-viewer__pdf-tools-secondary>button {
+    flex: 0 0 auto;
+    min-width: 34px;
+    padding: 5px 7px;
+  }
+
+  /* ----- Pesquisa integrada à segunda linha ----- */
+  .ws-file-viewer__search-group {
+    flex: 1 1 130px;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 4px;
+    min-width: 0;
+    width: auto;
+    margin-left: auto;
+  }
+
+  .ws-file-viewer .ws-file-viewer__pdf-search {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    height: 32px;
+    min-height: 32px;
+    padding: 0 7px;
+  }
+
+  .ws-file-viewer .ws-file-viewer__pdf-search input {
+    min-width: 0;
   }
 }

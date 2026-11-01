@@ -24,7 +24,7 @@
 | 10 | Experiência Mobile e adaptação entre telas | **Base concluída, validada e integrada à `main`** |
 | 11 | Perfil profissional e Sobre Mim | **Concluída e aprovada** |
 | 12 | Projetos e apresentação dos trabalhos | **Concluída e aprovada** |
-| 13 | Currículo e certificados | Não iniciada |
+| 13 | Currículo e certificados | **Concluída e aprovada** |
 | 14 | Dev Insights e visualização de dados | Não iniciada |
 | 15 | Busca global, navegação e compartilhamento | Não iniciada |
 | 16 | Notas e publicações | Não iniciada |
@@ -464,3 +464,44 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Etapa 12 concluída e aprovada pelo proprietário.
 - Funcionalidades e organização dos arquivos revisadas.
 - **Próxima etapa: 13 — Currículo e certificados.**
+
+## Etapa 13 — Currículo e certificados
+
+**Estado:** concluída e aprovada pelo proprietário.
+
+### Trabalhos realizados
+
+- Conferência do currículo profissional atualizado.
+- Melhoria da experiência de visualização do currículo em dispositivos móveis.
+- Preservação do funcionamento do visualizador no Desktop.
+- Revisão do catálogo de certificados, incluindo pesquisa, filtros e agrupamento por ano.
+- Reformulação visual dos cards dos certificados.
+- Padronização da interface do catálogo e da tela de detalhes.
+- Organização das informações de instituição, categoria, data e carga horária.
+- Preservação das funcionalidades de visualização, download e abertura de links externos.
+- Inclusão do certificado We Make Software — COREU 2026/2.
+- Preservação do certificado do primeiro semestre.
+- Revisão da responsividade no Desktop e Mobile.
+- Atualização do ambiente de testes para reconhecer os componentes reorganizados.
+- Correção de problemas identificados pelo ESLint e pelos testes automatizados.
+
+### Validação
+
+- `npm run lint` — aprovado.
+- `npm run test` — aprovado.
+- `npm run build` — aprovado.
+- Funcionamento visual e funcional aprovado pelo proprietário.
+
+### Decisões
+
+- Manter o currículo atual sem alterações de conteúdo.
+- Preservar os documentos originais dos certificados.
+- Não modificar `docs/INVENTARIO.csv`.
+- Reservar a revisão completa do Visualizador de Arquivos para a Etapa 18.
+
+### Encerramento
+
+- Etapa 13 concluída e aprovada pelo proprietário.
+- Catálogo e detalhes dos certificados revisados.
+- Currículo e certificados acessíveis no Desktop e Mobile.
+- **Próxima etapa: 14 — Dev Insights e visualização de dados.**

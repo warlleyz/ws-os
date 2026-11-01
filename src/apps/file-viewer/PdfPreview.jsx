@@ -462,6 +462,9 @@ export default function PdfPreview({ blob, name }) {
     <section className="ws-file-viewer__pdf" aria-label={`PDF: ${name}`}>
       {/* === Ferramentas de navegação e zoom === */}
       <div className="ws-file-viewer__pdf-tools" role="toolbar" aria-label={t('Controles do PDF')}>
+
+        {/* ----- Navegação e zoom ----- */}
+        <div className="ws-file-viewer__pdf-tools-primary">
         <button
           type="button"
           aria-label={t('Página anterior')}
@@ -544,13 +547,17 @@ export default function PdfPreview({ blob, name }) {
         >
           <Plus size={17} />
         </button>
-        <button
-          type="button"
-          disabled={!document}
-          onClick={() => setScale(1)}
-          title={t('Restaurar zoom')}
-          aria-label={t('Restaurar zoom')}
-        >
+        </div>
+
+        {/* ----- Ferramentas adicionais ----- */}
+        <div className="ws-file-viewer__pdf-tools-secondary">
+          <button
+            type="button"
+            disabled={!document}
+            onClick={() => setScale(1)}
+            title={t('Restaurar zoom')}
+            aria-label={t('Restaurar zoom')}
+          >
           100%
         </button>
         <button type="button" disabled={!document} onClick={fitWidth}>
@@ -608,7 +615,8 @@ export default function PdfPreview({ blob, name }) {
                 <ChevronRight size={16} />
               </button>
             </>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

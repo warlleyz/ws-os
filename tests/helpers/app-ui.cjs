@@ -38,6 +38,11 @@ async function renderApp(
       const presentationalComponents = new Set([
         'CertificateCard',
         'CertificateDetails',
+        'CertificateOverview',
+        'CertificateContent',
+        'CertificateTags',
+        'CertificateDocument',
+        'DetailsSectionHeading',
         'DetailsNavigation',
         'CategoryIcon',
         'CertificatesHeader',

@@ -261,6 +261,26 @@ export const portfolio = {
       },
       url: 'certificates/events/we-make-software-coreu-2026-01.pdf',
     },
+    {
+      id: 'we-make-software-coreu-2026-02',
+      title: {
+        'pt-BR': 'We Make Software — COREU 2026/2',
+        en: 'We Make Software — COREU 2026/2',
+      },
+      issuer: 'PUC Minas — Engenharia de Software',
+      category: 'event',
+      date: '2026-09-21',
+      workload: {
+        'pt-BR': '4 horas',
+        en: '4 hours',
+      },
+      description: {
+        'pt-BR':
+          'Participação no evento We Make Software — Coração Eucarístico, realizado em Belo Horizonte, no segundo semestre de 2026.',
+        en: 'Participation in the We Make Software event at the Coração Eucarístico campus in Belo Horizonte during the second semester of 2026.',
+      },
+      url: 'certificates/events/we-make-software-coreu-2026-02.pdf',
+    },
 
     /* ----- Cursos adicionais — outubro de 2026 ----- */
     {
