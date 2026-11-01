@@ -48,6 +48,8 @@ async function setup(instances, authorized = false) {
       MobileHome: 'Home',
       MobileCatalog: 'Catalog',
       MobileNavigation: 'Navigation',
+      MobileStatusBar: 'MobileStatusBar',
+      MobileHomeIndicator: 'MobileHomeIndicator',
       AppHost: 'AppHost',
       NotificationCenter: 'Notifications',
       QuickControls: 'Controls',

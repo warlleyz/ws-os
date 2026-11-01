@@ -484,3 +484,120 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* === Barra de status Mobile === */
+/* ----- Estrutura ----- */
+.ws-mobile__status-bar {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  min-height: 54px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(6px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 6px max(16px, env(safe-area-inset-left, 0px));
+  color: var(--text-primary);
+}
+
+/* ----- Horário ----- */
+.ws-mobile__status-time {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/* ----- Ações do sistema ----- */
+.ws-mobile__status-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ws-mobile__status-actions button {
+  position: relative;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* ----- Interações ----- */
+.ws-mobile__status-actions button:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+.ws-mobile__status-actions button[aria-expanded='true'] {
+  background: var(--surface-secondary);
+  color: var(--accent-secondary);
+}
+
+/* === Indicador inferior Mobile === */
+/* ----- Área de navegação ----- */
+.ws-mobile__home-indicator-container {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  min-height: 32px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 16px max(8px, env(safe-area-inset-bottom, 0px));
+}
+
+/* ----- Botão de retorno ----- */
+.ws-mobile__home-indicator {
+  display: flex;
+  width: 116px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ws-mobile__home-indicator span {
+  display: block;
+  width: 108px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--text-primary);
+  opacity: 0.85;
+}
+
+/* ----- Foco e interação ----- */
+.ws-mobile__home-indicator:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+.ws-mobile__home-indicator:active span {
+  transform: scaleX(0.85);
+}
+
+/* === Ajustes da estrutura Mobile === */
+/* ----- Área principal ----- */
+.ws-mobile__content-shell {
+  min-width: 0;
+  min-height: 100dvh;
+}
+
+/* ----- Conteúdo dos aplicativos ----- */
+.ws-mobile__app-content {
+  min-height: 0;
+}
+
+/* ----- Acessibilidade ----- */
+@media (prefers-reduced-motion: reduce) {
+  .ws-mobile__home-indicator span {
+    transition: none;
+  }
+}
