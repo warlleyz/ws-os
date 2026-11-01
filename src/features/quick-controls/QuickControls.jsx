@@ -58,6 +58,7 @@ export default function QuickControls({
   autoHideTaskbar,
   onAutoHideTaskbarChange,
   showAutoHideTaskbar = true,
+  onOpenSettings,
 }) {
   const locale = useLocale();
   const accessibility = useAccessibility();
@@ -87,6 +88,11 @@ export default function QuickControls({
 
   /* ----- Abrir o aplicativo Configurações ----- */
   function openSettings() {
+    if (onOpenSettings) {
+      onOpenSettings();
+      return;
+    }
+
     const opened = run(openApp, 'settings');
     if (opened) setQuickControlsOpen(false);
   }

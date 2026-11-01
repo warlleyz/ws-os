@@ -1344,6 +1344,10 @@
     "Envie uma mensagem profissional.": "Envie uma mensagem profissional.",
     "Portfólio de Desenvolvimento": "Portfólio de Desenvolvimento",
     "Pular apresentação": "Pular apresentação",
-    "Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo.": "Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo."
+    "Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo.": "Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo.",
+        "Nenhum widget ativo": "Nenhum widget ativo",
+        "Selecione os widgets que deseja exibir nas Configurações.": "Selecione os widgets que deseja exibir nas Configurações.",
+        "Escolha quais widgets aparecem na tela inicial do Mobile.": "Escolha quais widgets aparecem na tela inicial do Mobile.",
+        "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas."
   }
 }

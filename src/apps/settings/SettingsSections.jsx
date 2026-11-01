@@ -23,7 +23,11 @@ import { useAppearance, setAppearance } from '../../core/appearanceManager';
 import { useCursorMode, setCursorMode } from '../../core/cursorManager';
 import { useAccessibility, setAccessibility } from '../../core/effectsManager';
 import { useTaskbarAutoHide, setTaskbarAutoHide } from '../../core/taskbarPreferences';
-import { useMobilePreferences, setMobilePreferences } from '../../core/mobilePreferences';
+import {
+  useMobilePreferences,
+  setMobilePreferences,
+  setMobileWidgetVisibility,
+} from '../../core/mobilePreferences';
 import { useWidgetPreferences, configureWidget } from '../../core/widgetPreferences';
 import { getWidgetDefinition } from '../../core/widgetManager';
 import { restoreSystemPreferences } from '../../core/preferencesManager';
@@ -560,6 +564,39 @@ export default function SettingsSections({ activeSection }) {
             description={t('O modo Confortável aumenta a distância entre os aplicativos.')} />
           <p className="ws-settings__hint">{t('Essa configuração altera somente a grade de aplicativos do Mobile.')}</p>
         </SettingsCard>
+
+        {/* === WIDGETS MOBILE === */}
+        <SettingsCard
+          title={t('Widgets')}
+          description={t('Escolha quais widgets aparecem na tela inicial do Mobile.')}
+        >
+          {/* ----- Seleção de widgets ----- */}
+          <div className="ws-settings__preference-list">
+            {widgets.widgets.map((widget) => {
+              const definition = getWidgetDefinition(widget.widgetId);
+
+              if (!definition) return null;
+
+              return (
+                <SettingsToggle
+                  key={widget.widgetId}
+                  label={t(definition.name)}
+                  description={t(definition.description)}
+                  checked={(mobile.widgetIds ?? []).includes(widget.widgetId)}
+                  onChange={(visible) =>
+                    report(setMobileWidgetVisibility(widget.widgetId, visible))
+                  }
+                />
+              );
+            })}
+          </div>
+
+          {/* ----- Informação de organização ----- */}
+          <p className="ws-settings__hint">
+            {t('Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.')}
+          </p>
+        </SettingsCard>
+
         <WallpaperGallery shell="mobile" report={report} announce={announce} />
       </>
     );

@@ -1344,6 +1344,10 @@
     "Envie uma mensagem profissional.": "Send a professional message.",
     "Portfólio de Desenvolvimento": "Development Portfolio",
     "Pular apresentação": "Skip introduction",
-    "Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo.": "Explore my projects, skills, and Software Engineering journey through an interactive operating system."
+    "Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo.": "Explore my projects, skills, and Software Engineering journey through an interactive operating system.",
+        "Nenhum widget ativo": "No active widgets",
+        "Selecione os widgets que deseja exibir nas Configurações.": "Select the widgets you want to display in Settings.",
+        "Escolha quais widgets aparecem na tela inicial do Mobile.": "Choose which widgets appear on the Mobile home screen.",
+        "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Widgets are automatically arranged on Mobile. Desktop settings remain unchanged."
   }
 }

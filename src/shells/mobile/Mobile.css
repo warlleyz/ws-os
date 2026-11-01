@@ -1,204 +1,859 @@
-/* === ESTRUTURA MOBILE === */
-.ws-mobile{position:fixed;inset:0;z-index:100;isolation:isolate;display:flex;flex-direction:column;width:100%;height:100dvh;overflow:hidden;color:var(--text-primary,#fff);background:var(--surface-primary,#0c1222);font-family:inherit}
-.ws-mobile *{box-sizing:border-box}
-.ws-mobile button,.ws-mobile input{font:inherit}
-.ws-mobile button{cursor:pointer;-webkit-tap-highlight-color:transparent}
-.ws-mobile button:focus-visible,.ws-mobile input:focus-visible{outline:2px solid var(--accent-secondary,#86aaff);outline-offset:2px}
-.ws-mobile__wallpaper{position:absolute;inset:0;z-index:-1;pointer-events:none;background-position:center;background-size:cover;background-repeat:no-repeat}
-
-/* === BARRA DE STATUS === */
-.ws-mobile__status-bar{position:relative;z-index:20;display:flex;min-height:calc(48px + env(safe-area-inset-top,0px));flex:0 0 auto;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
-.ws-mobile__status-bar time{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;text-shadow:0 2px 8px #0006}
-.ws-mobile__status-actions{display:flex;align-items:center;gap:6px}
-.ws-mobile__status-actions button{position:relative;display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:14px;background:#111a2f55;color:inherit;backdrop-filter:blur(12px)}
-.ws-mobile__status-actions button[aria-expanded=true]{background:var(--accent-secondary,#7695dc);color:#101321}
-.ws-mobile__badge{position:absolute;top:0;right:0;min-width:17px;height:17px;padding:1px 4px;border-radius:20px;background:#fa637d;color:#fff;font-size:10px;font-weight:700}
-
-/* === HOME === */
-.ws-mobile__home{position:relative;display:flex;min-height:0;flex:1;flex-direction:column;gap:8px;padding:8px max(15px,env(safe-area-inset-right,0px)) 8px max(15px,env(safe-area-inset-left,0px));overflow:hidden}
-.ws-mobile__home-tools{display:flex;min-height:44px;flex:0 0 auto;align-items:center;justify-content:space-between;gap:12px;padding:0 8px}
-.ws-mobile__home-brand{font-size:13px;font-weight:800;letter-spacing:.18em;text-shadow:0 2px 8px #0008}
-.ws-mobile__home-tools button{min-height:36px;display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid #fff3;border-radius:14px;background:#15203690;color:inherit;backdrop-filter:blur(12px)}
-.ws-mobile__tool-actions{display:flex;gap:6px}
-.ws-mobile__home-pages{min-height:0;flex:1;overflow-y:auto;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y}
-.ws-mobile__home-pages::-webkit-scrollbar{display:none}
-.ws-mobile__home-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-content:start;gap:24px 8px;padding:16px 0}
-.ws-mobile__tile-wrap{position:relative;display:flex;min-width:0;justify-content:center}
-.ws-mobile__home-app{display:flex;min-width:0;width:100%;flex-direction:column;align-items:center;gap:9px;padding:4px 0;border:0;background:transparent;color:inherit}
-.ws-mobile__home-app-icon,.ws-mobile__dock-icon{display:grid;place-items:center;width:clamp(46px,13vw,61px);height:clamp(46px,13vw,61px);border:1px solid #fff3;border-radius:18px;background:linear-gradient(145deg,#263854cf,#142037dd);box-shadow:0 6px 18px #0004;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
-.ws-mobile__home-app-name{display:-webkit-box;max-width:100%;overflow:hidden;text-align:center;font-size:11px;line-height:1.3;text-shadow:0 1px 6px #000a;overflow-wrap:anywhere;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.ws-mobile__home-app:active .ws-mobile__home-app-icon,.ws-mobile__dock-app:active .ws-mobile__dock-icon{transform:scale(.94)}
-.ws-mobile__home-dots{display:flex;min-height:28px;align-items:center;justify-content:center;gap:2px}
-.ws-mobile__home-dots button{display:grid;place-items:center;width:27px;height:27px;border:0;background:transparent}
-.ws-mobile__home-dots span{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.4}
-.ws-mobile__home-dots .is-active span{width:8px;height:8px;opacity:1}
-.ws-mobile__dock{display:flex;min-height:78px;flex:0 0 auto;align-items:center;justify-content:space-around;gap:4px;padding:8px 10px;border:1px solid #fff3;border-radius:26px;background:#18253e99;box-shadow:0 12px 30px #0003;backdrop-filter:blur(24px) saturate(135%);-webkit-backdrop-filter:blur(24px) saturate(135%)}
-.ws-mobile__tile-wrap--dock{flex:1}
-.ws-mobile__dock-app{display:grid;place-items:center;width:100%;height:59px;border:0;background:transparent;color:inherit}
-.ws-mobile__dock-icon{width:54px;height:54px;border-radius:17px}
-.ws-mobile__dock-empty{display:grid;flex:1;place-items:center;color:#fffb}
-.ws-mobile__drawer-launcher{align-self:center;min-height:32px;padding:3px 14px;border:0;border-radius:12px;background:#111b2d33;color:inherit;font-size:11px;text-shadow:0 1px 6px #000a}
-.ws-mobile__drawer-launcher span{margin-left:8px;font-size:17px}
-.ws-mobile__home[data-editing=true] .ws-mobile__home-app-icon,.ws-mobile__home[data-editing=true] .ws-mobile__dock-icon{outline:1px dashed #fffa;outline-offset:3px}
-.ws-mobile__tile-edit{position:absolute;top:-8px;right:4px;z-index:2;display:grid;place-items:center;width:25px;height:25px;border:1px solid #fff6;border-radius:50%;background:#334b77;color:#fff}
-
-/* === CATÁLOGO E MULTITAREFA === */
-.ws-mobile__drawer,.ws-mobile__switcher{display:flex;min-height:0;flex:1;flex-direction:column;gap:16px;padding:14px 16px;overflow:hidden}
-.ws-mobile__screen-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.ws-mobile__screen-header small{font-size:11px;font-weight:800;letter-spacing:.12em;opacity:.65}
-.ws-mobile__screen-header h1{margin:3px 0 0;font-size:24px;line-height:1.2}
-.ws-mobile__screen-header button{min-width:44px;min-height:40px;padding:8px 12px;border:1px solid #fff3;border-radius:13px;background:#15233dc4;color:inherit}
-.ws-mobile__search{display:flex;min-height:47px;align-items:center;gap:10px;padding:0 14px;border:1px solid #fff3;border-radius:17px;background:#18243dc4;backdrop-filter:blur(16px)}
-.ws-mobile__search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:inherit}
-.ws-mobile__search input::placeholder{color:#fff9}
-.ws-mobile__drawer-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-content:start;gap:24px 8px;min-height:0;overflow:auto;padding:12px 0}
-.ws-mobile__empty{margin:18px 0;text-align:center;font-size:14px;opacity:.75}
-.ws-mobile__switcher-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:14px;min-height:0;overflow:auto;padding:4px}
-.ws-mobile__switcher-card{position:relative;min-height:214px;overflow:hidden;border:1px solid #fff3;border-radius:24px;background:#182640c9;box-shadow:0 8px 20px #0004;backdrop-filter:blur(18px)}
-.ws-mobile__switcher-card[data-active=true]{border-color:var(--accent-secondary,#8caeff)}
-.ws-mobile__switcher-select{display:flex;width:100%;min-height:214px;flex-direction:column;align-items:center;justify-content:center;gap:17px;padding:24px 12px;border:0;background:transparent;color:inherit}
-.ws-mobile__switcher-preview{display:grid;width:96px;height:112px;place-items:center;border:1px solid #fff2;border-radius:19px;background:#101b32c2}
-.ws-mobile__switcher-select strong{max-width:100%;overflow:hidden;font-size:12px;text-overflow:ellipsis;white-space:nowrap}
-.ws-mobile__switcher-close{position:absolute;top:8px;right:8px;display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:50%;background:#fff2;color:inherit}
-
-/* === APLICATIVOS EM TELA CHEIA === */
-.ws-mobile__app-content{position:relative;min-height:0;flex:1;overflow:hidden;background:var(--surface-primary,#11182a)}
-.ws-mobile__instance{position:absolute;inset:0;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain}
-.ws-mobile__instance[hidden],.ws-mobile__app-content[hidden]{display:none}
-.ws-mobile__instance .desktop-window__content{max-width:100%;min-width:0;min-height:100%;overflow:auto}
-
-/* === BARRA DE AÇÕES DO APLICATIVO === */
-/* ----- Estrutura e identidade ----- */
-.ws-mobile__app-toolbar {
-  position: relative;
-  z-index: 21;
+/* === ESTRUTURA PRINCIPAL === */
+/* ----- Sistema Mobile ----- */
+.ws-mobile {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
   display: flex;
+  width: 100%;
+  height: 100dvh;
   min-width: 0;
-  min-height: 62px;
+  flex-direction: column;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--surface-primary, #151820);
+  color: var(--text-primary, #fff);
+}
+
+/* ----- Papel de parede ----- */
+.ws-mobile__wallpaper {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  pointer-events: none;
+}
+
+/* === BARRA SUPERIOR === */
+/* ----- Estrutura ----- */
+.ws-mobile__status-bar {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  width: 100%;
+  min-height: calc(52px + env(safe-area-inset-top, 0px));
   flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 8px max(12px, env(safe-area-inset-right, 0px)) 10px max(12px, env(safe-area-inset-left, 0px));
-  border-bottom: 1px solid color-mix(in srgb, var(--text-primary, #fff) 12%, transparent);
-  background: var(--surface-primary, #121b2c);
+  gap: 12px;
+  padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  background: rgb(20 23 32 / 65%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
-.ws-mobile__app-toolbar-start, .ws-mobile__app-toolbar-actions {
+/* ----- Horário e data ----- */
+.ws-mobile__status-info {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
 }
 
-.ws-mobile__app-identity {
+.ws-mobile__status-info time {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ws-mobile__status-info>span {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* ----- Ações do sistema ----- */
+.ws-mobile__status-actions {
   display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-  padding-left: 5px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
 }
 
-.ws-mobile__app-eyebrow {
-  color: var(--text-secondary, #aab5ce);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .14em;
+.ws-mobile__status-actions button {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 }
 
-.ws-mobile__app-identity strong {
-  overflow: hidden;
-  font-size: 15px;
-  font-weight: 700;
-  text-overflow: ellipsis;
+.ws-mobile__status-actions button:hover,
+.ws-mobile__status-actions button[aria-expanded='true'] {
+  background: rgb(255 255 255 / 12%);
+}
+
+/* ----- Clima ----- */
+.ws-mobile__weather {
+  display: flex;
+  min-width: 30px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: inherit;
   white-space: nowrap;
 }
 
-/* ----- Botões de navegação e encerramento ----- */
-.ws-mobile__app-action {
+/* ----- Temperatura ----- */
+.ws-mobile__weather-temperature {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- Contador de notificações ----- */
+.ws-mobile__badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
   display: grid;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+  min-width: 17px;
+  height: 17px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--text-primary, #fff) 13%, transparent);
-  border-radius: 13px;
-  background: var(--surface-secondary, #253149);
-  color: var(--text-primary, #fff);
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--accent-primary, #588cff);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
 }
 
-.ws-mobile__app-action:hover { background: var(--surface-hover, #34435e); }
-.ws-mobile__app-action--close { color: #fff; background: #923b4a; border-color: #a24d5c; }
-.ws-mobile__app-action--close:hover { background: #a74454; }
-
-/* === SUPERFÍCIE DE APLICATIVO === */
-/* ----- Conteúdo útil e rolagem ----- */
-.ws-mobile[data-screen='app'] .ws-mobile__app-content {
-  margin: 0;
-  background: var(--surface-primary, #121b2c);
+/* === ÁREA DE TRABALHO MOBILE === */
+/* ----- Estrutura das páginas ----- */
+.ws-mobile__desktop {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.ws-mobile[data-screen='app'] .ws-mobile__instance {
-  overflow: auto;
+/* ----- Reconhecimento de gestos ----- */
+.ws-mobile__desktop {
+  touch-action: pan-y;
+}
+
+/* === PÁGINA DE APLICATIVOS === */
+/* ----- Área principal ----- */
+.ws-mobile__home {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
   overflow-x: hidden;
+  overflow-y: auto;
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 20px max(16px, env(safe-area-inset-left, 0px));
+  overscroll-behavior: contain;
   scrollbar-width: thin;
 }
 
-.ws-mobile[data-screen='app'] .ws-mobile__instance > .desktop-window__content {
-  width: 100%;
-  min-width: 0;
-  min-height: 100%;
+/* ----- Grade responsiva ----- */
+.ws-mobile__home-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-content: start;
+  gap: 26px 12px;
 }
 
-/* === NAVEGAÇÃO COM BOTÕES === */
-/* ----- Barra de navegação das telas do sistema ----- */
-.ws-mobile__bottom-navigation {
-  position: relative;
-  z-index: 25;
+/* ----- Aplicativo ----- */
+.ws-mobile__home-app {
   display: flex;
-  min-height: calc(64px + env(safe-area-inset-bottom, 0px));
-  flex: 0 0 auto;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px max(12px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(12px, env(safe-area-inset-left, 0px));
-  border-top: 1px solid #ffffff20;
-  background: var(--surface-primary, #10192bd9);
-  backdrop-filter: blur(18px);
-}
-
-.ws-mobile__navigation-button {
-  display: flex;
-  max-width: 150px;
   min-width: 0;
-  min-height: 45px;
-  flex: 1;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid #ffffff20;
-  border-radius: 14px;
-  background: var(--surface-secondary, #253149);
-  color: var(--text-primary, #fff);
-  font-size: 12px;
+  gap: 9px;
+  padding: 5px 2px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ----- Ícone ----- */
+.ws-mobile__home-app-icon {
+  display: grid;
+  width: clamp(48px, 13vw, 62px);
+  height: clamp(48px, 13vw, 62px);
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 17px;
+  background: rgb(30 35 48 / 65%);
+  box-shadow: 0 5px 18px rgb(0 0 0 / 20%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ----- Nome ----- */
+.ws-mobile__home-app>span:last-child {
+  display: -webkit-box;
+  width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 5px rgb(0 0 0 / 50%);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* ----- Interações ----- */
+.ws-mobile__home-app:active .ws-mobile__home-app-icon {
+  transform: scale(0.94);
+}
+
+/* === PÁGINA DE WIDGETS === */
+/* ----- Estrutura ----- */
+.ws-mobile__widgets {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 20px 16px;
+  overscroll-behavior: contain;
+}
+
+/* ----- Título temporário ----- */
+.ws-mobile__widgets h2 {
+  margin: 0;
+  font-size: 18px;
   font-weight: 600;
 }
 
-/* === RESPONSIVIDADE DAS AÇÕES === */
-/* ----- Telas estreitas ----- */
-@media (max-width: 365px) {
-  .ws-mobile__app-action { width: 36px; height: 38px; flex-basis: 36px; }
-  .ws-mobile__app-toolbar { gap: 4px; padding-inline: 8px; }
-  .ws-mobile__app-identity strong { font-size: 13px; }
-  .ws-mobile__navigation-button { gap: 4px; font-size: 11px; }
+/* === NAVEGAÇÃO ENTRE PÁGINAS === */
+/* ----- Contêiner ----- */
+.ws-mobile__pagination {
+  display: flex;
+  min-height: 44px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
 }
 
-/* === PAINÉIS === */
-.ws-mobile__overlay{position:absolute;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:calc(48px + env(safe-area-inset-top,0px)) 10px calc(16px + env(safe-area-inset-bottom,0px));background:#05091080;backdrop-filter:blur(5px)}
-.ws-mobile__panel{width:100%;max-width:540px;max-height:100%;overflow:auto;border:1px solid #fff3;border-radius:24px;background:var(--surface-primary,#151c2e);box-shadow:0 18px 60px #0008}
-.ws-mobile__panel .taskbar-notifications,.ws-mobile__panel .taskbar-quick-controls{position:static;inset:auto;transform:none;max-height:100%;width:100%;max-width:100%;box-shadow:none}
+/* ----- Botões ----- */
+.ws-mobile__pagination button {
+  display: grid;
+  width: 38px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
 
-/* === RESPONSIVIDADE E ACESSIBILIDADE === */
-@media(max-width:340px){.ws-mobile__home-grid,.ws-mobile__drawer-grid{column-gap:4px;row-gap:15px}.ws-mobile__home,.ws-mobile__drawer,.ws-mobile__switcher{padding-right:9px;padding-left:9px}.ws-mobile__dock-icon{width:47px;height:47px}.ws-mobile__switcher-card,.ws-mobile__switcher-select{min-height:170px}}
-@media(max-height:520px) and (orientation:landscape){.ws-mobile__home{gap:3px}.ws-mobile__home-tools{min-height:31px}.ws-mobile__home-grid{row-gap:12px;padding:5px 0}.ws-mobile__dock{min-height:55px;padding:3px}.ws-mobile__dock-app{height:46px}.ws-mobile__dock-icon{width:43px;height:43px}}
-@media(prefers-reduced-motion:reduce){.ws-mobile *{scroll-behavior:auto!important;animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
+.ws-mobile__pagination button span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-primary, #fff);
+  opacity: 0.4;
+}
+
+.ws-mobile__pagination button[aria-current='page'] span {
+  width: 9px;
+  height: 9px;
+  opacity: 1;
+}
+
+/* === JANELA DE APLICATIVO === */
+/* ----- Área disponível ----- */
+.ws-mobile__app-content {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  padding: 8px 8px 4px;
+}
+
+.ws-mobile__app-content[hidden] {
+  display: none;
+}
+
+/* === JANELAS DOS APLICATIVOS MOBILE === */
+/* ----- Estrutura da janela ----- */
+.ws-mobile__instance {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 16px;
+  background: var(--ws-window-background, #191d28);
+  box-shadow: 0 8px 28px rgb(0 0 0 / 18%);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ws-mobile__instance[hidden] {
+  display: none;
+}
+
+/* ----- Conteúdo hospedado ----- */
+.ws-mobile__instance .desktop-window__content {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ----- Conteúdo principal dos aplicativos ----- */
+.ws-mobile__instance>* {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ----- Conteúdo responsivo ----- */
+.ws-mobile__instance img,
+.ws-mobile__instance video,
+.ws-mobile__instance canvas {
+  max-width: 100%;
+}
+
+/* ----- Campos de formulário ----- */
+.ws-mobile__instance input,
+.ws-mobile__instance select,
+.ws-mobile__instance textarea {
+  max-width: 100%;
+}
+
+/* === BARRA INFERIOR DE SAÍDA === */
+/* ----- Estrutura ----- */
+.ws-mobile__exit-bar {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  min-height: calc(54px + env(safe-area-inset-bottom, 0px));
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px max(6px, env(safe-area-inset-bottom, 0px));
+}
+
+/* ----- Botão de saída ----- */
+.ws-mobile__exit-bar button {
+  display: flex;
+  min-width: 120px;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 12px;
+  background: rgb(30 35 48 / 75%);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ws-mobile__exit-bar button:active {
+  transform: scale(0.97);
+}
+
+/* === PAINÉIS SOBREPOSTOS === */
+/* ----- Sobreposição abaixo da barra superior ----- */
+.ws-mobile__overlay {
+  position: absolute;
+  top: calc(52px + env(safe-area-inset-top, 0px));
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 25;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8px 10px max(10px, env(safe-area-inset-bottom, 0px));
+  background: rgb(0 0 0 / 38%);
+}
+
+/* ----- Painel adaptado ----- */
+.ws-mobile__panel {
+  width: 100%;
+  max-width: 540px;
+  max-height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 18px;
+  background: var(--surface-primary, #1c202d);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 30%);
+  overscroll-behavior: contain;
+}
+
+/* ----- Conteúdo dos painéis existentes ----- */
+.ws-mobile__panel .taskbar-notifications,
+.ws-mobile__panel .taskbar-quick-controls {
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  min-width: 0;
+  position: relative;
+  inset: auto;
+  transform: none;
+}
+
+/* ----- Integração da Central de Controle ----- */
+.ws-mobile__panel .taskbar-quick-controls.ws-controls {
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  border: 0;
+  border-radius: inherit;
+  box-shadow: none;
+}
+
+/* ----- Conteúdo rolável ----- */
+.ws-mobile__panel .ws-controls__content {
+  overflow: visible;
+}
+
+/* ----- Área de interação ----- */
+.ws-mobile__panel .ws-controls__tiles {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* === NOTIFICAÇÕES MOBILE === */
+/* ----- Estrutura do painel ----- */
+.ws-mobile__panel .taskbar-notifications {
+  position: relative;
+  inset: auto;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  max-height: none;
+  flex-direction: column;
+  overflow: visible;
+  border: 0;
+  border-radius: inherit;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ----- Cabeçalho e controles ----- */
+.ws-mobile__panel .taskbar-notifications__header,
+.ws-mobile__panel .taskbar-notifications__controls,
+.ws-mobile__panel .taskbar-notifications__section {
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+/* ----- Área de notificações ----- */
+.ws-mobile__panel .taskbar-notifications__section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ----- Lista de notificações ----- */
+.ws-mobile__panel .taskbar-notifications__list {
+  min-width: 0;
+  max-height: none;
+  overflow: visible;
+}
+
+/* ----- Itens individuais ----- */
+.ws-mobile__panel .taskbar-notifications__item {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ----- Conteúdo textual ----- */
+.ws-mobile__panel .taskbar-notifications__item-content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ----- Botões de interação ----- */
+.ws-mobile__panel .taskbar-notifications__item-actions button,
+.ws-mobile__panel .taskbar-notifications__toolbar button,
+.ws-mobile__panel .taskbar-notifications__icon-button {
+  min-width: 32px;
+  min-height: 32px;
+  touch-action: manipulation;
+}
+
+/* ----- Larguras reduzidas ----- */
+@media (max-width: 360px) {
+
+  .ws-mobile__panel .taskbar-notifications__header,
+  .ws-mobile__panel .taskbar-notifications__controls {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .ws-mobile__panel .taskbar-notifications__item {
+    gap: 7px;
+  }
+}
+
+/* === ACESSIBILIDADE === */
+/* ----- Foco visível ----- */
+.ws-mobile button:focus-visible {
+  outline: 2px solid var(--accent-secondary, #82aaff);
+  outline-offset: 2px;
+}
+
+/* ----- Áreas de toque ----- */
+.ws-mobile__status-actions button,
+.ws-mobile__exit-bar button,
+.ws-mobile__pagination button {
+  touch-action: manipulation;
+}
+
+/* === RESPONSIVIDADE === */
+/* ----- Celulares estreitos ----- */
+@media (max-width: 360px) {
+  .ws-mobile__home {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .ws-mobile__home-grid {
+    column-gap: 6px;
+    row-gap: 20px;
+  }
+
+  .ws-mobile__status-bar {
+    gap: 6px;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .ws-mobile__status-info {
+    gap: 6px;
+  }
+
+  .ws-mobile__status-actions {
+    gap: 0;
+  }
+
+  .ws-mobile__status-actions button {
+    width: 38px;
+    height: 40px;
+  }
+}
+
+/* ----- Telas maiores ----- */
+@media (min-width: 480px) {
+  .ws-mobile__home-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .ws-mobile__app-content {
+    padding: 12px 12px 6px;
+  }
+}
+
+/* ----- Orientação horizontal ----- */
+@media (max-height: 520px) and (orientation: landscape) {
+  .ws-mobile__status-bar {
+    min-height: calc(44px + env(safe-area-inset-top, 0px));
+  }
+
+  .ws-mobile__home {
+    padding-top: 12px;
+  }
+
+  .ws-mobile__home-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    row-gap: 14px;
+  }
+
+  .ws-mobile__exit-bar {
+    min-height: calc(46px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ws-mobile__exit-bar button {
+    min-height: 36px;
+  }
+}
+
+/* ----- Movimento reduzido ----- */
+@media (prefers-reduced-motion: reduce) {
+
+  .ws-mobile__home-app-icon,
+  .ws-mobile__exit-bar button {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* === AVISOS TEMPORÁRIOS MOBILE === */
+/* ----- Posicionamento ----- */
+.ws-mobile__toast-region {
+  position: absolute;
+  top: calc(60px + env(safe-area-inset-top, 0px));
+  right: 10px;
+  left: 10px;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* ----- Contêiner de notificações ----- */
+.ws-mobile__toast-region .ws-toast-container {
+  position: relative;
+  inset: auto;
+  display: flex;
+  width: 100%;
+  max-width: 420px;
+  transform: none;
+  pointer-events: none;
+}
+
+/* ----- Fila ----- */
+.ws-mobile__toast-region .ws-toast-queue {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  max-width: 100%;
+  transform: none;
+  pointer-events: none;
+}
+
+/* ----- Aviso ativo ----- */
+.ws-mobile__toast-region .ws-toast {
+  max-width: 100%;
+  pointer-events: auto;
+}
+
+/* ----- Texto ----- */
+.ws-mobile__toast-region .ws-toast__content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ----- Dispositivos estreitos ----- */
+@media (max-width: 360px) {
+  .ws-mobile__toast-region {
+    right: 6px;
+    left: 6px;
+  }
+}
+
+/* ----- Movimento reduzido ----- */
+@media (prefers-reduced-motion: reduce) {
+  .ws-mobile__toast-region .ws-toast {
+    transition-duration: 0ms;
+    animation-duration: 0ms;
+  }
+}
+
+/* === WIDGETS MOBILE === */
+/* ----- Cabeçalho ----- */
+.ws-mobile__widgets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.ws-mobile__widgets-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+/* ----- Botão de configurações ----- */
+.ws-mobile__widgets-settings {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* ----- Organização automática ----- */
+.ws-mobile__widgets-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 14px;
+  padding-bottom: 12px;
+}
+
+/* ----- Contêiner dos widgets ----- */
+.ws-mobile__widget-card {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 180px;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  background: var(--ws-window-background);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+/* ----- Componentes compartilhados ----- */
+.ws-mobile__widget-card>.ws-widget {
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  min-height: 180px;
+  flex: 1;
+  border: 0;
+  border-radius: inherit;
+}
+
+/* ----- Calendário ----- */
+.ws-mobile__widget-card[data-widget-id='calendar'] {
+  min-height: 300px;
+}
+
+.ws-mobile__widget-card .ws-calendar__grid {
+  min-width: 0;
+}
+
+/* ----- Clima ----- */
+.ws-mobile__widget-card[data-widget-id='weather'] {
+  min-height: 240px;
+}
+
+/* ----- Dev Insights ----- */
+.ws-mobile__widget-card[data-widget-id='dev-insights'] {
+  min-height: 230px;
+}
+
+/* === ESTADO VAZIO DOS WIDGETS === */
+/* ----- Contêiner ----- */
+.ws-mobile__widgets-empty {
+  display: flex;
+  min-height: 240px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 16px;
+  border: 1px dashed var(--border-default);
+  border-radius: 16px;
+  background: var(--ws-window-background);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ----- Texto ----- */
+.ws-mobile__widgets-empty strong {
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.ws-mobile__widgets-empty p {
+  max-width: 250px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ----- Ação ----- */
+.ws-mobile__widgets-empty button {
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* === INTEGRAÇÃO RESPONSIVA DOS APLICATIVOS === */
+/* ----- Dimensões e fluxos internos ----- */
+.ws-mobile__instance {
+  container-type: inline-size;
+  scrollbar-width: thin;
+}
+
+.ws-mobile__instance :is(table, pre, code, iframe, svg) {
+  max-width: 100%;
+}
+
+.ws-mobile__instance :is(table, pre) {
+  overflow-x: auto;
+}
+
+.ws-mobile__instance :is(input, textarea, select, button) {
+  min-width: 0;
+}
+
+.ws-mobile__instance :is(h1, h2, h3, p, li, label) {
+  overflow-wrap: anywhere;
+}
+
+/* ----- Densidade da grade inicial ----- */
+.ws-mobile[data-grid-density='comfortable'] .ws-mobile__home-grid {
+  row-gap: 34px;
+  column-gap: 15px;
+}
+
+/* ----- Modo claro e superfícies adaptativas ----- */
+:root[data-theme='light'] .ws-mobile__status-bar {
+  background: color-mix(in srgb, var(--ws-window-background) 87%, transparent);
+  border-color: var(--border-default);
+}
+
+:root[data-theme='light'] .ws-mobile__home-app-icon,
+:root[data-theme='light'] .ws-mobile__exit-bar button {
+  background: color-mix(in srgb, var(--ws-window-background) 85%, transparent);
+  border-color: var(--border-default);
+}
+
+:root[data-theme='light'] .ws-mobile__home-app>span:last-child {
+  text-shadow: none;
+}
+
+/* ----- Altura útil com teclado virtual ----- */
+@supports (height: 100svh) {
+  .ws-mobile {
+    height: 100dvh;
+  }
+}
+
+/* ----- Navegação acessível ----- */
+.ws-mobile__pagination button {
+  min-height: 40px;
+  min-width: 40px;
+}
+
+.ws-mobile__desktop {
+  touch-action: pan-y;
+}

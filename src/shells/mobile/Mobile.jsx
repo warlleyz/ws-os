@@ -1,175 +1,651 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { ArrowLeft, Grid2X2, House, Layers3, X } from 'lucide-react';
+import { Bell, Settings2, X } from 'lucide-react';
+
 import { activateApp, closeApp, openApp, restoreApp } from '../../core/appManager';
 import { getAppDefinition, getRegisteredApps } from '../../core/appRegistry';
+import { useMobilePreferences } from '../../core/mobilePreferences';
+import { resolveNavigationOrigin } from '../../core/navigationManager';
 import { useSystem } from '../../core/useSystem';
-import { getWallpaperDefinition, useWallpaper, useWallpaperRevision } from '../../core/wallpaperManager';
-import { getAdminSessionVersion, isAdminAuthenticated, subscribeAdminSession } from '../../services/authService';
-import AppHost from '../../features/windows/AppHost';
+import {
+  getWallpaperDefinition,
+  useWallpaper,
+  useWallpaperRevision,
+} from '../../core/wallpaperManager';
+
 import NotificationCenter from '../../features/notifications/NotificationCenter';
+import NotificationToasts from '../../features/notifications/NotificationToasts';
 import QuickControls from '../../features/quick-controls/QuickControls';
+import AppHost from '../../features/windows/AppHost';
+
+import {
+  getAdminSessionVersion,
+  isAdminAuthenticated,
+  subscribeAdminSession,
+} from '../../services/authService';
+
+import { AppIcon } from '../../shared/components/AppIcon';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
-import MobileHome from './home/MobileHome';
-import MobileAppDrawer from './apps/MobileAppDrawer';
-import MobileAppSwitcher from './apps/MobileAppSwitcher';
-import MobileStatusBar from './system/MobileStatusBar';
+
+import MobileWeatherStatus from './system/MobileWeatherStatus';
+import MobileWidgets from './home/MobileWidgets';
+
 import './Mobile.css';
+
+/* === CONFIGURAÇÕES MOBILE === */
+const SWIPE_THRESHOLD = 60;
+const SWIPE_RATIO = 1.4;
 
 /* === SISTEMA MOBILE === */
 export default function Mobile({ theme, onThemeChange }) {
-  useLocale();
-  const { appState, run, notificationState, handleNotificationAction } = useSystem();
-  const wallpaper = useWallpaper('mobile');
-  useWallpaperRevision();
-  useSyncExternalStore(subscribeAdminSession, getAdminSessionVersion, getAdminSessionVersion);
-  const authorized = isAdminAuthenticated();
-  const shared = appState.instances.find((item) => item.origin === 'shared-link');
-  const [screen, setScreen] = useState(shared ? 'app' : 'home');
-  const [selectedInstanceId, setSelectedInstanceId] = useState(shared?.id ?? null);
-  const [activePanel, setActivePanel] = useState(null);
-  const gesture = useRef(null);
+  const locale = useLocale();
+  const mobilePreferences = useMobilePreferences();
 
-  /* === INSTÂNCIAS E PERMISSÕES === */
-  const apps = getRegisteredApps().filter((app) => (app.public && app.showInMenu !== false) || (authorized && app.id === 'administration'));
+  /* === SERVIÇOS DO SISTEMA === */
+  const {
+    appState,
+    run,
+    notificationState,
+    handleNotificationAction,
+    visibleToasts,
+    dismissToast,
+  } = useSystem();
+
+  const wallpaper = useWallpaper('mobile');
+
+  useWallpaperRevision();
+
+  useSyncExternalStore(
+    subscribeAdminSession,
+    getAdminSessionVersion,
+    getAdminSessionVersion,
+  );
+
+  const authorized = isAdminAuthenticated();
+
+  /* === ESTADOS === */
+  const sharedInstance = appState.instances.find(
+    (instance) => instance.origin === 'shared-link',
+  );
+
+  const [screen, setScreen] = useState(
+    sharedInstance ? 'app' : 'apps',
+  );
+
+  const [selectedInstanceId, setSelectedInstanceId] = useState(
+    sharedInstance?.id ?? null,
+  );
+
+  const [activePanel, setActivePanel] = useState(null);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+
+  /* === REFERÊNCIAS === */
+  const touchStartRef = useRef(null);
+  const touchDirectionRef = useRef(null);
+  const appStateRef = useRef(appState);
+  const panelRef = useRef(null);
+
+  /* === SINCRONIZAÇÃO === */
+  /* ----- Estado atualizado ----- */
+  useEffect(() => {
+    appStateRef.current = appState;
+  }, [appState]);
+
+  /* ----- Relógio ----- */
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const interval = window.setInterval(() => {
+      setCurrentTime(new Date());
+    }, 30000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  /* === DADOS DOS APLICATIVOS === */
+  /* ----- Aplicativos principais ----- */
+  const apps = getRegisteredApps().filter(
+    (app) =>
+      (app.public && app.desktopShortcut) ||
+      (app.public && app.id === 'wally-extended') ||
+      (authorized && app.id === 'administration'),
+  );
+
+  /* ----- Instâncias acessíveis ----- */
   const instances = appState.instances.filter((instance) => {
     const app = getAppDefinition(instance.appId);
-    return !instance.closing && (app?.public || (authorized && instance.appId === 'administration'));
-  });
-  const selected = instances.find((instance) => instance.id === selectedInstanceId);
-  const visibleScreen = screen === 'app' && !selected ? 'home' : screen;
-  const notifications = notificationState?.items ?? [];
-  const unreadCount = notifications.filter((item) => !item.read).length;
 
-  /* === AÇÕES DO SISTEMA === */
-  function openMobileApp(appId, params = {}) {
-    run(openApp, appId, { origin: 'mobile', params, onOpened: ({ instanceId }) => {
-      setSelectedInstanceId(instanceId);
+    return (
+      !instance.closing &&
+      (app?.public || (authorized && instance.appId === 'administration'))
+    );
+  });
+
+  /* ----- Aplicativo selecionado ----- */
+  const selectedInstance = instances.find(
+    (instance) => instance.id === appState.activeInstanceId,
+  ) ?? instances.find(
+    (instance) => instance.id === selectedInstanceId,
+  );
+
+  const selectedApp = selectedInstance
+    ? getAppDefinition(selectedInstance.appId)
+    : null;
+
+  const visibleScreen =
+    screen === 'app' && !selectedInstance ? 'apps' : screen;
+
+  /* ----- Notificações ----- */
+  const notifications = notificationState?.items ?? [];
+  const unreadCount = notifications.filter(
+    (notification) => !notification.read,
+  ).length;
+
+  /* ----- Data e horário ----- */
+  const time = currentTime.toLocaleTimeString(locale, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const date = currentTime.toLocaleDateString(locale, {
+    day: '2-digit',
+    month: '2-digit',
+  });
+
+  /* === CICLO DE VIDA MOBILE === */
+  /* ----- Identificação de descendentes contextuais ----- */
+  function findBranchIds(rootId, state) {
+    const ids = new Set([rootId]);
+    let changed = true;
+
+    while (changed) {
+      changed = false;
+      for (const instance of state.instances) {
+        if (ids.has(instance.id)) continue;
+        if (ids.has(instance.navigationOrigin?.instanceId)) {
+          ids.add(instance.id);
+          changed = true;
+        }
+      }
+    }
+
+    return [...ids];
+  }
+
+  /* ----- Fechamento protegido dos aplicativos relacionados ----- */
+  function closeBranch(rootId, completed) {
+    const state = appStateRef.current;
+    const branch = findBranchIds(rootId, state);
+    const active = state.instances.filter((instance) => branch.includes(instance.id));
+
+    if (!active.length) {
+      completed?.();
+      return;
+    }
+
+    const leaf = active.find(
+      (candidate) => !active.some(
+        (instance) => instance.navigationOrigin?.instanceId === candidate.id,
+      ),
+    );
+
+    if (!leaf) return;
+
+    run(closeApp, leaf.id, {
+      animate: false,
+      onClosed: () => closeBranch(rootId, completed),
+    });
+  }
+
+  /* ----- Retorno para a origem confirmada ----- */
+  function returnToOrigin(instance) {
+    const origin = resolveNavigationOrigin(
+      appStateRef.current,
+      instance.navigationOrigin,
+    );
+    const definition = origin && getAppDefinition(origin.appId);
+
+    if (origin && !origin.closing && (
+      definition?.public || (authorized && origin.appId === 'administration')
+    )) {
+      run(origin.minimized ? restoreApp : activateApp, origin.id);
+      setSelectedInstanceId(origin.id);
       setScreen('app');
       setActivePanel(null);
-    } });
-  }
-  function resume(instance) {
-    if (!instance || instance.closing) return;
-    run(instance.minimized ? restoreApp : activateApp, instance.id);
-    setSelectedInstanceId(instance.id);
-    setScreen('app');
+      return;
+    }
+
+    setSelectedInstanceId(null);
+    setScreen('apps');
     setActivePanel(null);
   }
-  function close(instanceId) {
-    if (!instances.some((instance) => instance.id === instanceId)) return;
-    run(closeApp, instanceId, { animate: false, onClosed: () => {
-      setSelectedInstanceId((id) => id === instanceId ? null : id);
-      setScreen((current) => current === 'app' && selectedInstanceId === instanceId ? 'home' : current);
-    } });
+
+  /* === ABERTURA DE APLICATIVOS === */
+  function openMobileApp(appId, params = {}) {
+    function openRequestedApp() {
+      run(openApp, appId, {
+        origin: 'mobile',
+        params,
+        onOpened: ({ instanceId }) => {
+          setSelectedInstanceId(instanceId);
+          setScreen('app');
+          setActivePanel(null);
+        },
+      });
+    }
+
+    const current = selectedInstance;
+    if (visibleScreen === 'app' && current) {
+      const rootId = (() => {
+        const visited = new Set();
+        let root = current;
+        while (root.navigationOrigin?.instanceId && !visited.has(root.id)) {
+          visited.add(root.id);
+          const parent = appState.instances.find(
+            (instance) => instance.id === root.navigationOrigin.instanceId,
+          );
+          if (!parent) break;
+          root = parent;
+        }
+        return root.id;
+      })();
+
+      closeBranch(rootId, openRequestedApp);
+      return;
+    }
+
+    openRequestedApp();
   }
-  function goHome() { setActivePanel(null); setScreen('home'); }
+
+  /* === FECHAMENTO DE APLICATIVOS === */
   function closeCurrentApp() {
-    if (selected) close(selected.id);
+    const current = selectedInstance;
+    if (!current) return;
+
+    closeBranch(current.id, () => returnToOrigin(current));
   }
-  function togglePanel(name) { setActivePanel((current) => current === name ? null : name); }
+
+  /* === NAVEGAÇÃO DA HOME === */
+  function selectPage(nextPage) {
+    setScreen(nextPage);
+    setActivePanel(null);
+  }
+
+  /* ----- Início do gesto ----- */
+  function handleTouchStart(event) {
+    touchStartRef.current = null;
+    touchDirectionRef.current = null;
+
+    if (
+      activePanel ||
+      visibleScreen === 'app' ||
+      event.touches.length !== 1
+    ) {
+      return;
+    }
+
+    const touch = event.touches[0];
+
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+    };
+  }
+
+  /* ----- Identificação da direção ----- */
+  function handleTouchMove(event) {
+    const start = touchStartRef.current;
+
+    if (!start || event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+
+    if (touchDirectionRef.current) return;
+
+    if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 12) {
+      return;
+    }
+
+    touchDirectionRef.current =
+      Math.abs(deltaX) > Math.abs(deltaY) * SWIPE_RATIO
+        ? 'horizontal'
+        : 'vertical';
+  }
+
+  /* ----- Conclusão do gesto ----- */
+  function handleTouchEnd(event) {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+
+    if (!start || event.changedTouches.length !== 1) {
+      touchDirectionRef.current = null;
+      return;
+    }
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - start.x;
+    const deltaY = touch.clientY - start.y;
+    const direction = touchDirectionRef.current;
+    touchDirectionRef.current = null;
+
+    if (
+      direction !== 'horizontal' ||
+      Math.abs(deltaX) < SWIPE_THRESHOLD ||
+      Math.abs(deltaX) <= Math.abs(deltaY) * SWIPE_RATIO
+    ) {
+      return;
+    }
+
+    if (deltaX < 0 && visibleScreen === 'apps') {
+      selectPage('widgets');
+    }
+
+    if (deltaX > 0 && visibleScreen === 'widgets') {
+      selectPage('apps');
+    }
+  }
+
+  /* === PAINÉIS === */
+  /* ----- Alternância ----- */
+  function togglePanel(name) {
+    setActivePanel((current) => current === name ? null : name);
+  }
+
+  /* ----- Abrir aplicativo de uma notificação ----- */
   function openNotification(notification) {
     const appId = notification?.action?.appId;
-    if (!appId) return;
     const app = getAppDefinition(appId);
+
     if (!app?.public) return;
-    const instance = [...appState.instances].reverse().find((item) => item.appId === appId);
+
     handleNotificationAction('read', notification.id);
-    if (instance) resume(instance);
-    else openMobileApp(appId);
-    setActivePanel(null);
+    openMobileApp(appId);
   }
 
-  /* === GESTOS DO SISTEMA === */
-  function gestureStart(event) {
-    if (event.touches.length !== 1 || activePanel) return;
-    const touch = event.touches[0];
-    gesture.current = { x: touch.clientX, y: touch.clientY, time: Date.now(), height: window.innerHeight, width: window.innerWidth };
-  }
-  function gestureEnd(event) {
-    const start = gesture.current;
-    gesture.current = null;
-    if (!start || event.changedTouches.length !== 1) return;
-    const touch = event.changedTouches[0];
-    const dx = touch.clientX - start.x;
-    const dy = touch.clientY - start.y;
-    if (Math.abs(dy) < 75 || Math.abs(dy) < Math.abs(dx) * 1.5) return;
-    if (dy > 0 && start.y < 55) { setActivePanel(start.x > start.width * 0.65 ? 'controls' : 'notifications'); return; }
-    if (visibleScreen !== 'app' && dy < 0 && start.y > start.height - 75) {
-      if (visibleScreen === 'home') setScreen('drawer');
-      else if (Date.now() - start.time > 380) setScreen('switcher');
-      else goHome();
-    }
-  }
+  /* ----- Teclado ----- */
   useEffect(() => {
-    function keyDown(event) {
-      if (event.key !== 'Escape') return;
-      if (activePanel) { setActivePanel(null); return; }
-      if (screen !== 'home') { setScreen('home'); setActivePanel(null); }
+    if (!activePanel) return;
+
+    const panel = panelRef.current;
+    const previousFocus = document.activeElement;
+
+    panel?.querySelector('button:not(:disabled)')?.focus();
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setActivePanel(null);
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const controls = Array.from(
+        panel?.querySelectorAll(
+          'button:not(:disabled), input:not(:disabled), select:not(:disabled), a[href]',
+        ) ?? [],
+      );
+
+      if (controls.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
-    window.addEventListener('keydown', keyDown);
-    return () => window.removeEventListener('keydown', keyDown);
-  }, [activePanel, screen]);
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+
+      if (previousFocus?.isConnected) {
+        previousFocus.focus();
+      }
+    };
+  }, [activePanel]);
 
   /* === INTERFACE === */
-  return <main id="ws-mobile" className="ws-mobile" data-screen={visibleScreen} tabIndex={-1} onTouchStartCapture={gestureStart} onTouchEndCapture={gestureEnd}>
-    <div className="ws-mobile__wallpaper" aria-hidden="true" style={{ background: getWallpaperDefinition(wallpaper, 'mobile').background }} />
-    <MobileStatusBar unreadCount={unreadCount} activePanel={activePanel} onTogglePanel={togglePanel} />
-    {visibleScreen === 'home' && <MobileHome apps={apps} onOpenApp={openMobileApp} onOpenDrawer={() => setScreen('drawer')} />}
-    {visibleScreen === 'drawer' && <MobileAppDrawer apps={apps} onOpenApp={openMobileApp} onBack={goHome} />}
-    {visibleScreen === 'switcher' && <MobileAppSwitcher instances={instances} activeInstanceId={selectedInstanceId} onSelect={resume} onClose={close} onHome={goHome} />}
-    {visibleScreen === 'app' && selected && (
-      <header className="ws-mobile__app-toolbar">
-        <div className="ws-mobile__app-toolbar-start">
-          <button type="button" className="ws-mobile__app-action" aria-label={t('Início')} title={t('Início')} onClick={goHome}>
-            <ArrowLeft size={20} aria-hidden="true" />
-          </button>
-          <div className="ws-mobile__app-identity">
-            <span className="ws-mobile__app-eyebrow">WS OS</span>
-            <strong>{t(getAppDefinition(selected.appId)?.name ?? '')}</strong>
-          </div>
+  return (
+    <main
+      id="ws-mobile"
+      className="ws-mobile"
+      data-screen={visibleScreen}
+      data-grid-density={mobilePreferences.gridDensity}
+      tabIndex={-1}
+    >
+      {/* === PAPEL DE PAREDE === */}
+      <div
+        className="ws-mobile__wallpaper"
+        aria-hidden="true"
+        style={{
+          background: getWallpaperDefinition(
+            wallpaper,
+            'mobile',
+          ).background,
+        }}
+      />
+
+      {/* === BARRA SUPERIOR === */}
+      <header className="ws-mobile__status-bar">
+        {/* ----- Horário e data ----- */}
+        <div className="ws-mobile__status-info">
+          <time dateTime={currentTime.toISOString()}>
+            {time}
+          </time>
+          <span>{date}</span>
         </div>
-        <div className="ws-mobile__app-toolbar-actions">
-          <button type="button" className="ws-mobile__app-action" aria-label={t('Início')} title={t('Início')} onClick={goHome}>
-            <House size={19} aria-hidden="true" />
+
+        {/* ----- Ações do sistema ----- */}
+        <div className="ws-mobile__status-actions">
+          <MobileWeatherStatus />
+
+          <button
+            type="button"
+            aria-label={t('Controle Rápido')}
+            title={t('Controle Rápido')}
+            aria-expanded={activePanel === 'controls'}
+            onClick={() => togglePanel('controls')}
+          >
+            <Settings2 size={19} aria-hidden="true" />
           </button>
-          <button type="button" className="ws-mobile__app-action" aria-label={t('Aplicativos')} title={t('Aplicativos')} onClick={() => setScreen('switcher')}>
-            <Layers3 size={19} aria-hidden="true" />
-          </button>
-          <button type="button" className="ws-mobile__app-action ws-mobile__app-action--close" aria-label={t('Fechar')} title={t('Fechar')} onClick={closeCurrentApp}>
-            <X size={20} aria-hidden="true" />
+
+          <button
+            type="button"
+            aria-label={t('Notificações')}
+            title={t('Notificações')}
+            aria-expanded={activePanel === 'notifications'}
+            onClick={() => togglePanel('notifications')}
+          >
+            <Bell size={19} aria-hidden="true" />
+
+            {unreadCount > 0 && (
+              <span className="ws-mobile__badge">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </button>
         </div>
       </header>
-    )}
-    <section className="ws-mobile__app-content" hidden={visibleScreen !== 'app'}>
-      {instances.map((instance) => {
-        const app = getAppDefinition(instance.appId);
-        const visible = visibleScreen === 'app' && selected?.id === instance.id;
-        return <div key={instance.id} className="ws-mobile__instance" hidden={!visible} inert={!visible}>
-          <AppHost appName={app.name} instance={app.pauseWhenMinimized && !visible ? { ...instance, executionState: 'paused' } : instance} />
-        </div>;
-      })}
-    </section>
-    {activePanel && <div className="ws-mobile__overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setActivePanel(null); }}>
-      <div className="ws-mobile__panel" role="dialog" aria-modal="true" aria-label={activePanel === 'notifications' ? t('Notificações') : t('Controle Rápido')}>
-        {activePanel === 'notifications' ? <NotificationCenter unreadCount={unreadCount} notifications={notifications} setNotificationOpen={(open) => setActivePanel(open ? 'notifications' : null)} onNotificationAction={handleNotificationAction} onNotificationOpen={openNotification} /> : <QuickControls theme={theme} onThemeChange={onThemeChange} setQuickControlsOpen={(open) => setActivePanel(open ? 'controls' : null)} showAutoHideTaskbar={false} />}
-      </div>
-    </div>}
-    {visibleScreen !== 'app' && (
-      <nav className="ws-mobile__bottom-navigation" aria-label={t('Aplicativos')}>
-        <button type="button" className="ws-mobile__navigation-button" aria-label={t('Início')} title={t('Início')} onClick={goHome}>
-          <House size={19} aria-hidden="true" />
-          <span>{t('Início')}</span>
-        </button>
-        <button type="button" className="ws-mobile__navigation-button" aria-label={t('Aplicativos')} title={t('Aplicativos')} onClick={() => { setActivePanel(null); setScreen('drawer'); }}>
-          <Grid2X2 size={19} aria-hidden="true" />
-          <span>{t('Aplicativos')}</span>
-        </button>
-        <button type="button" className="ws-mobile__navigation-button" aria-label={t('Recentes')} title={t('Recentes')} onClick={() => { setActivePanel(null); setScreen('switcher'); }}>
-          <Layers3 size={19} aria-hidden="true" />
-          <span>{t('Recentes')}</span>
-        </button>
-      </nav>
-    )}
-  </main>;
+
+      {/* === PÁGINAS INICIAIS === */}
+      {visibleScreen !== 'app' && (
+        <section
+          className="ws-mobile__desktop"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={() => {
+            touchStartRef.current = null;
+            touchDirectionRef.current = null;
+          }}
+        >
+          {/* ----- Página de aplicativos ----- */}
+          {visibleScreen === 'apps' && (
+            <div className="ws-mobile__home">
+              <div className="ws-mobile__home-grid">
+                {apps.map((app) => (
+                  <button
+                    key={app.id}
+                    type="button"
+                    className="ws-mobile__home-app"
+                    onClick={() => openMobileApp(app.id)}
+                  >
+                    <span className="ws-mobile__home-app-icon">
+                      <AppIcon app={app} size={28} />
+                    </span>
+                    <span>{t(app.name)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ----- Página de widgets ----- */}
+          {visibleScreen === 'widgets' && (
+            <MobileWidgets
+              onOpenSettings={() => openMobileApp('settings')}
+            />
+          )}
+
+          {/* ----- Navegação entre páginas ----- */}
+          <nav
+            className="ws-mobile__pagination"
+            aria-label={t('Navegação Mobile')}
+          >
+            <button
+              type="button"
+              aria-label={t('Aplicativos')}
+              aria-current={visibleScreen === 'apps' ? 'page' : undefined}
+              onClick={() => selectPage('apps')}
+            >
+              <span aria-hidden="true" />
+            </button>
+
+            <button
+              type="button"
+              aria-label="Widgets"
+              aria-current={visibleScreen === 'widgets' ? 'page' : undefined}
+              onClick={() => selectPage('widgets')}
+            >
+              <span aria-hidden="true" />
+            </button>
+          </nav>
+        </section>
+      )}
+
+      {/* === APLICATIVOS === */}
+      <section
+        className="ws-mobile__app-content"
+        hidden={visibleScreen !== 'app'}
+        aria-label={t(selectedApp?.name ?? 'Aplicativos')}
+      >
+        {instances.map((instance) => {
+          const app = getAppDefinition(instance.appId);
+
+          const isVisible =
+            visibleScreen === 'app' &&
+            selectedInstance?.id === instance.id;
+
+          return (
+            <div
+              key={instance.id}
+              className="ws-mobile__instance"
+              hidden={!isVisible}
+              inert={!isVisible}
+            >
+              <AppHost
+                appName={app.name}
+                instance={
+                  app.pauseWhenMinimized && !isVisible
+                    ? { ...instance, executionState: 'paused' }
+                    : instance
+                }
+              />
+            </div>
+          );
+        })}
+      </section>
+
+      {/* === BARRA INFERIOR === */}
+      {visibleScreen === 'app' && (
+        <nav className="ws-mobile__exit-bar">
+          <button
+            type="button"
+            onClick={closeCurrentApp}
+            aria-label={t('Fechar')}
+          >
+            <X size={18} aria-hidden="true" />
+            <span>{t('Fechar')}</span>
+          </button>
+        </nav>
+      )}
+
+      {/* === PAINÉIS SOBREPOSTOS === */}
+      {/* ----- Avisos temporários ----- */}
+      {visibleToasts?.length > 0 && !activePanel && (
+        <div className="ws-mobile__toast-region">
+          <NotificationToasts
+            visibleToasts={visibleToasts}
+            dismissToast={dismissToast}
+            handleNotificationOpen={openNotification}
+          />
+        </div>
+      )}
+      {activePanel && (
+        <div
+          className="ws-mobile__overlay"
+          onPointerDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setActivePanel(null);
+            }
+          }}
+        >
+          <div
+            ref={panelRef}
+            className="ws-mobile__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t(
+              activePanel === 'notifications'
+                ? 'Notificações'
+                : 'Controle Rápido',
+            )}
+          >
+            {activePanel === 'notifications' ? (
+              <NotificationCenter
+                unreadCount={unreadCount}
+                notifications={notifications}
+                setNotificationOpen={(open) => {
+                  setActivePanel(open ? 'notifications' : null);
+                }}
+                onNotificationAction={handleNotificationAction}
+                onNotificationOpen={openNotification}
+              />
+            ) : (
+              <QuickControls
+                theme={theme}
+                onThemeChange={onThemeChange}
+                setQuickControlsOpen={(open) => {
+                  setActivePanel(open ? 'controls' : null);
+                }}
+                showAutoHideTaskbar={false}
+                onOpenSettings={() => openMobileApp('settings')}
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </main>
+  );
 }
