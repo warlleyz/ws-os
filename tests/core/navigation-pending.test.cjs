@@ -88,6 +88,67 @@ function createCore() {
 }
 
 /* === Testes de confirmação pendente === */
+/* ----- Reabertura contextual na mesma instância ----- */
+test('reabrir o mesmo projeto emite nova navegação sem recriar a instância', () => {
+  const { manager, initial } = createCore();
+
+  const first = manager.requestAppOpen(initial, 'projects', {
+    params: { projectId: 'projeto-1' },
+  });
+
+  assert.equal(first.result.ok, true);
+
+  const instanceId = first.result.instanceId;
+
+  const second = manager.requestAppOpen(first.state, 'projects', {
+    params: { projectId: 'projeto-1' },
+  });
+
+  assert.equal(second.result.ok, true);
+  assert.equal(second.result.status, 'navigated');
+  assert.equal(second.result.instanceId, instanceId);
+  assert.equal(second.state.instances.length, 1);
+  assert.equal(second.state.instances[0].navigationRequestId, 1);
+});
+
+/* ----- Navegação entre resultados diferentes ----- */
+test('abrir outro certificado reutiliza a instância e atualiza o destino', () => {
+  const { manager, initial } = createCore();
+
+  const first = manager.requestAppOpen(initial, 'certificates', {
+    params: { certificateId: 'certificado-1' },
+  });
+
+  assert.equal(first.result.ok, true);
+
+  const second = manager.requestAppOpen(first.state, 'certificates', {
+    params: { certificateId: 'certificado-2' },
+  });
+
+  assert.equal(second.result.ok, true);
+  assert.equal(second.result.status, 'navigated');
+  assert.equal(second.result.instanceId, first.result.instanceId);
+  assert.equal(second.state.instances.length, 1);
+  assert.equal(second.state.instances[0].params.certificateId, 'certificado-2');
+});
+
+/* ----- Preservação de configurações ----- */
+test('reabrir a mesma seção de configurações não reinicia a navegação', () => {
+  const { manager, initial } = createCore();
+
+  const first = manager.requestAppOpen(initial, 'settings', {
+    params: { section: 'appearance' },
+  });
+
+  const second = manager.requestAppOpen(first.state, 'settings', {
+    params: { section: 'appearance' },
+  });
+
+  assert.equal(second.result.ok, true);
+  assert.equal(second.result.status, 'restored');
+  assert.equal(second.result.instanceId, first.result.instanceId);
+  assert.equal(second.state.instances[0].navigationRequestId, undefined);
+});
 /* ----- Cancelamento sem alteração do estado ----- */
 test('cancelar navegação pendente preserva a instância e seus parâmetros', () => {
   const { manager, guards, initial } = createCore();

@@ -26,7 +26,7 @@
 | 12 | Projetos e apresentação dos trabalhos | **Concluída e aprovada** |
 | 13 | Currículo e certificados | **Concluída e aprovada** |
 | 14 | Dev Insights e visualização de dados | **Concluída e aprovada** |
-| 15 | Busca global, navegação e compartilhamento | Não iniciada |
+| 15 | Busca global, navegação e compartilhamento | **Concluída e aprovada** |
 | 16 | Notas e publicações | Não iniciada |
 | 17 | Arquivos e armazenamento pessoal | Não iniciada |
 | 18 | Editor e visualizador de arquivos | Não iniciada |
@@ -552,3 +552,58 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 - Etapa 14 concluída e validada pelo proprietário.
 - **Próxima etapa prevista: 15 — Busca global, navegação e compartilhamento.**
+
+
+## Etapa 15 — Busca global, navegação e compartilhamento
+
+**Estado:** concluída e aprovada pelo proprietário.
+
+### Trabalhos realizados
+
+- Correção da abertura contextual dos certificados pela busca global.
+- Implementação do contrato de navegação `certificateId`.
+- Priorização dos resultados por relevância, considerando títulos e descrições.
+- Deduplicação de projetos locais e repositórios do GitHub.
+- Ordenação dos resultados antes da aplicação do limite de exibição.
+- Ampliação dos termos de pesquisa em português e inglês.
+- Melhoria da localização do perfil profissional por termos relacionados à formação e às habilidades.
+- Correção da reabertura contextual de projetos, notas e certificados.
+- Preservação da reutilização das instâncias existentes.
+- Ampliação dos links compartilháveis para certificados.
+- Validação de identificadores, parâmetros duplicados e destinos conflitantes.
+- Preservação de parâmetros não relacionados durante a limpeza de URLs.
+- Organização dos arquivos modificados e padronização dos comentários.
+
+### Arquivos modificados
+
+- `src/apps/certificates/Certificates.jsx`
+- `src/core/SystemProvider.jsx`
+- `src/core/appManager.js`
+- `src/core/appRegistry.js`
+- `src/features/search/searchService.js`
+- `tests/core/app-contracts.test.cjs`
+- `tests/core/navigation-pending.test.cjs`
+- `tests/core/search.test.cjs`
+
+### Validações
+
+- `npm run lint` — aprovado.
+- `npm run test` — aprovado.
+- `npm run build` — aprovado.
+- `git diff --check` — aprovado, conforme confirmação do proprietário após a organização.
+- Testes dos blocos de implementação aprovados pelo proprietário.
+- Revisão da busca, dos certificados e dos links compartilháveis realizada durante a etapa.
+
+### Decisões
+
+- Preservar a arquitetura atual de aplicativos e navegação.
+- Manter o limite de 24 resultados, aplicando-o após a ordenação por relevância.
+- Reutilizar instâncias existentes na navegação contextual.
+- Preservar os contratos de segurança e validação dos parâmetros.
+- Não antecipar funcionalidades pertencentes às etapas seguintes.
+- Manter a ordem das 33 etapas do planejamento.
+
+### Encerramento
+
+- Etapa 15 concluída e aprovada pelo proprietário.
+- **Próxima etapa prevista: 16 — Notas e publicações.**

@@ -26,7 +26,7 @@ import useAppBack from '../../shared/hooks/useAppBack';
 import '../../styles/apps.css';
 import './Certificates.css';
 
-/* === Configuração === */
+/* === CONFIGURAÇÃO === */
 const CERTIFICATES = portfolio.certificates ?? [];
 const CATEGORIES = [
   { id: 'all', label: 'Todos' },
@@ -36,8 +36,7 @@ const CATEGORIES = [
   { id: 'other', label: 'Outros' },
 ];
 
-/* === Utilitários === */
-
+/* === UTILITÁRIOS === */
 function readText(value, locale) {
   return contentText(value, locale) || '';
 }
@@ -115,8 +114,7 @@ function getCertificateResource(item) {
   }
 }
 
-/* === Ícones das categorias === */
-
+/* === ÍCONES DAS CATEGORIAS === */
 function CategoryIcon({ category, size = 20 }) {
   switch (category) {
     case 'course':
@@ -132,8 +130,7 @@ function CategoryIcon({ category, size = 20 }) {
   }
 }
 
-/* === Cabeçalho principal === */
-
+/* === CABEÇALHO PRINCIPAL === */
 function CertificatesHeader() {
   return (
     <header className="ws-certificates__hero">
@@ -153,8 +150,7 @@ function CertificatesHeader() {
   );
 }
 
-/* === Filtros e pesquisa === */
-
+/* === FILTROS E PESQUISA === */
 function CertificatesToolbar({
   search,
   onSearchChange,
@@ -203,8 +199,7 @@ function CertificatesToolbar({
   );
 }
 
-/* === Card de certificado === */
-
+/* === CARD DE CERTIFICADO === */
 function CertificateCard({ item, locale, onSelect }) {
   const title = readText(item.title, locale);
   const issuer = readText(item.issuer, locale);
@@ -220,7 +215,7 @@ function CertificateCard({ item, locale, onSelect }) {
         aria-label={`${t('Ver detalhes')}: ${title}`}
       >
 
-        {/* === Identificação do certificado === */}
+        {/* === IDENTIFICAÇÃO DO CERTIFICADO === */}
         <div className="ws-certificates__card-top">
           <span className="ws-certificates__card-symbol" aria-hidden="true">
             <CategoryIcon category={category} size={22} />
@@ -230,13 +225,13 @@ function CertificateCard({ item, locale, onSelect }) {
           </span>
         </div>
 
-        {/* === Título e instituição === */}
+        {/* === TÍTULO E INSTITUIÇÃO === */}
         <div className="ws-certificates__card-information">
           <h3>{title}</h3>
           {issuer && <p className="ws-certificates__card-issuer">{issuer}</p>}
         </div>
 
-        {/* === Informações e acesso aos detalhes === */}
+        {/* === INFORMAÇÕES E ACESSO AOS DETALHES === */}
         <div className="ws-certificates__card-bottom">
           <div className="ws-certificates__card-meta">
             {date && <span>{date}</span>}
@@ -507,11 +502,30 @@ export default function Certificates({ instance }) {
   const { run } = useSystem();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
-  const [selectedId, setSelectedId] = useState(null);
+
+  /* ----- Navegação integrada ao sistema ----- */
+  const navigation = instance?.navigationRequestId ?? 0;
+
+  const [selection, setSelection] = useState({
+    request: navigation,
+    id: instance?.params?.certificateId ?? null,
+  });
+
+  const selectedId =
+    selection.request === navigation
+      ? selection.id
+      : (instance?.params?.certificateId ?? null);
+
+  function setSelectedId(id) {
+    setSelection({
+      request: navigation,
+      id,
+    });
+  }
+
   const selected =
     CERTIFICATES.find((item) => item.id === selectedId) ?? null;
 
-  /* ----- Navegação integrada ao sistema ----- */
   useAppBack(instance?.id, () => {
     if (!selectedId) return false;
     setSelectedId(null);

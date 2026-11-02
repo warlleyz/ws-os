@@ -166,10 +166,14 @@ test('reutilização contextual distingue navegação efetiva de restauração',
   assert.equal(changed.result.instanceId, first.result.instanceId);
   assert.equal(changed.result.status, 'navigated');
   assert.equal(changed.state.instances[0].params.postId, 'two');
-  assert.equal(
-    m.requestAppOpen(changed.state, 'notes', { params: { postId: 'two' } }).result.status,
-    'restored',
-  );
+  const reopened = m.requestAppOpen(changed.state, 'notes', {
+    params: { postId: 'two' },
+  });
+
+  assert.equal(reopened.result.status, 'navigated');
+  assert.equal(reopened.result.instanceId, first.result.instanceId);
+  assert.equal(reopened.state.instances.length, 1);
+  assert.equal(reopened.state.instances[0].navigationRequestId, 2);
 });
 test('parâmetros legados continuam aceitos mas valores executáveis e referências mutáveis não entram na instância', () => {
   const { manager: m } = core();

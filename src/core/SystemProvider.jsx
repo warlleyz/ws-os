@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-
 import {
   activateApp,
   beginAppClose,
@@ -11,16 +10,13 @@ import {
   restoreApp,
   validateAppOpen,
 } from './appManager';
-
 import {
   requestGuardedAction,
   releaseCloseGuard,
   useCloseConfirmation,
   useClosePreparation,
 } from './appCloseGuards';
-
 import { getAppDefinition, getAppNavigationContract } from './appRegistry';
-
 import {
   addNotification,
   clearNotifications,
@@ -30,15 +26,12 @@ import {
   markNotificationAsRead,
   removeNotification,
 } from './notificationManager';
-
 import {
   getNotificationPreferences,
   subscribeNotificationPreferences,
 } from './notificationPreferences';
-
 import { SystemContext } from './systemContext';
 import { getWindowMotionDuration } from './windowLifecycle';
-
 import { resolveSharedEntry } from '../features/search/searchService';
 import AppCloseDialog from '../shared/components/AppCloseDialog';
 import { translate as t, useLocale } from '../shared/i18n/i18n';
@@ -56,11 +49,10 @@ function restoreFocus(previous) {
     document.querySelector?.('#ws-mobile');
   target?.focus();
 }
-
 export default function SystemProvider({ children }) {
+
   /* === IDIOMA E CONFIRMAÇÕES === */
   useLocale();
-
   const closeRequest = useCloseConfirmation();
   const preparation = useClosePreparation();
 
@@ -70,12 +62,11 @@ export default function SystemProvider({ children }) {
   const pendingClosuresRef = useRef(new Map());
   const closeTimersRef = useRef(new Map());
   const openRequestSequenceRef = useRef(0);
+
   /* ----- INICIALIZAÇÃO DA SESSÃO ----- */
   const [appState, setAppState] = useState(() => {
     const entry = resolveSharedEntry(window.location.search);
-
     if (!entry) return initialAppState;
-
     return openApp(initialAppState, entry.appId, {
       origin: entry.origin,
       params: entry.params,
@@ -149,13 +140,19 @@ export default function SystemProvider({ children }) {
   /* ----- LIMPEZA DOS LINKS COMPARTILHADOS ----- */
   useEffect(() => {
     if (!resolveSharedEntry(window.location.search)) return;
-
-    window.history.replaceState(null, '', import.meta.env.BASE_URL);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('project');
+    url.searchParams.delete('post');
+    url.searchParams.delete('certificate');
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${url.pathname}${url.search}${url.hash}`,
+    );
   }, []);
 
   /* === ESTADO DAS NOTIFICAÇÕES === */
   const [notificationState, setNotificationState] = useState(initialNotificationState);
-
   const [visibleToasts, setVisibleToasts] = useState([]);
 
   /* ----- PREFERÊNCIAS DE NOTIFICAÇÕES ----- */
@@ -172,16 +169,11 @@ export default function SystemProvider({ children }) {
   /* ----- CRIAÇÃO DE NOTIFICAÇÕES ----- */
   const notify = useCallback((details) => {
     const notification = createNotification(details);
-
     if (!notification) return;
-
     setNotificationState((current) => addNotification(current, notification));
-
     const doNotDisturb = getNotificationPreferences().doNotDisturb;
-
     const canShowToast =
       details?.toast !== false && (!doNotDisturb || notification.type === 'error');
-
     if (canShowToast) {
       setVisibleToasts((current) => [...current, notification].slice(0, 20));
     }
@@ -190,7 +182,6 @@ export default function SystemProvider({ children }) {
   /* ----- NOTIFICAÇÕES DE DESENVOLVIMENTO ----- */
   useEffect(() => {
     if (!import.meta.env.DEV) return;
-
     window.wsNotify = (type = 'info') => {
       notify({
         title: 'Notificação de teste',
@@ -199,7 +190,6 @@ export default function SystemProvider({ children }) {
         type,
       });
     };
-
     return () => {
       delete window.wsNotify;
     };
@@ -209,43 +199,32 @@ export default function SystemProvider({ children }) {
   /* ----- IDENTIFICAÇÃO DE NAVEGAÇÃO CONTEXTUAL ----- */
   function getContextualTarget(appId, params = {}) {
     const contract = getAppNavigationContract(appId);
-
     if (!contract || contract.params === null) return null;
-
     const keys = Object.keys(contract.params).filter((key) => Object.hasOwn(params, key));
-
     if (keys.length === 0) return null;
-
     const instances = appState.instances.filter(
       (instance) => instance.appId === appId && !instance.closing,
     );
-
     if (contract.reusePolicy === 'multiple') return null;
-
     if (contract.reusePolicy === 'contextual') {
       return (
         instances.find((instance) => keys.every((key) => instance.params?.[key] === params[key])) ??
         null
       );
     }
-
     return instances[0] ?? null;
   }
 
   /* ----- DETECÇÃO DE SUBSTITUIÇÃO DE CONTEXTO ----- */
   function getProtectedNavigationInstance(appId, params = {}) {
     const target = getContextualTarget(appId, params);
-
     if (!target) return null;
-
     const contract = getAppNavigationContract(appId);
-
     const changesContext = Object.keys(contract?.params ?? {}).some(
       (key) =>
         Object.hasOwn(params, key) &&
         JSON.stringify(target.params?.[key]) !== JSON.stringify(params[key]),
     );
-
     return changesContext ? target : null;
   }
 
@@ -280,7 +259,6 @@ export default function SystemProvider({ children }) {
   /* ----- ABERTURA PROTEGIDA ----- */
   function runOpen(appId, options) {
     const request = validateAppOpen(appId, options);
-
     if (!request.ok) {
       notify({
         title: t('Não foi possível abrir o aplicativo'),
@@ -288,7 +266,6 @@ export default function SystemProvider({ children }) {
         source: t('Sistema'),
         type: 'error',
       });
-
       return false;
     }
 
@@ -297,14 +274,12 @@ export default function SystemProvider({ children }) {
       origin: request.origin,
       params: { ...request.params },
     };
-
     if (options?.originInstanceId !== undefined) {
       openingOptions.originInstanceId = options.originInstanceId;
     }
 
     /* ----- IDENTIFICAÇÃO DO CONTEXTO PROTEGIDO ----- */
     const target = getProtectedNavigationInstance(appId, openingOptions.params);
-
     const targetInstanceId = target?.id ?? null;
     const previousParams = target ? { ...target.params } : null;
 
@@ -314,17 +289,15 @@ export default function SystemProvider({ children }) {
     /* ----- EXECUÇÃO DA ABERTURA ----- */
     const proceed = () => {
       pendingOpenRef.current.set(requestId, { appId, onOpened: options?.onOpened });
-
       setAppState((current) => {
+
         /* ----- VERIFICAÇÃO DA INSTÂNCIA PROTEGIDA ----- */
         if (targetInstanceId) {
           const currentTarget = current.instances.find(
             (instance) => instance.id === targetInstanceId,
           );
-
           const contract = getAppNavigationContract(appId);
           const keys = Object.keys(contract?.params ?? {});
-
           const contextUnchanged =
             currentTarget?.appId === appId &&
             keys.every(
@@ -332,7 +305,6 @@ export default function SystemProvider({ children }) {
                 JSON.stringify(currentTarget.params?.[key]) ===
                 JSON.stringify(previousParams?.[key]),
             );
-
           if (!contextUnchanged) {
             return {
               ...current,
@@ -352,7 +324,6 @@ export default function SystemProvider({ children }) {
 
         /* ----- REVALIDAÇÃO E ABERTURA ----- */
         const response = requestAppOpen(current, appId, openingOptions);
-
         const outcome = {
           id: requestId,
           ok: response.result.ok,
@@ -378,7 +349,6 @@ export default function SystemProvider({ children }) {
     if (targetInstanceId) {
       return requestGuardedAction(targetInstanceId, proceed, 'navigate');
     }
-
     proceed();
     return true;
   }
@@ -388,13 +358,10 @@ export default function SystemProvider({ children }) {
     if (operation === closeApp) {
       return runClose(id, options);
     }
-
     if (operation === openApp) {
       return runOpen(id, options);
     }
-
     setAppState((current) => operation(current, id, options));
-
     return true;
   }
 
@@ -409,25 +376,19 @@ export default function SystemProvider({ children }) {
     if (action === 'remove') {
       dismissToast(id);
     }
-
     if (action === 'clear') {
       setVisibleToasts([]);
     }
-
     setNotificationState((current) => {
       switch (action) {
         case 'read':
           return markNotificationAsRead(current, id);
-
         case 'read-all':
           return markAllNotificationsAsRead(current);
-
         case 'remove':
           return removeNotification(current, id);
-
         case 'clear':
           return clearNotifications(current);
-
         default:
           return current;
       }
@@ -437,23 +398,16 @@ export default function SystemProvider({ children }) {
   /* ----- ABERTURA DE APLICATIVOS POR NOTIFICAÇÕES ----- */
   function handleNotificationOpen(notification) {
     const action = notification?.action;
-
     if (action?.type !== 'open-app') return;
-
     const app = getAppDefinition(action.appId);
-
     if (!app?.public) return;
-
     const instance = [...appState.instances].reverse().find((item) => item.appId === action.appId);
-
     if (instance) {
       run(instance.minimized ? restoreApp : activateApp, instance.id);
     } else {
       if (!run(openApp, action.appId)) return;
     }
-
     setNotificationState((current) => markNotificationAsRead(current, notification.id));
-
     dismissToast(notification.id);
   }
 
@@ -484,7 +438,6 @@ export default function SystemProvider({ children }) {
       <div style={{ display: 'contents' }} inert={Boolean(closeRequest || preparation)}>
         {children}
       </div>
-
       {/* ----- CONFIRMAÇÃO DE ALTERAÇÕES NÃO SALVAS ----- */}
       <AppCloseDialog request={closeRequest} />
       {preparation && (

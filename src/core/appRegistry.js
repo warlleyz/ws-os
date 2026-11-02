@@ -325,6 +325,12 @@ const navigationContracts = {
     },
     reusePolicy: 'existing',
   },
+  certificates: {
+    params: {
+      certificateId: 'string',
+    },
+    reusePolicy: 'existing',
+  },
   settings: {
     params: {
       section: 'string',

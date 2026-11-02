@@ -252,10 +252,15 @@ function updateInstanceNavigation(state, instanceId, appId, params) {
   const acceptedParams = contract?.params ?? {};
 
   const target = state.instances.find((instance) => instance.id === instanceId);
+  
+  /* ----- Detecção de navegação contextual ----- */
   const hasContextualNavigation = Object.keys(acceptedParams).some(
     (key) =>
       Object.hasOwn(params, key) &&
-      JSON.stringify(target?.params?.[key]) !== JSON.stringify(params[key]),
+      (
+        JSON.stringify(target?.params?.[key]) !== JSON.stringify(params[key]) ||
+        ['projects', 'notes', 'certificates'].includes(appId)
+      ),
   );
 
   if (!hasContextualNavigation) return state;
