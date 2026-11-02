@@ -51,11 +51,7 @@ export default function Notes({ instance }) {
   const focusedNavigationRef = useRef(null);
 
   /* ----- Autenticação e publicações ----- */
-  const isAdmin = useSyncExternalStore(
-    subscribeAdminSession,
-    isAdminAuthenticated,
-    () => false,
-  );
+  const isAdmin = useSyncExternalStore(subscribeAdminSession, isAdminAuthenticated, () => false);
 
   const posts = resource.data ?? [];
   const visible = posts.filter((post) =>
@@ -98,11 +94,7 @@ export default function Notes({ instance }) {
           <h2>{t('Notas')}</h2>
           <p>{t('Publicações, estudos e registros públicos.')}</p>
         </div>
-        <NotebookPen
-          className="notes-app__hero-icon"
-          strokeWidth={1.5}
-          aria-hidden="true"
-        />
+        <NotebookPen className="notes-app__hero-icon" strokeWidth={1.5} aria-hidden="true" />
       </header>
 
       {/* ----- Pesquisa e ações ----- */}
@@ -120,7 +112,7 @@ export default function Notes({ instance }) {
         <button
           className="notes-app__refresh"
           type="button"
-          onClick={resource.refresh}
+          onClick={() => invalidatePublicData('/api/posts')}
           disabled={loading}
           title={t('Atualizar publicações')}
           aria-label={t('Atualizar publicações')}
@@ -153,13 +145,11 @@ export default function Notes({ instance }) {
         </p>
       )}
 
-      {resource.status === 'ready' &&
-        targetId &&
-        !posts.some((post) => post.id === targetId) && (
-          <p className="notes-app__notice" role="status">
-            {t('Esta publicação não está disponível.')}
-          </p>
-        )}
+      {resource.status === 'ready' && targetId && !posts.some((post) => post.id === targetId) && (
+        <p className="notes-app__notice" role="status">
+          {t('Esta publicação não está disponível.')}
+        </p>
+      )}
 
       {resource.status === 'ready' && visible.length === 0 && (
         <section className="notes-app__empty" role="status">
@@ -202,9 +192,7 @@ export default function Notes({ instance }) {
               <h3>{contentText(post.title, locale)}</h3>
 
               {contentText(post.summary, locale) && (
-                <p className="notes-app__summary">
-                  {contentText(post.summary, locale)}
-                </p>
+                <p className="notes-app__summary">{contentText(post.summary, locale)}</p>
               )}
 
               {(post.tags ?? []).length > 0 && (
@@ -219,9 +207,7 @@ export default function Notes({ instance }) {
             </header>
 
             {/* ----- Conteúdo da publicação ----- */}
-            <div className="notes-app__body">
-              {contentText(post.body, locale)}
-            </div>
+            <div className="notes-app__body">{contentText(post.body, locale)}</div>
 
             {/* ----- Anexos e curtidas ----- */}
             <footer className="notes-app__card-footer">

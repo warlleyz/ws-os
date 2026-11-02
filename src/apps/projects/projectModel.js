@@ -1,12 +1,11 @@
+import { projectDescription } from '../../content/projectDescriptions';
 import { safeExternalUrl } from '../../shared/utils/urls';
 import { resolveSharedEntry } from '../../features/search/searchService';
 
 /* === GERENCIAMENTO DE PROJETOS === */
 /* ----- Integração entre projetos cadastrados e GitHub ----- */
 export function mergeProjects(curated, repositories) {
-  const remaining = new Map(
-    repositories.map((item) => [item.repository, item]),
-  );
+  const remaining = new Map(repositories.map((item) => [item.repository, item]));
 
   const items = curated
     .filter((item) => typeof item.id === 'string' && item.id && item.name)
@@ -27,7 +26,10 @@ export function mergeProjects(curated, repositories) {
       };
     });
 
-  return [...items, ...remaining.values()];
+  return [...items, ...remaining.values()].map((item) => ({
+    ...item,
+    description: projectDescription(item.repository, item.description),
+  }));
 }
 
 /* === FILTRAGEM E ORDENAÇÃO === */
@@ -44,20 +46,13 @@ export function filterProjects(projects, search, technology, order, locale, text
       (item) =>
         (technology === 'all' || item.technologies.includes(technology)) &&
         normalize(
-          [
-            text(item.name, locale),
-            text(item.description, locale),
-            ...item.technologies,
-          ].join(' '),
+          [text(item.name, locale), text(item.description, locale), ...item.technologies].join(' '),
         ).includes(normalize(search.trim())),
     )
     .sort(
       order === 'name'
-        ? (a, b) =>
-          text(a.name, locale).localeCompare(text(b.name, locale), locale)
-        : (a, b) =>
-          (Date.parse(b.updatedAt) || 0) -
-          (Date.parse(a.updatedAt) || 0),
+        ? (a, b) => text(a.name, locale).localeCompare(text(b.name, locale), locale)
+        : (a, b) => (Date.parse(b.updatedAt) || 0) - (Date.parse(a.updatedAt) || 0),
     );
 }
 
@@ -81,9 +76,7 @@ export function createProjectShareUrl(projectId, baseUrl) {
 
     const entry = resolveSharedEntry(url.search);
 
-    return entry?.appId === 'projects' && entry.params.projectId === projectId
-      ? url.href
-      : null;
+    return entry?.appId === 'projects' && entry.params.projectId === projectId ? url.href : null;
   } catch {
     return null;
   }

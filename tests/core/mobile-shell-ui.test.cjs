@@ -13,6 +13,7 @@ async function setup(instances, authorized = false) {
   let pending;
 
   const definitions = {
+    calculator: { name: 'Calculadora', public: true, showInMenu: true, desktopShortcut: false },
     notes: {
       name: 'Notas',
       public: true,
@@ -45,13 +46,15 @@ async function setup(instances, authorized = false) {
     'src/shells/mobile/Mobile.jsx',
     {},
     {
-      useSyncExternalStore() { },
-      subscribeAdminSession() { },
-      getAdminSessionVersion() { },
+      normalizeSearch: (value) => value.toLowerCase(),
+      GlobalSearchResults: 'GlobalSearchResults',
+      useSyncExternalStore() {},
+      subscribeAdminSession() {},
+      getAdminSessionVersion() {},
       isAdminAuthenticated: () => authorized,
       useMobilePreferences: () => ({ gridDensity: 'default' }),
       useWallpaper: () => 'default',
-      useWallpaperRevision() { },
+      useWallpaperRevision() {},
       getWallpaperDefinition: () => ({
         background: '#000',
       }),
@@ -64,11 +67,11 @@ async function setup(instances, authorized = false) {
       resolveNavigationOrigin: (current, origin) => {
         if (!origin) return null;
 
-        return current.instances.find(
-          (instance) =>
-            instance.id === origin.instanceId &&
-            instance.appId === origin.appId,
-        ) ?? null;
+        return (
+          current.instances.find(
+            (instance) => instance.id === origin.instanceId && instance.appId === origin.appId,
+          ) ?? null
+        );
       },
       useSystem: () => ({
         appState: state,
@@ -76,8 +79,8 @@ async function setup(instances, authorized = false) {
           items: [],
         },
         visibleToasts: [],
-        dismissToast() { },
-        handleNotificationAction() { },
+        dismissToast() {},
+        handleNotificationAction() {},
         run: (action, id, options) => {
           pending = {
             action,
@@ -114,28 +117,24 @@ async function setup(instances, authorized = false) {
 /* === UTILITÁRIOS DE TESTE === */
 /* ----- Tela atual ----- */
 function getScreen(ui) {
-  return ui.nodes().find(
-    (node) => node.props.id === 'ws-mobile',
-  ).props['data-screen'];
+  return ui.nodes().find((node) => node.props.id === 'ws-mobile').props['data-screen'];
 }
 
 /* ----- Botão de saída ----- */
 function getExitButton(ui) {
-  return ui.nodes().find(
-    (node) =>
-      node.type === 'button' &&
-      node.props['aria-label'] === 'Fechar',
-  );
+  return ui.nodes().find((node) => node.type === 'button' && node.props['aria-label'] === 'Fechar');
 }
 
 /* ----- Atalho de aplicativo ----- */
 function getAppButton(ui, appId) {
-  return ui.nodes().find(
-    (node) =>
-      node.type === 'button' &&
-      node.props.className === 'ws-mobile__home-app' &&
-      ui.text(node).includes(appId === 'resume' ? 'Currículo' : appId),
-  );
+  return ui
+    .nodes()
+    .find(
+      (node) =>
+        node.type === 'button' &&
+        node.props.className === 'ws-mobile__home-app' &&
+        ui.text(node).includes(appId === 'resume' ? 'Currículo' : appId),
+    );
 }
 
 /* === CONTROLE DE ACESSO === */
@@ -150,12 +149,7 @@ test('Mobile não monta administração sem autenticação', async () => {
 
   assert.equal(getScreen(ui), 'apps');
 
-  assert.equal(
-    ui.nodes().filter(
-      (node) => node.type === 'AppHost',
-    ).length,
-    0,
-  );
+  assert.equal(ui.nodes().filter((node) => node.type === 'AppHost').length, 0);
 
   assert.equal(ui.text().includes('Carregando'), false);
 
@@ -214,16 +208,12 @@ test('Mobile mantém instâncias ocultas e pausa jogos', async () => {
     },
   ]);
 
-  const hosts = ui.nodes().filter(
-    (node) => node.type === 'AppHost',
-  );
+  const hosts = ui.nodes().filter((node) => node.type === 'AppHost');
 
   assert.equal(hosts.length, 2);
   assert.equal(hosts[0].props.instance.executionState, 'paused');
 
-  const instances = ui.nodes().filter(
-    (node) => node.props.className === 'ws-mobile__instance',
-  );
+  const instances = ui.nodes().filter((node) => node.props.className === 'ws-mobile__instance');
 
   assert.equal(instances[0].props.inert, true);
   assert.equal(instances[1].props.inert, false);
@@ -286,9 +276,7 @@ test('Mobile seleciona o Visualizador confirmado ao abrir Currículo', async () 
 
   assert.equal(getScreen(ui), 'app');
 
-  const host = ui.nodes().find(
-    (node) => node.type === 'AppHost',
-  );
+  const host = ui.nodes().find((node) => node.type === 'AppHost');
 
   assert.equal(host.props.instance.id, 'viewer-1');
 
@@ -298,5 +286,17 @@ test('Mobile seleciona o Visualizador confirmado ao abrir Currículo', async () 
   assert.equal(pending().id, 'viewer-1');
   assert.equal(pending().options.animate, false);
 
+  ui.unmount();
+});
+test('Mobile oferece Calculadora e busca contextual preservando parâmetros do destino', async () => {
+  const { ui, pending } = await setup([]);
+  assert.ok(ui.nodes().some((n) => n.type === 'button' && ui.text(n).includes('Calculadora')));
+  const input = ui.nodes().find((n) => n.type === 'input' && n.props.type === 'search');
+  input.props.onChange({ target: { value: 'certificado' } });
+  ui.render();
+  const results = ui.nodes().find((n) => n.type === 'GlobalSearchResults');
+  assert.ok(results);
+  results.props.onOpen('notes', { postId: 'note-one' });
+  assert.equal(pending().options.params.postId, 'note-one');
   ui.unmount();
 });

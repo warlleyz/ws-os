@@ -232,7 +232,13 @@
     "Publicando...": "Publicando...",
     "React, JavaScript, Estudos": "React, JavaScript, Estudos",
     "O arquivo ainda não foi vinculado. Use Enviar e vincular anexo para concluir.": "O arquivo ainda não foi vinculado. Use Enviar e vincular anexo para concluir.",
-    "Não foi possível atualizar os anexos. Tente novamente.": "Não foi possível atualizar os anexos. Tente novamente."
+    "Não foi possível atualizar os anexos. Tente novamente.": "Não foi possível atualizar os anexos. Tente novamente.",
+    "{0} curtida": "{0} curtida",
+    "{0} curtidas": "{0} curtidas",
+    "Pesquisar aplicativos e conteúdo": "Pesquisar aplicativos e conteúdo",
+    "Não foi possível consultar o serviço.": "Não foi possível consultar o serviço.",
+    "WakaTime requer configuração do token OAuth.": "WakaTime requer configuração do token OAuth.",
+    "Token do WakaTime inválido ou sem permissão de leitura.": "Token do WakaTime inválido ou sem permissão de leitura."
   },
   "apps": {
     "files": {

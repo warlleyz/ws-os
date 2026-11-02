@@ -34,7 +34,8 @@ Variáveis `VITE_*` podem ser incorporadas ao bundle público: **nunca inserir s
 | `MANAGED_FILES_ENABLED` | Habilitação de arquivos oficiais gerenciados |
 | `RANKINGS_ENABLED` | Habilitação de rankings |
 | `REQUEST_RETENTION_ENABLED` | Rotina de retenção de solicitações |
-| `WAKATIME_API_KEY` | Token da integração WakaTime |
+| `WAKATIME_ACCESS_TOKEN` | Token OAuth de servidor, com leitura de estatísticas; nunca VITE_* |
+| `WAKATIME_PUBLIC_PROJECTS` | Lista opcional de nomes de projetos autorizados publicamente, separados por vírgula; padrão não expõe projetos |
 | `WALLY_AI_ENABLED` | Habilitação da IA remota, desabilitada na base |
 | `GEMINI_MODEL` / `GEMINI_API_KEY` | Modelo e segredo de IA remota |
 | `EMAILJS_NOTIFICATIONS_ENABLED` | Controle da notificação por e-mail |
@@ -50,3 +51,10 @@ O binding D1 `WALLY_LIMITS_DB` está configurado no `wrangler.jsonc`; `ASSETS` r
 - Aplicar migrações e RLS antes de habilitar rotas persistentes.
 - Não executar migrações ou alterações de produção sem autorização e plano de reversão.
 - A Etapa 27 validará banco, Storage, permissões e retenção.
+
+## Desenvolvimento com backend
+
+Copiar .dev.vars.example para .dev.vars e preencher segredos apenas no arquivo local ignorado pelo Git.
+Executar npm run build e npm run dev:worker. Depois de alterar .dev.vars, reiniciar o Worker para carregar os valores.
+O token pessoal de leitura do WakaTime é obtido em https://wakatime.com/oauth. Chaves de plugin não autorizam estatísticas.
+A configuração do ambiente publicado é independente e exige alteração no provedor pelo proprietário.

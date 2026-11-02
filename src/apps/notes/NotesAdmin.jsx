@@ -62,7 +62,7 @@ export default function NotesAdmin({ instanceId, isAdmin, refreshPublicPosts }) 
   /* ----- Consulta da publicação salva ----- */
   const loadSavedPost = useCallback(async (id, token, sessionVersion, signal) => {
     const { response, payload } = await executeJsonRequest(
-      '/api/admin/posts',
+      '/api/admin/posts?id=' + encodeURIComponent(id),
       { cache: 'no-store', headers: { Authorization: `Bearer ${token}` } },
       { signal },
     );

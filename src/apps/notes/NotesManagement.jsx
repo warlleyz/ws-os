@@ -344,7 +344,7 @@ export default function NotesManagement({
     setAdminPostsError('');
 
     try {
-      const { response, payload: data } = await executeJsonRequest(
+      let { response, payload: data } = await executeJsonRequest(
         '/api/admin/posts',
         {
           headers: {
@@ -376,8 +376,39 @@ export default function NotesManagement({
         throw new Error('Resposta inválida do servidor.');
       }
 
-      setAdminPosts(data.posts);
-      return data.posts;
+      const posts = [...data.posts];
+      let offset = 0;
+      while (data.nextOffset != null) {
+        const next = data.nextOffset;
+        if (!Number.isSafeInteger(next) || next <= offset || next > 1000000)
+          throw new Error('Resposta inválida do servidor.');
+        offset = next;
+        const page = await executeJsonRequest(
+          '/api/admin/posts?offset=' + offset,
+          {
+            headers: { Authorization: 'Bearer ' + token },
+            cache: 'no-store',
+          },
+          { signal: controller.signal },
+        );
+        if ([401, 403].includes(page.response.status)) {
+          invalidateAdminSession(sessionVersion);
+          return;
+        }
+        if (!page.response.ok || !Array.isArray(page.payload?.posts))
+          throw new Error('Erro ao carregar publicações.');
+        data = page.payload;
+        posts.push(...data.posts);
+      }
+      if (
+        controller.signal.aborted ||
+        requestId !== adminPostsRequestIdRef.current ||
+        !isCurrentSession(sessionVersion)
+      )
+        return;
+      const unique = [...new Map(posts.map((post) => [post.id, post])).values()];
+      setAdminPosts(unique);
+      return unique;
     } catch (error) {
       if (
         !controller.signal.aborted &&

@@ -19,6 +19,7 @@ function load(file, bindings, names) {
     DOMException,
     setTimeout,
     clearTimeout,
+    ...loadContract(path.join(root, 'src/content/projectDescriptions.js')),
     ...bindings,
   });
 }
@@ -294,4 +295,19 @@ test('retorno contextual rejeita origem cujo aplicativo não corresponde à inst
   });
 
   assert.equal(resolved, null);
+});
+
+test('descrições complementares respeitam conteúdo editorial e não inventam projetos sem evidência', () => {
+  const { projectDescription } = loadContract(
+    path.join(root, 'src/content/projectDescriptions.js'),
+  );
+  assert.equal(
+    projectDescription('https://github.com/warlleyz/ws-os', 'Descrição remota'),
+    'Descrição remota',
+  );
+  assert.match(projectDescription('https://github.com/warlleyz/ws-os', '')['pt-BR'], /React/);
+  assert.equal(projectDescription('https://example.com/warlleyz/ws-os', ''), '');
+  assert.equal(projectDescription('https://github.com/warlleyz/unknown', ''), '');
+  const localized = { 'pt-BR': 'Editorial' };
+  assert.equal(projectDescription('https://github.com/warlleyz/ws-os', localized), localized);
 });

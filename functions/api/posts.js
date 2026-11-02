@@ -1,5 +1,5 @@
 // Somente leitura com chave anon/legacy JWT e RLS; nunca service_role.
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ env, request }) {
   const json = (body, status = 200) =>
     Response.json(body, {
       status,
@@ -14,13 +14,19 @@ export async function onRequestGet({ env }) {
   )
     return json({ error: 'Publicações ainda não configuradas.' }, 503);
   try {
+    const offset = Number(
+      new URL(request?.url ?? 'https://ws.local/api/posts').searchParams.get('offset') ?? 0,
+    );
+    if (!Number.isSafeInteger(offset) || offset < 0 || offset > 1000000)
+      return json({ error: 'Paginação inválida.' }, 400);
     const url = new URL('/rest/v1/posts', env.SUPABASE_URL);
     url.search = new URLSearchParams({
       select: 'id,title,summary,body,tags,published_at',
       status: 'eq.published',
       published_at: `lte.${new Date().toISOString()}`,
-      order: 'published_at.desc',
-      limit: '200',
+      order: 'published_at.desc,id.asc',
+      limit: '201',
+      offset: String(offset),
     });
     const response = await fetch(url, {
       headers: { apikey: env.SUPABASE_ANON_KEY, Authorization: `Bearer ${env.SUPABASE_ANON_KEY}` },
@@ -30,7 +36,8 @@ export async function onRequestGet({ env }) {
     const rows = await response.json();
     if (!Array.isArray(rows)) return json({ error: 'Resposta do serviço inválida.' }, 502);
     return json({
-      posts: rows.map((row) => ({
+      nextOffset: rows.length > 200 ? offset + 200 : null,
+      posts: rows.slice(0, 200).map((row) => ({
         id: row.id,
         title: row.title,
         summary: row.summary,

@@ -1,0 +1,10 @@
+# Copiar para .dev.vars; nunca versionar valores reais.
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+WAKATIME_ACCESS_TOKEN=
+# Somente nomes de projetos cuja divulgação foi autorizada; vazio não expõe projetos.
+WAKATIME_PUBLIC_PROJECTS=
+TURNSTILE_SECRET_KEY=
+ADMIN_LOGIN_RATE_LIMIT_SALT=
+POST_LIKES_HASH_SALT=
+PUBLIC_WRITE_HASH_SALT=

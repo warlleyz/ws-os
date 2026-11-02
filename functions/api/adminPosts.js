@@ -67,11 +67,22 @@ export async function onRequestGet({ request, env }) {
   try {
     const url = new URL('/rest/v1/posts', env.SUPABASE_URL);
 
+    const query = new URL(request.url).searchParams;
+    const id = query.get('id');
+    const offset = Number(query.get('offset') ?? 0);
+    if (
+      (id !== null && !/^[a-z\d_-]{1,80}$/i.test(id)) ||
+      !Number.isSafeInteger(offset) ||
+      offset < 0 ||
+      offset > 1000000
+    )
+      return json({ error: 'Parâmetros de consulta inválidos.' }, 400);
     url.search = new URLSearchParams({
       select:
         'id,title,summary,body,tags,status,published_at,updated_at,post_attachments(official_files(id,name,mime_type,size))',
-      order: 'published_at.desc.nullslast',
-      limit: '200',
+      order: 'published_at.desc.nullslast,id.asc',
+      limit: id ? '1' : '201',
+      ...(id ? { id: 'eq.' + id } : { offset: String(offset) }),
     });
 
     const response = await fetch(url, {
@@ -93,7 +104,8 @@ export async function onRequestGet({ request, env }) {
     }
 
     return json({
-      posts: rows.map((row) => ({
+      nextOffset: !id && rows.length > 200 ? offset + 200 : null,
+      posts: rows.slice(0, 200).map((row) => ({
         id: row.id,
         title: row.title,
         summary: row.summary,

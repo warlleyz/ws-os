@@ -26,6 +26,7 @@ dist-ssr
 # Segredos locais das Pages Functions e integracoes
 .dev.vars
 .dev.vars.*
+!.dev.vars.example
 .env
 .env.*
 !.env.example

@@ -35,7 +35,7 @@ Preferências, rascunhos e arquivos pessoais compatíveis utilizam recursos loca
 - Preservar separação entre shell, core, app e serviço.
 - Revisar consumidores antes de mover ou remover arquivos.
 - Não inferir desuso apenas por ausência de importação estática.
-- Atualizar `docs/INVENTARIO.csv` sempre que arquivos forem alterados ou criados.
+- Preservar `docs/INVENTARIO.csv` como inventário histórico inicial. Atualizar `docs/INVENTARIO-ATUAL.csv` ao criar, remover ou revisar arquivos; cadastro não comprova revisão funcional.
 - Alterações de contratos devem ser validadas nos consumidores e testes.
 
 ## Evidências

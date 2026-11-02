@@ -794,3 +794,100 @@ test('validação temporal aceita precisão PostgreSQL e recusa datas inválidas
   ])
     assert.equal(validInstant(value), false, value);
 });
+
+test('WakaTime projeta estatísticas públicas e exige autorização explícita para nomes de projetos', async () => {
+  const source = {
+    total_seconds: 42,
+    languages: [{ name: 'JS', total_seconds: 42 }],
+    editors: [{ name: 'Editor', total_seconds: 42, secret: 'hidden' }],
+    operating_systems: [],
+    categories: [],
+    projects: [
+      { name: 'public', total_seconds: 1 },
+      { name: 'private', total_seconds: 41 },
+    ],
+    email: 'hidden',
+  };
+  const api = load('wakatime.js', (url, options) => {
+    assert.equal(url.hostname, 'api.wakatime.com');
+    assert.equal(options.headers.Authorization, 'Bearer fixture');
+    return Response.json({ data: source });
+  });
+  for (const allowed of ['', 'public']) {
+    const response = await api.onRequestGet({
+      request: req('api/wakatime'),
+      env: { WAKATIME_ACCESS_TOKEN: 'fixture', WAKATIME_PUBLIC_PROJECTS: allowed },
+    });
+    assert.equal(response.status, 200);
+    const text = await response.text();
+    const data = JSON.parse(text).data;
+    assert.equal(data.editors[0].name, 'Editor');
+    assert.ok(Array.isArray(data.operating_systems));
+    assert.ok(Array.isArray(data.categories));
+    assert.equal(text.includes('hidden'), false);
+    assert.equal(text.includes('private'), false);
+    assert.equal(text.includes('fixture'), false);
+    assert.equal(data.projects?.length, allowed ? 1 : undefined);
+  }
+});
+
+test('WakaTime distingue configuração OAuth ausente, autorização recusada e processamento', async () => {
+  const missing = load('wakatime.js', () => {
+    throw Error('unexpected upstream');
+  });
+  assert.equal(
+    (
+      await missing.onRequestGet({
+        request: req('api/wakatime'),
+        env: { WAKATIME_API_KEY: 'legacy' },
+      })
+    ).status,
+    503,
+  );
+  for (const status of [401, 403, 202]) {
+    const api = load('wakatime.js', () =>
+      Response.json({ error: 'private-provider-error' }, { status }),
+    );
+    const response = await api.onRequestGet({
+      request: req('api/wakatime'),
+      env: { WAKATIME_ACCESS_TOKEN: 'fixture' },
+    });
+    assert.equal(response.status, 503);
+    assert.equal((await response.text()).includes('private-provider-error'), false);
+  }
+});
+
+test('consulta administrativa encontra rascunho por ID sem depender do tamanho do catálogo', async () => {
+  const api = load('adminPosts.js', (url) => {
+    assert.equal(url.searchParams.get('id'), 'eq.draft-one');
+    assert.equal(url.searchParams.get('limit'), '1');
+    return Response.json([
+      { id: 'draft-one', status: 'draft', updated_at: '2026-11-02T17:31:00.969156+00:00' },
+    ]);
+  });
+  const response = await api.onRequestGet({ request: req('api/admin/posts?id=draft-one'), env });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).posts[0].id, 'draft-one');
+});
+
+test('paginação administrativa e pública indica continuação e valida offset antes do banco', async () => {
+  for (const file of ['adminPosts.js', 'posts.js']) {
+    const api = load(file, (url) => {
+      assert.equal(url.searchParams.get('offset'), '200');
+      return Response.json(Array.from({ length: 201 }, (_, i) => ({ id: 'post-' + i })));
+    });
+    const response = await api.onRequestGet({
+      request: req('api/' + (file === 'posts.js' ? 'posts' : 'admin/posts') + '?offset=200'),
+      env,
+    });
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    assert.equal(data.posts.length, 200);
+    assert.equal(data.nextOffset, 400);
+    const invalid = await api.onRequestGet({
+      request: req('api/' + (file === 'posts.js' ? 'posts' : 'admin/posts') + '?offset=-1'),
+      env,
+    });
+    assert.equal(invalid.status, 400);
+  }
+});

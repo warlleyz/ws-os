@@ -23,7 +23,7 @@ As funcionalidades novas indicadas neste plano são possibilidades para avaliaç
 
 ### Controle de todos os arquivos
 
-Manter um inventário com:
+Manter um inventário com (fotografia inicial em `INVENTARIO.csv`; acompanhamento corrente em `INVENTARIO-ATUAL.csv`, conforme decisão do proprietário de preservar o original):
 
 | Arquivo | Responsabilidade | Consumidores | Decisão | Etapa | Situação |
 | --- | --- | --- | --- | --- | --- |

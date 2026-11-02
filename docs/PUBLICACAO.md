@@ -5,7 +5,8 @@
 - Repositório: https://github.com/warlleyz/ws-os
 - Commit de referência V2: `c7af7834e3774ab29a631b0798d70e8cc59999ad`
 - O proprietário confirmou que a publicação e a base auditada correspondem ao mesmo commit.
-- **V2.1 não publicada:** as alterações da nova versão devem passar por validação e autorização antes do deploy.
+- GitHub confirmado no commit `4c3dd2b90a8b98bb5a99ea81d1eb8421ffc1ec43` em 02/11/2026, incluindo a Etapa 16. Push e deploy são eventos distintos: o SHA do deploy ativo não foi confirmado pelo provedor.
+- As correções posteriores da auditoria 01–16 foram aprovadas pelo proprietário, que autorizou commit e push em 02/11/2026. O commit de fechamento pode ser identificado no histórico pela mensagem `fix: consolidar correcoes da auditoria das etapas 01 a 16`. Nenhum deploy foi executado pelo assistente.
 
 ## Topologia identificada
 - Vite compila o frontend para `dist`.

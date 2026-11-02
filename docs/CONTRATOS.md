@@ -51,3 +51,9 @@ Rotas listadas conforme `worker/index.js` no commit `c7af7834e3774ab29a631b0798d
 
 ## Validação pendente por etapa
 Testes de integração e autorização de rotas (26–28); consumidores (04 e 15–25); homologação final (32).
+
+## Atualização de contratos — auditoria 01–16, 02/11/2026
+
+- GET /api/posts e GET /api/admin/posts aceitam offset inteiro de 0 a 1.000.000 e retornam até 200 itens em posts. nextOffset indica a próxima página ou null. Ordenação inclui id para desempate.
+- GET /api/admin/posts?id=IDENTIFICADOR retorna somente a nota solicitada, mantendo autenticação e autorização administrativas; o compositor usa essa consulta para recuperar a revisão exata do rascunho.
+- GET /api/wakatime exige WAKATIME_ACCESS_TOKEN no servidor e usa OAuth Bearer. A resposta pública contém apenas estatísticas selecionadas; nomes de projetos exigem WAKATIME_PUBLIC_PROJECTS. Erros de configuração/autorização retornam 503 sem credenciais ou detalhes privados do provedor.

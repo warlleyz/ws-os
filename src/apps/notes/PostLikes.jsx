@@ -164,9 +164,7 @@ export default function PostLikes({ postId }) {
     } catch (err) {
       /* ----- Tratamento de falhas ----- */
       if (requestId === requestIdRef.current) {
-        setError(
-          `${err.message} Verifique o estado da curtida antes de tentar novamente.`,
-        );
+        setError(`${err.message} Verifique o estado da curtida antes de tentar novamente.`);
         setCount(null);
       }
     } finally {
@@ -205,7 +203,10 @@ export default function PostLikes({ postId }) {
           <span
             className="notes-app__like-count"
             aria-live="polite"
-            aria-label={t(`${count} ${count === 1 ? 'curtida' : 'curtidas'}`)}
+            aria-label={t(count === 1 ? '{0} curtida' : '{0} curtidas').replace(
+              '{0}',
+              String(count),
+            )}
           >
             {count}
           </span>

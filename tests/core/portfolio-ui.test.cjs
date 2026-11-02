@@ -49,12 +49,14 @@ test('certificados abrem detalhes, preservam origem, download e links externos',
 
   /* === Certificado local === */
   /* ----- Abrir detalhes ----- */
-  const localCard = ui.nodes().find(
-    (node) =>
-      node.type === 'button' &&
-      node.props.className === 'ws-certificates__card-button' &&
-      node.props['aria-label']?.includes('Local'),
-  );
+  const localCard = ui
+    .nodes()
+    .find(
+      (node) =>
+        node.type === 'button' &&
+        node.props.className === 'ws-certificates__card-button' &&
+        node.props['aria-label']?.includes('Local'),
+    );
 
   assert.ok(localCard, 'O card do certificado local deve existir.');
 
@@ -62,11 +64,12 @@ test('certificados abrem detalhes, preservam origem, download e links externos',
   ui.render();
 
   /* ----- Visualizar documento ----- */
-  const viewButton = ui.nodes().find(
-    (node) =>
-      node.type === 'button' &&
-      node.props.className === 'ws-certificates__primary-action',
-  );
+  const viewButton = ui
+    .nodes()
+    .find(
+      (node) =>
+        node.type === 'button' && node.props.className === 'ws-certificates__primary-action',
+    );
 
   assert.ok(viewButton, 'O botão Visualizar deve existir nos detalhes.');
 
@@ -78,20 +81,16 @@ test('certificados abrem detalhes, preservam origem, download e links externos',
   assert.equal(calls[0][2].params.url, 'https://ws.test/local.pdf');
 
   /* ----- Download ----- */
-  const downloadLink = ui.nodes().find(
-    (node) => node.type === 'a' && node.props.download,
-  );
+  const downloadLink = ui.nodes().find((node) => node.type === 'a' && node.props.download);
 
   assert.ok(downloadLink, 'O link de download deve existir.');
   assert.equal(downloadLink.props.href, 'https://ws.test/local.pdf');
 
   /* === Certificado externo === */
   /* ----- Retornar à listagem ----- */
-  const backButton = ui.nodes().find(
-    (node) =>
-      node.type === 'button' &&
-      node.props.className === 'ws-certificates__back',
-  );
+  const backButton = ui
+    .nodes()
+    .find((node) => node.type === 'button' && node.props.className === 'ws-certificates__back');
 
   assert.ok(backButton, 'O botão Voltar deve existir.');
 
@@ -99,23 +98,23 @@ test('certificados abrem detalhes, preservam origem, download e links externos',
   ui.render();
 
   /* ----- Abrir detalhes externos ----- */
-  const externalCard = ui.nodes().find(
-    (node) =>
-      node.type === 'button' &&
-      node.props.className === 'ws-certificates__card-button' &&
-      node.props['aria-label']?.includes('Externo'),
-  );
+  const externalCard = ui
+    .nodes()
+    .find(
+      (node) =>
+        node.type === 'button' &&
+        node.props.className === 'ws-certificates__card-button' &&
+        node.props['aria-label']?.includes('Externo'),
+    );
 
   assert.ok(externalCard, 'O card externo deve existir.');
 
   externalCard.props.onClick();
   ui.render();
 
-  const externalLink = ui.nodes().find(
-    (node) =>
-      node.type === 'a' &&
-      node.props.href === 'https://issuer.test/cert',
-  );
+  const externalLink = ui
+    .nodes()
+    .find((node) => node.type === 'a' && node.props.href === 'https://issuer.test/cert');
 
   assert.ok(externalLink, 'O link externo deve existir.');
   assert.equal(externalLink.props.target, '_blank');
@@ -345,4 +344,29 @@ test('Projetos preserva metadados e permite recuperar destaques quando a integra
   projects.button('Tentar novamente').props.onClick();
   assert.equal(refreshed, 1);
   projects.unmount();
+});
+
+test('distribuição de linguagens soma cem por cento mesmo quando o total da fonte diverge', async () => {
+  const ui = await renderApp(
+    'src/apps/dev-insights/DevInsights.jsx',
+    {
+      data: {
+        totalSeconds: 10,
+        languages: [
+          { name: 'JS', seconds: 40 },
+          { name: 'CSS', seconds: 60 },
+        ],
+      },
+      locale: 'pt-BR',
+      copy: {},
+    },
+    {},
+    { entryPoint: 'WakaTimeSummary' },
+  );
+  const widths = ui
+    .nodes()
+    .filter((n) => n.props.style?.['--coding-width'])
+    .map((n) => n.props.style['--coding-width']);
+  assert.deepEqual(widths, ['40%', '60%']);
+  ui.unmount();
 });

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { Bell, Settings2, X } from 'lucide-react';
+import { Bell, Search, Settings2, X } from 'lucide-react';
 
 import { activateApp, closeApp, openApp, restoreApp } from '../../core/appManager';
 import { getAppDefinition, getRegisteredApps } from '../../core/appRegistry';
@@ -28,6 +28,9 @@ import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
 import MobileWeatherStatus from './system/MobileWeatherStatus';
 import MobileWidgets from './home/MobileWidgets';
+import GlobalSearchResults from '../../features/search/GlobalSearchResults';
+import { normalizeSearch } from '../../features/search/searchService';
+import '../../features/search/GlobalSearchResults.css';
 
 import './Mobile.css';
 
@@ -54,28 +57,19 @@ export default function Mobile({ theme, onThemeChange }) {
 
   useWallpaperRevision();
 
-  useSyncExternalStore(
-    subscribeAdminSession,
-    getAdminSessionVersion,
-    getAdminSessionVersion,
-  );
+  useSyncExternalStore(subscribeAdminSession, getAdminSessionVersion, getAdminSessionVersion);
 
   const authorized = isAdminAuthenticated();
 
   /* === ESTADOS === */
-  const sharedInstance = appState.instances.find(
-    (instance) => instance.origin === 'shared-link',
-  );
+  const sharedInstance = appState.instances.find((instance) => instance.origin === 'shared-link');
 
-  const [screen, setScreen] = useState(
-    sharedInstance ? 'app' : 'apps',
-  );
+  const [screen, setScreen] = useState(sharedInstance ? 'app' : 'apps');
 
-  const [selectedInstanceId, setSelectedInstanceId] = useState(
-    sharedInstance?.id ?? null,
-  );
+  const [selectedInstanceId, setSelectedInstanceId] = useState(sharedInstance?.id ?? null);
 
   const [activePanel, setActivePanel] = useState(null);
+  const [search, setSearch] = useState('');
   const [currentTime, setCurrentTime] = useState(() => new Date());
 
   /* === REFERÊNCIAS === */
@@ -105,7 +99,7 @@ export default function Mobile({ theme, onThemeChange }) {
   /* ----- Aplicativos principais ----- */
   const apps = getRegisteredApps().filter(
     (app) =>
-      (app.public && app.desktopShortcut) ||
+      (app.public && (app.desktopShortcut || app.showInMenu)) ||
       (app.public && app.id === 'wally-extended') ||
       (authorized && app.id === 'administration'),
   );
@@ -115,30 +109,22 @@ export default function Mobile({ theme, onThemeChange }) {
     const app = getAppDefinition(instance.appId);
 
     return (
-      !instance.closing &&
-      (app?.public || (authorized && instance.appId === 'administration'))
+      !instance.closing && (app?.public || (authorized && instance.appId === 'administration'))
     );
   });
 
   /* ----- Aplicativo selecionado ----- */
-  const selectedInstance = instances.find(
-    (instance) => instance.id === appState.activeInstanceId,
-  ) ?? instances.find(
-    (instance) => instance.id === selectedInstanceId,
-  );
+  const selectedInstance =
+    instances.find((instance) => instance.id === appState.activeInstanceId) ??
+    instances.find((instance) => instance.id === selectedInstanceId);
 
-  const selectedApp = selectedInstance
-    ? getAppDefinition(selectedInstance.appId)
-    : null;
+  const selectedApp = selectedInstance ? getAppDefinition(selectedInstance.appId) : null;
 
-  const visibleScreen =
-    screen === 'app' && !selectedInstance ? 'apps' : screen;
+  const visibleScreen = screen === 'app' && !selectedInstance ? 'apps' : screen;
 
   /* ----- Notificações ----- */
   const notifications = notificationState?.items ?? [];
-  const unreadCount = notifications.filter(
-    (notification) => !notification.read,
-  ).length;
+  const unreadCount = notifications.filter((notification) => !notification.read).length;
 
   /* ----- Data e horário ----- */
   const time = currentTime.toLocaleTimeString(locale, {
@@ -183,9 +169,8 @@ export default function Mobile({ theme, onThemeChange }) {
     }
 
     const leaf = active.find(
-      (candidate) => !active.some(
-        (instance) => instance.navigationOrigin?.instanceId === candidate.id,
-      ),
+      (candidate) =>
+        !active.some((instance) => instance.navigationOrigin?.instanceId === candidate.id),
     );
 
     if (!leaf) return;
@@ -198,15 +183,14 @@ export default function Mobile({ theme, onThemeChange }) {
 
   /* ----- Retorno para a origem confirmada ----- */
   function returnToOrigin(instance) {
-    const origin = resolveNavigationOrigin(
-      appStateRef.current,
-      instance.navigationOrigin,
-    );
+    const origin = resolveNavigationOrigin(appStateRef.current, instance.navigationOrigin);
     const definition = origin && getAppDefinition(origin.appId);
 
-    if (origin && !origin.closing && (
-      definition?.public || (authorized && origin.appId === 'administration')
-    )) {
+    if (
+      origin &&
+      !origin.closing &&
+      (definition?.public || (authorized && origin.appId === 'administration'))
+    ) {
       run(origin.minimized ? restoreApp : activateApp, origin.id);
       setSelectedInstanceId(origin.id);
       setScreen('app');
@@ -277,6 +261,7 @@ export default function Mobile({ theme, onThemeChange }) {
 
     if (
       activePanel ||
+      event.target?.closest?.('input, button, .ws-global-search') ||
       visibleScreen === 'app' ||
       event.touches.length !== 1
     ) {
@@ -308,9 +293,7 @@ export default function Mobile({ theme, onThemeChange }) {
     }
 
     touchDirectionRef.current =
-      Math.abs(deltaX) > Math.abs(deltaY) * SWIPE_RATIO
-        ? 'horizontal'
-        : 'vertical';
+      Math.abs(deltaX) > Math.abs(deltaY) * SWIPE_RATIO ? 'horizontal' : 'vertical';
   }
 
   /* ----- Conclusão do gesto ----- */
@@ -349,7 +332,7 @@ export default function Mobile({ theme, onThemeChange }) {
   /* === PAINÉIS === */
   /* ----- Alternância ----- */
   function togglePanel(name) {
-    setActivePanel((current) => current === name ? null : name);
+    setActivePanel((current) => (current === name ? null : name));
   }
 
   /* ----- Abrir aplicativo de uma notificação ----- */
@@ -429,10 +412,7 @@ export default function Mobile({ theme, onThemeChange }) {
         className="ws-mobile__wallpaper"
         aria-hidden="true"
         style={{
-          background: getWallpaperDefinition(
-            wallpaper,
-            'mobile',
-          ).background,
+          background: getWallpaperDefinition(wallpaper, 'mobile').background,
         }}
       />
 
@@ -440,9 +420,7 @@ export default function Mobile({ theme, onThemeChange }) {
       <header className="ws-mobile__status-bar">
         {/* ----- Horário e data ----- */}
         <div className="ws-mobile__status-info">
-          <time dateTime={currentTime.toISOString()}>
-            {time}
-          </time>
+          <time dateTime={currentTime.toISOString()}>{time}</time>
           <span>{date}</span>
         </div>
 
@@ -470,9 +448,7 @@ export default function Mobile({ theme, onThemeChange }) {
             <Bell size={19} aria-hidden="true" />
 
             {unreadCount > 0 && (
-              <span className="ws-mobile__badge">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
+              <span className="ws-mobile__badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
             )}
           </button>
         </div>
@@ -493,36 +469,48 @@ export default function Mobile({ theme, onThemeChange }) {
           {/* ----- Página de aplicativos ----- */}
           {visibleScreen === 'apps' && (
             <div className="ws-mobile__home">
+              <label className="ws-mobile__search">
+                <Search size={18} aria-hidden="true" />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder={t('Pesquisar aplicativos e conteúdo')}
+                  aria-label={t('Pesquisar aplicativos e conteúdo')}
+                />
+              </label>
               <div className="ws-mobile__home-grid">
-                {apps.map((app) => (
-                  <button
-                    key={app.id}
-                    type="button"
-                    className="ws-mobile__home-app"
-                    onClick={() => openMobileApp(app.id)}
-                  >
-                    <span className="ws-mobile__home-app-icon">
-                      <AppIcon app={app} size={28} />
-                    </span>
-                    <span>{t(app.name)}</span>
-                  </button>
-                ))}
+                {apps
+                  .filter((app) =>
+                    normalizeSearch(t(app.name)).includes(normalizeSearch(search.trim())),
+                  )
+                  .map((app) => (
+                    <button
+                      key={app.id}
+                      type="button"
+                      className="ws-mobile__home-app"
+                      onClick={() => openMobileApp(app.id)}
+                    >
+                      <span className="ws-mobile__home-app-icon">
+                        <AppIcon app={app} size={28} />
+                      </span>
+                      <span>{t(app.name)}</span>
+                    </button>
+                  ))}
               </div>
+              {search.trim().length >= 2 && (
+                <GlobalSearchResults query={search} onOpen={openMobileApp} />
+              )}
             </div>
           )}
 
           {/* ----- Página de widgets ----- */}
           {visibleScreen === 'widgets' && (
-            <MobileWidgets
-              onOpenSettings={() => openMobileApp('settings')}
-            />
+            <MobileWidgets onOpenSettings={() => openMobileApp('settings')} />
           )}
 
           {/* ----- Navegação entre páginas ----- */}
-          <nav
-            className="ws-mobile__pagination"
-            aria-label={t('Navegação Mobile')}
-          >
+          <nav className="ws-mobile__pagination" aria-label={t('Navegação Mobile')}>
             <button
               type="button"
               aria-label={t('Aplicativos')}
@@ -553,9 +541,7 @@ export default function Mobile({ theme, onThemeChange }) {
         {instances.map((instance) => {
           const app = getAppDefinition(instance.appId);
 
-          const isVisible =
-            visibleScreen === 'app' &&
-            selectedInstance?.id === instance.id;
+          const isVisible = visibleScreen === 'app' && selectedInstance?.id === instance.id;
 
           return (
             <div
@@ -580,11 +566,7 @@ export default function Mobile({ theme, onThemeChange }) {
       {/* === BARRA INFERIOR === */}
       {visibleScreen === 'app' && (
         <nav className="ws-mobile__exit-bar">
-          <button
-            type="button"
-            onClick={closeCurrentApp}
-            aria-label={t('Fechar')}
-          >
+          <button type="button" onClick={closeCurrentApp} aria-label={t('Fechar')}>
             <X size={18} aria-hidden="true" />
             <span>{t('Fechar')}</span>
           </button>
@@ -616,11 +598,7 @@ export default function Mobile({ theme, onThemeChange }) {
             className="ws-mobile__panel"
             role="dialog"
             aria-modal="true"
-            aria-label={t(
-              activePanel === 'notifications'
-                ? 'Notificações'
-                : 'Controle Rápido',
-            )}
+            aria-label={t(activePanel === 'notifications' ? 'Notificações' : 'Controle Rápido')}
           >
             {activePanel === 'notifications' ? (
               <NotificationCenter

@@ -83,11 +83,11 @@ test('proxy WakaTime mantém chave no header e remove dados privados', async () 
   });
   const response = await onRequestGet({
     request: new Request('https://ws.test/api/wakatime?range=last_7_days'),
-    env: { WAKATIME_API_KEY: 'test-secret' },
+    env: { WAKATIME_ACCESS_TOKEN: 'test-secret' },
   });
   const body = await response.text();
   assert.equal(response.status, 200);
-  assert.match(called.options.headers.Authorization, /^Basic /);
+  assert.equal(called.options.headers.Authorization, 'Bearer test-secret');
   assert.ok(!called.url.includes('test-secret'));
   assert.ok(!body.includes('private'));
   assert.ok(!body.includes('test-secret'));
@@ -105,7 +105,7 @@ test('proxy não expõe mensagens/credenciais em erro do provedor', async () => 
   });
   const response = await onRequestGet({
     request: new Request('https://ws.test/api/wakatime'),
-    env: { WAKATIME_API_KEY: 'test-secret' },
+    env: { WAKATIME_ACCESS_TOKEN: 'test-secret' },
   });
   assert.equal(response.status, 502);
   assert.ok(!(await response.text()).includes('secret'));
@@ -146,7 +146,33 @@ test('posts exige origem Supabase e consulta somente colunas públicas publicada
   assert.equal(response.status, 200);
   assert.equal(called.url.searchParams.get('status'), 'eq.published');
   assert.match(called.url.searchParams.get('published_at'), /^lte\./);
-  assert.equal(called.url.searchParams.get('limit'), '200');
+  assert.equal(called.url.searchParams.get('limit'), '201');
   assert.ok(!called.url.searchParams.get('select').includes('*'));
   assert.ok(!(await response.text()).includes('private'));
+});
+
+test('catálogo de notas percorre páginas sem truncar a nota 201', async () => {
+  const calls = [];
+  const row = (id) => ({
+    id: 'note-' + id,
+    status: 'published',
+    title: 'Title',
+    body: 'Body',
+    publishedAt: '2020-01-01',
+  });
+  const api = load('src/services/notesService.js', ['fetchNotes'], {
+    contentText: (v) => v,
+    portfolio: { notesEndpoint: '/api/posts' },
+    requestPublicJson: async (url) => {
+      calls.push(url);
+      return {
+        data: url.includes('offset=200')
+          ? { posts: [row(201)], nextOffset: null }
+          : { posts: Array.from({ length: 200 }, (_, i) => row(i)), nextOffset: 200 },
+      };
+    },
+  });
+  const result = await api.fetchNotes();
+  assert.equal(result.data.length, 201);
+  assert.deepEqual(calls, ['/api/posts', '/api/posts?offset=200']);
 });

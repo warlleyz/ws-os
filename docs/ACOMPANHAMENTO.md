@@ -27,7 +27,7 @@
 | 13 | Currículo e certificados | **Concluída e aprovada** |
 | 14 | Dev Insights e visualização de dados | **Concluída e aprovada** |
 | 15 | Busca global, navegação e compartilhamento | **Concluída e aprovada** |
-| 16 | Notas e publicações | **Concluída e validada localmente** |
+| 16 | Notas e publicações | **Concluída e aprovada pelo proprietário** |
 | 17 | Arquivos e armazenamento pessoal | Não iniciada |
 | 18 | Editor e visualizador de arquivos | Não iniciada |
 | 19 | Contato e solicitações de horário | Não iniciada |
@@ -65,15 +65,15 @@
 - `docs/INVENTARIO.csv` e `docs/DIAGNOSTICO-ETAPA-01.md` copiados pelo proprietário.
 - Planejamento original de 33 etapas recuperado integralmente e preservado no novo `PLANO-V2.1.md`.
 
-### A executar e verificar
+### Evidências e reconciliação em 02/11/2026
 
-- [ ] Copiar os dois novos documentos para `docs/` e conferir caminhos/links.
-- [ ] Conferir documentação operacional vigente do backend e deployment antes de reconstruí-la.
-- [ ] Documentar arquitetura atual e contratos sem inventar interfaces.
-- [ ] Definir convenções para novos arquivos, movimentação, remoção e comentários.
-- [ ] Criar exemplos seguros de variáveis de ambiente a partir das configurações reais.
-- [ ] Checar referências a componentes removidos e documentar decisões de compatibilidade.
-- [ ] Executar `git diff --check`, revisar alterações e registrar o commit autorizado.
+- Documentos operacionais disponíveis em CONFIGURACAO.md, ARQUITETURA.md, CONTRATOS.md e PUBLICACAO.md.
+- Diagnóstico original de 31/10/2026 recuperado, sem reescrever seu conteúdo histórico.
+- Exemplo de configuração adicionado sem credenciais reais; execução do Worker documentada.
+- Convenções de edição registradas neste acompanhamento.
+- INVENTARIO.csv preservado como fotografia inicial por decisão do proprietário.
+- INVENTARIO-ATUAL.csv registra a árvore atual e distingue cadastro de revisão funcional.
+- Commits das etapas anteriores disponíveis no histórico; as correções desta auditoria permanecem locais até revisão do proprietário.
 
 ### Decisões já aprovadas
 
@@ -143,8 +143,8 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 - Nenhuma alteração funcional adicional necessária nesta etapa.
 - Ajustes cosméticos de quebra de linha e indentação podem ser realizados posteriormente.
-- Alterações ainda não commitadas.
-- Commit e push dependem de autorização do proprietário.
+- Integração histórica da Etapa 04 registrada no commit ba450f6.
+- Correções posteriores são registradas em suas respectivas etapas.
 
 ## Etapa 05 — Componentes compartilhados, hooks e utilitários
 
@@ -611,7 +611,7 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 ## Etapa 16 — Notas e publicações
 
-**Estado:** concluída e validada localmente em 02/11/2026.
+**Estado:** concluída e aprovada pelo proprietário em 02/11/2026, após a correção e confirmação do WakaTime.
 
 ### Trabalhos realizados
 
@@ -676,6 +676,41 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 ### Encerramento
 
-- Etapa 16 concluída e validada localmente.
-- Commit, push e publicação não executados pelo assistente.
+- Etapa 16 concluída e aprovada pelo proprietário.
+- Commit e push das correções autorizados pelo proprietário em 02/11/2026; publicação não executada pelo assistente.
 - **Próxima etapa prevista: 17 — Arquivos e armazenamento pessoal.**
+## Correções da auditoria das Etapas 01–16 — 02/11/2026
+
+- Recuperação do diagnóstico original e reconciliação dos registros históricos.
+- Inventário inicial preservado; inventário corrente separado para permitir acompanhamento dos arquivos atuais.
+- API WakaTime migrada para OAuth e projeção de editores, sistemas e categorias. Nomes de projetos exigem autorização explícita por configuração.
+- Token OAuth validado em consulta real de leitura ao provedor; configuração publicada depende do proprietário.
+- Atualização de Notas invalida conteúdo, anexos e curtidas; consulta por ID recupera o rascunho independentemente do catálogo.
+- Paginação pública e administrativa adicionada para ultrapassar 200 registros, com validação de parâmetros e ordenação estável.
+- Busca global reutilizada no Mobile, com abertura contextual, e Calculadora incluída na grade.
+- Menu nativo do navegador preservado fora dos menus próprios do sistema.
+- Traduções de mensagens e contador de curtidas corrigidas.
+- Descrições complementares baseadas em READMEs públicos adicionadas sem alterar os repositórios remotos ou a seleção administrativa de destaques. Repositórios sem documentação suficiente continuam identificados sem inventar funcionalidades.
+- Procedência dos recursos visuais registrada sem presumir licenças. Tamanho do PDF.js e homologação final permanecem nas etapas específicas 30 e 32–33.
+- Correções aprovadas pelo proprietário, com commit e push autorizados em 02/11/2026. Sem deploy ou migração.
+
+### Verificação das correções
+
+- WakaTime consultado com sucesso pelo Worker local nos períodos de 7 dias, 30 dias e 365 dias; editores, sistemas e categorias presentes, nomes de projetos privados omitidos.
+- Distribuição percentual de linguagens usa a soma da própria categoria, evitando percentuais que excedam 100% quando a fonte apresenta totais divergentes.
+- Wrangler 4.156.2 fixado no lockfile e script dev:worker adicionado.
+- Override de minimatch 11.0.1 elimina os alertas conhecidos; auditoria npm completa com zero vulnerabilidades em 02/11/2026.
+- Suite ampliada para 590 testes; validações finais de lint, build e diff registradas após a conclusão.
+- Banco e seleção remota de destaques preservados. A configuração OAuth em produção não foi alterada.
+
+- Validação final: 590 testes aprovados, lint sem erros, build aprovado e git diff --check aprovado. Busca Mobile abriu o certificado SQL no destino correto; Calculadora carregou pela grade. Nenhuma gravação de conteúdo no banco durante a validação.
+
+### Aceite do proprietário e continuidade — 02/11/2026
+
+- Proprietário confirmou que o WakaTime funcionou e aprovou o resultado visual e funcional apresentado para as Etapas 01–16.
+- Commit e push das correções desta auditoria autorizados explicitamente.
+- Este aceite não afirma que todos os arquivos tiveram revisão manual individual nem que o ambiente publicado foi integralmente homologado.
+- O inventário corrente cobre os 459 arquivos atuais; a evidência de cadastro permanece distinta da revisão funcional de consumidores.
+- Licenças sem comprovação, otimização dos módulos grandes e homologação integrada continuam registradas nas etapas correspondentes.
+- Credenciais reais permanecem em configuração local ignorada pelo Git; somente o exemplo sem valores é versionado.
+- Próxima etapa: 17 — Arquivos e armazenamento pessoal.

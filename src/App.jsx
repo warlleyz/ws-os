@@ -5,16 +5,9 @@ import { useEffect, useState } from 'react';
 import { translate as t, useLocale } from './shared/i18n/i18n';
 
 import { applyTheme, useTheme, setTheme } from './core/themeManager';
-import {
-  updateAppearanceContext,
-  useAppearance,
-} from './core/appearanceManager';
+import { updateAppearanceContext, useAppearance } from './core/appearanceManager';
 import { applyAccessibility, useAccessibility } from './core/effectsManager';
-import {
-  getWallpaper,
-  getWallpaperDefinition,
-  subscribeWallpapers,
-} from './core/wallpaperManager';
+import { getWallpaper, getWallpaperDefinition, subscribeWallpapers } from './core/wallpaperManager';
 import { useCursorMode } from './core/cursorManager';
 import { CURSOR_VARIANTS, getCursorCssValue } from './core/cursorCatalog';
 
@@ -38,7 +31,6 @@ const MOBILE_BREAKPOINT = '(max-width: 767px)';
 /* === Preferências iniciais === */
 /* ----- Verificar apresentação de boas-vindas ----- */
 function shouldShowWelcome() {
-
   /* ----- Entrada por link compartilhado ----- */
   if (resolveSharedEntry(window.location.search)) {
     return false;
@@ -59,7 +51,6 @@ function isMobileViewport() {
 
 /* === Aplicativo principal === */
 export default function App() {
-
   /* ----- Preferências globais ----- */
   const locale = useLocale();
   const theme = useTheme();
@@ -127,19 +118,6 @@ export default function App() {
       }
     };
   }, [cursorMode, theme]);
-
-  /* === MENU CONTEXTUAL DO SISTEMA === */
-  // Impede o menu nativo sem interferir nos menus personalizados.
-  useEffect(() => {
-    if (typeof document.addEventListener !== 'function') return;
-    function preventNativeContextMenu(event) {
-      event.preventDefault();
-    }
-    document.addEventListener('contextmenu', preventNativeContextMenu);
-    return () => {
-      document.removeEventListener('contextmenu', preventNativeContextMenu);
-    };
-  }, []);
 
   /* === Responsividade === */
   /* ----- Alternância entre Desktop e Mobile ----- */

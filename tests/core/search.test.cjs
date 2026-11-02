@@ -5,10 +5,17 @@ const vm = require('node:vm');
 const path = require('node:path');
 const source = fs
   .readFileSync(path.join(__dirname, '../../src/features/search/searchService.js'), 'utf8')
+  .replace(/^import .*;\r?\n/gm, '')
   .replace(/export /g, '');
 const { searchContent, resolveSharedEntry } = vm.runInNewContext(
   '(()=>{' + source + ';return {searchContent,resolveSharedEntry}})()',
-  { URL, URLSearchParams },
+  {
+    URL,
+    URLSearchParams,
+    ...require('../helpers/contract-loader.cjs').loadContract(
+      path.resolve(__dirname, '../../src/content/projectDescriptions.js'),
+    ),
+  },
 );
 const portfolio = {
   projects: [{ id: 'one', name: 'Árvore', description: 'Local', technologies: ['React'] }],
@@ -114,11 +121,7 @@ test('busca encontra configurações em português e inglês', () => {
     const results = searchContent(query, { portfolio });
 
     assert.ok(
-      results.some(
-        (result) =>
-          result.kind === 'setting' &&
-          result.params.section === section,
-      ),
+      results.some((result) => result.kind === 'setting' && result.params.section === section),
       `Termo não encontrado: ${query}`,
     );
   }

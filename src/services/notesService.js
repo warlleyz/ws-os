@@ -5,7 +5,6 @@ export function normalizeNotes(items, now = Date.now()) {
   if (!Array.isArray(items)) throw new Error('Resposta de publicações inválida.');
   const ids = new Set();
   return items
-    .slice(0, 200)
     .filter((item) => {
       if (
         !item ||
@@ -42,9 +41,33 @@ export async function fetchNotes(options = {}) {
     return { data: normalizeNotes(portfolio.posts ?? []), source: 'local', updatedAt: Date.now() };
   if (!/^\/api\/[a-z\d/_-]+$/i.test(portfolio.notesEndpoint))
     throw new Error('Endpoint de publicações inválido.');
-  const result = await requestPublicJson(portfolio.notesEndpoint, {
-    category: 'content',
-    ...options,
-  });
-  return { ...result, data: normalizeNotes(result.data?.posts) };
+  const posts = [];
+  let offset = 0;
+  let result;
+  let updatedAt = Infinity;
+  let source = 'live';
+  let warning;
+  do {
+    result = await requestPublicJson(
+      portfolio.notesEndpoint + (offset ? '?offset=' + offset : ''),
+      { category: 'content', ...options },
+    );
+    if (!Array.isArray(result.data?.posts)) throw new Error('Resposta de publicações inválida.');
+    posts.push(...result.data.posts);
+    updatedAt = Math.min(updatedAt, result.updatedAt ?? Infinity);
+    if (result.source === 'cache') source = 'cache';
+    warning ??= result.warning;
+    const next = result.data.nextOffset;
+    if (next == null) break;
+    if (!Number.isSafeInteger(next) || next <= offset || next > 1000000)
+      throw new Error('Paginação de publicações inválida.');
+    offset = next;
+  } while (result.data.nextOffset != null);
+  return {
+    ...result,
+    source,
+    updatedAt: Number.isFinite(updatedAt) ? updatedAt : result.updatedAt,
+    warning,
+    data: normalizeNotes(posts),
+  };
 }

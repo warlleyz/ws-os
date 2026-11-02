@@ -1,3 +1,5 @@
+import { projectDescription } from '../../content/projectDescriptions';
+
 /* === NORMALIZAÇÃO DA BUSCA === */
 export function normalizeSearch(value) {
   return String(value ?? '')
@@ -91,9 +93,7 @@ export function searchContent(
 
     if (repository && repositoryKeys.has(repository)) continue;
 
-    const key = repository
-      ? `repository:${repository}`
-      : `project:${item.id}`;
+    const key = repository ? `repository:${repository}` : `project:${item.id}`;
 
     if (uniqueProjects.has(key)) continue;
 
@@ -108,7 +108,7 @@ export function searchContent(
       'project',
       item.id,
       text(item.name),
-      `${text(item.description)} ${(item.technologies ?? []).join(' ')}`,
+      `${text(projectDescription(item.repository, item.description))} ${(item.technologies ?? []).join(' ')}`,
       'projects',
       { projectId: item.id },
     );
@@ -128,14 +128,9 @@ export function searchContent(
 
   /* ----- Pesquisa de certificados ----- */
   for (const item of portfolio.certificates) {
-    add(
-      'certificate',
-      item.id,
-      text(item.title),
-      text(item.issuer),
-      'certificates',
-      { certificateId: item.id },
-    );
+    add('certificate', item.id, text(item.title), text(item.issuer), 'certificates', {
+      certificateId: item.id,
+    });
   }
 
   /* ----- Pesquisa do perfil profissional ----- */
@@ -164,39 +159,38 @@ export function searchContent(
       'appearance',
       'Aparência',
       'aparencia appearance tema theme temas themes cor cores color colors ' +
-      'wallpaper papel de parede background fundo blur desfoque ' +
-      'transparencia transparency brilho brightness',
+        'wallpaper papel de parede background fundo blur desfoque ' +
+        'transparencia transparency brilho brightness',
     ],
     [
       'language',
       'Idioma',
       'idioma idiomas language languages portugues português ' +
-      'portuguese ingles inglês english traducao tradução translation',
+        'portuguese ingles inglês english traducao tradução translation',
     ],
     [
       'accessibility',
       'Acessibilidade',
       'acessibilidade accessibility contraste contrast ' +
-      'animacao animação animations motion movimento ' +
-      'reduced motion movimento reduzido',
+        'animacao animação animations motion movimento ' +
+        'reduced motion movimento reduzido',
     ],
     [
       'widgets',
       'Widgets',
       'widget widgets relogio relógio clock calendario calendário ' +
-      'calendar clima weather previsao previsão tempo',
+        'calendar clima weather previsao previsão tempo',
     ],
     [
       'desktop',
       'Área de Trabalho',
       'area área de trabalho desktop workspace ' +
-      'taskbar barra de tarefas atalhos shortcuts icones ícones',
+        'taskbar barra de tarefas atalhos shortcuts icones ícones',
     ],
     [
       'mobile',
       'Mobile',
-      'mobile celular smartphone telefone phone tablet ' +
-      'tela screen toque touch',
+      'mobile celular smartphone telefone phone tablet ' + 'tela screen toque touch',
     ],
   ]) {
     add('setting', section, translate(label), terms, 'settings', { section });
@@ -206,8 +200,7 @@ export function searchContent(
   return [...new Map(results.map((result) => [result.key, result])).values()]
     .sort(
       (first, second) =>
-        second.relevance - first.relevance ||
-        first.label.localeCompare(second.label, locale),
+        second.relevance - first.relevance || first.label.localeCompare(second.label, locale),
     )
     .slice(0, 24)
     .map(({ key, kind, label, description, appId, params }) => ({
