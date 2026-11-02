@@ -755,3 +755,42 @@ test('moderação recusa confirmação de pontuação que mudou desde a consulta
   });
   assert.equal(response.status, 409);
 });
+
+test('anexos preservam a revisão PostgreSQL com microssegundos ao vincular e remover', async () => {
+  const revision = '2026-11-02T17:31:00.969156+00:00';
+  for (const method of ['POST', 'DELETE']) {
+    let received;
+    const api = load('attachments.js', (url, options) => {
+      assert.equal(url.pathname, '/rest/v1/rpc/set_post_attachment');
+      received = JSON.parse(options.body);
+      return Response.json(true);
+    });
+    const response = await api.onRequest({
+      request: req('api/admin/attachments', method, {
+        postId: 'post',
+        resourceId: 'file',
+        updatedAt: revision,
+      }),
+      env,
+    });
+    assert.equal(response.status, 200);
+    assert.equal(received.expected_updated_at, revision);
+    assert.equal(received.remove_link, method === 'DELETE');
+  }
+});
+
+test('validação temporal aceita precisão PostgreSQL e recusa datas inválidas', () => {
+  const { validInstant } = loadContract(path.join(root, 'src/shared/utils/contractValidation.js'));
+  for (const value of [
+    '2026-11-02T17:31:00Z',
+    '2026-11-02T17:31:00.969Z',
+    '2026-11-02T17:31:00.969156+00:00',
+  ])
+    assert.equal(validInstant(value), true, value);
+  for (const value of [
+    '2026-02-30T17:31:00.969156Z',
+    '2026-11-02T24:31:00.969156Z',
+    '2026-11-02T17:31:00.9691567Z',
+  ])
+    assert.equal(validInstant(value), false, value);
+});

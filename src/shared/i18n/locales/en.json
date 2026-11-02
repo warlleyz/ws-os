@@ -218,7 +218,21 @@
     "VELOCIDADE": "SPEED",
     "Visibilidade, tamanho e opções dos widgets.": "Widget visibility, size, and options.",
     "Você encontrou uma mina!": "You hit a mine!",
-    "WS OS / ENTERTAINMENT": "WS OS / ENTERTAINMENT"
+    "WS OS / ENTERTAINMENT": "WS OS / ENTERTAINMENT",
+    "Nova nota": "New note",
+    "Fechar editor": "Close editor",
+    "Descartar alterações não salvas?": "Discard unsaved changes?",
+    "Sessão administrativa encerrada. Entre novamente pelo Terminal para continuar.": "Your administrator session ended. Sign in again through Terminal to continue.",
+    "Revise o título, o conteúdo e os assuntos da nota.": "Check the title, content and topics of the note.",
+    "Não foi possível consultar o rascunho salvo.": "The saved draft could not be retrieved.",
+    "O rascunho foi salvo, mas não foi possível localizar seus dados.": "The draft was saved, but its details could not be found.",
+    "Rascunho salvo. Agora você pode anexar arquivos ou publicar.": "Draft saved. You can now attach files or publish.",
+    "Não foi possível publicar a nota.": "The note could not be published.",
+    "Salve o rascunho para adicionar arquivos.": "Save the draft to attach files.",
+    "Publicando...": "Publishing...",
+    "React, JavaScript, Estudos": "React, JavaScript, Studies",
+    "O arquivo ainda não foi vinculado. Use Enviar e vincular anexo para concluir.": "The file has not been attached yet. Use Upload and link attachment to finish.",
+    "Não foi possível atualizar os anexos. Tente novamente.": "Attachments could not be refreshed. Try again."
   },
   "apps": {
     "files": {
@@ -1345,9 +1359,9 @@
     "Portfólio de Desenvolvimento": "Development Portfolio",
     "Pular apresentação": "Skip introduction",
     "Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo.": "Explore my projects, skills, and Software Engineering journey through an interactive operating system.",
-        "Nenhum widget ativo": "No active widgets",
-        "Selecione os widgets que deseja exibir nas Configurações.": "Select the widgets you want to display in Settings.",
-        "Escolha quais widgets aparecem na tela inicial do Mobile.": "Choose which widgets appear on the Mobile home screen.",
-        "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Widgets are automatically arranged on Mobile. Desktop settings remain unchanged."
+    "Nenhum widget ativo": "No active widgets",
+    "Selecione os widgets que deseja exibir nas Configurações.": "Select the widgets you want to display in Settings.",
+    "Escolha quais widgets aparecem na tela inicial do Mobile.": "Choose which widgets appear on the Mobile home screen.",
+    "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Widgets are automatically arranged on Mobile. Desktop settings remain unchanged."
   }
 }

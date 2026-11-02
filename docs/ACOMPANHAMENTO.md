@@ -27,7 +27,7 @@
 | 13 | Currículo e certificados | **Concluída e aprovada** |
 | 14 | Dev Insights e visualização de dados | **Concluída e aprovada** |
 | 15 | Busca global, navegação e compartilhamento | **Concluída e aprovada** |
-| 16 | Notas e publicações | Não iniciada |
+| 16 | Notas e publicações | **Concluída e validada localmente** |
 | 17 | Arquivos e armazenamento pessoal | Não iniciada |
 | 18 | Editor e visualizador de arquivos | Não iniciada |
 | 19 | Contato e solicitações de horário | Não iniciada |
@@ -607,3 +607,75 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 
 - Etapa 15 concluída e aprovada pelo proprietário.
 - **Próxima etapa prevista: 16 — Notas e publicações.**
+
+
+## Etapa 16 — Notas e publicações
+
+**Estado:** concluída e validada localmente em 02/11/2026.
+
+### Trabalhos realizados
+
+- Reformulação do aplicativo Notas seguindo a identidade visual V2.1.
+- Alinhamento da pesquisa e dos botões Atualizar e Nova nota.
+- Exibição integral das publicações, sem tela ou botão de detalhes.
+- Pesquisa por título, resumo, conteúdo e assuntos.
+- Curtidas e anexos disponíveis diretamente nas publicações.
+- Criação de notas em card exclusivo para administrador autenticado.
+- Formulário com título, resumo opcional, conteúdo e assuntos.
+- Fluxo de salvar rascunho, enviar e vincular anexos e publicar.
+- Reconciliação dos anexos após respostas incertas do servidor.
+- Correção da validação de datas com microssegundos retornadas pelo banco.
+- Preservação da revisão exata da nota nas operações com anexos.
+- Proteção contra descarte acidental e operações com sessão expirada.
+- Preservação da gestão de publicações na Administração.
+- Manutenção da navegação contextual por busca e links compartilhados.
+- Atualização das traduções em português e inglês.
+
+### Arquivos modificados
+
+- `src/apps/administration/AdminPosts.jsx`
+- `src/apps/notes/Notes.jsx`
+- `src/apps/notes/Notes.css`
+- `src/apps/notes/NotesAdmin.jsx`
+- `src/apps/notes/NotesManagement.jsx`
+- `src/apps/notes/NotesManagement.css`
+- `src/apps/notes/PostAttachmentManager.jsx`
+- `src/apps/notes/PostAttachments.jsx`
+- `src/apps/notes/PostLikes.jsx`
+- `src/shared/i18n/locales/pt-BR.json`
+- `src/shared/i18n/locales/en.json`
+- `src/shared/utils/contractValidation.js`
+- `tests/core/backend-domains.test.cjs`
+- `tests/core/notes-ui.test.cjs`
+- `tests/helpers/app-ui.cjs`
+- `docs/ACOMPANHAMENTO.md`
+
+### Validações
+
+- Suíte automatizada: 581 testes aprovados na última execução.
+- `npm run lint` — aprovado.
+- `npm run build` — aprovado.
+- `git diff --check` — aprovado.
+- Feed, pesquisa, curtidas e criação verificados com API fictícia local.
+- Interface Mobile verificada em 390 × 844 px.
+- Regressão reproduziu o bloqueio dos anexos antes da correção.
+- Vinculação e remoção preservam a precisão da revisão nos testes da API.
+- Proprietário confirmou o funcionamento do envio da nota com anexo em
+  `http://127.0.0.1:8787/`.
+
+### Decisões
+
+- Exibir as notas integralmente no feed.
+- Restringir a criação ao administrador autenticado.
+- Preservar a gestão editorial na Administração.
+- Manter autenticação e validação das operações no servidor.
+- Preservar a precisão dos dados de revisão retornados pelo banco.
+- Nenhuma migração de banco executada.
+- Inventário preservado conforme decisão anterior do proprietário.
+- Aviso de tamanho dos bundles permanece no escopo da Etapa 30.
+
+### Encerramento
+
+- Etapa 16 concluída e validada localmente.
+- Commit, push e publicação não executados pelo assistente.
+- **Próxima etapa prevista: 17 — Arquivos e armazenamento pessoal.**

@@ -22,7 +22,7 @@ export function validText(value, max = 2000, min = 0) {
 export function validInstant(value) {
   return (
     typeof value === 'string' &&
-    /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,3})?(?:Z|[+-]\d\d:\d\d)$/.test(value) &&
+    /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,6})?(?:Z|[+-]\d\d:\d\d)$/.test(value) &&
     Number.isFinite(Date.parse(value)) &&
     validDate(value.slice(0, 10)) &&
     Number(value.slice(11, 13)) < 24

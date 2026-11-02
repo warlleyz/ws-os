@@ -56,6 +56,8 @@ async function component(name, fetchMock) {
   const Component = vm.runInNewContext(`${code}; ${name}`, {
     React,
     PostAttachmentManager: () => null,
+    FilePlus2: 'FilePlus2', Paperclip: 'Paperclip', Send: 'Send', X: 'X', Heart: 'Heart',
+    createPortal: (children) => children, document: { body: {} },
     ...React,
     AbortController,
     crypto: { randomUUID: () => 'created-note' },
@@ -114,7 +116,7 @@ async function component(name, fetchMock) {
     flush,
     nodes,
     text,
-    button: (label) => nodes().find((n) => n.type === 'button' && text(n).trim() === label),
+    button: (label) => nodes().find((n) => n.type === 'button' && (n.props['aria-label'] === label || text(n).trim() === label)),
     input: (i, value) =>
       nodes()
         .filter((n) => n.type === 'input' || n.type === 'textarea')
@@ -152,7 +154,7 @@ test('curtidas lê estado GET, confirma gravação sem contador e permite reconc
   ui.button('Tentar novamente').props.onClick();
   ui.render();
   await ui.flush();
-  assert.match(ui.text(), /1 curtida/);
+  assert.ok(ui.nodes().some((n) => n.props['aria-label'] === '1 curtida'));
   assert.equal(ui.button('Tentar novamente'), undefined);
 });
 
@@ -177,7 +179,7 @@ test('editar não descarta texto sem confirmação e expiração preserva o rasc
       status: 'draft',
     },
   ];
-  const ui = await component('NotesAdmin', async () => Response.json({ posts }));
+  const ui = await component('NotesManagement', async () => Response.json({ posts }));
   await ui.button('Gerenciar publicações').props.onClick();
   await ui.flush();
   ui.button('Editar').props.onClick();
@@ -202,7 +204,7 @@ test('publicar e excluir liberam seus controles e atualizam a leitura pública',
   let posts = [
     { id: 'one', title: 'Primeira', tags: [], updatedAt: '2026-10-18T10:00:00Z', status: 'draft' },
   ];
-  const ui = await component('NotesAdmin', async (url, options) => {
+  const ui = await component('NotesManagement', async (url, options) => {
     if (options?.method === 'PATCH') {
       posts = [{ ...posts[0], status: 'published', updatedAt: '2026-10-18T11:00:00Z' }];
       return Response.json({ success: true, ...posts[0] });
@@ -229,7 +231,7 @@ test('publicar e excluir liberam seus controles e atualizam a leitura pública',
 test('salvar cria uma nota, atualiza a leitura e ignora sucesso de sessão antiga', async () => {
   let resolve;
   const ui = await component(
-    'NotesAdmin',
+    'NotesManagement',
     () =>
       new Promise((done) => {
         resolve = done;
@@ -274,7 +276,7 @@ test('editor preserva texto quando a confirmação pertence a outra publicação
     status: 'draft',
     updatedAt: '2026-10-18T10:00:00Z',
   };
-  const ui = await component('NotesAdmin', async (_url, options) =>
+  const ui = await component('NotesManagement', async (_url, options) =>
     options.method === 'PATCH'
       ? Response.json({ success: true, id: 'another-note' })
       : Response.json({ posts: [post] }),
@@ -297,7 +299,7 @@ test('editor preserva texto quando a confirmação pertence a outra publicação
 
 test('criação repete a mesma identidade após perda da confirmação', async () => {
   const ids = [];
-  const ui = await component('NotesAdmin', async (_url, options) => {
+  const ui = await component('NotesManagement', async (_url, options) => {
     ids.push(JSON.parse(options.body).id);
     if (ids.length === 1) throw Error('network lost after write');
     return Response.json({ success: true, id: ids[0] });
@@ -477,6 +479,197 @@ test('notificação pública revalida curtidas sem transmitir dados do visitante
   ui.render();
   await ui.flush();
   assert.equal(reads, 2);
-  assert.match(ui.text(), /2 curtidas/);
+  assert.ok(ui.nodes().some((n) => n.props['aria-label'] === '2 curtidas'));
   ui.unmount();
+});
+
+/* === FEED COMPLETO E CARD DE CRIAÇÃO === */
+test('feed exibe corpo integral, anexos e curtidas sem navegação de detalhes', async () => {
+  const focused = [];
+  const note = { id: 'one', title: 'Nota completa', summary: 'Resumo', body: 'Primeira linha\nÚltima linha da publicação', tags: ['React'], publishedAt: '2026-11-02T12:00:00Z' };
+  const ui = await renderApp('src/apps/notes/Notes.jsx', {
+    instance: { id: 'feed', params: { postId: 'one' }, navigationRequestId: 1 },
+  }, {
+    useSyncExternalStore: () => false,
+    subscribeAdminSession() {}, isAdminAuthenticated: () => false,
+    usePublicResource: () => ({ status: 'ready', data: [note], refresh() {} }),
+    fetchNotes() {}, NotesAdmin: 'NotesAdmin', PostLikes: 'PostLikes', PostAttachments: 'PostAttachments',
+    attachRef: () => ({ focus: () => focused.push('focus'), scrollIntoView: () => focused.push('scroll') }),
+  });
+  assert.match(ui.text(), /Última linha da publicação/);
+  assert.ok(!ui.nodes().some((n) => n.type === 'button' && /detalhes|Ler publicação/.test(n.props['aria-label'] ?? '')));
+  assert.equal(ui.nodes().find((n) => n.type === 'PostAttachments').props.postId, 'one');
+  assert.equal(ui.nodes().find((n) => n.type === 'PostLikes').props.postId, 'one');
+  assert.deepEqual(focused, ['scroll', 'focus']);
+  ui.unmount();
+});
+
+test('criador fica oculto ao visitante e preserva texto ao cancelar descarte ou expirar sessão', async () => {
+  const ui = await component('NotesAdmin', async () => { throw Error('nenhuma chamada esperada'); });
+  ui.session(false);
+  assert.equal(ui.button('Nova nota'), undefined);
+  ui.session(true);
+  ui.button('Nova nota').props.onClick(); ui.render();
+  ui.input(0, 'Título preservado'); ui.render();
+  ui.confirm(false); ui.button('Cancelar').props.onClick(); ui.render();
+  assert.equal(ui.dirty(), true);
+  assert.ok(ui.nodes().some((n) => n.props.role === 'dialog'));
+  ui.session(false);
+  assert.match(ui.text(), /Sessão administrativa encerrada/);
+  assert.equal(ui.button('Salvar rascunho').props.disabled, true);
+  ui.session(true);
+  assert.equal(ui.nodes().find((n) => n.type === 'input').props.value, 'Título preservado');
+});
+
+test('criador salva uma vez, usa revisão confirmada e só fecha após publicação confirmada', async () => {
+  const calls = [];
+  const post = { id: 'created-note', status: 'draft', updatedAt: 'revision-one' };
+  const ui = await component('NotesAdmin', async (url, options) => {
+    calls.push({ url, options });
+    if (url.endsWith('/create')) return Response.json({ success: true, id: post.id });
+    if (url.endsWith('/status')) return Response.json({ success: true, id: post.id, status: 'published' });
+    return Response.json({ posts: [post] });
+  });
+  ui.button('Nova nota').props.onClick(); ui.render();
+  ui.input(0, 'Título'); ui.input(2, 'Corpo completo'); ui.render();
+  const submit = ui.nodes().find((n) => n.type === 'form').props.onSubmit;
+  await Promise.all([submit({ preventDefault() {} }), submit({ preventDefault() {} })]);
+  ui.render();
+  assert.equal(calls.filter((c) => c.url.endsWith('/create')).length, 1);
+  assert.equal(ui.dirty(), false);
+  assert.equal(ui.button('Publicar').props.disabled, false);
+  await ui.button('Publicar').props.onClick(); ui.render();
+  const mutation = calls.find((c) => c.url.endsWith('/status'));
+  assert.equal(JSON.parse(mutation.options.body).updatedAt, 'revision-one');
+  assert.ok(!ui.nodes().some((n) => n.props.role === 'dialog'));
+  assert.equal(ui.refreshed(), 2);
+});
+
+test('criador ignora resposta de sessão antiga e não envia publicação depois da expiração', async () => {
+  let resolve;
+  const calls = [];
+  const ui = await component('NotesAdmin', (url) => {
+    calls.push(url);
+    return new Promise((done) => { resolve = done; });
+  });
+  ui.button('Nova nota').props.onClick(); ui.render();
+  ui.input(0, 'Rascunho'); ui.input(2, 'Conteúdo'); ui.render();
+  const pending = ui.nodes().find((n) => n.type === 'form').props.onSubmit({ preventDefault() {} });
+  ui.session(false);
+  resolve(Response.json({ success: true, id: 'created-note' }));
+  await pending; ui.render();
+  assert.equal(calls.length, 1);
+  assert.equal(ui.refreshed(), 0);
+  assert.equal(ui.dirty(), true);
+});
+
+test('criador mantém identidade após falha e preserva o card em conflito de publicação', async () => {
+  const ids = [];
+  const ui = await component('NotesAdmin', async (url, options) => {
+    if (url.endsWith('/create')) {
+      ids.push(JSON.parse(options.body).id);
+      if (ids.length === 1) throw Error('rede interrompida');
+      return Response.json({ success: true, id: 'created-note' });
+    }
+    if (url.endsWith('/status')) return Response.json({ error: 'Conflito de revisão.' }, { status: 409 });
+    return Response.json({ posts: [{ id: 'created-note', status: 'draft', updatedAt: 'revision-one' }] });
+  });
+  ui.button('Nova nota').props.onClick(); ui.render();
+  ui.input(0, 'Rascunho'); ui.input(2, 'Conteúdo'); ui.render();
+  await ui.nodes().find((n) => n.type === 'form').props.onSubmit({ preventDefault() {} }); ui.render();
+  await ui.nodes().find((n) => n.type === 'form').props.onSubmit({ preventDefault() {} }); ui.render();
+  assert.deepEqual(ids, ['created-note', 'created-note']);
+  await ui.button('Publicar').props.onClick(); ui.render();
+  assert.ok(ui.nodes().some((n) => n.props.role === 'dialog'));
+  assert.equal(ui.nodes().find((n) => n.type === 'input').props.value, 'Rascunho');
+  assert.equal(ui.refreshed(), 1);
+});
+
+/* === RECUPERAÇÃO DE ANEXOS === */
+test('Atualizar lista reconhece vínculo confirmado após perda de resposta e libera publicação', async () => {
+  let linked = false, pendingState = false, writes = 0;
+  const file = { resourceId: 'same-file', name: 'test.pdf', mimeType: 'application/pdf', size: 12 };
+  const ui = await renderApp('src/apps/notes/PostAttachmentManager.jsx', {
+    post: { id: 'one', updatedAt: 'revision-one', attachments: [] },
+    onPending: (value) => { pendingState = value; }, onBusy() {},
+    onRefresh: async () => ({ id: 'one', updatedAt: linked ? 'revision-two' : 'revision-one', attachments: linked ? [file] : [] }),
+  }, {
+    ...attachmentsContract, MAX_POST_ATTACHMENTS: 5,
+    crypto: { randomUUID: () => 'same-file' },
+    getOfficialFile: async () => ({ item: { resourceId: 'same-file', state: 'available', revision: 3 } }),
+    setPostAttachment: async () => { writes++; linked = true; throw Error('lost response after commit'); },
+  });
+  ui.nodes().find((n) => n.type === 'input').props.onChange({ target: { files: [{ name: 'test.pdf', type: 'application/pdf', size: 12 }] } });
+  ui.render();
+  await ui.button('Enviar e vincular anexo').props.onClick(); ui.render();
+  assert.equal(pendingState, true);
+  await ui.button('Atualizar lista').props.onClick(); ui.render();
+  assert.equal(pendingState, false);
+  assert.equal(ui.button('Enviar e vincular anexo'), undefined);
+  assert.match(ui.text(), /Anexos atualizados/);
+  assert.doesNotMatch(ui.text(), /Operação não confirmada/);
+  assert.equal(writes, 1);
+  ui.unmount();
+});
+
+test('envio usa revisão atual da nota e atualização não descarta arquivo ainda não vinculado', async () => {
+  const writes = [];
+  const ui = await renderApp('src/apps/notes/PostAttachmentManager.jsx', {
+    post: { id: 'one', updatedAt: 'old-revision', attachments: [] },
+    onPending() {}, onBusy() {},
+    onRefresh: async () => ({ id: 'one', updatedAt: 'current-revision', attachments: [] }),
+  }, {
+    ...attachmentsContract, MAX_POST_ATTACHMENTS: 5,
+    crypto: { randomUUID: () => 'same-file' },
+    getOfficialFile: async () => ({ item: { resourceId: 'same-file', state: 'available', revision: 3 } }),
+    setPostAttachment: async (input) => { writes.push(input); return { success: true, postId: 'one', resourceId: 'same-file' }; },
+  });
+  ui.nodes().find((n) => n.type === 'input').props.onChange({ target: { files: [{ name: 'test.pdf', type: 'application/pdf', size: 12 }] } }); ui.render();
+  await ui.button('Atualizar lista').props.onClick(); ui.render();
+  assert.ok(ui.button('Enviar e vincular anexo'));
+  assert.match(ui.text(), /ainda não foi vinculado/);
+  await ui.button('Enviar e vincular anexo').props.onClick(); ui.render();
+  assert.equal(writes[0].updatedAt, 'current-revision');
+  ui.unmount();
+});
+
+test('arquivo texto sem MIME é normalizado antes do upload sem perder nome ou conteúdo', async () => {
+  const created = [], uploaded = [];
+  const file = new File(['Nota local'], 'nota.txt');
+  const ui = await renderApp('src/apps/notes/PostAttachmentManager.jsx', {
+    post: { id: 'one', updatedAt: 'revision', attachments: [] }, onPending() {}, onBusy() {}, onRefresh: async () => {},
+  }, {
+    ...attachmentsContract, MAX_POST_ATTACHMENTS: 5,
+    crypto: { randomUUID: () => 'text-file' },
+    getOfficialFile: async () => { throw Object.assign(Error('missing'), { code: 'NOT_FOUND' }); },
+    createOfficialFile: async (input) => { created.push(input); return { item: { resourceId: input.id, state: 'pending', revision: 1 } }; },
+    uploadOfficialFile: async (_id, _revision, blob) => { uploaded.push(blob); return { item: { resourceId: 'text-file', state: 'available', revision: 3 } }; },
+    setPostAttachment: async () => ({ success: true, postId: 'one', resourceId: 'text-file' }),
+  });
+  ui.nodes().find((n) => n.type === 'input').props.onChange({ target: { files: [file] } }); ui.render();
+  await ui.button('Enviar e vincular anexo').props.onClick(); ui.render();
+  assert.equal(created[0].name, 'nota.txt');
+  assert.equal(created[0].mimeType, 'text/plain');
+  assert.equal(uploaded[0].type, 'text/plain');
+  assert.equal(await uploaded[0].text(), 'Nota local');
+  ui.unmount();
+});
+
+test('criador retorna a revisão reconciliada dos anexos e a utiliza na publicação', async () => {
+  let revision = '2026-11-02T10:00:00Z';
+  const calls = [];
+  const ui = await component('NotesAdmin', async (url, options) => {
+    if (url.endsWith('/create')) return Response.json({ success: true, id: 'created-note' });
+    if (url.endsWith('/status')) { calls.push(JSON.parse(options.body)); return Response.json({ success: true, id: 'created-note', status: 'published' }); }
+    return Response.json({ posts: [{ id: 'created-note', status: 'draft', updatedAt: revision, attachments: [] }] });
+  });
+  ui.button('Nova nota').props.onClick(); ui.render();
+  ui.input(0, 'Título'); ui.input(2, 'Corpo'); ui.render();
+  await ui.nodes().find((n) => n.type === 'form').props.onSubmit({ preventDefault() {} }); ui.render();
+  revision = '2026-11-02T11:00:00Z';
+  const manager = ui.nodes().find((n) => typeof n.type === 'function');
+  const updated = await manager.props.onRefresh(); ui.render();
+  assert.equal(updated.updatedAt, revision);
+  await ui.button('Publicar').props.onClick(); ui.render();
+  assert.equal(calls[0].updatedAt, revision);
 });

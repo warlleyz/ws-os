@@ -1,25 +1,39 @@
 import { useEffect, useState } from 'react';
+
 import { executeJsonRequest } from '../../services/httpRequestContract';
 import { subscribePublicData } from '../../services/publicDataService';
 import { validateNoteAttachments } from '../../services/storage/noteAttachmentContract';
+
 import { openApp } from '../../core/appManager';
 import { useSystem } from '../../core/useSystem';
 import { translate as t } from '../../shared/i18n/i18n';
 
-/* === Anexos públicos: metadados e bytes mantêm autorização no servidor === */
+/* === ANEXOS PÚBLICOS === */
 export default function PostAttachments({ postId, instanceId }) {
+  /* ----- Sistema e estados ----- */
   const { run } = useSystem();
   const [attempt, setAttempt] = useState(0);
-  const [resource, setResource] = useState({ id: postId, status: 'loading', attachments: [] });
+  const [resource, setResource] = useState({
+    id: postId,
+    status: 'loading',
+    attachments: [],
+  });
+
+  /* ----- Atualização dos dados públicos ----- */
   useEffect(
     () =>
       subscribePublicData(({ prefix }) => {
-        if (prefix && '/api/posts/attachments'.startsWith(prefix)) setAttempt((value) => value + 1);
+        if (prefix && '/api/posts/attachments'.startsWith(prefix)) {
+          setAttempt((value) => value + 1);
+        }
       }),
     [],
   );
+
+  /* ----- Carregamento dos anexos ----- */
   useEffect(() => {
     const controller = new AbortController();
+
     async function load() {
       try {
         const { response, payload } = await executeJsonRequest(
@@ -27,28 +41,63 @@ export default function PostAttachments({ postId, instanceId }) {
           { cache: 'no-store' },
           { signal: controller.signal },
         );
+
         const parsed = validateNoteAttachments(payload?.attachments);
-        if (!response.ok || !parsed.ok) throw Error('ATTACHMENTS_UNAVAILABLE');
-        if (!controller.signal.aborted)
-          setResource({ id: postId, status: 'ready', attachments: parsed.attachments });
+
+        if (!response.ok || !parsed.ok) {
+          throw Error('ATTACHMENTS_UNAVAILABLE');
+        }
+
+        if (!controller.signal.aborted) {
+          setResource({
+            id: postId,
+            status: 'ready',
+            attachments: parsed.attachments,
+          });
+        }
       } catch {
-        if (!controller.signal.aborted)
-          setResource({ id: postId, status: 'error', attachments: [] });
+        if (!controller.signal.aborted) {
+          setResource({
+            id: postId,
+            status: 'error',
+            attachments: [],
+          });
+        }
       }
     }
+
     void load();
+
     return () => controller.abort();
   }, [postId, attempt]);
-  const current = resource.id === postId ? resource : { status: 'loading', attachments: [] };
-  if (current.status === 'loading') return <p role="status">{t('Carregando anexos...')}</p>;
-  if (current.status === 'error')
+
+  /* ----- Estado atual dos anexos ----- */
+  const current =
+    resource.id === postId
+      ? resource
+      : { status: 'loading', attachments: [] };
+
+  /* === ESTADOS DA CONSULTA === */
+  /* ----- Carregamento ----- */
+  if (current.status === 'loading') {
+    return <p role="status">{t('Carregando anexos...')}</p>;
+  }
+
+  /* ----- Erro e nova tentativa ----- */
+  if (current.status === 'error') {
     return (
       <section aria-label={t('Anexos')}>
-        <p role="alert">{t('Não foi possível carregar os anexos desta publicação.')}</p>
+        <p role="alert">
+          {t('Não foi possível carregar os anexos desta publicação.')}
+        </p>
         <button
           type="button"
           onClick={() => {
-            setResource({ id: postId, status: 'loading', attachments: [] });
+            setResource({
+              id: postId,
+              status: 'loading',
+              attachments: [],
+            });
             setAttempt((value) => value + 1);
           }}
         >
@@ -56,10 +105,18 @@ export default function PostAttachments({ postId, instanceId }) {
         </button>
       </section>
     );
+  }
+
+  /* ----- Lista vazia ----- */
   if (!current.attachments.length) return null;
+
+  /* === INTERFACE DOS ANEXOS === */
   return (
     <section aria-label={t('Anexos')}>
+      {/* ----- Cabeçalho ----- */}
       <h4>{t('Anexos')}</h4>
+
+      {/* ----- Lista de arquivos ----- */}
       <ul>
         {current.attachments.map((file) => (
           <li key={file.resourceId}>

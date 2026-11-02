@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
+import { Heart } from 'lucide-react';
+
 import { executeJsonRequest } from '../../services/httpRequestContract';
 import { invalidatePublicData, subscribePublicData } from '../../services/publicDataService';
-import { translate as t } from '../../shared/i18n/i18n';
 import { getVisitorId } from '../../services/visitorIdentityService';
+import { translate as t } from '../../shared/i18n/i18n';
 
+/* === CURTIDAS DA PUBLICAÇÃO === */
 export default function PostLikes({ postId }) {
+  /* ----- Estados ----- */
   const [count, setCount] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -12,20 +16,27 @@ export default function PostLikes({ postId }) {
   const [error, setError] = useState('');
   const [retryCount, setRetryCount] = useState(0);
 
+  /* ----- Referências de requisições ----- */
   const requestIdRef = useRef(0);
   const submittingRef = useRef(false);
   const mutationController = useRef(null);
 
+  /* === SINCRONIZAÇÃO DAS CURTIDAS === */
+  /* ----- Atualização dos dados públicos ----- */
   useEffect(
     () =>
       subscribePublicData(({ prefix }) => {
-        if (!prefix || !'/api/posts/likes'.startsWith(prefix) || submittingRef.current) return;
+        if (!prefix || !'/api/posts/likes'.startsWith(prefix) || submittingRef.current) {
+          return;
+        }
+
         setLoading(true);
         setRetryCount((current) => current + 1);
       }),
     [],
   );
 
+  /* ----- Carregamento das curtidas ----- */
   useEffect(() => {
     const controller = new AbortController();
     const requestId = ++requestIdRef.current;
@@ -45,6 +56,7 @@ export default function PostLikes({ postId }) {
           { signal: controller.signal },
         );
 
+        /* ----- Validação da resposta ----- */
         if (!response.ok) {
           throw new Error(data.error || 'Erro ao consultar curtidas.');
         }
@@ -57,6 +69,8 @@ export default function PostLikes({ postId }) {
         ) {
           throw new Error('Resposta de curtidas inválida.');
         }
+
+        /* ----- Atualização dos estados ----- */
         if (requestId === requestIdRef.current && !controller.signal.aborted) {
           setCount(data.count);
           setLiked(data.liked);
@@ -75,6 +89,7 @@ export default function PostLikes({ postId }) {
 
     void loadLikes();
 
+    /* ----- Cancelamento das requisições ----- */
     return () => {
       controller.abort();
       mutationController.current?.abort();
@@ -82,21 +97,25 @@ export default function PostLikes({ postId }) {
     };
   }, [postId, retryCount]);
 
+  /* === OPERAÇÕES DE CURTIDAS === */
+  /* ----- Nova tentativa de carregamento ----- */
   function retryLoadLikes() {
     if (loading || submitting || submittingRef.current) return;
 
     setError('');
     setLoading(true);
-
     setRetryCount((current) => current + 1);
   }
 
+  /* ----- Registro de curtida ----- */
   async function handleLike() {
     if (submittingRef.current || liked || loading || count === null) return;
 
     submittingRef.current = true;
+
     const controller = new AbortController();
     mutationController.current = controller;
+
     const requestId = requestIdRef.current;
     const currentPostId = postId;
 
@@ -118,6 +137,7 @@ export default function PostLikes({ postId }) {
         { operation: 'write', signal: controller.signal },
       );
 
+      /* ----- Validação da resposta ----- */
       if (!response.ok) {
         throw new Error(data.error || 'Não foi possível registrar a curtida.');
       }
@@ -130,19 +150,27 @@ export default function PostLikes({ postId }) {
         throw new Error('Resposta de curtidas inválida.');
       }
 
+      /* ----- Atualização da curtida ----- */
       if (requestId === requestIdRef.current) {
         invalidatePublicData('/api/posts/likes');
         setLiked(true);
-        if (data.count !== null) setCount(data.count);
-        else setError('Curtida registrada, mas não foi possível atualizar a contagem.');
+
+        if (data.count !== null) {
+          setCount(data.count);
+        } else {
+          setError('Curtida registrada, mas não foi possível atualizar a contagem.');
+        }
       }
     } catch (err) {
+      /* ----- Tratamento de falhas ----- */
       if (requestId === requestIdRef.current) {
-        setError(`${err.message} Verifique o estado da curtida antes de tentar novamente.`);
-
+        setError(
+          `${err.message} Verifique o estado da curtida antes de tentar novamente.`,
+        );
         setCount(null);
       }
     } finally {
+      /* ----- Finalização da operação ----- */
       submittingRef.current = false;
       mutationController.current = null;
 
@@ -152,27 +180,49 @@ export default function PostLikes({ postId }) {
     }
   }
 
+  /* === INTERFACE === */
   return (
     <section className="notes-app__likes" aria-label={t('Curtidas da publicação')}>
+      {/* ----- Botão de curtida ----- */}
       <button
         type="button"
+        className={`notes-app__like-button${liked ? ' is-liked' : ''}`}
         onClick={handleLike}
         disabled={loading || submitting || liked || count === null}
         aria-pressed={liked}
+        aria-label={t(liked ? 'Curtido' : 'Curtir')}
+        title={t(liked ? 'Curtido' : 'Curtir')}
       >
-        {submitting ? t('Registrando...') : liked ? t('Curtido') : t('Curtir')}
+        <Heart
+          size={17}
+          strokeWidth={1.8}
+          fill={liked ? 'currentColor' : 'none'}
+          aria-hidden="true"
+        />
+
+        {/* ----- Contador de curtidas ----- */}
+        {count !== null && (
+          <span
+            className="notes-app__like-count"
+            aria-live="polite"
+            aria-label={t(`${count} ${count === 1 ? 'curtida' : 'curtidas'}`)}
+          >
+            {count}
+          </span>
+        )}
       </button>
 
-      <span aria-live="polite">
-        {loading && count === null
-          ? t('Carregando curtidas...')
-          : count === null
-            ? t('Curtidas indisponíveis')
-            : t(`${count} ${count === 1 ? 'curtida' : 'curtidas'}`)}
-      </span>
+      {/* ----- Estado de carregamento ----- */}
+      {count === null && (
+        <span role="status">
+          {loading ? t('Carregando curtidas...') : t('Curtidas indisponíveis')}
+        </span>
+      )}
 
+      {/* ----- Mensagens de erro ----- */}
       {error && <p role="alert">{t(error)}</p>}
 
+      {/* ----- Nova tentativa ----- */}
       {!loading && error && (
         <button type="button" onClick={retryLoadLikes} disabled={submitting}>
           {t('Tentar novamente')}

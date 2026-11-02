@@ -218,7 +218,21 @@
     "VELOCIDADE": "VELOCIDADE",
     "Visibilidade, tamanho e opções dos widgets.": "Visibilidade, tamanho e opções dos widgets.",
     "Você encontrou uma mina!": "Você encontrou uma mina!",
-    "WS OS / ENTERTAINMENT": "WS OS / ENTERTAINMENT"
+    "WS OS / ENTERTAINMENT": "WS OS / ENTERTAINMENT",
+    "Nova nota": "Nova nota",
+    "Fechar editor": "Fechar editor",
+    "Descartar alterações não salvas?": "Descartar alterações não salvas?",
+    "Sessão administrativa encerrada. Entre novamente pelo Terminal para continuar.": "Sessão administrativa encerrada. Entre novamente pelo Terminal para continuar.",
+    "Revise o título, o conteúdo e os assuntos da nota.": "Revise o título, o conteúdo e os assuntos da nota.",
+    "Não foi possível consultar o rascunho salvo.": "Não foi possível consultar o rascunho salvo.",
+    "O rascunho foi salvo, mas não foi possível localizar seus dados.": "O rascunho foi salvo, mas não foi possível localizar seus dados.",
+    "Rascunho salvo. Agora você pode anexar arquivos ou publicar.": "Rascunho salvo. Agora você pode anexar arquivos ou publicar.",
+    "Não foi possível publicar a nota.": "Não foi possível publicar a nota.",
+    "Salve o rascunho para adicionar arquivos.": "Salve o rascunho para adicionar arquivos.",
+    "Publicando...": "Publicando...",
+    "React, JavaScript, Estudos": "React, JavaScript, Estudos",
+    "O arquivo ainda não foi vinculado. Use Enviar e vincular anexo para concluir.": "O arquivo ainda não foi vinculado. Use Enviar e vincular anexo para concluir.",
+    "Não foi possível atualizar os anexos. Tente novamente.": "Não foi possível atualizar os anexos. Tente novamente."
   },
   "apps": {
     "files": {
@@ -1345,9 +1359,9 @@
     "Portfólio de Desenvolvimento": "Portfólio de Desenvolvimento",
     "Pular apresentação": "Pular apresentação",
     "Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo.": "Conheça meus projetos, habilidades e trajetória em Engenharia de Software por meio de um sistema operacional interativo.",
-        "Nenhum widget ativo": "Nenhum widget ativo",
-        "Selecione os widgets que deseja exibir nas Configurações.": "Selecione os widgets que deseja exibir nas Configurações.",
-        "Escolha quais widgets aparecem na tela inicial do Mobile.": "Escolha quais widgets aparecem na tela inicial do Mobile.",
-        "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas."
+    "Nenhum widget ativo": "Nenhum widget ativo",
+    "Selecione os widgets que deseja exibir nas Configurações.": "Selecione os widgets que deseja exibir nas Configurações.",
+    "Escolha quais widgets aparecem na tela inicial do Mobile.": "Escolha quais widgets aparecem na tela inicial do Mobile.",
+    "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas."
   }
 }
