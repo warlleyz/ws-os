@@ -97,6 +97,29 @@ function descendants(entries, id) {
 }
 
 /* ----- Validação da estrutura e integridade ----- */
+export function validateFileEntry(item) {
+  if (
+    !item ||
+    typeof item.id !== 'string' ||
+    !item.id.trim() ||
+    (item.parentId !== null && typeof item.parentId !== 'string') ||
+    typeof item.trashed !== 'boolean' ||
+    (item.trashed && typeof item.trashRootId !== 'string') ||
+    !['folder', 'file'].includes(item.kind) ||
+    !Number.isSafeInteger(item.revision) ||
+    item.revision < 1 ||
+    (item.kind === 'file' &&
+      (!(item.blob instanceof Blob) ||
+        item.blob.size > FILE_LIMIT ||
+        !fileKind(item.name)))
+  ) {
+    throw new Error(FILE_ERROR);
+  }
+
+  validateFileName(item.name);
+
+  return item;
+}
 export function validateFileEntries(entries) {
   if (!Array.isArray(entries) || entries.length > MAX_ENTRIES) {
     throw new Error(FILE_ERROR);
@@ -105,26 +128,12 @@ export function validateFileEntries(entries) {
   const ids = new Set();
 
   for (const item of entries) {
-    if (
-      !item ||
-      typeof item.id !== 'string' ||
-      !item.id.trim() ||
-      (item.parentId !== null && typeof item.parentId !== 'string') ||
-      typeof item.trashed !== 'boolean' ||
-      (item.trashed && typeof item.trashRootId !== 'string') ||
-      ids.has(item.id) ||
-      !['folder', 'file'].includes(item.kind) ||
-      !Number.isSafeInteger(item.revision) ||
-      item.revision < 1 ||
-      (item.kind === 'file' &&
-        (!(item.blob instanceof Blob) ||
-          item.blob.size > FILE_LIMIT ||
-          !fileKind(item.name)))
-    ) {
+    validateFileEntry(item);
+
+    if (ids.has(item.id)) {
       throw new Error(FILE_ERROR);
     }
 
-    validateFileName(item.name);
     ids.add(item.id);
   }
 

@@ -23,10 +23,16 @@ function storage(options = {}) {
         transaction() {
           const tx = { error: null };
           let pendingRead,
+            pendingId,
             aborted = false,
             working;
           const store = {
             getAll() {
+              pendingId = undefined;
+              return (pendingRead = {});
+            },
+            get(id) {
+              pendingId = id;
               return (pendingRead = {});
             },
             put(item) {
@@ -45,7 +51,10 @@ function storage(options = {}) {
               new Promise((done) =>
                 setImmediate(() => {
                   working = new Map([...records].map(([id, item]) => [id, { ...item }]));
-                  pendingRead.result = [...working.values()];
+                  pendingRead.result =
+                    pendingId === undefined
+                      ? [...working.values()]
+                      : working.get(pendingId);
                   pendingRead.onsuccess();
                   if (quota) {
                     tx.error = new DOMException('quota', 'QuotaExceededError');
@@ -133,6 +142,43 @@ test('transações concorrentes não sobrescrevem revisões ou nomes duplicados'
   assert.equal(duplicates.filter((r) => r.status === 'fulfilled').length, 1);
 });
 
+test('leitura individual recupera o arquivo e rejeita itens indisponíveis', async () => {
+  const db = storage();
+
+  const file = await db.createLocalText('documento.txt', null, 'conteúdo');
+  const folder = await db.createLocalFolder('Pasta');
+
+  const loaded = await db.readLocalFile(file.id);
+
+  assert.equal(loaded.id, file.id);
+  assert.equal(await loaded.blob.text(), 'conteúdo');
+
+  await assert.rejects(
+    db.readLocalFile(folder.id),
+    /não encontrado/,
+  );
+
+  await assert.rejects(
+    db.readLocalFile('inexistente'),
+    /não encontrado/,
+  );
+
+  await assert.rejects(
+    db.readLocalFile(null),
+    /não encontrado/,
+  );
+
+  await db.changeLocalFile({
+    type: 'trash',
+    id: file.id,
+  });
+
+  await assert.rejects(
+    db.readLocalFile(file.id),
+    /não encontrado/,
+  );
+});
+
 test('quota aborta a transação, preserva conteúdo e não anuncia gravação', async () => {
   const db = storage();
   const file = await db.createLocalText('a.txt', null, 'preservado');
@@ -215,4 +261,29 @@ test('IndexedDB ausente e abertura bloqueada informam falha sem apagar dados', a
   };
   request.onsuccess();
   assert.equal(closed, true);
+});
+
+test('leitura individual rejeita registros inválidos sem alterar o banco', async () => {
+  const db = storage();
+  const file = await db.createLocalText('valido.txt', null, 'preservado');
+
+  const original = db.records.get(file.id);
+
+  db.records.set(file.id, {
+    ...original,
+    blob: 'conteúdo inválido',
+  });
+
+  await assert.rejects(
+    db.readLocalFile(file.id),
+    /Dados locais inválidos/,
+  );
+
+  assert.equal(db.records.get(file.id).blob, 'conteúdo inválido');
+
+  db.records.set(file.id, original);
+
+  const recovered = await db.readLocalFile(file.id);
+
+  assert.equal(await recovered.blob.text(), 'preservado');
 });

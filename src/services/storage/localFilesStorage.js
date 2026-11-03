@@ -1,6 +1,7 @@
 import {
   applyFileOperation,
   validateFileEntries,
+  validateFileEntry,
   FILE_LIMIT,
   TEXT_LIMIT,
   fileKind,
@@ -121,9 +122,49 @@ async function transact(operation) {
 }
 export const listLocalFiles = () => transact(null);
 export async function readLocalFile(id) {
-  const item = (await listLocalFiles()).find((item) => item.id === id && !item.trashed);
-  if (!item || item.kind !== 'file') throw new Error('Arquivo ou pasta não encontrado.');
-  return item;
+  if (typeof id !== 'string' || !id.trim())
+    throw new Error('Arquivo ou pasta não encontrado.');
+
+  const db = await open();
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const request = tx.objectStore(STORE).get(id);
+      let item;
+
+      request.onsuccess = () => {
+        item = request.result;
+      };
+
+      request.onerror = () => {
+        reject(request.error ?? new Error('Não foi possível ler o arquivo.'));
+      };
+
+      tx.oncomplete = () => {
+        if (!item || item.kind !== 'file' || item.trashed) {
+          reject(new Error('Arquivo ou pasta não encontrado.'));
+          return;
+        }
+
+        try {
+          resolve(validateFileEntry(item));
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      tx.onabort = () => {
+        reject(tx.error ?? new Error('A leitura foi cancelada.'));
+      };
+
+      tx.onerror = () => {
+        reject(tx.error ?? new Error('Não foi possível ler o arquivo.'));
+      };
+    });
+  } finally {
+    db.close();
+  }
 }
 export async function changeLocalFile(operation) {
   if (!operation || typeof operation !== 'object') throw new Error('Operação de arquivo inválida.');

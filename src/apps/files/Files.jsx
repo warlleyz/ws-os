@@ -15,7 +15,7 @@ import {
   Info,
   LayoutGrid,
   List,
-  MoreHorizontal,
+  MoreVertical,
   Plus,
   RotateCcw,
   Search,
@@ -331,7 +331,8 @@ export default function Files({ instance }) {
     .filter((item) => {
       const inSpace =
         space === 'trash'
-          ? item.trashed && !store.entries.find((parent) => parent.id === item.parentId)?.trashed
+          ? item.trashed &&
+          (term || !store.entries.find((parent) => parent.id === item.parentId)?.trashed)
           : !unavailableFolder &&
             !item.trashed &&
             (space === 'personal' && term ? true : item.parentId === parentId);
@@ -1395,12 +1396,21 @@ export default function Files({ instance }) {
                         >
                           <option value="">{t('Meus arquivos')}</option>
                           {store.entries
-                            .filter(
-                              (item) =>
-                                item.kind === 'folder' &&
-                                !item.trashed &&
-                                !action.ids.includes(item.id),
-                            )
+                              .filter((item) => {
+                                if (item.kind !== 'folder' || item.trashed) return false;
+
+                                let current = item;
+
+                                while (current) {
+                                  if (action.ids.includes(current.id)) return false;
+
+                                  current = store.entries.find(
+                                    (entry) => entry.id === current.parentId,
+                                  );
+                                }
+
+                                return true;
+                              })
                             .map((item) => (
                               <option value={item.id} key={item.id}>
                                 {item.name}
@@ -1475,7 +1485,7 @@ export default function Files({ instance }) {
                             aria-label={t('Ações') + ' ' + contentText(item.name, locale)}
                             onClick={(event) => showContext(event, { type: 'official', item })}
                           >
-                            <MoreHorizontal size={18} aria-hidden="true" />
+                            <MoreVertical size={18} aria-hidden="true" />
                           </button>
                         </div>
                         <div className="ws-files__official-icon">
@@ -1610,7 +1620,7 @@ export default function Files({ instance }) {
                               showContext(event, { type: 'local', id: item.id });
                             }}
                           >
-                            <MoreHorizontal size={18} />
+                            <MoreVertical size={18} aria-hidden="true" />
                           </button>
                         </li>
                       );

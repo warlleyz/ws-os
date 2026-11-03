@@ -60,6 +60,7 @@ async function component(file, props, bindings = {}) {
         'Replace',
         'X',
         'MoreHorizontal',
+        'MoreVertical',
         'Info',
         'Upload',
         'Plus',
@@ -842,6 +843,118 @@ test('pesquisa encontra arquivos em todas as pastas sem modificar os dados', asy
 
   ui.unmount();
 });
+
+test('pesquisa na lixeira encontra arquivos dentro de pastas excluídas', async () => {
+  const store = {
+    entries: [
+      entry({
+        id: 'folder',
+        name: 'Pasta',
+        kind: 'folder',
+        parentId: null,
+        trashed: true,
+      }),
+      entry({
+        id: 'nested',
+        name: 'documento.txt',
+        parentId: 'folder',
+        trashed: true,
+      }),
+    ],
+    loading: false,
+    error: '',
+    refresh() { },
+  };
+
+  const ui = await filesMenu(store);
+
+  ui.button('Lixeira').props.onClick();
+  ui.render();
+
+  const rows = () =>
+    ui.nodes().filter(
+      (node) => node.type === 'li' && node.props.onDoubleClick,
+    );
+
+  assert.equal(rows().length, 1);
+
+  ui.nodes()
+    .find((node) => node.type === 'input' && node.props.type === 'search')
+    .props.onChange({ target: { value: 'documento' } });
+
+  ui.render();
+
+  assert.equal(rows().length, 1);
+  assert.equal(rows()[0].props['aria-label'], 'documento.txt');
+
+  ui.unmount();
+});
+
+test('movimentação não oferece pastas descendentes como destino', async () => {
+  const store = {
+    entries: [
+      entry({
+        id: 'parent',
+        name: 'Principal',
+        kind: 'folder',
+        parentId: null,
+      }),
+      entry({
+        id: 'child',
+        name: 'Subpasta',
+        kind: 'folder',
+        parentId: 'parent',
+      }),
+      entry({
+        id: 'other',
+        name: 'Destino',
+        kind: 'folder',
+        parentId: null,
+      }),
+    ],
+    loading: false,
+    error: '',
+    refresh() { },
+  };
+
+  const ui = await filesMenu(store);
+
+  ui.button('Meus arquivos').props.onClick();
+  ui.render();
+
+  const parent = ui.nodes().find(
+    (node) =>
+      node.type === 'li' &&
+      node.props.onDoubleClick &&
+      node.props['aria-label'] === 'Principal',
+  );
+
+  parent.props.onClick({});
+  ui.render();
+
+  ui.button('Mover item').props.onClick();
+  ui.render();
+
+  const dialog = ui.nodes().find(
+    (node) => node.props.role === 'dialog',
+  );
+
+  const destination = ui.nodes(dialog).find(
+    (node) => node.type === 'select',
+  );
+
+  const options = ui.nodes(destination)
+    .filter((node) => node.type === 'option')
+    .map((node) => node.props.value);
+
+  assert.ok(options.includes(''));
+  assert.ok(options.includes('other'));
+  assert.ok(!options.includes('parent'));
+  assert.ok(!options.includes('child'));
+
+  ui.unmount();
+});
+
 /* === Regressões do fechamento da Etapa 05: Editor === */
 test('cópia mantém a pasta atual e preserva o rascunho quando a gravação falha', async () => {
   let destination;

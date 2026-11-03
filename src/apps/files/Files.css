@@ -161,15 +161,14 @@
 .ws-files__storage {
   display: grid;
   gap: 8px;
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
   margin-top: auto;
   padding: 12px 4px 0;
   border-top: 1px solid var(--files-line);
   font-size: 11px;
   color: var(--text-secondary);
-  flex: 0 0 auto;
-  width: 100%;
-  min-width: 0;
-  margin-top: auto;
 }
 
 .ws-files__storage-heading {
@@ -201,14 +200,6 @@
   display: none;
 }
 
-/* ----- Dimensões do indicador de armazenamento ----- */
-.ws-files__storage {
-  flex: 0 0 auto;
-  width: 100%;
-  min-width: 0;
-  margin-top: auto;
-}
-
 /* ----- Barra de capacidade ----- */
 .ws-files__storage-track {
   width: 100%;
@@ -235,7 +226,7 @@
   margin-bottom: 17px;
   padding: 8px 0;
   border-bottom: 1px solid var(--files-line);
-  position: relative
+  position: relative;
 }
 
 .ws-files__create {
@@ -492,6 +483,13 @@
 .ws-files__entry:hover {
   background: var(--files-soft);
   border-color: var(--files-line);
+}
+
+.ws-files__entry:focus-visible {
+  border-color: var(--accent-secondary);
+  background: var(--files-soft);
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: -2px;
 }
 
 .ws-files__entry[data-selected='true'] {
@@ -2313,4 +2311,477 @@
     gap: 9px;
     padding: 9px;
   }
+}
+
+/* === ORGANIZAÇÃO MOBILE DO EXPLORADOR === */
+@container (max-width: 610px) {
+
+  /* ----- Distribuição da navegação ----- */
+  .ws-files__layout {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .ws-files__sidebar {
+    height: auto;
+    padding: 8px 12px;
+    overflow: hidden;
+  }
+
+  .ws-files__navigation {
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding-bottom: 2px;
+    overscroll-behavior-x: contain;
+  }
+
+  .ws-files__navigation button {
+    justify-content: center;
+    min-height: 38px;
+  }
+
+  /* ----- Área de conteúdo ----- */
+  .ws-files__main {
+    height: auto;
+    min-height: 0;
+    padding: 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* ----- Barra de ferramentas ----- */
+  .ws-files__tools {
+    gap: 8px;
+    min-height: 0;
+    margin-bottom: 12px;
+    padding: 8px 0;
+  }
+
+  .ws-files__create,
+  .ws-files__commandbar {
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 100%;
+    gap: 6px;
+  }
+
+  .ws-files__create button {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .ws-files__commandbar {
+    justify-content: flex-start;
+  }
+
+  .ws-files__sort {
+    max-width: 100%;
+  }
+
+  .ws-files__sort .ws-select {
+    width: min(150px, 100%);
+  }
+
+  /* ----- Seleção múltipla ----- */
+  .ws-files .ws-files__selection {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  .ws-files__selection .ws-files__check {
+    flex: 0 0 auto;
+    margin-right: 5px;
+  }
+
+  /* ----- Listagem de arquivos ----- */
+  .ws-files__list--details .ws-files__entry {
+    gap: 9px;
+    padding-right: 39px;
+  }
+
+  .ws-files__list--details .ws-files__entry strong {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .ws-files__list--details .ws-files__entry small {
+    flex: 0 0 auto;
+  }
+
+  .ws-files__workspace-heading {
+    flex-wrap: wrap;
+  }
+
+  /* ----- Documentos oficiais ----- */
+  .ws-files__official-grid--list .ws-files__official-card {
+    min-width: 0;
+  }
+
+  .ws-files__official-grid--list .ws-files__official-description {
+    min-width: 0;
+  }
+}
+
+/* === AJUSTES PARA TELAS MUITO ESTREITAS === */
+@container (max-width: 380px) {
+
+  /* ----- Controles de criação ----- */
+  .ws-files__create button {
+    flex: 1 1 100%;
+  }
+
+  /* ----- Ordenação e visualização ----- */
+  .ws-files__commandbar {
+    gap: 8px;
+  }
+
+  .ws-files__sort {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* ----- Listagem compacta ----- */
+  .ws-files__list--details .ws-files__entry {
+    gap: 7px;
+  }
+
+  .ws-files__list--details .ws-files__entry small {
+    display: none;
+  }
+}
+
+/* === ORGANIZAÇÃO MOBILE — ARQUIVOS === */
+@container (max-width: 610px) {
+
+  /* ----- Estrutura principal ----- */
+  .ws-files__layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    min-width: 0;
+  }
+
+  .ws-files__main {
+    min-width: 0;
+    min-height: 0;
+    padding: 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* ----- Navegação em duas colunas ----- */
+  .ws-files__sidebar {
+    height: auto;
+    min-height: 0;
+    padding: 10px 12px;
+    overflow: hidden;
+  }
+
+  .ws-files__navigation {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .ws-files__navigation button {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+    padding: 7px 9px;
+    overflow: hidden;
+  }
+
+  .ws-files__navigation button span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ----- Endereço e pesquisa ----- */
+  .ws-files .ws-files__page-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    min-width: 0;
+    margin-bottom: 14px;
+  }
+
+  .ws-files .ws-files__addressbar,
+  .ws-files .ws-files__header-search {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* ----- Ferramentas ----- */
+  .ws-files__tools {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    min-width: 0;
+    margin-bottom: 12px;
+  }
+
+  .ws-files__create,
+  .ws-files__commandbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+  }
+
+  .ws-files__commandbar {
+    justify-content: space-between;
+  }
+
+  .ws-files__sort {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .ws-files__sort .ws-select {
+    width: min(150px, 100%);
+    max-width: 100%;
+  }
+
+  /* ----- Ações da seleção ----- */
+  .ws-files .ws-files__selection {
+    flex-wrap: nowrap;
+    align-items: center;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+  }
+
+  .ws-files__selection .ws-files__check {
+    flex: 0 0 auto;
+    margin-right: 5px;
+  }
+
+  /* ----- Contenção dos avisos ----- */
+  .ws-files__notice,
+  .ws-files__empty,
+  .ws-files__home-empty {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  /* ----- Lista de documentos oficiais ----- */
+  .ws-files__official,
+  .ws-files__official-grid,
+  .ws-files__official-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ws-files .ws-files__official-grid--list .ws-files__official-card {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .ws-files .ws-files__official-grid--list .ws-files__official-icon {
+    grid-column: 1;
+    grid-row: 1;
+    width: 38px;
+    height: 38px;
+    margin: 0;
+  }
+
+  .ws-files .ws-files__official-grid--list .ws-files__official-description {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ws-files .ws-files__official-grid--list .ws-files__official-description h3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ws-files .ws-files__official-grid--list .ws-files__official-heading {
+    grid-column: 3;
+    grid-row: 1;
+    width: auto;
+    margin: 0;
+  }
+
+  .ws-files .ws-files__official-grid--list .ws-files__official-card>button {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    margin: 0;
+  }
+
+  /* ----- Arquivos pessoais ----- */
+  .ws-files__list {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ws-files__list--details .ws-files__entry {
+    min-width: 0;
+    gap: 8px;
+    padding-right: 40px;
+  }
+
+  .ws-files__list--details .ws-files__entry strong {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* === TELAS MOBILE MAIS ESTREITAS === */
+@container (max-width: 380px) {
+
+  /* ----- Distribuição dos controles ----- */
+  .ws-files__commandbar {
+    justify-content: flex-start;
+  }
+
+  .ws-files__sort {
+    flex: 1 1 100%;
+  }
+
+  /* ----- Prioridade ao nome do arquivo ----- */
+  .ws-files__list--details .ws-files__entry small {
+    display: none;
+  }
+
+  .ws-files__navigation button {
+    gap: 7px;
+    padding-inline: 7px;
+  }
+}
+
+/* === AJUSTES FINAIS DO ARQUIVOS MOBILE === */
+@container (max-width: 610px) {
+
+  /* ----- Ordenação e controles na mesma linha ----- */
+  .ws-files__commandbar {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ws-files__sort {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .ws-files__sort .ws-select {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    max-width: 150px;
+    top: 0;
+  }
+
+  .ws-files__view-controls {
+    flex: 0 0 auto;
+  }
+
+  .ws-files .ws-files__commandbar>button:not(.ws-files__scope) {
+    flex: 0 0 35px;
+  }
+}
+
+@container (max-width: 380px) {
+  .ws-files__sort {
+    flex: 1 1 auto;
+  }
+}
+
+/* === BOTÕES DE AÇÕES MOBILE === */
+@container (max-width: 610px) {
+
+  /* ----- Ações dos arquivos pessoais ----- */
+  .ws-files .ws-files__more {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    min-height: 32px !important;
+    border: 1px solid var(--files-line) !important;
+    border-radius: 8px;
+    background: var(--files-soft) !important;
+    color: var(--text-primary);
+  }
+
+  /* ----- Ações dos documentos oficiais ----- */
+  .ws-files .ws-files__official-more {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0;
+    border: 1px solid var(--files-line);
+    border-radius: 8px;
+    background: var(--files-soft);
+    color: var(--text-primary);
+  }
+
+  .ws-files .ws-files__more:active,
+  .ws-files .ws-files__official-more:active {
+    background: var(--files-accent) !important;
+    color: var(--accent-secondary);
+  }
+}
+
+/* ----- Correção dos ícones de ações ----- */
+@container (max-width: 610px) {
+
+  .ws-files .ws-files__more svg,
+  .ws-files .ws-files__official-more svg {
+    display: block;
+    flex: 0 0 20px;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px;
+    min-height: 20px;
+    stroke-width: 2.5;
+  }
+}
+
+/* === ÍCONES DOS BOTÕES DE AÇÕES === */
+.ws-files .ws-files__more svg,
+.ws-files .ws-files__official-more svg {
+  display: block;
+  flex: 0 0 20px;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px;
+  min-height: 20px;
+  stroke-width: 2.5;
 }

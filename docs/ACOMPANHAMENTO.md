@@ -28,7 +28,7 @@
 | 14 | Dev Insights e visualização de dados | **Concluída e aprovada** |
 | 15 | Busca global, navegação e compartilhamento | **Concluída e aprovada** |
 | 16 | Notas e publicações | **Concluída e aprovada pelo proprietário** |
-| 17 | Arquivos e armazenamento pessoal | Não iniciada |
+| 17 | Arquivos e armazenamento pessoal | **Concluída e aprovada pelo proprietário** |
 | 18 | Editor e visualizador de arquivos | Não iniciada |
 | 19 | Contato e solicitações de horário | Não iniciada |
 | 20 | Wally e assistência de navegação | Não iniciada |
@@ -714,3 +714,62 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Licenças sem comprovação, otimização dos módulos grandes e homologação integrada continuam registradas nas etapas correspondentes.
 - Credenciais reais permanecem em configuração local ignorada pelo Git; somente o exemplo sem valores é versionado.
 - Próxima etapa: 17 — Arquivos e armazenamento pessoal.
+ 
+## Etapa 17 — Arquivos e armazenamento pessoal
+
+**Estado:** concluída e aprovada pelo proprietário em 02/11/2026.
+
+### Trabalhos realizados
+
+- Otimização da leitura individual no IndexedDB utilizando `get(id)`, preservando `getAll()` nas listagens e operações transacionais.
+- Validação estrutural individual dos arquivos recuperados, com rejeição de registros inválidos sem alteração automática dos dados.
+- Preservação da última listagem válida quando uma atualização do armazenamento falha.
+- Manutenção dos controles de revisão, das transações atômicas, dos limites de armazenamento e da sincronização entre abas.
+- Ampliação da pesquisa na lixeira para localizar arquivos dentro de pastas excluídas.
+- Restrição de destinos inválidos na movimentação, impedindo a escolha de subpastas dos itens selecionados.
+- Ajustes pontuais de organização dos estilos e navegação por teclado no Desktop.
+- Reorganização da interface Mobile, mantendo a identidade visual do WS OS.
+- Distribuição da navegação Mobile em duas colunas.
+- Ajustes de responsividade do cabeçalho, pesquisa, ferramentas, listagens e seleção múltipla.
+- Melhorias nos botões de ações contextuais, com ícone de três pontos verticais no Desktop e Mobile.
+- Atualização do simulador de interface para reconhecer o novo ícone.
+
+### Arquivos modificados
+
+- `src/services/storage/fileModel.js`
+- `src/services/storage/localFilesStorage.js`
+- `src/apps/files/Files.jsx`
+- `src/apps/files/Files.css`
+- `tests/core/files-storage.test.cjs`
+- `tests/core/files-ui.test.cjs`
+- `docs/ACOMPANHAMENTO.md`
+
+### Validações
+
+- Testes automatizados aprovados, conforme execução informada pelo proprietário.
+- `npm run lint` — aprovado.
+- `npm run test` — aprovado.
+- `npm run build` — aprovado.
+- `git diff --check` — aprovado.
+- Testes de armazenamento e interface executados durante as correções.
+- Funcionamento do aplicativo Arquivos confirmado no Desktop e Mobile pelo proprietário.
+- Ícones e organização responsiva verificados após os ajustes.
+- Resultados informados pelo proprietário; não executados pelo assistente.
+
+### Decisões
+
+- Preservar a estrutura existente do IndexedDB, sem migrações.
+- Manter as validações completas nas operações de escrita.
+- Preservar as funcionalidades e a identidade visual do WS OS.
+- Limitar os ajustes Mobile à organização e responsividade.
+- Não realizar refatoração extensa do componente principal sem necessidade funcional.
+- Manter avaliações aprofundadas de desempenho e exportação de segurança como melhorias futuras, sem considerá-las implementadas.
+- Nenhuma dependência adicionada.
+- Nenhum commit, push ou deploy executado pelo assistente.
+
+### Encerramento
+
+- Etapa 17 concluída e aprovada pelo proprietário.
+- Integridade do armazenamento, operações de arquivos e organização Desktop/Mobile validadas conforme as verificações realizadas.
+- Alterações locais pendentes de confirmação de versionamento.
+- **Próxima etapa prevista: 18 — Editor e visualizador de arquivos.**
