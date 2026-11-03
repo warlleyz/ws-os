@@ -592,3 +592,43 @@
 .ws-editor__modal:focus {
   outline: none;
 }
+
+/* === ORGANIZAÇÃO MOBILE DO EDITOR === */
+@container (max-width: 500px) {
+
+  /* ----- Aproveitamento da área de edição ----- */
+  .ws-editor__surface {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ws-editor .ws-editor__text {
+    width: 100%;
+    min-width: 0;
+    min-height: 240px;
+    max-height: 55dvh;
+    resize: none;
+  }
+
+  .ws-editor__syntax {
+    min-height: 240px;
+  }
+
+  /* ----- Ferramentas e informações ----- */
+  .ws-editor__toolbar,
+  .ws-editor__search-panel,
+  .ws-editor__notice {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ws-editor__toolbar-group,
+  .ws-editor__status-group {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ws-editor__notice {
+    overflow-wrap: anywhere;
+  }
+}

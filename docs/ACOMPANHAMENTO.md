@@ -29,7 +29,7 @@
 | 15 | Busca global, navegação e compartilhamento | **Concluída e aprovada** |
 | 16 | Notas e publicações | **Concluída e aprovada pelo proprietário** |
 | 17 | Arquivos e armazenamento pessoal | **Concluída e aprovada pelo proprietário** |
-| 18 | Editor e visualizador de arquivos | Não iniciada |
+| 18 | Editor e visualizador de arquivos | **Concluída e aprovada pelo proprietário** |
 | 19 | Contato e solicitações de horário | Não iniciada |
 | 20 | Wally e assistência de navegação | Não iniciada |
 | 21 | Terminal e Calculadora | Não iniciada |
@@ -773,3 +773,60 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Integridade do armazenamento, operações de arquivos e organização Desktop/Mobile validadas conforme as verificações realizadas.
 - Alterações locais pendentes de confirmação de versionamento.
 - **Próxima etapa prevista: 18 — Editor e visualizador de arquivos.**
+
+## Etapa 18 — Editor e visualizador de arquivos
+
+**Estado:** concluída e aprovada pelo proprietário em 02/11/2026.
+
+### Trabalhos realizados
+
+- Revisão dos fluxos existentes de abertura, edição, salvamento e cópia de arquivos de texto.
+- Conferência dos mecanismos de proteção contra alterações não salvas e conflitos entre revisões.
+- Revisão dos recursos de pesquisa, substituição e preferências de edição.
+- Revisão dos fluxos de visualização de textos, imagens e PDFs.
+- Conferência dos controles de navegação, zoom, rotação, pesquisa e download.
+- Revisão das validações de arquivos oficiais e locais, dos limites de pré-visualização e do descarte de recursos temporários.
+- Ajustes responsivos no Editor para melhorar o aproveitamento da área de edição.
+- Reorganização do cabeçalho, das ações e dos controles do Visualizador no Mobile.
+- Preservação da identidade visual e dos comportamentos existentes no WS OS.
+
+### Arquivos modificados
+
+- `src/apps/file-editor/FileEditor.css`
+- `src/apps/file-viewer/FileViewer.css`
+- `docs/ACOMPANHAMENTO.md`
+
+### Validações
+
+- `npm run lint` — aprovado.
+- `npm run test` — aprovado.
+- `npm run build` — aprovado.
+- `git diff --check` — aprovado.
+- Interface do Editor considerada adequada no Mobile pelo proprietário.
+- Interface do Visualizador aprovada visualmente pelo proprietário.
+- Validações automatizadas executadas pelo proprietário, conforme confirmação.
+- Nenhuma execução local de testes pelo assistente.
+
+### Correções complementares de etapas anteriores
+
+- Corrigida a organização da barra de seleção múltipla no aplicativo Arquivos no Mobile, em `src/apps/files/Files.css`.
+- Restaurado o funcionamento do WakaTime no domínio `warlleys.dev` após a configuração do segredo OAuth no ambiente Cloudflare.
+- As duas correções foram confirmadas pelo proprietário.
+- A correção do WakaTime não exigiu alteração de código no repositório.
+
+### Decisões
+
+- Preservar os mecanismos existentes de edição, revisão, armazenamento e proteção de arquivos.
+- Evitar refatorações sem necessidade funcional identificada.
+- Preservar a identidade visual do WS OS no Desktop e Mobile.
+- Não adicionar dependências nem modificar os contratos existentes.
+- Manter os ajustes de etapas anteriores identificados separadamente.
+- Nenhum commit, push ou deploy realizado pelo assistente.
+
+### Encerramento
+
+- Etapa 18 concluída e aprovada pelo proprietário.
+- Editor e Visualizador mantidos com os recursos existentes e refinamentos responsivos.
+- Testes, lint, build e integridade do diff aprovados conforme confirmação do proprietário.
+- Alterações locais pendentes de versionamento.
+- **Próxima etapa prevista: 19 — Contato e solicitações de horário.**

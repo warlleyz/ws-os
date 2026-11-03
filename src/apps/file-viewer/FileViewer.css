@@ -806,3 +806,92 @@
     min-width: 0;
   }
 }
+
+/* === ORGANIZAÇÃO MOBILE DO VISUALIZADOR === */
+@media (max-width: 600px) {
+
+  /* ----- Cabeçalho e identificação ----- */
+  .ws-file-viewer__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ws-file-viewer__identity {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ws-file-viewer__identity-content {
+    min-width: 0;
+  }
+
+  /* ----- Ações do documento ----- */
+  .ws-file-viewer__actions {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .ws-file-viewer__actions a,
+  .ws-file-viewer__actions button {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  /* ----- Controles de PDF ----- */
+  .ws-file-viewer__pdf-tools-primary {
+    justify-content: flex-start;
+    gap: 5px;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+  }
+
+  .ws-file-viewer__pdf-tools-secondary {
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* ----- Pesquisa do PDF ----- */
+  .ws-file-viewer__search-group {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .ws-file-viewer .ws-file-viewer__pdf-search {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+  }
+
+  /* ----- Área de leitura ----- */
+  .ws-file-viewer__workspace,
+  .ws-file-viewer__content,
+  .ws-file-viewer__pdf {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .ws-file-viewer__pdf-viewport,
+  .ws-file-viewer__image-viewport {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* ----- Propriedades ----- */
+  .ws-file-viewer__properties {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
