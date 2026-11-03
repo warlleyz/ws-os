@@ -30,7 +30,7 @@
 | 16 | Notas e publicações | **Concluída e aprovada pelo proprietário** |
 | 17 | Arquivos e armazenamento pessoal | **Concluída e aprovada pelo proprietário** |
 | 18 | Editor e visualizador de arquivos | **Concluída e aprovada pelo proprietário** |
-| 19 | Contato e solicitações de horário | Não iniciada |
+| 19 | Contato e solicitações de horário | **Concluída e aprovada pelo proprietário** |
 | 20 | Wally e assistência de navegação | Não iniciada |
 | 21 | Terminal e Calculadora | Não iniciada |
 | 22 | Jogos, recordes e rankings | Não iniciada |
@@ -830,3 +830,76 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Testes, lint, build e integridade do diff aprovados conforme confirmação do proprietário.
 - Alterações locais pendentes de versionamento.
 - **Próxima etapa prevista: 19 — Contato e solicitações de horário.**
+ 
+## Etapa 19 — Contato e solicitações de horário
+
+**Estado:** concluída e aprovada pelo proprietário em 02/11/2026.
+
+### Trabalhos realizados
+
+- Revisão do aplicativo Contato e dos canais profissionais disponíveis.
+- Preservação do formulário dedicado exclusivamente ao envio de mensagens.
+- Manutenção das validações, do consentimento e da proteção contra envios duplicados.
+- Melhoria do carregamento do Cloudflare Turnstile, com limite de espera e opção de recuperação.
+- Diagnóstico da falha de notificação do EmailJS em produção.
+- Identificação do bloqueio de requisições de aplicações que não são navegadores.
+- Habilitação dessa modalidade de acesso na conta EmailJS pelo proprietário.
+- Confirmação de recebimento de notificação por e-mail antes da rotação da chave privada.
+- Personalização do template do EmailJS, removendo informações de agendamento.
+- Remoção dos registros temporários de diagnóstico do backend.
+- Inclusão de informações sobre utilização e retenção dos dados no formulário.
+- Revisão das mensagens apresentadas após o registro de solicitações.
+- Preservação da integração com o aplicativo Administração.
+- Ajuste da configuração versionada para habilitar notificações do EmailJS.
+- Remoção de credencial privada identificada no `wrangler.jsonc`.
+- Rotação da chave privada e atualização do Secret na Cloudflare, conforme confirmação do proprietário.
+
+### Arquivos modificados
+
+- `functions/_lib/requestNotification.js`
+- `src/apps/contact/Contact.css`
+- `src/apps/contact/Contact.jsx`
+- `src/features/wally/WallyTurnstile.jsx`
+- `tests/core/contact-ui.test.cjs`
+- `wrangler.jsonc`
+- `docs/ACOMPANHAMENTO.md`
+
+### Validações
+
+- `npm run lint` — aprovado, conforme execução do proprietário.
+- `npm run test` — aprovado, conforme execução do proprietário.
+- `npm run build` — aprovado, conforme execução do proprietário.
+- `git diff --check` — aprovado.
+- Ajustes de interface considerados adequados pelo proprietário.
+- Persistência de solicitações confirmada em produção.
+- Recebimento de notificação EmailJS confirmado antes da rotação da credencial.
+- Nenhuma execução automatizada de testes realizada pelo assistente.
+
+### Decisões
+
+- Manter mensagens registradas na Administração e notificações pelo EmailJS como mecanismos independentes.
+- Não reintroduzir solicitações de horário ou agendamento na interface pública.
+- Preservar os contratos existentes de solicitações privadas.
+- Não publicar credenciais no repositório ou em variáveis públicas.
+- Manter a chave privada exclusivamente como Secret do ambiente.
+- Preservar o tratamento de idempotência e de resultados incertos.
+- Evitar alterações desnecessárias nos serviços de armazenamento e notificação.
+
+### Homologação final
+
+- Envio e recebimento de e-mail confirmados após a rotação da chave privada.
+- Formulário validado no Mobile utilizando rede móvel.
+- `git diff --check` aprovado após correção de whitespace.
+- Diagnósticos temporários removidos da versão local.
+- Publicação da versão final limpa pendente de versionamento e deploy.
+- Tratamento operacional das solicitações antigas mantido como pendência da etapa de retenção.
+
+### Encerramento
+
+- Etapa 19 concluída e aprovada pelo proprietário.
+- Formulário, persistência, notificações e experiência Mobile validados.
+- Lint, testes, build e integridade do diff aprovados conforme confirmação do proprietário.
+- Tratamento de solicitações antigas reservado para a etapa de retenção.
+- Alterações locais pendentes de versionamento e publicação final.
+- Nenhum commit ou push executado pelo assistente.
+- **Próxima etapa prevista: 20 — Wally e assistência de navegação.**

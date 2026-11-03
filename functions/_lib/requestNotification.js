@@ -2,8 +2,11 @@ import { database } from './backend.js';
 
 /* === Notificação independente; envio incerto nunca é repetido automaticamente === */
 export async function notifyPrivateRequest(env, result, data, visitor) {
+  /* ----- Verificação do estado da notificação ----- */
   if (['confirmed', 'failed', 'unknown'].includes(result.email)) return result.email;
   if (result.email === 'sending') return 'unknown';
+
+  /* ----- Configuração do EmailJS ----- */
   if (
     env.EMAILJS_NOTIFICATIONS_ENABLED !== 'true' ||
     ![
@@ -14,18 +17,29 @@ export async function notifyPrivateRequest(env, result, data, visitor) {
     ].every((value) => typeof value === 'string' && value)
   )
     return 'not_sent';
+
+  /* ----- Reserva da notificação para evitar duplicidade ----- */
   try {
     const claimed = await database(env, 'rpc/claim_request_notification', {
       method: 'POST',
       service: true,
-      body: { target_id: result.id, target_visitor: visitor },
+      body: {
+        target_id: result.id,
+        target_visitor: visitor,
+      },
     });
+
     if (claimed !== true)
-      return ['confirmed', 'failed', 'unknown'].includes(result.email) ? result.email : 'unknown';
+      return ['confirmed', 'failed', 'unknown'].includes(result.email)
+        ? result.email
+        : 'unknown';
   } catch {
     return 'unknown';
   }
+
+  /* ----- Envio da notificação pelo EmailJS ----- */
   let state;
+
   try {
     const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
       method: 'POST',
@@ -47,19 +61,28 @@ export async function notifyPrivateRequest(env, result, data, visitor) {
         },
       }),
     });
+
     state = response.ok ? 'confirmed' : 'failed';
   } catch {
     state = 'unknown';
   }
+
+  /* ----- Registro do resultado da notificação ----- */
   try {
     const recorded = await database(env, 'rpc/finish_request_notification', {
       method: 'POST',
       service: true,
-      body: { target_id: result.id, target_visitor: visitor, delivery_state: state },
+      body: {
+        target_id: result.id,
+        target_visitor: visitor,
+        delivery_state: state,
+      },
     });
+
     if (recorded !== true) return 'unknown';
   } catch {
     return 'unknown';
   }
+
   return state;
 }

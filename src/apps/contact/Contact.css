@@ -445,6 +445,19 @@
   line-height: 19px;
 }
 
+/* === Transparência dos dados de contato === */
+.ws-contact__privacy {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.ws-contact__privacy+.ws-contact__privacy {
+  margin-top: -8px;
+}
+
 /* === Verificação e envio === */
 .ws-contact__form-footer {
   display: flex;

@@ -115,6 +115,8 @@ test('resultado incerto bloqueia alterações e conserva chave mesmo após retry
   assert.equal(ui.nodes().find((node) => node.type === 'textarea').props.value, '');
   assert.equal(dirty, false);
   assert.match(ui.text(), /private-request/);
+  assert.match(ui.text(), /Mensagem recebida e registrada/);
+  assert.match(ui.text(), /Sua mensagem foi registrada/);
   assert.doesNotMatch(ui.text(), /Mensagem enviada e confirmada pelo serviço/);
   ui.unmount();
 });

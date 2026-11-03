@@ -279,7 +279,9 @@ export default function Contact({ instance }) {
 
       setStatus('success');
       setReceipt(result);
-      setMessage('Operação concluída.');
+      setMessage(
+        locale === 'en' ? 'Message received and saved.' : 'Mensagem recebida e registrada.',
+      );
       setForm(createEmptyForm());
     } catch (error) {
       if (!mounted.current || controller?.signal.aborted) {
@@ -423,6 +425,20 @@ export default function Contact({ instance }) {
 
               <span>{t('Concordo em enviar estes dados para receber uma resposta.')}</span>
             </label>
+
+            {/* ----- Transparência sobre o tratamento dos dados ----- */}
+            <p className="ws-contact__privacy">
+              {locale === 'en'
+                ? 'Your name, email address and message are stored to manage and respond to your contact. EmailJS may be used to send an email notification, and Cloudflare Turnstile protects the form against automated submissions.'
+                : 'Seu nome, e-mail e mensagem são armazenados para gerenciar e responder ao contato. O EmailJS pode ser utilizado para enviar uma notificação por e-mail, e o Cloudflare Turnstile protege o formulário contra envios automatizados.'}
+            </p>
+
+            <p className="ws-contact__privacy">
+              {locale === 'en'
+                ? 'Completed or archived requests have a retention period of 180 days from closure. Open requests do not have an automatic expiration date. To request access to or deletion of your data, use the contact email provided above.'
+                : 'Solicitações concluídas ou arquivadas possuem prazo de retenção de 180 dias após o encerramento. Solicitações abertas não possuem expiração automática. Para solicitar acesso ou exclusão dos seus dados, utilize o e-mail de contato informado acima.'}
+            </p>
+
           </fieldset>
 
           {/* === Verificação e envio === */}
@@ -483,12 +499,9 @@ export default function Contact({ instance }) {
               </p>
 
               <p>
-                {t('E-mail')}:{' '}
-                {t(
-                  receipt.emailConfirmed
-                    ? 'Mensagem enviada e confirmada pelo serviço.'
-                    : 'Envio não confirmado. Confira antes de reenviar para evitar duplicidade.',
-                )}
+                {locale === 'en'
+                  ? 'Your message has been registered. Keep this reference number for future contact.'
+                  : 'Sua mensagem foi registrada. Guarde este código para futuras consultas.'}
               </p>
             </section>
           )}
