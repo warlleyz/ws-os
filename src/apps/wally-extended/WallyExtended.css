@@ -86,6 +86,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 0 0 auto;
 }
 
 /* ----- Indicador de modo ----- */
@@ -99,12 +100,14 @@
   background: var(--surface-secondary);
   color: var(--text-secondary);
   font-size: 11px;
+  white-space: nowrap;
 }
 
 /* ----- Estado do provedor ----- */
 .wally-ext__status-dot {
   width: 7px;
   height: 7px;
+  flex: 0 0 auto;
   border-radius: 50%;
   background: var(--accent-secondary);
 }
@@ -115,6 +118,7 @@
   place-items: center;
   width: 35px;
   height: 35px;
+  flex: 0 0 auto;
   padding: 0;
   border: 1px solid var(--border-default);
   border-radius: 10px;
@@ -286,7 +290,7 @@
   min-width: 0;
 }
 
-/* ----- Mensagem do usuário ----- */
+/* ----- Mensagens do usuário ----- */
 .wally-ext__message--user {
   justify-content: flex-end;
 }
@@ -345,6 +349,31 @@
   overflow-wrap: anywhere;
 }
 
+/* ----- Negrito nas respostas ----- */
+.wally-ext__bubble p strong {
+  font-weight: 750;
+  color: var(--text-primary);
+}
+
+/* ----- Links clicáveis ----- */
+.wally-ext__bubble p a {
+  color: var(--accent-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+/* ----- Estados de links ----- */
+.wally-ext__bubble p a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.wally-ext__bubble p a:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 /* ----- Informação de cancelamento e origem ----- */
 .wally-ext__cancelled,
 .wally-ext__message-provider {
@@ -389,6 +418,7 @@
   align-items: center;
   gap: 10px;
   min-width: 0;
+  max-width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border-default);
   border-radius: 11px;
@@ -397,12 +427,18 @@
   font-size: 12px;
 }
 
+/* ----- Texto do indicador ----- */
+.wally-ext__thinking-label {
+  min-width: 0;
+}
+
 /* ----- Botão de cancelamento ----- */
 .wally-ext__thinking-content button {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   min-height: 30px;
+  flex: 0 0 auto;
   padding: 5px 8px;
   border: 1px solid var(--border-default);
   border-radius: 8px;
@@ -411,10 +447,29 @@
   cursor: pointer;
 }
 
-/* ----- Ícone animado ----- */
-.wally-ext__spinner {
+/* ----- Pontos animados de digitação ----- */
+.wally-ext__typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   flex: 0 0 auto;
-  animation: wally-ext-spin 1s linear infinite;
+}
+
+.wally-ext__typing-dots i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-secondary);
+  animation: wally-ext-typing 1.2s ease-in-out infinite;
+}
+
+.wally-ext__typing-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.wally-ext__typing-dots i:nth-child(3) {
+  animation-delay: 0.3s;
 }
 
 /* === CAMPO DE MENSAGEM === */
@@ -449,6 +504,7 @@
   justify-content: center;
   width: 100%;
   max-width: 850px;
+  min-width: 0;
   margin: 0 auto;
 }
 
@@ -459,6 +515,7 @@
   gap: 8px;
   width: 100%;
   max-width: 850px;
+  min-width: 0;
   margin: 0 auto;
   padding: 10px 12px;
   border: 1px solid var(--border-control);
@@ -475,9 +532,9 @@
 .wally-ext__composer textarea {
   width: 100%;
   min-height: 44px;
-  max-height: 140px;
+  max-height: min(35dvh, 190px);
   padding: 3px;
-  resize: vertical;
+  resize: none;
   border: 0;
   outline: none;
   background: transparent;
@@ -575,17 +632,20 @@
   color: var(--accent-secondary);
 }
 
-/* ----- Altura controlada pelo botão ----- */
-.wally-ext__composer textarea {
-  resize: none;
-  max-height: min(35dvh, 190px);
-}
-
 /* === ANIMAÇÕES E ACESSIBILIDADE === */
-/* ----- Rotação de carregamento ----- */
-@keyframes wally-ext-spin {
-  to {
-    transform: rotate(360deg);
+/* ----- Animação de digitação ----- */
+@keyframes wally-ext-typing {
+
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
   }
 }
 
@@ -598,7 +658,7 @@
 
 /* ----- Movimento reduzido ----- */
 @media (prefers-reduced-motion: reduce) {
-  .wally-ext__spinner {
+  .wally-ext__typing-dots i {
     animation: none;
   }
 
@@ -611,7 +671,30 @@
 /* ----- Janelas estreitas ----- */
 @media (max-width: 700px) {
   .wally-ext__header {
+    gap: 8px;
     padding: 12px 14px;
+  }
+
+  .wally-ext__brand {
+    gap: 9px;
+  }
+
+  .wally-ext__avatar--header {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .wally-ext__brand-info p {
+    font-size: 10px;
+  }
+
+  .wally-ext__header-actions {
+    gap: 6px;
+  }
+
+  .wally-ext__mode {
+    padding: 6px 8px;
   }
 
   .wally-ext__conversation {
@@ -644,6 +727,68 @@
   .wally-ext__composer-hint {
     display: none;
   }
+
+  .wally-ext__thinking-content {
+    flex-wrap: wrap;
+  }
+
+  .wally-ext__thinking-content button {
+    margin-left: auto;
+  }
+}
+
+/* ----- Telas Mobile estreitas ----- */
+@media (max-width: 420px) {
+  .wally-ext__header {
+    padding: 10px 12px;
+  }
+
+  .wally-ext__brand-info p {
+    display: none;
+  }
+
+  .wally-ext__conversation {
+    padding: 12px;
+  }
+
+  .wally-ext__bottom {
+    gap: 6px;
+    padding: 9px 12px 10px;
+  }
+
+  .wally-ext__message-content {
+    max-width: calc(100% - 42px);
+  }
+
+  .wally-ext__message--user .wally-ext__message-content {
+    max-width: 92%;
+  }
+
+  .wally-ext__bubble {
+    padding: 10px 12px;
+  }
+
+  .wally-ext__thinking {
+    gap: 7px;
+  }
+
+  .wally-ext__thinking-content {
+    gap: 8px;
+    padding: 9px 10px;
+    font-size: 11px;
+  }
+
+  .wally-ext__composer {
+    padding: 9px 10px;
+  }
+
+  .wally-ext__composer textarea {
+    font-size: 16px;
+  }
+
+  .wally-ext__footer {
+    font-size: 9px;
+  }
 }
 
 /* ----- Janelas baixas ----- */
@@ -656,5 +801,137 @@
   .wally-ext__mascot {
     width: 70px;
     max-height: 90px;
+  }
+}
+
+/* === CAPACIDADES E PRIVACIDADE === */
+.ws-wally__privacy {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ws-wally__privacy summary {
+  cursor: pointer;
+}
+
+.ws-wally__privacy p {
+  max-height: 90px;
+  overflow-y: auto;
+  margin: 6px 0;
+}
+
+/* === ADAPTAÇÃO FINAL DO WALLY ESTENDIDO NO MOBILE === */
+@media (max-width: 700px) {
+
+  /* ----- Histórico e elementos flexíveis ----- */
+  .ws-wally-extended {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .wally-ext__conversation {
+    flex: 1 1 auto;
+    min-height: 0;
+    overscroll-behavior-y: contain;
+  }
+
+  /* ----- Área inferior sem sobreposição ----- */
+  .wally-ext__bottom {
+    flex: 0 0 auto;
+    max-height: 55%;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .wally-ext__composer,
+  .wally-ext__turnstile,
+  .wally-ext__notice {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .wally-ext__notice {
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 420px) {
+
+  /* ----- Espaço para a conversa em telas compactas ----- */
+  .wally-ext__welcome {
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 6px 0;
+  }
+
+  .wally-ext__suggestion-grid {
+    gap: 7px;
+  }
+
+  .wally-ext__suggestion {
+    min-height: 44px;
+    padding: 9px 11px;
+  }
+
+  .wally-ext__composer textarea {
+    min-height: 36px;
+    max-height: 30dvh;
+    font-size: 16px;
+  }
+
+  .wally-ext__footer {
+    display: none;
+  }
+}
+
+/* === COMPOSITOR COMPACTO NO MOBILE === */
+@media (max-width: 700px) {
+
+  /* ----- Cartão de escrita ----- */
+  .wally-ext__composer {
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: 14px;
+  }
+
+  /* ----- Campo recolhido ----- */
+  .wally-ext__composer textarea[rows='2'] {
+    height: 42px;
+    min-height: 42px;
+  }
+
+  /* ----- Campo expandido ----- */
+  .wally-ext__composer textarea[rows='6'] {
+    height: auto;
+    min-height: 110px;
+  }
+
+  /* ----- Organização dos controles ----- */
+  .wally-ext__composer-toolbar {
+    gap: 10px;
+    min-height: 40px;
+  }
+
+  .wally-ext__expand-button {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+  }
+
+  .wally-ext__character-count {
+    font-size: 11px;
+  }
+
+  /* ----- Envio alinhado à direita ----- */
+  .wally-ext__send-button {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    margin-left: auto;
   }
 }

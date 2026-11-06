@@ -1,4 +1,4 @@
-const REQUEST_TIMEOUT_MS = 15000;
+const REQUEST_TIMEOUT_MS = 30000;
 
 export async function askWallyRemote({
   question,
@@ -21,7 +21,9 @@ export async function askWallyRemote({
     signal?.addEventListener('abort', abort, { once: true });
   }
 
+  let timedOut = false;
   const timeout = setTimeout(() => {
+    timedOut = true;
     controller.abort();
   }, REQUEST_TIMEOUT_MS);
 
@@ -62,6 +64,9 @@ export async function askWallyRemote({
       actions: [],
       provider: 'gemini',
     };
+  } catch (error) {
+    if (timedOut && !signal?.aborted) throw new Error('AI_TIMEOUT', { cause: error });
+    throw error;
   } finally {
     clearTimeout(timeout);
     signal?.removeEventListener('abort', abort);

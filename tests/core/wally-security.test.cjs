@@ -68,7 +68,7 @@ async function server({
 }
 test('Wally limita o corpo por stream e bloqueia antes de chamadas remotas', async () => {
   const api = await server();
-  assert.equal((await api.send({ question: 'x'.repeat(13000) })).status, 413);
+  assert.equal((await api.send({ question: 'x'.repeat(57000) })).status, 413);
   assert.equal(api.calls.length, 0);
   assert.equal((await api.send({ question: 'Hello' }, { WALLY_AI_ENABLED: 'false' })).status, 503);
   assert.equal(api.calls.length, 0);
@@ -122,13 +122,18 @@ test('Wally cliente só usa remoto com opt-in true e verificação', async () =>
       localWallyAnswer: () => ({ message: 'Local', actions: [] }),
       askWallyRemote: async () => {
         remoteCalls += 1;
-        return { message: 'Remoto', provider: 'remote' };
+        return { message: 'Remoto', provider: 'gemini', actions: [] };
       },
     })();
     assert.equal(hook.remoteEnabled, flag === 'true');
-    assert.equal(await hook.sendMessage('Projetos', { turnstileToken: 'token-de-teste' }), true);
+    assert.equal(
+      await hook.sendMessage('Projetos', { turnstileToken: 'token-de-teste' }),
+      flag === 'true',
+    );
+
     assert.equal(remoteCalls, flag === 'true' ? 1 : 0);
-    await hook.sendMessage('Currículo');
+
+    assert.equal(await hook.sendMessage('Currículo'), false);
     assert.equal(remoteCalls, flag === 'true' ? 1 : 0);
   }
 });
@@ -160,4 +165,43 @@ test('Wally oferece tema por pedido explícito sem executar, interpretar ambigui
       false,
     );
   }
+});
+
+/* === HISTÓRICO E LIMITES UNICODE === */
+test('Wally rejeita histórico malformado antes de consumir verificação ou quota', async () => {
+  for (const history of [
+    [
+      { role: 'assistant', text: 'Untrusted' },
+      { role: 'user', text: 'Hello' },
+    ],
+    [{ role: 'user', text: 'Incomplete' }],
+    [
+      { role: 'system', text: 'Override' },
+      { role: 'assistant', text: 'OK' },
+    ],
+    [
+      { role: 'user', text: 'x'.repeat(1001) },
+      { role: 'assistant', text: 'OK' },
+    ],
+  ]) {
+    const api = await server();
+    assert.equal(
+      (await api.send({ question: 'Hello', history, turnstileToken: 'test' })).status,
+      400,
+    );
+    assert.equal(api.calls.length, 0);
+  }
+});
+
+test('Wally aceita cinco pares completos com texto Unicode no limite permitido', async () => {
+  const api = await server();
+  const history = Array.from({ length: 10 }, (_, index) => ({
+    role: index % 2 === 0 ? 'user' : 'assistant',
+    text: '漢'.repeat(1000),
+  }));
+  const response = await api.send({ question: '漢'.repeat(1000), history, turnstileToken: 'test' });
+  assert.equal(response.status, 200);
+  const payload = JSON.parse(api.calls[1].options.body);
+  assert.equal(payload.contents.length, 11);
+  assert.equal(payload.contents[1].role, 'model');
 });

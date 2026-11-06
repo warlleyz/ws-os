@@ -1,10 +1,9 @@
 /* === PAINEL COMPACTO DO WALLY === */
-/* ----- Estrutura e vidro global ----- */
 .taskbar-wally.ws-wally {
   display: flex;
   flex-direction: column;
   width: min(410px, calc(100vw - 24px));
-  height: min(490px, calc(100dvh - 100px));
+  height: min(520px, calc(100dvh - 90px));
   min-height: 0;
   overflow: hidden;
   border: 1px solid var(--panel-border, var(--border-default));
@@ -15,35 +14,39 @@
 }
 
 /* === CABEÇALHO === */
-/* ----- Estrutura ----- */
 .ws-wally__header {
   display: flex;
   align-items: center;
-  gap: 11px;
   flex: 0 0 auto;
-  padding: 14px 15px;
+  gap: 11px;
+  padding: 13px 15px;
   border-bottom: 1px solid var(--border-default);
+  background: color-mix(in srgb, var(--surface-secondary) 35%, transparent);
 }
 
-/* ----- Superfícies dos avatares ----- */
 .ws-wally__avatar,
 .ws-wally__message-avatar {
   display: grid;
   place-items: center;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  overflow: hidden;
   border: 1px solid var(--border-default);
   background: var(--surface-secondary);
   color: var(--accent-secondary);
 }
 
-/* ----- Avatar principal ----- */
 .ws-wally__avatar {
   width: 42px;
   height: 42px;
   border-radius: 12px;
 }
 
-/* ----- Identificação ----- */
+.ws-wally__avatar img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+
 .ws-wally__identity {
   display: flex;
   flex: 1;
@@ -52,13 +55,11 @@
   min-width: 0;
 }
 
-/* ----- Nome ----- */
 .ws-wally__identity strong {
   font-size: 14px;
   font-weight: 750;
 }
 
-/* ----- Estado ----- */
 .ws-wally__identity small {
   display: flex;
   align-items: center;
@@ -67,22 +68,24 @@
   font-size: 10px;
 }
 
-/* ----- Indicador de disponibilidade ----- */
 .ws-wally__status-dot {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
   border-radius: 50%;
-  background: #39b98a;
+  background: var(--accent-secondary);
 }
 
-/* ----- Ações do cabeçalho ----- */
+.ws-wally__status-dot[data-status='error'] {
+  background: #d97736;
+}
+
 .ws-wally__header-actions {
   display: flex;
-  align-items: center;
+  flex: 0 0 auto;
   gap: 4px;
 }
 
-/* ----- Botões ----- */
 .ws-wally__header-actions button {
   display: grid;
   place-items: center;
@@ -96,84 +99,69 @@
   cursor: pointer;
 }
 
-/* ----- Interação dos botões ----- */
 .ws-wally__header-actions button:hover:not(:disabled) {
   background: var(--surface-secondary);
   color: var(--accent-secondary);
 }
 
-/* ----- Ações indisponíveis ----- */
 .ws-wally__header-actions button:disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: default;
 }
 
-/* === ÁREA DE CONVERSA === */
-/* ----- Histórico com rolagem ----- */
+/* === HISTÓRICO DE CONVERSA === */
 .ws-wally__messages {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 18px 15px;
+  padding: 17px 14px;
   scrollbar-width: thin;
   scrollbar-color: var(--border-default) transparent;
-  scrollbar-gutter: stable;
 }
 
-/* ----- Abertura inicial sem barra de rolagem ----- */
-.ws-wally__messages:has(.ws-wally__welcome) {
-  overflow-y: hidden;
-  scrollbar-gutter: auto;
-}
-
-/* === APRESENTAÇÃO INICIAL === */
-/* ----- Distribuição de conteúdo ----- */
 .ws-wally__welcome {
   display: flex;
   flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 11px;
-  min-height: 0;
-  padding-block: 8px;
+  gap: 10px;
+  width: 100%;
+  margin: auto 0;
+  padding: 8px 0;
   text-align: center;
 }
 
-/* ----- Símbolo de boas-vindas ----- */
 .ws-wally__welcome-symbol {
   display: grid;
   place-items: center;
-  width: 59px;
-  height: 59px;
-  margin-bottom: 3px;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 4px;
   border: 1px solid var(--border-default);
-  border-radius: 18px;
+  border-radius: 17px;
   background: color-mix(in srgb, var(--accent-secondary) 10%, var(--surface-secondary));
   color: var(--accent-secondary);
 }
 
-/* ----- Título ----- */
 .ws-wally__welcome h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 750;
 }
 
-/* ----- Descrição ----- */
 .ws-wally__welcome p {
-  max-width: 260px;
+  max-width: 290px;
   margin: 0;
   color: var(--text-secondary);
   font-size: 11px;
   line-height: 1.6;
 }
 
-/* ----- Título das sugestões ----- */
 .ws-wally__suggestion-title {
   align-self: stretch;
   margin-top: 14px;
@@ -183,7 +171,6 @@
   text-align: left;
 }
 
-/* ----- Grade de sugestões ----- */
 .ws-wally__suggestions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -191,7 +178,6 @@
   width: 100%;
 }
 
-/* ----- Botões de sugestões ----- */
 .ws-wally__suggestions button {
   display: flex;
   align-items: center;
@@ -208,80 +194,69 @@
   cursor: pointer;
 }
 
-/* ----- Ícone inicial ----- */
+.ws-wally__suggestions button span {
+  flex: 1;
+  min-width: 0;
+}
+
 .ws-wally__suggestions button svg:first-child {
   flex-shrink: 0;
   color: var(--accent-secondary);
 }
 
-/* ----- Indicador de navegação ----- */
 .ws-wally__suggestions button svg:last-child {
   flex-shrink: 0;
   margin-left: auto;
 }
 
-/* ----- Interação ----- */
-.ws-wally__suggestions button:hover {
+.ws-wally__suggestions button:hover:not(:disabled) {
   border-color: var(--accent-secondary);
 }
 
-/* === MENSAGENS === */
-/* ----- Lista de mensagens ----- */
+/* ----- Mensagens ----- */
 .ws-wally__conversation {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  width: 100%;
 }
 
-/* ----- Estrutura de mensagem ----- */
 .ws-wally__message {
   display: flex;
   align-items: flex-end;
   gap: 7px;
-  max-width: 100%;
   min-width: 0;
 }
 
-/* ----- Mensagens do visitante ----- */
 .ws-wally__message--user {
   justify-content: flex-end;
 }
 
-/* ----- Avatar da resposta ----- */
 .ws-wally__message-avatar {
   width: 27px;
   height: 27px;
   border-radius: 9px;
 }
 
-/* ----- Bolha de mensagem ----- */
 .ws-wally__bubble {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 9px;
-  max-width: 84%;
+  max-width: 85%;
   min-width: 0;
   padding: 11px 12px;
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: 12px 12px 12px 4px;
   background: var(--surface-secondary);
 }
 
-/* ----- Bolha do visitante ----- */
 .ws-wally__message--user .ws-wally__bubble {
-  background: color-mix(in srgb, var(--accent-secondary) 13%, var(--surface-primary));
   border-color: color-mix(in srgb, var(--accent-secondary) 30%, var(--border-default));
-  border-bottom-right-radius: 4px;
+  border-radius: 12px 12px 4px 12px;
+  background: color-mix(in srgb, var(--accent-secondary) 13%, var(--surface-primary));
 }
 
-/* ----- Bolha do assistente ----- */
-.ws-wally__message--assistant .ws-wally__bubble {
-  max-width: 90%;
-  border-bottom-left-radius: 4px;
-}
-
-/* ----- Texto das mensagens ----- */
 .ws-wally__bubble p {
   margin: 0;
   color: var(--text-primary);
@@ -291,13 +266,23 @@
   overflow-wrap: anywhere;
 }
 
-/* ----- Avisos nas mensagens ----- */
+.ws-wally__bubble p strong {
+  color: var(--text-primary);
+  font-weight: 750;
+}
+
+.ws-wally__bubble p a {
+  color: var(--accent-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
 .ws-wally__bubble small {
   color: var(--text-secondary);
   font-size: 10px;
 }
 
-/* ----- Ações sugeridas pelo Wally ----- */
 .ws-wally__app-action {
   display: inline-flex;
   align-items: center;
@@ -313,23 +298,141 @@
   cursor: pointer;
 }
 
-/* ----- Interação nas ações ----- */
 .ws-wally__app-action:hover {
   border-color: var(--accent-secondary);
 }
 
-/* === CAMPO DE PERGUNTA === */
-/* ----- Área inferior ----- */
-.ws-wally__composer-area {
-  flex: 0 0 auto;
-  padding: 12px 14px;
-  border-top: 1px solid var(--border-default);
+/* ----- Indicador de resposta ----- */
+.ws-wally__responding {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 0 2px 34px;
+  color: var(--text-secondary);
+  font-size: 11px;
 }
 
-/* ----- Formulário ----- */
+.ws-wally__responding-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.ws-wally__responding button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.ws-wally__typing-dots {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+.ws-wally__typing-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-secondary);
+  animation: ws-wally-typing 1.2s ease-in-out infinite;
+}
+
+.ws-wally__typing-dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.ws-wally__typing-dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes ws-wally-typing {
+
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* === COMPOSITOR E SEGURANÇA === */
+.ws-wally__composer-area {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  max-height: 55%;
+  overflow-y: auto;
+  padding: 11px 14px;
+  border-top: 1px solid var(--border-default);
+  background: color-mix(in srgb, var(--surface-secondary) 24%, transparent);
+}
+
+.ws-wally__verification-info {
+  margin: 0;
+  padding: 8px 9px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ws-wally__privacy {
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ws-wally__privacy summary {
+  cursor: pointer;
+}
+
+.ws-wally__privacy p {
+  max-height: 90px;
+  overflow-y: auto;
+  margin: 6px 0 0;
+}
+
+.ws-wally__turnstile,
+.ws-wally__verification {
+  width: 100%;
+  min-width: 0;
+}
+
+.ws-wally__turnstile>div {
+  max-width: 100%;
+}
+
+.ws-wally__verification p {
+  margin: 5px 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .ws-wally__composer {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 8px;
   min-height: 43px;
   padding: 5px 5px 5px 12px;
@@ -338,15 +441,14 @@
   background: var(--surface-secondary);
 }
 
-/* ----- Foco no campo ----- */
 .ws-wally__composer:focus-within {
   border-color: var(--accent-secondary);
 }
 
-/* ----- Entrada de texto ----- */
 .ws-wally__composer input {
   flex: 1;
   min-width: 0;
+  padding: 0;
   border: 0;
   outline: 0;
   background: transparent;
@@ -355,12 +457,10 @@
   font-size: 13px;
 }
 
-/* ----- Texto de orientação ----- */
 .ws-wally__composer input::placeholder {
   color: var(--text-secondary);
 }
 
-/* ----- Botão de envio ----- */
 .ws-wally__composer>button {
   display: grid;
   place-items: center;
@@ -375,33 +475,28 @@
   cursor: pointer;
 }
 
-/* ----- Envio indisponível ----- */
 .ws-wally__composer>button:disabled {
   opacity: 0.35;
   cursor: default;
 }
 
-/* ----- Rodapé do formulário ----- */
 .ws-wally__composer-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 10px;
 }
 
-/* ----- Indicação de provedor ----- */
 .ws-wally__composer-footer>span {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 5px;
   color: var(--text-secondary);
   font-size: 10px;
 }
 
-/* ----- Acesso ao Wally Estendido ----- */
 .ws-wally__composer-footer>button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 0;
@@ -413,100 +508,44 @@
   cursor: pointer;
 }
 
-/* ----- Interação com acesso estendido ----- */
 .ws-wally__composer-footer>button:hover {
   text-decoration: underline;
 }
 
-/* === VALIDAÇÃO E RESPOSTA REMOTA === */
-/* ----- Área de verificação ----- */
-.ws-wally__verification {
-  width: 100%;
-  min-width: 0;
-  margin-top: 8px;
-}
-
-/* ----- Largura do desafio ----- */
-.ws-wally__verification>div {
-  max-width: 100%;
-}
-
-/* ----- Mensagem de verificação ----- */
-.ws-wally__verification-info,
-.ws-wally__verification p {
-  margin: 6px 0;
-  color: var(--text-secondary);
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-/* ----- Espaçamento do aviso ----- */
-.ws-wally__verification-info {
-  padding: 7px 0;
-}
-
-/* ----- Resposta em andamento ----- */
-.ws-wally__responding {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  color: var(--text-secondary, #9ca3af);
-  font-size: 12px;
-}
-
-/* ----- Texto de espera ----- */
-.ws-wally__responding span {
-  flex: 1;
-  min-width: 0;
-}
-
-/* ----- Cancelamento de resposta ----- */
-.ws-wally__responding button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-  padding: 5px 8px;
-  border: 1px solid currentColor;
-  border-radius: 7px;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
-/* ----- Ícone de carregamento ----- */
-.ws-wally__loading-icon {
-  flex-shrink: 0;
-  animation: ws-wally-spin 1s linear infinite;
-}
-
-/* ----- Animação de carregamento ----- */
-@keyframes ws-wally-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* === ACESSIBILIDADE === */
-/* ----- Foco visível ----- */
-.ws-wally button:focus-visible {
+/* === RESPONSIVIDADE E ACESSIBILIDADE === */
+.ws-wally button:focus-visible,
+.ws-wally input:focus-visible,
+.ws-wally a:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
 }
 
-/* ----- Preferência do sistema para reduzir movimento ----- */
-@media (prefers-reduced-motion: reduce) {
-  .ws-wally__loading-icon {
-    animation: none;
+@media (max-width: 430px) {
+  .taskbar-wally.ws-wally {
+    width: calc(100vw - 16px);
+    height: min(520px, calc(100dvh - 74px));
+  }
+
+  .ws-wally__header {
+    padding: 11px 12px;
+  }
+
+  .ws-wally__messages {
+    padding: 12px;
+  }
+
+  .ws-wally__composer-area {
+    padding: 10px 12px max(10px, env(safe-area-inset-bottom));
+  }
+
+  .ws-wally__composer input {
+    font-size: 16px;
   }
 }
 
-/* === RESPONSIVIDADE === */
-/* ----- Altura reduzida ----- */
 @media (max-height: 600px) {
   .taskbar-wally.ws-wally {
-    height: min(390px, calc(100dvh - 85px));
+    height: min(420px, calc(100dvh - 75px));
   }
 
   .ws-wally__welcome {
@@ -514,24 +553,8 @@
   }
 }
 
-/* ----- Compactação da abertura inicial ----- */
-@media (max-height: 650px) {
-  .ws-wally__welcome {
-    gap: 8px;
-  }
-
-  .ws-wally__welcome-symbol {
-    width: 46px;
-    height: 46px;
-    margin-bottom: 0;
-  }
-
-  .ws-wally__suggestion-title {
-    margin-top: 6px;
-  }
-
-  .ws-wally__suggestions button {
-    min-height: 32px;
-    padding: 6px;
+@media (prefers-reduced-motion: reduce) {
+  .ws-wally__typing-dots i {
+    animation: none;
   }
 }

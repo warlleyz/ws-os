@@ -33,7 +33,7 @@ test('Worker recusa métodos incompatíveis e preserva entrega dos assets', asyn
   });
   assert.equal(await response.text(), 'shell');
 });
-test('IA continua desativada antes de rede, Turnstile ou D1', async (t) => {
+test('IA desativada por ambiente bloqueia rede, Turnstile e D1', async (t) => {
   const app = await worker();
   let calls = 0;
   t.mock.method(globalThis, 'fetch', () => {
@@ -55,7 +55,7 @@ test('IA continua desativada antes de rede, Turnstile ou D1', async (t) => {
   const config = JSON.parse(
     fs.readFileSync(path.resolve(__dirname, '../../wrangler.jsonc'), 'utf8'),
   );
-  assert.equal(config.vars.WALLY_AI_ENABLED, 'false');
+  assert.equal(config.vars.WALLY_AI_ENABLED, 'true');
 });
 
 test('Worker real roteia novos domínios e métodos sem cair nos assets', async () => {

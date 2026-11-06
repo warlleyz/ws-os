@@ -1,12 +1,12 @@
 
-import { translate as t, useLocale } from '../../shared/i18n/i18n';
-
 import { useEffect, useRef, useState } from 'react';
+import { translate as t, useLocale } from '../../shared/i18n/i18n';
 
 const SCRIPT_ID = 'ws-wally-turnstile-script';
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 const LOAD_TIMEOUT = 15000;
 
+/* === VERIFICAÇÃO CLOUDFLARE TURNSTILE === */
 export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
   useLocale();
 
@@ -19,11 +19,12 @@ export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
 
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
+  /* ----- Manter a referência atual do callback ----- */
   useEffect(() => {
     callbackRef.current = onTokenChange;
   }, [onTokenChange]);
 
-  /* === Carregamento e recuperação do Turnstile === */
+  /* === CARREGAMENTO E RECUPERAÇÃO DO TURNSTILE === */
   useEffect(() => {
     if (!siteKey) return undefined;
 
@@ -33,13 +34,13 @@ export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
     let timeoutTimer;
     let observer;
 
-    /* ----- Encerramento da espera ----- */
+    /* ----- Encerrar temporizadores ----- */
     function stopWaiting() {
       window.clearTimeout(retryTimer);
       window.clearTimeout(timeoutTimer);
     }
 
-    /* ----- Falha de carregamento ----- */
+    /* ----- Tratar falha de carregamento ----- */
     function failLoading() {
       if (disposed || failed || widgetIdRef.current !== null) return;
 
@@ -50,7 +51,7 @@ export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
       setError(true);
     }
 
-    /* ----- Inicialização do widget ----- */
+    /* ----- Inicializar o widget de verificação ----- */
     function mountWidget() {
       if (disposed || failed || !containerRef.current) return;
 
@@ -68,12 +69,18 @@ export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
           theme: 'auto',
           size: 'flexible',
 
+          /* ----- Verificação concluída ----- */
           callback(token) {
+            if (disposed) return;
+
             callbackRef.current?.(token);
             setError(false);
           },
 
+          /* ----- Token expirado ----- */
           'expired-callback'() {
+            if (disposed) return;
+
             callbackRef.current?.(null);
 
             if (widgetIdRef.current !== null) {
@@ -81,11 +88,18 @@ export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
             }
           },
 
+          /* ----- Tempo de verificação excedido ----- */
           'timeout-callback'() {
+            if (disposed) return;
+
             callbackRef.current?.(null);
+            setError(true);
           },
 
+          /* ----- Falha na verificação ----- */
           'error-callback'() {
+            if (disposed) return;
+
             callbackRef.current?.(null);
             setError(true);
           },
@@ -97,7 +111,7 @@ export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
       }
     }
 
-    /* ----- Carregamento do script compartilhado ----- */
+    /* ----- Carregar script compartilhado ----- */
     let script = document.getElementById(SCRIPT_ID);
 
     if (!script) {
@@ -132,6 +146,7 @@ export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
       disposed = true;
 
       stopWaiting();
+
       script.removeEventListener('error', failLoading);
       observer.disconnect();
 
@@ -144,7 +159,7 @@ export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
     };
   }, [siteKey, action, attempt]);
 
-  /* === Estado sem configuração === */
+  /* === ESTADO SEM CONFIGURAÇÃO === */
   if (!siteKey) {
     return (
       <p className="ws-wally__verification-info">
@@ -153,7 +168,7 @@ export default function WallyTurnstile({ onTokenChange, action = 'wally' }) {
     );
   }
 
-  /* === Interface de verificação === */
+  /* === INTERFACE DE VERIFICAÇÃO === */
   return (
     <div className="ws-wally__verification">
       <div ref={containerRef} />

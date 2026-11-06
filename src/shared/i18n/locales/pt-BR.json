@@ -238,7 +238,13 @@
     "Pesquisar aplicativos e conteúdo": "Pesquisar aplicativos e conteúdo",
     "Não foi possível consultar o serviço.": "Não foi possível consultar o serviço.",
     "WakaTime requer configuração do token OAuth.": "WakaTime requer configuração do token OAuth.",
-    "Token do WakaTime inválido ou sem permissão de leitura.": "Token do WakaTime inválido ou sem permissão de leitura."
+    "Token do WakaTime inválido ou sem permissão de leitura.": "Token do WakaTime inválido ou sem permissão de leitura.",
+    "Capacidades e privacidade": "Capacidades e privacidade",
+    "Conexão indisponível": "Conexão indisponível",
+    "IA desativada": "IA desativada",
+    "Você pode tentar enviar a mensagem novamente.": "Você pode tentar enviar a mensagem novamente.",
+    "Pergunte sobre projetos, habilidades e conteúdos do WS OS.": "Pergunte sobre projetos, habilidades e conteúdos do WS OS.",
+    "Não foi possível obter a resposta.": "Não foi possível obter a resposta."
   },
   "apps": {
     "files": {
@@ -1368,6 +1374,12 @@
     "Nenhum widget ativo": "Nenhum widget ativo",
     "Selecione os widgets que deseja exibir nas Configurações.": "Selecione os widgets que deseja exibir nas Configurações.",
     "Escolha quais widgets aparecem na tela inicial do Mobile.": "Escolha quais widgets aparecem na tela inicial do Mobile.",
-    "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas."
+    "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.",
+    "Assistente com IA e respostas locais": "Assistente com IA e respostas locais",
+    "Com IA ativa, sua pergunta e até cinco pares de mensagens são enviados ao Google Gemini com contexto público do portfólio. Não envie dados sensíveis. Sem verificação ou em caso de falha, uso respostas locais.": "Com IA ativa, sua pergunta e até cinco pares de mensagens são enviados ao Google Gemini com contexto público do portfólio. Não envie dados sensíveis. Sem verificação ou em caso de falha, uso respostas locais.",
+    "Respostas locais, sem envio da conversa à IA. Posso sugerir aplicativos e temas; você escolhe executar as ações.": "Respostas locais, sem envio da conversa à IA. Posso sugerir aplicativos e temas; você escolhe executar as ações.",
+    "A IA demorou para responder. Resposta local utilizada.": "A IA demorou para responder. Resposta local utilizada.",
+    "A IA não retornou uma resposta válida. Resposta local utilizada.": "A IA não retornou uma resposta válida. Resposta local utilizada.",
+    "Não foi possível verificar o limite de consultas. Resposta local utilizada.": "Não foi possível verificar o limite de consultas. Resposta local utilizada."
   }
 }

@@ -238,7 +238,13 @@
     "Pesquisar aplicativos e conteúdo": "Search apps and content",
     "Não foi possível consultar o serviço.": "Unable to fetch data from the service.",
     "WakaTime requer configuração do token OAuth.": "WakaTime requires an OAuth token.",
-    "Token do WakaTime inválido ou sem permissão de leitura.": "WakaTime token is invalid or lacks read permissions."
+    "Token do WakaTime inválido ou sem permissão de leitura.": "WakaTime token is invalid or lacks read permissions.",
+    "Capacidades e privacidade": "Capabilities and privacy",
+    "Conexão indisponível": "Connection unavailable",
+    "IA desativada": "AI disabled",
+    "Você pode tentar enviar a mensagem novamente.": "You can try sending the message again.",
+    "Pergunte sobre projetos, habilidades e conteúdos do WS OS.": "Ask about projects, skills, and WS OS content.",
+    "Não foi possível obter a resposta.": "Could not retrieve the response."
   },
   "apps": {
     "files": {
@@ -831,7 +837,7 @@
     "Klondike: compre uma carta. Selecione uma carta e depois o destino. Sequências alternam cores; espaços vazios recebem reis. Bases começam com ases.": "Klondike: draw one card. Select a card, then its destination. Sequences alternate colors; empty columns take kings. Foundations start with aces.",
     "Ler publicação": "Read publication",
     "Limite de cinco anexos por publicação.": "A post can have up to five attachments.",
-    "Limite de consultas atingido. Resposta local utilizada.": "Request limit reached. A local response was used.",
+    "Limite de consultas atingido. Resposta local utilizada.": "Query limit reached. A local response was used.",
     "Limite do serviço atingido. Tente mais tarde.": "Service limit reached. Try again later.",
     "Limite local de 500 itens ou 50 MB atingido. Revise a lixeira.": "The local limit of 500 items or 50 MB was reached. Review the trash.",
     "Limites locais: 10 MB por arquivo, 50 MB e 500 itens no total, incluindo a lixeira. O editor aceita textos de até 1 MB.": "Local limits: 10 MB per file, 50 MB and 500 items total, including trash. The editor accepts text up to 1 MB.",
@@ -925,7 +931,7 @@
     "Não foi possível salvar esta preferência. Ela continua ativa nesta sessão.": "Unable to save this preference. It remains active in this session.",
     "Não foi possível salvar o rascunho.": "Unable to save the draft.",
     "Não foi possível salvar os arquivos.": "Files could not be saved.",
-    "Não foi possível usar a IA. Resposta local utilizada.": "Could not use AI. A local response was used.",
+    "Não foi possível usar a IA. Resposta local utilizada.": "AI could not be used. A local response was used.",
     "Não foi possível verificar o uso da imagem.": "Unable to check whether the image is in use.",
     "Não há espaço disponível para essa organização. Os atalhos e as áreas reservadas foram preservados.": "There is no space for this arrangement. Shortcuts and reserved areas were preserved.",
     "não lidas": "unread",
@@ -980,8 +986,8 @@
     "O conteúdo mudou em outra janela. Atualize a lista.": "Content changed in another window. Refresh the list.",
     "O conteúdo não corresponde ao formato da imagem.": "The content does not match the image format.",
     "O conteúdo não corresponde ao formato do arquivo.": "The content does not match the file format.",
-    "O controle de consultas está indisponível. Resposta local utilizada.": "Request limiting is unavailable. A local response was used.",
-    "O controle de consultas não está configurado. Resposta local utilizada.": "Request limiting is not configured. A local response was used.",
+    "O controle de consultas está indisponível. Resposta local utilizada.": "Query limiting is unavailable. A local response was used.",
+    "O controle de consultas não está configurado. Resposta local utilizada.": "Query limiting is not configured. A local response was used.",
     "O currículo ainda não está disponível para visualização.": "The resume is not yet available for viewing.",
     "O currículo pode ser consultado no aplicativo Currículo.": "You can view the resume in the Resume app.",
     "O editor aceita textos de até 1 MB.": "The editor accepts text up to 1 MB.",
@@ -1368,6 +1374,12 @@
     "Nenhum widget ativo": "No active widgets",
     "Selecione os widgets que deseja exibir nas Configurações.": "Select the widgets you want to display in Settings.",
     "Escolha quais widgets aparecem na tela inicial do Mobile.": "Choose which widgets appear on the Mobile home screen.",
-    "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Widgets are automatically arranged on Mobile. Desktop settings remain unchanged."
+    "Os widgets são organizados automaticamente no Mobile. As configurações do Desktop não são alteradas.": "Widgets are automatically arranged on Mobile. Desktop settings remain unchanged.",
+    "Assistente com IA e respostas locais": "Assistant with AI and local responses",
+    "Com IA ativa, sua pergunta e até cinco pares de mensagens são enviados ao Google Gemini com contexto público do portfólio. Não envie dados sensíveis. Sem verificação ou em caso de falha, uso respostas locais.": "With AI enabled, your question and up to five message pairs are sent to Google Gemini with public portfolio context. Do not send sensitive data. Without verification or if a request fails, I use local responses.",
+    "Respostas locais, sem envio da conversa à IA. Posso sugerir aplicativos e temas; você escolhe executar as ações.": "Local responses, without sending the conversation to AI. I can suggest apps and themes; you choose whether to perform actions.",
+    "A IA demorou para responder. Resposta local utilizada.": "AI took too long to respond. A local response was used.",
+    "A IA não retornou uma resposta válida. Resposta local utilizada.": "AI did not return a valid response. A local response was used.",
+    "Não foi possível verificar o limite de consultas. Resposta local utilizada.": "The query limit could not be checked. A local response was used."
   }
 }

@@ -24,4 +24,14 @@ test('Wally local só sugere ações públicas conhecidas e não inventa IA', ()
   assert.equal(m.localWallyAnswer('qualquer coisa').actions.length, 0);
   assert.match(m.localWallyAnswer('qualquer coisa').message, /modo local/);
   assert.equal(m.localWallyAnswer('login password').actions.length, 0);
+  /* ----- Contato sem agendamento ----- */
+  const contactPt = m.localWallyAnswer('Como agendar uma reunião?');
+  assert.equal(contactPt.actions[0].appId, 'contact');
+  assert.match(contactPt.message, /mensagem profissional/);
+  assert.doesNotMatch(contactPt.message, /solicitações de horário/);
+
+  const contactEn = m.localWallyAnswer('How can I schedule a meeting?', '', 'en');
+  assert.equal(contactEn.actions[0].appId, 'contact');
+  assert.match(contactEn.message, /professional message/);
+  assert.doesNotMatch(contactEn.message, /meeting requests/);
 });

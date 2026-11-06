@@ -1,9 +1,9 @@
+import WallyMessageText from '../../features/wally/WallyMessageText';
 import { useEffect, useRef, useState } from 'react';
 import {
   ArrowUp,
   CheckCircle2,
   ExternalLink,
-  LoaderCircle,
   Maximize2,
   MessageSquare,
   Minimize2,
@@ -20,12 +20,10 @@ import useSharedWallyConversation from '../../features/wally/useSharedWallyConve
 import WallyTurnstile from '../../features/wally/WallyTurnstile';
 import { getWallyErrorMessage } from '../../features/wally/wallyErrorMessages';
 import './WallyExtended.css';
-
 /* === RECURSOS VISUAIS === */
 /* ----- Imagens públicas do Wally ----- */
 const WALLY_FACE = `${import.meta.env.BASE_URL}assets/wally/wally-rosto.webp`;
 const WALLY_BODY = `${import.meta.env.BASE_URL}assets/wally/wally-corpo.webp`;
-
 /* ----- Perguntas sugeridas ----- */
 const SUGGESTIONS = [
   { label: 'Projetos', question: 'Quais projetos posso explorar?' },
@@ -33,7 +31,6 @@ const SUGGESTIONS = [
   { label: 'Habilidades', question: 'Quais tecnologias o desenvolvedor utiliza?' },
   { label: 'Contato', question: 'Como posso entrar em contato?' },
 ];
-
 /* === IDENTIDADE DO ASSISTENTE === */
 function WallyAvatar({ className = '' }) {
   return (
@@ -42,7 +39,6 @@ function WallyAvatar({ className = '' }) {
     </span>
   );
 }
-
 /* === TELA INICIAL === */
 function WallyWelcome({ onAsk }) {
   return (
@@ -61,7 +57,6 @@ function WallyWelcome({ onAsk }) {
           </p>
         </div>
       </div>
-
       {/* ----- Atalhos de conversa ----- */}
       <div className="wally-ext__suggestion-grid">
         {SUGGESTIONS.map((suggestion) => (
@@ -80,7 +75,6 @@ function WallyWelcome({ onAsk }) {
     </div>
   );
 }
-
 /* === HISTÓRICO DE CONVERSA === */
 function WallyMessages({ messages, onOpenApp, onTheme }) {
   return (
@@ -97,10 +91,11 @@ function WallyMessages({ messages, onOpenApp, onTheme }) {
             <div className="wally-ext__message-content">
               <span className="wally-ext__message-author">{isUser ? t('Você') : 'Wally'}</span>
               <div className="wally-ext__bubble">
-                <p>{isUser ? message.text : t(message.text)}</p>
+                <p>{isUser ? message.text : <WallyMessageText text={t(message.text)} />}</p>
                 {message.cancelled && (
                   <span className="wally-ext__cancelled">{t('Resposta cancelada')}</span>
                 )}
+                {/* ----- Sugestão de mudança de tema ----- */}
                 {!isUser &&
                   message.provider === 'local' &&
                   message.actions
@@ -118,6 +113,7 @@ function WallyMessages({ messages, onOpenApp, onTheme }) {
                         {t(action.theme === 'light' ? 'Ativar tema claro' : 'Ativar tema escuro')}
                       </button>
                     ))}
+                {/* ----- Navegação para aplicativos públicos ----- */}
                 {!isUser &&
                   message.actions
                     ?.filter(
@@ -151,7 +147,6 @@ function WallyMessages({ messages, onOpenApp, onTheme }) {
     </div>
   );
 }
-
 /* === APLICATIVO WALLY ESTENDIDO === */
 export default function WallyExtended({ instance }) {
   useLocale();
@@ -169,13 +164,11 @@ export default function WallyExtended({ instance }) {
     sendMessage,
     cancelResponse,
     clearConversation,
-    provider,
     remoteEnabled,
     lastError,
     maxQuestionLength,
   } = useSharedWallyConversation();
   const isResponding = status === 'responding';
-
   /* ----- Acompanhar novas respostas ----- */
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -183,13 +176,17 @@ export default function WallyExtended({ instance }) {
       behavior: 'smooth',
     });
   }, [messages, status]);
-
   /* ----- Aplicar somente o tema oferecido por uma resposta local ----- */
   async function applyTheme(theme) {
     if (!['dark', 'light'].includes(theme)) return;
     const result = await executeSystemAction(
       { id: 'appearance.set-theme', params: { theme } },
-      { run, context: 'wally', origin: 'wally-extended', originInstanceId: instance?.id },
+      {
+        run,
+        context: 'wally',
+        origin: 'wally-extended',
+        originInstanceId: instance?.id,
+      },
     );
     setActionFeedback(
       !result.ok
@@ -199,7 +196,6 @@ export default function WallyExtended({ instance }) {
           : 'Tema aplicado.',
     );
   }
-
   /* ----- Enviar uma pergunta ----- */
   async function submitQuestion(value) {
     if (isResponding || typeof value !== 'string') return;
@@ -216,31 +212,34 @@ export default function WallyExtended({ instance }) {
       inputRef.current?.focus();
     }
   }
-
   /* ----- Controlar envio por teclado ----- */
   function handleKeyDown(event) {
-    if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent?.isComposing) return;
+    if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent?.isComposing) {
+      return;
+    }
     event.preventDefault();
     void submitQuestion(question);
   }
-
   /* ----- Limpar conversa compartilhada ----- */
   function handleClear() {
     clearConversation();
     setQuestion('');
     inputRef.current?.focus();
   }
-
   /* ----- Executar ação autorizada ----- */
   function openRelatedApp(appId) {
     const app = getAppDefinition(appId);
     if (!app?.public) return;
     void executeSystemAction(
       { id: 'app.open', params: { appId } },
-      { run, context: 'wally', origin: 'wally-extended', originInstanceId: instance?.id },
+      {
+        run,
+        context: 'wally',
+        origin: 'wally-extended',
+        originInstanceId: instance?.id,
+      },
     );
   }
-
   /* === INTERFACE DO APLICATIVO === */
   return (
     <article className="desktop-window__content ws-wally-extended">
@@ -256,7 +255,11 @@ export default function WallyExtended({ instance }) {
         <div className="wally-ext__header-actions">
           <span className="wally-ext__mode">
             <span className="wally-ext__status-dot" />
-            {provider === 'gemini' ? 'Gemini' : t('Local')}
+            {status === 'error'
+              ? t('Conexão indisponível')
+              : remoteEnabled
+                ? 'Gemini'
+                : t('IA desativada')}
           </span>
           <button
             type="button"
@@ -270,7 +273,6 @@ export default function WallyExtended({ instance }) {
           </button>
         </div>
       </header>
-
       {/* ----- Conteúdo principal e histórico ----- */}
       <main
         ref={scrollRef}
@@ -286,12 +288,19 @@ export default function WallyExtended({ instance }) {
         {messages.length > 0 && (
           <WallyMessages messages={messages} onOpenApp={openRelatedApp} onTheme={applyTheme} />
         )}
+        {/* ----- Indicador animado de resposta ----- */}
         {isResponding && (
           <div className="wally-ext__thinking" role="status">
             <WallyAvatar />
             <div className="wally-ext__thinking-content">
-              <LoaderCircle size={16} className="wally-ext__spinner" aria-hidden="true" />
-              <span>{t('Wally está preparando uma resposta...')}</span>
+              <span className="wally-ext__typing-dots" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="wally-ext__thinking-label">
+                {t('Wally está preparando uma resposta...')}
+              </span>
               <button type="button" onClick={cancelResponse}>
                 <Square size={12} aria-hidden="true" />
                 {t('Cancelar')}
@@ -300,25 +309,32 @@ export default function WallyExtended({ instance }) {
           </div>
         )}
       </main>
-
       {/* ----- Redação e envio de mensagens ----- */}
       <div className="wally-ext__bottom">
         {actionFeedback && <p role="status">{t(actionFeedback)}</p>}
-        {status === 'error' && (
-          <p className="wally-ext__notice" role="alert">
-            {t('Não foi possível gerar uma resposta.')}
-          </p>
-        )}
         {lastError && (
-          <p className="wally-ext__notice" role="status">
-            {t(getWallyErrorMessage(lastError))}
+          <p className="wally-ext__notice" role="alert">
+            {t(getWallyErrorMessage(lastError))}{' '}
+            {t('Você pode tentar enviar a mensagem novamente.')}
           </p>
         )}
+        <details className="ws-wally__privacy">
+          <summary>{t('Capacidades e privacidade')}</summary>
+          <p>
+            {t(
+              remoteEnabled
+                ? 'Quando a IA estiver ativa, sua pergunta e até cinco pares de mensagens serão enviados ao Google Gemini com contexto público do portfólio. Não envie dados sensíveis. Em caso de falha, mostraremos um aviso, sem respostas locais automáticas.'
+                : 'A IA está desativada. Nenhuma pergunta será enviada ao Gemini.',
+            )}
+          </p>
+        </details>
+        {/* ----- Verificação de segurança ----- */}
         {remoteEnabled && (
           <div className="wally-ext__turnstile">
             <WallyTurnstile key={verificationKey} onTokenChange={setTurnstileToken} />
           </div>
         )}
+        {/* ----- Compositor de mensagens ----- */}
         <form
           className="wally-ext__composer"
           onSubmit={(event) => {
@@ -367,6 +383,7 @@ export default function WallyExtended({ instance }) {
             </button>
           </div>
         </form>
+        {/* ----- Rodapé de informações ----- */}
         <footer className="wally-ext__footer">
           <span>
             <ShieldCheck size={13} aria-hidden="true" />

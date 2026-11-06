@@ -31,7 +31,7 @@
 | 17 | Arquivos e armazenamento pessoal | **Concluída e aprovada pelo proprietário** |
 | 18 | Editor e visualizador de arquivos | **Concluída e aprovada pelo proprietário** |
 | 19 | Contato e solicitações de horário | **Concluída e aprovada pelo proprietário** |
-| 20 | Wally e assistência de navegação | Não iniciada |
+| 20 | Wally e assistência de navegação | **Concluída e validada pelo proprietário** |
 | 21 | Terminal e Calculadora | Não iniciada |
 | 22 | Jogos, recordes e rankings | Não iniciada |
 | 23 | Configurações e personalização | Não iniciada |
@@ -903,3 +903,46 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Alterações locais pendentes de versionamento e publicação final.
 - Nenhum commit ou push executado pelo assistente.
 - **Próxima etapa prevista: 20 — Wally e assistência de navegação.**
+
+
+## Etapa 20 — Wally e assistência de navegação
+
+**Estado:** concluída e validada pelo proprietário em 06/11/2026.
+
+### Trabalhos realizados
+
+- Reconstrução do controlador de conversas do Wally.
+- Definição do Google Gemini como único provedor de respostas conversacionais.
+- Remoção do fallback local automático.
+- Compartilhamento do histórico entre o Painel Compacto e o Wally Estendido.
+- Revisão das interfaces e dos estados de carregamento, erro e cancelamento.
+- Preservação da verificação de segurança com Cloudflare Turnstile.
+- Refinamento visual das interfaces Desktop e Mobile.
+- Ajuste do campo de mensagem e dos controles de envio no Mobile.
+- Atualização das traduções em português e inglês.
+- Adequação dos testes automatizados à arquitetura aprovada.
+
+### Validações
+
+- `npm run lint` — aprovado, conforme confirmação do proprietário.
+- `npm run test` — aprovado, conforme confirmação do proprietário.
+- `npm run build` — aprovado, conforme confirmação do proprietário.
+- `git diff --check` — aprovado, conforme confirmação do proprietário.
+- Funcionamento das interfaces Desktop e Mobile confirmado pelo proprietário.
+- Nenhuma execução automatizada de testes realizada pelo assistente.
+
+### Decisões
+
+- Manter o Gemini como único provedor conversacional.
+- Não utilizar respostas locais como fallback automático.
+- Compartilhar o estado da conversa entre as duas interfaces do Wally.
+- Preservar os controles de segurança e os contratos existentes.
+- Não adicionar dependências desnecessárias.
+
+### Encerramento
+
+- Reconstrução do Wally concluída e validada localmente.
+- Integração e interfaces aprovadas pelo proprietário.
+- Alterações pendentes de revisão final e versionamento.
+- Nenhum commit, push ou deploy realizado pelo assistente.
+- **Próxima etapa prevista: 21 — Terminal e Calculadora.**

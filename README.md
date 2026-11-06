@@ -186,9 +186,9 @@ Entre suas funcionalidades estão:
 
 O Wally possui uma interface integrada ao ambiente e uma experiência estendida.
 
-**Modo de funcionamento:** a versão publicada utiliza o Wally em modo local, sem chamadas a modelos de inteligência artificial remotos.
+**Modo de funcionamento:** o Google Gemini é o único provedor de respostas conversacionais do Wally. A integração depende da habilitação no frontend e no Worker, além da verificação de segurança. Quando a IA estiver indisponível ou a verificação falhar, o sistema informa o problema sem gerar uma resposta local automática. O estado da versão publicada depende da configuração do deploy ativo.
 
-A arquitetura contempla a possibilidade de integração com serviços de IA, sujeita à configuração e disponibilidade do backend.
+A integração remota envia a pergunta e até cinco pares do histórico com contexto público do portfólio. As ações sugeridas exigem interação do visitante; a IA não executa operações administrativas. Consulte `docs/CONFIGURACAO.md` para limites, privacidade e configuração.
 
 ## Jogos
 

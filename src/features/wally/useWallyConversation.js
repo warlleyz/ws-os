@@ -1,21 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { localWallyAnswer } from '../../services/wallyService';
 import { askWallyRemote } from '../../services/wallyRemoteService';
-import { portfolio, contentText } from '../../content/portfolioContent';
 import { useLocale } from '../../shared/i18n/i18n';
 
 const MAX_QUESTION_LENGTH = 1000;
 const MAX_MESSAGES = 60;
+const MAX_HISTORY_MESSAGES = 10;
 
 const REMOTE_ENABLED = import.meta.env.VITE_WALLY_REMOTE_ENABLED === 'true';
 
+/* === CONTROLADOR DE CONVERSA DO WALLY === */
 export default function useWallyConversation() {
   const locale = useLocale();
 
   const [messages, setMessages] = useState([]);
   const [status, setStatus] = useState('idle');
-  const [provider, setProvider] = useState('local');
+  const [provider, setProvider] = useState(null);
   const [lastError, setLastError] = useState(null);
 
   const messagesRef = useRef([]);
@@ -25,6 +25,8 @@ export default function useWallyConversation() {
   const generationRef = useRef(0);
   const pendingMessageIdRef = useRef(null);
 
+  /* === CICLO DE VIDA === */
+
   useEffect(() => {
     return () => {
       generationRef.current += 1;
@@ -32,16 +34,54 @@ export default function useWallyConversation() {
     };
   }, []);
 
+  /* ----- Identificação de mensagens ----- */
   const createId = useCallback(() => {
     nextId.current += 1;
     return `wally-message-${nextId.current}`;
   }, []);
 
+  /* ----- Atualização do histórico compartilhado ----- */
   const updateMessages = useCallback((next) => {
     messagesRef.current = next.slice(-MAX_MESSAGES);
     setMessages(messagesRef.current);
   }, []);
 
+  /* === HISTÓRICO PARA O GEMINI === */
+  const getCompletedHistory = useCallback(() => {
+    const completedHistory = [];
+    const currentMessages = messagesRef.current;
+
+    for (let i = 0; i < currentMessages.length - 1; i += 1) {
+      const user = currentMessages[i];
+      const assistant = currentMessages[i + 1];
+
+      if (
+        user.role === 'user' &&
+        !user.cancelled &&
+        !user.failed &&
+        assistant.role === 'assistant' &&
+        assistant.provider === 'gemini' &&
+        typeof assistant.text === 'string' &&
+        assistant.text.trim()
+      ) {
+        completedHistory.push(
+          { role: 'user', text: user.text },
+          { role: 'assistant', text: assistant.text },
+        );
+
+        i += 1;
+      }
+    }
+
+    return completedHistory
+      .slice(-MAX_HISTORY_MESSAGES)
+      .map((message) => ({
+        role: message.role,
+        text: message.text.slice(0, MAX_QUESTION_LENGTH),
+      }));
+  }, []);
+
+  /* === ENVIO DE MENSAGENS === */
   const sendMessage = useCallback(
     async (value, options = {}) => {
       if (typeof value !== 'string' || busyRef.current) {
@@ -54,35 +94,34 @@ export default function useWallyConversation() {
         return false;
       }
 
+      /* ----- Verificar disponibilidade da integração ----- */
+      if (!REMOTE_ENABLED) {
+        setLastError('AI_DISABLED');
+        setStatus('error');
+        return false;
+      }
+
+      /* ----- Exigir verificação antes do envio ----- */
+      if (!options.turnstileToken) {
+        setLastError('VERIFICATION_REQUIRED');
+        setStatus('error');
+        return false;
+      }
+
       busyRef.current = true;
+
       const generation = generationRef.current;
+      const controller = new AbortController();
+
+      abortRef.current = controller;
 
       setStatus('responding');
       setLastError(null);
 
-      // Envia apenas pares completos de pergunta e resposta.
-      // Perguntas canceladas não entram no contexto do Gemini.
-      const completedHistory = [];
+      /* ----- Preparar contexto anterior ----- */
+      const history = getCompletedHistory();
 
-      for (let i = 0; i < messagesRef.current.length - 1; i += 1) {
-        const user = messagesRef.current[i];
-        const assistant = messagesRef.current[i + 1];
-
-        if (user.role === 'user' && !user.cancelled && assistant.role === 'assistant') {
-          completedHistory.push(
-            { role: 'user', text: user.text },
-            { role: 'assistant', text: assistant.text },
-          );
-
-          i += 1;
-        }
-      }
-
-      const history = completedHistory.slice(-10).map((message) => ({
-        role: message.role,
-        text: message.text.slice(0, MAX_QUESTION_LENGTH),
-      }));
-
+      /* ----- Registrar pergunta do visitante ----- */
       const userMessage = {
         id: createId(),
         role: 'user',
@@ -93,85 +132,96 @@ export default function useWallyConversation() {
 
       updateMessages([...messagesRef.current, userMessage]);
 
-      let response;
-      let remoteError = null;
+      try {
 
-      if (REMOTE_ENABLED && options.turnstileToken) {
-        const controller = new AbortController();
-        abortRef.current = controller;
+        /* ----- Consultar exclusivamente o Gemini ----- */
+        const response = await askWallyRemote({
+          question,
+          locale,
+          history,
+          turnstileToken: options.turnstileToken,
+          signal: controller.signal,
+        });
 
-        try {
-          response = await askWallyRemote({
-            question,
-            locale,
-            history,
-            turnstileToken: options.turnstileToken,
-            signal: controller.signal,
-          });
-        } catch (error) {
-          remoteError = error.message || 'REMOTE_UNAVAILABLE';
-        } finally {
-          if (abortRef.current === controller) {
-            abortRef.current = null;
-          }
-        }
-      } else if (REMOTE_ENABLED) {
-        remoteError = 'VERIFICATION_REQUIRED';
-      }
-
-      if (generation !== generationRef.current) {
-        return false;
-      }
-
-      if (!response) {
-        try {
-          const summary = contentText(portfolio.profile.summary, locale);
-
-          response = {
-            ...localWallyAnswer(question, summary, locale),
-            provider: 'local',
-          };
-        } catch {
-          const pendingId = pendingMessageIdRef.current;
-          pendingMessageIdRef.current = null;
-
-          if (pendingId) {
-            updateMessages(
-              messagesRef.current.map((message) =>
-                message.id === pendingId ? { ...message, cancelled: true } : message,
-              ),
-            );
-          }
-
-          setStatus('error');
-          busyRef.current = false;
+        /* ----- Ignorar resultados de operações canceladas ----- */
+        if (
+          generation !== generationRef.current ||
+          controller.signal.aborted
+        ) {
           return false;
         }
+
+        /* ----- Validar a resposta remota ----- */
+        if (
+          response?.provider !== 'gemini' ||
+          typeof response.message !== 'string' ||
+          !response.message.trim()
+        ) {
+          throw new Error('INVALID_SERVER_RESPONSE');
+        }
+
+        /* ----- Adicionar resposta da IA ----- */
+        updateMessages([
+          ...messagesRef.current,
+          {
+            id: createId(),
+            role: 'assistant',
+            text: response.message,
+            actions: [],
+            provider: 'gemini',
+          },
+        ]);
+
+        pendingMessageIdRef.current = null;
+
+        setProvider('gemini');
+        setLastError(null);
+        setStatus('idle');
+
+        return true;
+      } catch (error) {
+        if (generation !== generationRef.current) {
+          return false;
+        }
+
+        /* ----- Manter a pergunta e identificar a falha ----- */
+        const pendingId = pendingMessageIdRef.current;
+
+        if (pendingId) {
+          updateMessages(
+            messagesRef.current.map((message) =>
+              message.id === pendingId
+                ? { ...message, failed: true }
+                : message,
+            ),
+          );
+        }
+
+        pendingMessageIdRef.current = null;
+
+        const errorCode =
+          controller.signal.aborted
+            ? 'AI_TIMEOUT'
+            : error?.message || 'REMOTE_UNAVAILABLE';
+
+        setLastError(errorCode);
+        setStatus('error');
+
+        return false;
+      } finally {
+        if (abortRef.current === controller) {
+          abortRef.current = null;
+        }
+
+        if (generation === generationRef.current) {
+          busyRef.current = false;
+        }
       }
-
-      updateMessages([
-        ...messagesRef.current,
-        {
-          id: createId(),
-          role: 'assistant',
-          text: response.message,
-          actions: Array.isArray(response.actions) ? response.actions : [],
-          provider: response.provider,
-        },
-      ]);
-
-      pendingMessageIdRef.current = null;
-
-      setProvider(response.provider);
-      setLastError(remoteError);
-      setStatus('idle');
-      busyRef.current = false;
-
-      return true;
     },
-    [locale, createId, updateMessages],
+    [locale, createId, updateMessages, getCompletedHistory],
   );
 
+  /* === CANCELAMENTO === */
   const cancelResponse = useCallback(() => {
     if (!busyRef.current) return;
 
@@ -184,10 +234,13 @@ export default function useWallyConversation() {
     const pendingId = pendingMessageIdRef.current;
     pendingMessageIdRef.current = null;
 
+    /* ----- Identificar pergunta cancelada ----- */
     if (pendingId) {
       updateMessages(
         messagesRef.current.map((message) =>
-          message.id === pendingId ? { ...message, cancelled: true } : message,
+          message.id === pendingId
+            ? { ...message, cancelled: true }
+            : message,
         ),
       );
     }
@@ -198,18 +251,24 @@ export default function useWallyConversation() {
     setLastError(null);
   }, [updateMessages]);
 
+  /* === LIMPEZA DA CONVERSA === */
   const clearConversation = useCallback(() => {
     generationRef.current += 1;
+
     abortRef.current?.abort();
     abortRef.current = null;
+
     busyRef.current = false;
     pendingMessageIdRef.current = null;
+
     updateMessages([]);
-    setProvider('local');
+
+    setProvider(null);
     setLastError(null);
     setStatus('idle');
   }, [updateMessages]);
 
+  /* === CONTRATO PÚBLICO DO CONTROLADOR === */
   return {
     messages,
     status,
