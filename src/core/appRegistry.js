@@ -54,7 +54,7 @@ const windowProfiles = {
   'file-editor': { width: 920, height: 680 },
   'file-viewer': { width: 1040, height: 720 },
   'wally-extended': { width: 1050, height: 740 },
-  'calculator': { width: 400, height: 750 },
+  'calculator': { width: 400, height: 800 },
   'administration': { width: 1050, height: 740 },
 };
 const appDefinitions = [

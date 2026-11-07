@@ -23,6 +23,11 @@ async function calculator({ stored = null, failSave = false } = {}) {
     {},
     {
       calculate,
+      Select: 'Select',
+      CalculatorIcon: 'CalculatorIcon',
+      History: 'History',
+      FlaskConical: 'FlaskConical',
+      Delete: 'Delete',
       attachRef: () => field,
       localStorage: {
         getItem: () => stored,
@@ -117,8 +122,8 @@ test('unidade científica invalida resultado e mantém grau e radiano explícito
     .props.onChange({ target: { checked: true } });
   ui.render();
   ui.nodes()
-    .find((n) => n.type === 'select')
-    .props.onChange({ target: { value: 'rad' } });
+    .find((n) => n.type === 'Select')
+    .props.onChange('rad');
   ui.render();
   assert.equal(ui.result(), '—');
   ui.change('cos(pi)');

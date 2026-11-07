@@ -165,7 +165,6 @@ export default function Terminal({ instance }) {
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const [currentFolderId, setCurrentFolderId] = useState(null);
-  const [pathSuggestions, setPathSuggestions] = useState([]);
 
   /* === AUTENTICAÇÃO === */
   const [loginStep, setLoginStep] = useState(null);
@@ -338,44 +337,77 @@ export default function Terminal({ instance }) {
     setHistoryIndex(null);
   }
 
-  async function autocomplete() {
-    const command = input.trimStart().split(/\s+/)[0]?.toLowerCase();
 
+  async function autocomplete() {
+    const source = input;
+    const command = source.trimStart().split(/\s+/)[0]?.toLowerCase();
     let paths = [];
 
     if (['cd', 'ls', 'cat'].includes(command)) {
       try {
-        const entries = visibleEntries(await listLocalFiles());
-
-        if (!alive.current) return;
-
-        const argument = input.slice(command.length).trimStart();
+        const argument = source.slice(command.length).trimStart();
         const slash = argument.lastIndexOf('/');
         const directory = slash >= 0 ? argument.slice(0, slash + 1) : '.';
+        const path = normalizePortfolioPath(terminalPath, directory);
 
-        const folderId = getDirectory(entries, currentFolderId, directory);
+        if (path === '~/personal' || path.startsWith('~/personal/')) {
+          const entries = visibleEntries(await listLocalFiles());
 
-        paths = entries
-          .filter(
-            (item) => item.parentId === folderId && (command !== 'cd' || item.kind === 'folder'),
-          )
-          .map((item) => item.name);
+          if (!alive.current) return;
 
-        setPathSuggestions(paths);
+          const personalPath = path.replace(/^~\/personal\/?/, '');
+          const folderId = getDirectory(entries, null, personalPath || '.');
+
+          paths = entries
+            .filter(
+              (item) =>
+                item.parentId === folderId &&
+                (command !== 'cd' || item.kind === 'folder'),
+            )
+            .map((item) => item.name);
+        } else {
+          let tree = createPortfolioTree(
+            portfolio,
+            repositories,
+            locale,
+            contentText,
+          );
+
+          if (
+            (path === '~/portfolio/projects' ||
+              path.startsWith('~/portfolio/projects/')) &&
+            !projectsLoaded
+          ) {
+            const result = await fetchGithubPortfolio(portfolio.githubUser);
+
+            if (!alive.current) return;
+
+            const items = result.data?.repositories ?? [];
+            setRepositories(items);
+            setProjectsLoaded(true);
+            tree = createPortfolioTree(portfolio, items, locale, contentText);
+          }
+
+          paths = listPortfolioPath(tree, path)
+            .filter((item) => command !== 'cd' || item.endsWith('/'))
+            .map((item) => item.replace(/\/$/, ''));
+        }
       } catch {
-        setPathSuggestions([]);
         return;
       }
     }
 
     setInput((current) =>
-      completeCommand(
-        current,
-        apps.filter((app) => app.implemented).map((app) => app.id),
-        paths,
-      ),
+      current === source
+        ? completeCommand(
+          current,
+          apps.filter((app) => app.implemented).map((app) => app.id),
+          paths,
+        )
+        : current,
     );
   }
+
 
   function handleCommandKeyDown(event) {
     if (event.nativeEvent?.isComposing || event.isComposing) {
@@ -383,18 +415,20 @@ export default function Terminal({ instance }) {
     }
 
     if (event.key === 'Tab') {
+      if (/^(cd|ls|cat)\s/i.test(input)) {
+        event.preventDefault();
+        void autocomplete();
+        return;
+      }
+
       const immediate = completeCommand(
         input,
         apps.filter((app) => app.implemented).map((app) => app.id),
-        pathSuggestions,
       );
 
       if (immediate !== input) {
         event.preventDefault();
         setInput(immediate);
-      } else if (/^(cd|ls|cat)\s/.test(input)) {
-        event.preventDefault();
-        void autocomplete();
       }
 
       return;
@@ -516,7 +550,6 @@ export default function Terminal({ instance }) {
 
     setInput('');
     setHistoryIndex(null);
-    setPathSuggestions([]);
 
     if (safeCommand !== 'login') {
       setHistory((current) => [...current, command].slice(-MAX_HISTORY));
@@ -623,7 +656,7 @@ export default function Terminal({ instance }) {
 
         /* === TEMA === */
         case 'theme': {
-          if (!['dark', 'light'].includes(args[0])) {
+          if (args.length !== 1 || !['dark', 'light'].includes(args[0])) {
             throw new Error(`Uso: ${TERMINAL_USAGE.theme}`);
           }
 
@@ -635,7 +668,7 @@ export default function Terminal({ instance }) {
 
         /* === IDIOMA === */
         case 'lang': {
-          if (!['pt-BR', 'en'].includes(args[0])) {
+          if (args.length !== 1 || !['pt-BR', 'en'].includes(args[0])) {
             throw new Error(`Uso: ${TERMINAL_USAGE.lang}`);
           }
 
@@ -858,11 +891,9 @@ export default function Terminal({ instance }) {
 
         /* === HISTÓRICO === */
         case 'history': {
-          output = history.map((item, index) => `${index + 1} ${item}`);
+          const commands = [...history, command].slice(-MAX_HISTORY);
 
-          if (!output.length) {
-            output = ['Histórico vazio.'];
-          }
+          output = commands.map((item, index) => `${index + 1} ${item}`);
 
           break;
         }

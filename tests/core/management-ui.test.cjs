@@ -86,6 +86,28 @@ test('Terminal preserva a instância de origem ao abrir aplicativo público', as
   ui.unmount();
 });
 
+
+test('Terminal inclui a própria consulta no histórico exibido', async () => {
+  const ui = await terminal();
+  const input = () =>
+    ui.nodes().find((node) => node.type === 'input' && node.props.maxLength === 512);
+
+  input().props.onChange({ target: { value: 'echo teste' } });
+  ui.render();
+  await submit(ui);
+  ui.render();
+
+  input().props.onChange({ target: { value: 'history' } });
+  ui.render();
+  await submit(ui);
+  ui.render();
+
+  assert.match(ui.text(), /1 echo teste/);
+  assert.match(ui.text(), /2 history/);
+
+  ui.unmount();
+});
+
 /* === Ciclo privado compartilhado, com cancelamento e confirmação da sessão === */
 test('recurso administrativo limpa dados privados e aborta operação ao expirar sessão', async () => {
   let listener,

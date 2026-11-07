@@ -1,11 +1,13 @@
+
 import { useEffect, useRef, useState } from 'react';
+import { Calculator as CalculatorIcon, History, FlaskConical, Delete } from 'lucide-react';
 import { translate as t, useLocale } from '../../shared/i18n/i18n';
 import { calculate } from './calculatorEngine';
+import Select from '../../shared/components/Select';
 import '../../styles/apps.css';
 import './Calculator.css';
 
 /* === HISTÓRICO LOCAL === */
-/* ----- Carregamento e validação dos cálculos armazenados ----- */
 const KEY = 'ws-os:calculator-history';
 
 function loadHistory() {
@@ -46,13 +48,36 @@ const SCIENTIFIC_KEYS = [
   'e', '^', '(', ')',
 ];
 
+const OPERATOR_LABELS = {
+  '/': '÷',
+  '*': '×',
+  '-': '−',
+  '+': '+',
+  '^': 'xʸ',
+  'sqrt(': '√x',
+  'pi': 'π',
+  '⌫': '⌫',
+};
+
 function keyClass(value) {
-  if (value === '=') return 'ws-calculator__key ws-calculator__key--equals';
-  if (value === 'AC' || value === '⌫') return 'ws-calculator__key ws-calculator__key--utility';
-  if (['/', '*', '-', '+', '%', '^'].includes(value)) {
-    return 'ws-calculator__key ws-calculator__key--operator';
+  const classes = ['ws-calculator__key'];
+
+  if (value === '=') classes.push('ws-calculator__key--equals');
+  else if (value === 'AC' || value === '⌫') {
+    classes.push('ws-calculator__key--utility');
+  } else if (['/', '*', '-', '+', '%', '^'].includes(value)) {
+    classes.push('ws-calculator__key--operator');
+  } else {
+    classes.push('ws-calculator__key--number');
   }
-  return 'ws-calculator__key';
+
+  return classes.join(' ');
+}
+
+function formatResult(value, locale) {
+  return value === null
+    ? '—'
+    : value.toLocaleString(locale, { maximumSignificantDigits: 14 });
 }
 
 /* === APLICATIVO CALCULADORA === */
@@ -67,22 +92,24 @@ export default function Calculator() {
   const inputRef = useRef(null);
   const caretRef = useRef(null);
 
-  /* ----- Restaurar posição do cursor após editar pelas teclas ----- */
+  /* ----- Restauração do cursor ----- */
   useEffect(() => {
     if (caretRef.current !== null) {
-      inputRef.current?.setSelectionRange(caretRef.current, caretRef.current);
+      inputRef.current?.setSelectionRange(
+        caretRef.current,
+        caretRef.current,
+      );
       caretRef.current = null;
     }
   }, [expression]);
 
-  /* ----- Atualizar expressão sem manter resultados obsoletos ----- */
+  /* ----- Entrada e resultado ----- */
   function replaceExpression(value) {
     setExpression(value.slice(0, 256));
     setResult(null);
     setError('');
   }
 
-  /* ----- Calcular e armazenar no histórico local ----- */
   function evaluate() {
     try {
       const value = calculate(expression, angle);
@@ -99,11 +126,15 @@ export default function Calculator() {
       }
     } catch (calculationError) {
       setResult(null);
-      setError(calculationError.message);
+      setError(
+        typeof calculationError?.message === 'string'
+          ? calculationError.message
+          : 'Expressão inválida.',
+      );
     }
   }
 
-  /* ----- Inserção que respeita seleção e posição do cursor ----- */
+  /* ----- Inserção com seleção e cursor ----- */
   function insert(value) {
     if (value === '=') {
       evaluate();
@@ -118,14 +149,23 @@ export default function Calculator() {
 
     const start = inputRef.current?.selectionStart ?? expression.length;
     const end = inputRef.current?.selectionEnd ?? start;
-    const from = value === '⌫' && start === end ? Math.max(0, start - 1) : start;
+    const from =
+      value === '⌫' && start === end
+        ? Math.max(0, start - 1)
+        : start;
     const addition = value === '⌫' ? '' : value;
-    const next = expression.slice(0, from) + addition + expression.slice(end);
+    const next =
+      expression.slice(0, from) +
+      addition +
+      expression.slice(end);
 
     if (next.length > 256) return;
 
     if (next === expression) {
-      inputRef.current?.setSelectionRange(from + addition.length, from + addition.length);
+      inputRef.current?.setSelectionRange(
+        from + addition.length,
+        from + addition.length,
+      );
       return;
     }
 
@@ -133,13 +173,12 @@ export default function Calculator() {
     replaceExpression(next);
   }
 
-  /* ----- Reutilizar uma expressão do histórico ----- */
+  /* ----- Histórico ----- */
   function restoreHistoryExpression(value) {
     caretRef.current = value.length;
     replaceExpression(value);
   }
 
-  /* ----- Limpar histórico salvo ----- */
   function clearHistory() {
     setHistory([]);
     try {
@@ -149,157 +188,250 @@ export default function Calculator() {
     }
   }
 
-  const formattedResult = result === null
-    ? '—'
-    : result.toLocaleString(locale, { maximumSignificantDigits: 14 });
+  const formattedResult = formatResult(result, locale);
 
   /* === INTERFACE === */
   return (
     <article className="desktop-window__content ws-app ws-calculator">
-      {/* ----- Cabeçalho e modo de operação ----- */}
       <header className="ws-calculator__header">
-        <div className="ws-calculator__heading">
-          <h2>{t('Calculadora')}</h2>
-          <span className="ws-calculator__mode-label">
-            {t(scientific ? 'Modo científico' : 'Calculadora')}
-          </span>
+        <div className="ws-calculator__brand">
+          <div className="ws-calculator__brand-icon" aria-hidden="true">
+            <CalculatorIcon size={20} strokeWidth={2} />
+          </div>
+
+          <div className="ws-calculator__heading">
+            <h2>{t('Calculadora')}</h2>
+            <span className="ws-calculator__subtitle">
+              WS OS / {t(scientific ? 'Modo científico' : 'Calculadora')}
+            </span>
+          </div>
         </div>
+
         <label className="ws-calculator__mode-toggle">
-          <span>{t('Modo científico')}</span>
           <input
             type="checkbox"
             checked={scientific}
             onChange={(event) => setScientific(event.target.checked)}
           />
+          <span className="ws-calculator__mode-control">
+            <FlaskConical size={15} aria-hidden="true" />
+            {t('Modo científico')}
+          </span>
         </label>
       </header>
 
-      {/* ----- Visor de entrada e resultado ----- */}
-      <section className="ws-calculator__display" aria-label={t('Expressão')}>
-        <label className="ws-calculator__expression-label" htmlFor="ws-calculator-expression">
-          {t('Expressão')}
-        </label>
-        <input
-          id="ws-calculator-expression"
-          ref={inputRef}
-          className="ws-calculator__expression"
-          value={expression}
-          maxLength={256}
-          inputMode="text"
-          onChange={(event) => {
-            caretRef.current = null;
-            replaceExpression(event.target.value);
-          }}
-          onKeyDown={(event) => {
-            if (event.nativeEvent?.isComposing || event.isComposing) return;
-            if (event.key === 'Enter' || event.key === '=') {
-              event.preventDefault();
-              evaluate();
-            }
-            if (event.key === 'Escape') {
-              event.preventDefault();
-              event.stopPropagation();
-              insert('AC');
-            }
-          }}
-          autoComplete="off"
-          spellCheck={false}
-        />
-        <output aria-live="polite" className="ws-calculator__result">
-          {formattedResult}
-        </output>
-      </section>
-
-      {error && (
-        <p className="ws-calculator__error" role="alert">
-          {t(error)}
-        </p>
-      )}
-
-      {/* ----- Ferramentas científicas ----- */}
-      {scientific && (
-        <section className="ws-calculator__scientific" aria-label={t('Modo científico')}>
-          <label className="ws-calculator__angle">
-            <span>{t('Ângulos')}</span>
-            <select
-              value={angle}
-              onChange={(event) => {
-                setAngle(event.target.value);
-                setResult(null);
-                setError('');
-              }}
-            >
-              <option value="deg">{t('Graus')}</option>
-              <option value="rad">{t('Radianos')}</option>
-            </select>
-          </label>
-          <div className="ws-calculator__keys ws-calculator__keys--scientific">
-            {SCIENTIFIC_KEYS.map((value) => (
-              <button
-                key={value}
-                type="button"
-                className="ws-calculator__key ws-calculator__key--scientific"
-                onClick={() => insert(value)}
-              >
-                {value}
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ----- Teclado principal ----- */}
-      <div className="ws-calculator__keys ws-calculator__keys--basic">
-        {BASIC_KEYS.map((value) => (
-          <button
-            key={value}
-            type="button"
-            className={keyClass(value)}
-            aria-label={t(
-              value === '⌫'
-                ? 'Apagar último caractere'
-                : value === 'AC'
-                  ? 'Limpar expressão'
-                  : value === '='
-                    ? 'Calcular'
-                    : value,
-            )}
-            onClick={() => insert(value)}
+      <div className="ws-calculator__workspace">
+        <main className="ws-calculator__main">
+          {/* === VISOR === */}
+          <section
+            className="ws-calculator__display"
+            aria-label={t('Expressão')}
           >
-            {value}
-          </button>
-        ))}
-      </div>
+            <div className="ws-calculator__display-top">
+              <span className="ws-calculator__display-caption">
+                {t('Expressão')}
+              </span>
+              <span className="ws-calculator__display-status">
+                {scientific ? angle.toUpperCase() : 'STD'}
+              </span>
+            </div>
 
-      {/* ----- Instrução de teclado ----- */}
-      <p className="ws-calculator__hint ws-app__muted">
-        {t('Use Enter para calcular e Escape para limpar. % divide o valor por 100.')}
-      </p>
+            <label
+              className="ws-calculator__expression-label"
+              htmlFor="ws-calculator-expression"
+            >
+              {t('Expressão')}
+            </label>
 
-      {/* ----- Histórico de operações ----- */}
-      {history.length > 0 && (
-        <section className="ws-calculator__history">
-          <div className="ws-calculator__history-header">
-            <h3>{t('Histórico local')}</h3>
-            <button type="button" onClick={clearHistory}>
-              {t('Limpar histórico')}
-            </button>
-          </div>
-          <ol className="ws-calculator__history-list">
-            {history.map((item, index) => (
-              <li key={index}>
+            <input
+              id="ws-calculator-expression"
+              ref={inputRef}
+              className="ws-calculator__expression"
+              value={expression}
+              maxLength={256}
+              inputMode="text"
+              placeholder="0"
+              onChange={(event) => {
+                caretRef.current = null;
+                replaceExpression(event.target.value);
+              }}
+              onKeyDown={(event) => {
+                if (
+                  event.nativeEvent?.isComposing ||
+                  event.isComposing
+                ) return;
+
+                if (event.key === 'Enter' || event.key === '=') {
+                  event.preventDefault();
+                  evaluate();
+                }
+
+                if (event.key === 'Escape') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  insert('AC');
+                }
+              }}
+              autoComplete="off"
+              spellCheck={false}
+            />
+
+            <div className="ws-calculator__result-area">
+              <span className="ws-calculator__result-caption">
+                {t('Resultado')}
+              </span>
+
+              <output
+                aria-live="polite"
+                className="ws-calculator__result"
+                title={formattedResult}
+              >
+                {formattedResult}
+              </output>
+            </div>
+          </section>
+
+          {error && (
+            <p className="ws-calculator__error" role="alert">
+              {t(error)}
+            </p>
+          )}
+
+          {/* === TECLADO === */}
+          <section className="ws-calculator__keyboard">
+            {scientific && (
+              <div className="ws-calculator__scientific">
+                <div className="ws-calculator__scientific-header">
+                  <span className="ws-calculator__section-label">
+                    {t('Modo científico')}
+                  </span>
+
+                  <label className="ws-calculator__angle">
+                    <span>{t('Ângulos')}</span>
+                    <Select
+                      label={t('Ângulos')}
+                      value={angle}
+                      variant="compact"
+                      options={[
+                        { value: 'deg', label: t('Graus') },
+                        { value: 'rad', label: t('Radianos') },
+                      ]}
+                      onChange={(value) => {
+                        setAngle(value);
+                        setResult(null);
+                        setError('');
+                      }}
+                    />
+                  </label>
+                </div>
+
+                <div className="ws-calculator__keys ws-calculator__keys--scientific">
+                  {SCIENTIFIC_KEYS.map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className="ws-calculator__key ws-calculator__key--scientific"
+                      aria-label={value}
+                      onClick={() => insert(value)}
+                    >
+                      {OPERATOR_LABELS[value] ?? value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="ws-calculator__keyboard-heading">
+              <span className="ws-calculator__section-label">
+                {t('Calculadora')}
+              </span>
+              <span className="ws-calculator__keyboard-meta">
+                {scientific ? 'SCI' : 'STD'}
+              </span>
+            </div>
+
+            <div className="ws-calculator__keys ws-calculator__keys--basic">
+              {BASIC_KEYS.map((value) => (
                 <button
+                  key={value}
                   type="button"
-                  onClick={() => restoreHistoryExpression(item.expression)}
+                  className={keyClass(value)}
+                  aria-label={t(
+                    value === '⌫'
+                      ? 'Apagar último caractere'
+                      : value === 'AC'
+                        ? 'Limpar expressão'
+                        : value === '='
+                          ? 'Calcular'
+                          : value,
+                  )}
+                  onClick={() => insert(value)}
                 >
-                  {item.expression} ={' '}
-                  {item.result.toLocaleString(locale, { maximumSignificantDigits: 14 })}
+                  {value === '⌫' ? (
+                    <>
+                      <Delete size={20} strokeWidth={1.8} aria-hidden="true" />
+                      <span className="ws-calculator__sr-only">⌫</span>
+                    </>
+                  ) : (
+                    value
+                  )}
                 </button>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
+              ))}
+            </div>
+          </section>
+
+          <p className="ws-calculator__hint ws-app__muted">
+            {t('Use Enter para calcular e Escape para limpar. % divide o valor por 100.')}
+          </p>
+        </main>
+
+        {/* === HISTÓRICO === */}
+        <aside className="ws-calculator__history-panel">
+          <div className="ws-calculator__history-header">
+            <div className="ws-calculator__history-title">
+              <History size={17} aria-hidden="true" />
+              <h3>{t('Histórico local')}</h3>
+              <span className="ws-calculator__history-count">
+                {history.length}
+              </span>
+            </div>
+
+            {history.length > 0 && (
+              <button
+                type="button"
+                className="ws-calculator__clear-history"
+                onClick={clearHistory}
+              >
+                {t('Limpar histórico')}
+              </button>
+            )}
+          </div>
+
+          {history.length > 0 ? (
+            <ol className="ws-calculator__history-list">
+              {history.map((item, index) => (
+                <li key={index}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      restoreHistoryExpression(item.expression)
+                    }
+                  >
+                    {item.expression} ={' '}
+                    {formatResult(item.result, locale)}
+                  </button>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="ws-calculator__history-empty">
+              <History size={24} strokeWidth={1.5} aria-hidden="true" />
+              <p>{t('Histórico local')}</p>
+                <span>{t('As operações realizadas aparecerão aqui.')}</span>
+            </div>
+          )}
+        </aside>
+      </div>
     </article>
   );
 }

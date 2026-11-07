@@ -32,7 +32,7 @@
 | 18 | Editor e visualizador de arquivos | **Concluída e aprovada pelo proprietário** |
 | 19 | Contato e solicitações de horário | **Concluída e aprovada pelo proprietário** |
 | 20 | Wally e assistência de navegação | **Concluída e validada pelo proprietário** |
-| 21 | Terminal e Calculadora | Não iniciada |
+| 21 | Terminal e Calculadora | **Concluída e validada pelo proprietário** |
 | 22 | Jogos, recordes e rankings | Não iniciada |
 | 23 | Configurações e personalização | Não iniciada |
 | 24 | Notificações, painéis e widgets | Não iniciada |
@@ -946,3 +946,44 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Alterações pendentes de revisão final e versionamento.
 - Nenhum commit, push ou deploy realizado pelo assistente.
 - **Próxima etapa prevista: 21 — Terminal e Calculadora.**
+
+## Etapa 21 — Terminal e Calculadora
+
+**Estado:** concluída e validada pelo proprietário em 07/11/2026.
+
+### Trabalhos realizados
+
+- Correção do autocompletar de arquivos e diretórios do Terminal.
+- Validação de argumentos adicionais nos comandos `theme` e `lang`.
+- Correção da apresentação do histórico de comandos.
+- Revisão da proteção de credenciais e autenticação administrativa.
+- Reformulação completa da interface da Calculadora.
+- Preservação do motor matemático, incluindo funções científicas e precedência.
+- Modernização do teclado, visor e histórico de cálculos.
+- Substituição do seletor nativo pelo componente compartilhado `Select`.
+- Adequação dos testes automatizados à nova interface.
+- Atualização das traduções em português e inglês.
+
+### Validações
+
+- `npm run lint` — aprovado, conforme confirmação do proprietário.
+- `npm run test` — aprovado, conforme confirmação do proprietário.
+- `npm run build` — aprovado, conforme confirmação do proprietário.
+- Correções do Terminal validadas funcionalmente pelo proprietário.
+- Interface da Calculadora aprovada pelo proprietário.
+- Nenhuma execução automatizada de testes realizada pelo assistente.
+
+### Decisões
+
+- Preservar o motor matemático existente.
+- Reutilizar componentes visuais compartilhados do WS OS.
+- Manter o histórico de cálculos no armazenamento local.
+- Preservar a proteção de credenciais do Terminal.
+- Não adicionar dependências novas.
+
+### Encerramento
+
+- Terminal e Calculadora aprovados pelo proprietário.
+- Alterações locais aguardando versionamento.
+- Nenhum commit, push ou deploy realizado pelo assistente.
+- **Próxima etapa prevista: 22 — Jogos, recordes e rankings.**
