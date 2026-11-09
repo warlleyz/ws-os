@@ -52,12 +52,14 @@
 }
 
 /* === ATUALIZAÇÃO DA CLASSIFICAÇÃO === */
-.ws-games .ws-ranking__refresh {
+.ws-games.ws-app button.ws-ranking__refresh {
     display: grid;
     flex: 0 0 34px;
     place-items: center;
     width: 34px;
     height: 34px;
+    min-height: 34px;
+    min-width: 34px;
     padding: 0;
     border: 1px solid var(--border-default);
     border-radius: 8px;
@@ -67,6 +69,12 @@
     transition:
         border-color 160ms ease,
         color 160ms ease;
+}
+
+.ws-games.ws-app button.ws-ranking__refresh svg {
+    display: block;
+    flex: none;
+    margin: 0;
 }
 
 .ws-games .ws-ranking__refresh:hover:not(:disabled) {
@@ -424,9 +432,24 @@
 }
 
 .ws-ranking__notice {
+    flex-direction: column;
     border: 1px solid color-mix(in srgb, #d9a44f 25%, transparent);
     background: color-mix(in srgb, #d9a44f 8%, transparent);
     color: var(--text-secondary);
+}
+
+.ws-ranking__notice p {
+    margin: 0;
+}
+
+.ws-games .ws-ranking__notice button {
+    min-height: 36px;
+    padding: 7px 10px;
+    border: 1px solid var(--border-default);
+    border-radius: 6px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
 }
 
 .ws-ranking__message {
@@ -502,4 +525,4 @@
     .ws-games .ws-ranking__submit {
         transition: none;
     }
-}   
+}

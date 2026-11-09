@@ -1,5 +1,5 @@
 import { requireAdministrator } from './auth.js';
-import { database, domainFailure } from '../_lib/backend.js';
+import { database, domainFailure, pageOffset } from '../_lib/backend.js';
 import { readBoundedJson, protectPublicWrite } from '../_lib/publicWriteProtection.js';
 import { RANKING_GAME_LIMITS } from '../../src/services/publicContentContract.js';
 
@@ -10,6 +10,9 @@ const MAX_SCORES = RANKING_GAME_LIMITS;
 const PUBLIC_ERRORS = [
   'INVALID_SCORE',
   'INVALID_ALIAS',
+  'ALIAS_TAKEN',
+  'SCORE_NOT_IMPROVED',
+  'INVALID_VISITOR',
   'INVALID_BODY',
   'INVALID_CONTENT_TYPE',
   'BODY_TOO_LARGE',
@@ -48,11 +51,13 @@ const publicFailure = (error) => {
       ? 413
       : code === 'RATE_LIMITED'
         ? 429
-        : code.startsWith('INVALID')
-          ? 400
-          : code.startsWith('VERIFICATION')
-            ? 403
-            : 503;
+        : code === 'ALIAS_TAKEN' || code === 'SCORE_NOT_IMPROVED'
+          ? 409
+          : code.startsWith('INVALID')
+            ? 400
+            : code.startsWith('VERIFICATION')
+              ? 403
+              : 503;
 
   return json(
     {
@@ -76,7 +81,7 @@ export function validateScore(input) {
 
   const alias = typeof input.alias === 'string' ? input.alias.trim() : '';
 
-  if (!/^[\p{L}\p{N} _-]{2,24}$/u.test(alias)) {
+  if (alias.length < 2 || alias.length > 24 || !/^[\p{L}\p{N} _-]+$/u.test(alias)) {
     throw Error('INVALID_ALIAS');
   }
 
@@ -90,10 +95,11 @@ export function validateScore(input) {
 /* === OPERAÇÕES ADMINISTRATIVAS === */
 
 /* ----- LISTAGEM ADMINISTRATIVA ----- */
-async function listAdministrativeScores(env) {
+async function listAdministrativeScores(request, env) {
+  const offset = pageOffset(request);
   const rows = await database(
     env,
-    'game_scores?select=game,visitor_hash,alias,score,created_at&order=created_at.desc&limit=100',
+    'game_scores?select=game,visitor_hash,alias,score,created_at&order=created_at.desc,game.asc,visitor_hash.asc&limit=100&offset=' + offset,
     { service: true },
   );
 
@@ -102,6 +108,7 @@ async function listAdministrativeScores(env) {
   }
 
   return json({
+    nextOffset: rows.length === 100 ? offset + 100 : null,
     scores: rows.map((row) => ({
       game: row.game,
       visitorHash: row.visitor_hash,
@@ -166,7 +173,7 @@ async function handleAdministrativeRequest(request, env) {
 
   try {
     if (request.method === 'GET') {
-      return await listAdministrativeScores(env);
+      return await listAdministrativeScores(request, env);
     }
 
     return await deleteAdministrativeScore(request, env);
@@ -224,7 +231,15 @@ async function submitPublicScore(request, env) {
   const input = await readBoundedJson(request);
   const score = validateScore(input);
 
-  const visitor = await protectPublicWrite(request, env, input.turnstileToken, 'rankings');
+  if (typeof input.visitorId !== 'string' || !/^[a-f0-9]{32}$/.test(input.visitorId))
+    throw Error('INVALID_VISITOR');
+
+  await protectPublicWrite(request, env, input.turnstileToken, 'rankings');
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(`${env.PUBLIC_WRITE_HASH_SALT}:ranking-browser:${input.visitorId}`),
+  );
+  const visitor = Array.from(new Uint8Array(digest), (value) => value.toString(16).padStart(2, '0')).join('');
 
   const url = new URL('/rest/v1/rpc/submit_game_score', env.SUPABASE_URL);
 
@@ -244,10 +259,35 @@ async function submitPublicScore(request, env) {
   });
 
   if (!response.ok) {
+    if (response.status === 409) {
+      const failure = await response.json().catch(() => null);
+
+      if (
+        failure?.code === '23505' &&
+        typeof failure.message === 'string' &&
+        failure.message.includes('game_scores_game_alias_unique')
+      ) {
+        throw Error('ALIAS_TAKEN');
+      }
+    }
+
+    console.error('[Rankings] Falha no RPC de pontuação', { status: response.status });
     throw Error('RANKINGS_UNAVAILABLE');
   }
 
-  return json({ accepted: true }, 201);
+  const params = new URLSearchParams({
+    select: 'alias,score',
+    game: `eq.${score.game}`,
+    visitor_hash: `eq.${visitor}`,
+    limit: '1',
+  });
+  const rows = await database(env, `game_scores?${params}`, { service: true });
+  if (!Array.isArray(rows) || rows.length !== 1) throw Error('RANKINGS_UNAVAILABLE');
+  const stored = validateScore({ game: score.game, ...rows[0] });
+  if (stored.alias !== score.alias) throw Error('SCORE_NOT_IMPROVED');
+  if (stored.score < score.score) throw Error('RANKINGS_UNAVAILABLE');
+
+  return json({ accepted: true, score: stored.score }, 201);
 }
 
 /* ----- ROTEAMENTO PÚBLICO ----- */
@@ -263,6 +303,12 @@ async function handlePublicRequest(request, env) {
 
     return await submitPublicScore(request, env);
   } catch (error) {
+    if (!PUBLIC_ERRORS.includes(error?.message))
+      console.error('[Rankings] Falha de serviço público', {
+        operation: request.method === 'POST' ? 'submit' : 'list',
+        reason: ['PROTECTION_UNAVAILABLE', 'SERVICE_UNAVAILABLE', 'RANKINGS_UNAVAILABLE'].includes(error?.message)
+          ? error.message : 'UNEXPECTED_FAILURE',
+      });
     return publicFailure(error);
   }
 }

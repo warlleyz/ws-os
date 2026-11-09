@@ -52,7 +52,9 @@ function getRankLabel(rank) {
 function SolitaireCard({
     card,
     selected = false,
+    disabled = false,
     onClick,
+    onPointerDown,
     style,
 }) {
     const suit = SUITS[card.suit];
@@ -68,10 +70,13 @@ function SolitaireCard({
             ].filter(Boolean).join(' ')}
             style={style}
             onClick={onClick}
+            onPointerDown={onPointerDown}
+            onDragStart={(event) => event.preventDefault()}
+            disabled={disabled || !card.faceUp}
             aria-pressed={selected}
             aria-label={
                 card.faceUp
-                    ? t(`Carta ${getRankLabel(card.rank)} de ${t(suit.label)}`)
+                    ? t('Carta {0} de {1}').replace('{0}', getRankLabel(card.rank)).replace('{1}', t(suit.label))
                     : t('Carta virada para baixo')
             }
         >
@@ -154,6 +159,10 @@ export default function SolitaireGame({
     /* ----- ESTADO DA PARTIDA ----- */
     const [game, setGame] = useState(createSolitaireGame);
     const [selection, setSelection] = useState(null);
+    const [drag, setDrag] = useState(null);
+    const dragRef = useRef(null);
+    const tableRef = useRef(null);
+    const suppressClickRef = useRef(false);
     const onHeaderChangeRef = useRef(onHeaderChange);
 
     const finished = game.status === 'won';
@@ -221,6 +230,10 @@ export default function SolitaireGame({
 
     /* === SELEÇÃO DE CARTAS === */
     const handleCardClick = useCallback((source, card) => {
+        if (suppressClickRef.current) {
+            suppressClickRef.current = false;
+            return;
+        }
         if (
             paused ||
             game.status !== 'playing' ||
@@ -256,6 +269,47 @@ export default function SolitaireGame({
             cardId: card.id,
         });
     }, [game.status, paused, selection, moveTo]);
+
+    /* === ARRASTE POR MOUSE, CANETA E TOQUE === */
+    function beginDrag(event, source, card) {
+        suppressClickRef.current = false;
+        if (paused || game.status !== 'playing' || !card.faceUp || event.button !== 0 || event.isPrimary === false) return;
+        const rect = event.currentTarget.getBoundingClientRect();
+        const pile = source.type === 'tableau' ? game.tableau[source.index]
+            : source.type === 'waste' ? game.waste : game.foundations[source.index];
+        dragRef.current = { source, cardId: card.id, pointerId: event.pointerId,
+            startX: event.clientX, startY: event.clientY, offsetX: event.clientX - rect.left,
+            offsetY: event.clientY - rect.top, cards: pile.slice(pile.findIndex((item) => item.id === card.id)),
+            element: event.currentTarget, moved: false };
+        event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    function updateDrag(event) {
+        const current = dragRef.current;
+        if (!current || current.pointerId !== event.pointerId || paused || game.status !== 'playing') return;
+        if (!current.moved && Math.hypot(event.clientX - current.startX, event.clientY - current.startY) < 6) return;
+        current.moved = true;
+        event.preventDefault();
+        const rect = tableRef.current.getBoundingClientRect();
+        setDrag({ cards: current.cards, x: event.clientX - rect.left - current.offsetX,
+            y: event.clientY - rect.top - current.offsetY });
+    }
+
+    function finishDrag(event, cancelled = false) {
+        const current = dragRef.current;
+        if (!current || (event.pointerId !== undefined && current.pointerId !== event.pointerId)) return;
+        dragRef.current = null;
+        setDrag(null);
+        if (current.element.hasPointerCapture(current.pointerId)) current.element.releasePointerCapture(current.pointerId);
+        if (!current.moved) return;
+        suppressClickRef.current = true;
+        if (cancelled || paused || game.status !== 'playing') return;
+        const target = tableRef.current.ownerDocument.elementFromPoint(event.clientX, event.clientY)?.closest('[data-solitaire-target]');
+        if (!target || !tableRef.current.contains(target)) return;
+        setGame((state) => moveSolitaireCards(state, current.source,
+            { type: target.dataset.solitaireTarget, index: Number(target.dataset.pileIndex) }, current.cardId));
+        setSelection(null);
+    }
 
     /* === CABEÇALHO COMPARTILHADO === */
     const headerActions = useMemo(() => (
@@ -323,7 +377,23 @@ export default function SolitaireGame({
             </div>
 
             {/* === MESA DE JOGO === */}
-            <div className="ws-solitaire-game__table">
+            <div className="ws-solitaire-game__table" ref={tableRef}
+                onPointerMove={updateDrag}
+                onPointerUp={(event) => finishDrag(event)}
+                onPointerCancel={(event) => finishDrag(event, true)}
+                onLostPointerCapture={(event) => finishDrag(event, true)}
+                onKeyDown={(event) => { if (event.key === 'Escape' && dragRef.current) { event.stopPropagation(); finishDrag(event, true); } }}
+            >
+                {drag && !paused && game.status === 'playing' && (
+                    <div className="ws-solitaire-game__drag-preview" aria-hidden="true" style={{ left: drag.x, top: drag.y }}>
+                        {drag.cards.map((card, index) => (
+                            <span key={card.id} className={card.color === 'red' ? 'is-red' : ''}
+                                style={{ transform: `translateY(${index * 20}px)` }}>
+                                {getRankLabel(card.rank)} {SUITS[card.suit].symbol}
+                            </span>
+                        ))}
+                    </div>
+                )}
                 {/* ----- ESTOQUE, DESCARTE E BASES ----- */}
                 <div className="ws-solitaire-game__top-row">
                     <div className="ws-solitaire-game__pile">
@@ -357,6 +427,8 @@ export default function SolitaireGame({
                             {wasteTop && (
                                 <SolitaireCard
                                     card={wasteTop}
+                                    onPointerDown={(event) => beginDrag(event, { type: 'waste', index: 0 }, wasteTop)}
+                                    disabled={interactionDisabled}
                                     selected={
                                         selection?.cardId === wasteTop.id
                                     }
@@ -377,12 +449,16 @@ export default function SolitaireGame({
                             return (
                                 <div
                                     className="ws-solitaire-game__pile"
+                                    data-solitaire-target="foundation"
+                                    data-pile-index={index}
                                     key={index}
                                 >
                                     <div className="ws-solitaire-game__slot">
                                         {topCard ? (
                                             <SolitaireCard
                                                 card={topCard}
+                                                onPointerDown={(event) => beginDrag(event, { type: 'foundation', index }, topCard)}
+                                                disabled={interactionDisabled}
                                                 selected={
                                                     selection?.cardId ===
                                                     topCard.id
@@ -422,6 +498,8 @@ export default function SolitaireGame({
                     {game.tableau.map((cards, columnIndex) => (
                         <div
                             className="ws-solitaire-game__column"
+                            data-solitaire-target="tableau"
+                            data-pile-index={columnIndex}
                             key={columnIndex}
                         >
                             <button
@@ -444,6 +522,8 @@ export default function SolitaireGame({
                                     <SolitaireCard
                                         key={card.id}
                                         card={card}
+                                        onPointerDown={(event) => beginDrag(event, { type: 'tableau', index: columnIndex }, card)}
+                                        disabled={interactionDisabled}
                                         style={{
                                             '--card-index': cardIndex,
                                             '--stack-count': cards.length,
@@ -514,7 +594,7 @@ export default function SolitaireGame({
             <div className="ws-solitaire-game__footer">
                 <span>
                     <Layers3 size={14} aria-hidden="true" />
-                    {t('Selecione uma carta e depois clique no destino.')}
+                    {t('Arraste uma carta até o destino ou selecione a carta e toque no destino.')}
                 </span>
 
                 {selection && (

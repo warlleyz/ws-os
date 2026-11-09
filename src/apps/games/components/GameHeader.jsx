@@ -25,7 +25,7 @@ export default function GameHeader({
                     aria-label={t('Voltar ao catálogo')}
                     title={t('Voltar ao catálogo')}
                 >
-                    <ArrowLeft size={18} aria-hidden="true" />
+                    <ArrowLeft size={22} strokeWidth={2} aria-hidden="true" />
                 </button>
 
                 <div className="ws-games__header-info">
@@ -41,7 +41,7 @@ export default function GameHeader({
                         )}
 
                         {status && (
-                            <span className="ws-games__header-status">
+                            <span className="ws-games__header-status" role="status" aria-atomic="true">
                                 <span
                                     className="ws-games__header-status-dot"
                                     aria-hidden="true"

@@ -70,3 +70,13 @@ A configuração do ambiente publicado é independente e exige alteração no pr
 - O contexto do Gemini é uma seleção do conteúdo público versionado, não inclui arquivos pessoais, segredos, sessão administrativa ou rascunhos. Não consulta automaticamente o catálogo dinâmico do GitHub nem dados privados. O visitante é orientado a não enviar dados sensíveis.
 - O Gemini é o único provedor de respostas conversacionais. Sem configuração, sem verificação ou após falhas remotas, o Wally apresenta o estado de indisponibilidade correspondente, sem fallback local automático. Respostas remotas não concedem privilégios nem executam ações administrativas.
 - A configuração e os testes locais não confirmam o SHA publicado, a disponibilidade do modelo, o faturamento ou os segredos da Cloudflare. A homologação remota depende do ambiente do proprietário.
+
+## Jogos e rankings — Etapa 22
+
+- Os cinco jogos e seus recordes locais funcionam sem backend. O ranking público de Snake e Flappy exige `VITE_RANKINGS_ENABLED=true`, `VITE_TURNSTILE_SITE_KEY`, `RANKINGS_ENABLED=true`, configuração Supabase, `TURNSTILE_SECRET_KEY`, `PUBLIC_WRITE_HASH_SALT` e D1 com a tabela `public_write_limits`.
+- `npm run dev` executa apenas o frontend, sem encaminhamento das APIs ao Worker. Para testar a integração, executar o build atualizado e o Worker conforme as instruções acima, utilizando o endereço do Worker e credenciais do ambiente de homologação. A execução local do Worker não isola automaticamente o Supabase apontado em `.dev.vars`.
+- O cliente envia `visitorId` aleatório de 32 caracteres hexadecimais, mantido em `ws-os:visitor-id`. O Worker valida e deriva um hash salgado para a chave da pontuação. O limite de requisições continua vinculado ao IP, independentemente dessa identidade.
+- A confirmação do envio inclui `{ accepted: true, score }`, somente após consulta da pontuação persistida. Pontuação igual reenvia com segurança o mesmo registro; pontuação superior já existente com o mesmo apelido é informada ao visitante. Alteração de apelido sem superar a marca existente retorna `SCORE_NOT_IMPROVED`.
+- A reserva de apelidos depende do índice da migração `20261107180000_etapa22_ranking_alias_unico.sql`. Verificar duplicatas e homologar a migração antes da publicação; ela não foi aplicada nesta etapa local.
+- Preservar registros históricos por IP. Sua vinculação a navegadores novos não pode ser recuperada automaticamente. Limpar os dados do navegador também elimina a identidade local; isso não remove o registro público.
+- Publicar frontend e Worker compatíveis juntos. Testes locais não confirmam migrações, variáveis nem disponibilidade do ambiente publicado.

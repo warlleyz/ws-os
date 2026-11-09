@@ -1,5 +1,6 @@
 import { executeJsonRequest } from '../../../services/httpRequestContract';
 import { RANKING_GAME_LIMITS } from '../../../services/publicContentContract';
+import { getVisitorId } from '../../../services/visitorIdentityService';
 
 import {
     isValidRankingScore,
@@ -118,6 +119,7 @@ function validateRankingSubmission({
         alias: alias.trim(),
         score,
         turnstileToken,
+        visitorId: getVisitorId(),
     };
 }
 
@@ -157,15 +159,25 @@ export async function submitGameRanking({
     );
 
     if (!response.ok) {
-        throw new Error('RANKING_UNAVAILABLE');
+        if (
+            response.status === 409 &&
+            ['ALIAS_TAKEN', 'SCORE_NOT_IMPROVED'].includes(payload?.error)
+        ) {
+            throw new Error(payload.error);
+        }
+
+        throw Object.assign(new Error('RANKING_UNAVAILABLE'), {
+            definitive: response.status >= 400 && response.status < 500,
+        });
     }
 
-    if (payload?.accepted !== true) {
+    if (payload?.accepted !== true || !isValidPublicScore(gameId, payload.score) || payload.score < score) {
         throw new Error('RANKING_UNCONFIRMED');
     }
 
     return {
         accepted: true,
+        score: payload.score,
     };
 }
 

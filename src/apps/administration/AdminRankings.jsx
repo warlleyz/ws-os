@@ -10,6 +10,7 @@ async function loadPage(options) {
   if (
     !Array.isArray(result?.scores) ||
     result.scores.length > 100 ||
+    !(result.nextOffset === null || (Number.isSafeInteger(result.nextOffset) && result.nextOffset > options.offset)) ||
     result.scores.some(
       (row) =>
         !['snake', 'flappy'].includes(row.game) ||
@@ -20,7 +21,7 @@ async function loadPage(options) {
     )
   )
     throw Error('INVALID_SCORES');
-  return { items: result.scores, nextOffset: null };
+  return { items: result.scores, nextOffset: result.nextOffset };
 }
 /* === Moderação explícita das pontuações existentes, sem confiar no navegador === */
 export default function AdminRankings({ authorized, instanceId }) {
@@ -64,6 +65,16 @@ export default function AdminRankings({ authorized, instanceId }) {
           </li>
         ))}
       </ul>
+      {resource.offset > 0 && (
+        <button type="button" disabled={!authorized || resource.busy} onClick={() => resource.load(0)}>
+          {t('Atualizar lista')}
+        </button>
+      )}
+      {resource.nextOffset !== null && (
+        <button type="button" disabled={!authorized || resource.busy} onClick={() => resource.load(resource.nextOffset)}>
+          {t('Próxima página')}
+        </button>
+      )}
     </section>
   );
 }

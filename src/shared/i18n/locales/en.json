@@ -1,5 +1,15 @@
 {
   "common": {
+    "Arraste uma carta até o destino ou selecione a carta e toque no destino.": "Drag a card to its destination or select the card and tap the destination.",
+    "Use as setas ou WASD para mover, Espaço ou P para pausar e R para reiniciar.": "Use the arrow keys or WASD to move, Space or P to pause, and R to restart.",
+    "Pressione Espaço ou toque no cenário para voar. Use P para pausar e R para reiniciar.": "Press Space or tap the scene to flap. Use P to pause and R to restart.",
+    "Este apelido já está em uso neste jogo. Escolha outro.": "This nickname is already in use for this game. Choose another one.",
+    "Não foi possível confirmar o envio. Seu recorde local está preservado.": "Submission could not be confirmed. Your local high score is preserved.",
+    "Não foi possível enviar o recorde. Verifique os dados e tente novamente.": "Your high score could not be submitted. Check the details and try again.",
+    "O recorde público fica vinculado a este navegador. Limpar os dados locais cria uma nova identidade.": "Your public high score is linked to this browser. Clearing local data creates a new identity.",
+    "Seu recorde público já é maior que esta pontuação.": "Your public high score is already higher than this score.",
+    "Seu recorde público é maior ou igual. Supere-o para alterar o apelido.": "Your public high score is higher or equal. Beat it to change your nickname.",
+    "Cancelar nova tentativa": "Cancel retry",
     "Flappy Bird": "Flappy Bird",
     "Snake": "Snake",
     "echo <texto>": "echo <text>",

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useLocale } from '../../shared/i18n/i18n';
 import useAppBack from '../../shared/hooks/useAppBack';
@@ -38,6 +38,36 @@ export default function Games({ instance, onWindowResize }) {
 
   /* ----- NAVEGAÇÃO ----- */
   const [selected, setSelected] = useState(null);
+  const rootRef = useRef(null);
+  const resizeRef = useRef(onWindowResize);
+
+  useEffect(() => { resizeRef.current = onWindowResize; }, [onWindowResize]);
+
+  /* === ENQUADRAMENTO DA JANELA APÓS A MONTAGEM === */
+  useEffect(() => {
+    const root = rootRef.current;
+    const content = root?.querySelector('.ws-games__play-content');
+    const desktopWindow = root?.closest('.desktop-window');
+    if (!selected || !content || !desktopWindow || !resizeRef.current) return;
+    let frame = 0, lastHeight = 0;
+    function fit() {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        if (desktopWindow.matches('.desktop-window--maximized, .desktop-window--left, .desktop-window--right')) return;
+        const overflow = content.scrollHeight - content.clientHeight;
+        if (overflow <= 2) return;
+        const height = Math.ceil(desktopWindow.getBoundingClientRect().height + overflow + 2);
+        if (height === lastHeight) return;
+        lastHeight = height;
+        resizeRef.current?.({ width: GAMES_CATALOG.find((game) => game.id === selected).window.width, height });
+      });
+    }
+    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(fit) : null;
+    observer?.observe(content);
+    if (content.firstElementChild) observer?.observe(content.firstElementChild);
+    fit();
+    return () => { observer?.disconnect(); window.cancelAnimationFrame(frame); };
+  }, [selected]);
 
   /* ----- JOGO SELECIONADO ----- */
   const current = GAMES_CATALOG.find(
@@ -81,7 +111,7 @@ export default function Games({ instance, onWindowResize }) {
 
   /* === INTERFACE DO APLICATIVO === */
   return (
-    <article className="desktop-window__content ws-app ws-games">
+    <article className="desktop-window__content ws-app ws-games" ref={rootRef}>
       {current && Component ? (
         <GameLayout
           game={current}

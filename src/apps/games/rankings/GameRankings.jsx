@@ -236,7 +236,7 @@ export default function GameRankings({
     setMessage('');
 
     try {
-      await submitGameRanking({
+      const result = await submitGameRanking({
         ...submission,
         turnstileToken: token,
         signal: controller.signal,
@@ -246,7 +246,7 @@ export default function GameRankings({
         attemptRef.current = null;
 
         setUncertain(false);
-        setMessage('Recorde enviado.');
+        setMessage(result.score > submission.score ? 'Seu recorde público já é maior que esta pontuação.' : 'Recorde enviado.');
 
         writeRef.current = null;
 
@@ -254,9 +254,15 @@ export default function GameRankings({
       }
     } catch (error) {
       if (!controller.signal.aborted) {
+        const aliasTaken = error.message === 'ALIAS_TAKEN';
+        const notImproved = error.message === 'SCORE_NOT_IMPROVED';
+
+        const knownFailure =
+          aliasTaken || notImproved || error.definitive ||
+          error.message === 'INVALID_RANKING_SUBMISSION';
+
         const mayHaveWritten =
-          previousUncertain ||
-          error.message !== 'INVALID_RANKING_SUBMISSION';
+          previousUncertain || !knownFailure;
 
         if (!mayHaveWritten) {
           attemptRef.current = null;
@@ -265,9 +271,13 @@ export default function GameRankings({
         setUncertain(mayHaveWritten);
 
         setMessage(
-          mayHaveWritten
-            ? 'Não foi possível confirmar o envio. Seu recorde local está preservado.'
-            : 'Não foi possível enviar o recorde. Verifique os dados e tente novamente.',
+          notImproved && !previousUncertain
+            ? 'Seu recorde público é maior ou igual. Supere-o para alterar o apelido.'
+            : aliasTaken && !previousUncertain
+            ? 'Este apelido já está em uso neste jogo. Escolha outro.'
+            : mayHaveWritten
+              ? 'Não foi possível confirmar o envio. Seu recorde local está preservado.'
+              : 'Não foi possível enviar o recorde. Verifique os dados e tente novamente.',
         );
       }
     } finally {
@@ -390,6 +400,10 @@ export default function GameRankings({
                 )}
               </p>
 
+              <p className="ws-ranking__form-description">
+                {t('O recorde público fica vinculado a este navegador. Limpar os dados locais cria uma nova identidade.')}
+              </p>
+
               {/* ----- APELIDO ----- */}
               <label className="ws-ranking__field">
                 <span>{t('Apelido público')}</span>
@@ -422,11 +436,20 @@ export default function GameRankings({
               </div>
 
               {uncertain && (
-                <p className="ws-ranking__notice" role="status">
+                <div className="ws-ranking__notice" role="status">
+                  <p>
                   {t(
                     'O envio não foi confirmado. Uma nova tentativa utilizará o mesmo apelido e pontuação.',
                   )}
-                </p>
+                  </p>
+                  <button type="button" disabled={submitting} onClick={() => {
+                    attemptRef.current = null;
+                    setUncertain(false);
+                    setMessage('');
+                  }}>
+                    {t('Cancelar nova tentativa')}
+                  </button>
+                </div>
               )}
 
               {/* ----- VERIFICAÇÃO ----- */}

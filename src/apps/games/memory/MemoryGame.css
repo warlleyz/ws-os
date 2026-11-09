@@ -293,3 +293,6 @@
         transition: none;
     }
 }
+/* === CARTAS ADAPTADAS À ALTURA === */
+.ws-memory-game__board { max-width: min(620px, max(260px, calc((100cqh - 175px) * 1.5))); }
+.ws-games.ws-app button.ws-memory-game__card { min-height: 0; padding: 0; touch-action: manipulation; }

@@ -33,7 +33,7 @@
 | 19 | Contato e solicitações de horário | **Concluída e aprovada pelo proprietário** |
 | 20 | Wally e assistência de navegação | **Concluída e validada pelo proprietário** |
 | 21 | Terminal e Calculadora | **Concluída e validada pelo proprietário** |
-| 22 | Jogos, recordes e rankings | Não iniciada |
+| 22 | Jogos, recordes e rankings | Concluída e aprovada pelo proprietário; ranking em produção pendente de teste |
 | 23 | Configurações e personalização | Não iniciada |
 | 24 | Notificações, painéis e widgets | Não iniciada |
 | 25 | Administração e gerenciamento de conteúdo | Não iniciada |
@@ -987,3 +987,67 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Alterações locais aguardando versionamento.
 - Nenhum commit, push ou deploy realizado pelo assistente.
 - **Próxima etapa prevista: 22 — Jogos, recordes e rankings.**
+
+## Etapa 22 — Jogos, recordes e rankings
+
+**Estado em 08/11/2026:** implementação local preparada para teste do proprietário. A etapa ainda não está aprovada; a Etapa 23 não foi iniciada.
+
+### Trabalhos realizados
+
+- Preservadas as alterações locais existentes no layout de Jogos, cabeçalho, Snake e tratamento de apelidos duplicados, incluindo a migração SQL já presente.
+- Revisados catálogo, componentes compartilhados, cinco motores, suspensão, recordes locais e transporte do ranking. Mantidos os cinco jogos e as dificuldades atuais para preservar a comparabilidade dos recordes; nenhum jogo, nível ou dependência adicionado.
+- Snake: preservada a fila de até duas direções, bloqueio de inversão, limite de 397 pontos e melhorias visuais existentes. Atalhos isolados de campos, botões, menus e janelas inativas; foco retorna ao tabuleiro ao iniciar ou reiniciar. Instruções de pausa e reinício incluídas.
+- Flappy: mesma proteção de teclado, inclusive modificadores e composição de texto; cenário focalizável, foco ao iniciar/reiniciar e instruções de atalhos completas. Física e dificuldade preservadas.
+- Memória: verificados oito pares, contagem de tentativas, bloqueio de repetição, pausa do temporizador de erro, vitória e reinício.
+- Campo Minado: verificados primeiro clique seguro, dez minas, bandeiras, cronômetro, vitória e derrota. Rótulos de células usam os templates traduzidos existentes.
+- Paciência: verificados distribuição, bases, compra, sequência final de vitória e reinício. Cartas ficam desabilitadas quando viradas para baixo ou fora de uma partida ativa.
+- Estado do cabeçalho anunciado por região de status. Mensagens adicionadas e mensagens dinâmicas de ranking cobertas em pt-BR/en.
+- Recordes locais: verificados os cinco jogos, melhores resultados, recarregamento, sincronização entre abas, limpeza e falha de armazenamento sem perda do estado da sessão. O mecanismo de persistência existente foi preservado.
+- Ranking: identidade passa a derivar do identificador aleatório persistido no navegador, com hash salgado no servidor. O IP continua sendo usado apenas para a proteção contra abuso, mantendo cinco tentativas por 15 minutos por IP/escopo.
+- A API confere a pontuação persistida após o RPC; não confirma como novo recorde uma troca de apelido que o banco não efetuou. Cliente valida a confirmação e distingue conflito conhecido de resultado incerto. Uma tentativa incerta pode ser cancelada explicitamente sem apagar o recorde local.
+- Moderação dos rankings agora percorre páginas de 100 registros com ordenação determinística e proteção administrativa preservada.
+
+### Validação automatizada
+
+- `npm test`: 619 testes aprovados, nenhuma falha. `npm run lint`: aprovado. `npm run build`: aprovado, com o aviso preexistente de chunks grandes reservado à Etapa 30. Verificação final do diff sem erros de whitespace.
+- Testes adicionais em `tests/core/games-stage22.test.cjs` e `tests/core/games-ui.test.cjs`: ciclo dos cinco jogos, cancelamento de temporizadores, aba oculta/minimização, isolamento dos atalhos, vitórias, persistência, identidade de ranking, conflitos, confirmação e paginação.
+- Os testes de interface utilizam o ambiente controlado existente; não equivalem a teste visual ou de DOM real.
+- Tentativa de acesso a `http://127.0.0.1:5173/` pelo navegador integrado falhou com `net::ERR_CONNECTION_TIMED_OUT`. A validação visual e de toque permanece pendente para o proprietário.
+
+### Banco, compatibilidade e limites
+
+- A migração local `database/migrations/20261107180000_etapa22_ranking_alias_unico.sql` foi preservada e não executada. Ela verifica duplicatas antes de criar o índice único por jogo e apelido, ignorando caixa e espaços nas extremidades. Não exclui registros para resolver conflitos.
+- A unicidade de apelidos exige que esse índice exista no banco do ambiente testado. Os testes simulam o erro de unicidade; não comprovam aplicação da migração no ambiente remoto.
+- Registros antigos vinculados ao IP permanecem intactos. Não é possível atribuí-los automaticamente a um navegador com segurança; apelidos antigos podem continuar ocupados. A eventual reconciliação exige revisão administrativa, sem exclusão automática.
+- Limpar os dados locais ou usar outro navegador cria outra identidade anônima. O ranking continua recreativo, baseado em pontuação enviada pelo cliente; não comprova uma partida legítima.
+- Frontend e Worker desta etapa devem ser publicados juntos: o envio passa a exigir `visitorId`, e a confirmação passa a incluir `score`. Nenhum deploy foi realizado.
+
+### Teste do proprietário
+
+1. Desktop e Mobile: abrir cada jogo, iniciar, pausar, continuar, terminar quando possível, reiniciar e retornar ao catálogo.
+2. Snake: setas/WASD, curvas rápidas, colisões, botões direcionais, Espaço/P e R. Confirmar que os atalhos não interferem no campo de apelido nem no uso normal de botões.
+3. Flappy: Espaço, toque no cenário, P/R, colisões, pontuação e foco ao iniciar.
+4. Memória: pares certos/errados, pausa com duas cartas abertas e vitória. Campo Minado: primeiro clique, bandeiras pelo modo de toque e botão direito, relógio, vitória/derrota.
+5. Paciência: comprar/reciclar, selecionar/mover cartas e sequências, bases, pausa e reinício.
+6. Minimizar, trocar de aba e restaurar: conferir interrupção dos jogos/relógios e retomada sem salto de física. Reabrir o aplicativo e recarregar para conferir recordes.
+7. Em ambiente com Worker/Turnstile/banco configurados: consultar e enviar ranking de Snake/Flappy, repetir marca, testar apelido ocupado e indisponibilidade. Verificar dois navegadores na mesma rede e o mesmo navegador em outra rede.
+
+### Continuidade autorizada pelo proprietário
+
+- Aguardar teste e aceite explícito desta etapa antes de commit e push.
+- Após o aceite, fazer commit e push das alterações da Etapa 22 e então iniciar a Etapa 23 — Configurações e personalização.
+- Sem commit, push, deploy ou alteração no banco remoto durante esta implementação.
+
+
+### Ajustes finais e aceite da Etapa 22
+
+- Proprietário testou os jogos, solicitou refinamentos e autorizou o commit e o push após os ajustes.
+- Dimensões próprias por jogo, enquadramento conforme a altura disponível e ajuste de janela após montagem. Rankings recolhíveis preservam o espaço da partida, com rolagem de conteúdo longo quando necessário.
+- Corrigida a precedência dos estilos dos botões: ícone de atualização centralizado e cartas da Paciência com naipes vermelhos/pretos.
+- Paciência permite arrastar cartas e sequências com mouse, caneta ou toque, preservando validação de jogadas e a alternativa de selecionar/tocar no destino.
+- Snake inclui gestos direcionais e controles de toque antes do ranking. Tabuleiros dos cinco jogos ajustados à altura disponível.
+- Identificada ausência de PUBLIC_WRITE_HASH_SALT no .dev.vars; gerado valor aleatório apenas no arquivo local ignorado. Esquema D1 local consultado em modo somente leitura; tabela public_write_limits existente. Nenhuma alteração no banco remoto.
+- Proprietário reportou VERIFICATION_FAILED no Wrangler local e decidiu testar o ranking no domínio principal após o push. Isso não confirma homologação do Turnstile ou do ranking em produção. Migração de unicidade permanece não aplicada pelo assistente.
+- Verificações finais: 619 testes aprovados e build aprovado; lint conferido antes do commit. Aviso de chunks grandes permanece reservado à Etapa 30.
+- Mensagem de commit conforme o padrão recente: feat: conclui etapa 22 com melhorias nos jogos e rankings.
+- Próxima etapa autorizada: 23 — Configurações e personalização.

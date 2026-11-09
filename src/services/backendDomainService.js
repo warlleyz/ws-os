@@ -132,8 +132,8 @@ export function getOfficialFiles({ signal, offset = 0 } = {}) {
 }
 
 /* === Moderação de rankings; projeção privada somente para administrador === */
-export function getAdministrativeScores({ signal } = {}) {
-  return requestDomain('/api/admin/rankings', { administrative: true, signal });
+export function getAdministrativeScores({ signal, offset = 0 } = {}) {
+  return requestDomain('/api/admin/rankings?offset=' + encodeURIComponent(offset), { administrative: true, signal });
 }
 export function deleteAdministrativeScore(input, { signal } = {}) {
   return requestDomain('/api/admin/rankings', {

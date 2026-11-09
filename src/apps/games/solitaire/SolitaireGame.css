@@ -110,7 +110,7 @@
 }
 
 /* === CARTAS === */
-.ws-games .ws-solitaire-game__card {
+.ws-games.ws-app button.ws-solitaire-game__card {
     position: absolute;
     inset: 0 auto auto 0;
     display: flex;
@@ -127,15 +127,47 @@
     box-shadow: 0 2px 5px rgb(0 0 0 / 14%);
 }
 
-.ws-solitaire-game__card.is-red {
-    color: #d34651;
+.ws-games.ws-app button.ws-solitaire-game__card.is-red {
+    color: #b42336;
 }
 
-.ws-solitaire-game__card.is-black {
+.ws-games.ws-app button.ws-solitaire-game__card.is-black {
     color: #202532;
 }
 
-.ws-games .ws-solitaire-game__card.is-selected {
+.ws-games.ws-app button.ws-solitaire-game__card.is-face-up {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.ws-solitaire-game__drag-preview {
+    position: absolute;
+    z-index: 100;
+    pointer-events: none;
+    width: var(--solitaire-card-width);
+    height: var(--solitaire-card-height);
+    opacity: 0.9;
+}
+
+.ws-solitaire-game__drag-preview > span {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid #9ca3af;
+    border-radius: 8px;
+    background: #f7f8fc;
+    color: #202532;
+    font-size: 24px;
+    box-shadow: 0 6px 18px rgb(0 0 0 / 24%);
+}
+
+.ws-solitaire-game__drag-preview > .is-red {
+    color: #b42336;
+}
+
+.ws-games.ws-app button.ws-solitaire-game__card.is-selected {
     outline: 3px solid var(--accent-primary);
     outline-offset: -2px;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 30%, transparent);
@@ -167,7 +199,7 @@
 }
 
 /* === VERSO DAS CARTAS === */
-.ws-games .ws-solitaire-game__card.is-face-down {
+.ws-games.ws-app button.ws-solitaire-game__card.is-face-down {
     display: grid;
     place-items: center;
     padding: 6px;
@@ -449,4 +481,14 @@
     .ws-solitaire-game__tableau {
         --solitaire-tableau-height: 240px;
     }
+}
+
+/* === MESA ADAPTADA À ALTURA === */
+.ws-games .ws-solitaire-game__tableau {
+  --solitaire-tableau-height: clamp(110px, calc(100cqh - var(--solitaire-card-height) - 210px), 360px);
+}
+@container (max-width: 560px) {
+  .ws-solitaire-game__footer { flex-wrap: wrap; }
+  .ws-games.ws-app button.ws-solitaire-game__card { padding: 4px; border-radius: 5px; }
+  .ws-solitaire-game__card-center { font-size: 20px; }
 }

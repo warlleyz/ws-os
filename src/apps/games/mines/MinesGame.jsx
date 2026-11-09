@@ -79,7 +79,7 @@ const MinesCell = memo(function MinesCell({
             ? 'Mina'
             : cell.revealed
                 ? number > 0
-                    ? `${number} minas próximas`
+                    ? t('{0} minas próximas').replace('{0}', number)
                     : 'Célula vazia'
                 : 'Célula oculta';
 
@@ -93,7 +93,7 @@ const MinesCell = memo(function MinesCell({
                 showMine ? 'is-mine' : '',
             ].filter(Boolean).join(' ')}
             data-count={number || undefined}
-            aria-label={t(`${t(label)}, linha ${cell.row + 1}, coluna ${cell.column + 1}`)}
+            aria-label={t('{0}, linha {1}, coluna {2}').replace('{0}', t(label)).replace('{1}', cell.row + 1).replace('{2}', cell.column + 1)}
             disabled={disabled || cell.revealed}
             onClick={handleClick}
             onContextMenu={handleContextMenu}

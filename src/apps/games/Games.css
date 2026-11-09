@@ -65,13 +65,13 @@
 
 .ws-games .ws-games__back {
   display: grid;
-  flex: 0 0 38px;
+  flex: 0 0 48px;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   border: 1px solid var(--border-default);
-  border-radius: 9px;
+  border-radius: 11px;
   background: color-mix(in srgb, var(--surface-secondary) 40%, transparent);
   color: var(--text-primary);
   cursor: pointer;
@@ -163,9 +163,9 @@
   }
 
   .ws-games .ws-games__back {
-    flex-basis: 34px;
-    width: 34px;
-    height: 34px;
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
   }
 
   .ws-games__header-title {
@@ -175,18 +175,6 @@
   .ws-games__header-details {
     gap: 6px;
   }
-}
-
-.ws-games .ws-games__back {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 13px;
-  border: 1px solid var(--games-border);
-  border-radius: 8px;
-  background: var(--surface-secondary);
-  color: var(--text-primary);
-  cursor: var(--ws-cursor-pointer, pointer);
 }
 
 .ws-games .ws-games__back:hover {
@@ -858,4 +846,32 @@
 .ws-flappy__control:focus-visible {
   outline: 2px solid var(--accent-secondary);
   outline-offset: 3px;
+}
+/* === ENQUADRAMENTO DA PARTIDA === */
+.ws-games__play-content {
+  container-type: size;
+  scrollbar-gutter: auto;
+}
+.ws-games__ranking-panel {
+  min-width: 0;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+}
+.ws-games__ranking-panel > summary {
+  padding: 12px;
+  color: var(--text-primary);
+  font-weight: 650;
+  cursor: pointer;
+  min-height: 44px;
+}
+.ws-games__ranking-panel[open] > .ws-ranking {
+  max-height: max(200px, calc(100cqh - 55px));
+  overflow-y: auto;
+  border: 0;
+}
+@media (pointer: coarse) {
+  .ws-games__header-category { display: none; }
+  .ws-games__play-header { gap: 6px; padding-block: 6px; }
+  .ws-games__header-controls { gap: 4px; }
+  .ws-games.ws-app .ws-games__header-controls button { min-height: 44px; }
 }

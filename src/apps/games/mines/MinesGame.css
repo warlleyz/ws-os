@@ -329,3 +329,6 @@
         transition: none;
     }
 }
+/* === TABULEIRO ADAPTADO À ALTURA === */
+.ws-mines-game__board { width: min(100%, 440px, max(250px, calc(100cqh - 225px))); }
+.ws-games.ws-app button.ws-mines-game__cell { min-height: 0; padding: 0; }

@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import GameHeader from './GameHeader';
 import GameRankings from '../rankings/GameRankings';
 import { supportsPublicRanking } from '../rankings/rankingConfig';
+import { translate as t } from '../../../shared/i18n/i18n';
 
 /* === ESTRUTURA COMPARTILHADA DOS JOGOS === */
 export default function GameLayout({
@@ -44,15 +45,18 @@ export default function GameLayout({
 
     const ranking =
         hasIntegratedRanking && hasPublicRanking ? (
-            <GameRankings
+            <details className="ws-games__ranking-panel" key={game.id}>
+                <summary>{t('Ranking público')}</summary>
+                <GameRankings
                 key={game.id}
                 game={game.id}
                 paused={paused}
-            />
+                />
+            </details>
         ) : null;
 
     return (
-        <div className="ws-games__play-view">
+        <div className="ws-games__play-view" data-game={game.id}>
             {/* === CABEÇALHO COMPARTILHADO === */}
             <GameHeader
                 title={game.name}

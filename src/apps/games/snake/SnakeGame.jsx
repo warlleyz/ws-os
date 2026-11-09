@@ -47,6 +47,7 @@ import {
 
 import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 import { useGameRecord } from '../rankings/gameRecords';
+import { canHandleGameKey } from '../shared/gameKeyboard';
 
 import {
     SNAKE_CONFIG,
@@ -404,7 +405,9 @@ export default function SnakeGame({
     const [game, setGame] = useState(createSnakeGame);
     const gameRef = useRef(game);
     const boardRef = useRef(null);
+    const touchStartRef = useRef(null);
     const directionLockedRef = useRef(false);
+    const queuedDirectionRef = useRef(null);
     const timerRef = useRef(null);
     const onHeaderChangeRef = useRef(onHeaderChange);
 
@@ -438,14 +441,30 @@ export default function SnakeGame({
         (direction) => {
             const current = gameRef.current;
 
-            if (
-                paused ||
-                directionLockedRef.current ||
-                current.status !== 'playing'
-            ) {
+            if (paused || current.status !== 'playing') {
                 return;
             }
 
+            /* ----- ARMAZENAMENTO DA SEGUNDA DIREÇÃO ----- */
+            if (directionLockedRef.current) {
+                if (queuedDirectionRef.current !== null) {
+                    return;
+                }
+
+                const projected = {
+                    ...current,
+                    direction: current.nextDirection,
+                    nextDirection: current.nextDirection,
+                };
+
+                if (changeSnakeDirection(projected, direction) !== projected) {
+                    queuedDirectionRef.current = direction;
+                }
+
+                return;
+            }
+
+            /* ----- APLICAÇÃO DA PRIMEIRA DIREÇÃO ----- */
             const next = changeSnakeDirection(current, direction);
 
             if (next === current) {
@@ -453,7 +472,6 @@ export default function SnakeGame({
             }
 
             directionLockedRef.current = true;
-
             gameRef.current = next;
         },
         [paused],
@@ -466,10 +484,12 @@ export default function SnakeGame({
         }
 
         updateGame(startSnakeGame);
+        boardRef.current?.focus({ preventScroll: true });
     }, [paused, updateGame]);
 
     /* === PAUSAR === */
     const handlePause = useCallback(() => {
+        queuedDirectionRef.current = null;
         updateGame(pauseSnakeGame);
     }, [updateGame]);
 
@@ -482,9 +502,11 @@ export default function SnakeGame({
         const next = createSnakeGame();
 
         directionLockedRef.current = false;
+        queuedDirectionRef.current = null;
         gameRef.current = next;
 
         setGame(next);
+        boardRef.current?.focus({ preventScroll: true });
     }, [paused]);
 
     /* === AÇÕES DO CABEÇALHO === */
@@ -532,8 +554,20 @@ export default function SnakeGame({
 
             updateGame(advanceSnakeGame);
 
-            // Libera uma nova mudança de direção após o movimento.
+            /* ----- APLICAR DIREÇÃO AGUARDANDO O PRÓXIMO MOVIMENTO ----- */
+            const queued = queuedDirectionRef.current;
+            queuedDirectionRef.current = null;
             directionLockedRef.current = false;
+
+            if (queued && gameRef.current.status === 'playing') {
+                const current = gameRef.current;
+                const next = changeSnakeDirection(current, queued);
+
+                if (next !== current) {
+                    gameRef.current = next;
+                    directionLockedRef.current = true;
+                }
+            }
 
             scheduleNextTick();
         }
@@ -567,23 +601,7 @@ export default function SnakeGame({
     /* === CONTROLES DO TECLADO === */
     useEffect(() => {
         function handleKeyDown(event) {
-            const target = event.target;
-            const desktopWindow = boardRef.current?.closest('.desktop-window');
-
-            /* ----- CONTROLES SOMENTE NA JANELA ATIVA ----- */
-            if (
-                paused ||
-                (desktopWindow && !desktopWindow.classList.contains('desktop-window--active')) ||
-                (
-                    target instanceof HTMLElement &&
-                    (
-                        target.isContentEditable ||
-                        ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
-                    )
-                )
-            ) {
-                return;
-            }
+            if (!canHandleGameKey(event, boardRef.current, paused)) return;
 
             const key = event.key.toLowerCase();
             const direction = KEY_DIRECTIONS[key];
@@ -663,11 +681,27 @@ export default function SnakeGame({
             {/* === ÁREA PRINCIPAL === */}
             <div className="ws-snake__layout">
                 {/* ----- TABULEIRO ----- */}
+                <div className="ws-snake__board-column">
                 <div
                     ref={boardRef}
                     className="ws-snake__board-container"
                     tabIndex={0}
                     aria-label={t('Área de jogo do Snake')}
+                    onPointerDown={(event) => {
+                        if (event.target.closest('button') || paused || gameRef.current.status !== 'playing') return;
+                        touchStartRef.current = { x: event.clientX, y: event.clientY, id: event.pointerId };
+                        event.currentTarget.setPointerCapture(event.pointerId);
+                    }}
+                    onPointerMove={(event) => {
+                        const start = touchStartRef.current;
+                        if (!start || start.id !== event.pointerId) return;
+                        const x = event.clientX - start.x, y = event.clientY - start.y;
+                        if (Math.max(Math.abs(x), Math.abs(y)) < 18) return;
+                        handleDirection(Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up'));
+                        touchStartRef.current = { x: event.clientX, y: event.clientY, id: event.pointerId };
+                    }}
+                    onPointerUp={() => { touchStartRef.current = null; }}
+                    onPointerCancel={() => { touchStartRef.current = null; }}
                 >
                     <SnakeBoard game={game} />
 
@@ -707,6 +741,10 @@ export default function SnakeGame({
                         </div>
                     )}
                 </div>
+                <div className="ws-snake__mobile-controls">
+                    <SnakeDirectionControls onDirection={handleDirection} disabled={paused || game.status !== 'playing'} />
+                </div>
+                </div>
 
                 {/* ----- RANKING LATERAL ----- */}
                 <aside className="ws-snake__sidebar">
@@ -721,12 +759,9 @@ export default function SnakeGame({
             </div>
 
             {/* === CONTROLES MÓVEIS === */}
-            <div className="ws-snake__mobile-controls">
-                <SnakeDirectionControls
-                    onDirection={handleDirection}
-                    disabled={paused || game.status !== 'playing'}
-                />
-            </div>
+            <p className="ws-snake__hint">
+                {t('Use as setas ou WASD para mover, Espaço ou P para pausar e R para reiniciar.')}
+            </p>
 
             {/* === ERROS DE PERSISTÊNCIA === */}
             {recordError && (

@@ -282,3 +282,9 @@
         transition: none;
     }
 }
+/* === CENÁRIO ADAPTADO À ALTURA === */
+.ws-flappy-game__stage { width: min(100%, 350px, max(140px, calc((100cqh - 160px) * 2 / 3))); }
+@container (max-width: 760px) {
+  .ws-flappy-game__layout { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .ws-flappy-game__stage { width: min(100%, 350px, max(140px, calc((100cqh - 210px) * 2 / 3))); }
+}

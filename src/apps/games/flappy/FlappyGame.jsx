@@ -16,6 +16,7 @@ import {
 
 import { translate as t, useLocale } from '../../../shared/i18n/i18n';
 import { useGameRecord } from '../rankings/gameRecords';
+import { canHandleGameKey } from '../shared/gameKeyboard';
 
 import {
     FLAPPY_CONFIG,
@@ -210,6 +211,7 @@ export default function FlappyGame({
         if (paused) return;
 
         updateGame(startFlappyGame);
+        boardRef.current?.focus({ preventScroll: true });
     }, [paused, updateGame]);
 
     const handlePause = useCallback(() => {
@@ -223,12 +225,14 @@ export default function FlappyGame({
 
         gameRef.current = next;
         setGame(next);
+        boardRef.current?.focus({ preventScroll: true });
     }, [paused]);
 
     const handleFlap = useCallback(() => {
         if (paused) return;
 
         updateGame(flapBird);
+        boardRef.current?.focus({ preventScroll: true });
     }, [paused, updateGame]);
 
     /* === CICLO DE ANIMAÇÃO === */
@@ -293,32 +297,7 @@ export default function FlappyGame({
     /* === TECLADO === */
     useEffect(() => {
         function handleKeyDown(event) {
-            if (paused || event.repeat) return;
-
-            const target = event.target;
-
-            if (
-                target instanceof HTMLElement &&
-                (
-                    target.isContentEditable ||
-                    ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
-                )
-            ) {
-                return;
-            }
-
-            const desktopWindow = boardRef.current?.closest(
-                '.desktop-window',
-            );
-
-            if (
-                desktopWindow &&
-                !desktopWindow.classList.contains(
-                    'desktop-window--active',
-                )
-            ) {
-                return;
-            }
+            if (!canHandleGameKey(event, boardRef.current, paused)) return;
 
             if (
                 event.code === 'Space' ||
@@ -427,6 +406,8 @@ export default function FlappyGame({
             <div
                 ref={boardRef}
                 className="ws-flappy-game__stage"
+                tabIndex={0}
+                aria-label={t('Tabuleiro de voo')}
             >
                 <button
                     type="button"
@@ -528,7 +509,7 @@ export default function FlappyGame({
 
             {/* === INSTRUÇÕES === */}
             <p className="ws-flappy-game__hint">
-                {t('Pressione Espaço ou toque no cenário para voar.')}
+                {t('Pressione Espaço ou toque no cenário para voar. Use P para pausar e R para reiniciar.')}
             </p>
 
                 {recordError && (

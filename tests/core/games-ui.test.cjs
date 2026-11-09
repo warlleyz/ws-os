@@ -132,6 +132,7 @@ async function mountGame(definition, paused = false) {
     props,
     {
       ...model,
+      ...loadContract(path.join(base, 'shared/gameKeyboard.js')),
       ...icons,
       memo: (component) => component,
       window: browser,
@@ -152,6 +153,50 @@ async function mountGame(definition, paused = false) {
 
 /* === TESTES DE MONTAGEM E SUSPENSÃO === */
 for (const definition of GAME_COMPONENTS) {
+  test(`${definition.name} inicia, pausa, suspende e reinicia sem manter recursos ativos`, async () => {
+    const { ui, props, browser, headerUpdates } = await mountGame(definition);
+    const actions = () => headerUpdates.at(-1).actions.props;
+    try {
+      actions().onStart();
+      ui.render();
+      assert.equal(headerUpdates.at(-1).status, 'JOGANDO');
+      if (definition.id === 'mines') {
+        const cell = ui.nodes().find((node) => node.props.cell?.id === '0:0');
+        cell.props.onReveal('0:0');
+        ui.render();
+      }
+      if (definition.id === 'memory') {
+        const cards = ui.nodes().filter((node) => node.props.card?.technology);
+        cards[0].props.onReveal(cards[0].props.card.id);
+        ui.render();
+        const other = cards.find((node) => node.props.card.technology !== cards[0].props.card.technology);
+        other.props.onReveal(other.props.card.id);
+        ui.render();
+      }
+      if (definition.id !== 'solitaire') assert.ok(browser.timers.size > 0);
+      actions().onPause();
+      ui.render();
+      assert.equal(headerUpdates.at(-1).status, 'PAUSADO');
+      assert.equal(browser.timers.size, 0);
+      actions().onStart();
+      ui.render();
+      props.paused = true;
+      ui.render();
+      assert.equal(headerUpdates.at(-1).status, 'SUSPENSO');
+      assert.equal(browser.timers.size, 0);
+      props.paused = false;
+      ui.render();
+      actions().onRestart();
+      ui.render();
+      assert.equal(headerUpdates.at(-1).status, 'PRONTO');
+      assert.equal(browser.timers.size, 0);
+    } finally {
+      ui.unmount();
+    }
+    assert.equal(browser.listeners.size, 0);
+    assert.equal(browser.timers.size, 0);
+  });
+
   test(`${definition.name} monta sua interface sem erros`, async () => {
     const { ui } = await mountGame(definition);
 
@@ -327,6 +372,23 @@ test('recordes preservam melhores marcas entre abas', () => {
 });
 
 /* === FALHA DE PERSISTÊNCIA === */
+test('recordes dos cinco jogos sobrevivem ao recarregamento e podem ser limpos entre abas', () => {
+  const storage = new Map();
+  const first = recordsTab(storage);
+  const scores = { snake: 7, flappy: 3, memory: 8, mines: 12, solitaire: 80 };
+  for (const [game, score] of Object.entries(scores)) assert.equal(first.saveGameRecord(game, score), true);
+  first.remove();
+  const reloaded = recordsTab(storage);
+  try {
+    for (const [game, score] of Object.entries(scores)) assert.equal(reloaded.getGameRecord(game), score);
+    storage.delete('ws-os:game-records');
+    reloaded.sync(null);
+    for (const game of Object.keys(scores)) assert.equal(reloaded.getGameRecord(game), null);
+  } finally {
+    reloaded.remove();
+  }
+});
+
 test('recordes sinalizam falha de armazenamento sem perder a sessão', () => {
   const storage = new Map();
   const tab = recordsTab(storage);
