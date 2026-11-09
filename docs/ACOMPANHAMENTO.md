@@ -33,8 +33,8 @@
 | 19 | Contato e solicitações de horário | **Concluída e aprovada pelo proprietário** |
 | 20 | Wally e assistência de navegação | **Concluída e validada pelo proprietário** |
 | 21 | Terminal e Calculadora | **Concluída e validada pelo proprietário** |
-| 22 | Jogos, recordes e rankings | Concluída e aprovada pelo proprietário; ranking em produção pendente de teste |
-| 23 | Configurações e personalização | Não iniciada |
+| 22 | Jogos, recordes e rankings | Concluída e aprovada; envio de recorde em produção confirmado pelo proprietário |
+| 23 | Configurações e personalização | Concluída e aprovada pelo proprietário |
 | 24 | Notificações, painéis e widgets | Não iniciada |
 | 25 | Administração e gerenciamento de conteúdo | Não iniciada |
 | 26 | Backend, APIs e serviços privados | Não iniciada |
@@ -1051,3 +1051,50 @@ Cada etapa percorre diagnóstico, definição, implementação, validação e do
 - Verificações finais: 619 testes aprovados e build aprovado; lint conferido antes do commit. Aviso de chunks grandes permanece reservado à Etapa 30.
 - Mensagem de commit conforme o padrão recente: feat: conclui etapa 22 com melhorias nos jogos e rankings.
 - Próxima etapa autorizada: 23 — Configurações e personalização.
+
+## Etapa 23 — Configurações e personalização
+
+**Estado:** implementação local testada e aprovada pelo proprietário, com commit e push autorizados conforme o fluxo combinado. Proprietário confirmou a publicação de recorde em `warlleys.dev` após o push da Etapa 22 (`d1162a6`). A migração de unicidade não foi aplicada pelo assistente.
+
+### Diagnóstico e decisões
+
+- Revisados Configurações e seus consumidores: tema, aparência, cursor, idioma, acessibilidade, wallpapers, Taskbar, organização Desktop, preferências Mobile e widgets.
+- Mantidos os valores padrão e os gerenciadores existentes. Troca de tema recupera as cores e wallpapers próprios do destino, sem regravar as escolhas do outro tema ou plataforma.
+- Corrigido o contrato de preferências para reconhecer os formatos atuais: aparência com ocultação do fundo e cores por tema, seleção de widgets Mobile, quatro chaves de wallpaper e mapa de enquadramento. Formatos legados continuam sendo lidos sem gravação automática; dados desconhecidos são rejeitados.
+- Avaliada importação/exportação: não implementada nesta etapa. Imagens pessoais estão em IndexedDB, enquanto seleções e opções ficam em localStorage; um arquivo só de preferências não seria uma cópia completa e exigiria uma definição específica para referências ausentes e restauração. A entrega atual concentra-se nos controles e na restauração seletiva.
+
+### Trabalhos realizados
+
+- Restauração por categoria, com todas as categorias selecionadas inicialmente para preservar o fluxo anterior. O botão fica indisponível sem seleção; a confirmação apresenta as categorias escolhidas e bloqueia alterações na seleção até confirmar ou cancelar.
+- Escopos explicados na interface: tema, efeitos, cursor e ocultação do fundo compartilhados entre Desktop e Mobile; wallpapers independentes por plataforma/tema; destaque independente por tema; idioma e acessibilidade globais neste navegador.
+- Falha parcial de restauração usa mensagem que não afirma sucesso de controles cuja gravação foi recusada. A restauração usa somente a lista explícita de ações; não limpa localStorage nem IndexedDB.
+- Preservados arquivos, conteúdo dos aplicativos, identidade do visitante, recordes, favoritos, coleção de imagens e posições de atalhos/widgets. A restauração de widgets mantém instâncias adicionais; carregamento e persistência passam a recuperá-las com identificadores únicos e tipos conhecidos.
+- Controles dos widgets Mobile usam o catálogo de tipos, sem depender da quantidade de instâncias do Desktop ou gerar opções duplicadas.
+- Upload de wallpaper deixa de aplicar uma seleção depois que sua seção foi desmontada. Mudanças de seleção ou restauração ocorridas enquanto o upload estava pendente têm prioridade; uma imagem já salva continua na coleção, sem sobrescrever a escolha posterior.
+- Mensagem de falha ao persistir a seleção distingue uma imagem aplicada só na sessão de uma falha ao armazenar o arquivo.
+- Exclusão de imagem pessoal exige confirmação com o nome da imagem e a informação sobre substituição nos contextos em uso. Cancelar ou pressionar Escape devolve o foco ao botão de origem.
+- Textos novos traduzidos para pt-BR e inglês. Nenhuma dependência adicionada.
+
+### Arquivos e validações
+
+- Interface: `src/apps/settings/SettingsSections.jsx`, `SettingsSections.css` e catálogos de tradução.
+- Core: `preferenceContract.js`, `wallpaperManager.js`, `widgetManager.js`, `widgetPreferences.js`; demais gerenciadores e consumidores revisados sem alteração.
+- Testes: `settings-stage23.test.cjs`, `settings.test.cjs` e `settings-ui.test.cjs`.
+- `npm test`: **630 testes aprovados**, nenhuma falha. `npm run lint` e `npm run build`: aprovados. Aviso conhecido de bundles grandes permanece na Etapa 30.
+- Testes adicionais cobrem leitura dos formatos atuais/legados, isolamento de categorias, preservação dos dados dos aplicativos, recuperação dos widgets, sincronização Mobile, confirmação de exclusão e uploads tardios/cancelados.
+- Testes de UI utilizam o ambiente controlado existente. Validação visual, teclado e toque no navegador permanecem para o teste do proprietário.
+
+### Roteiro para teste do proprietário
+
+1. Abrir Configurações com `npm run dev` e testar temas, cor automática/manual, cursor, ocultação do fundo, blur, transparência e intensidade de animações. Alternar claro/escuro e conferir recuperação das escolhas próprias.
+2. Escolher wallpapers e enquadramentos distintos para Desktop/Mobile e para os dois temas. Recarregar e conferir persistência; em outra aba, conferir sincronização.
+3. Alterar idioma e acessibilidade; verificar aplicação em Desktop e Mobile. Redução de movimento/transparência e baixo custo continuam prevalecendo sobre efeitos decorativos.
+4. Alterar auto-ocultação da Taskbar, densidade Mobile, visibilidade/tamanho dos widgets e preferências de relógio/clima. A seleção de widgets Mobile deve permanecer independente da visibilidade no Desktop.
+5. Em Restaurar, desmarcar tudo: botão desabilitado. Selecionar apenas Idioma, cancelar e depois confirmar; somente o idioma deve retornar ao padrão. Repetir para wallpapers do Desktop, verificando que o Mobile não mudou.
+6. Restaurar todas as categorias e conferir que documentos, recordes, imagens pessoais, favoritos e posições continuam disponíveis. Fazer a verificação com documentos de teste salvos.
+7. Adicionar imagem pessoal; iniciar outro upload e sair da seção antes de concluir. A escolha atual deve ser preservada, e o arquivo já salvo pode continuar na coleção. Ao excluir uma imagem de teste, conferir confirmação e cancelamento.
+
+### Encerramento pendente
+
+- Aguardar teste e aceite do proprietário para commit e push da Etapa 23.
+- Etapa 24 — Notificações, painéis e widgets não iniciada.

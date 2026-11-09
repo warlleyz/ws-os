@@ -1393,5 +1393,19 @@
     "A IA demorou para responder. Resposta local utilizada.": "A IA demorou para responder. Resposta local utilizada.",
     "A IA não retornou uma resposta válida. Resposta local utilizada.": "A IA não retornou uma resposta válida. Resposta local utilizada.",
     "Não foi possível verificar o limite de consultas. Resposta local utilizada.": "Não foi possível verificar o limite de consultas. Resposta local utilizada."
+  },
+  "stage23": {
+    "Aparência e cursor": "Aparência e cursor",
+    "Escolha o que restaurar": "Escolha o que restaurar",
+    "Algumas preferências não puderam ser restauradas ou salvas. Revise as opções e tente novamente.": "Algumas preferências não puderam ser restauradas ou salvas. Revise as opções e tente novamente.",
+    "Tema, efeitos, cursor e ocultação do fundo são compartilhados entre Desktop e Mobile. Wallpapers são independentes por plataforma e tema; a cor de destaque é independente por tema.": "Tema, efeitos, cursor e ocultação do fundo são compartilhados entre Desktop e Mobile. Wallpapers são independentes por plataforma e tema; a cor de destaque é independente por tema.",
+    "Esta preferência vale para Desktop e Mobile neste navegador.": "Esta preferência vale para Desktop e Mobile neste navegador.",
+    "Somente as categorias selecionadas serão restauradas. Mobile inclui densidade, widgets visíveis e wallpapers dos dois temas.": "Somente as categorias selecionadas serão restauradas. Mobile inclui densidade, widgets visíveis e wallpapers dos dois temas.",
+    "Confirmar exclusão da imagem": "Confirmar exclusão da imagem",
+    "Excluir esta imagem pessoal? Se estiver em uso, ela será substituída pelos fundos padrão nas plataformas e temas correspondentes.": "Excluir esta imagem pessoal? Se estiver em uso, ela será substituída pelos fundos padrão nas plataformas e temas correspondentes.",
+    "A imagem foi aplicada nesta sessão, mas a seleção não pôde ser salva.": "A imagem foi aplicada nesta sessão, mas a seleção não pôde ser salva.",
+    "A imagem foi salva na coleção, mas a seleção mudou durante o envio.": "A imagem foi salva na coleção, mas a seleção mudou durante o envio.",
+    "Confirmar exclusão": "Confirmar exclusão",
+    "Visibilidade e tamanho são próprios do Desktop. As opções de relógio e clima também são usadas pelos widgets Mobile.": "Visibilidade e tamanho são próprios do Desktop. As opções de relógio e clima também são usadas pelos widgets Mobile."
   }
 }

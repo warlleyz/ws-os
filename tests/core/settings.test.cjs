@@ -642,6 +642,35 @@ test('hidratação atrasada não substitui upload novo', async () => {
 });
 
 /* === Widgets === */
+test('upload atrasado preserva a escolha mais recente e mantém a imagem na coleção', async () => {
+  let release;
+  const ready = new Promise((resolve) => { release = resolve; });
+  const { m } = await wallpaper({ bindings: {
+    addPersonalWallpaper: async (file) => { await ready; return { id: 'delayed', name: 'Teste', type: file.type, size: file.size }; },
+  } });
+  const pending = m.uploadCustomWallpaper(png());
+  m.setWallpaper('dark-green', 'desktop', 'dark');
+  release();
+  await assert.rejects(pending, /salva na coleção/);
+  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-green');
+  assert.equal(m.getPersonalWallpapers().some((item) => item.id === 'personal:delayed'), true);
+});
+
+test('cancelar upload pendente não aplica imagem após sair das configurações', async () => {
+  let release;
+  const ready = new Promise((resolve) => { release = resolve; });
+  const { m } = await wallpaper({ bindings: {
+    addPersonalWallpaper: async (file) => { await ready; return { id: 'cancelled', name: 'Teste', type: file.type, size: file.size }; },
+  } });
+  const controller = new AbortController();
+  const pending = m.uploadCustomWallpaper(png(), 'desktop', { signal: controller.signal });
+  controller.abort();
+  release();
+  assert.equal(await pending, false);
+  assert.equal(m.getWallpaper('desktop', 'dark'), 'dark-blue');
+  assert.equal(m.getPersonalWallpapers().some((item) => item.id === 'personal:cancelled'), true);
+});
+
 /* ----- Organização e capacidade ----- */
 test('widgets conservam posição e respeitam limite da grade', () => {
   const initialWidgetState = {

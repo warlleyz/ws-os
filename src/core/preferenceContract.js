@@ -1,4 +1,5 @@
-import { getWidgetDefinition } from './widgetManager.js';
+import { getWidgetDefinition, getRegisteredWidgets } from './widgetManager.js';
+import { isWallpaperSelectionId } from './wallpaperSelectionContract.js';
 import { isContractData, isRecord, validId } from '../shared/utils/contractValidation.js';
 
 /* === CONTRATOS DE PREFERÊNCIAS === */
@@ -13,6 +14,11 @@ export const PREFERENCE_KEYS = Object.freeze({
   'ws-os:desktop-shortcut-positions': { category: 'desktop', encoding: 'json' },
   'ws-os:wallpaper': { category: 'desktop', encoding: 'raw' },
   'ws-os:mobile-wallpaper': { category: 'mobile', encoding: 'raw' },
+  'ws-os:wallpaper:desktop:dark': { category: 'desktop', encoding: 'raw' },
+  'ws-os:wallpaper:desktop:light': { category: 'desktop', encoding: 'raw' },
+  'ws-os:wallpaper:mobile:dark': { category: 'mobile', encoding: 'raw' },
+  'ws-os:wallpaper:mobile:light': { category: 'mobile', encoding: 'raw' },
+  'ws-os:wallpaper-fit': { category: 'appearance', encoding: 'json' },
   'ws-os:mobile-preferences': { category: 'mobile', encoding: 'json' },
   'ws-os:desktop-widgets': { category: 'widgets', encoding: 'json' },
   'ws-os:taskbar-auto-hide': { category: 'taskbar', encoding: 'boolean' },
@@ -36,7 +42,8 @@ export function validatePreferenceValue(key, value) {
   };
   if (enums[key]) return enums[key].includes(value);
   if (key === 'ws-os:taskbar-auto-hide') return typeof value === 'boolean';
-  if (key.endsWith('wallpaper')) return typeof value === 'string' && validId(value);
+  if (key.endsWith('wallpaper') || key.startsWith('ws-os:wallpaper:'))
+    return isWallpaperSelectionId(value, key.startsWith('ws-os:wallpaper:') ? key.split(':').at(-1) : undefined);
   if (key === 'ws-os:menu-favorites')
     return (
       Array.isArray(value) &&
@@ -45,15 +52,28 @@ export function validatePreferenceValue(key, value) {
       new Set(value).size === value.length
     );
   if (!isRecord(value)) return false;
+  if (key === 'ws-os:wallpaper-fit')
+    return Object.entries(value).every(([shell, themes]) =>
+      ['desktop', 'mobile'].includes(shell) && isRecord(themes) &&
+      Object.entries(themes).every(([theme, fit]) =>
+        ['dark', 'light'].includes(theme) && ['cover', 'contain', 'center'].includes(fit)));
   if (key === 'ws-os:appearance')
-    return Object.entries(value).every(([field, item]) =>
-      ({
+    return Object.entries(value).every(([field, item]) => {
+      if (field === 'hideWallpaper') return typeof item === 'boolean';
+      if (field === 'accentMode') return ['auto', 'manual'].includes(item);
+      if (field === 'accents') return isRecord(item) &&
+        Object.entries(item).every(([theme, preference]) =>
+          ['dark', 'light'].includes(theme) && isRecord(preference) &&
+          Object.keys(preference).every((key) => ['mode', 'manual'].includes(key)) &&
+          ['auto', 'manual'].includes(preference.mode) &&
+          ['blue', 'violet', 'green'].includes(preference.manual));
+      return ({
         accent: ['blue', 'violet', 'green'],
         motion: ['off', 'subtle', 'normal'],
         blur: ['off', 'soft', 'normal', 'strong'],
         transparency: ['solid', 'default', 'high'],
-      })[field]?.includes(item),
-    );
+      })[field]?.includes(item);
+    });
   if (key === 'ws-os:accessibility')
     return Object.keys(value).every(
       (field) =>
@@ -63,7 +83,10 @@ export function validatePreferenceValue(key, value) {
   if (key === 'ws-os:mobile-preferences')
     return (
       ['default', 'comfortable'].includes(value.gridDensity) &&
-      Object.keys(value).every((field) => field === 'gridDensity')
+      Object.keys(value).every((field) => ['gridDensity', 'widgetIds'].includes(field)) &&
+      (value.widgetIds === undefined || (Array.isArray(value.widgetIds) &&
+        new Set(value.widgetIds).size === value.widgetIds.length &&
+        value.widgetIds.every((id) => getRegisteredWidgets().some((widget) => widget.id === id))))
     );
   if (key === 'ws-os:desktop-shortcut-positions')
     return Object.entries(value).every(
@@ -104,7 +127,7 @@ export function validatePreferenceValue(key, value) {
       (value.folderId === null || validId(value.folderId))
     );
   if (key === 'ws-os:notification-preferences')
-    return Object.values(value).every((item) => typeof item === 'boolean');
+    return Object.entries(value).every(([field, item]) => field === 'doNotDisturb' && typeof item === 'boolean');
   return false;
 }
 

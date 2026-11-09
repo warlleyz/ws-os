@@ -29,11 +29,19 @@ import {
   setMobileWidgetVisibility,
 } from '../../core/mobilePreferences';
 import { useWidgetPreferences, configureWidget } from '../../core/widgetPreferences';
-import { getWidgetDefinition } from '../../core/widgetManager';
+import { getWidgetDefinition, getRegisteredWidgets } from '../../core/widgetManager';
 import { restoreSystemPreferences } from '../../core/preferencesManager';
 import { useSystem } from '../../core/useSystem';
 
 import './SettingsSections.css';
+
+/* === CATEGORIAS DE RESTAURAÇÃO === */
+const RESET_CATEGORIES = [
+  ['appearance', 'Aparência e cursor'], ['language', 'Idioma'],
+  ['accessibility', 'Acessibilidade'], ['desktop', 'Papel de parede do Desktop'],
+  ['mobile', 'Mobile'], ['widgets', 'Widgets do Desktop'],
+  ['taskbar', 'Barra de tarefas'], ['notifications', 'Notificações'],
+];
 
 /* === ELEMENTOS COMPARTILHADOS === */
 /* ----- Grupo de preferências ----- */
@@ -123,13 +131,19 @@ function WallpaperGallery({ shell, report, announce }) {
   const status = useWallpaperStatus();
   const personalWallpapers = usePersonalWallpapers();
   const [busy, setBusy] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const inputRef = useRef(null);
+  const uploadRef = useRef(null);
+  const deleteConfirmRef = useRef(null);
+  const deleteTriggerRef = useRef(null);
   const mounted = useRef(false);
 
   useEffect(() => {
     mounted.current = true;
-    return () => { mounted.current = false; };
+    return () => { mounted.current = false; uploadRef.current?.abort(); };
   }, []);
+
+  useEffect(() => { if (deleteTarget) deleteConfirmRef.current?.focus(); }, [deleteTarget]);
 
   const officialChoices = getOfficialWallpapersByTheme(theme);
 
@@ -139,16 +153,19 @@ function WallpaperGallery({ shell, report, announce }) {
     input.value = '';
     if (!file || busy) return;
     setBusy(true);
+    const controller = new AbortController();
+    uploadRef.current = controller;
     try {
-      const saved = await uploadCustomWallpaper(file, shell);
+      const saved = await uploadCustomWallpaper(file, shell, { signal: controller.signal });
       if (!mounted.current) return;
       announce(
-        saved ? 'Imagem salva e aplicada.' : 'Não foi possível salvar a imagem. A imagem anterior foi preservada.',
+        saved ? 'Imagem salva e aplicada.' : 'A imagem foi aplicada nesta sessão, mas a seleção não pôde ser salva.',
         !saved,
       );
     } catch (error) {
       if (mounted.current) announce(error?.message || 'Não foi possível concluir a operação.', true);
     } finally {
+      if (uploadRef.current === controller) uploadRef.current = null;
       if (mounted.current) setBusy(false);
     }
   }
@@ -158,6 +175,7 @@ function WallpaperGallery({ shell, report, announce }) {
   async function removeWallpaper(id) {
     if (busy || id === 'personal:legacy') return;
 
+    setDeleteTarget(null);
     setBusy(true);
 
     try {
@@ -243,13 +261,22 @@ function WallpaperGallery({ shell, report, announce }) {
                   <button type="button" className="ws-settings__personal-wallpaper-delete"
                     disabled={busy || item.id === 'personal:legacy'}
                     title={t(inUse ? 'Excluir e substituir o wallpaper em uso' : 'Excluir')}
-                    aria-label={`${t('Excluir')}: ${item.name}`} onClick={() => removeWallpaper(item.id)}>
+                    aria-label={`${t('Excluir')}: ${item.name}`} onClick={(event) => { deleteTriggerRef.current = event.currentTarget; setDeleteTarget(item); }}>
                     {t('Excluir')}
                   </button>
                 </div>
               );
             })}
           </div>
+        </div>
+      )}
+      {deleteTarget && (
+        <div className="ws-settings__confirm" role="group" aria-label={t('Confirmar exclusão da imagem')}
+          onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); setDeleteTarget(null); deleteTriggerRef.current?.focus(); } }}>
+          <p>{t('Excluir esta imagem pessoal? Se estiver em uso, ela será substituída pelos fundos padrão nas plataformas e temas correspondentes.')}</p>
+          <strong>{deleteTarget.name}</strong>
+          <button ref={deleteConfirmRef} type="button" disabled={busy} onClick={() => removeWallpaper(deleteTarget.id)}>{t('Confirmar exclusão')}</button>
+          <button type="button" disabled={busy} onClick={() => { setDeleteTarget(null); deleteTriggerRef.current?.focus(); }}>{t('Cancelar')}</button>
         </div>
       )}
       <div className="ws-settings__upload">
@@ -288,6 +315,7 @@ export default function SettingsSections({ activeSection }) {
   const { notify } = useSystem();
   const [message, setMessage] = useState(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [resetCategories, setResetCategories] = useState(() => RESET_CATEGORIES.map(([id]) => id));
   const confirmRef = useRef(null);
   const resetButtonRef = useRef(null);
 
@@ -321,11 +349,12 @@ export default function SettingsSections({ activeSection }) {
   }
 
   function reset() {
-    const result = restoreSystemPreferences();
+    if (!resetCategories.length) return;
+    const result = restoreSystemPreferences(resetCategories);
     closeReset();
     announce(result.ok
       ? 'As preferências padrão foram aplicadas.'
-      : 'As preferências foram aplicadas nesta sessão, mas algumas não puderam ser salvas.', !result.ok);
+      : 'Algumas preferências não puderam ser restauradas ou salvas. Revise as opções e tente novamente.', !result.ok);
   }
 
   /* === ALTERAÇÃO DO TEMA === */
@@ -360,6 +389,7 @@ export default function SettingsSections({ activeSection }) {
           </div>
         </SettingsCard>
         <WallpaperGallery shell="desktop" report={report} announce={announce} />
+        <p className="ws-settings__hint">{t('Tema, efeitos, cursor e ocultação do fundo são compartilhados entre Desktop e Mobile. Wallpapers são independentes por plataforma e tema; a cor de destaque é independente por tema.')}</p>
         <SettingsCard title={t('Cores e cursor')} description={t('Ajuste a cor de destaque e como o ponteiro aparece no WS OS.')}>
           <SettingsToggle label={t('Ocultar papel de parede')}
             description={t('Exibe uma superfície uniforme no lugar da imagem de fundo.')}
@@ -434,6 +464,7 @@ export default function SettingsSections({ activeSection }) {
   if (activeSection === 'language') {
     content = (
       <SettingsCard title={t('Idioma da interface')} description={t('Defina como menus, aplicativos e mensagens do WS OS são apresentados.')}>
+        <p className="ws-settings__hint">{t('Esta preferência vale para Desktop e Mobile neste navegador.')}</p>
         <div className="ws-settings__language-preview">
           <div className="ws-settings__language-symbol" aria-hidden="true">{locale === 'en' ? 'EN' : 'PT'}</div>
           <div><strong>{locale === 'en' ? 'English' : 'Português (Brasil)'}</strong><small>{t('Idioma atual do sistema')}</small></div>
@@ -451,6 +482,7 @@ export default function SettingsSections({ activeSection }) {
   if (activeSection === 'accessibility') {
     content = (
       <SettingsCard title={t('Conforto visual e desempenho')} description={t('Reduza efeitos que podem atrapalhar a navegação ou exigir mais do dispositivo.')}>
+        <p className="ws-settings__hint">{t('Esta preferência vale para Desktop e Mobile neste navegador.')}</p>
         <div className="ws-settings__preference-list">
           {[
             ['motion', 'Reduzir movimento', 'Diminui animações e transições da interface.'],
@@ -490,6 +522,7 @@ export default function SettingsSections({ activeSection }) {
   if (activeSection === 'widgets') {
     content = (
       <SettingsCard title={t('Widgets do Desktop')} description={t('Altere a visibilidade, o tamanho e as preferências de cada widget. A posição continua sendo gerenciada no Desktop.')}>
+        <p className="ws-settings__hint">{t('Visibilidade e tamanho são próprios do Desktop. As opções de relógio e clima também são usadas pelos widgets Mobile.')}</p>
         <div className="ws-settings__widget-list">
           {widgets.widgets.map((widget) => {
             const definition = getWidgetDefinition(widget.widgetId);
@@ -572,19 +605,15 @@ export default function SettingsSections({ activeSection }) {
         >
           {/* ----- Seleção de widgets ----- */}
           <div className="ws-settings__preference-list">
-            {widgets.widgets.map((widget) => {
-              const definition = getWidgetDefinition(widget.widgetId);
-
-              if (!definition) return null;
-
+            {getRegisteredWidgets().map((definition) => {
               return (
                 <SettingsToggle
-                  key={widget.widgetId}
+                  key={definition.id}
                   label={t(definition.name)}
                   description={t(definition.description)}
-                  checked={(mobile.widgetIds ?? []).includes(widget.widgetId)}
+                  checked={(mobile.widgetIds ?? []).includes(definition.id)}
                   onChange={(visible) =>
-                    report(setMobileWidgetVisibility(widget.widgetId, visible))
+                    report(setMobileWidgetVisibility(definition.id, visible))
                   }
                 />
               );
@@ -607,8 +636,16 @@ export default function SettingsSections({ activeSection }) {
     content = (
       <SettingsCard title={t('Restaurar preferências')} description={t('Retorne as configurações visuais aos valores originais sem apagar os dados dos aplicativos.')}>
         <div className="ws-settings__reset">
+          <fieldset className="ws-settings__reset-categories" disabled={confirmReset}>
+            <legend>{t('Escolha o que restaurar')}</legend>
+            {RESET_CATEGORIES.map(([id, label]) => (
+              <SettingsToggle key={id} label={t(label)} checked={resetCategories.includes(id)}
+                onChange={(checked) => setResetCategories((current) => checked
+                  ? [...current, id] : current.filter((category) => category !== id))} />
+            ))}
+          </fieldset>
           <div className="ws-settings__restore-summary">
-            <div><strong>{t('O que será restaurado')}</strong><p>{t('Tema, idioma, cores, efeitos, acessibilidade, barra de tarefas, densidade Mobile, seleção de wallpapers e tamanho/visibilidade dos widgets.')}</p></div>
+            <div><strong>{t('O que será restaurado')}</strong><p>{t('Somente as categorias selecionadas serão restauradas. Mobile inclui densidade, widgets visíveis e wallpapers dos dois temas.')}</p></div>
             <div><strong>{t('O que será preservado')}</strong><p>{t('Arquivos, dados dos aplicativos, favoritos, imagens pessoais e posições de atalhos e widgets.')}</p></div>
           </div>
           {confirmReset ? (
@@ -617,11 +654,12 @@ export default function SettingsSections({ activeSection }) {
                 if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closeReset(); }
               }}>
               <p>{t('Deseja restaurar as preferências padrão? Os dados dos aplicativos não serão apagados.')}</p>
+              <p>{RESET_CATEGORIES.filter(([id]) => resetCategories.includes(id)).map(([, label]) => t(label)).join(', ')}</p>
               <button ref={confirmRef} type="button" onClick={reset}>{t('Confirmar restauração')}</button>
               <button type="button" onClick={closeReset}>{t('Cancelar')}</button>
             </div>
           ) : (
-            <button ref={resetButtonRef} type="button" className="ws-settings__reset-button" onClick={() => setConfirmReset(true)}>
+            <button ref={resetButtonRef} type="button" className="ws-settings__reset-button" disabled={!resetCategories.length} onClick={() => setConfirmReset(true)}>
               <RotateCcw size={17} aria-hidden="true" />{t('Restaurar padrões')}
             </button>
           )}

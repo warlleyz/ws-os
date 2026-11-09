@@ -79,6 +79,7 @@ function loadSelections() {
 
 /* === ESTADO COMPARTILHADO === */
 let selected = loadSelections();
+const selectionVersions = new Map();
 let fits = loadFits();
 let personalWallpapers = [];
 let personalUrls = new Map();
@@ -243,6 +244,8 @@ export function setWallpaper(id, shell = 'desktop', theme = getTheme()) {
   if (!result.ok) return false;
 
   selected = result.selections;
+  const context = `${shell}:${theme}`;
+  selectionVersions.set(context, (selectionVersions.get(context) ?? 0) + 1);
   emit();
 
   try {
@@ -518,13 +521,20 @@ export async function addWallpaperToCollection(file) {
 }
 
 /* ----- COMPATIBILIDADE COM UPLOAD ANTERIOR ----- */
-export async function uploadCustomWallpaper(file, shell = 'desktop') {
+export async function uploadCustomWallpaper(file, shell = 'desktop', { signal } = {}) {
   if (!WALLPAPER_SHELLS.includes(shell)) {
     throw new Error('Preferência inválida.');
   }
 
   const theme = getTheme();
+  const context = `${shell}:${theme}`;
+  const version = selectionVersions.get(context) ?? 0;
+  if (signal?.aborted) return false;
   const entry = await addWallpaperToCollection(file);
+
+  if (signal?.aborted) return false;
+  if ((selectionVersions.get(context) ?? 0) !== version)
+    throw new Error('A imagem foi salva na coleção, mas a seleção mudou durante o envio.');
 
   return setWallpaper(entry.id, shell, theme);
 }
@@ -700,6 +710,12 @@ if (typeof window !== 'undefined') {
 
     /* ----- ATUALIZAÇÃO DAS SELEÇÕES ----- */
     if (event.key === null || selectionKeys.includes(event.key) || legacyKeys.includes(event.key)) {
+      for (const shell of WALLPAPER_SHELLS) for (const theme of WALLPAPER_THEMES) {
+        if (event.key === null || event.key === WALLPAPER_SELECTION_KEYS[shell][theme] || event.key === LEGACY_WALLPAPER_KEYS[shell]) {
+          const context = `${shell}:${theme}`;
+          selectionVersions.set(context, (selectionVersions.get(context) ?? 0) + 1);
+        }
+      }
       selected = loadSelections();
       emit();
     }

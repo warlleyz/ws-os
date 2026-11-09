@@ -1393,5 +1393,19 @@
     "A IA demorou para responder. Resposta local utilizada.": "AI took too long to respond. A local response was used.",
     "A IA não retornou uma resposta válida. Resposta local utilizada.": "AI did not return a valid response. A local response was used.",
     "Não foi possível verificar o limite de consultas. Resposta local utilizada.": "The query limit could not be checked. A local response was used."
+  },
+  "stage23": {
+    "Aparência e cursor": "Appearance and cursor",
+    "Escolha o que restaurar": "Choose what to restore",
+    "Algumas preferências não puderam ser restauradas ou salvas. Revise as opções e tente novamente.": "Some preferences could not be restored or saved. Review the options and try again.",
+    "Tema, efeitos, cursor e ocultação do fundo são compartilhados entre Desktop e Mobile. Wallpapers são independentes por plataforma e tema; a cor de destaque é independente por tema.": "Theme, effects, cursor and wallpaper visibility are shared between Desktop and Mobile. Wallpapers are independent per platform and theme; accent colors are independent per theme.",
+    "Esta preferência vale para Desktop e Mobile neste navegador.": "This preference applies to Desktop and Mobile in this browser.",
+    "Somente as categorias selecionadas serão restauradas. Mobile inclui densidade, widgets visíveis e wallpapers dos dois temas.": "Only the selected categories will be restored. Mobile includes spacing, visible widgets and wallpapers for both themes.",
+    "Confirmar exclusão da imagem": "Confirm image deletion",
+    "Excluir esta imagem pessoal? Se estiver em uso, ela será substituída pelos fundos padrão nas plataformas e temas correspondentes.": "Delete this personal image? If it is in use, it will be replaced with default wallpapers on the corresponding platforms and themes.",
+    "A imagem foi aplicada nesta sessão, mas a seleção não pôde ser salva.": "The image was applied for this session, but the selection could not be saved.",
+    "A imagem foi salva na coleção, mas a seleção mudou durante o envio.": "The image was saved to your collection, but the selection changed during the upload.",
+    "Confirmar exclusão": "Confirm deletion",
+    "Visibilidade e tamanho são próprios do Desktop. As opções de relógio e clima também são usadas pelos widgets Mobile.": "Visibility and size apply only to Desktop. Clock and weather options are also used by Mobile widgets."
   }
 }

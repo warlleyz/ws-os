@@ -80,3 +80,19 @@ A configuração do ambiente publicado é independente e exige alteração no pr
 - A reserva de apelidos depende do índice da migração `20261107180000_etapa22_ranking_alias_unico.sql`. Verificar duplicatas e homologar a migração antes da publicação; ela não foi aplicada nesta etapa local.
 - Preservar registros históricos por IP. Sua vinculação a navegadores novos não pode ser recuperada automaticamente. Limpar os dados do navegador também elimina a identidade local; isso não remove o registro público.
 - Publicar frontend e Worker compatíveis juntos. Testes locais não confirmam migrações, variáveis nem disponibilidade do ambiente publicado.
+
+## Preferências locais — Etapa 23
+
+| Escopo | Preferências |
+|---|---|
+| Compartilhadas entre Desktop/Mobile neste navegador | Tema, idioma, cursor, efeitos, ocultação do fundo e acessibilidade |
+| Independentes por tema | Modo automático/manual e cor de destaque |
+| Independentes por plataforma e tema | Seleção do wallpaper e enquadramento |
+| Desktop | Auto-ocultação da Taskbar, posições, visibilidade e dimensões dos widgets |
+| Mobile | Densidade dos aplicativos e seleção dos tipos de widget visíveis |
+
+As categorias de restauração não correspondem a uma limpeza geral do navegador. Aparência inclui tema, cursor e efeitos; Desktop restaura somente os wallpapers/enquadramentos da plataforma; Mobile inclui densidade, seleção de widgets e seus wallpapers/enquadramentos. Widgets restaura opções, tamanhos e visibilidade do Desktop, preservando instâncias e posições. Taskbar e notificações têm categorias próprias.
+
+Os widgets Mobile reutilizam as opções internas das instâncias padrão, incluindo fuso do relógio e unidades do clima. A seleção de quais tipos aparecem no Mobile é independente da visibilidade e do tamanho das instâncias do Desktop. Restaurar a categoria Widgets também restaura essas opções internas compartilhadas.
+
+Documentos, recordes, identidade do visitante, favoritos e imagens pessoais não são apagados pela restauração. Imagens pessoais só são removidas pelo comando de exclusão específico, após confirmação. As seleções continuam locais; não há sincronização entre dispositivos nem exportação/importação nesta etapa.

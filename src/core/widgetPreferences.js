@@ -234,12 +234,15 @@ export function configureWidget(instanceId, patch) {
 
 /* === RESTAURAÇÃO DOS WIDGETS === */
 export function resetWidgetPreferences() {
+  const ids = new Set(current.widgets.map((widget) => widget.instanceId));
+  const widgets = [...current.widgets, ...initialWidgetState.widgets.filter((widget) => !ids.has(widget.instanceId))];
   return saveWidgetPreferences({
-    widgets: initialWidgetState.widgets.map((item) => ({
-      ...item,
-      position:
-        current.widgets.find((entry) => entry.instanceId === item.instanceId)?.position ?? null,
-    })),
+    widgets: widgets.map((widget) => {
+      const defaults = initialWidgetState.widgets.find((item) => item.widgetId === widget.widgetId);
+      if (!defaults) return widget;
+      return { ...widget, ...defaults, instanceId: widget.instanceId,
+        position: widget.position ?? null, size: { ...defaults.size }, settings: {} };
+    }),
   });
 }
 

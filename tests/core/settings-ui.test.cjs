@@ -28,6 +28,7 @@ async function settings(section, overrides = {}) {
     useTaskbarAutoHide: () => false,
     useMobilePreferences: () => ({ gridDensity: 'default' }),
     useWidgetPreferences: () => ({ widgets: [] }),
+    getRegisteredWidgets: () => [],
     useSystem: () => ({ notify: (value) => calls.push(value) }),
     Moon: 'Moon',
     Sun: 'Sun',
@@ -68,7 +69,62 @@ test('Configurações só restaura após confirmação e informa falha parcial',
   ui.button('Confirmar restauração').props.onClick();
   ui.render();
   assert.equal(calls[0], 'reset');
-  assert.match(ui.text(), /algumas não puderam ser salvas/);
+  assert.match(ui.text(), /Algumas preferências não puderam ser restauradas ou salvas/);
+});
+
+test('restauração seletiva exige uma categoria e envia somente a seleção confirmada', async () => {
+  const selected = [];
+  const { ui } = await settings('reset', { restoreSystemPreferences: (categories) => {
+    selected.push(Array.from(categories)); return { ok: true, failed: [] };
+  } });
+  for (const toggle of ui.nodes().filter((node) => node.type?.name === 'SettingsToggle')) toggle.props.onChange(false);
+  ui.render();
+  assert.equal(ui.button('Restaurar padrões').props.disabled, true);
+  ui.nodes().find((node) => node.type?.name === 'SettingsToggle' && node.props.label === 'Idioma').props.onChange(true);
+  ui.render();
+  ui.button('Restaurar padrões').props.onClick();
+  ui.render();
+  assert.equal(selected.length, 0);
+  ui.button('Confirmar restauração').props.onClick();
+  ui.render();
+  assert.deepEqual(selected, [['language']]);
+  ui.unmount();
+});
+
+test('seleção de widgets Mobile usa o catálogo e não duplica instâncias do Desktop', async () => {
+  const { ui } = await settings('mobile', {
+    useWidgetPreferences: () => ({ widgets: [{ widgetId: 'clock' }, { widgetId: 'clock' }] }),
+    getRegisteredWidgets: () => [{ id: 'clock', name: 'Relógio' }, { id: 'weather', name: 'Clima' }],
+    useMobilePreferences: () => ({ gridDensity: 'default', widgetIds: ['clock'] }),
+  });
+  const toggles = ui.nodes().filter((node) => node.type?.name === 'SettingsToggle');
+  assert.equal(toggles.length, 2);
+  assert.equal(toggles[0].props.checked, true);
+  assert.equal(toggles[1].props.checked, false);
+  ui.unmount();
+});
+
+test('galeria só exclui a imagem pessoal após confirmação e permite cancelar', async () => {
+  const deleted = [];
+  const ui = await renderApp('src/apps/settings/SettingsSections.jsx',
+    { shell: 'desktop', report() {}, announce() {} }, {
+      useTheme: () => 'dark', useWallpaper: () => 'dark-blue',
+      useWallpaperRevision() {}, useWallpaperStatus: () => 'ready',
+      usePersonalWallpapers: () => [{ id: 'personal:test', name: 'Teste' }],
+      getWallpaperFit: () => 'cover', getWallpaperDefinition: () => ({ background: 'none' }),
+      getOfficialWallpapersByTheme: () => [], isPersonalWallpaperInUse: () => false,
+      getWallpaper: () => 'dark-blue', deleteWallpaperFromCollection: async (id) => { deleted.push(id); return { ok: true }; },
+      Check: 'Check',
+    }, { entryPoint: 'WallpaperGallery' });
+  const clickDelete = () => ui.button('Excluir').props.onClick({ currentTarget: { focus() {} } });
+  clickDelete(); ui.render();
+  assert.equal(deleted.length, 0);
+  ui.button('Cancelar').props.onClick(); ui.render();
+  assert.equal(deleted.length, 0);
+  clickDelete(); ui.render();
+  await ui.button('Confirmar exclusão').props.onClick(); ui.render();
+  assert.deepEqual(deleted, ['personal:test']);
+  ui.unmount();
 });
 
 test('Configurações aciona tema e informa preferência mantida na sessão', async () => {
@@ -152,7 +208,7 @@ test('Galeria preserva mensagem correta quando upload falha e não anuncia após
     await operation;
     assert.deepEqual(
       messages,
-      unmount ? [] : ['Não foi possível salvar a imagem. A imagem anterior foi preservada.'],
+      unmount ? [] : ['A imagem foi aplicada nesta sessão, mas a seleção não pôde ser salva.'],
     );
   }
 });

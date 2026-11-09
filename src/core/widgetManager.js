@@ -127,14 +127,22 @@ export function loadWidgetPreferences() {
 
     let invalid = false;
 
-    const widgets = widgetDefinitions.map((definition) => {
+    const entries = widgetDefinitions.map((definition) => ({ definition,
+      stored: parsed.widgets.find((widget) => widget?.instanceId === `${definition.id}-default` && widget?.widgetId === definition.id) }));
+    const ids = new Set(initialWidgetState.widgets.map((widget) => widget.instanceId));
+    for (const stored of parsed.widgets) {
+      const definition = getWidgetDefinition(stored?.widgetId);
+      if (initialWidgetState.widgets.some((widget) => widget.instanceId === stored?.instanceId)) continue;
+      if (!definition || typeof stored?.instanceId !== 'string' || !/^[a-zA-Z0-9_-]{1,80}$/.test(stored.instanceId) || ids.has(stored.instanceId)) {
+        invalid = true;
+        continue;
+      }
+      ids.add(stored.instanceId);
+      entries.push({ definition, stored });
+    }
+    const widgets = entries.map(({ definition, stored }) => {
       const defaults = initialWidgetState.widgets.find(
         (widget) => widget.widgetId === definition.id,
-      );
-
-      const stored = parsed.widgets.find(
-        (widget) =>
-          widget?.instanceId === defaults.instanceId && widget?.widgetId === definition.id,
       );
 
       /* ----- RECUPERAÇÃO DOS PADRÕES ----- */
@@ -166,6 +174,7 @@ export function loadWidgetPreferences() {
 
       return {
         ...defaults,
+        instanceId: stored.instanceId,
         visible: validVisible ? stored.visible : defaults.visible,
         position,
         size,
